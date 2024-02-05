@@ -8,7 +8,7 @@
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TIMESTAMP_FIELD } from '../../constants';
 import { DataViewSpecWithId } from '../../dataset_selection';
-import { ExplorerDataViewType } from '../types';
+import { DataViewDescriptorType } from '../types';
 import { buildIndexPatternRegExp } from '../utils';
 
 type Whitelist = Array<string | RegExp>;
@@ -18,21 +18,21 @@ const LOGS_WHITELIST: Whitelist = [
   // Add more strings or regex patterns as needed
 ];
 
-export class ExplorerDataView {
-  id: ExplorerDataViewType['id'];
-  dataType: ExplorerDataViewType['dataType'];
-  name: ExplorerDataViewType['name'];
-  namespaces: ExplorerDataViewType['namespaces'];
-  title: ExplorerDataViewType['title'];
-  type: ExplorerDataViewType['type'];
+export class DataViewDescriptor {
+  id: DataViewDescriptorType['id'];
+  dataType: DataViewDescriptorType['dataType'];
+  name: DataViewDescriptorType['name'];
+  namespaces: DataViewDescriptorType['namespaces'];
+  title: DataViewDescriptorType['title'];
+  type: DataViewDescriptorType['type'];
 
-  private constructor(explorerDataView: ExplorerDataViewType) {
-    this.id = explorerDataView.id;
-    this.dataType = explorerDataView.dataType;
-    this.name = explorerDataView.name;
-    this.namespaces = explorerDataView.namespaces;
-    this.title = explorerDataView.title;
-    this.type = explorerDataView.type;
+  private constructor(dataViewDescriptor: DataViewDescriptorType) {
+    this.id = dataViewDescriptor.id;
+    this.dataType = dataViewDescriptor.dataType;
+    this.name = dataViewDescriptor.name;
+    this.namespaces = dataViewDescriptor.namespaces;
+    this.title = dataViewDescriptor.title;
+    this.type = dataViewDescriptor.type;
   }
 
   getFullTitle() {
@@ -59,12 +59,12 @@ export class ExplorerDataView {
 
   public static create(dataViewListItem: DataViewListItem) {
     const name = dataViewListItem.name ?? dataViewListItem.title;
-    const dataType = ExplorerDataView.#extractDataType(dataViewListItem.title);
+    const dataType = DataViewDescriptor.#extractDataType(dataViewListItem.title);
 
-    return new ExplorerDataView({ ...dataViewListItem, dataType, name });
+    return new DataViewDescriptor({ ...dataViewListItem, dataType, name });
   }
 
-  static #extractDataType(title: string): ExplorerDataViewType['dataType'] {
+  static #extractDataType(title: string): DataViewDescriptorType['dataType'] {
     if (testAgainstWhitelist(title, LOGS_WHITELIST)) {
       return 'logs';
     }

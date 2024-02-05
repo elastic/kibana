@@ -7,7 +7,7 @@
 
 import {
   DatasetSelection,
-  ExplorerDataViewSelection,
+  DataViewSelection,
   isDatasetSelection,
 } from '../../common/dataset_selection';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
@@ -23,7 +23,7 @@ export interface UseEsqlResult {
 }
 
 interface EsqlContextDeps {
-  datasetSelection: DatasetSelection | ExplorerDataViewSelection;
+  datasetSelection: DatasetSelection | DataViewSelection;
 }
 
 export const useEsql = ({ datasetSelection }: EsqlContextDeps): UseEsqlResult => {

@@ -9,18 +9,18 @@ import React from 'react';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { openDiscoverLabel } from '../constants';
 
-interface ExplorerDataViewMenuItemProps {
-  dataView: ExplorerDataView;
+interface DataViewMenuItemProps {
+  dataView: DataViewDescriptor;
 }
 
 const rightSpacing = css`
   margin-right: ${euiThemeVars.euiSizeS};
 `;
 
-export const ExplorerDataViewMenuItem = ({ dataView }: ExplorerDataViewMenuItemProps) => {
+export const DataViewMenuItem = ({ dataView }: DataViewMenuItemProps) => {
   if (dataView.dataType === 'logs') {
     return <span>{dataView.name}</span>;
   }

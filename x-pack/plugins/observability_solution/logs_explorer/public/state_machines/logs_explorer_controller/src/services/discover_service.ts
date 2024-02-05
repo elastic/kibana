@@ -8,7 +8,7 @@
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
-import { isExplorerDataViewSelection } from '../../../../../common/dataset_selection';
+import { isDataViewSelection } from '../../../../../common/dataset_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,
@@ -89,7 +89,7 @@ export const redirectToDiscover =
     discover: DiscoverStart
   ): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   (_context, event) => {
-    if (event.type === 'UPDATE_DATASET_SELECTION' && isExplorerDataViewSelection(event.data)) {
+    if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
       discover.locator?.navigate({ dataViewId: event.data.selection.dataView.id });
     }
   };

@@ -11,7 +11,7 @@ const dataTypeRT = rt.keyof({
   unknown: null,
 });
 
-export const explorerDataViewRT = rt.exact(
+export const dataViewDescriptorRT = rt.exact(
   rt.intersection([
     rt.type({
       id: rt.string,
@@ -26,4 +26,4 @@ export const explorerDataViewRT = rt.exact(
   ])
 );
 
-export type ExplorerDataViewType = rt.TypeOf<typeof explorerDataViewRT>;
+export type DataViewDescriptorType = rt.TypeOf<typeof dataViewDescriptorRT>;

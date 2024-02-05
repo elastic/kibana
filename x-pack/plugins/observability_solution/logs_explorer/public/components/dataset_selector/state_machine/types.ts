@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { SearchDataViews } from '../../../hooks/use_data_views';
 import {
   DatasetSelection,
-  ExplorerDataViewSelection,
+  DataViewSelection,
   SelectionChange,
 } from '../../../../common/dataset_selection';
 import { Dataset } from '../../../../common/datasets/models/dataset';
@@ -22,7 +22,7 @@ import type { IHashedCache } from '../../../../common/hashed_cache';
 import { DatasetsSelectorSearchParams, PanelId, TabId } from '../types';
 
 export interface DefaultDatasetsSelectorContext {
-  selection: DatasetSelection | ExplorerDataViewSelection;
+  selection: DatasetSelection | DataViewSelection;
   tabId: TabId;
   panelId: PanelId;
   searchCache: IHashedCache<PanelId | TabId, DatasetsSelectorSearchParams>;
@@ -107,7 +107,7 @@ export type DatasetsSelectorEvent =
     }
   | {
       type: 'SELECT_EXPLORER_DATA_VIEW';
-      selection: ExplorerDataView;
+      selection: DataViewDescriptor;
     }
   | {
       type: 'SELECT_ALL_LOGS_DATASET';

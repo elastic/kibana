@@ -8,7 +8,7 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
-import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';
 import type {
@@ -138,13 +138,13 @@ export const createDataViewsStateMachine = ({
           ? Promise.resolve(context.cache.get(searchParams))
           : dataViews
               .getIdsWithTitle()
-              .then((views) => views.map(ExplorerDataView.create))
+              .then((views) => views.map(DataViewDescriptor.create))
               .then((views) => searchDataViews(views, searchParams));
       },
     },
   });
 
-const searchDataViews = (dataViews: ExplorerDataView[], search: DataViewsSearchParams) => {
+const searchDataViews = (dataViews: DataViewDescriptor[], search: DataViewsSearchParams) => {
   const { name, sortOrder } = search;
 
   return dataViews

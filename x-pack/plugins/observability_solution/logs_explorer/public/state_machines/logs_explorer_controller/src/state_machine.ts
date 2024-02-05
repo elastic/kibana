@@ -10,10 +10,7 @@ import { QueryStart } from '@kbn/data-plugin/public';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { ControlPanelRT } from '../../../../common/control_panels';
-import {
-  isDatasetSelection,
-  isExplorerDataViewSelection,
-} from '../../../../common/dataset_selection';
+import { isDatasetSelection, isDataViewSelection } from '../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -122,11 +119,11 @@ export const createPureLogsExplorerControllerStateMachine = (
                     },
                     UPDATE_DATASET_SELECTION: [
                       {
-                        cond: 'isUnknownExplorerDataView',
+                        cond: 'isUnknownDataViewDescriptor',
                         actions: ['redirectToDiscover'],
                       },
                       {
-                        cond: 'isLogssExplorerDataView',
+                        cond: 'isLogssDataViewDescriptor',
                         target: 'changingDataView',
                         actions: ['storeDatasetSelection'],
                       },
@@ -145,11 +142,11 @@ export const createPureLogsExplorerControllerStateMachine = (
                   on: {
                     UPDATE_DATASET_SELECTION: [
                       {
-                        cond: 'isUnknownExplorerDataView',
+                        cond: 'isUnknownDataViewDescriptor',
                         actions: ['redirectToDiscover'],
                       },
                       {
-                        cond: 'isLogssExplorerDataView',
+                        cond: 'isLogssDataViewDescriptor',
                         target: 'changingDataView',
                         actions: ['storeDatasetSelection'],
                       },
@@ -252,8 +249,7 @@ export const createPureLogsExplorerControllerStateMachine = (
     {
       actions: {
         storeDatasetSelection: actions.assign((_context, event) =>
-          'data' in event &&
-          (isDatasetSelection(event.data) || isExplorerDataViewSelection(event.data))
+          'data' in event && (isDatasetSelection(event.data) || isDataViewSelection(event.data))
             ? {
                 datasetSelection: event.data,
               }
@@ -289,20 +285,14 @@ export const createPureLogsExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
-        isLogssExplorerDataView: (_context, event) => {
-          if (
-            event.type === 'UPDATE_DATASET_SELECTION' &&
-            isExplorerDataViewSelection(event.data)
-          ) {
+        isLogssDataViewDescriptor: (_context, event) => {
+          if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isLogsDataType();
           }
           return false;
         },
-        isUnknownExplorerDataView: (_context, event) => {
-          if (
-            event.type === 'UPDATE_DATASET_SELECTION' &&
-            isExplorerDataViewSelection(event.data)
-          ) {
+        isUnknownDataViewDescriptor: (_context, event) => {
+          if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isUnknownDataType();
           }
           return false;

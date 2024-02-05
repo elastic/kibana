@@ -24,7 +24,7 @@ import {
 } from './constants';
 import { useDatasetSelector } from './state_machine/use_dataset_selector';
 import { SelectorPopover } from './sub_components/selector_popover';
-import { ExplorerDataViewMenuItem } from './sub_components/explorer_data_view_menu_item';
+import { DataViewMenuItem } from './sub_components/data_view_menu_item';
 import { SearchControls } from './sub_components/search_controls';
 import { ESQLButton, SelectorFooter, ShowAllLogsButton } from './sub_components/selector_footer';
 import { DatasetSelectorProps } from './types';
@@ -77,7 +77,7 @@ export function DatasetSelector({
     searchByName,
     selectAllLogDataset,
     selectDataset,
-    selectExplorerDataView,
+    selectDataViewDescriptor,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
@@ -162,10 +162,10 @@ export function DatasetSelector({
 
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
-      name: <ExplorerDataViewMenuItem dataView={dataView} />,
-      onClick: () => selectExplorerDataView(dataView),
+      name: <DataViewMenuItem dataView={dataView} />,
+      onClick: () => selectDataViewDescriptor(dataView),
     }));
-  }, [dataViews, dataViewsError, isLoadingDataViews, selectExplorerDataView, onDataViewsReload]);
+  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataViewDescriptor, onDataViewsReload]);
 
   const tabs = [
     {

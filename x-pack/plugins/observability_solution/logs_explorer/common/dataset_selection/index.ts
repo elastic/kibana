@@ -6,7 +6,7 @@
  */
 
 import { AllDatasetSelection } from './all_dataset_selection';
-import { ExplorerDataViewSelection } from './explorer_data_view_selection';
+import { DataViewSelection } from './data_view_selection';
 import { SingleDatasetSelection } from './single_dataset_selection';
 import { UnresolvedDatasetSelection } from './unresolved_dataset_selection';
 
@@ -14,7 +14,7 @@ export type DatasetSelection =
   | AllDatasetSelection
   | SingleDatasetSelection
   | UnresolvedDatasetSelection;
-export type SelectionChange = (selection: DatasetSelection | ExplorerDataViewSelection) => void;
+export type SelectionChange = (selection: DatasetSelection | DataViewSelection) => void;
 
 export const isDatasetSelection = (input: any): input is DatasetSelection => {
   return (
@@ -24,12 +24,12 @@ export const isDatasetSelection = (input: any): input is DatasetSelection => {
   );
 };
 
-export const isExplorerDataViewSelection = (input: any): input is ExplorerDataViewSelection => {
-  return input instanceof ExplorerDataViewSelection;
+export const isDataViewSelection = (input: any): input is DataViewSelection => {
+  return input instanceof DataViewSelection;
 };
 
 export * from './all_dataset_selection';
-export * from './explorer_data_view_selection';
+export * from './data_view_selection';
 export * from './single_dataset_selection';
 export * from './single_dataset_selection';
 export * from './unresolved_dataset_selection';

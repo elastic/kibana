@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DoneInvokeEvent } from 'xstate';
-import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
+import { DataViewDescriptor } from '../../../../common/data_views/models/data_view_descriptor';
 import type { IHashedCache } from '../../../../common/hashed_cache';
 import { SortOrder } from '../../../../common/latest';
 
@@ -15,7 +15,7 @@ export interface DataViewsSearchParams {
 }
 
 export interface WithCache {
-  cache: IHashedCache<DataViewsSearchParams, ExplorerDataView[]>;
+  cache: IHashedCache<DataViewsSearchParams, DataViewDescriptor[]>;
 }
 
 export interface WithSearch {
@@ -23,8 +23,8 @@ export interface WithSearch {
 }
 
 export interface WithDataViews {
-  dataViewsSource: ExplorerDataView[];
-  dataViews: ExplorerDataView[];
+  dataViewsSource: DataViewDescriptor[];
+  dataViews: DataViewDescriptor[];
 }
 
 export interface WithNullishDataViews {
@@ -94,4 +94,4 @@ export type DataViewsEvent =
       type: 'SORT_DATA_VIEWS';
       search: DataViewsSearchParams;
     }
-  | DoneInvokeEvent<ExplorerDataView[] | Error>;
+  | DoneInvokeEvent<DataViewDescriptor[] | Error>;

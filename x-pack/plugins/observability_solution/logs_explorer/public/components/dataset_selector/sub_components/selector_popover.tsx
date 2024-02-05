@@ -17,8 +17,8 @@ import {
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import {
   DatasetSelection,
-  ExplorerDataViewSelection,
-  isExplorerDataViewSelection,
+  DataViewSelection,
+  isDataViewSelection,
 } from '../../../../common/dataset_selection';
 import { DATA_VIEW_POPOVER_CONTENT_WIDTH, POPOVER_ID } from '../constants';
 import { getPopoverButtonStyles } from '../utils';
@@ -27,7 +27,7 @@ const panelStyle = { width: DATA_VIEW_POPOVER_CONTENT_WIDTH };
 interface SelectorPopoverProps extends Omit<EuiPopoverProps, 'button'> {
   children: React.ReactNode;
   onClick: () => void;
-  selection: DatasetSelection | ExplorerDataViewSelection;
+  selection: DatasetSelection | DataViewSelection;
 }
 
 export const SelectorPopover = ({
@@ -53,8 +53,8 @@ export const SelectorPopover = ({
           fullWidth={isMobile}
           data-test-subj="datasetSelectorPopoverButton"
         >
-          {isExplorerDataViewSelection(selection) ? (
-            <ExplorerDataViewPopover explorerDataViewSelection={selection} />
+          {isDataViewSelection(selection) ? (
+            <DataViewDescriptorPopover dataViewSelection={selection} />
           ) : (
             <DatasetPopover datasetSelection={selection} />
           )}
@@ -77,12 +77,12 @@ export const SelectorPopover = ({
   );
 };
 
-const ExplorerDataViewPopover = ({
-  explorerDataViewSelection,
+const DataViewDescriptorPopover = ({
+  dataViewSelection,
 }: {
-  explorerDataViewSelection: ExplorerDataViewSelection;
+  dataViewSelection: DataViewSelection;
 }) => {
-  const { name } = explorerDataViewSelection.selection.dataView;
+  const { name } = dataViewSelection.selection.dataView;
 
   return <span className="eui-textTruncate">{name}</span>;
 };

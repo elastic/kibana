@@ -8,7 +8,7 @@
 import { actions, assign, createMachine, raise } from 'xstate';
 import {
   AllDatasetSelection,
-  ExplorerDataViewSelection,
+  DataViewSelection,
   SingleDatasetSelection,
 } from '../../../../common/dataset_selection';
 import { DATA_VIEWS_TAB_ID, INTEGRATIONS_TAB_ID, UNCATEGORIZED_TAB_ID } from '../constants';
@@ -138,7 +138,7 @@ export const createPureDatasetsSelectorStateMachine = (
                     },
                     SELECT_EXPLORER_DATA_VIEW: {
                       target: '#closed',
-                      actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
+                      actions: ['storeDataViewSelection', 'notifySelectionChanged'],
                     },
                   },
                 },
@@ -159,8 +159,8 @@ export const createPureDatasetsSelectorStateMachine = (
                   actions: ['storeSingleSelection', 'notifySelectionChanged'],
                 },
                 SELECT_EXPLORER_DATA_VIEW: {
-                  actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
-                  target: 'explorerDataView',
+                  actions: ['storeDataViewSelection', 'notifySelectionChanged'],
+                  target: 'dataViewDescriptor',
                 },
               },
             },
@@ -171,12 +171,12 @@ export const createPureDatasetsSelectorStateMachine = (
                   target: 'single',
                 },
                 SELECT_EXPLORER_DATA_VIEW: {
-                  actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
-                  target: 'explorerDataView',
+                  actions: ['storeDataViewSelection', 'notifySelectionChanged'],
+                  target: 'dataViewDescriptor',
                 },
               },
             },
-            explorerDataView: {
+            dataViewDescriptor: {
               on: {
                 SELECT_ALL_LOGS_DATASET: {
                   actions: ['storeAllSelection', 'notifySelectionChanged'],
@@ -187,7 +187,7 @@ export const createPureDatasetsSelectorStateMachine = (
                   target: 'single',
                 },
                 SELECT_EXPLORER_DATA_VIEW: {
-                  actions: ['storeExplorerDataViewSelection', 'notifySelectionChanged'],
+                  actions: ['storeDataViewSelection', 'notifySelectionChanged'],
                 },
               },
             },
@@ -222,9 +222,9 @@ export const createPureDatasetsSelectorStateMachine = (
             ? { selection: SingleDatasetSelection.create(event.selection) }
             : {}
         ),
-        storeExplorerDataViewSelection: assign((_context, event) =>
+        storeDataViewSelection: assign((_context, event) =>
           event.type === 'SELECT_EXPLORER_DATA_VIEW'
-            ? { selection: ExplorerDataViewSelection.create(event.selection) }
+            ? { selection: DataViewSelection.create(event.selection) }
             : {}
         ),
         retrieveSearchFromCache: assign((context, event) => {

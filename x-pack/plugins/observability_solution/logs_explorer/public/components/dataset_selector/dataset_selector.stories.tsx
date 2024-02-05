@@ -11,11 +11,11 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { ExplorerDataView } from '../../../common/data_views/models/explorer_data_view';
+import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import {
   AllDatasetSelection,
   DatasetSelection,
-  ExplorerDataViewSelection,
+  DataViewSelection,
   SelectionChange,
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
@@ -44,9 +44,9 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [datasetSelection, setDatasetSelection] = useState<
-    DatasetSelection | ExplorerDataViewSelection
-  >(() => AllDatasetSelection.create());
+  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection | DataViewSelection>(
+    () => AllDatasetSelection.create()
+  );
 
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
     sortOrder: 'asc',
@@ -508,7 +508,7 @@ const mockDatasets: Dataset[] = [
   { name: 'data-scaling-logs-*' as IndexPattern },
 ].map((dataset) => Dataset.create(dataset));
 
-const mockDataViews: ExplorerDataView[] = [
+const mockDataViews: DataViewDescriptor[] = [
   {
     id: 'logs-*',
     namespaces: ['default'],
@@ -528,4 +528,4 @@ const mockDataViews: ExplorerDataView[] = [
     typeMeta: {},
     name: 'synthetics-dashboard',
   },
-].map((dataView) => ExplorerDataView.create(dataView));
+].map((dataView) => DataViewDescriptor.create(dataView));

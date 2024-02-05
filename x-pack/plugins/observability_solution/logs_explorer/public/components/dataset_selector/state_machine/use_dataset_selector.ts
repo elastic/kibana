@@ -11,7 +11,7 @@ import {
   ChangePanelHandler,
   DatasetSelectionHandler,
   DatasetsSelectorSearchHandler,
-  ExplorerDataViewSelectionHandler,
+  DataViewSelectionHandler,
   PanelId,
 } from '../types';
 import { createDatasetsSelectorStateMachine } from './state_machine';
@@ -103,11 +103,11 @@ export const useDatasetSelector = ({
     [datasetsSelectorStateService]
   );
 
-  const selectExplorerDataView = useCallback<ExplorerDataViewSelectionHandler>(
-    (explorerDataView) =>
+  const selectDataViewDescriptor = useCallback<DataViewSelectionHandler>(
+    (dataViewDescriptor) =>
       datasetsSelectorStateService.send({
         type: 'SELECT_EXPLORER_DATA_VIEW',
-        selection: explorerDataView,
+        selection: dataViewDescriptor,
       }),
     [datasetsSelectorStateService]
   );
@@ -143,7 +143,7 @@ export const useDatasetSelector = ({
     searchByName,
     selectAllLogDataset,
     selectDataset,
-    selectExplorerDataView,
+    selectDataViewDescriptor,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,

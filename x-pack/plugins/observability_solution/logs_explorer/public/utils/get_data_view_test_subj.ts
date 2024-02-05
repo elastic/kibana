@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-const BASE_DATA_VIEW_TEST_SUBJ = 'logsExplorerDataView';
+const BASE_DATA_VIEW_TEST_SUBJ = 'logsDataViewDescriptor';
 
 const publicDataViewPatternsSet = new Set(['logs-*', 'logstash-*', 'filebeat-*']);
 

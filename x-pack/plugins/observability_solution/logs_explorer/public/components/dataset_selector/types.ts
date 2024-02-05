@@ -9,11 +9,11 @@ import { EuiContextMenuPanelId } from '@elastic/eui/src/components/context_menu/
 import type {
   DatasetSelection,
   SelectionChange,
-  ExplorerDataViewSelection,
+  DataViewSelection,
 } from '../../../common/dataset_selection';
 import { SortOrder } from '../../../common/latest';
 import { Dataset, Integration, IntegrationId } from '../../../common/datasets';
-import { ExplorerDataView } from '../../../common/data_views/models/explorer_data_view';
+import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import { LoadDatasets, ReloadDatasets, SearchDatasets } from '../../hooks/use_datasets';
 import {
   LoadMoreIntegrations,
@@ -35,9 +35,9 @@ export interface DatasetSelectorProps {
   /* Any error occurred to show when the user preview the generic data streams */
   datasetsError: Error | null;
   /* The current selection instance */
-  datasetSelection: DatasetSelection | ExplorerDataViewSelection;
+  datasetSelection: DatasetSelection | DataViewSelection;
   /* The available data views list */
-  dataViews: ExplorerDataView[] | null;
+  dataViews: DataViewDescriptor[] | null;
   /* Any error occurred to show when the user preview the data views */
   dataViewsError: Error | null;
   /* url props to navigate to discover ES|QL */
@@ -99,4 +99,4 @@ export type ChangePanelHandler = ({ panelId }: { panelId: EuiContextMenuPanelId 
 
 export type DatasetSelectionHandler = (dataset: Dataset) => void;
 
-export type ExplorerDataViewSelectionHandler = (dataView: ExplorerDataView) => void;
+export type DataViewSelectionHandler = (dataView: DataViewDescriptor) => void;

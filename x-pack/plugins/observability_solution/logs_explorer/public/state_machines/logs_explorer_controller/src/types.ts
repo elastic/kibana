@@ -13,11 +13,11 @@ import { ControlPanels, DisplayOptions } from '../../../../common';
 import type {
   DatasetEncodingError,
   DatasetSelection,
-  ExplorerDataViewSelection,
+  DataViewSelection,
 } from '../../../../common/dataset_selection';
 
 export interface WithDatasetSelection {
-  datasetSelection: DatasetSelection | ExplorerDataViewSelection;
+  datasetSelection: DatasetSelection | DataViewSelection;
 }
 
 export interface WithControlPanelGroupAPI {
@@ -146,7 +146,7 @@ export type LogsExplorerControllerEvent =
     }
   | {
       type: 'UPDATE_DATASET_SELECTION';
-      data: DatasetSelection | ExplorerDataViewSelection;
+      data: DatasetSelection | DataViewSelection;
     }
   | {
       type: 'DATASET_SELECTION_RESTORE_FAILURE';
@@ -171,7 +171,7 @@ export type LogsExplorerControllerEvent =
       type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
       refreshInterval: RefreshInterval;
     }
-  | DoneInvokeEvent<DatasetSelection | ExplorerDataViewSelection>
+  | DoneInvokeEvent<DatasetSelection | DataViewSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
   | DoneInvokeEvent<DatasetEncodingError>
