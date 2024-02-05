@@ -649,29 +649,30 @@ const useFitToContent = ({
   isFullScreen: boolean;
   fitToContent?: { minLines?: number; maxLines?: number };
 }) => {
+  const isFitToContent = !!fitToContent;
+  const minLines = fitToContent?.minLines;
+  const maxLines = fitToContent?.maxLines;
   useEffect(() => {
     if (!editor) return;
+    if (isFullScreen) return;
+    if (!isFitToContent) return;
 
     const updateHeight = () => {
-      if (fitToContent && !isFullScreen) {
-        const contentHeight = editor.getContentHeight();
-        const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
-        const minHeight = (fitToContent.minLines ?? 1) * lineHeight;
-        const maxHeight = fitToContent.maxLines
-          ? fitToContent.maxLines * lineHeight
-          : contentHeight;
-        editor.layout({
-          height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
-          width: editor.getLayoutInfo().width,
-        });
-      } else {
-        editor.layout();
-      }
+      const contentHeight = editor.getContentHeight();
+      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+      const minHeight = (minLines ?? 1) * lineHeight;
+      let maxHeight = maxLines ? maxLines * lineHeight : contentHeight;
+      maxHeight = Math.max(minHeight, maxHeight);
+      editor.layout({
+        height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
+        width: editor.getLayoutInfo().width,
+      });
     };
     updateHeight();
     const disposable = editor.onDidContentSizeChange(updateHeight);
     return () => {
       disposable.dispose();
+      editor.layout(); // reset the layout that was controlled by the fitToContent
     };
-  }, [editor, fitToContent, isFullScreen]);
+  }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
 };
