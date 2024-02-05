@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { FtrProviderContext } from '../../ftr_provider_context';
 import request from 'superagent';
 import { inflateResponse } from '@kbn/bfetch-plugin/public/streaming';
 import expect from '@kbn/expect';
-import {
-  ELASTIC_HTTP_VERSION_HEADER,
-} from '@kbn/core-http-common';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 function parseBfetchResponse(resp: request.Response, compressed: boolean = false) {
   return resp.text
@@ -30,23 +28,23 @@ export default function ({ getService }: FtrProviderContext) {
     describe('ES|QL', () => {
       it(`should return getColumns response in expected shape`, async () => {
         const resp = await supertest
-            .post(`/internal/bsearch`)
-            .set('kbn-xsrf', 'kibana')
-            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-            .send({
+          .post(`/internal/bsearch`)
+          .set('kbn-xsrf', 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
             batch: [
-                {
+              {
                 request: {
                   params: {
                     query: 'from logstash-* | keep geo.coordinates | limit 0',
-                    },
+                  },
                 },
                 options: {
-                    strategy: 'esql',
+                  strategy: 'esql',
                 },
-                },
+              },
             ],
-            });
+          });
 
         const jsonBody = parseBfetchResponse(resp);
         expect(resp.status).to.be(200);
@@ -54,33 +52,33 @@ export default function ({ getService }: FtrProviderContext) {
           all_columns: [
             {
               name: 'geo.coordinates',
-              type: 'geo_point'
-            }
+              type: 'geo_point',
+            },
           ],
           columns: [],
-          values: []
+          values: [],
         });
       });
 
       it(`should return getValues response in expected shape`, async () => {
         const resp = await supertest
-            .post(`/internal/bsearch`)
-            .set('kbn-xsrf', 'kibana')
-            .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
-            .send({
+          .post(`/internal/bsearch`)
+          .set('kbn-xsrf', 'kibana')
+          .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+          .send({
             batch: [
-                {
+              {
                 request: {
                   params: {
                     query: 'from logstash-* | keep geo.coordinates | limit 1',
-                    },
+                  },
                 },
                 options: {
-                    strategy: 'esql',
+                  strategy: 'esql',
                 },
-                },
+              },
             ],
-            });
+          });
 
         const jsonBody = parseBfetchResponse(resp);
         expect(resp.status).to.be(200);
@@ -88,20 +86,18 @@ export default function ({ getService }: FtrProviderContext) {
           all_columns: [
             {
               name: 'geo.coordinates',
-              type: 'geo_point'
-            }
+              type: 'geo_point',
+            },
           ],
           columns: [
             {
               name: 'geo.coordinates',
-              type: 'geo_point'
-            }
+              type: 'geo_point',
+            },
           ],
-          values: [
-            ['POINT (-77.846302 40.851206)']
-          ]
+          values: [['POINT (-77.846302 40.851206)']],
         });
       });
     });
   });
-};
+}
