@@ -7,15 +7,14 @@
 
 import type { FleetActionRequest } from '@kbn/fleet-plugin/server/services/actions';
 import { v4 as uuidv4 } from 'uuid';
-import type { CommonResponseActionMethodOptions } from '../..';
-import { ResponseActionsClientError } from './errors';
-import { getActionRequestExpiration } from '../create/write_action_to_indices';
-import { stringify } from '../../../utils/stringify';
-import type { HapiReadableStream } from '../../../../types';
+import { ResponseActionsClientError } from '../errors';
+import { getActionRequestExpiration } from '../../create/write_action_to_indices';
+import { stringify } from '../../../../utils/stringify';
+import type { HapiReadableStream } from '../../../../../types';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionAgentType,
-} from '../../../../../common/endpoint/service/response_actions/constants';
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import type {
   ExecuteActionRequestBody,
   GetProcessesRequestBody,
@@ -23,8 +22,8 @@ import type {
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
   ResponseActionsRequestBody,
-} from '../../../../../common/api/endpoint';
-import { ResponseActionsClientImpl } from './lib/base_response_actions_client';
+} from '../../../../../../common/api/endpoint';
+import { ResponseActionsClientImpl } from '../lib/base_response_actions_client';
 import type {
   ActionDetails,
   HostMetadata,
@@ -41,7 +40,8 @@ import type {
   SuspendProcessActionOutputContent,
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
-} from '../../../../../common/endpoint/types';
+} from '../../../../../../common/endpoint/types';
+import type { CommonResponseActionMethodOptions } from '../lib/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
