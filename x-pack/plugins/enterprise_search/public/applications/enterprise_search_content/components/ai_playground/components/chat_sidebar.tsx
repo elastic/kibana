@@ -13,7 +13,7 @@ import { EuiFormRow, EuiSwitch } from '@elastic/eui';
 
 import { InstructionsField } from './instructions_field';
 
-export const AIPlaygroundSidebar: React.FC = () => {
+export const ChatSidebar: React.FC = () => {
   const [prompt, setPrompt] = React.useState('');
   const [isIncludeCitations, setIncludeCitations] = React.useState<boolean>(true);
 

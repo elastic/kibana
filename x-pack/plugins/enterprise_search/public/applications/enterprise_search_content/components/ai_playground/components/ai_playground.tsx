@@ -10,14 +10,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiFlexGroup, EuiFlexItem, EuiPageTemplate, useEuiTheme } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 
 import { EnterpriseSearchContentPageTemplate } from '../../layout/page_template';
-import { AIPlaygroundSidebar } from './ai_playground_sidebar';
+import { Chat } from './chat';
 
 export const AIPlayground: React.FC = () => {
-  const { euiTheme } = useEuiTheme();
-
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[
@@ -43,26 +41,7 @@ export const AIPlayground: React.FC = () => {
         contentProps={{ css: { display: 'flex', flexGrow: 1 } }}
         paddingSize="none"
       >
-        <EuiFlexGroup gutterSize="none">
-          <EuiFlexItem
-            grow={2}
-            css={{
-              borderRight: euiTheme.border.thin,
-              padding: euiTheme.size.l,
-            }}
-          >
-            <EuiFlexGroup direction="column" justifyContent="spaceBetween"></EuiFlexGroup>
-          </EuiFlexItem>
-
-          <EuiFlexItem
-            grow={1}
-            css={{
-              padding: euiTheme.size.l,
-            }}
-          >
-            <AIPlaygroundSidebar />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <Chat />
       </EuiPageTemplate.Section>
     </EnterpriseSearchContentPageTemplate>
   );
