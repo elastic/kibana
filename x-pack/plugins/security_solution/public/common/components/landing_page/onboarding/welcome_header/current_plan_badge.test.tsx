@@ -6,23 +6,23 @@
  */
 import React from 'react';
 import { render } from '@testing-library/react';
-import { ProductTierBadge } from './product_tier_badge';
+import { CurrentPlanBadge } from './current_plan_badge';
 import { ProductTier } from '../configs';
 
-describe('ProductTierBadge', () => {
+describe('CurrentPlanBadge', () => {
   it('renders nothing when productTier is undefined', () => {
-    const { container } = render(<ProductTierBadge productTier={undefined} />);
+    const { container } = render(<CurrentPlanBadge currentPlan={undefined} />);
     expect(container.firstChild).toBeNull();
   });
 
-  it('renders the badge with the correct text when productTier is essential', () => {
-    const { getByTestId } = render(<ProductTierBadge productTier={ProductTier.essentials} />);
+  it('renders the badge with the correct text when ProductTier is essential', () => {
+    const { getByTestId } = render(<CurrentPlanBadge currentPlan={ProductTier.essentials} />);
     const badge = getByTestId('product-tier-badge');
     expect(badge).toHaveTextContent('Essential');
   });
 
-  it('renders the badge with the correct text when productTier is complete', () => {
-    const { getByTestId } = render(<ProductTierBadge productTier={ProductTier.complete} />);
+  it('renders the badge with the correct text when ProductTier is complete', () => {
+    const { getByTestId } = render(<CurrentPlanBadge currentPlan={ProductTier.complete} />);
     const badge = getByTestId('product-tier-badge');
     expect(badge).toHaveTextContent('Complete');
   });
