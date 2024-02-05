@@ -37,6 +37,7 @@ function toPagination(params: FindSLOGroupsParams): Pagination {
 interface SliDocument {
   sliValue: number;
   status: Status;
+  'slo.id': string;
 }
 
 export class FindSLOGroups {
@@ -86,7 +87,7 @@ export class FindSLOGroups {
                     },
                   },
                   _source: {
-                    includes: ['sliValue', 'status'],
+                    includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
                   },
                   size: 1,
                 },
@@ -146,6 +147,7 @@ export class FindSLOGroups {
     const total = response.aggregations?.distinct_items?.value ?? 0;
     const results =
       response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
+        const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
         return [
           ...acc,
           {
@@ -153,10 +155,7 @@ export class FindSLOGroups {
             groupBy,
             summary: {
               total: bucket.doc_count ?? 0,
-              worst: {
-                sliValue: (bucket.worst?.hits?.hits[0]?._source as SliDocument)?.sliValue,
-                status: (bucket.worst?.hits?.hits[0]?._source as SliDocument)?.status,
-              },
+              worst: sliDocument,
               violated: bucket.violated?.doc_count,
               healthy: bucket.healthy?.doc_count,
               degrading: bucket.degrading?.doc_count,

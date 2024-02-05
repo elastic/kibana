@@ -10,16 +10,22 @@ import {
   EuiBadge,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTablePagination,
   EuiText,
   EuiTextColor,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { memo, useState } from 'react';
+import { GroupSummary } from '@kbn/slo-schema';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
 import { useSloFormattedSLIValue } from '../../hooks/use_slo_summary';
@@ -34,14 +40,7 @@ interface Props {
   sort: string;
   direction: SortDirection;
   groupBy: string;
-  summary: {
-    worst: {
-      sliValue: number;
-      status: string;
-    };
-    total: number;
-    violated: number;
-  };
+  summary: GroupSummary;
   filters: Filter[];
 }
 
@@ -69,6 +68,10 @@ export function GroupListView({
   };
   const isAccordionOpen = accordionState === 'open';
 
+  const {
+    http: { basePath },
+  } = useKibana<CoreStart>().services;
+
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const {
     isLoading,
@@ -90,29 +93,7 @@ export function GroupListView({
     setPage(pageNumber);
   };
 
-  const getTotalViolated = () => {
-    if (isNullOrUndefined(summary.violated) || isNullOrUndefined(summary.total)) {
-      return null;
-    }
-    if (summary.violated === 0) {
-      return i18n.translate('xpack.observability.slo.group.totalHealthy', {
-        defaultMessage: '{total} Healthy',
-        values: {
-          total: `${summary.total}/${summary.total}`,
-        },
-      });
-    } else {
-      return i18n.translate('xpack.observability.slo.group.totalViolated', {
-        defaultMessage: '{total} Violated',
-        values: {
-          total: `${summary.violated}/${summary.total}`,
-        },
-      });
-    }
-  };
-
   const worstSLI = useSloFormattedSLIValue(summary.worst.sliValue);
-  const totalViolated = getTotalViolated();
 
   return (
     <>
@@ -124,27 +105,89 @@ export function GroupListView({
               onToggle={onToggle}
               buttonContent={
                 <EuiFlexGroup alignItems="center" responsive={false}>
-                  <EuiFlexItem>
+                  <EuiFlexItem grow={false}>
                     <EuiTitle size="xs">
                       <h3>{groupName}</h3>
                     </EuiTitle>
                   </EuiFlexItem>
-                  {totalViolated && (
+                  <EuiFlexItem grow={false}>
+                    <EuiText color="subdued">({summary.total})</EuiText>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              }
+              extraAction={
+                <EuiFlexGroup alignItems="center">
+                  {summary.violated > 0 && (
                     <EuiFlexItem grow={false}>
-                      <EuiBadge color={summary.violated > 0 ? 'danger' : 'success'}>
-                        {totalViolated}
+                      <EuiBadge color="danger">
+                        {i18n.translate('xpack.observability.slo.group.totalViolated', {
+                          defaultMessage: '{total} Violated',
+                          values: {
+                            total: summary.violated,
+                          },
+                        })}
                       </EuiBadge>
                     </EuiFlexItem>
                   )}
-                  <EuiText size="s">
-                    {i18n.translate('xpack.observability.slo.group.worstPerforming', {
-                      defaultMessage: 'Worst performing',
-                    })}
-                    {': '}
-                    <EuiTextColor color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}>
-                      <strong>{worstSLI}</strong>
-                    </EuiTextColor>
-                  </EuiText>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color={'success'}>
+                      {i18n.translate('xpack.observability.slo.group.totalHealthy', {
+                        defaultMessage: '{total} Healthy',
+                        values: {
+                          total: summary.healthy,
+                        },
+                      })}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiToolTip
+                      content={
+                        <>
+                          <EuiText size="s">
+                            {i18n.translate(
+                              'xpack.observability.slo.group.totalSloViolatedTooltip',
+                              {
+                                defaultMessage: 'SLO: {name}',
+                                values: {
+                                  name: summary.worst.slo.name,
+                                },
+                              }
+                            )}
+                          </EuiText>
+                          <EuiText size="s">
+                            {i18n.translate(
+                              'xpack.observability.slo.group.totalSloViolatedTooltip.instance',
+                              {
+                                defaultMessage: 'Instance: {instance}',
+                                values: {
+                                  instance: summary.worst.slo.instanceId,
+                                },
+                              }
+                            )}
+                          </EuiText>
+                        </>
+                      }
+                    >
+                      <EuiLink
+                        data-test-subj="o11yGroupListViewLink"
+                        href={basePath.prepend(
+                          paths.observability.sloDetails(
+                            summary.worst.slo.id,
+                            summary.worst.slo.instanceId
+                          )
+                        )}
+                      >
+                        {i18n.translate('xpack.observability.slo.group.worstPerforming', {
+                          defaultMessage: 'Worst performing: ',
+                        })}
+                        <EuiTextColor
+                          color={summary.worst.status !== 'HEALTHY' ? 'danger' : undefined}
+                        >
+                          <strong>{worstSLI}</strong>
+                        </EuiTextColor>
+                      </EuiLink>
+                    </EuiToolTip>
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               }
               id={group}
@@ -179,7 +222,3 @@ export function GroupListView({
 }
 
 const MemoEuiAccordion = memo(EuiAccordion);
-
-function isNullOrUndefined(value: any) {
-  return value === undefined || value === null;
-}

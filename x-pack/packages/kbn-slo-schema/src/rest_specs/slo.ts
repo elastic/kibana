@@ -333,6 +333,7 @@ type TimesliceMetricDocCountMetric = t.OutputOf<typeof timesliceMetricDocCountMe
 type TimesclieMetricPercentileMetric = t.OutputOf<typeof timesliceMetricPercentileMetric>;
 type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
+type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 
 export {
   createSLOParamsSchema,
@@ -407,4 +408,5 @@ export type {
   HistogramIndicator,
   KQLCustomIndicator,
   TimeWindow,
+  GroupSummary,
 };

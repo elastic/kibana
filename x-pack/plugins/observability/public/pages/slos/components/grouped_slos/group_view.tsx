@@ -69,11 +69,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
             kqlQuery={kqlQuery}
             sort={sort}
             direction={direction}
-            summary={{
-              worst: result.summary.worst,
-              total: result.summary.total,
-              violated: result.summary.violated,
-            }}
+            summary={result.summary}
             filters={filters}
           />
         ))}

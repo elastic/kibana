@@ -48,6 +48,11 @@ const groupSummarySchema = t.type({
   worst: t.type({
     sliValue: t.number,
     status: t.string,
+    slo: t.type({
+      id: t.string,
+      instanceId: t.string,
+      name: t.string,
+    }),
   }),
   violated: t.number,
   healthy: t.number,
