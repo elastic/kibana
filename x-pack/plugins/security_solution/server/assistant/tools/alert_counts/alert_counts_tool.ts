@@ -37,7 +37,6 @@ export const ALERT_COUNTS_TOOL: AssistantTool = {
       func: async () => {
         const query = getAlertsCountQuery(alertsIndexPattern);
         const result = await esClient.search<SearchResponse>(query);
-        console.log('alerts-count-tool result:', JSON.stringify(result));
 
         return JSON.stringify(result);
       },

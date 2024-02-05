@@ -135,13 +135,12 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
     const handleStreamEnd = (finalResponse: string) => {
-      console.log('finalResponse???', finalResponse);
       // @yuliia this would be a good place for pushing the response to the chat history
       streamEnd();
     };
 
     executor
-      .stream(
+      .invoke(
         {
           input: latestMessage[0].content,
           chat_history: [],
@@ -150,11 +149,10 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
           callbacks: [
             {
               handleLLMNewToken(payload) {
-                console.log('TOKEN???', payload);
-                push({ payload, type: 'content' });
+                if (payload.length) push({ payload, type: 'content' });
               },
-              handleLLMEnd(llmResult) {
-                handleStreamEnd(llmResult.generations[0][0].text);
+              handleChainEnd(llmResult) {
+                handleStreamEnd(llmResult.output);
               },
             },
             apmTracer,

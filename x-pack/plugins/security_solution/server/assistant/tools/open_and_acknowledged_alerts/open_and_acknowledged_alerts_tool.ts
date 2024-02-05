@@ -57,24 +57,13 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       name: 'OpenAndAcknowledgedAlertsTool',
       description: OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL_DESCRIPTION,
       func: async () => {
-        console.log('open-and-acknowledged-alerts-tool', {
-          alertsIndexPattern,
-          allow,
-          allowReplacement,
-          esClient,
-          onNewReplacements,
-          replacements,
-          size,
-        });
         const query = getOpenAndAcknowledgedAlertsQuery({
           alertsIndexPattern,
           allow: allow ?? [],
           size,
         });
-        console.log('open-and-acknowledged-alerts-tool query', query);
 
         const result = await esClient.search<SearchResponse>(query);
-        console.log('open-and-acknowledged-alerts-tool result', result);
 
         // Accumulate replacements locally so we can, for example use the same
         // replacement for a hostname when we see it in multiple alerts:
