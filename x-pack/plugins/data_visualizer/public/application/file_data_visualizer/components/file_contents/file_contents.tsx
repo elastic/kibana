@@ -11,6 +11,7 @@ import React, { FC, useEffect, useState, useMemo } from 'react';
 import { EuiTitle, EuiSpacer, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import useMountedState from 'react-use/lib/useMountedState';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useGrokHighlighter } from './use_text_parser';
@@ -51,6 +52,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
   if (format === EDITOR_MODE.JSON) {
     mode = EDITOR_MODE.JSON;
   }
+  const isMounted = useMountedState();
 
   const {
     services: { http },
@@ -84,9 +86,11 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       multilineStartPattern,
       excludeLinesPattern
     ).then((docs) => {
-      setHighlightedLines(docs);
+      if (isMounted()) {
+        setHighlightedLines(docs);
+      }
     });
-  }, [http, format, data, semiStructureTextData, grokHighlighter, showParsedData]);
+  }, [http, format, data, semiStructureTextData, grokHighlighter, showParsedData, isMounted]);
 
   return (
     <>
