@@ -6,8 +6,8 @@
  */
 
 import type { UseQueryOptions, UseQueryResult } from '@tanstack/react-query';
-import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { useQuery } from '@tanstack/react-query';
+import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { useHttp } from '../../../common/lib/kibana';
 import { BASE_ENDPOINT_ACTION_ROUTE } from '../../../../common/endpoint/constants';
@@ -41,6 +41,7 @@ export const useGetEndpointActionList = (
         version: '2023-10-31',
         query: {
           agentIds: query.agentIds,
+          agentTypes: query.agentTypes,
           commands: query.commands,
           endDate: query.endDate,
           page: query.page,
