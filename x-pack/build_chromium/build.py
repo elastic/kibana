@@ -38,7 +38,6 @@ if arch_name != 'x64' and arch_name != 'arm64':
   raise Exception('Unexpected architecture: ' + arch_name + '. `x64` and `arm64` are supported.')
 
 print('Fetching locale files')
-runcmd('.buildkite/scripts/common/activate_service_account.sh gs://headless_shell_staging')
 runcmd('gsutil cp gs://headless_shell_staging/en-US.pak .')
 
 print('Building Chromium ' + source_version + ' for ' + arch_name + ' from ' + src_path)
@@ -123,6 +122,5 @@ print('Creating ' + path.join(src_path, sha256_filename))
 with open (sha256_filename, 'w') as f:
   f.write(sha256_file(zip_filename))
 
-runcmd('.buildkite/scripts/common/activate_service_account.sh gs://headless_shell_staging')
 runcmd('gsutil cp ' + path.join(src_path, zip_filename) + ' gs://headless_shell_staging')
 runcmd('gsutil cp ' + path.join(src_path, sha256_filename) + ' gs://headless_shell_staging')
