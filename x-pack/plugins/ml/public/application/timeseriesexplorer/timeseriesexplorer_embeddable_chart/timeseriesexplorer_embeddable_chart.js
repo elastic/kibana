@@ -866,7 +866,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <TimeSeriesExplorerHelpPopover />
+                  <TimeSeriesExplorerHelpPopover embeddableMode />
                 </EuiFlexItem>
               </EuiFlexGroup>
               <EuiFlexGroup style={{ float: 'right' }}>
