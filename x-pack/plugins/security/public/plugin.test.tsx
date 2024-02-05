@@ -189,34 +189,27 @@ describe('Security Plugin', () => {
   });
 
   describe('#applyServerlessUiOverrides', () => {
-    let paramsResult;
-    let coreSetupMock;
-    let setupManagementServiceMock;
-    let managementSetupMock;
+    const coreSetupMock = coreMock.createSetup({ basePath: '/some-base-path' });
 
-    beforeEach(() => {
-      coreSetupMock = coreMock.createSetup({ basePath: '/some-base-path' });
+    const setupManagementServiceMock = jest
+      .spyOn(ManagementService.prototype, 'setup')
+      .mockImplementation(() => {});
 
-      setupManagementServiceMock = jest
-        .spyOn(ManagementService.prototype, 'setup')
-        .mockImplementation(() => {});
+    const managementSetupMock = managementPluginMock.createSetupContract();
 
-      managementSetupMock = managementPluginMock.createSetupContract();
-
-      paramsResult = {
-        authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
-        license: {
-          isLicenseAvailable: expect.any(Function),
-          isEnabled: expect.any(Function),
-          getFeatures: expect.any(Function),
-          hasAtLeast: expect.any(Function),
-          features$: expect.any(Observable),
-        },
-        management: managementSetupMock,
-        fatalErrors: coreSetupMock.fatalErrors,
-        getStartServices: coreSetupMock.getStartServices,
-      };
-    });
+    const paramsResult = {
+      authc: { getCurrentUser: expect.any(Function), areAPIKeysEnabled: expect.any(Function) },
+      license: {
+        isLicenseAvailable: expect.any(Function),
+        isEnabled: expect.any(Function),
+        getFeatures: expect.any(Function),
+        hasAtLeast: expect.any(Function),
+        features$: expect.any(Observable),
+      },
+      management: managementSetupMock,
+      fatalErrors: coreSetupMock.fatalErrors,
+      getStartServices: coreSetupMock.getStartServices,
+    };
 
     it('should override `roleManagementEnabled` if `config.serverlessOverrides.ui.roleManagementEnabled` is `true` and type is serverless', () => {
       const config = {
