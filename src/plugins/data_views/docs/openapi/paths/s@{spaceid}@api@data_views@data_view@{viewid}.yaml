@@ -7,6 +7,7 @@ get:
     - data views
   parameters:
     - $ref: '../components/parameters/view_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '200':
       description: Indicates a successful call.
@@ -35,6 +36,7 @@ delete:
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
   responses:
     '204':
       description: Indicates a successful call.
@@ -55,6 +57,7 @@ post:
   parameters:
     - $ref: '../components/headers/kbn_xsrf.yaml'
     - $ref: '../components/parameters/view_id.yaml'
+    - $ref: '../components/parameters/space_id.yaml'
   requestBody:
     required: true
     content:
