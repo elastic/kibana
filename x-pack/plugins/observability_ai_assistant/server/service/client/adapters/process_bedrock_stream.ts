@@ -64,6 +64,8 @@ export function processBedrockStream({
       let functionCallsBuffer: string = '';
       const id = v4();
 
+      let nextPromise = Promise.resolve();
+
       async function handleNext(value: BedrockChunkMember) {
         const response: {
           completion: string;
@@ -84,7 +86,7 @@ export function processBedrockStream({
         if (isStartOfFunctionCall) {
           const [before, after] = completion.split('<function');
           functionCallsBuffer += `<function${after}`;
-          completion = before;
+          completion = before.trimEnd();
         } else if (isEndOfFunctionCall) {
           completion = '';
           functionCallsBuffer += response.completion + response.stop;
@@ -125,15 +127,15 @@ export function processBedrockStream({
 
       source.subscribe({
         next: (value) => {
-          handleNext(value).catch((error) => {
-            subscriber.error(error);
-          });
+          nextPromise = nextPromise.then(() =>
+            handleNext(value).catch((error) => subscriber.error(error))
+          );
         },
         error: (err) => {
           subscriber.error(err);
         },
         complete: () => {
-          subscriber.complete();
+          nextPromise.then(() => subscriber.complete());
         },
       });
     });

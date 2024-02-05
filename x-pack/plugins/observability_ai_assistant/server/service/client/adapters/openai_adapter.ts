@@ -12,7 +12,7 @@ import { processOpenAiStream } from '../../../../common/utils/process_openai_str
 import { eventsourceStreamIntoObservable } from '../../util/eventsource_stream_into_observable';
 import { LlmApiAdapterFactory } from './types';
 
-export const createOpenOAiAdapter: LlmApiAdapterFactory = ({
+export const createOpenAiAdapter: LlmApiAdapterFactory = ({
   messages,
   functions,
   functionCall,

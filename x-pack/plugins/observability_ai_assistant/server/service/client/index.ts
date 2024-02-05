@@ -54,7 +54,7 @@ import {
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
-import { createOpenOAiAdapter } from './adapters/openai_adapter';
+import { createOpenAiAdapter } from './adapters/openai_adapter';
 import { LlmApiAdapter } from './adapters/types';
 
 export class ObservabilityAIAssistantClient {
@@ -431,7 +431,7 @@ export class ObservabilityAIAssistantClient {
 
     switch (connector.actionTypeId) {
       case ObservabilityAIAssistantConnectorType.OpenAI:
-        adapter = createOpenOAiAdapter({
+        adapter = createOpenAiAdapter({
           logger: this.dependencies.logger,
           messages,
           functionCall,

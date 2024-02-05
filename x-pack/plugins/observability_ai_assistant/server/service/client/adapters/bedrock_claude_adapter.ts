@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import dedent from 'dedent';
 import { castArray } from 'lodash';
 import { filter, tap } from 'rxjs';
 import { Builder } from 'xml2js';
@@ -140,48 +141,50 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
           `,
       },
       ...otherMessages.map((message, index) => {
+        const builder = new Builder({ headless: true });
         if (message.message.name) {
           const deserialized = JSON.parse(message.message.content || '{}');
 
           if ('error' in deserialized) {
             return {
               role: message.message.role,
-              content: `<function_results>
+              content: dedent(`<function_results>
                   <system>
-                    ${JSON.stringify(deserialized)}
+                    ${builder.buildObject(deserialized)}
                   </system>
                 </function_results>
-              `,
+              `),
             };
           }
 
           return {
             role: message.message.role,
-            content: `
+            content: dedent(`
               <function_results>
                 <result>
                   <tool_name>${message.message.name}</tool_name>
                   <stdout>
-                    ${message.message.content}
+                    ${builder.buildObject(deserialized)}
                   </stdout>
                 </result>
-              </function_results>`,
+              </function_results>`),
           };
         }
 
-        let content = message.message.content || '';
+        let content = replaceFunctionsWithTools(message.message.content || '');
 
         if (message.message.function_call) {
-          content += new Builder({ headless: true }).buildObject({
+          content += builder.buildObject({
             function_calls: {
               invoke: {
                 tool_name: message.message.function_call.name,
+                parameters: JSON.parse(message.message.function_call.arguments ?? '{}'),
               },
             },
           });
         }
 
-        if (index === messages.length - 1 && functionCall) {
+        if (index === otherMessages.length - 1 && functionCall) {
           content += `
           
           Remember, use the ${functionCall} tool to answer this question.`;
@@ -189,7 +192,7 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
 
         return {
           role: message.message.role,
-          content: replaceFunctionsWithTools(content),
+          content,
         };
       }),
     ];

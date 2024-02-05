@@ -26,7 +26,7 @@ export function convertDeserializedXmlWithJsonSchema(
 
   parameters.forEach((param) => {
     const key = param.name;
-    let value: any[] = result[key];
+    let value: any[] = result[key] ?? [];
     value = param.array
       ? String(value)
           .split(',')
