@@ -18,6 +18,16 @@
     "@kbn/core",
     "@kbn/licensing-plugin",
     "@kbn/screenshotting-plugin",
-    "@kbn/reporting-public"
+    "@kbn/reporting-public",
+    "@kbn/i18n",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/data-plugin",
+    "@kbn/share-plugin",
+    "@kbn/reporting-common",
+    "@kbn/i18n-react",
+    "@kbn/test-jest-helpers",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
+    "@kbn/kibana-react-plugin"
   ]
 }
