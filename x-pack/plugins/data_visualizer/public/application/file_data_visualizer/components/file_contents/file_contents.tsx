@@ -6,7 +6,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useState, useMemo } from 'react';
 
 import { EuiTitle, EuiSpacer, EuiHorizontalRule, EuiTab, EuiTabs } from '@elastic/eui';
 
@@ -52,15 +52,22 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     mode = EDITOR_MODE.JSON;
   }
 
-  const showParsedData = semiStructureTextDataGuard(semiStructureTextData);
-
-  const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
-  const [selectedTab, setSelectedTab] = useState<TABS>(showParsedData ? TABS.PARSED : TABS.RAW);
-  const grokHighlighter = useGrokHighlighter();
-
   const {
     services: { http },
   } = useDataVisualizerKibana();
+  const grokHighlighter = useGrokHighlighter();
+
+  const showParsedData = useMemo(
+    () => semiStructureTextDataGuard(semiStructureTextData),
+    [semiStructureTextData]
+  );
+  const formattedData = useMemo(
+    () => limitByNumberOfLines(data, numberOfLines),
+    [data, numberOfLines]
+  );
+
+  const [highlightedLines, setHighlightedLines] = useState<JSX.Element[] | null>(null);
+  const [selectedTab, setSelectedTab] = useState<TABS>(showParsedData ? TABS.PARSED : TABS.RAW);
 
   useEffect(() => {
     if (showParsedData === false) {
@@ -80,8 +87,6 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       setHighlightedLines(docs);
     });
   }, [http, format, data, semiStructureTextData, grokHighlighter, showParsedData]);
-
-  const formattedData = limitByNumberOfLines(data, numberOfLines);
 
   return (
     <>
