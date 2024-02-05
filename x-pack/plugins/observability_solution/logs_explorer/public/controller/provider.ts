@@ -6,10 +6,10 @@
  */
 
 import createContainer from 'constate';
-import type { LogExplorerController } from './types';
+import type { LogsExplorerController } from './types';
 
-const useLogExplorerController = ({ controller }: { controller: LogExplorerController }) =>
+const useLogsExplorerController = ({ controller }: { controller: LogsExplorerController }) =>
   controller;
 
-export const [LogExplorerControllerProvider, useLogExplorerControllerContext] =
-  createContainer(useLogExplorerController);
+export const [LogsExplorerControllerProvider, useLogsExplorerControllerContext] =
+  createContainer(useLogsExplorerController);

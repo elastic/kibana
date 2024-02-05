@@ -8,19 +8,19 @@
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { LocatorDefinition, LocatorPublic } from '@kbn/share-plugin/public';
 import {
-  LogExplorerLocatorParams,
-  LOG_EXPLORER_LOCATOR_ID,
+  LogsExplorerLocatorParams,
+  LOGS_EXPLORER_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import { LogExplorerLocatorDependencies } from './types';
+import { LogsExplorerLocatorDependencies } from './types';
 
-export type LogExplorerLocator = LocatorPublic<LogExplorerLocatorParams>;
+export type LogsExplorerLocator = LocatorPublic<LogsExplorerLocatorParams>;
 
-export class LogExplorerLocatorDefinition implements LocatorDefinition<LogExplorerLocatorParams> {
-  public readonly id = LOG_EXPLORER_LOCATOR_ID;
+export class LogsExplorerLocatorDefinition implements LocatorDefinition<LogsExplorerLocatorParams> {
+  public readonly id = LOGS_EXPLORER_LOCATOR_ID;
 
-  constructor(protected readonly deps: LogExplorerLocatorDependencies) {}
+  constructor(protected readonly deps: LogsExplorerLocatorDependencies) {}
 
-  public readonly getLocation = (params: LogExplorerLocatorParams) => {
+  public readonly getLocation = (params: LogsExplorerLocatorParams) => {
     const { dataset } = params;
     const dataViewSpec: DataViewSpec | undefined = dataset
       ? {

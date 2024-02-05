@@ -16,10 +16,10 @@ import {
   ControlPanelRT,
   ControlPanels,
 } from '../../../../../common';
-import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
+import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const initializeControlPanels =
-  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   async (context) => {
     if (!('discoverStateContainer' in context)) return;
     return context.controlPanels
@@ -28,7 +28,7 @@ export const initializeControlPanels =
   };
 
 export const subscribeControlGroup =
-  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   (context) =>
   (send) => {
     if (!('controlGroupAPI' in context)) return;
@@ -55,7 +55,7 @@ export const subscribeControlGroup =
   };
 
 export const updateControlPanels =
-  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   async (context, event) => {
     if (!('controlGroupAPI' in context)) return;
     if (!('discoverStateContainer' in context)) return;

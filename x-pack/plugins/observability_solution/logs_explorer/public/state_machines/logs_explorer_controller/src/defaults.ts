@@ -12,9 +12,9 @@ import {
   LOG_LEVEL_FIELD,
 } from '../../../../common/constants';
 import { AllDatasetSelection } from '../../../../common/dataset_selection';
-import { DefaultLogExplorerControllerState } from './types';
+import { DefaultLogsExplorerControllerState } from './types';
 
-export const DEFAULT_CONTEXT: DefaultLogExplorerControllerState = {
+export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
   datasetSelection: AllDatasetSelection.create(),
   grid: {
     columns: DEFAULT_COLUMNS,
