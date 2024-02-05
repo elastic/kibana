@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
@@ -14,7 +14,6 @@ import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { cloneRuleRoute } from './clone_rule';
 import { SanitizedDefaultRuleAction, SanitizedRule } from '../types';
-import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -82,7 +81,7 @@ describe('cloneRuleRoute', () => {
     ],
   };
 
-  const cloneResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const cloneResult = {
     ...ruleToClone,
     mute_all: mockedRule.muteAll,
     created_by: mockedRule.createdBy,
@@ -99,7 +98,7 @@ describe('cloneRuleRoute', () => {
     },
     actions: [
       {
-        ...ruleToClone.actions[0],
+        ...omit(ruleToClone.actions[0], 'type'),
         connector_type_id: 'test',
         uuid: '123-456',
       },
