@@ -362,17 +362,36 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   }
 
   getIndexPatternIds() {
-    const indexPatternIds = this.getSource().getIndexPatternIds();
+    const indexPatternIds = [];
+    const source = this.getSource();
+    if (hasESSourceMethod(source, 'getIndexPatternId')) {
+      indexPatternIds.push(source.getIndexPatternId());
+    }
+
     this.getValidJoins().forEach((join) => {
-      indexPatternIds.push(...join.getIndexPatternIds());
+      const rightSource = join.getRightJoinSource();
+      if (hasESSourceMethod(rightSource, 'getIndexPatternId')) {
+        indexPatternIds.push(rightSource.getIndexPatternId());
+      }
     });
     return indexPatternIds;
   }
 
   getQueryableIndexPatternIds() {
-    const indexPatternIds = this.getSource().getQueryableIndexPatternIds();
+    const indexPatternIds = [];
+    const source = this.getSource();
+    if (source.getApplyGlobalQuery() && hasESSourceMethod(source, 'getIndexPatternId')) {
+      indexPatternIds.push(source.getIndexPatternId());
+    }
+
     this.getValidJoins().forEach((join) => {
-      indexPatternIds.push(...join.getQueryableIndexPatternIds());
+      const rightSource = join.getRightJoinSource();
+      if (
+        rightSource.getApplyGlobalQuery() &&
+        hasESSourceMethod(rightSource, 'getIndexPatternId')
+      ) {
+        indexPatternIds.push(rightSource.getIndexPatternId());
+      }
     });
     return indexPatternIds;
   }

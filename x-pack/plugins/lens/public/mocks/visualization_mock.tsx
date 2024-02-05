@@ -9,11 +9,13 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { Visualization, VisualizationMap } from '../types';
 
 export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualization> {
+  const layerId = 'layer1';
+
   return {
     id,
     clearLayer: jest.fn((state, _layerId, _indexPatternId) => state),
     removeLayer: jest.fn(),
-    getLayerIds: jest.fn((_state) => ['layer1']),
+    getLayerIds: jest.fn((_state) => [layerId]),
     getSupportedLayers: jest.fn(() => [{ type: LayerTypes.DATA, label: 'Data Layer' }]),
     getLayerType: jest.fn((_state, _layerId) => LayerTypes.DATA),
     visualizationTypes: [
@@ -36,7 +38,7 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
         {
           groupId: 'a',
           groupLabel: 'a',
-          layerId: 'layer1',
+          layerId,
           supportsMoreColumns: true,
           accessors: [],
           filterOperations: jest.fn(() => true),
@@ -49,7 +51,7 @@ export function createMockVisualization(id = 'testVis'): jest.Mocked<Visualizati
     getUserMessages: jest.fn((_state) => []),
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
-    DimensionEditorComponent: jest.fn(() => <div />),
+    DimensionEditorComponent: jest.fn(() => <div data-test-subj="lnsVisDimensionEditor" />),
   };
 }
 

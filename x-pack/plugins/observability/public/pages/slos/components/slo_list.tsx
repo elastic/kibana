@@ -15,16 +15,7 @@ import { ToggleSLOView } from './toggle_slo_view';
 
 export function SloList() {
   const { state, store: storeState } = useUrlSearchState();
-  const {
-    view,
-    page,
-    perPage,
-    kqlQuery,
-    filters,
-    compact: isCompact,
-    tagsFilter,
-    statusFilter,
-  } = state;
+  const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter } = state;
 
   const {
     isLoading,
@@ -61,8 +52,6 @@ export function SloList() {
           sloList={sloList}
           sloView={view}
           onChangeView={(newView) => onStateChange({ view: newView })}
-          onToggleCompactView={() => onStateChange({ compact: !isCompact })}
-          isCompact={isCompact}
           loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
           onStateChange={onStateChange}
           initialState={state}
@@ -72,7 +61,6 @@ export function SloList() {
         sloList={results}
         loading={isLoading || isRefetching}
         error={isError}
-        isCompact={isCompact}
         sloView={view}
       />
 

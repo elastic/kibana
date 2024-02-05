@@ -10,29 +10,17 @@ import { rpcSchemas } from '../../../common/schemas';
 import type { MSearchIn, MSearchOut } from '../../../common';
 import type { ProcedureDefinition } from '../rpc_service';
 import type { Context } from '../types';
-import { getStorageContext } from './utils';
+import { getMSearchClientFactory } from '../../content_client';
 
 export const mSearch: ProcedureDefinition<Context, MSearchIn, MSearchOut> = {
   schemas: rpcSchemas.mSearch,
-  fn: async (ctx, { contentTypes: contentTypes, query }) => {
-    const contentTypesWithStorageContext = contentTypes.map(({ contentTypeId, version }) => {
-      const storageContext = getStorageContext({
-        contentTypeId,
-        version,
-        ctx,
-      });
-
-      return {
-        contentTypeId,
-        ctx: storageContext,
-      };
+  fn: async (ctx, { contentTypes, query }) => {
+    const clientFactory = getMSearchClientFactory({
+      contentRegistry: ctx.contentRegistry,
+      mSearchService: ctx.mSearchService,
     });
+    const mSearchClient = clientFactory(ctx);
 
-    const result = await ctx.mSearchService.search(contentTypesWithStorageContext, query);
-
-    return {
-      contentTypes,
-      result,
-    };
+    return mSearchClient.msearch({ contentTypes, query });
   },
 };
