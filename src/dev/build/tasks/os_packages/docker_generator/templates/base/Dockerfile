@@ -121,10 +121,6 @@ WORKDIR /usr/share/kibana
 # https://github.com/openssl/openssl/blob/openssl-3.0/README-FIPS.md
 # https://www.openssl.org/docs/man3.0/man7/fips_module.html
 
-# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
-RUN echo -e '\n--enable-fips' >> config/node.options
-RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
-
 # Ideally we would handle this in the builder step, but make is installing over the OS version
 # of OpenSSL and requires linking of many submodules.
 RUN set -e ; \
@@ -140,6 +136,9 @@ RUN set -e ; \
  ldconfig /usr/local/lib64/  ; \
  chown -R 1000:0 /usr/share/kibana/openssl-3.0.8
 
+# Enable FIPS for Kibana only. In the future we can override OS wide with ENV OPENSSL_CONF
+RUN echo -e '\n--enable-fips' >> config/node.options
+RUN echo '--openssl-config=/usr/share/kibana/openssl-3.0.8/nodejs.cnf' >> config/node.options
 COPY --chown=1000:0 openssl/nodejs.cnf /usr/share/kibana/openssl-3.0.8/nodejs.cnf
 ENV OPENSSL_MODULES=/usr/local/lib64/ossl-modules
 
