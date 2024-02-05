@@ -8,6 +8,7 @@
 import { ComponentType } from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CreateDatasetQualityController } from './controller';
 import { DatasetQualityProps } from './components/dataset_quality';
 
@@ -20,6 +21,7 @@ export interface DatasetQualityPluginStart {
 }
 
 export interface DatasetQualityStartDeps {
+  data: DataPublicPluginStart;
   share: SharePluginStart;
   fieldFormats: FieldFormatsStart;
 }

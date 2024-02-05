@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { getDefaultTimeRange } from '../../../utils';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../../../common/constants';
 import { DefaultDatasetQualityControllerState } from './types';
+
+const ONE_MINUTE_IN_MS = 60000;
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
   table: {
@@ -21,7 +22,14 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
   filters: {
     inactive: true,
     fullNames: false,
-    timeRange: getDefaultTimeRange(),
+    timeRange: {
+      from: 'now-24h',
+      to: 'now',
+      refresh: {
+        isPaused: true,
+        interval: ONE_MINUTE_IN_MS,
+      },
+    },
   },
   flyout: {},
   datasets: [],

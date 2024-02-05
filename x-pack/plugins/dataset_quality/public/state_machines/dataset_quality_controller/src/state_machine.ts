@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { mergeDegradedStatsIntoDataStreams } from '../../../utils/merge_degraded_docs_into_datastreams';
+import { getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import { DataStreamDetails } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
@@ -76,6 +76,15 @@ export const createPureDatasetQualityControllerStateMachine = (
               },
             },
           },
+          on: {
+            UPDATE_TIME_RANGE: {
+              target: 'datasets.fetching',
+              actions: ['storeTimeRange'],
+            },
+            REFRESH_DATA: {
+              target: 'datasets.fetching',
+            },
+          },
         },
         degradedDocs: {
           initial: 'fetching',
@@ -94,6 +103,15 @@ export const createPureDatasetQualityControllerStateMachine = (
               },
             },
             loaded: {},
+          },
+          on: {
+            UPDATE_TIME_RANGE: {
+              target: 'degradedDocs.fetching',
+              actions: ['storeTimeRange'],
+            },
+            REFRESH_DATA: {
+              target: 'degradedDocs.fetching',
+            },
           },
         },
         flyout: {
@@ -166,6 +184,16 @@ export const createPureDatasetQualityControllerStateMachine = (
               fullNames: !context.filters.fullNames,
             },
           };
+        }),
+        storeTimeRange: assign((context, event) => {
+          return 'timeRange' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  timeRange: event.timeRange,
+                },
+              }
+            : {};
         }),
         storeFlyoutOptions: assign((context, event) => {
           return 'dataset' in event
@@ -240,11 +268,14 @@ export const createDatasetQualityControllerStateMachine = ({
     },
     services: {
       loadDataStreamStats: (_context) => dataStreamStatsClient.getDataStreamsStats(),
-      loadDegradedDocs: (context) =>
-        dataStreamStatsClient.getDataStreamsDegradedStats({
-          start: context.filters.timeRange.from,
-          end: context.filters.timeRange.to,
-        }),
+      loadDegradedDocs: (context) => {
+        const { start, end } = getDateRange(context.filters.timeRange);
+
+        return dataStreamStatsClient.getDataStreamsDegradedStats({
+          start,
+          end,
+        });
+      },
       loadDataStreamDetails: (context) => {
         if (!context.flyout.dataset) {
           fetchDatasetDetailsFailedNotifier(toasts, new Error(noDatasetSelected));

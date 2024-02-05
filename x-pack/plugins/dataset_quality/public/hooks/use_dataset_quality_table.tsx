@@ -14,8 +14,7 @@ import { tableSummaryAllText, tableSummaryOfText } from '../../common/translatio
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
-import { useKibanaContextForPlugin } from '../utils';
-import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
+import { filterInactiveDatasets, isActiveDataset, useKibanaContextForPlugin } from '../utils';
 
 export type Direction = 'asc' | 'desc';
 export type SortField = keyof DataStreamStat;
@@ -153,7 +152,7 @@ export const useDatasetQualityTable = () => {
   }, [showInactiveDatasets, datasets, timeRange, sort.field, sort.direction, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
+    const startNumberItemsOnPage = rowsPerPage * page + 1;
     const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
     return rowsPerPage === 0 ? (

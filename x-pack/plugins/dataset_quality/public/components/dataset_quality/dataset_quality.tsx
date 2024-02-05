@@ -45,12 +45,16 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
 
 const Header = dynamic(() => import('./header'));
 const Table = dynamic(() => import('./table'));
+const Filters = dynamic(() => import('./filters'));
 
 function DatasetQuality() {
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiFlexItem grow={false}>
         <Header />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Filters />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <Table />

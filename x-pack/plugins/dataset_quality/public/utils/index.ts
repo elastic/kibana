@@ -5,5 +5,7 @@
  * 2.0.
  */
 
+export * from './filter_inactive_datasets';
+export * from './get_date_range';
+export * from './merge_degraded_docs_into_datastreams';
 export * from './use_kibana';
-export * from './default_timerange';

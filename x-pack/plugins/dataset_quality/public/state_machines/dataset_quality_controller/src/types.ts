@@ -29,13 +29,19 @@ interface TableCriteria {
   };
 }
 
+interface TimeRange {
+  from: string;
+  to: string;
+  refresh: {
+    isPaused: boolean;
+    interval: number;
+  };
+}
+
 interface FiltersCriteria {
   inactive: boolean;
   fullNames: boolean;
-  timeRange: {
-    from: string;
-    to: string;
-  };
+  timeRange: TimeRange;
 }
 
 export interface WithTableOptions {
@@ -128,6 +134,13 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'TOGGLE_FULL_DATASET_NAMES';
+    }
+  | {
+      type: 'UPDATE_TIME_RANGE';
+      timeRange: TimeRange;
+    }
+  | {
+      type: 'REFRESH_DATA';
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

@@ -6,6 +6,7 @@
  */
 
 import { DataStreamStat } from '../../common/data_streams_stats';
+import { getDateRange } from './get_date_range';
 
 interface FilterInactiveDatasetsOptions {
   datasets: DataStreamStat[];
@@ -16,13 +17,11 @@ interface FilterInactiveDatasetsOptions {
 }
 
 export const filterInactiveDatasets = (options: FilterInactiveDatasetsOptions) => {
-  const {
-    datasets,
-    timeRange: { from, to },
-  } = options;
+  const { datasets, timeRange } = options;
+  const { start, end } = getDateRange(timeRange);
 
-  const startDate = new Date(from).getTime();
-  const endDate = new Date(to).getTime();
+  const startDate = new Date(start).getTime();
+  const endDate = new Date(end).getTime();
 
   return datasets.filter((dataset) =>
     dataset.lastActivity ? isActive(dataset.lastActivity, startDate, endDate) : false
@@ -38,13 +37,11 @@ interface IsActiveDatasetOptions {
 }
 
 export const isActiveDataset = (options: IsActiveDatasetOptions) => {
-  const {
-    lastActivity,
-    timeRange: { from, to },
-  } = options;
+  const { lastActivity, timeRange } = options;
+  const { start, end } = getDateRange(timeRange);
 
-  const startDate = new Date(from).getTime();
-  const endDate = new Date(to).getTime();
+  const startDate = new Date(start).getTime();
+  const endDate = new Date(end).getTime();
 
   return isActive(lastActivity, startDate, endDate);
 };
