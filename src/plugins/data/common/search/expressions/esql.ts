@@ -11,7 +11,6 @@ import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/
 import { i18n } from '@kbn/i18n';
 import type {
   Datatable,
-  DatatableColumn,
   DatatableColumnType,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
