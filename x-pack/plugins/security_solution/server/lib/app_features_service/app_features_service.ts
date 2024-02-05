@@ -101,10 +101,7 @@ export class AppFeaturesService {
     return this.appFeatures.has(appFeatureKey);
   }
 
-  public isApiPrivilegeEnabled(privilege: string) {
-    const apiAction = `api:${APP_ID}-${privilege}`;
-    return this.isActionRegistered(apiAction);
-  }
+  public getApiActionName = (apiPrivilege: string) => `api:${APP_ID}-${apiPrivilege}`;
 
   public isActionRegistered(action: string) {
     return (
@@ -112,6 +109,10 @@ export class AppFeaturesService {
       this.casesAppFeatures.isActionRegistered(action) ||
       this.securityAssistantAppFeatures.isActionRegistered(action)
     );
+  }
+
+  public isApiPrivilegeEnabled(apiPrivilege: string) {
+    return this.isActionRegistered(this.getApiActionName(apiPrivilege));
   }
 
   public registerApiAuthorization(http: HttpServiceSetup) {

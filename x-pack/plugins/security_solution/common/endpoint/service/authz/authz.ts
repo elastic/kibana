@@ -27,15 +27,18 @@ import type { MaybeImmutable } from '../../types';
 function hasAuthFactory(fleetAuthz: FleetAuthz, appFeatureService?: AppFeaturesService) {
   return function hasAuth(
     privilege: keyof typeof ENDPOINT_PRIVILEGES,
-    { skipAppFeatureCheck = false }: { skipAppFeatureCheck?: boolean } = {}
+    { action }: { action?: string } = {}
   ): boolean {
-    if (
-      appFeatureService &&
-      !skipAppFeatureCheck &&
-      !appFeatureService.isApiPrivilegeEnabled(privilege)
-    ) {
-      return false;
+    // Product features control
+    if (appFeatureService) {
+      // Only server side has to check this, to prevent "superuser" role from being allowed to use product gated APIs.
+      // UI side does not need to check this. Capabilities list is correct for superuser.
+      const actionToCheck = action ?? appFeatureService.getApiActionName(privilege);
+      if (!appFeatureService.isActionRegistered(actionToCheck)) {
+        return false;
+      }
     }
+    // Role access control
     if (privilege === 'showEndpointExceptions' || privilege === 'crudEndpointExceptions') {
       return fleetAuthz.endpointExceptionsPrivileges?.actions[privilege] ?? false;
     }
@@ -63,8 +66,8 @@ export const calculateEndpointAuthz = (
   const isEnterpriseLicense = licenseService.isEnterprise();
   const hasEndpointManagementAccess = userRoles.includes('superuser');
 
-  const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { skipAppFeatureCheck: true });
-  const canReadSecuritySolution = hasAuth('readSecuritySolution', { skipAppFeatureCheck: true });
+  const canWriteSecuritySolution = hasAuth('writeSecuritySolution', { action: 'ui:write' });
+  const canReadSecuritySolution = hasAuth('readSecuritySolution', { action: 'ui:read' });
   const canWriteEndpointList = hasAuth('writeEndpointList');
   const canReadEndpointList = hasAuth('readEndpointList');
   const canWritePolicyManagement = hasAuth('writePolicyManagement');
