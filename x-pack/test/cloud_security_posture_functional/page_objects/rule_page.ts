@@ -139,6 +139,48 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       );
       await takeActionOption.click();
     },
+
+    getCountersEmptyState: async () => {
+      return await testSubjects.exists('rules-counters-empty-state');
+    },
+
+    getPostureScoreCounter: async () => {
+      return await testSubjects.find('rules-counters-posture-score-counter');
+    },
+
+    clickPostureScoreButton: async () => {
+      const postureScoreButton = await testSubjects.find('rules-counters-posture-score-button');
+      await postureScoreButton.click();
+    },
+
+    getIntegrationsEvaluatedCounter: async () => {
+      return await testSubjects.find('rules-counters-integrations-evaluated-counter');
+    },
+
+    clickIntegrationsEvaluatedButton: async () => {
+      const integrationsEvaluatedButton = await testSubjects.find(
+        'rules-counters-integrations-evaluated-button'
+      );
+      await integrationsEvaluatedButton.click();
+    },
+
+    getFailedFindingsCounter: async () => {
+      return await testSubjects.find('rules-counters-failed-findings-counter');
+    },
+
+    clickFailedFindingsButton: async () => {
+      const failedFindingsButton = await testSubjects.find('rules-counters-failed-findings-button');
+      await failedFindingsButton.click();
+    },
+
+    getDisabledRulesCounter: async () => {
+      return await testSubjects.find('rules-counters-disabled-rules-counter');
+    },
+
+    clickDisabledRulesButton: async () => {
+      const disabledRulesButton = await testSubjects.find('rules-counters-disabled-rules-button');
+      await disabledRulesButton.click();
+    },
   };
 
   const navigateToRulePage = async (benchmarkCisId: string, benchmarkCisVersion: string) => {

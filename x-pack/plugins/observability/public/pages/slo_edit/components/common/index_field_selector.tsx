@@ -21,11 +21,13 @@ interface Props {
   isLoading: boolean;
   isRequired?: boolean;
   defaultValue?: string;
+  labelAppend?: ReactNode;
 }
 export function IndexFieldSelector({
   indexFields,
   name,
   label,
+  labelAppend,
   placeholder,
   isDisabled,
   isLoading,
@@ -41,7 +43,7 @@ export function IndexFieldSelector({
 
   return (
     <EuiFlexItem>
-      <EuiFormRow label={label} isInvalid={getFieldState(name).invalid}>
+      <EuiFormRow label={label} isInvalid={getFieldState(name).invalid} labelAppend={labelAppend}>
         <Controller
           defaultValue={defaultValue}
           name={name}

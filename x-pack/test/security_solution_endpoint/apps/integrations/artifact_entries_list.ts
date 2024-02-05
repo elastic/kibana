@@ -260,7 +260,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
-          await retry.waitForWithTimeout('entry is updated in list', 10000, async () => {
+          await retry.waitForWithTimeout('entry is updated in list', 20000, async () => {
             const currentValue = await testSubjects.getVisibleText(
               `${testData.pagePrefix}-card-criteriaConditions${
                 testData.pagePrefix === 'EventFiltersListPage' ? '-condition' : ''

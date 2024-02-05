@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_START } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   AlertsTableConfigurationRegistry,
@@ -35,7 +35,7 @@ export const getRuleDetailsTableConfiguration = (
     }),
   sort: [
     {
-      [TIMESTAMP]: {
+      [ALERT_START]: {
         order: 'desc' as SortOrder,
       },
     },
