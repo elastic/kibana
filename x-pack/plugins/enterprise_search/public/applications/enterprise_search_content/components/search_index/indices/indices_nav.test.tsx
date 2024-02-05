@@ -8,8 +8,6 @@
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 import { mockUseRouteMatch, mockUseParams } from '../../../../__mocks__/react_router';
 
-import { shallow } from 'enzyme';
-
 import { isConnectorIndex, isCrawlerIndex } from '../../../utils/indices';
 
 import { mockIndexNameValues } from '../_mocks_/index_name_logic.mock';
