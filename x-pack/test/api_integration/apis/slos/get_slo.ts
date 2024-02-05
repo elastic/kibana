@@ -367,7 +367,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send()
           .expect(200);
 
-        // // expect 3 instances to be created
+        // expect 3 instances to be created
         expect(instanceResponse.body.groupBy).toEqual('tags');
         expect(instanceResponse.body.instances.sort()).toEqual(['tags:1', 'tags:2', 'tags:3']);
       });
