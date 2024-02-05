@@ -262,9 +262,6 @@ async function scoreSuggestions({
     ).pipe(concatenateChatCompletionChunks())
   );
 
-  logger.debug(`Received scoring response`);
-  logger.debug(JSON.stringify(response, null, 2));
-
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
     scoreFunctionRequest.message.function_call.arguments

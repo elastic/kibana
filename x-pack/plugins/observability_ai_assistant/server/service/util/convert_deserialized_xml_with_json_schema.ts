@@ -10,6 +10,9 @@ import type { JSONSchema } from 'json-schema-to-ts';
 import { forEach, get, isPlainObject } from 'lodash';
 import { jsonSchemaToFlatParameters } from './json_schema_to_flat_parameters';
 
+// JS to XML is "lossy", e.g. everything becomes an array and a string,
+// so we need a JSON schema to deserialize it
+
 export function convertDeserializedXmlWithJsonSchema(
   parameterResults: Array<Record<string, string[]>>,
   schema: JSONSchema

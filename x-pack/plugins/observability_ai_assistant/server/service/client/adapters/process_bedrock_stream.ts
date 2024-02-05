@@ -64,7 +64,13 @@ export function processBedrockStream({
       let functionCallsBuffer: string = '';
       const id = v4();
 
+      // We use this to make sure we don't complete the Observable
+      // before all operations have completed.
       let nextPromise = Promise.resolve();
+
+      // As soon as we see a `<function` token, we write all chunks
+      // to a buffer, that we flush as a function request if we
+      // spot the stop sequence.
 
       async function handleNext(value: BedrockChunkMember) {
         const response: {
@@ -112,6 +118,9 @@ export function processBedrockStream({
         }
 
         if (completion.trim()) {
+          // OpenAI tokens come roughly separately, Bedrock/Claude
+          // chunks are bigger, so we split them up to give a more
+          // responsive feel in the UI
           const parts = completion.split(' ');
           parts.forEach((part, index) => {
             subscriber.next({

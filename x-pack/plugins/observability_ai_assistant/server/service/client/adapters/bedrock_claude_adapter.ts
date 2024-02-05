@@ -24,6 +24,9 @@ function replaceFunctionsWithTools(content: string) {
   });
 }
 
+// Most of the work here is to re-format OpenAI-compatible functions for Claude.
+// See https://github.com/anthropics/anthropic-tools/blob/main/tool_use_package/prompt_constructors.py
+
 export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
   messages,
   functions,

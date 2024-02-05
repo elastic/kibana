@@ -28,6 +28,9 @@ export interface ModelStreamErrorExceptionMember {
 
 export type BedrockStreamMember = BedrockChunkMember | ModelStreamErrorExceptionMember;
 
+// AWS uses SerDe to send over serialized data, so we use their
+// @smithy library to parse the stream data
+
 export function eventstreamSerdeIntoObservable(readable: Readable) {
   return new Observable<BedrockStreamMember>((subscriber) => {
     const marshaller = new EventStreamMarshaller({

@@ -9,6 +9,9 @@ import { createParser } from 'eventsource-parser';
 import { Readable } from 'node:stream';
 import { Observable } from 'rxjs';
 
+// OpenAI sends server-sent events, so we can use a library
+// to deal with parsing, buffering, unicode etc
+
 export function eventsourceStreamIntoObservable(readable: Readable) {
   return new Observable<string>((subscriber) => {
     const parser = createParser((event) => {
