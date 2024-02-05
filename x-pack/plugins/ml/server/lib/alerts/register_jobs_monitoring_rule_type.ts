@@ -122,6 +122,12 @@ export function registerJobsMonitoringRuleType({
     validate: {
       params: anomalyDetectionJobsHealthRuleParams,
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: anomalyDetectionJobsHealthRuleParams,
+      },
+    },
     actionVariables: {
       context: [
         {
