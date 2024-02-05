@@ -24,7 +24,7 @@ import { SenderUtils } from './sender_helpers';
 import { newTelemetryLogger, type TelemetryLogger } from './helpers';
 
 export const DEFAULT_QUEUE_CONFIG: QueueConfig = {
-  bufferTimeSpanMillis: 60 * 1_000,
+  bufferTimeSpanMillis: 30 * 1_000,
   inflightEventsThreshold: 1_000,
   maxPayloadSizeBytes: 1024 * 1024, // 1MiB
 };
@@ -216,13 +216,11 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
 
       // buffer events for a while
       rx.bufferWhen<Event>(() => rx.interval(this.getConfigFor(channel).bufferTimeSpanMillis)),
-      // rx.bufferCount(3),
 
       // exclude empty buffers
       rx.filter((n: Event[]) => n.length > 0),
 
       // serialize the payloads
-      // TODO(sebastian.zaffarano): configure serializer (e.g. protobuf)
       rx.map((events) => events.map((e) => JSON.stringify(e.payload))),
 
       // chunk by size
@@ -252,6 +250,8 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   private async sendEvents(channel: TelemetryChannel, events: string[]): Promise<Result> {
+    this.logger.l(`Sending ${events.length} telemetry events to channel "${channel}"`);
+
     try {
       const senderMetadata = await this.getSenderMetadata(channel);
 
@@ -263,7 +263,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           channel
         );
 
-        this.logger.l('Telemetry is not opted-in.');
+        this.logger.l(`Unable to send events to channel "${channel}": Telemetry is not opted-in.`);
         throw newFailure('Telemetry is not opted-in', channel, events.length);
       }
 
@@ -276,12 +276,11 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
           channel
         );
 
-        return Promise.reject(
-          newFailure('Telemetry Services are not reachable', channel, events.length)
+        this.logger.l(
+          `Unable to send events to channel "${channel}": Telemetry services are not reachable.`
         );
+        throw newFailure('Telemetry Services are not reachable', channel, events.length);
       }
-
-      this.logger.l(`Sending ${events.length} telemetry events to ${channel}`);
 
       const body = events.join('\n');
 

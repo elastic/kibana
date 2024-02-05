@@ -10,9 +10,17 @@ import type {
   KibanaRequest,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import { asyncForEach } from '@kbn/std';
+
 import {
   createExceptionList,
   createExceptionListItem,
+  deleteExceptionList,
+  deleteExceptionListItem,
 } from '@kbn/lists-plugin/server/services/exception_lists';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { DETECTION_TYPE, NAMESPACE_TYPE } from '@kbn/lists-plugin/common/constants.mock';
@@ -23,6 +31,8 @@ import type {
 } from '../../plugin_contract';
 import type { SecurityTelemetryTask } from '../../lib/telemetry/task';
 import { Plugin as SecuritySolutionPlugin } from '../../plugin';
+import { AsyncTelemetryEventsSender } from '../../lib/telemetry/async_sender';
+
 export function getTelemetryTasks(
   spy: jest.SpyInstance<
     SecuritySolutionPluginStart,
@@ -40,6 +50,30 @@ export function getTelemetryTasks(
     if (sender instanceof TelemetryEventsSender) {
       /* eslint dot-notation: "off" */
       return sender['telemetryTasks'] ?? [];
+    } else {
+      throw new Error('Telemetry sender not started');
+    }
+  } else {
+    throw new Error('Telemetry sender not started');
+  }
+}
+
+export function getAsyncTelemetryEventSender(
+  spy: jest.SpyInstance<
+    SecuritySolutionPluginStart,
+    [core: CoreStart, plugins: SecuritySolutionPluginStartDependencies]
+  >
+): AsyncTelemetryEventsSender {
+  const pluginInstances = spy.mock.instances;
+  if (pluginInstances.length === 0) {
+    throw new Error('Telemetry sender not started');
+  }
+  const plugin = pluginInstances[0];
+  if (plugin instanceof SecuritySolutionPlugin) {
+    /* eslint dot-notation: "off" */
+    const sender = plugin['asyncTelemetryEventsSender'];
+    if (sender instanceof AsyncTelemetryEventsSender) {
+      return sender;
     } else {
       throw new Error('Telemetry sender not started');
     }
@@ -77,6 +111,24 @@ export async function createMockedAlert(
   });
 }
 
+export async function cleanupMockedAlerts(
+  esClient: ElasticsearchClient,
+  so: SavedObjectsServiceStart
+) {
+  const alertIndex = so.getIndexForType('alert');
+  const aliasInfo = await esClient.indices.getAlias({ index: alertIndex });
+  const alias = Object.keys(aliasInfo);
+
+  await esClient.deleteByQuery({
+    index: alias[0],
+    body: {
+      query: {
+        match_all: {},
+      },
+    },
+  });
+}
+
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
   const type = DETECTION_TYPE;
   const listId = ENDPOINT_ARTIFACT_LISTS.trustedApps.id;
@@ -93,7 +145,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
   const tags: string[] = [];
   const tieBreaker = '';
 
-  await createExceptionList({
+  const exceptionList = await createExceptionList({
     listId,
     immutable,
     savedObjectsClient,
@@ -108,7 +160,7 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
     version,
   });
 
-  await createExceptionListItem({
+  const exceptionListItem = await createExceptionListItem({
     comments: [],
     entries: [
       {
@@ -131,6 +183,40 @@ export async function createMockedExceptionList(so: SavedObjectsServiceStart) {
     tags,
     tieBreaker,
     type: 'simple',
+  });
+
+  return { exceptionList, exceptionListItem };
+}
+
+export async function cleanupMockedExceptionLists(
+  exceptionsList: ExceptionListSchema[],
+  exceptionsListItem: ExceptionListItemSchema[],
+  so: SavedObjectsServiceStart
+) {
+  const savedObjectsClient = so.getScopedClient(fakeKibanaRequest);
+  asyncForEach(exceptionsListItem, async (exceptionListItem) => {
+    try {
+      await deleteExceptionListItem({
+        itemId: exceptionListItem.item_id,
+        id: exceptionListItem.id,
+        namespaceType: NAMESPACE_TYPE,
+        savedObjectsClient,
+      });
+    } catch (e) {
+      // just ignore...
+    }
+  });
+  asyncForEach(exceptionsList, async (exceptionList) => {
+    try {
+      await deleteExceptionList({
+        listId: exceptionList.list_id,
+        id: exceptionList.id,
+        namespaceType: NAMESPACE_TYPE,
+        savedObjectsClient,
+      });
+    } catch (e) {
+      // just ignore...
+    }
   });
 }
 
@@ -277,3 +363,11 @@ const fakeKibanaRequest = {
     },
   },
 } as unknown as KibanaRequest;
+
+export function getTelemetryTaskTitle(task: SecurityTelemetryTask): string {
+  if (task !== null && typeof task === 'object') {
+    return task['config']['title'];
+  } else {
+    return '';
+  }
+}

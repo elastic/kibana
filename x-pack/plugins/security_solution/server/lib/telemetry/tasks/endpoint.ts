@@ -65,6 +65,11 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
       const trace = taskMetricsService.start(taskName);
       try {
+        tlog(
+          logger,
+          `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+        );
+
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');
         }

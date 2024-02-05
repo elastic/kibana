@@ -82,9 +82,6 @@ export interface TelemetryEvent {
 
 /**
  * List of supported telemetry channels.
- *
- * TODO(sebastian.zaffarano): should we start using this list instead of
- * the hardcoded values or the constants defined along the code?
  */
 export enum TelemetryChannel {
   LISTS = 'security-lists-v2',

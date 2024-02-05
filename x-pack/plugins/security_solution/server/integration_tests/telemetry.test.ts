@@ -7,14 +7,23 @@
 import Path from 'path';
 import axios from 'axios';
 
+import type {
+  ExceptionListItemSchema,
+  ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+
 import { ENDPOINT_STAGING } from '@kbn/telemetry-plugin/common/constants';
 
 import { eventually, setupTestServers, removeFile } from './lib/helpers';
 import {
+  cleanupMockedAlerts,
+  cleanupMockedExceptionLists,
   createMockedAlert,
-  getTelemetryTasks,
-  getTelemetryTask,
   createMockedExceptionList,
+  getAsyncTelemetryEventSender,
+  getTelemetryTask,
+  getTelemetryTaskTitle,
+  getTelemetryTasks,
 } from './lib/telemetry_helpers';
 
 import {
@@ -27,6 +36,8 @@ import {
   type TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server/plugin';
 import type { SecurityTelemetryTask } from '../lib/telemetry/task';
+import { TelemetryChannel } from '../lib/telemetry/types';
+import type { AsyncTelemetryEventsSender } from '../lib/telemetry/async_sender';
 
 jest.mock('axios');
 
@@ -43,6 +54,9 @@ describe('telemetry tasks', () => {
     let kibanaServer: TestKibanaUtils;
     let taskManagerPlugin: TaskManagerStartContract;
     let tasks: SecurityTelemetryTask[];
+    let asyncTelemetryEventSender: AsyncTelemetryEventsSender;
+    let exceptionsList: ExceptionListSchema[] = [];
+    let exceptionsListItem: ExceptionListItemSchema[] = [];
 
     beforeAll(async () => {
       await removeFile(logFilePath);
@@ -57,6 +71,14 @@ describe('telemetry tasks', () => {
       expect(telemetrySenderStartSpy).toHaveBeenCalledTimes(1);
 
       tasks = getTelemetryTasks(telemetrySenderStartSpy);
+      asyncTelemetryEventSender = getAsyncTelemetryEventSender(telemetrySenderStartSpy);
+
+      // update queue config to not wait for a long bufferTimeSpanMillis
+      asyncTelemetryEventSender.updateQueueConfig(TelemetryChannel.TASK_METRICS, {
+        bufferTimeSpanMillis: 100,
+        inflightEventsThreshold: 1_000,
+        maxPayloadSizeBytes: 1024 * 1024,
+      });
     });
 
     afterAll(async () => {
@@ -81,7 +103,20 @@ describe('telemetry tasks', () => {
       });
     });
 
-    afterEach(async () => {});
+    afterEach(async () => {
+      await cleanupMockedExceptionLists(
+        exceptionsList,
+        exceptionsListItem,
+        kibanaServer.coreStart.savedObjects
+      );
+      await cleanupMockedAlerts(
+        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+        kibanaServer.coreStart.savedObjects
+      ).then(() => {
+        exceptionsList = [];
+        exceptionsListItem = [];
+      });
+    });
 
     it('shuld execute when scheduled', async () => {
       const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
@@ -91,9 +126,14 @@ describe('telemetry tasks', () => {
         kibanaServer.coreStart.elasticsearch.client.asInternalUser,
         kibanaServer.coreStart.savedObjects
       );
-      await createMockedExceptionList(kibanaServer.coreStart.savedObjects);
+      const { exceptionList, exceptionListItem } = await createMockedExceptionList(
+        kibanaServer.coreStart.savedObjects
+      );
 
-      // schedule task to roon ASAP
+      exceptionsList.push(exceptionList);
+      exceptionsListItem.push(exceptionListItem);
+
+      // schedule task to run ASAP
       await eventually(async () => {
         await taskManagerPlugin.runSoon(task.getTaskId());
       });
@@ -111,6 +151,55 @@ describe('telemetry tasks', () => {
 
       expect(body).not.toBeFalsy();
       expect(body.detection_rule).not.toBeFalsy();
+    });
+
+    it('should send task metrics', async () => {
+      const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
+
+      // create some data
+      await createMockedAlert(
+        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+        kibanaServer.coreStart.savedObjects
+      );
+      const { exceptionList, exceptionListItem } = await createMockedExceptionList(
+        kibanaServer.coreStart.savedObjects
+      );
+
+      exceptionsList.push(exceptionList);
+      exceptionsListItem.push(exceptionListItem);
+
+      // schedule task to run ASAP
+      await eventually(async () => {
+        await taskManagerPlugin.runSoon(task.getTaskId());
+      });
+
+      // wait until the events are sent to the telemetry server
+      const body = await eventually(
+        async () => {
+          const calls = mockedAxiosPost.mock.calls.flatMap(([url, data]) => {
+            return (data as string).split('\n').map((b) => {
+              return { url, body: b };
+            });
+          });
+
+          const found = calls.find(({ url, body: b }) => {
+            return (
+              b.indexOf(getTelemetryTaskTitle(task)) !== -1 &&
+              url.startsWith(ENDPOINT_STAGING) &&
+              url.endsWith('task-metrics')
+            );
+          });
+          expect(found).not.toBeFalsy();
+
+          return found !== undefined ? found.body : '{}';
+        },
+        60 * 1_000,
+        1_000
+      );
+
+      const asJson = JSON.parse(body);
+      expect(asJson).not.toBeFalsy();
+      expect(asJson.passed).toEqual(true);
     });
   });
 });

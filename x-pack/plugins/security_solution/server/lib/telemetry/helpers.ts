@@ -300,6 +300,10 @@ export interface TelemetryLogger extends Logger {
 export const newTelemetryLogger = (logger: Logger): TelemetryLogger => {
   return {
     ...logger,
+    error: logger.error,
+    info: logger.info,
+    debug: logger.debug,
+    warn: logger.warn,
     l: (message: string) => tlog(logger, message),
   };
 };
