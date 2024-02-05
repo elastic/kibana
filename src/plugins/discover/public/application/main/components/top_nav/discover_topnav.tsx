@@ -7,8 +7,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
-import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
+import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
@@ -33,6 +33,8 @@ export interface DiscoverTopNavProps {
   textBasedLanguageModeErrors?: Error;
   textBasedLanguageModeWarning?: string;
   onFieldEdited: () => Promise<void>;
+  isLoading?: boolean;
+  onCancelClick?: () => void;
 }
 
 export const DiscoverTopNav = ({
@@ -42,6 +44,8 @@ export const DiscoverTopNav = ({
   textBasedLanguageModeErrors,
   textBasedLanguageModeWarning,
   onFieldEdited,
+  isLoading,
+  onCancelClick,
 }: DiscoverTopNavProps) => {
   const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
@@ -201,6 +205,8 @@ export const DiscoverTopNav = ({
       appName="discover"
       indexPatterns={[dataView]}
       onQuerySubmit={updateQuery}
+      onCancel={onCancelClick}
+      isLoading={isLoading}
       onSavedQueryIdChange={updateSavedQueryId}
       query={query}
       savedQueryId={savedQuery}
