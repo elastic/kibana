@@ -7,6 +7,7 @@
  */
 import React from 'react';
 import { of } from 'rxjs';
+import { calculateBounds } from '@kbn/data-plugin/common';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -15,6 +16,11 @@ import { allSuggestionsMock } from './suggestions';
 
 const dataPlugin = dataPluginMock.createStartContract();
 dataPlugin.query.filterManager.getFilters = jest.fn(() => []);
+
+dataPlugin.query.timefilter.timefilter = {
+  ...dataPlugin.query.timefilter.timefilter,
+  calculateBounds: jest.fn((timeRange) => calculateBounds(timeRange)),
+};
 
 export const unifiedHistogramServicesMock = {
   data: dataPlugin,

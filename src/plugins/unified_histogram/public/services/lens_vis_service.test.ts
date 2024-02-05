@@ -14,9 +14,6 @@ import {
 } from '../__mocks__/data_view_with_timefield';
 import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
-import * as intervalUtils from '../utils/compute_interval';
-
-jest.spyOn(intervalUtils, 'computeInterval');
 
 describe('LensVisService', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
@@ -802,10 +799,8 @@ describe('LensVisService', () => {
   });
 
   it('should use the correct histogram query when no suggestion passed', async () => {
-    (intervalUtils.computeInterval as jest.Mock).mockImplementation(() => '30 seconds');
-
     const histogramQuery = {
-      esql: 'from logstash-* | limit 10 | EVAL timestamp=DATE_TRUNC(30 seconds, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 30 seconds`',
+      esql: 'from logstash-* | limit 10 | EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 10 minute`',
     };
     const lensVis = await getLensVisMock({
       chartTitle: undefined,
@@ -818,6 +813,7 @@ describe('LensVisService', () => {
       columns: [],
       isPlainRecord: true,
       allSuggestions: [], // none available
+      hasHistogramSuggestionForESQL: true,
     });
     expect(lensVis.lensAttributesContext?.attributes.state.query).toStrictEqual(histogramQuery);
   });

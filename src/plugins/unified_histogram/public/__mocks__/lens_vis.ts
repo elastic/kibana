@@ -31,6 +31,7 @@ export const getLensVisMock = async ({
   breakdownField,
   dataView,
   allSuggestions,
+  hasHistogramSuggestionForESQL,
 }: {
   chartTitle?: string;
   filters: QueryParams['filters'];
@@ -42,6 +43,7 @@ export const getLensVisMock = async ({
   breakdownField: DataViewField | undefined;
   suggestionContext: UnifiedHistogramSuggestionContext | undefined;
   allSuggestions?: Suggestion[];
+  hasHistogramSuggestionForESQL?: boolean;
 }): Promise<{
   lensService: LensVisService;
   lensAttributesContext: UnifiedHistogramLensAttributesContext | undefined;
@@ -56,7 +58,7 @@ export const getLensVisMock = async ({
           if ('query' in context && context.query === query) {
             return allSuggestions;
           }
-          return [histogramESQLSuggestionMock];
+          return hasHistogramSuggestionForESQL ? [histogramESQLSuggestionMock] : [];
         }
       : lensApi.suggestions,
   });

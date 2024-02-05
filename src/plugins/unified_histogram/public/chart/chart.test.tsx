@@ -46,6 +46,7 @@ async function mountComponent({
   isPlainRecord,
   hasDashboardPermissions,
   isChartLoading,
+  hasHistogramSuggestionForESQL,
 }: {
   customToggle?: ReactElement;
   noChart?: boolean;
@@ -59,6 +60,7 @@ async function mountComponent({
   isPlainRecord?: boolean;
   hasDashboardPermissions?: boolean;
   isChartLoading?: boolean;
+  hasHistogramSuggestionForESQL?: boolean;
 } = {}) {
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: noHits ? 0 : 2 } } }))
@@ -114,6 +116,7 @@ async function mountComponent({
         suggestionDeps: [dataView.id, [], requestParams.query, undefined],
       },
       allSuggestions,
+      hasHistogramSuggestionForESQL,
     })
   ).lensService;
 
@@ -296,6 +299,7 @@ describe('Chart', () => {
     const component = await mountComponent({
       currentSuggestion: undefined,
       allSuggestions: [],
+      hasHistogramSuggestionForESQL: false,
       isPlainRecord: true,
     });
     expect(
