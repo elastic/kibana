@@ -17,6 +17,7 @@ import type {
 import { createThreatSignal } from './create_threat_signal';
 import { createEventSignal } from './create_event_signal';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { MAX_SIGNALS_SUPPRESSION_MULTIPLIER } from '../../constants';
 import {
   buildExecutionIntervalValidator,
   combineConcurrentResults,
@@ -56,12 +57,15 @@ export const createThreatSignals = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
+  runOpts,
   runtimeMappings,
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  licensing,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const allowedFieldsForTermsQuery = await getAllowedFieldsForTermQuery({
@@ -87,6 +91,7 @@ export const createThreatSignals = async ({
     searchAfterTimes: [],
     lastLookBackDate: null,
     createdSignalsCount: 0,
+    suppressedAlertsCount: 0,
     createdSignals: [],
     errors: [],
     warningMessages: [],
@@ -177,6 +182,8 @@ export const createThreatSignals = async ({
         `bulk create times ${results.bulkCreateTimes}ms,`,
         `all successes are ${results.success}`
       );
+
+      // if alerts suppressed it means suppression enabled, so suppression alert limit should be applied (5 * max_signals)
       if (results.createdSignalsCount >= params.maxSignals) {
         if (results.warningMessages.includes(getMaxSignalsWarning())) {
           results.warningMessages = uniq(results.warningMessages);
@@ -185,6 +192,19 @@ export const createThreatSignals = async ({
         }
         ruleExecutionLogger.debug(
           `Indicator match has reached its max signals count ${params.maxSignals}. Additional documents not checked are ${documentCount}`
+        );
+        break;
+      } else if (
+        results.suppressedAlertsCount &&
+        results.suppressedAlertsCount > 0 &&
+        results.suppressedAlertsCount + results.createdSignalsCount >=
+          MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
+      ) {
+        // warning should be already set
+        ruleExecutionLogger.debug(
+          `Indicator match has reached its max signals count ${
+            MAX_SIGNALS_SUPPRESSION_MULTIPLIER * params.maxSignals
+          }. Additional documents not checked are ${documentCount}`
         );
         break;
       }
@@ -247,6 +267,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          wrapSuppressedHits,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
@@ -256,6 +277,8 @@ export const createThreatSignals = async ({
           threatMatchedFields,
           inputIndexFields,
           threatIndexFields,
+          runOpts,
+          licensing,
         }),
     });
   } else {
@@ -302,6 +325,7 @@ export const createThreatSignals = async ({
           tuple,
           type,
           wrapHits,
+          wrapSuppressedHits,
           runtimeMappings,
           primaryTimestamp,
           secondaryTimestamp,
@@ -317,6 +341,8 @@ export const createThreatSignals = async ({
           allowedFieldsForTermsQuery,
           inputIndexFields,
           threatIndexFields,
+          runOpts,
+          licensing,
         }),
     });
   }
