@@ -23,6 +23,7 @@ import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { EventsAsUnit } from '../../../../../common/constants';
 import { Comparator } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
@@ -214,7 +215,7 @@ export function RuleConditionChart({
         id: formatId,
         params: {
           decimals: formatId === LensFieldFormat.PERCENT ? 0 : 2,
-          suffix: isRate(metrics) && formatId === LensFieldFormat.NUMBER ? 'Events' : undefined,
+          suffix: isRate(metrics) && formatId === LensFieldFormat.NUMBER ? EventsAsUnit : undefined,
         },
       },
     };

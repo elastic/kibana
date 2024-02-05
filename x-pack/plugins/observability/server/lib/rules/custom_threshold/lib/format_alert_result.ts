@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { EventsAsUnit } from '../../../../../common/constants';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import {
@@ -68,7 +69,7 @@ export const formatAlertResult = (evaluationResult: Evaluation): FormattedEvalua
     !metrics[0].field?.endsWith('.pct') &&
     !metrics[0].field?.endsWith('.bytes') &&
     !metrics[0].field?.endsWith('.bits')
-      ? ' Events'
+      ? ` ${EventsAsUnit}`
       : '';
   const rateUnitPerSec = eventsAsUnit + perSecIfRate;
 
