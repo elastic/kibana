@@ -127,7 +127,7 @@ export function registerQueryFunction({
       ];
 
       const source$ = (
-        await client.chat({
+        await client.chat('classify_esql', {
           connectorId,
           messages: withEsqlSystemMessage(
             `Use the classify_esql function to classify the user's request
@@ -244,10 +244,12 @@ export function registerQueryFunction({
           break;
       }
 
-      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat({
-        messages: [
-          ...withEsqlSystemMessage(
-            `Format every ES|QL query as Markdown:
+      const esqlResponse$: Observable<ChatCompletionChunkEvent> = await client.chat(
+        'answer_esql_question',
+        {
+          messages: [
+            ...withEsqlSystemMessage(
+              `Format every ES|QL query as Markdown:
               \`\`\`esql
               <query>
               \`\`\`
@@ -272,33 +274,34 @@ export function registerQueryFunction({
               \`\`\`
               
               `
-          ),
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.Assistant,
-              content: '',
-              function_call: {
-                name: 'get_esql_info',
-                arguments: JSON.stringify(args),
-                trigger: MessageRole.Assistant as const,
+            ),
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: '',
+                function_call: {
+                  name: 'get_esql_info',
+                  arguments: JSON.stringify(args),
+                  trigger: MessageRole.Assistant as const,
+                },
               },
             },
-          },
-          {
-            '@timestamp': new Date().toISOString(),
-            message: {
-              role: MessageRole.User,
-              name: 'get_esql_info',
-              content: JSON.stringify({
-                documentation: messagesToInclude,
-              }),
+            {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                role: MessageRole.User,
+                name: 'get_esql_info',
+                content: JSON.stringify({
+                  documentation: messagesToInclude,
+                }),
+              },
             },
-          },
-        ],
-        connectorId,
-        signal,
-      });
+          ],
+          connectorId,
+          signal,
+        }
+      );
 
       return esqlResponse$.pipe(
         emitWithConcatenatedMessage((msg) => {

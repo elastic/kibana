@@ -179,17 +179,20 @@ export async function createChatService({
           });
       });
     },
-    chat({
-      connectorId,
-      messages,
-      function: callFunctions = 'auto',
-      signal,
-    }: {
-      connectorId: string;
-      messages: Message[];
-      function?: 'none' | 'auto';
-      signal: AbortSignal;
-    }) {
+    chat(
+      name: string,
+      {
+        connectorId,
+        messages,
+        function: callFunctions = 'auto',
+        signal,
+      }: {
+        connectorId: string;
+        messages: Message[];
+        function?: 'none' | 'auto';
+        signal: AbortSignal;
+      }
+    ) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
         const contexts = ['core', 'apm'];
 
@@ -204,6 +207,7 @@ export async function createChatService({
         client('POST /internal/observability_ai_assistant/chat', {
           params: {
             body: {
+              name,
               messages,
               connectorId,
               functions:
