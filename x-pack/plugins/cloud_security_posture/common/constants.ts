@@ -40,18 +40,18 @@ export const DETECTION_RULE_ALERTS_STATUS_API_CURRENT_VERSION = '1';
 export const DETECTION_RULE_RULES_API_CURRENT_VERSION = '2023-10-31';
 
 export const CLOUD_SECURITY_POSTURE_PACKAGE_NAME = 'cloud_security_posture';
-// TODO: REMOVE CSP_LATEST_FINDINGS_DATA_VIEW and replace it with LATEST_FINDINGS_INDEX_PATTERN
-export const CSP_LATEST_FINDINGS_DATA_VIEW = 'logs-cloud_security_posture.findings_latest-*';
 
 export const FINDINGS_INDEX_NAME = 'logs-cloud_security_posture.findings';
 export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-default*';
 export const FINDINGS_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.findings-default';
 
 export const LATEST_FINDINGS_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.findings_latest';
+// Defined in https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/kibana/index_pattern
+export const LATEST_FINDINGS_INDEX_PATTERN_ID =
+  'cloud_security_posture-303eea10-c475-11ec-af18-c5b9b437dbbe';
 export const LATEST_FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings_latest-*';
 export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
-
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
@@ -65,6 +65,9 @@ export const VULNERABILITIES_INDEX_DEFAULT_NS =
 
 export const LATEST_VULNERABILITIES_INDEX_TEMPLATE_NAME =
   'logs-cloud_security_posture.vulnerabilities_latest';
+// Defined in https://github.com/elastic/integrations/tree/main/packages/cloud_security_posture/kibana/index_pattern
+export const LATEST_VULNERABILITIES_INDEX_PATTERN_ID =
+  'cloud_security_posture-07a5e6d6-982d-4c7c-a845-5f2be43279c9';
 export const LATEST_VULNERABILITIES_INDEX_PATTERN =
   'logs-cloud_security_posture.vulnerabilities_latest*';
 export const LATEST_VULNERABILITIES_INDEX_DEFAULT_NS =
