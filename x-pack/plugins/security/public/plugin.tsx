@@ -6,6 +6,7 @@
  */
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import type { BuildFlavor } from '@kbn/config';
 import type {
   CoreSetup,
   CoreStart,
@@ -79,6 +80,7 @@ export class SecurityPlugin
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
   private securityApiClients!: SecurityApiClients;
+  private buildFlavor: BuildFlavor;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
@@ -86,6 +88,7 @@ export class SecurityPlugin
     this.navControlService = new SecurityNavControlService(
       initializerContext.env.packageInfo.buildFlavor
     );
+    this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
   }
 
   public setup(
@@ -131,13 +134,14 @@ export class SecurityPlugin
     });
 
     if (management) {
+      const uiConfig = applyServerlessUiOverrides(this.config, this.buildFlavor);
       this.managementService.setup({
         license,
         management,
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
-        uiConfig: this.config.ui,
+        uiConfig,
       });
     }
 
@@ -186,9 +190,10 @@ export class SecurityPlugin
     this.securityCheckupService.start({ http, notifications, docLinks });
 
     if (management) {
+      const uiConfig = applyServerlessUiOverrides(this.config, this.buildFlavor);
       this.managementService.start({
         capabilities: application.capabilities,
-        uiConfig: this.config.ui,
+        uiConfig,
       });
     }
 
@@ -239,4 +244,24 @@ export interface SecurityPluginStart extends SecurityPluginStartWithoutDeprecate
    * @deprecated
    */
   uiApi: UiApi;
+}
+
+function applyServerlessUiOverrides(
+  config: ConfigType,
+  buildFlavor: BuildFlavor
+):
+  | {
+      userManagementEnabled: boolean;
+      roleManagementEnabled: boolean;
+      roleMappingManagementEnabled: boolean;
+    }
+  | undefined {
+  let result = config.ui;
+  const roleUiOverride = config?.serverlessOverrides?.ui?.roleManagementEnabled;
+
+  if (buildFlavor === 'serverless' && roleUiOverride !== undefined) {
+    result = { ...config.ui, roleManagementEnabled: roleUiOverride };
+  }
+
+  return result;
 }

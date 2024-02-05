@@ -14,7 +14,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
 
-  describe('Management landing page', function () {
+  describe('Roles management card', function () {
     this.tags('smoke');
     before(async () => {
       // Navigate to the index management page
@@ -26,28 +26,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.svlCommonPage.forceLogout();
     });
 
-    it('renders the page', async () => {
+    it('renders the page, displays the Roles card, and will navigate to the Roles UI', async () => {
       await retry.waitFor('page to be visible', async () => {
         return await testSubjects.exists('cards-navigation-page');
       });
 
-      const url = await browser.getCurrentUrl();
+      let url = await browser.getCurrentUrl();
       expect(url).to.contain(`/management`);
-    });
 
-    it('navigates to index management by clicking the card', async () => {
-      await testSubjects.click('app-card-index_management');
-      await retry.waitFor('Index Management title to be visible', async () => {
-        return await testSubjects.exists('indexManagementHeaderContent');
-      });
-    });
+      await pageObjects.svlCommonPage.assertRoleManagementCardExists();
 
-    describe('Roles management card', () => {
-      it('should not be displayed by default', async () => {
-        await pageObjects.common.navigateToApp('management');
+      await pageObjects.svlCommonPage.clickRoleManagementCard();
 
-        await pageObjects.svlCommonPage.assertRoleManagementCardDoesNotExist();
-      });
+      url = await browser.getCurrentUrl();
+      expect(url).to.contain('/management/security/roles');
     });
   });
 };

@@ -134,4 +134,12 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     }),
     icon: 'gear',
   },
+
+  [AppIds.ROLES]: {
+    category: appCategories.OTHER,
+    description: i18n.translate('management.landing.withCardNavigation.rolesDescription', {
+      defaultMessage: 'Allow custom roles to be created for users.',
+    }),
+    icon: 'usersRolesApp',
+  },
 };

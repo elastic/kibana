@@ -14,4 +14,9 @@ export interface ConfigType {
     roleManagementEnabled: boolean;
     roleMappingManagementEnabled: boolean;
   };
+  serverlessOverrides: {
+    ui: {
+      roleManagementEnabled: boolean;
+    };
+  };
 }

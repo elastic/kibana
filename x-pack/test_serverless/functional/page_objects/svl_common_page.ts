@@ -145,7 +145,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     },
 
     async clickUserAvatar() {
-      testSubjects.click('userMenuAvatar');
+      await testSubjects.click('userMenuAvatar');
     },
 
     async assertUserAvatarExists() {
@@ -154,6 +154,18 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
     async assertUserMenuExists() {
       await testSubjects.existOrFail('userMenu');
+    },
+
+    async assertRoleManagementCardExists() {
+      await testSubjects.existOrFail('app-card-roles');
+    },
+
+    async assertRoleManagementCardDoesNotExist() {
+      await testSubjects.missingOrFail('app-card-roles');
+    },
+
+    async clickRoleManagementCard() {
+      await testSubjects.click('app-card-roles');
     },
   };
 }

@@ -27,6 +27,7 @@ export enum AppIds {
   RULES = 'triggersActions',
   MAINTENANCE_WINDOWS = 'maintenanceWindows',
   SERVERLESS_SETTINGS = 'settings',
+  ROLES = 'roles',
 }
 
 // Create new type that is a union of all the appId values
