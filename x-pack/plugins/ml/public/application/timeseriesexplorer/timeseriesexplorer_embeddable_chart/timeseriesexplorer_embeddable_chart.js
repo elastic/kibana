@@ -915,6 +915,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
                 contextAggregationInterval={contextAggregationInterval}
                 bounds={bounds}
                 detectorIndex={selectedDetectorIndex}
+                embeddableMode
                 renderFocusChartOnly={renderFocusChartOnly}
                 selectedJob={selectedJob}
                 selectedEntities={this.props.selectedEntities}

@@ -21,6 +21,7 @@ import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_u
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
   detectorIndex: number;
+  embeddableMode?: boolean;
   renderFocusChartOnly: boolean;
   selectedJob: CombinedJob;
   selectedEntities: Record<string, any>;
@@ -34,6 +35,7 @@ interface TimeSeriesChartWithTooltipsProps {
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
   detectorIndex,
+  embeddableMode,
   renderFocusChartOnly,
   selectedJob,
   selectedEntities,
@@ -132,6 +134,7 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             annotationData={annotationData}
             bounds={bounds}
             detectorIndex={detectorIndex}
+            embeddableMode={embeddableMode}
             renderFocusChartOnly={renderFocusChartOnly}
             selectedJob={selectedJob}
             showAnnotations={showAnnotations}

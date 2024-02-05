@@ -108,6 +108,7 @@ class TimeseriesChartIntl extends Component {
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
     detectorIndex: PropTypes.number,
+    embeddableMode: PropTypes.boolean,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
@@ -578,6 +579,7 @@ class TimeseriesChartIntl extends Component {
 
   renderFocusChart() {
     const {
+      embeddableMode,
       focusAggregationInterval,
       focusAnnotationData: focusAnnotationDataOriginalPropValue,
       focusChartData,
@@ -755,8 +757,10 @@ class TimeseriesChartIntl extends Component {
       this.props.annotationUpdatesService
     );
 
-    // disable brushing (creation of annotations) when annotations aren't shown
-    focusChart.select('.mlAnnotationBrush').style('display', showAnnotations ? null : 'none');
+    // disable brushing (creation of annotations) when annotations aren't shown or when in embeddable mode
+    focusChart
+      .select('.mlAnnotationBrush')
+      .style('display', !showAnnotations || embeddableMode ? 'none' : null);
 
     focusChart.select('.values-line').attr('d', this.focusValuesLine(data));
     drawLineChartDots(data, focusChart, this.focusValuesLine);
