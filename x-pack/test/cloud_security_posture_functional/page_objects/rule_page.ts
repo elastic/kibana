@@ -54,7 +54,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
 
       retry.waitFor('bulk action options to be displayed', async () => {
         await bulkActionButtonToBeClicked.click();
-        const bulkActionOptions = await testSubjects.findAll(RULES_BULK_ACTION_OPTION_ENABLE);
+        const bulkActionOptions = await testSubjects.findAll(RULES_BULK_ACTION_OPTION_DISABLE);
         return bulkActionOptions.length > 0;
       });
     },
