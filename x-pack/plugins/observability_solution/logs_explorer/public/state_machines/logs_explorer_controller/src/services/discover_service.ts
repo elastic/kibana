@@ -16,13 +16,13 @@ import {
   getGridRowsDisplayOptionsFromDiscoverAppState,
   getQueryStateFromDiscoverAppState,
 } from '../../../../utils/convert_discover_app_state';
-import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
+import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const subscribeToDiscoverState =
   () =>
   (
-    context: LogExplorerControllerContext
-  ): InvokeCallback<LogExplorerControllerEvent, LogExplorerControllerEvent> =>
+    context: LogsExplorerControllerContext
+  ): InvokeCallback<LogsExplorerControllerEvent, LogsExplorerControllerEvent> =>
   (send, onEvent) => {
     if (!('discoverStateContainer' in context)) {
       throw new Error('Failed to subscribe to the Discover state: no state container in context.');
@@ -49,8 +49,8 @@ export const subscribeToDiscoverState =
   };
 
 export const updateContextFromDiscoverAppState = actions.assign<
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent
+  LogsExplorerControllerContext,
+  LogsExplorerControllerEvent
 >((context, event) => {
   if ('appState' in event && event.type === 'RECEIVE_DISCOVER_APP_STATE') {
     return {
@@ -74,8 +74,8 @@ export const updateContextFromDiscoverAppState = actions.assign<
 });
 
 export const updateDiscoverAppStateFromContext: ActionFunction<
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent
+  LogsExplorerControllerContext,
+  LogsExplorerControllerEvent
 > = (context, _event) => {
   if (!('discoverStateContainer' in context)) {
     return;
@@ -87,7 +87,7 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
 export const redirectToDiscover =
   (
     discover: DiscoverStart
-  ): ActionFunction<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  ): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   (_context, event) => {
     if (event.type === 'UPDATE_DATASET_SELECTION' && isExplorerDataViewSelection(event.data)) {
       discover.locator?.navigate({ dataViewId: event.data.selection.dataView.id });

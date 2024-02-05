@@ -12,18 +12,18 @@ import {
   SingleDatasetSelection,
 } from '../../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
-import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
+import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
-interface LogExplorerControllerUrlStateDependencies {
+interface LogsExplorerControllerUrlStateDependencies {
   datasetsClient: IDatasetsClient;
 }
 
 export const validateSelection =
   ({
     datasetsClient,
-  }: LogExplorerControllerUrlStateDependencies): InvokeCreator<
-    LogExplorerControllerContext,
-    LogExplorerControllerEvent
+  }: LogsExplorerControllerUrlStateDependencies): InvokeCreator<
+    LogsExplorerControllerContext,
+    LogsExplorerControllerEvent
   > =>
   (context) =>
   async (send) => {

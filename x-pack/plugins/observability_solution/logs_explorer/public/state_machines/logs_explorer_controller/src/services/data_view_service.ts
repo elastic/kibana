@@ -6,10 +6,10 @@
  */
 
 import { InvokeCreator } from 'xstate';
-import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
+import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const createAndSetDataView =
-  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   async (context) => {
     if (!('discoverStateContainer' in context)) return;
     const { discoverStateContainer } = context;
@@ -28,7 +28,7 @@ export const createAndSetDataView =
   };
 
 export const changeDataView =
-  (): InvokeCreator<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   async (context) => {
     if (!('discoverStateContainer' in context)) return;
     const { discoverStateContainer } = context;
