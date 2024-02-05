@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
+import type { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
+import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
+import { reactEmbeddableRegistryHasKey } from '@kbn/embeddable-plugin/public';
+import { SerializedPanelState } from '@kbn/presentation-containers';
 import { showSaveModal } from '@kbn/saved-objects-plugin/public';
+import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-
-import { PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 
 import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
 import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
@@ -25,6 +27,33 @@ import { DashboardSaveOptions, DashboardStateFromSaveModal } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { extractTitleAndCount } from './lib/extract_title_and_count';
 import { DashboardSaveModal } from './overlays/save_modal';
+
+const serializeAllPanelState = async (
+  dashboard: DashboardContainer
+): Promise<DashboardContainerInput['panels']> => {
+  const reactEmbeddableSavePromises: Array<
+    Promise<{ serializedState: SerializedPanelState; uuid: string }>
+  > = [];
+  const panels = cloneDeep(dashboard.getInput().panels);
+  for (const [uuid, panel] of Object.entries(panels)) {
+    if (!reactEmbeddableRegistryHasKey(panel.type)) continue;
+    const api = dashboard.reactEmbeddableChildren.value[uuid];
+    if (api) {
+      reactEmbeddableSavePromises.push(
+        new Promise((resolve) => {
+          api.serializeState().then((serializedState) => {
+            resolve({ serializedState, uuid });
+          });
+        })
+      );
+    }
+  }
+  const saveResults = await Promise.all(reactEmbeddableSavePromises);
+  for (const { serializedState, uuid } of saveResults) {
+    panels[uuid].explicitInput = { ...serializedState.rawState, id: uuid };
+  }
+  return panels;
+};
 
 export function runSaveAs(this: DashboardContainer) {
   const {
@@ -83,18 +112,20 @@ export function runSaveAs(this: DashboardContainer) {
         // do not save if title is duplicate and is unconfirmed
         return {};
       }
-
-      const lastSavedInput: DashboardContainerInput = {
+      const nextPanels = await serializeAllPanelState(this);
+      const dashboardStateToSave: DashboardContainerInput = {
         ...currentState,
+        panels: nextPanels,
         ...stateFromSaveModal,
       };
-      let stateToSave: SavedDashboardInput = lastSavedInput;
+      let stateToSave: SavedDashboardInput = dashboardStateToSave;
       let persistableControlGroupInput: PersistableControlGroupInput | undefined;
       if (this.controlGroup) {
         persistableControlGroupInput = this.controlGroup.getPersistableInput();
         stateToSave = { ...stateToSave, controlGroupInput: persistableControlGroupInput };
       }
       const beforeAddTime = window.performance.now();
+
       const saveResult = await saveDashboardState({
         currentState: stateToSave,
         saveOptions,
@@ -113,7 +144,8 @@ export function runSaveAs(this: DashboardContainer) {
       if (saveResult.id) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-          this.dispatch.setLastSavedInput(lastSavedInput);
+          this.dispatch.setLastSavedInput(dashboardStateToSave);
+          this.lastSavedState.next();
           if (this.controlGroup && persistableControlGroupInput) {
             this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
           }
@@ -154,7 +186,8 @@ export async function runQuickSave(this: DashboardContainer) {
 
   if (managed) return;
 
-  let stateToSave: SavedDashboardInput = currentState;
+  const nextPanels = await serializeAllPanelState(this);
+  let stateToSave: SavedDashboardInput = { ...currentState, panels: nextPanels };
   let persistableControlGroupInput: PersistableControlGroupInput | undefined;
   if (this.controlGroup) {
     persistableControlGroupInput = this.controlGroup.getPersistableInput();
@@ -168,6 +201,7 @@ export async function runQuickSave(this: DashboardContainer) {
   });
 
   this.dispatch.setLastSavedInput(currentState);
+  this.lastSavedState.next();
   if (this.controlGroup && persistableControlGroupInput) {
     this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
   }

@@ -69,4 +69,6 @@ export interface AnalyticsNoDataPageProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+  onESQLNavigationComplete?: () => void;
 }
