@@ -65,15 +65,18 @@ export const getBuiltinCompatibleFunctionDefinition = (
   command: string,
   option: string | undefined,
   argType: string,
-  returnTypes?: string[]
+  returnTypes?: string[],
+  { skipAssign }: { skipAssign?: boolean } = {}
 ): AutocompleteCommandDefinition[] => {
   const compatibleFunctions = builtinFunctions.filter(
     ({ name, supportedCommands, supportedOptions, signatures, ignoreAsSuggestion }) =>
       !ignoreAsSuggestion &&
       !/not_/.test(name) &&
+      (!skipAssign || name !== '=') &&
       (option ? supportedOptions?.includes(option) : supportedCommands.includes(command)) &&
       signatures.some(
-        ({ params }) => !params.length || params.some((pArg) => pArg.type === argType)
+        ({ params }) =>
+          !params.length || params.some((pArg) => pArg.type === argType || pArg.type === 'any')
       )
   );
   if (!returnTypes) {
@@ -100,7 +103,7 @@ function buildCharCompleteItem(
   return {
     label,
     insertText: quoted ? `"${label}"` : label,
-    kind: 1,
+    kind: 11,
     detail,
     sortText,
   };
@@ -140,7 +143,7 @@ export const listCompleteItem: AutocompleteCommandDefinition = {
   label: '( ... )',
   insertText: '( $0 )',
   insertTextRules: 4,
-  kind: 1,
+  kind: 11,
   detail: i18n.translate('monaco.esql.autocomplete.listDoc', {
     defaultMessage: 'List of items ( ...)',
   }),
