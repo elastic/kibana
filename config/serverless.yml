@@ -4,7 +4,6 @@ xpack.serverless.plugin.enabled: true
 # Fleet settings
 xpack.fleet.internal.fleetServerStandalone: true
 xpack.fleet.internal.disableILMPolicies: true
-xpack.fleet.internal.disableProxies: true
 xpack.fleet.internal.activeAgentsSoftLimit: 25000
 xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions: true
 xpack.fleet.internal.retrySetupOnBoot: true
