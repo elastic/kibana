@@ -23,12 +23,12 @@ interface Props {
 }
 
 interface SemiStructureTextData {
-  grokPattern: string;
-  multilineStartPattern: string;
-  excludeLinesPattern: string | undefined;
+  grokPattern?: string;
+  multilineStartPattern?: string;
+  excludeLinesPattern?: string;
   sampleStart: string;
   mappings: FindFileStructureResponse['mappings'];
-  ecsCompatibility: string | undefined;
+  ecsCompatibility?: string;
 }
 
 function semiStructureTextDataGuard(
@@ -74,10 +74,10 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
 
     grokHighlighter(
       data,
-      grokPattern,
+      grokPattern!,
       mappings,
       ecsCompatibility,
-      multilineStartPattern,
+      multilineStartPattern!,
       excludeLinesPattern
     )
       .then((docs) => {
