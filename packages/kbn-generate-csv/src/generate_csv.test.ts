@@ -1280,6 +1280,7 @@ describe('CsvGenerator', () => {
   });
 
   it('handles unknown errors', async () => {
+    const streamWriteSpy = jest.spyOn(stream, 'write');
     mockDataClient.search = jest.fn().mockImplementation(() => {
       throw new Error('An unknown error');
     });
@@ -1300,6 +1301,7 @@ describe('CsvGenerator', () => {
       mockLogger,
       stream
     );
+
     await expect(generateCsv.generateData()).resolves.toMatchInlineSnapshot(`
       Object {
         "content_type": "text/csv",
@@ -1316,6 +1318,18 @@ describe('CsvGenerator', () => {
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",
         ],
       }
+    `);
+    expect(streamWriteSpy.mock.calls).toMatchInlineSnapshot(`
+      Array [
+        Array [
+          "",
+        ],
+        Array [
+          "
+      \\"Encountered an unknown error: An unknown error\\"
+      \\"Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.\\"",
+        ],
+      ]
     `);
   });
 

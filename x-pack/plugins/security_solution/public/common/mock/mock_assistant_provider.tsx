@@ -22,7 +22,6 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-  mockHttp.get.mockResolvedValue([]);
   const mockAssistantAvailability: AssistantAvailability = {
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,

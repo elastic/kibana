@@ -141,11 +141,15 @@ export function jobServiceRoutes({ router, routeGuard }: RouteInitialization) {
         tags: ['access:ml:canDeleteJob'],
       },
     },
-    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response }) => {
+    routeGuard.fullLicenseAPIGuard(async ({ client, mlClient, request, response, context }) => {
       try {
-        const { deleteJobs } = jobServiceProvider(client, mlClient);
-        const { jobIds, deleteUserAnnotations } = request.body;
-        const resp = await deleteJobs(jobIds, deleteUserAnnotations);
+        const alerting = await context.alerting;
+        const rulesClient = alerting?.getRulesClient();
+        const { deleteJobs } = jobServiceProvider(client, mlClient, rulesClient);
+
+        const { jobIds, deleteUserAnnotations, deleteAlertingRules } = request.body;
+
+        const resp = await deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules);
 
         return response.ok({
           body: resp,

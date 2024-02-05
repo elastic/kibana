@@ -383,6 +383,7 @@ packages/kbn-eslint-plugin-imports @elastic/kibana-operations
 packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
 examples/eso_model_version_example @elastic/kibana-security
 x-pack/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+packages/kbn-esql-utils @elastic/kibana-visualizations
 packages/kbn-event-annotation-common @elastic/kibana-visualizations
 packages/kbn-event-annotation-components @elastic/kibana-visualizations
 src/plugins/event_annotation_listing @elastic/kibana-visualizations
@@ -529,6 +530,7 @@ x-pack/packages/maps/vector_tile_utils @elastic/kibana-gis
 x-pack/plugins/metrics_data_access @elastic/obs-knowledge-team
 x-pack/packages/ml/agg_utils @elastic/ml-ui
 x-pack/packages/ml/anomaly_utils @elastic/ml-ui
+x-pack/packages/ml/cancellable_search @elastic/ml-ui
 x-pack/packages/ml/category_validator @elastic/ml-ui
 x-pack/packages/ml/chi2test @elastic/ml-ui
 x-pack/packages/ml/creation_wizard_utils @elastic/ml-ui
@@ -842,7 +844,6 @@ x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 src/plugins/url_forwarding @elastic/kibana-visualizations
-packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
@@ -1497,6 +1498,7 @@ x-pack/test/security_solution_api_integration/test_suites/entity_analytics @elas
 x-pack/test/security_solution_cypress/cypress/e2e/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-entity-analytics
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
+x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/risk_score @elastic/security-entity-analytics
 
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
