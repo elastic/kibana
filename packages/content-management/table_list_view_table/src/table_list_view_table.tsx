@@ -446,14 +446,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ...ret[item.id],
           delete: {
             enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemDeleteDisabled', {
-              defaultMessage: 'Managed item',
+            reason: i18n.translate('contentManagement.tableList.managedItemReadonly', {
+              defaultMessage: 'This item is managed by Elastic. It cannot be deleted.',
             }),
           },
           edit: {
             enabled: false,
-            reason: i18n.translate('contentManagement.tableList.managedItemDeleteDisabled', {
-              defaultMessage: 'Managed item',
+            reason: i18n.translate('contentManagement.tableList.managedItemReadonly', {
+              defaultMessage: 'This item is managed by Elastic. Clone it before making changes.',
             }),
           },
         };
