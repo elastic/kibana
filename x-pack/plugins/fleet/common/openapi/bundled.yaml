@@ -3171,6 +3171,8 @@ paths:
                   type: string
                 is_default:
                   type: boolean
+                is_internal:
+                  type: boolean
                 host_urls:
                   type: array
                   items:
@@ -3240,6 +3242,8 @@ paths:
                 name:
                   type: string
                 is_default:
+                  type: boolean
+                is_internal:
                   type: boolean
                 host_urls:
                   type: array
@@ -5121,6 +5125,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5188,6 +5194,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5337,6 +5345,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5407,6 +5417,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5449,6 +5461,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5519,6 +5533,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5654,6 +5670,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5747,6 +5765,8 @@ components:
         name:
           type: string
         is_default:
+          type: boolean
+        is_internal:
           type: boolean
         is_preconfigured:
           type: boolean

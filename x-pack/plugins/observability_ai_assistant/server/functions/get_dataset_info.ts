@@ -54,7 +54,11 @@ export function registerGetDatasetInfoFunction({
           name: index === '' ? '*' : index,
           expand_wildcards: 'open',
         });
-        indices = [...body.indices.map((i) => i.name), ...body.data_streams.map((d) => d.name)];
+        indices = [
+          ...body.indices.map((i) => i.name),
+          ...body.data_streams.map((d) => d.name),
+          ...body.aliases.map((d) => d.name),
+        ];
       } catch (e) {
         indices = [];
       }
@@ -111,7 +115,7 @@ export function registerGetDatasetInfoFunction({
       const relevantFields = await Promise.all(
         chunk(fieldNames, 500).map(async (fieldsInChunk) => {
           const chunkResponse$ = (
-            await client.chat({
+            await client.chat('get_relevent_dataset_names', {
               connectorId,
               signal,
               messages: [
