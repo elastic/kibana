@@ -17,7 +17,7 @@ import {
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
-  ObservabilityLogExplorerLocators,
+  ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
@@ -33,7 +33,7 @@ export class ObservabilityLogExplorerPlugin
   implements Plugin<ObservabilityLogExplorerPluginSetup, ObservabilityLogExplorerPluginStart>
 {
   private config: ObservabilityLogExplorerConfig;
-  private locators?: ObservabilityLogExplorerLocators;
+  private locators?: ObservabilityLogsExplorerLocators;
 
   constructor(context: PluginInitializerContext<ObservabilityLogExplorerConfig>) {
     this.config = context.config.get();
@@ -87,7 +87,7 @@ export class ObservabilityLogExplorerPlugin
     });
 
     if (serverless) {
-      discover.showLogExplorerTabs();
+      discover.showLogsExplorerTabs();
     }
 
     // Register Locators

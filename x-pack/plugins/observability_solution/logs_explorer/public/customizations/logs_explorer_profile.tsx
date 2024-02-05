@@ -44,7 +44,6 @@ export const createLogsExplorerProfileCustomizations =
       ...discoverServices,
     };
     const { data, dataViews, navigation, unifiedSearch } = pluginsWithOverrides;
-
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
     /**
@@ -109,8 +108,8 @@ export const createLogsExplorerProfileCustomizations =
     customizations.set({
       id: 'flyout',
       size: '60%',
-      title: i18n.translate('xpack.logssExplorer.flyoutDetail.title', {
-        defaultMessage: 'Logs details',
+      title: i18n.translate('xpack.logsExplorer.flyoutDetail.title', {
+        defaultMessage: 'Log details',
       }),
       actions: {
         defaultActions: {
@@ -120,8 +119,8 @@ export const createLogsExplorerProfileCustomizations =
       },
       docViewsRegistry: (registry) => {
         registry.add({
-          id: 'doc_view_logs_overview',
-          title: i18n.translate('xpack.logssExplorer.flyoutDetail.docViews.overview', {
+          id: 'doc_view_log_overview',
+          title: i18n.translate('xpack.logsExplorer.flyoutDetail.docViews.overview', {
             defaultMessage: 'Overview',
           }),
           order: 0,

@@ -13,20 +13,20 @@ import React, { MouseEvent } from 'react';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
 import type { DiscoverServices } from '../../build_services';
 
-export interface LogExplorerTabsProps {
+export interface LogsExplorerTabsProps {
   services: Pick<DiscoverServices, 'share'>;
-  selectedTab: 'discover' | 'log-explorer';
+  selectedTab: 'discover' | 'logs-explorer';
 }
 
 const emptyParams = {};
 
-export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps) => {
+export const LogsExplorerTabs = ({ services, selectedTab }: LogsExplorerTabsProps) => {
   const { euiTheme } = useEuiTheme();
   const locators = services.share?.url.locators;
   const discoverLocator = locators?.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const logExplorerLocator = locators?.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
+  const logsExplorerLocator = locators?.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
   const discoverUrl = discoverLocator?.getRedirectUrl(emptyParams);
-  const logExplorerUrl = logExplorerLocator?.getRedirectUrl(emptyParams);
+  const logsExplorerUrl = logsExplorerLocator?.getRedirectUrl(emptyParams);
 
   const navigateToDiscover = createNavigateHandler(() => {
     if (selectedTab !== 'discover') {
@@ -34,9 +34,9 @@ export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps)
     }
   });
 
-  const navigateToLogExplorer = createNavigateHandler(() => {
-    if (selectedTab !== 'log-explorer') {
-      logExplorerLocator?.navigate(emptyParams);
+  const navigateToLogsExplorer = createNavigateHandler(() => {
+    if (selectedTab !== 'logs-explorer') {
+      logsExplorerLocator?.navigate(emptyParams);
     }
   });
 
@@ -54,9 +54,9 @@ export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps)
         })}
       </EuiTab>
       <EuiTab
-        isSelected={selectedTab === 'log-explorer'}
-        href={logExplorerUrl}
-        onClick={navigateToLogExplorer}
+        isSelected={selectedTab === 'logs-explorer'}
+        href={logsExplorerUrl}
+        onClick={navigateToLogsExplorer}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
         data-test-subj="logsExplorerTab"
       >
@@ -69,7 +69,7 @@ export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps)
 };
 
 // eslint-disable-next-line import/no-default-export
-export default LogExplorerTabs;
+export default LogsExplorerTabs;
 
 const isModifiedEvent = (event: MouseEvent) =>
   event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
