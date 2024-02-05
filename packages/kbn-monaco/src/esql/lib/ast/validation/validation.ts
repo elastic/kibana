@@ -134,8 +134,9 @@ function validateNestedFunctionArg(
   ) {
     // The isSupported check ensure the definition exists
     const argFn = getFunctionDefinition(actualArg.name)!;
-
-    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
+    const fnDef = getFunctionDefinition(astFunction.name)!;
+    // no nestying criteria should be enforced only for same type function
+    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions && fnDef.type === argFn.type) {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
