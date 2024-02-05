@@ -7,7 +7,7 @@ env:
 steps:
   - label: ':label: Create tag'
     command: .buildkite/scripts/steps/serverless/tag.sh
-    if: build.tag =~ /^deploy-hotfix-.*\$/ && build.branch =~ /^hotfix-.*\$/
+    if: build.branch =~ /^deploy-fix@.*\$/
 
   # - label: ':argo: Emergency Release'
   #   if: build.tag =~ /^deploy-hotfix-.*\$/ && build.branch =~ /^hotfix-.*\$/
