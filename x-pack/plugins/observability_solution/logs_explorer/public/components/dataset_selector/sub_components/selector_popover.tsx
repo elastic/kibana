@@ -54,9 +54,9 @@ export const SelectorPopover = ({
           data-test-subj="datasetSelectorPopoverButton"
         >
           {isDataViewSelection(selection) ? (
-            <DataViewDescriptorPopover dataViewSelection={selection} />
+            <DataViewPopoverContent dataViewSelection={selection} />
           ) : (
-            <DatasetPopover datasetSelection={selection} />
+            <DatasetPopoverContent datasetSelection={selection} />
           )}
         </EuiButton>
       }
@@ -77,7 +77,7 @@ export const SelectorPopover = ({
   );
 };
 
-const DataViewDescriptorPopover = ({
+const DataViewPopoverContent = ({
   dataViewSelection,
 }: {
   dataViewSelection: DataViewSelection;
@@ -87,7 +87,7 @@ const DataViewDescriptorPopover = ({
   return <span className="eui-textTruncate">{name}</span>;
 };
 
-const DatasetPopover = ({ datasetSelection }: { datasetSelection: DatasetSelection }) => {
+const DatasetPopoverContent = ({ datasetSelection }: { datasetSelection: DatasetSelection }) => {
   const { iconType, parentIntegration } = datasetSelection.selection.dataset;
   const title = datasetSelection.selection.dataset.getFullTitle();
   const hasIntegration = typeof parentIntegration === 'object';
