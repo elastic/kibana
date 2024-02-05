@@ -115,7 +115,7 @@ export function registerGetDatasetInfoFunction({
       const relevantFields = await Promise.all(
         chunk(fieldNames, 500).map(async (fieldsInChunk) => {
           const chunkResponse$ = (
-            await client.chat({
+            await client.chat('get_relevent_dataset_names', {
               connectorId,
               signal,
               messages: [

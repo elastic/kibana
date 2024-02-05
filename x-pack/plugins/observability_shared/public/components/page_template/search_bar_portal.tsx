@@ -11,30 +11,27 @@ import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 export interface Props {
   children: ReactNode;
-  containerRef: React.RefObject<HTMLDivElement>;
 }
 
-export function SearchBarPortal({ children, containerRef }: Props) {
+export function SearchBarPortal({ children }: Props) {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
 
   useEffect(() => {
-    if (containerRef?.current) {
-      setTimeout(() => {
-        const mainContent = containerRef?.current?.querySelector('main');
-        if (!mainContent) return;
-        const element = document.createElement('div');
-        element.setAttribute('id', 'searchBarContainer');
-        ReactDOM.render(<OutPortal node={portalNode} />, element);
-        if (mainContent.childNodes?.[0]) {
-          mainContent.insertBefore(element, mainContent.childNodes?.[0]);
-        }
-      }, 10);
-    }
+    setTimeout(() => {
+      const mainContent = globalThis.document.querySelector('main');
+      if (!mainContent) return;
+      const element = document.createElement('div');
+      element.setAttribute('id', 'searchBarContainer');
+      ReactDOM.render(<OutPortal node={portalNode} />, element);
+      if (mainContent.childNodes?.[0]) {
+        mainContent.insertBefore(element, mainContent.childNodes?.[0]);
+      }
+    }, 10);
 
     return () => {
       portalNode.unmount();
     };
-  }, [portalNode, containerRef]);
+  }, [portalNode]);
 
   return (
     <InPortal node={portalNode}>

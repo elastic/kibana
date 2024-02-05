@@ -186,17 +186,21 @@ export class KibanaClient {
       unregister: () => void;
     }> = [];
 
-    async function chat({
-      messages,
-      functions,
-      functionCall,
-    }: {
-      messages: Message[];
-      functions: FunctionDefinition[];
-      functionCall?: string;
-    }) {
+    async function chat(
+      name: string,
+      {
+        messages,
+        functions,
+        functionCall,
+      }: {
+        messages: Message[];
+        functions: FunctionDefinition[];
+        functionCall?: string;
+      }
+    ) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
         {
+          name,
           messages,
           connectorId,
           functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -235,7 +239,7 @@ export class KibanaClient {
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat({ messages, functions: functionDefinitions });
+        return chat('chat', { messages, functions: functionDefinitions });
       },
       complete: async (...args) => {
         const messagesArg = args.length === 1 ? args[0] : args[1];
@@ -298,7 +302,7 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId }, criteria) => {
-        const message = await chat({
+        const message = await chat('evaluate', {
           messages: [
             {
               '@timestamp': new Date().toISOString(),
