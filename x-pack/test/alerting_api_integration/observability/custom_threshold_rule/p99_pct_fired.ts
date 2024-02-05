@@ -13,7 +13,7 @@ import {
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
@@ -23,7 +23,7 @@ import {
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 import { ISO_DATE_REGEX } from './constants';
 
 // eslint-disable-next-line import/no-default-export
@@ -237,7 +237,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(resp.hits.hits[0]._source?.value).eql('250%');
 
-        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
