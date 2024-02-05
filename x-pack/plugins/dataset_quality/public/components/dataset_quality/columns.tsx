@@ -31,7 +31,7 @@ import {
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 import { IntegrationIcon } from '../common';
-import { useLinkToLogExplorer } from '../../hooks';
+import { useLinkToLogsExplorer } from '../../hooks';
 import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
@@ -208,21 +208,21 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogExplorerLink = ({
+const LogsExplorerLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
 
-  return <EuiLink {...logExplorerLinkProps}>{title}</EuiLink>;
+  return <EuiLink {...logsExplorerLinkProps}>{title}</EuiLink>;
 };

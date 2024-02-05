@@ -7,8 +7,8 @@
 import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
-  LogExplorerController,
-  LogExplorerPluginStart,
+  LogsExplorerController,
+  LogsExplorerPluginStart,
 } from '@kbn/logs-explorer-plugin/public';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
@@ -35,8 +35,8 @@ export const ObservabilityLogExplorerMainRoute = () => {
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   const createLogExplorerController = useMemo(
-    () => createLogExplorerControllerWithCustomizations(logsExplorer.createLogExplorerController),
-    [logsExplorer.createLogExplorerController]
+    () => createLogExplorerControllerWithCustomizations(logsExplorer.createLogsExplorerController),
+    [logsExplorer.createLogsExplorerController]
   );
 
   return (
@@ -97,12 +97,12 @@ const InitializedContent = React.memo(
     logExplorerController,
   }: {
     history: ObservabilityLogExplorerHistory;
-    logExplorer: LogExplorerPluginStart;
-    logExplorerController: LogExplorerController;
+    logExplorer: LogsExplorerPluginStart;
+    logExplorerController: LogsExplorerController;
   }) => {
     return (
       <ObservabilityLogExplorerPageTemplate>
-        <logExplorer.LogExplorer controller={logExplorerController} scopedHistory={history} />
+        <logExplorer.LogsExplorer controller={logExplorerController} scopedHistory={history} />
       </ObservabilityLogExplorerPageTemplate>
     );
   }
