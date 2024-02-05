@@ -50,7 +50,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('SearchBar', () => {
-      it('add filter', async () => {
+      it('add / remove filter', async () => {
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({
           field: 'Resource Name',
@@ -62,9 +62,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(
           await latestVulnerabilitiesTable.hasColumnValue('resource.name', resourceName1)
         ).to.be(true);
-      });
 
-      it('remove filter', async () => {
         await filterBar.removeFilter('resource.name');
 
         expect(await filterBar.hasFilter('resource.name', resourceName1)).to.be(false);
@@ -94,6 +92,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('DataTable features', () => {
+      it('Findings table columns are initialized from DataView', async () => {
+        const headers = await latestVulnerabilitiesTable.getHeaders();
+        const expectedHeaders = [
+          '',
+          'Vulnerability',
+          'CVSS',
+          'Resource Name',
+          'Resource ID',
+          'Severity',
+          'Package',
+          'Version',
+          'Fix Version',
+        ];
+        const headerTexts = await Promise.all(headers.map((header) => header.getVisibleText()));
+        expect(headerTexts).to.eql(expectedHeaders);
+      });
+
       it('Edit data view field option is Enabled', async () => {
         await latestVulnerabilitiesTable.toggleEditDataViewFieldsOption('vulnerability.id');
         expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();

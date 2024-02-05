@@ -129,7 +129,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
 
     async getHeaders() {
       const element = await this.getElement();
-      return await element.findAllByCssSelector('.euiDataGridHeader');
+      return await element.findAllByClassName('euiDataGridHeaderCell__content');
     },
 
     async getColumnIndex(columnName: string) {

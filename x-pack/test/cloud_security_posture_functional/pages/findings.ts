@@ -149,17 +149,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/174472
-    describe.skip('SearchBar', () => {
-      it('add filter', async () => {
+    describe('SearchBar', () => {
+      it('add / remove filter', async () => {
         // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
         expect(await latestFindingsTable.hasColumnValue('rule.name', ruleName1)).to.be(true);
-      });
 
-      it('remove filter', async () => {
         await filterBar.removeFilter('rule.name');
 
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(false);
@@ -180,46 +177,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152913
-    describe.skip('Table Sort', () => {
-      type SortingMethod = (a: string, b: string) => number;
-      type SortDirection = 'asc' | 'desc';
-      // Sort by lexical order will sort by the first character of the string (case-sensitive)
-      const compareStringByLexicographicOrder = (a: string, b: string) => {
-        return a > b ? 1 : b > a ? -1 : 0;
-      };
-      const sortByAlphabeticalOrder = (a: string, b: string) => {
-        return a.localeCompare(b);
-      };
+    describe('Table Sort', () => {
+      it('defaults sorting by timestamp DESC', async () => {
+        const timestamps = await latestFindingsTable.getColumnValues('@timestamp');
+        const sortedTimestamps = timestamps.sort((a, b) => (a > b ? -1 : 1));
 
-      it('sorts by a column, should be case sensitive/insensitive depending on the column', async () => {
-        type TestCase = [string, SortDirection, SortingMethod];
-        const testCases: TestCase[] = [
-          ['rule.section', 'asc', sortByAlphabeticalOrder],
-          ['rule.section', 'desc', sortByAlphabeticalOrder],
-          ['resource.id', 'asc', compareStringByLexicographicOrder],
-          ['resource.id', 'desc', compareStringByLexicographicOrder],
-          ['resource.name', 'asc', sortByAlphabeticalOrder],
-          ['resource.name', 'desc', sortByAlphabeticalOrder],
-          ['resource.sub_type', 'asc', sortByAlphabeticalOrder],
-          ['resource.sub_type', 'desc', sortByAlphabeticalOrder],
-        ];
-        for (const [columnName, dir, sortingMethod] of testCases) {
-          await latestFindingsTable.toggleColumnSort(columnName, dir);
-          /* This sleep or delay is added to allow some time for the column to settle down before we get the value and to prevent the test from getting the wrong value*/
-          pageObjects.header.waitUntilLoadingHasFinished();
-          const values = (await latestFindingsTable.getColumnValues(columnName)).filter(Boolean);
-          expect(values).to.not.be.empty();
-          const sorted = values
-            .slice()
-            .sort((a, b) => (dir === 'asc' ? sortingMethod(a, b) : sortingMethod(b, a)));
-          values.forEach((value, i) => {
-            expect(value).to.be.eql(
-              sorted[i],
-              `Row number ${i + 1} missmatch, expected value: ${value}. Instead got: ${sorted[i]}`
-            );
-          });
-        }
+        expect(timestamps).to.eql(sortedTimestamps);
       });
     });
 
@@ -237,6 +200,23 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     describe('DataTable features', () => {
+      it('Findings table columns are initialized from DataView', async () => {
+        const headers = await latestFindingsTable.getHeaders();
+        const expectedHeaders = [
+          '',
+          'Result',
+          'Resource ID',
+          'Resource Name',
+          'Resource Type',
+          'Rule Number',
+          'Rule Name',
+          'CIS Section',
+          'Last Checked',
+        ];
+        const headerTexts = await Promise.all(headers.map((header) => header.getVisibleText()));
+        expect(headerTexts).to.eql(expectedHeaders);
+      });
+
       it('Edit data view field option is Enabled', async () => {
         await latestFindingsTable.toggleEditDataViewFieldsOption('result.evaluation');
         expect(await testSubjects.find('gridEditFieldButton')).to.be.ok();
