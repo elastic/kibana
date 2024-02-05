@@ -36,6 +36,14 @@ export const OutputFormElasticsearchSection: React.FunctionComponent<Props> = (p
         )}
         {...inputs.elasticsearchUrlInput.props}
         isUrl
+        helpText={
+          inputs.elasticsearchUrlInput.props.disabled && (
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.serverlessHostUrlsHelpText"
+              defaultMessage="Custom host URLs are not allowed in serverless."
+            />
+          )
+        }
       />
       <EuiFormRow
         fullWidth

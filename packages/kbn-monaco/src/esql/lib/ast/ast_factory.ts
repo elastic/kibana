@@ -141,8 +141,14 @@ export class AstListener implements ESQLParserListener {
   exitStatsCommand(ctx: StatsCommandContext) {
     const command = createCommand('stats', ctx);
     this.ast.push(command);
-    const [statsExpr, byExpr] = ctx.fields();
-    command.args.push(...collectAllFieldsStatements(statsExpr), ...visitByOption(ctx, byExpr));
+    const fields = ctx.fields();
+    // STATS expression is optional
+    if (ctx._stats) {
+      command.args.push(...collectAllFieldsStatements(fields[0]));
+    }
+    if (ctx._grouping) {
+      command.args.push(...visitByOption(ctx, ctx._stats ? fields[1] : fields[0]));
+    }
   }
 
   /**
