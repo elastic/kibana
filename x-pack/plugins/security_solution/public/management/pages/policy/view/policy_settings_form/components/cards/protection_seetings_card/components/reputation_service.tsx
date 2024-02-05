@@ -104,7 +104,7 @@ export const ReputationService = React.memo(
                 content={
                   <FormattedMessage
                     id="xpack.securitySolution.endpoint.policyDetailsConfig.reputationServiceTooltip"
-                    defaultMessage="This option enables/disables the Reputation Service feature in Endpoint. When the option is ON, Endpoint will reach out to a Cloud API for additional malware analysis. When it's OFF, Endpoint will not reach out to the Cloud API." // TODO: update message
+                    defaultMessage="This option enables/disables the Reputation Service feature in Endpoint. When the option is ON, Endpoint will reach out to a Cloud API for additional detection coverage. When it's OFF, Endpoint will not reach out to the Cloud API, resulting in reduced efficacy."
                   />
                 }
               />

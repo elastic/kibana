@@ -7,6 +7,8 @@
 
 import numeral from '@elastic/numeral';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { IBasePath } from '@kbn/core-http-browser';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
@@ -14,8 +16,17 @@ import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 export const useSloFormattedSummary = (slo: SLOWithSummaryResponse) => {
   const {
     http: { basePath },
+    uiSettings,
   } = useKibana().services;
-  const { uiSettings } = useKibana().services;
+
+  return getSloFormattedSummary(slo, uiSettings, basePath);
+};
+
+export const getSloFormattedSummary = (
+  slo: SLOWithSummaryResponse,
+  uiSettings: IUiSettingsClient,
+  basePath: IBasePath
+) => {
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const sliValue =
@@ -47,4 +58,14 @@ export const useSloFormattedSummary = (slo: SLOWithSummaryResponse) => {
     sloTarget,
     errorBudgetRemaining: errorBudgetRemainingTitle,
   };
+};
+
+export const useSloFormattedSLIValue = (sliValue?: number): string | null => {
+  const { uiSettings } = useKibana().services;
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+
+  const formattedSLIValue =
+    sliValue !== undefined && sliValue !== null ? numeral(sliValue).format(percentFormat) : null;
+
+  return formattedSLIValue;
 };

@@ -24,7 +24,8 @@
       "actions",
       "dashboard",
       "licensing",
-      "expressions"
+      "expressions",
+      "lens"
     ],
     "optionalPlugins": [
       "cloud",

@@ -57,7 +57,7 @@
             "label": "store",
             "description": [],
             "signature": [
-              "EnhancedStore",
+              "ToolkitStore",
               "<{ colorMapping: ",
               "Config",
               "; }, ",

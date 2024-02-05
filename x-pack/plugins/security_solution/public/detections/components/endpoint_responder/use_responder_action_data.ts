@@ -6,53 +6,104 @@
  */
 import type { ReactNode } from 'react';
 import { useCallback, useMemo } from 'react';
-import { useGetEndpointDetails, useWithShowEndpointResponder } from '../../../management/hooks';
+import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
+import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
+import type { ThirdPartyAgentInfo } from '../../../../common/types';
+import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
+import { useGetEndpointDetails, useWithShowResponder } from '../../../management/hooks';
 import { HostStatus } from '../../../../common/endpoint/types';
 import {
-  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
-  LOADING_ENDPOINT_DATA_TOOLTIP,
   HOST_ENDPOINT_UNENROLLED_TOOLTIP,
+  LOADING_ENDPOINT_DATA_TOOLTIP,
   METADATA_API_ERROR_TOOLTIP,
+  NOT_FROM_ENDPOINT_HOST_TOOLTIP,
 } from './translations';
+import { getFieldValue } from '../host_isolation/helpers';
 
 export interface ResponderContextMenuItemProps {
   endpointId: string;
   onClick?: () => void;
+  agentType?: ResponseActionAgentType;
+  eventData?: TimelineEventsDetailsItem[] | null;
 }
+
+const getThirdPartyAgentInfo = (
+  eventData: TimelineEventsDetailsItem[] | null
+): ThirdPartyAgentInfo => {
+  return {
+    agent: {
+      id: getSentinelOneAgentId(eventData) || '',
+      type: getFieldValue(
+        { category: 'event', field: 'event.module' },
+        eventData
+      ) as ResponseActionAgentType,
+    },
+    host: {
+      name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+      os: {
+        name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+        family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
+        version: getFieldValue({ category: 'host', field: 'host.os.version' }, eventData),
+      },
+    },
+    lastCheckin: getFieldValue(
+      { category: 'kibana', field: 'kibana.alert.last_detected' },
+      eventData
+    ),
+  };
+};
+
+/**
+ * This hook is used to get the data needed to show the context menu items for the responder
+ * actions.
+ * @param endpointId the id of the endpoint
+ * @param onClick the callback to handle the click event
+ * @param agentType the type of agent, defaults to 'endpoint'
+ * @param eventData the event data, exists only when agentType !== 'endpoint'
+ * @returns an object with the data needed to show the context menu item
+ */
 
 export const useResponderActionData = ({
   endpointId,
   onClick,
+  agentType = 'endpoint',
+  eventData,
 }: ResponderContextMenuItemProps): {
   handleResponseActionsClick: () => void;
   isDisabled: boolean;
   tooltip: ReactNode;
 } => {
-  const showEndpointResponseActionsConsole = useWithShowEndpointResponder();
+  const isEndpointHost = agentType === 'endpoint';
+  const showResponseActionsConsole = useWithShowResponder();
 
   const {
-    data: endpointHostInfo,
+    data: hostInfo,
     isFetching,
     error,
   } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
-    // Still loading Endpoint host info
+    if (!isEndpointHost) {
+      return [false, undefined];
+    }
+
+    // Still loading host info
     if (isFetching) {
       return [true, LOADING_ENDPOINT_DATA_TOOLTIP];
     }
 
-    // if we got an error, and it's a 404 it means the endpoint is not from the endpoint host
+    // if we got an error, and it's a 404, it means the endpoint is not from the endpoint host
     if (error && error.body?.statusCode === 404) {
       return [true, NOT_FROM_ENDPOINT_HOST_TOOLTIP];
     }
 
-    // if we got an error and it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
+    // if we got an error and,
+    // it's a 400 with unenrolled in the error message (alerts can exist for endpoint that are no longer around)
     // or,
     // the Host status is `unenrolled`
     if (
       (error && error.body?.statusCode === 400 && error.body?.message.includes('unenrolled')) ||
-      endpointHostInfo?.host_status === HostStatus.UNENROLLED
+      hostInfo?.host_status === HostStatus.UNENROLLED
     ) {
       return [true, HOST_ENDPOINT_UNENROLLED_TOOLTIP];
     }
@@ -63,12 +114,34 @@ export const useResponderActionData = ({
     }
 
     return [false, undefined];
-  }, [endpointHostInfo, error, isFetching]);
+  }, [isEndpointHost, isFetching, error, hostInfo?.host_status]);
 
   const handleResponseActionsClick = useCallback(() => {
-    if (endpointHostInfo) showEndpointResponseActionsConsole(endpointHostInfo.metadata);
+    if (!isEndpointHost) {
+      const agentInfoFromAlert = getThirdPartyAgentInfo(eventData || null);
+      showResponseActionsConsole({
+        agentId: agentInfoFromAlert.agent.id,
+        agentType,
+        capabilities: ['isolation'],
+        hostName: agentInfoFromAlert.host.name,
+        platform: agentInfoFromAlert.host.os.family,
+        lastCheckin: agentInfoFromAlert.lastCheckin,
+      });
+    }
+    if (hostInfo) {
+      showResponseActionsConsole({
+        agentId: hostInfo.metadata.agent.id,
+        agentType: 'endpoint',
+        capabilities: hostInfo.metadata.Endpoint.capabilities ?? [],
+        hostName: hostInfo.metadata.host.name,
+      });
+    }
     if (onClick) onClick();
-  }, [endpointHostInfo, onClick, showEndpointResponseActionsConsole]);
+  }, [isEndpointHost, hostInfo, onClick, eventData, showResponseActionsConsole, agentType]);
 
-  return { handleResponseActionsClick, isDisabled, tooltip };
+  return {
+    handleResponseActionsClick,
+    isDisabled,
+    tooltip,
+  };
 };

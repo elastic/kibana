@@ -131,6 +131,24 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       );
     },
 
+    async assertAnomalyActionLogRateAnalysisButtonExists(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.existOrFail('mlAnomaliesListRowAction_runLogRateAnalysisButton');
+    },
+
+    async assertAnomalyActionLogRateAnalysisButtonNotExists(rowIndex: number) {
+      await this.ensureAnomalyActionsMenuOpen(rowIndex);
+      await testSubjects.missingOrFail('mlAnomaliesListRowAction_runLogRateAnalysisButton');
+    },
+
+    async ensureAnomalyActionLogRateAnalysisButtonClicked(rowIndex: number) {
+      await retry.tryForTime(10 * 1000, async () => {
+        await this.ensureAnomalyActionsMenuOpen(rowIndex);
+        await testSubjects.click('mlAnomaliesListRowAction_runLogRateAnalysisButton');
+        await testSubjects.existOrFail('aiopsLogRateAnalysisPage');
+      });
+    },
+
     /**
      * Asserts selected number of rows per page on the pagination control.
      * @param rowsNumber

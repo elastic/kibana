@@ -21,11 +21,11 @@ steps:
       queue: kb-static-ubuntu
     depends_on: build
     key: tests
-    timeout_in_minutes: 60
+    timeout_in_minutes: 90
     retry:
       automatic:
         - exit_status: '-1'
-          limit: 3
+          limit: 2
         - exit_status: '*'
           limit: 1
 

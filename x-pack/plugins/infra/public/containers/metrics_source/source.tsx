@@ -57,7 +57,7 @@ export const useSource = ({ sourceId }: { sourceId: string }) => {
         const response = await fetchService.fetch<MetricsSourceConfigurationResponse>(API_URL, {
           method: 'GET',
         });
-        telemetry.reportPerformanceMetricEvent(
+        telemetry?.reportPerformanceMetricEvent(
           'infra_source_load',
           performance.now() - start,
           {},

@@ -523,6 +523,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{columnId}, column {col}, row {row}',
         values: { columnId, row, col },
       }),
+    'euiDataGridCell.expansionEnterPrompt': i18n.translate(
+      'core.euiDataGridCell.expansionEnterPrompt',
+      { defaultMessage: 'Press the Enter key to expand this cell.' }
+    ),
+    'euiDataGridCell.focusTrapEnterPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapEnterPrompt',
+      { defaultMessage: "Press the Enter key to interact with this cell's contents." }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {

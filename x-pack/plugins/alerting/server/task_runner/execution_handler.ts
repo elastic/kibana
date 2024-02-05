@@ -368,6 +368,9 @@ export class ExecutionHandler<
           try {
             enqueueResponse = await this.actionsClient!.bulkEnqueueExecution(c);
           } catch (e) {
+            if (e.statusCode === 404) {
+              throw createTaskRunError(e, TaskErrorSource.USER);
+            }
             throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
           }
           if (enqueueResponse.errors) {
@@ -623,6 +626,22 @@ export class ExecutionHandler<
 
         if (alert.isFilteredOut(summarizedAlerts)) {
           continue;
+        }
+
+        if (
+          this.rule.notificationDelay &&
+          alert.getActiveCount() < this.rule.notificationDelay.active
+        ) {
+          this.logger.debug(
+            `no scheduling of action "${action.id}" for rule "${
+              this.taskInstance.params.alertId
+            }": the alert activeCount: ${alert.getActiveCount()} is less than the rule notificationDelay.active: ${
+              this.rule.notificationDelay.active
+            } threshold.`
+          );
+          continue;
+        } else {
+          alert.resetActiveCount();
         }
 
         const actionGroup = this.getActionGroup(alert);

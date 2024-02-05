@@ -18,7 +18,6 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useLicense } from '../../hooks/use_license';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { FeedbackButton } from '../../components/slo/feedback_button/feedback_button';
 import { SloEditForm } from './components/slo_edit_form';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
@@ -79,7 +78,7 @@ export function SloEditPage() {
           : i18n.translate('xpack.observability.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
-        rightSideItems: [<FeedbackButton />, <OutPortal node={InspectSLOPortalNode} />],
+        rightSideItems: [<OutPortal node={InspectSLOPortalNode} />],
         bottomBorder: false,
       }}
       data-test-subj="slosEditPage"

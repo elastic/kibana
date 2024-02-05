@@ -5,32 +5,21 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
-import { XYChartModel, XYLayerOptions } from '@kbn/lens-embeddable-utils';
+import type { LensBreakdownConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
 export const hostsView = {
-  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
-    const commonVisualOptions: XYChartModel['visualOptions'] = {
-      showDottedLine: true,
-      missingValues: 'Linear',
-    };
-
-    const layerOptions: XYLayerOptions = {
-      breakdown: {
-        type: 'top_values',
-        field: 'host.name',
-        params: {
-          size: 20,
-        },
-      },
+  get: ({ metricsDataViewId }: { metricsDataViewId?: string }) => {
+    const breakdown: LensBreakdownConfig = {
+      field: 'host.name',
+      type: 'topValues',
+      size: 20,
     };
 
     const {
       memoryUsage,
       memoryFree,
-      diskUsage,
       diskSpaceAvailable,
       diskIORead,
       diskIOWrite,
@@ -39,13 +28,10 @@ export const hostsView = {
       rx,
       tx,
     } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: [
-        'cpuUsage',
+      chartType: 'xy',
+      fromFormulas: [
         'memoryUsage',
-        'normalizedLoad1m',
         'memoryFree',
-        'diskUsage',
         'diskSpaceAvailable',
         'diskIORead',
         'diskIOWrite',
@@ -54,24 +40,40 @@ export const hostsView = {
         'rx',
         'tx',
       ],
-      dataView: metricsDataView,
-      layerOptions,
-      visualOptions: commonVisualOptions,
+      chartConfig: {
+        layerConfig: {
+          breakdown,
+        },
+      },
+      dataViewId: metricsDataViewId,
     });
 
-    const { cpuUsage, normalizedLoad1m } = createBasicCharts({
-      visualizationType: 'lnsXY',
-      formulaIds: ['cpuUsage', 'normalizedLoad1m'],
-      layerOptions,
-      visualOptions: {
-        ...commonVisualOptions,
-        yLeftExtent: {
-          mode: 'dataBounds',
+    const { normalizedLoad1m } = createBasicCharts({
+      chartType: 'xy',
+      fromFormulas: ['normalizedLoad1m'],
+      chartConfig: {
+        layerConfig: {
+          breakdown,
+        },
+      },
+      dataViewId: metricsDataViewId,
+    });
+    normalizedLoad1m.layers.push({ type: 'reference', yAxis: [{ value: '1' }] });
+
+    const { cpuUsage, diskUsage } = createBasicCharts({
+      chartType: 'xy',
+      fromFormulas: ['cpuUsage', 'diskUsage'],
+      chartConfig: {
+        layerConfig: {
+          breakdown,
+        },
+        yBounds: {
+          mode: 'custom',
           lowerBound: 0,
           upperBound: 1,
         },
       },
-      dataView: metricsDataView,
+      dataViewId: metricsDataViewId,
     });
 
     return createDashboardModel({

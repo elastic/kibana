@@ -5,13 +5,12 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-
 import React, { useMemo } from 'react';
 import { EuiFilterButton, hexToRgb } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { FieldValueSuggestions } from '@kbn/observability-shared-plugin/public';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
-import FieldValueSuggestions from '../../../field_value_suggestions';
 import { SeriesUrl } from '../../types';
 import { NestedFilterOpen } from './filter_expanded';
 
@@ -95,7 +94,10 @@ export function FilterValueButton({
   return nestedField && forceOpenNested ? (
     <FieldValueSuggestions
       button={button}
-      label={'Version'}
+      label={i18n.translate(
+        'xpack.exploratoryView.filterValueButton.fieldValueSuggestions.versionLabel',
+        { defaultMessage: 'Version' }
+      )}
       sourceField={nestedField}
       onChange={onNestedChange}
       filters={filters}

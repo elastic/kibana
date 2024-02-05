@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
-import { UnifiedDataTableSettings } from '../types';
+import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -85,6 +85,7 @@ function buildEuiGridColumn({
   columnTypes,
   showColumnTokens,
   headerRowHeight,
+  customGridColumnsConfiguration,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -103,6 +104,7 @@ function buildEuiGridColumn({
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -193,6 +195,10 @@ function buildEuiGridColumn({
   if (columnWidth > 0) {
     column.initialWidth = Number(columnWidth);
   }
+
+  if (customGridColumnsConfiguration && customGridColumnsConfiguration[column.id]) {
+    return customGridColumnsConfiguration[column.id]({ column, headerRowHeight });
+  }
   return column;
 }
 
@@ -214,6 +220,7 @@ export function getEuiGridColumns({
   columnTypes,
   showColumnTokens,
   headerRowHeight,
+  customGridColumnsConfiguration,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -235,6 +242,7 @@ export function getEuiGridColumns({
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
   headerRowHeight?: number;
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -257,6 +265,7 @@ export function getEuiGridColumns({
       columnTypes,
       showColumnTokens,
       headerRowHeight,
+      customGridColumnsConfiguration,
     })
   );
 }

@@ -19,9 +19,10 @@ export const fromSavedSearchAttributes = (
   tags: string[] | undefined,
   references: SavedObjectReference[] | undefined,
   searchSource: SavedSearch['searchSource'],
-  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps']
+  sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'],
+  managed: boolean
 ): SavedSearch => ({
-  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource),
+  ...fromSavedSearchAttributesCommon(id, attributes, tags, searchSource, managed),
   sharingSavedObjectProps,
   references,
 });

@@ -46,7 +46,9 @@ const BASELINE_TS = DEVIATION_TS - DAY_MS * 1;
 
 function getTextFieldMessage(timestamp: number, user: string, url: string, responseCode: string) {
   const date = new Date(timestamp);
-  return `${user} [${date.toLocaleString('en-US')}] "GET /${url} HTTP/1.1" ${responseCode}`;
+  return `${user} [${date.toLocaleString('en-US', {
+    timeZone: 'UTC',
+  })}] "GET /${url} HTTP/1.1" ${responseCode}`;
 }
 
 function getArtificialLogsWithDeviation(
@@ -224,7 +226,9 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
     public async generateData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
-          // will be added via UI
+          await esArchiver.loadIfNeeded(
+            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+          );
           break;
 
         case 'farequote_with_spike':
@@ -328,7 +332,9 @@ export function LogRateAnalysisDataGeneratorProvider({ getService }: FtrProvider
     public async removeGeneratedData(dataGenerator: LogRateAnalysisDataGenerator) {
       switch (dataGenerator) {
         case 'kibana_sample_data_logs':
-          // do not remove
+          await esArchiver.unload(
+            'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb'
+          );
           break;
 
         case 'farequote_with_spike':

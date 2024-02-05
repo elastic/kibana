@@ -124,10 +124,9 @@
               "(kibanaResponse: ",
               "KibanaResponse",
               "<any>) => ",
-              "ResponseObject",
-              " | ",
               "Boom",
-              "<any>"
+              "<any> | ",
+              "ResponseObject"
             ],
             "path": "packages/core/http/core-http-router-server-internal/src/response_adapter.ts",
             "deprecated": false,

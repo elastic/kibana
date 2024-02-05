@@ -211,8 +211,8 @@ describe('enrichEvents', () => {
         ...createEntity('user', 'user name 1'),
         ...createEntity('host', 'host name 1'),
 
-        'kibana.alert.host.criticality_level': 'low',
-        'kibana.alert.user.criticality_level': 'important',
+        'host.asset.criticality': 'low',
+        'user.asset.criticality': 'important',
       }),
       createAlert('2', {
         ...createEntity('host', 'user name 1'),

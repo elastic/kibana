@@ -8,6 +8,7 @@
 
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import React from 'react';
 import {
   getEuiGridColumns,
   getVisibleColumns,
@@ -350,6 +351,53 @@ describe('Data table columns', function () {
         },
       });
       expect(gridColumns[1].schema).toBe('numeric');
+    });
+
+    it('returns columns in correct format when column customisation is provided', async () => {
+      const gridColumns = getEuiGridColumns({
+        columns,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+      });
+
+      const extensionGridColumn = gridColumns[0];
+      extensionGridColumn.display = <span>test</span>;
+      const customGridColumnsConfiguration = {
+        extension: () => extensionGridColumn,
+      };
+
+      const customizedGridColumns = getEuiGridColumns({
+        columns,
+        settings: {},
+        dataView: dataViewWithTimefieldMock,
+        defaultColumns: false,
+        isSortEnabled: true,
+        isPlainRecord: true,
+        valueToStringConverter: dataTableContextMock.valueToStringConverter,
+        rowsCount: 100,
+        services: {
+          uiSettings: servicesMock.uiSettings,
+          toastNotifications: servicesMock.toastNotifications,
+        },
+        hasEditDataViewPermission: () =>
+          servicesMock.dataViewFieldEditor.userPermissions.editIndexPattern(),
+        onFilter: () => {},
+        customGridColumnsConfiguration,
+      });
+
+      expect(customizedGridColumns).toMatchSnapshot();
     });
   });
 });
