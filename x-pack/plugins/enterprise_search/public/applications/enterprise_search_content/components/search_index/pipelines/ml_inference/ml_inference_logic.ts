@@ -138,6 +138,7 @@ export interface MLInferenceProcessorsActions {
     CreateMlInferencePipelineResponse
   >['apiSuccess'];
   createPipeline: () => void;
+  fetchModelsApiSuccess: CachedFetchModlesApiLogicActions['apiSuccess'];
   fetchPipelineByName: FetchPipelineApiLogicActions['makeRequest'];
   fetchPipelineSuccess: FetchPipelineApiLogicActions['apiSuccess'];
   makeAttachPipelineRequest: Actions<
@@ -234,7 +235,10 @@ export const MLInferenceLogic = kea<
   connect: {
     actions: [
       CachedFetchModelsApiLogic,
-      ['startPolling as startPollingModels'],
+      [
+        'apiSuccess as fetchModelsApiSuccess',
+        'startPolling as startPollingModels',
+      ],
       FetchMlInferencePipelinesApiLogic,
       [
         'makeRequest as makeMlInferencePipelinesRequest',

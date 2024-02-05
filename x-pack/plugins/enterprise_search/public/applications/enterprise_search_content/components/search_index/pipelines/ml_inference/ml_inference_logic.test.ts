@@ -6,16 +6,15 @@
  */
 
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
-import { nerModel, textExpansionModel } from '../../../../__mocks__/ml_models.mock';
 
 import { HttpResponse } from '@kbn/core/public';
 
-import { ErrorResponse } from '../../../../../../../common/types/api';
+import { ErrorResponse, Status } from '../../../../../../../common/types/api';
+import { MlModel, MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
-import { MLModelsApiLogic } from '../../../../api/ml_models/ml_models_logic';
 import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
@@ -30,6 +29,7 @@ import {
   MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 import { AddInferencePipelineSteps } from './types';
+import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 
 const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   addInferencePipelineModal: {
@@ -50,6 +50,7 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   index: null,
   isConfigureStepValid: false,
   isLoading: true,
+  isModelsInitialLoading: false,
   isPipelineDataValid: false,
   isTextExpansionModelSelected: false,
   mappingData: undefined,
@@ -57,20 +58,32 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   mlInferencePipeline: undefined,
   mlInferencePipelineProcessors: undefined,
   mlInferencePipelinesData: undefined,
-  // mlModelsData: null,
-  // mlModelsStatus: 0,
   modelsData: undefined,
   modelsStatus: 0,
   selectableModels: [],
   selectedModel: undefined,
   sourceFields: undefined,
-  // supportedMLModels: [],
 };
+
+const MODELS: MlModel[] = [{
+  modelId: 'model_1',
+  title: 'Model 1',
+  type: 'ner',
+  deploymentState: MlModelDeploymentState.NotDeployed,
+  startTime: 0,
+  targetAllocationCount: 0,
+  nodeAllocationCount: 0,
+  threadsPerAllocation: 0,
+  isPlaceholder: false,
+  hasStats: false,
+  types: [],
+  inputFieldNames: [],
+}];
 
 describe('MlInferenceLogic', () => {
   const { mount } = new LogicMounter(MLInferenceLogic);
   const { mount: mountMappingApiLogic } = new LogicMounter(MappingsApiLogic);
-  const { mount: mountMLModelsApiLogic } = new LogicMounter(MLModelsApiLogic);
+  const { mount: mountCachedFetchModelsApiLogic } = new LogicMounter(CachedFetchModelsApiLogic);
   const { mount: mountSimulateExistingMlInterfacePipelineApiLogic } = new LogicMounter(
     SimulateExistingMlInterfacePipelineApiLogic
   );
@@ -95,7 +108,7 @@ describe('MlInferenceLogic', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mountMappingApiLogic();
-    mountMLModelsApiLogic();
+    mountCachedFetchModelsApiLogic();
     mountFetchMlInferencePipelineProcessorsApiLogic();
     mountFetchMlInferencePipelinesApiLogic();
     mountSimulateExistingMlInterfacePipelineApiLogic();
@@ -108,7 +121,13 @@ describe('MlInferenceLogic', () => {
   });
 
   it('has expected default values', () => {
-    expect(MLInferenceLogic.values).toEqual(DEFAULT_VALUES);
+    CachedFetchModelsApiLogic.actions.apiSuccess(MODELS);
+    expect(MLInferenceLogic.values).toEqual({
+      ...DEFAULT_VALUES,
+      modelsData: MODELS, // Populated by afterMount hook
+      modelsStatus: Status.SUCCESS,
+      selectableModels: MODELS,
+    });
   });
 
   describe('actions', () => {
@@ -187,6 +206,7 @@ describe('MlInferenceLogic', () => {
   describe('selectors', () => {
     describe('existingInferencePipelines', () => {
       beforeEach(() => {
+        CachedFetchModelsApiLogic.actions.apiSuccess(MODELS);
         MappingsApiLogic.actions.apiSuccess({
           mappings: {
             properties: {
@@ -209,7 +229,7 @@ describe('MlInferenceLogic', () => {
                   field_map: {
                     body: 'text_field',
                   },
-                  model_id: 'test-model',
+                  model_id: MODELS[0].modelId,
                   target_field: 'ml.inference.test-field',
                 },
               },
@@ -221,8 +241,8 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([
           {
             disabled: false,
-            modelId: 'test-model',
-            modelType: '',
+            modelId: MODELS[0].modelId,
+            modelType: 'ner',
             pipelineName: 'unit-test',
             sourceFields: ['body'],
             indexFields: ['body'],
@@ -269,8 +289,8 @@ describe('MlInferenceLogic', () => {
           {
             disabled: true,
             disabledReason: expect.stringContaining('title, body_content'),
-            modelId: 'test-model',
-            modelType: '',
+            modelId: MODELS[0].modelId,
+            modelType: 'ner',
             pipelineName: 'unit-test',
             sourceFields: ['title', 'body', 'body_content'],
             indexFields: ['body'],
@@ -334,165 +354,6 @@ describe('MlInferenceLogic', () => {
         });
 
         expect(MLInferenceLogic.values.existingInferencePipelines).toEqual([]);
-      });
-    });
-    describe('mlInferencePipeline', () => {
-      it('returns undefined when configuration is invalid', () => {
-        MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          modelID: '',
-          pipelineName: '', // Invalid
-          fieldMappings: [], // Invalid
-          targetField: '',
-        });
-
-        expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
-      });
-      it('generates inference pipeline', () => {
-        MLModelsApiLogic.actions.apiSuccess([nerModel]);
-        MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          modelID: nerModel.model_id,
-          pipelineName: 'unit-test',
-          fieldMappings: [
-            {
-              sourceField: 'body',
-              targetField: 'ml.inference.body',
-            },
-          ],
-          targetField: '',
-        });
-
-        expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
-      });
-      it('returns undefined when existing pipeline not yet selected', () => {
-        MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          existingPipeline: true,
-          modelID: '',
-          pipelineName: '',
-          fieldMappings: [],
-          targetField: '',
-        });
-        expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
-      });
-      it('return existing pipeline when selected', () => {
-        const existingPipeline = {
-          description: 'this is a test',
-          processors: [],
-          version: 1,
-        };
-        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
-          'unit-test': existingPipeline,
-        });
-        MLInferenceLogic.actions.setInferencePipelineConfiguration({
-          existingPipeline: true,
-          modelID: '',
-          pipelineName: 'unit-test',
-          fieldMappings: [
-            {
-              sourceField: 'body',
-              targetField: 'ml.inference.body',
-            },
-          ],
-          targetField: '',
-        });
-        expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
-        expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
-      });
-    });
-    describe('supportedMLModels', () => {
-      it('filters unsupported ML models', () => {
-        MLModelsApiLogic.actions.apiSuccess([
-          {
-            inference_config: {
-              ner: {},
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'ner-mocked-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1',
-          },
-          {
-            inference_config: {
-              some_unsupported_task_type: {},
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'unsupported-mocked-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1',
-          },
-        ]);
-
-        expect(MLInferenceLogic.values.supportedMLModels).toEqual([
-          expect.objectContaining({
-            inference_config: {
-              ner: {},
-            },
-          }),
-        ]);
-      });
-
-      it('promotes text_expansion ML models and sorts others by ID', () => {
-        MLModelsApiLogic.actions.apiSuccess([
-          {
-            inference_config: {
-              ner: {},
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'ner-mocked-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1',
-          },
-          {
-            inference_config: {
-              text_expansion: {},
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'text-expansion-mocked-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1',
-          },
-          {
-            inference_config: {
-              text_embedding: {},
-            },
-            input: {
-              field_names: ['text_field'],
-            },
-            model_id: 'text-embedding-mocked-model',
-            model_type: 'pytorch',
-            tags: [],
-            version: '1',
-          },
-        ]);
-
-        expect(MLInferenceLogic.values.supportedMLModels).toEqual([
-          expect.objectContaining({
-            inference_config: {
-              text_expansion: {},
-            },
-          }),
-          expect.objectContaining({
-            inference_config: {
-              ner: {},
-            },
-          }),
-          expect.objectContaining({
-            inference_config: {
-              text_embedding: {},
-            },
-          }),
-        ]);
       });
     });
     describe('formErrors', () => {
@@ -573,6 +434,75 @@ describe('MlInferenceLogic', () => {
         });
       });
     });
+    describe('mlInferencePipeline', () => {
+      it('returns undefined when configuration is invalid', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          modelID: '',
+          pipelineName: '', // Invalid
+          fieldMappings: [], // Invalid
+          targetField: '',
+        });
+
+        expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
+      });
+      it('generates inference pipeline', () => {
+        CachedFetchModelsApiLogic.actions.apiSuccess(MODELS);
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          modelID: MODELS[0].modelId,
+          pipelineName: 'unit-test',
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
+          targetField: '',
+        });
+
+        expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
+      });
+      it('returns undefined when existing pipeline not yet selected', () => {
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          existingPipeline: true,
+          modelID: '',
+          pipelineName: '',
+          fieldMappings: [],
+          targetField: '',
+        });
+        expect(MLInferenceLogic.values.mlInferencePipeline).toBeUndefined();
+      });
+      it('return existing pipeline when selected', () => {
+        const existingPipeline = {
+          description: 'this is a test',
+          processors: [],
+          version: 1,
+        };
+        FetchMlInferencePipelinesApiLogic.actions.apiSuccess({
+          'unit-test': existingPipeline,
+        });
+        MLInferenceLogic.actions.setInferencePipelineConfiguration({
+          existingPipeline: true,
+          modelID: '',
+          pipelineName: 'unit-test',
+          fieldMappings: [
+            {
+              sourceField: 'body',
+              targetField: 'ml.inference.body',
+            },
+          ],
+          targetField: '',
+        });
+        expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
+        expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
+      });
+    });    
+    describe('selectableModels', () => {
+      it('makes fetch models request', () => {
+        MLInferenceLogic.actions.fetchModelsApiSuccess(MODELS);
+
+        expect(MLInferenceLogic.values.selectableModels).toBe(MODELS);
+      });
+    });
   });
 
   describe('listeners', () => {
@@ -618,14 +548,14 @@ describe('MlInferenceLogic', () => {
             ...mockModelConfiguration,
             configuration: {
               ...mockModelConfiguration.configuration,
-              modelID: textExpansionModel.model_id,
+              modelID: MODELS[0].modelId,
               fieldMappings: [],
             },
           },
         });
         jest.spyOn(MLInferenceLogic.actions, 'makeCreatePipelineRequest');
 
-        MLModelsApiLogic.actions.apiSuccess([textExpansionModel]);
+        CachedFetchModelsApiLogic.actions.apiSuccess(MODELS);
         MLInferenceLogic.actions.selectFields(['my_source_field1', 'my_source_field2']);
         MLInferenceLogic.actions.addSelectedFieldsToMapping(true);
         MLInferenceLogic.actions.createPipeline();
@@ -633,7 +563,7 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.actions.makeCreatePipelineRequest).toHaveBeenCalledWith({
           indexName: mockModelConfiguration.indexName,
           inferenceConfig: undefined,
-          modelId: textExpansionModel.model_id,
+          modelId: MODELS[0].modelId,
           fieldMappings: [
             {
               sourceField: 'my_source_field1',
@@ -651,13 +581,13 @@ describe('MlInferenceLogic', () => {
     });
     describe('startTextExpansionModelSuccess', () => {
       it('fetches ml models', () => {
-        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
+        jest.spyOn(MLInferenceLogic.actions, 'startPollingModels');
         StartTextExpansionModelApiLogic.actions.apiSuccess({
           deploymentState: 'started',
           modelId: 'foo',
         });
 
-        expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
+        expect(MLInferenceLogic.actions.startPollingModels).toHaveBeenCalled();
       });
     });
     describe('onAddInferencePipelineStepChange', () => {
@@ -676,12 +606,12 @@ describe('MlInferenceLogic', () => {
           existingPipeline: false,
         });
         jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
-        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
+        jest.spyOn(MLInferenceLogic.actions, 'startPollingModels');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).toHaveBeenCalledWith({
           pipelineName: 'ml-inference-unit-test-pipeline',
         });
-        expect(MLInferenceLogic.actions.makeMLModelsRequest).toHaveBeenCalledWith(undefined);
+        expect(MLInferenceLogic.actions.startPollingModels).toHaveBeenCalled();
       });
       it('does not trigger pipeline and model fetch existing pipeline is selected', () => {
         MLInferenceLogic.actions.setInferencePipelineConfiguration({
@@ -691,10 +621,10 @@ describe('MlInferenceLogic', () => {
           existingPipeline: true,
         });
         jest.spyOn(MLInferenceLogic.actions, 'fetchPipelineByName');
-        jest.spyOn(MLInferenceLogic.actions, 'makeMLModelsRequest');
+        jest.spyOn(MLInferenceLogic.actions, 'startPollingModels');
         MLInferenceLogic.actions.onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
         expect(MLInferenceLogic.actions.fetchPipelineByName).not.toHaveBeenCalled();
-        expect(MLInferenceLogic.actions.makeMLModelsRequest).not.toHaveBeenCalled();
+        expect(MLInferenceLogic.actions.startPollingModels).not.toHaveBeenCalled();
       });
     });
     describe('fetchPipelineSuccess', () => {
