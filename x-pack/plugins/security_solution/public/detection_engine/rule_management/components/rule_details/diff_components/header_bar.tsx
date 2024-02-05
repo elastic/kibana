@@ -38,7 +38,7 @@ export const RuleDiffHeaderBar = () => {
             display="block"
           />
           <EuiTitle size="xxs">
-            <h6>{i18n.CURRENT_VERSION}</h6>
+            <h6>{i18n.CURRENT_RULE_VERSION}</h6>
           </EuiTitle>
         </EuiFlexGroup>
         <EuiFlexGroup alignItems="baseline" gutterSize="xs">
@@ -49,7 +49,7 @@ export const RuleDiffHeaderBar = () => {
             size="m"
           />
           <EuiTitle size="xxs">
-            <h6>{i18n.UPDATED_VERSION}</h6>
+            <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
           </EuiTitle>
         </EuiFlexGroup>
       </EuiFlexGroup>

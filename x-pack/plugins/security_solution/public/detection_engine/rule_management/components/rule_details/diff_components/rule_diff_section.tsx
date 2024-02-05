@@ -15,31 +15,29 @@ interface RuleDiffSectionProps {
   fields: RuleFieldDiff[];
 }
 
-export const RuleDiffSection = ({ title, fields }: RuleDiffSectionProps) => {
-  return (
-    <>
-      <EuiSpacer size="m" />
-      <EuiAccordion
-        initialIsOpen={true}
-        id={title}
-        css={css`
-          padding-top: 1px;
-        `}
-        buttonContent={
-          <EuiTitle size="s">
-            <h3>{title}</h3>
-          </EuiTitle>
-        }
-      >
-        {fields.map(({ fieldName, formattedDiffs }) => {
-          return (
-            <React.Fragment key={fieldName}>
-              <EuiSpacer size="m" />
-              <FieldDiffComponent ruleDiffs={formattedDiffs} fieldName={fieldName} />
-            </React.Fragment>
-          );
-        })}
-      </EuiAccordion>
-    </>
-  );
-};
+export const RuleDiffSection = ({ title, fields }: RuleDiffSectionProps) => (
+  <>
+    <EuiSpacer size="m" />
+    <EuiAccordion
+      initialIsOpen={true}
+      id={title}
+      css={css`
+        padding-top: 1px; // Fixes border disappearing bug
+      `}
+      buttonContent={
+        <EuiTitle size="s">
+          <h3>{title}</h3>
+        </EuiTitle>
+      }
+    >
+      {fields.map(({ fieldName, formattedDiffs }) => {
+        return (
+          <React.Fragment key={fieldName}>
+            <EuiSpacer size="m" />
+            <FieldDiffComponent ruleDiffs={formattedDiffs} fieldName={fieldName} />
+          </React.Fragment>
+        );
+      })}
+    </EuiAccordion>
+  </>
+);

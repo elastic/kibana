@@ -167,7 +167,7 @@ export const RuleDiffTab = ({ oldRule, newRule }: RuleDiffTabProps) => {
               size="m"
             />
             <EuiTitle size="xxxs">
-              <h6>{i18n.UPDATED_VERSION}</h6>
+              <h6>{i18n.ELASTIC_UPDATE_VERSION}</h6>
             </EuiTitle>
           </EuiFlexGroup>
         </EuiFlexGroup>
