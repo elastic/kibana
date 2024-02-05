@@ -53,6 +53,15 @@ describe('putUpdateNative lib function', () => {
     });
     await expect(
       putUpdateNative(mockClient as unknown as ElasticsearchClient, 'connectorId', true)
-    ).rejects.toEqual(new Error('Could not find document'));
+    ).rejects.toEqual(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            type: `document_missing_exception`,
+          },
+        },
+      } as any)
+    );
   });
 });
