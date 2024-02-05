@@ -40,11 +40,10 @@ export class ElasticChartService extends FtrService {
     return await this.find.existsByCssSelector('.echChart canvas:last-of-type');
   }
 
-  public async waitForRenderComplete(dataTestSubj?: string, timeout?: number) {
-    const chart = await this.getChart(dataTestSubj, timeout);
+  public async waitForRenderComplete(dataTestSubj?: string) {
+    const chart = await this.getChart(dataTestSubj);
     const rendered = await chart.findAllByCssSelector(
-      '.echChartStatus[data-ech-render-complete=true]',
-      timeout
+      '.echChartStatus[data-ech-render-complete=true]'
     );
     expect(rendered.length).to.equal(1);
   }
