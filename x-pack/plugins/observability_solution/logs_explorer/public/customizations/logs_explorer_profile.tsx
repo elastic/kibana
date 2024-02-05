@@ -22,7 +22,6 @@ import { createCustomCellRenderer } from './custom_cell_renderer';
 import { createCustomGridColumnsConfiguration } from './custom_column';
 import { createCustomControlColumnsConfiguration } from './custom_control_column';
 
-
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
