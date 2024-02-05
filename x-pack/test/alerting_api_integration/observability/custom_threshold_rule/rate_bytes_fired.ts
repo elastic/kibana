@@ -12,7 +12,7 @@ import {
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
 import { createDataView, deleteDataView } from '../helpers/data_view';
@@ -252,11 +252,10 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
-        // TODO: uncomment after https://github.com/elastic/kibana/pull/175479 as the threshold changes every time.
-        // expect(resp.hits.hits[0]._source?.reason).eql(
-        //   `Rate system.network.in.bytes is 0.5, above the threshold of 0.2. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
-        // );
-        // expect(resp.hits.hits[0]._source?.value).eql('80%');
+        expect(resp.hits.hits[0]._source?.reason).eql(
+          `Rate of system.network.in.bytes is 0.2 B/s, above the threshold of 0.2 B/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
+        );
+        expect(resp.hits.hits[0]._source?.value).eql('0.2 B/s');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );

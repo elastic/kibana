@@ -13,7 +13,7 @@ import {
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
@@ -241,7 +241,7 @@ export default function ({ getService }: FtrProviderContext) {
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataset: DATE_VIEW_TITLE,
           timeRange: { to: 'now' },
