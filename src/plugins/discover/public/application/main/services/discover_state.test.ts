@@ -19,6 +19,7 @@ import {
   savedSearchMock,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
+  savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
@@ -648,6 +649,20 @@ describe('Test discover state actions', () => {
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchAdHoc.id });
     expect(state.appState.getState().index).toBe(adHocDataViewId);
     expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
+  });
+
+  test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
+    const savedSearchMockWithESQLCopy = copySavedSearch(savedSearchMockWithESQL);
+    const persistedDataViewId = savedSearchMockWithESQLCopy?.searchSource.getField('index')!.id;
+    const url = "/#?_a=(index:'the-data-view-id')&_g=()";
+    const { state } = await getState(url, {
+      savedSearch: savedSearchMockWithESQLCopy,
+      isEmptyUrl: false,
+    });
+    const nextSavedSearch = await state.actions.loadSavedSearch({
+      savedSearchId: savedSearchMockWithESQL.id,
+    });
+    expect(persistedDataViewId).toBe(nextSavedSearch?.searchSource.getField('index')!.id);
   });
 
   test('onChangeDataView', async () => {

@@ -4,24 +4,35 @@ exports[`AlertDetailsAppSection should render annotations 1`] = `
 Array [
   Object {
     "annotations": Array [
-      <AlertAnnotation
-        alertStart={1678716383695}
-        color="#BD271E"
-        dateFormat="YYYY-MM-DD HH:mm"
-        id="alert_start_annotation"
-      />,
-      <AlertActiveTimeRangeAnnotation
-        alertStart={1678716383695}
-        color="#BD271E"
-        id="alert_time_range_annotation"
-      />,
+      Object {
+        "color": "#BD271E",
+        "icon": "alert",
+        "id": "custom_threshold_alert_start_annotation",
+        "key": Object {
+          "timestamp": "2023-03-28T13:40:00.000Z",
+          "type": "point_in_time",
+        },
+        "label": "Alert",
+        "type": "manual",
+      },
+      Object {
+        "color": "#F04E9833",
+        "id": "custom_threshold_recovered_alert_range_annotation",
+        "key": Object {
+          "endTimestamp": "2023-03-28T14:40:00.000Z",
+          "timestamp": "2023-03-28T13:40:00.000Z",
+          "type": "range",
+        },
+        "label": "Alert duration",
+        "type": "manual",
+      },
     ],
-    "chartType": "line",
-    "derivedIndexPattern": Object {
-      "fields": Array [],
-      "title": "unknown-index",
-    },
-    "expression": Object {
+    "dataView": undefined,
+    "filterQuery": "",
+    "groupBy": Array [
+      "host.hostname",
+    ],
+    "metricExpression": Object {
       "comparator": ">",
       "metrics": Array [
         Object {
@@ -35,11 +46,7 @@ Array [
       "timeSize": 15,
       "timeUnit": "m",
     },
-    "filterQuery": "host.hostname: Users-System.local and service.type: system",
-    "groupBy": Array [
-      "host.hostname",
-    ],
-    "hideTitle": true,
+    "seriesType": "bar_stacked",
     "timeRange": Object {
       "from": "2023-03-28T10:43:13.802Z",
       "to": "2023-03-29T13:14:09.581Z",
