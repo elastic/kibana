@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
 import type {
   MlDatafeedState,
   MlJobState,
@@ -19,11 +19,18 @@ import type {
   RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
-import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { AlertsClientError, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
+import { DefaultAlert, MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
+import { ES_FIELD_TYPES } from '@kbn/field-types';
+import {
+  ALERT_DATAFEED_RESULTS,
+  ALERT_DELAYED_DATA_RESULTS,
+  ALERT_JOB_ERRORS_RESULTS,
+  ALERT_MML_RESULTS,
+  ML_ALERT_TYPES,
+} from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
@@ -98,6 +105,66 @@ export type JobsHealthExecutorOptions = RuleExecutorOptions<
   DefaultAlert
 >;
 
+export const ANOMALY_DETECTION_HEALTH_AAD_INDEX_NAME = 'ml.anomaly-detection-health';
+
+export const ANOMALY_DETECTION_HEALTH_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
+  context: ANOMALY_DETECTION_HEALTH_AAD_INDEX_NAME,
+  mappings: {
+    fieldMap: {
+      [ALERT_MML_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          memory_status: { type: ES_FIELD_TYPES.KEYWORD },
+          log_time: { type: ES_FIELD_TYPES.DATE },
+          model_bytes: { type: ES_FIELD_TYPES.LONG },
+          model_bytes_memory_limit: { type: ES_FIELD_TYPES.LONG },
+          peak_model_bytes: { type: ES_FIELD_TYPES.LONG },
+          model_bytes_exceeded: { type: ES_FIELD_TYPES.LONG },
+        },
+      },
+      [ALERT_DATAFEED_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          job_state: { type: ES_FIELD_TYPES.KEYWORD },
+          datafeed_id: { type: ES_FIELD_TYPES.KEYWORD },
+          datafeed_state: { type: ES_FIELD_TYPES.KEYWORD },
+        },
+      },
+      [ALERT_DELAYED_DATA_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          annotation: { type: ES_FIELD_TYPES.TEXT },
+          missed_docs_count: { type: ES_FIELD_TYPES.LONG },
+          end_timestamp: { type: ES_FIELD_TYPES.DATE },
+        },
+      },
+      [ALERT_JOB_ERRORS_RESULTS]: {
+        type: ES_FIELD_TYPES.OBJECT,
+        array: true,
+        required: false,
+        dynamic: false,
+        properties: {
+          job_id: { type: ES_FIELD_TYPES.KEYWORD },
+          errors: { type: ES_FIELD_TYPES.OBJECT },
+        },
+      },
+    },
+  },
+  shouldWrite: true,
+};
+
 export function registerJobsMonitoringRuleType({
   alerting,
   mlServicesProviders,
@@ -155,7 +222,7 @@ export function registerJobsMonitoringRuleType({
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,
-    alerts: DEFAULT_AAD_CONFIG,
+    alerts: ANOMALY_DETECTION_HEALTH_AAD_CONFIG,
     async executor(options) {
       const {
         services,
