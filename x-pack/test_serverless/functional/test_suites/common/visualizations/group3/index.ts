@@ -12,7 +12,7 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
 
   describe('Visualizations - Group 3', function () {
     before(async () => {
-      await svlCommonPage.loginWithRole('viewer');
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     loadTestFile(require.resolve('./open_in_lens/tsvb'));

@@ -16,7 +16,7 @@ export default function ({ getService, loadTestFile, getPageObject }: FtrProvide
     before(async function () {
       await browser.setWindowSize(1300, 800);
       // TODO: Serverless tests require login first
-      await svlCommonPage.loginWithRole('viewer');
+      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async function unloadMakelogs() {

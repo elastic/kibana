@@ -28,17 +28,23 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     async loginWithRole(role: string) {
       log.debug(`Delete all the cookies in the current browser context`);
       await browser.deleteAllCookies();
-      log.debug(`Setting the cookie for '${role}' role`);
+      log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getSessionCookieForRole(role);
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,
         async () => {
           // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
+          log.debug(`Navigate to /bootstrap.js`);
           await browser.get(deployment.getHostPort() + '/bootstrap.js');
+          log.debug(`Set the new cookie in the current browser context`);
           await browser.setCookie('sid', sidCookie);
           // Cookie should be already set in the browsing context, navigating to the Home page
+          log.debug(`Navigate to base url`);
           await browser.get(deployment.getHostPort());
+          log.debug(`Close alert if any`);
+          const alert = await browser.getAlert();
+          await alert?.accept();
           // Verifying that we are logged in
           if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
