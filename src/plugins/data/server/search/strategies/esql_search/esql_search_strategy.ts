@@ -32,12 +32,12 @@ export const esqlSearchStrategyProvider = (
 
     const search = async () => {
       try {
-        const { terminateAfter, ...requestParams } = request.params ?? {};
+        const { terminateAfter, dropNullColumns, ...requestParams } = request.params ?? {};
         const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
             path: `/_query`,
-            querystring: 'drop_null_columns',
+            querystring: dropNullColumns ? 'drop_null_columns' : '',
             body: {
               ...requestParams,
             },

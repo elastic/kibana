@@ -195,7 +195,10 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchReponse>
-          >({ params }, { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }).pipe(
+          >(
+            { params: { ...params, dropNullColumns: true } },
+            { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }
+          ).pipe(
             catchError((error) => {
               if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
