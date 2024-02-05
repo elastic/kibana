@@ -8,17 +8,17 @@
 import type { QueryStart } from '@kbn/data-plugin/public';
 import { map, merge, Observable } from 'rxjs';
 import { ActionFunction, actions } from 'xstate';
-import type { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
+import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
 export const subscribeToTimefilterService =
-  (query: QueryStart) => (): Observable<LogExplorerControllerEvent> => {
+  (query: QueryStart) => (): Observable<LogsExplorerControllerEvent> => {
     const {
       timefilter: { timefilter },
     } = query;
 
     const time$ = timefilter.getTimeUpdate$().pipe(
       map(
-        (): LogExplorerControllerEvent => ({
+        (): LogsExplorerControllerEvent => ({
           type: 'RECEIVE_TIMEFILTER_TIME',
           time: timefilter.getTime(),
         })
@@ -27,7 +27,7 @@ export const subscribeToTimefilterService =
 
     const refreshInterval$ = timefilter.getRefreshIntervalUpdate$().pipe(
       map(
-        (): LogExplorerControllerEvent => ({
+        (): LogsExplorerControllerEvent => ({
           type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL',
           refreshInterval: timefilter.getRefreshInterval(),
         })
@@ -38,8 +38,8 @@ export const subscribeToTimefilterService =
   };
 
 export const updateContextFromTimefilter = actions.assign<
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent
+  LogsExplorerControllerContext,
+  LogsExplorerControllerEvent
 >((context, event) => {
   if (event.type === 'RECEIVE_TIMEFILTER_TIME' && 'time' in event) {
     return {
@@ -57,7 +57,7 @@ export const updateContextFromTimefilter = actions.assign<
 });
 
 export const updateTimefilterFromContext =
-  (query: QueryStart): ActionFunction<LogExplorerControllerContext, LogExplorerControllerEvent> =>
+  (query: QueryStart): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   (context, _event) => {
     if (context.time != null) {
       query.timefilter.timefilter.setTime(context.time);

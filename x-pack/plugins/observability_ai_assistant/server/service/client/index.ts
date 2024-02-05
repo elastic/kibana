@@ -10,6 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, merge, noop, omit, pick, take } from 'lodash';
 import {
@@ -200,17 +201,22 @@ export class ObservabilityAIAssistantClient {
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
             const response$ = (
-              await this.chat({
-                messages: nextMessages,
-                connectorId,
-                signal,
-                functions:
-                  numFunctionsCalled >= MAX_FUNCTION_CALLS
-                    ? []
-                    : functionClient
-                        .getFunctions()
-                        .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
-              })
+              await this.chat(
+                lastMessage.message.name && lastMessage.message.name !== 'recall'
+                  ? 'function_response'
+                  : 'user_message',
+                {
+                  messages: nextMessages,
+                  connectorId,
+                  signal,
+                  functions:
+                    numFunctionsCalled >= MAX_FUNCTION_CALLS
+                      ? []
+                      : functionClient
+                          .getFunctions()
+                          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+                }
+              )
             ).pipe(emitWithConcatenatedMessage(), shareReplay());
 
             response$.subscribe({
@@ -235,6 +241,14 @@ export class ObservabilityAIAssistantClient {
           }
 
           if (isAssistantMessageWithFunctionRequest) {
+            const span = apm.startSpan(
+              `execute_function ${lastMessage.message.function_call!.name}`
+            );
+
+            span?.addLabels({
+              ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
+            });
+
             const functionResponse =
               numFunctionsCalled >= MAX_FUNCTION_CALLS
                 ? {
@@ -256,6 +270,8 @@ export class ObservabilityAIAssistantClient {
                         return response;
                       }
 
+                      span?.setOutcome('success');
+
                       const encoded = encode(JSON.stringify(response.content || {}));
 
                       if (encoded.length <= MAX_FUNCTION_RESPONSE_TOKEN_COUNT) {
@@ -272,6 +288,7 @@ export class ObservabilityAIAssistantClient {
                       };
                     })
                     .catch((error): FunctionResponse => {
+                      span?.setOutcome('failure');
                       return {
                         content: {
                           message: error.toString(),
@@ -331,8 +348,13 @@ export class ObservabilityAIAssistantClient {
                 )
               );
 
+              span?.end();
+
               return await next(nextMessages.concat(messageEvents.map((event) => event.message)));
             }
+
+            span?.end();
+
             return await next(nextMessages);
           }
 
@@ -410,92 +432,114 @@ export class ObservabilityAIAssistantClient {
     ).pipe(shareReplay());
   };
 
-  chat = async ({
-    messages,
-    connectorId,
-    functions,
-    functionCall,
-    signal,
-  }: {
-    messages: Message[];
-    connectorId: string;
-    functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
-    functionCall?: string;
-    signal: AbortSignal;
-  }): Promise<Observable<ChatCompletionChunkEvent>> => {
-    const connector = await this.dependencies.actionsClient.get({
-      id: connectorId,
-    });
-
-    let adapter: LlmApiAdapter;
-
-    switch (connector.actionTypeId) {
-      case ObservabilityAIAssistantConnectorType.OpenAI:
-        adapter = createOpenAiAdapter({
-          logger: this.dependencies.logger,
-          messages,
-          functionCall,
-          functions,
-        });
-        break;
-
-      case ObservabilityAIAssistantConnectorType.Bedrock:
-        adapter = createBedrockClaudeAdapter({
-          logger: this.dependencies.logger,
-          messages,
-          functionCall,
-          functions,
-        });
-        break;
-
-      default:
-        throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
+  chat = async (
+    name: string,
+    {
+      messages,
+      connectorId,
+      functions,
+      functionCall,
+      signal,
+    }: {
+      messages: Message[];
+      connectorId: string;
+      functions?: Array<{ name: string; description: string; parameters: CompatibleJSONSchema }>;
+      functionCall?: string;
+      signal: AbortSignal;
     }
+  ): Promise<Observable<ChatCompletionChunkEvent>> => {
+    const span = apm.startSpan(`chat ${name}`);
 
-    const subAction = adapter.getSubAction();
+    try {
+      const connector = await this.dependencies.actionsClient.get({
+        id: connectorId,
+      });
 
-    this.dependencies.logger.debug(`Sending conversation to connector`);
-    this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+      let adapter: LlmApiAdapter;
 
-    const executeResult = await this.dependencies.actionsClient.execute({
-      actionId: connectorId,
-      params: subAction,
-    });
+      switch (connector.actionTypeId) {
+        case ObservabilityAIAssistantConnectorType.OpenAI:
+          adapter = createOpenAiAdapter({
+            logger: this.dependencies.logger,
+            messages,
+            functionCall,
+            functions,
+          });
+          break;
 
-    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+        case ObservabilityAIAssistantConnectorType.Bedrock:
+          adapter = createBedrockClaudeAdapter({
+            logger: this.dependencies.logger,
+            messages,
+            functionCall,
+            functions,
+          });
+          break;
 
-    if (executeResult.status === 'error' && executeResult?.serviceMessage) {
-      const tokenLimitRegex =
-        /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
-      const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
-
-      if (tokenLimitRegexResult) {
-        const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
-        throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
+        default:
+          throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
       }
+
+      const subAction = adapter.getSubAction();
+
+      this.dependencies.logger.debug(`Sending conversation to connector`);
+      this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
+
+      const executeResult = await this.dependencies.actionsClient.execute({
+        actionId: connectorId,
+        params: subAction,
+      });
+
+      this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+
+      if (executeResult.status === 'error' && executeResult?.serviceMessage) {
+        const tokenLimitRegex =
+          /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
+        const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
+
+        if (tokenLimitRegexResult) {
+          const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
+          throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
+        }
+      }
+
+      if (executeResult.status === 'error') {
+        throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
+      }
+
+      const response = executeResult.data as Readable;
+
+      signal.addEventListener('abort', () => response.destroy());
+
+      const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+
+      response$.pipe(concatenateChatCompletionChunks(), lastOperator()).subscribe({
+        error: (error) => {
+          this.dependencies.logger.debug('Error in chat response');
+          this.dependencies.logger.debug(error);
+        },
+        next: (message) => {
+          this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
+        },
+      });
+
+      lastValueFrom(response$)
+        .then(() => {
+          span?.setOutcome('success');
+        })
+        .catch(() => {
+          span?.setOutcome('failure');
+        })
+        .finally(() => {
+          span?.end();
+        });
+
+      return response$;
+    } catch (error) {
+      span?.setOutcome('failure');
+      span?.end();
+      throw error;
     }
-
-    if (executeResult.status === 'error') {
-      throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
-    }
-
-    const response = executeResult.data as Readable;
-
-    signal.addEventListener('abort', () => response.destroy());
-
-    const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
-
-    response$.pipe(concatenateChatCompletionChunks(), lastOperator()).subscribe({
-      error: (error) => {
-        this.dependencies.logger.debug('Error in chat response');
-        this.dependencies.logger.debug(error);
-      },
-      next: (message) => {
-        this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
-      },
-    });
-
-    return response$;
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -555,7 +599,7 @@ export class ObservabilityAIAssistantClient {
     connectorId: string;
     signal: AbortSignal;
   }) => {
-    const response$ = await this.chat({
+    const response$ = await this.chat('generate_title', {
       messages: [
         {
           '@timestamp': new Date().toString(),

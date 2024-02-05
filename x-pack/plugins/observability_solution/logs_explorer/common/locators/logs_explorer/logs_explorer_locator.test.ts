@@ -6,33 +6,33 @@
  */
 
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import { LogExplorerLocatorDefinition } from './log_explorer_locator';
-import { LogExplorerLocatorDependencies } from './types';
+import { LogsExplorerLocatorDefinition } from './logs_explorer_locator';
+import { LogsExplorerLocatorDependencies } from './types';
 
 const setup = async () => {
-  const logExplorerLocatorDependencies: LogExplorerLocatorDependencies = {
+  const logsExplorerLocatorDependencies: LogsExplorerLocatorDependencies = {
     discoverAppLocator: sharePluginMock.createLocator(),
   };
-  const logExplorerLocator = new LogExplorerLocatorDefinition(logExplorerLocatorDependencies);
+  const logsExplorerLocator = new LogsExplorerLocatorDefinition(logsExplorerLocatorDependencies);
 
   return {
-    logExplorerLocator,
-    discoverGetLocation: logExplorerLocatorDependencies.discoverAppLocator?.getLocation,
+    logsExplorerLocator,
+    discoverGetLocation: logsExplorerLocatorDependencies.discoverAppLocator?.getLocation,
   };
 };
 
 describe('Logs Explorer Locators', () => {
   const dataset = 'logs-*-*';
   it('should call discover locator with empty params', async () => {
-    const { logExplorerLocator, discoverGetLocation } = await setup();
-    await logExplorerLocator.getLocation({});
+    const { logsExplorerLocator, discoverGetLocation } = await setup();
+    await logsExplorerLocator.getLocation({});
 
     expect(discoverGetLocation).toBeCalledWith({});
   });
 
   it('should call discover locator with correct dataViewId if dataset is sent', async () => {
-    const { logExplorerLocator, discoverGetLocation } = await setup();
-    await logExplorerLocator.getLocation({ dataset });
+    const { logsExplorerLocator, discoverGetLocation } = await setup();
+    await logsExplorerLocator.getLocation({ dataset });
 
     expect(discoverGetLocation).toBeCalledWith(
       expect.objectContaining({
@@ -42,8 +42,8 @@ describe('Logs Explorer Locators', () => {
   });
 
   it('should call discover locator with correct dataViewSpec if dataset is sent', async () => {
-    const { logExplorerLocator, discoverGetLocation } = await setup();
-    await logExplorerLocator.getLocation({ dataset });
+    const { logsExplorerLocator, discoverGetLocation } = await setup();
+    await logsExplorerLocator.getLocation({ dataset });
 
     expect(discoverGetLocation).toBeCalledWith(
       expect.objectContaining({

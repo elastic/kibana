@@ -32,11 +32,11 @@ export interface WithDiscoverStateContainer {
   discoverStateContainer: DiscoverStateContainer;
 }
 
-export type DefaultLogExplorerControllerState = WithDatasetSelection &
+export type DefaultLogsExplorerControllerState = WithDatasetSelection &
   WithQueryState &
   WithDisplayOptions;
 
-export type LogExplorerControllerTypeState =
+export type LogsExplorerControllerTypeState =
   | {
       value: 'uninitialized';
       context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
@@ -120,11 +120,11 @@ export type LogExplorerControllerTypeState =
         WithDiscoverStateContainer;
     };
 
-export type LogExplorerControllerContext = LogExplorerControllerTypeState['context'];
+export type LogsExplorerControllerContext = LogsExplorerControllerTypeState['context'];
 
-export type LogExplorerControllerStateValue = LogExplorerControllerTypeState['value'];
+export type LogsExplorerControllerStateValue = LogsExplorerControllerTypeState['value'];
 
-export type LogExplorerControllerEvent =
+export type LogsExplorerControllerEvent =
   | {
       type: 'RECEIVED_STATE_CONTAINER';
       discoverStateContainer: DiscoverStateContainer;

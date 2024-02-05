@@ -8,28 +8,28 @@
 import type { ScopedHistory } from '@kbn/core-application-browser';
 import type { CoreStart } from '@kbn/core/public';
 import React, { useMemo } from 'react';
-import type { LogExplorerController } from '../../controller';
-import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
-import { LogExplorerStartDeps } from '../../types';
+import type { LogsExplorerController } from '../../controller';
+import { createLogsExplorerProfileCustomizations } from '../../customizations/logs_explorer_profile';
+import { LogsExplorerStartDeps } from '../../types';
 
-export interface CreateLogExplorerArgs {
+export interface CreateLogsExplorerArgs {
   core: CoreStart;
-  plugins: LogExplorerStartDeps;
+  plugins: LogsExplorerStartDeps;
 }
 
-export interface LogExplorerProps {
+export interface LogsExplorerProps {
   scopedHistory: ScopedHistory;
-  controller: LogExplorerController;
+  controller: LogsExplorerController;
 }
 
-export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
+export const createLogsExplorer = ({ core, plugins }: CreateLogsExplorerArgs) => {
   const {
     discover: { DiscoverContainer },
   } = plugins;
 
-  return ({ scopedHistory, controller }: LogExplorerProps) => {
-    const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ controller, core, plugins })],
+  return ({ scopedHistory, controller }: LogsExplorerProps) => {
+    const logsExplorerCustomizations = useMemo(
+      () => [createLogsExplorerProfileCustomizations({ controller, core, plugins })],
       [controller]
     );
 
@@ -37,7 +37,7 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
 
     return (
       <DiscoverContainer
-        customizationCallbacks={logExplorerCustomizations}
+        customizationCallbacks={logsExplorerCustomizations}
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
         stateStorageContainer={urlStateStorage}

@@ -9,6 +9,6 @@
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { lazy } from 'react';
 
-export type { LogExplorerTabsProps } from './log_explorer_tabs';
+export type { LogsExplorerTabsProps } from './logs_explorer_tabs';
 
-export const LogExplorerTabs = withSuspense(lazy(() => import('./log_explorer_tabs')));
+export const LogsExplorerTabs = withSuspense(lazy(() => import('./logs_explorer_tabs')));

@@ -49,8 +49,10 @@ export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   };
 }
 
-export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
-  const hasArgs = fn.signatures.some(({ params }) => params.length);
+export function getAutocompleteBuiltinDefinition(
+  fn: FunctionDefinition
+): AutocompleteCommandDefinition {
+  const hasArgs = fn.signatures.some(({ params }) => params.length > 1);
   return {
     label: fn.name,
     insertText: hasArgs ? `${fn.name} $0` : fn.name,
@@ -61,7 +63,7 @@ export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
       value: '',
     },
     sortText: 'D',
-    command: TRIGGER_SUGGESTION_COMMAND,
+    command: hasArgs ? TRIGGER_SUGGESTION_COMMAND : undefined,
   };
 }
 
@@ -95,13 +97,17 @@ export function getAutocompleteCommandDefinition(
   const commandSignature = getCommandSignature(commandDefinition);
   return {
     label: commandDefinition.name,
-    insertText: commandDefinition.name,
+    insertText: commandDefinition.signature.params.length
+      ? `${commandDefinition.name} $0`
+      : commandDefinition.name,
+    insertTextRules: 4, // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet,
     kind: 0,
     detail: commandDefinition.description,
     documentation: {
       value: buildDocumentation(commandSignature.declaration, commandSignature.examples),
     },
     sortText: 'A',
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
 
