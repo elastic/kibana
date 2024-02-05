@@ -56,6 +56,7 @@ export async function mountManagementSection(
     savedObjectsManagement,
     savedSearch,
     contentManagement,
+    observabilityAIAssistant,
   } = plugins;
   const { docTitle } = chrome;
 
@@ -94,6 +95,7 @@ export async function mountManagementSection(
     savedObjectsManagement,
     savedSearch,
     contentManagement,
+    observabilityAIAssistant,
   };
 
   const enabledFeatures: TransformEnabledFeatures = {

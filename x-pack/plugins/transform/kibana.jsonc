@@ -27,6 +27,7 @@
       "savedObjectsFinder",
       "savedObjectsManagement",
       "contentManagement",
+      "observabilityAIAssistant",
     ],
     "optionalPlugins": [
       "dataViewEditor",

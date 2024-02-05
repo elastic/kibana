@@ -49,6 +49,7 @@ import {
   getAlertRuleManageContext,
   TransformAlertFlyoutWrapper,
 } from '../../../alerting/transform_alerting_flyout';
+import { TransformElasticAssistantChat } from './components/ai_assistant_chat';
 
 const ErrorMessageCallout: FC<{
   text: JSX.Element;
@@ -74,7 +75,7 @@ const ErrorMessageCallout: FC<{
   );
 };
 
-export const TransformManagement: FC = () => {
+export const TransformManagement: FC = (props) => {
   const { esTransform } = useDocumentationLinks();
   const { showNodeInfo } = useEnabledFeatures();
   const { dataViewEditor } = useAppDependencies();
@@ -222,6 +223,7 @@ export const TransformManagement: FC = () => {
 
   return (
     <>
+      <TransformElasticAssistantChat />
       <EuiPageTemplate.Header
         pageTitle={
           <span data-test-subj="transformAppTitle">

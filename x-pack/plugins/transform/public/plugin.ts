@@ -25,6 +25,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
@@ -45,6 +46,7 @@ export interface PluginsDependencies {
   fieldFormats: FieldFormatsStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
   contentManagement: ContentManagementPublicStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
 }
 
 export class TransformUiPlugin {
@@ -76,6 +78,6 @@ export class TransformUiPlugin {
     }
   }
 
-  public start() {}
-  public stop() {}
+  public start() { }
+  public stop() { }
 }
