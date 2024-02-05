@@ -32,7 +32,7 @@ import { ILayer, LayerIcon, LayerMessage } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
-export function isLayerGroup(layer: ILayer) {
+export function isLayerGroup(layer: ILayer): layer is LayerGroup {
   return layer instanceof LayerGroup;
 }
 
@@ -110,12 +110,6 @@ export class LayerGroup implements ILayer {
 
   isPreviewLayer(): boolean {
     return !!this._descriptor.__isPreviewLayer;
-  }
-
-  supportsElasticsearchFilters(): boolean {
-    return this.getChildren().some((child) => {
-      return child.supportsElasticsearchFilters();
-    });
   }
 
   async supportsFitToBounds(): Promise<boolean> {

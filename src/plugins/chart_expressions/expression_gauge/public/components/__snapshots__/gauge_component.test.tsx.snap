@@ -536,6 +536,7 @@ exports[`GaugeComponent renders the chart 1`] = `
       />
     }
     onRenderChange={[Function]}
+    onResize={[Function]}
     theme={
       Array [
         Object {

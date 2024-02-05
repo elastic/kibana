@@ -45,18 +45,15 @@ import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
-import { ConcurrentInstallOperationError } from '../../../errors';
+import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import {
-  createInstallation,
-  restartInstallation,
-  installIndexTemplatesAndPipelines,
-} from './install';
+import { createInstallation, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -387,10 +384,12 @@ export async function _installPackage({
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
     if (SavedObjectsErrorHelpers.isConflictError(err)) {
-      throw new ConcurrentInstallOperationError(
-        `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+      throw new PackageSavedObjectConflictError(
+        `Saved Object conflict encountered while installing ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'
-        } detected, aborting. Original error: ${err.message}`
+        }. There may be a conflicting Saved Object saved to another Space. Original error: ${
+          err.message
+        }`
       );
     } else {
       throw err;

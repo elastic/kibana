@@ -13,6 +13,11 @@ import { merge } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import {
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+  TraceLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
@@ -80,6 +85,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    profilingIntegrationAvailable: false,
   },
   serverless: { enabled: false },
 };
@@ -126,14 +132,15 @@ const mockPlugin = {
   },
 };
 
-export const observabilityLogExplorerLocatorsMock = {
+export const observabilityLogsExplorerLocatorsMock = {
   allDatasetsLocator: sharePluginMock.createLocator(),
   singleDatasetLocator: sharePluginMock.createLocator(),
 };
 
-export const infraLocatorsMock = {
-  nodeLogsLocator: sharePluginMock.createLocator(),
-  logsLocator: sharePluginMock.createLocator(),
+export const logsLocatorsMock = {
+  logsLocator: sharePluginMock.createLocator<LogsLocatorParams>(),
+  nodeLogsLocator: sharePluginMock.createLocator<NodeLogsLocatorParams>(),
+  traceLogsLocator: sharePluginMock.createLocator<TraceLogsLocatorParams>(),
 };
 
 const mockCorePlugins = {

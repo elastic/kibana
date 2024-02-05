@@ -23,7 +23,7 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
-|This plugin contains the advanced settings management section
+|This plugin registers the management settings application
 allowing users to configure their advanced settings, also known
 as uiSettings within the code.
 
@@ -274,6 +274,10 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |Helps to globally configure the no data page components
 
 
+|{kib-repo}blob/{branch}/src/plugins/presentation_panel/README.md[presentationPanel]
+|The Presentation Panel is the point of contact between any React component and any registered UI actions. Components provided to the Presentation Panel should use an imperative handle to expose methods and state.
+
+
 |{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
 |The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
@@ -502,10 +506,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
-|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
 |Adds all the links to the Elastic Cloud console.
 
@@ -647,8 +647,8 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/log_explorer/README.md[logExplorer]
-|This plugin is home to the <LogExplorer /> component and related types. It implements several of the underlying concepts that the Observability Log Explorer app builds upon.
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
+|This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
@@ -692,8 +692,8 @@ Elastic.
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_log_explorer/README.md[observabilityLogExplorer]
-|This plugin provides an app based on the LogExplorer component from the log_explorer plugin, but adds observability-specific affordances.
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
+|This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]

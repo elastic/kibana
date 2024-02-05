@@ -40,14 +40,16 @@ export async function waitForRuleStatus({
 export async function waitForDocumentInIndex<T>({
   esClient,
   indexName,
+  docCountTarget = 1,
 }: {
   esClient: Client;
   indexName: string;
+  docCountTarget?: number;
 }): Promise<SearchResponse<T, Record<string, AggregationsAggregate>>> {
   return pRetry(
     async () => {
-      const response = await esClient.search<T>({ index: indexName });
-      if (response.hits.hits.length === 0) {
+      const response = await esClient.search<T>({ index: indexName, rest_total_hits_as_int: true });
+      if (!response.hits.total || response.hits.total < docCountTarget) {
         throw new Error('No hits found');
       }
       return response;

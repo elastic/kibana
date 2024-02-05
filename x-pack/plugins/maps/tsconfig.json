@@ -74,6 +74,7 @@
     "@kbn/content-management-table-list-view",
     "@kbn/serverless",
     "@kbn/logging",
+    "@kbn/chart-expressions-common",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
     "@kbn/calculate-width-from-char-count",
@@ -82,6 +83,9 @@
     "@kbn/es-types",
     "@kbn/data-service",
     "@kbn/code-editor",
+    "@kbn/managed-content-badge",
+    "@kbn/presentation-publishing",
+    "@kbn/esql-utils",
   ],
   "exclude": [
     "target/**/*",

@@ -8,16 +8,9 @@
 import React from 'react';
 import { act, render } from '@testing-library/react';
 import { OverviewCardWithActions } from './overview_card';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../../mock';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { createMockStore, mockGlobalState, TestProviders } from '../../../mock';
+import { SeverityBadge } from '../../severity_badge';
 import type { State } from '../../../store';
-import { createStore } from '../../../store';
 import { TimelineId } from '../../../../../common/types';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 
@@ -34,8 +27,7 @@ const state: State = {
   },
 };
 
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+const store = createMockStore(state);
 
 const props = {
   title: 'Severity',

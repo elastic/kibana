@@ -29,7 +29,7 @@ export interface DiscoverCustomizationContext {
   /**
    * Whether or not to show the Log Explorer tabs
    */
-  showLogExplorerTabs: boolean;
+  showLogsExplorerTabs: boolean;
 }
 
 export interface RecordsFetchResponse {
@@ -37,4 +37,9 @@ export interface RecordsFetchResponse {
   textBasedQueryColumns?: DatatableColumn[];
   textBasedHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
+}
+
+export interface SidebarToggleState {
+  isCollapsed: boolean;
+  toggle: undefined | ((isCollapsed: boolean) => void);
 }

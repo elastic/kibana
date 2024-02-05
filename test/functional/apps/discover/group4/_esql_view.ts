@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('addFilter')).to.be(true);
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(true);
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
+        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('docTableExpandToggleColumn')).to.be(true);
@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('dscViewModeDocumentButton')).to.be(false);
         // when Lens suggests a table, we render an ESQL based histogram
         expect(await testSubjects.exists('unifiedHistogramChart')).to.be(true);
-        expect(await testSubjects.exists('unifiedHistogramQueryHits')).to.be(true);
+        expect(await testSubjects.exists('discoverQueryHits')).to.be(true);
         expect(await testSubjects.exists('discoverAlertsButton')).to.be(true);
         expect(await testSubjects.exists('shareTopNavButton')).to.be(true);
         expect(await testSubjects.exists('dataGridColumnSortingButton')).to.be(false);
@@ -132,6 +132,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
+      });
+
+      it('should render correctly if there are empty fields', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await dataGrid.getHeaders()).to.eql([
+          'Control column',
+          'Select column',
+          'Numberbytes',
+          'machine.ram_range',
+        ]);
       });
     });
     describe('errors', () => {

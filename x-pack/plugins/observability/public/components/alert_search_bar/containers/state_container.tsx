@@ -35,7 +35,7 @@ interface AlertSearchBarStateTransitions {
 }
 
 const defaultState: AlertSearchBarContainerState = {
-  rangeFrom: 'now-15m',
+  rangeFrom: 'now-24h',
   rangeTo: 'now',
   kuery: '',
   status: ALL_ALERTS.status,
