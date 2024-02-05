@@ -123,17 +123,6 @@ export interface DiscoverDataStateContainer {
    * resetting all data observable to initial state
    */
   reset: (savedSearch: SavedSearch) => void;
-
-  /**
-   * cancels the running queries
-   */
-  cancel: () => void;
-
-  /**
-   * gets active AbortController for running queries
-   */
-  getAbortController: () => AbortController;
-
   /**
    * Available Inspector Adaptor allowing to get details about recent requests to ES
    */
@@ -325,15 +314,6 @@ export function getDataStateContainer({
     sendResetMsg(dataSubjects, getInitialFetchStatus(), recordType);
   };
 
-  const cancel = () => {
-    abortController?.abort();
-    abortControllerFetchMore?.abort();
-  };
-
-  const getAbortController = () => {
-    return abortController;
-  };
-
   return {
     fetch: fetchQuery,
     fetchMore,
@@ -344,7 +324,5 @@ export function getDataStateContainer({
     reset,
     inspectorAdapters,
     getInitialFetchStatus,
-    cancel,
-    getAbortController,
   };
 }
