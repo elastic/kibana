@@ -1375,7 +1375,7 @@
         "CombinedJobWithStats",
         "[]>; groups(): Promise<",
         "Group",
-        "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
+        "[]>; updateGroups(updatedJobs: { jobId: string; groups: string[]; }[]): Promise<any>; forceStartDatafeeds(datafeedIds: string[], start: string, end: string): Promise<any>; stopDatafeeds(datafeedIds: string[]): Promise<any>; deleteJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined, deleteAlertingRules?: boolean | undefined): Promise<any>; closeJobs(jobIds: string[]): Promise<any>; resetJobs(jobIds: string[], deleteUserAnnotations?: boolean | undefined): Promise<",
         "ResetJobsResponse",
         ">; forceStopAndCloseJob(jobId: string): Promise<{ success: boolean; }>; jobAuditMessages({ jobId, from, start, end, }: { jobId: string; from?: number | undefined; start?: string | undefined; end?: string | undefined; }): Promise<{ messages: ",
         "JobMessage",

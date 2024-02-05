@@ -18,6 +18,7 @@ import { act } from 'react-dom/test-utils';
 import { LensEmbeddableInput } from '../embeddable';
 import { loadInitial } from './lens_slice';
 import { Filter } from '@kbn/es-query';
+import faker from 'faker';
 
 const history = {
   location: {
@@ -92,7 +93,7 @@ describe('Initializing the store', () => {
             {
               icon: 'empty',
               id: 'testVis',
-              label: 'TEST1',
+              label: faker.lorem.word(),
               groupLabel: 'testVisGroup',
             },
           ],
