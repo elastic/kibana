@@ -25,7 +25,8 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
 }) => {
   // Typescript types are widened to accept more than what is needed.  Take only what is necessary
   // so the context remains clean.
-  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, onTryESQL } = services;
+  const { canCreateNewDataView, dataViewsDocLink, openDataViewEditor, onTryESQL, esqlDocLink } =
+    services;
 
   return (
     <NoDataViewsPromptContext.Provider
@@ -34,6 +35,7 @@ export const NoDataViewsPromptProvider: FC<NoDataViewsPromptServices> = ({
         dataViewsDocLink,
         openDataViewEditor,
         onTryESQL,
+        esqlDocLink,
       }}
     >
       {children}
@@ -62,6 +64,7 @@ export const NoDataViewsPromptKibanaProvider: FC<NoDataViewsPromptKibanaDependen
         dataViewsDocLink: services.coreStart.docLinks.links.indexPatterns?.introduction,
         canCreateNewDataView: services.dataViewEditor.userPermissions.editDataView(),
         openDataViewEditor: services.dataViewEditor.openEditor,
+        esqlDocLink: services.coreStart.docLinks.links.query?.queryESQL,
         onTryESQL,
       }}
     >

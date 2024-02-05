@@ -29,7 +29,9 @@ export const NoDataViewsPrompt = ({
   onESQLNavigationComplete,
   allowAdHocDataView = false,
 }: NoDataViewsPromptProps) => {
-  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, onTryESQL } = useServices();
+  const { canCreateNewDataView, openDataViewEditor, dataViewsDocLink, onTryESQL, esqlDocLink } =
+    useServices();
+
   const closeDataViewEditor = useRef<CloseDataViewEditorFn>();
 
   useEffect(() => {
@@ -78,6 +80,7 @@ export const NoDataViewsPrompt = ({
         onClickCreate,
         canCreateNewDataView,
         dataViewsDocLink,
+        esqlDocLink,
         onTryESQL: onTryESQL
           ? () => {
               onTryESQL();

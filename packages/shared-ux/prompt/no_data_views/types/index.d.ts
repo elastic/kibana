@@ -43,6 +43,8 @@ export interface NoDataViewsPromptServices {
   dataViewsDocLink: string;
   /** Get a handler for trying ES|QL */
   onTryESQL: (() => void) | undefined;
+  /** A link to the documentation for ES|QL */
+  esqlDocLink: string;
 }
 
 export type NavigateToAppFn = (appId: string, options?: { path?: string; state?: unknown }) => void;
@@ -57,6 +59,9 @@ export interface NoDataViewsPromptKibanaDependencies {
       links: {
         indexPatterns: {
           introduction: string;
+        };
+        query: {
+          queryESQL: string;
         };
       };
     };
@@ -88,6 +93,8 @@ export interface NoDataViewsPromptComponentProps {
   onClickCreate?: () => void;
   /** Handler for someone wanting to try ES|QL. */
   onTryESQL?: () => void;
+  /** Link to documentation on ES|QL. */
+  esqlDocLink?: string;
 }
 
 // TODO: https://github.com/elastic/kibana/issues/127695

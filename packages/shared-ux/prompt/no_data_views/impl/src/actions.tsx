@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiButton, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiButton, EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
@@ -15,6 +15,7 @@ interface NoDataButtonProps {
   onClickCreate: (() => void) | undefined;
   canCreateNewDataView: boolean;
   onTryESQL?: () => void;
+  esqlDocLink?: string;
 }
 
 const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewText', {
@@ -25,6 +26,7 @@ export const NoDataButtonLink = ({
   onClickCreate,
   canCreateNewDataView,
   onTryESQL,
+  esqlDocLink,
 }: NoDataButtonProps) => {
   if (!onTryESQL && !canCreateNewDataView) {
     return null;
@@ -47,7 +49,19 @@ export const NoDataButtonLink = ({
         <EuiText size="xs" color={'subdued'}>
           <FormattedMessage
             id="sharedUXPackages.no_data_views.esqlMessage"
-            defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview)."
+            defaultMessage="Alternatively, you can query your data directly using ES|QL (technical preview). {docsLink}"
+            values={{
+              docsLink: esqlDocLink && (
+                <EuiLink href={esqlDocLink} target="_blank">
+                  {i18n.translate(
+                    'xpack.idxMgmt.mappingsEditor.configuration.indexOptionsdDocumentationLink',
+                    {
+                      defaultMessage: 'Learn more.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
           />
           <EuiSpacer size={'s'} />
           <EuiButton color="success" onClick={onTryESQL} size="s" data-test-subj="tryESQLLink">

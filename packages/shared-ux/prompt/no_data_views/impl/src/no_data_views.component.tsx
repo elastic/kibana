@@ -28,6 +28,7 @@ export const NoDataViewsPrompt = ({
   canCreateNewDataView,
   dataViewsDocLink,
   onTryESQL,
+  esqlDocLink,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
   const title = canCreateNewDataView ? (
@@ -80,7 +81,9 @@ export const NoDataViewsPrompt = ({
   );
 
   const icon = <Illustration />;
-  const actions = <NoDataButtonLink {...{ onClickCreate, canCreateNewDataView, onTryESQL }} />;
+  const actions = (
+    <NoDataButtonLink {...{ onClickCreate, canCreateNewDataView, onTryESQL, esqlDocLink }} />
+  );
 
   return (
     <EuiEmptyPrompt
@@ -89,13 +92,6 @@ export const NoDataViewsPrompt = ({
       css={css`
         max-width: ${MAX_WIDTH}px !important; // Necessary to override EuiEmptyPrompt to fit content
         flex-grow: 0;
-        // Necessary to override EuiEmptyPrompt to fit ES|QL prompt in one line
-        &.euiEmptyPrompt--horizontal .euiEmptyPrompt__icon {
-          min-width: 39%; // override from 40%
-        }
-        &.euiEmptyPrompt--horizontal .euiEmptyPrompt__content {
-          max-width: 38em; // override from 36em
-        }
       `}
       color={emptyPromptColor}
       {...{ actions, icon, title, body, footer }}
