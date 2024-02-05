@@ -319,7 +319,7 @@ export class Plugin
     };
 
     coreSetup.application.register(app);
-      
+
     registerObservabilityRuleTypes(
       this.observabilityRuleTypeRegistry,
       coreSetup.uiSettings,
