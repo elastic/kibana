@@ -8,6 +8,7 @@ import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
+import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
@@ -43,13 +44,23 @@ export async function executeCreateAction({
   const defaultDataView = await deps.dataViews.getDefaultDataView({
     displayErrors: false,
   });
-  if (!isCompatibleAction || !defaultDataView) {
+
+  const getFallbackDataView = async () => {
+    const indexName = await getIndexForESQLQuery({ dataViews: deps.dataViews });
+    if (!indexName) return null;
+    const dataView = await getESQLAdHocDataview(indexName, deps.dataViews);
+    return dataView;
+  };
+
+  const dataView = defaultDataView ?? (await getFallbackDataView());
+
+  if (!isCompatibleAction || !dataView) {
     throw new IncompatibleActionError();
   }
   const visualizationMap = getVisualizationMap();
   const datasourceMap = getDatasourceMap();
+  const defaultIndex = dataView.getIndexPattern();
 
-  const defaultIndex = defaultDataView.getIndexPattern();
   const defaultEsqlQuery = {
     esql: `from ${defaultIndex} | limit 10`,
   };
@@ -64,13 +75,13 @@ export async function executeCreateAction({
 
   const table = await fetchDataFromAggregateQuery(
     performantQuery,
-    defaultDataView,
+    dataView,
     deps.data,
     deps.expressions
   );
 
   const context = {
-    dataViewSpec: defaultDataView.toSpec(),
+    dataViewSpec: dataView.toSpec(),
     fieldName: '',
     textBasedColumns: table?.columns,
     query: defaultEsqlQuery,
@@ -78,7 +89,7 @@ export async function executeCreateAction({
 
   // get the initial attributes from the suggestions api
   const allSuggestions =
-    suggestionsApi({ context, dataView: defaultDataView, datasourceMap, visualizationMap }) ?? [];
+    suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
 
   // Lens might not return suggestions for some cases, i.e. in case of errors
   if (!allSuggestions.length) return undefined;
@@ -87,7 +98,7 @@ export async function executeCreateAction({
     filters: [],
     query: defaultEsqlQuery,
     suggestion: firstSuggestion,
-    dataView: defaultDataView,
+    dataView,
   });
   const embeddableStart = deps.embeddable;
   const factory = embeddableStart.getEmbeddableFactory('lens');

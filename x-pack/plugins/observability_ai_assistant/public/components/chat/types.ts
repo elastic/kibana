@@ -4,20 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 type ChatActionClickPayloadBase<TType extends ChatActionClickType, TExtraProps extends {}> = {
   type: TType;
 } & TExtraProps;
 
 type ChatActionClickPayloadExecuteEsql = ChatActionClickPayloadBase<
-  ChatActionClickType.executeEsqlQuery,
-  { query: string }
+  | ChatActionClickType.executeEsqlQuery
+  | ChatActionClickType.visualizeEsqlQuery
+  | ChatActionClickType.updateVisualization,
+  { query: string; userOverrides?: TypedLensByValueInput }
 >;
 
 type ChatActionClickPayload = ChatActionClickPayloadExecuteEsql;
 
 export enum ChatActionClickType {
   executeEsqlQuery = 'executeEsqlQuery',
+  visualizeEsqlQuery = 'visualizeEsqlQuery',
+  updateVisualization = 'updateVisualization',
 }
 
 export type ChatActionClickHandler = (payload: ChatActionClickPayload) => void;
+
+export interface ChatFlyoutSecondSlotHandler {
+  container?: HTMLDivElement | null;
+  setVisibility?: (status: boolean) => void;
+}

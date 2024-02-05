@@ -54,7 +54,7 @@ import { TechnicalPreviewBadge } from '../../../../common/components/technical_p
 import { BadgeList } from './badge_list';
 import { DEFAULT_DESCRIPTION_LIST_COLUMN_WIDTHS } from './constants';
 import * as i18n from './translations';
-import type { ExperimentalFeatures } from '../../../../../common/experimental_features';
+import { useAlertSuppression } from '../../logic/use_alert_suppression';
 
 interface SavedQueryNameProps {
   savedQueryName: string;
@@ -426,7 +426,7 @@ const prepareDefinitionSectionListItems = (
   rule: Partial<RuleResponse>,
   isInteractive: boolean,
   savedQuery: SavedQuery | undefined,
-  experimentalFeatures?: Partial<ExperimentalFeatures>
+  isSuppressionEnabled: boolean
 ): EuiDescriptionListProps['listItems'] => {
   const definitionSectionListItems: EuiDescriptionListProps['listItems'] = [];
 
@@ -656,7 +656,7 @@ const prepareDefinitionSectionListItems = (
     });
   }
 
-  if ('alert_suppression' in rule && rule.alert_suppression) {
+  if (isSuppressionEnabled && 'alert_suppression' in rule && rule.alert_suppression) {
     if ('group_by' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
@@ -738,10 +738,13 @@ export const RuleDefinitionSection = ({
     ruleType: rule.type,
   });
 
+  const { isSuppressionEnabled } = useAlertSuppression(rule.type);
+
   const definitionSectionListItems = prepareDefinitionSectionListItems(
     rule,
     isInteractive,
-    savedQuery
+    savedQuery,
+    isSuppressionEnabled
   );
 
   return (

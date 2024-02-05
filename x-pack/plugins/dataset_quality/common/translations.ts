@@ -35,8 +35,8 @@ export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCance
   defaultMessage: 'Cancel',
 });
 
-export const flyoutOpenInLogExplorerText = i18n.translate(
-  'xpack.datasetQuality.flyoutOpenInLogExplorerText',
+export const flyoutOpenInLogsExplorerText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInLogsExplorerText',
   {
     defaultMessage: 'Open in Logs Explorer',
   }
@@ -81,5 +81,28 @@ export const flyoutIntegrationNameText = i18n.translate(
   'xpack.datasetQuality.flyoutIntegrationNameText',
   {
     defaultMessage: 'Name',
+  }
+);
+
+export const inactiveDatasetsLabel = i18n.translate('xpack.datasetQuality.inactiveDatasetsLabel', {
+  defaultMessage: 'Show inactive datasets',
+});
+
+export const inactiveDatasetsDescription = i18n.translate(
+  'xpack.datasetQuality.inactiveDatasetsDescription',
+  {
+    defaultMessage:
+      'Turn on to show datasets with a Last activity outside of the selected timeframe.',
+  }
+);
+
+export const fullDatasetNameLabel = i18n.translate('xpack.datasetQuality.fullDatasetNameLabel', {
+  defaultMessage: 'Show full dataset names',
+});
+
+export const fullDatasetNameDescription = i18n.translate(
+  'xpack.datasetQuality.fullDatasetNameDescription',
+  {
+    defaultMessage: 'Turn on to show the actual dataset names used to store the documents.',
   }
 );
