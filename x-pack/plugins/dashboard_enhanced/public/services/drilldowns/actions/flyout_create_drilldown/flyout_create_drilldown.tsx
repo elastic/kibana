@@ -130,7 +130,7 @@ export class FlyoutCreateDrilldownAction implements Action<EmbeddableApiContext>
       {
         ownFocus: true,
         'data-test-subj': 'createDrilldownFlyout',
-        onClose: (overlayRef) => {
+        onClose: () => {
           close();
         },
       }

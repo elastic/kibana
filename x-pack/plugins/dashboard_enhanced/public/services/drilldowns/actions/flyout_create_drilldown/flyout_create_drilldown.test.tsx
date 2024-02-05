@@ -10,12 +10,12 @@ import {
   UiActionsEnhancedMemoryActionStorage as MemoryActionStorage,
   UiActionsEnhancedDynamicActionManager as DynamicActionManager,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   FlyoutCreateDrilldownAction,
   OpenFlyoutAddDrilldownParams,
 } from './flyout_create_drilldown';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { uiActionsEnhancedPluginMock } from '@kbn/ui-actions-enhanced-plugin/public/mocks';
 import { UiActionsEnhancedActionFactory } from '@kbn/ui-actions-enhanced-plugin/public';
 
