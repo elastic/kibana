@@ -100,7 +100,7 @@ export function createLiteralString(token: Token): ESQLLiteral {
   };
 }
 
-function isMissingText(text: string) {
+export function isMissingText(text: string) {
   return /<missing /.test(text);
 }
 
@@ -180,6 +180,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
     location.min = walkFunctionStructure(fn.args, location, 'min', () => 0);
     // get max location navigating in depth keeping the right/last arg
     location.max = walkFunctionStructure(fn.args, location, 'max', (args) => args.length - 1);
+    // in case of empty array as last arg, bump the max location by 3 chars (empty brackets)
+    if (
+      Array.isArray(fn.args[fn.args.length - 1]) &&
+      !(fn.args[fn.args.length - 1] as ESQLAstItem[]).length
+    ) {
+      location.max += 3;
+    }
   }
   return location;
 }

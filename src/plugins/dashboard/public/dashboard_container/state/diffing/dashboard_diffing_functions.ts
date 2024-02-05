@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import fastIsEqual from 'fast-deep-equal';
-
-import { shouldRefreshFilterCompareOptions } from '@kbn/embeddable-plugin/public';
+import {
+  reactEmbeddableRegistryHasKey,
+  shouldRefreshFilterCompareOptions,
+} from '@kbn/embeddable-plugin/public';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,
   isFilterPinned,
   onlyDisabledFiltersChanged,
 } from '@kbn/es-query';
-
+import fastIsEqual from 'fast-deep-equal';
 import { DashboardContainerInput } from '../../../../common';
 import { DashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardContainerInputWithoutId } from '../../types';
@@ -82,7 +83,11 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
       (panel) =>
         new Promise<boolean>((resolve, reject) => {
           const embeddableId = panel.explicitInput.id;
-          if (!embeddableId) reject();
+          if (!embeddableId || reactEmbeddableRegistryHasKey(panel.type)) {
+            // if this is a new style embeddable, it will handle its own diffing.
+            reject();
+            return;
+          }
           try {
             container.untilEmbeddableLoaded(embeddableId).then((embeddable) =>
               embeddable
