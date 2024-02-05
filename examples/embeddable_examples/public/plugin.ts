@@ -54,8 +54,6 @@ export interface EmbeddableExamplesStart {
   factories: ExampleEmbeddableFactories;
 }
 
-registerMarkdownEditorEmbeddable();
-
 export class EmbeddableExamplesPlugin
   implements
     Plugin<
@@ -71,6 +69,8 @@ export class EmbeddableExamplesPlugin
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
   ) {
+    registerMarkdownEditorEmbeddable(deps.uiActions);
+
     this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
       deps.embeddable.registerEmbeddableFactory(
         HELLO_WORLD_EMBEDDABLE,

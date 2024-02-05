@@ -21,9 +21,15 @@ import {
   useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { useInheritedViewMode, useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import {
+  EmbeddableApiContext,
+  useInheritedViewMode,
+  useStateFromPublishingSubject,
+} from '@kbn/presentation-publishing';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 
 // -----------------------------------------------------------------------------
 // Types for this embeddable
@@ -34,7 +40,8 @@ type MarkdownEditorSerializedState = SerializedReactEmbeddableTitles & {
 
 type MarkdownEditorApi = DefaultEmbeddableApi;
 
-const type = 'euiMarkdown';
+const EUI_MARKDOWN_ID = 'euiMarkdown';
+const ADD_EUI_MARKDOWN_ACTION_ID = 'create_eui_markdown';
 
 // -----------------------------------------------------------------------------
 // Define the Embeddable Factory
@@ -116,7 +123,7 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
           `}
           value={content ?? ''}
           onChange={(value) => contentSubject.next(value)}
-          aria-label={i18n.translate('dashboard.test.markdownEditor.ariaLabel', {
+          aria-label={i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
             defaultMessage: 'Dashboard markdown editor',
           })}
           height="full"
@@ -139,5 +146,30 @@ const markdownEmbeddableFactory: ReactEmbeddableFactory<
 // on the plugin. Instead, it's a simple imported function. I.E to register an
 // Embeddable, you only need the embeddable plugin in your requiredBundles
 // -----------------------------------------------------------------------------
-export const registerMarkdownEditorEmbeddable = () =>
-  registerReactEmbeddableFactory(type, markdownEmbeddableFactory);
+export const registerMarkdownEditorEmbeddable = (uiActions: UiActionsStart) => {
+  registerReactEmbeddableFactory(EUI_MARKDOWN_ID, markdownEmbeddableFactory);
+
+  // -----------------------------------------------------------------------------
+  // Create and register an action which allows this embeddable to be created from
+  // the dashboard toolbar context menu.
+  // -----------------------------------------------------------------------------
+  uiActions.registerAction<EmbeddableApiContext>({
+    id: ADD_EUI_MARKDOWN_ACTION_ID,
+    getIconType: () => 'editorCodeBlock',
+    isCompatible: async ({ embeddable }) => {
+      return apiIsPresentationContainer(embeddable);
+    },
+    execute: async ({ embeddable }) => {
+      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
+      embeddable.addNewPanel({
+        panelType: EUI_MARKDOWN_ID,
+        initialState: { content: '# hello world!' },
+      });
+    },
+    getDisplayName: () =>
+      i18n.translate('embeddableExamples.euiMarkdownEditor.ariaLabel', {
+        defaultMessage: 'EUI Markdown',
+      }),
+  });
+  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_EUI_MARKDOWN_ACTION_ID);
+};

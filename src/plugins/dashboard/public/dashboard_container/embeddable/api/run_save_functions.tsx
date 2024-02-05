@@ -185,7 +185,8 @@ export async function runQuickSave(this: DashboardContainer) {
   if (managed) return;
 
   const nextPanels = await serializeAllPanelState(this);
-  let stateToSave: SavedDashboardInput = { ...currentState, panels: nextPanels };
+  const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
+  let stateToSave: SavedDashboardInput = dashboardStateToSave;
   let persistableControlGroupInput: PersistableControlGroupInput | undefined;
   if (this.controlGroup) {
     persistableControlGroupInput = this.controlGroup.getPersistableInput();
@@ -198,7 +199,7 @@ export async function runQuickSave(this: DashboardContainer) {
     saveOptions: {},
   });
 
-  this.dispatch.setLastSavedInput(currentState);
+  this.dispatch.setLastSavedInput(dashboardStateToSave);
   this.lastSavedState.next();
   if (this.controlGroup && persistableControlGroupInput) {
     this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);

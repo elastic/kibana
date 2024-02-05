@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 } from 'uuid';
 import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
@@ -47,6 +48,8 @@ import {
   DASHBOARD_APP_ID,
   DASHBOARD_LOADED_EVENT,
   DASHBOARD_UI_METRIC_ID,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
 } from '../../dashboard_constants';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
@@ -78,6 +81,7 @@ import {
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
+import { panelPlacementStrategies } from '../component/panel_placement/place_new_panel_strategies';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -416,6 +420,28 @@ export class DashboardContainer
     panelPackage: PanelPackage,
     silent?: boolean
   ) {
+    if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
+      const newId = v4();
+      const { newPanelPlacement, otherPanels } = panelPlacementStrategies.findTopLeftMostOpenSpace({
+        currentPanels: this.getInput().panels,
+        height: DEFAULT_PANEL_HEIGHT,
+        width: DEFAULT_PANEL_WIDTH,
+      });
+      const newPanel: DashboardPanelState = {
+        type: panelPackage.panelType,
+        gridData: {
+          ...newPanelPlacement,
+          i: newId,
+        },
+        explicitInput: {
+          ...panelPackage.initialState,
+          id: newId,
+        },
+      };
+      this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
+      return;
+    }
+
     const {
       notifications: { toasts },
       embeddable: { getEmbeddableFactory },
