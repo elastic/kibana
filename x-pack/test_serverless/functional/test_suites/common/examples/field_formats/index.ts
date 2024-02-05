@@ -14,8 +14,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Field formats example', function () {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
       await PageObjects.common.navigateToApp('fieldFormatsExample');
     });
 

@@ -11,8 +11,8 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
 
   describe('Discover alerting', function () {
     before(async function () {
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await svlCommonPage.loginWithRole('system_indices_superuser');
     });
 
     loadTestFile(require.resolve('./search_source_alert'));

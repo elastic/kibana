@@ -21,13 +21,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Search Profiler Editor', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
       await PageObjects.common.navigateToApp('searchProfiler');
       expect(await PageObjects.searchProfiler.editorExists()).to.be(true);
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('supports pre-configured search query', async () => {

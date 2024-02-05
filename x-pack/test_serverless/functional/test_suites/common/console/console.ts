@@ -28,17 +28,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('console app', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async () => {
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
     });
 
     beforeEach(async () => {
       await PageObjects.console.closeHelpIfExists();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('should show the default request', async () => {

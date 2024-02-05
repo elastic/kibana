@@ -22,8 +22,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Index component templates', function () {
     before(async () => {
       await security.testUser.setRoles(['index_management_user']);
-      // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
     });
 
     beforeEach(async () => {
@@ -31,10 +31,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       // Navigate to the index templates tab
       await pageObjects.indexManagement.changeTabs('component_templatesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
-    });
-
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the component templates tab', async () => {

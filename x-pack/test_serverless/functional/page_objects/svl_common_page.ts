@@ -26,14 +26,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
   return {
     async loginWithRole(role: string) {
+      log.debug(`Delete all the cookies in the current browser context`);
+      await browser.deleteAllCookies();
+      log.debug(`Setting the cookie for '${role}' role`);
+      const sidCookie = await svlUserManager.getSessionCookieForRole(role);
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,
         async () => {
-          log.debug(`Delete all the cookies in the current browser context`);
-          await browser.deleteAllCookies();
-          log.debug(`Setting the cookie for '${role}' role`);
-          const sidCookie = await svlUserManager.getSessionCookieForRole(role);
           // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
           await browser.get(deployment.getHostPort() + '/bootstrap.js');
           await browser.setCookie('sid', sidCookie);
@@ -42,32 +42,36 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           // Verifying that we are logged in
           if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
+            return true;
           } else {
             throw new Error(`Failed to login with cookie for '${role}' role`);
           }
-
-          // Validating that the new cookie in the browser is set for the correct user
-          const browserCookies = await browser.getCookies();
-          if (browserCookies.length === 0) {
-            throw new Error(`The cookie is missing in browser context`);
-          }
-          const { body } = await supertestWithoutAuth
-            .get('/internal/security/me')
-            .set(svlCommonApi.getInternalRequestHeader())
-            .set({ Cookie: `sid=${browserCookies[0].value}` });
-
-          const userData = await svlUserManager.getUserData(role);
-          // email returned from API call must match the email for the specified role
-          if (body.email === userData.email) {
-            log.debug(`The new cookie is properly set for  '${role}' role`);
-            return true;
-          } else {
-            throw new Error(
-              `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
-            );
-          }
         }
       );
+
+      // Validating that the new cookie in the browser is set for the correct user
+      const browserCookies = await browser.getCookies();
+      if (browserCookies.length === 0) {
+        throw new Error(`The cookie is missing in browser context`);
+      }
+      const { body } = await supertestWithoutAuth
+        .get('/internal/security/me')
+        .set(svlCommonApi.getInternalRequestHeader())
+        .set({ Cookie: `sid=${browserCookies[0].value}` });
+
+      const userData = await svlUserManager.getUserData(role);
+      // email returned from API call must match the email for the specified role
+      if (body.email === userData.email) {
+        log.debug(`The new cookie is properly set for  '${role}' role`);
+      } else {
+        throw new Error(
+          `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
+        );
+      }
+    },
+
+    async loginWithDefaultRole() {
+      await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
     },
 
     async navigateToLoginForm() {

@@ -45,8 +45,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
       // create rollup data
       log.info(`loading ${testIndex} index...`);
       await esArchiver.loadIfNeeded(testArchive);

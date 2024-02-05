@@ -23,7 +23,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Index Templates', function () {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
     });
 
     beforeEach(async () => {
@@ -42,8 +43,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         log.debug('[Setup error] Error creating test policy');
         throw e;
       }
-
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the index templates tab', async () => {

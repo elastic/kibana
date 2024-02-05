@@ -16,11 +16,8 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   describe('Search bar features', () => {
     before(async () => {
-      await PageObjects.svlCommonPage.login();
-    });
-
-    after(async () => {
-      await PageObjects.svlCommonPage.forceLogout();
+      // TODO: Update with valid SAML role
+      await PageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
     });
 
     describe('list features', () => {

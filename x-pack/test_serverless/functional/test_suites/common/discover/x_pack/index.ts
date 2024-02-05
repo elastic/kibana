@@ -13,7 +13,7 @@ export default function ({ loadTestFile, getPageObject }: FtrProviderContext) {
   describe('discover', function () {
     before(async function () {
       // TODO: Serverless tests require login first
-      await svlCommonPage.login();
+      await svlCommonPage.loginWithRole('viewer');
     });
 
     loadTestFile(require.resolve('./reporting'));

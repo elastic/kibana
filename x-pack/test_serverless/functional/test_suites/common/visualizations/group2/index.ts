@@ -13,11 +13,7 @@ export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/168985
   describe.skip('Visualizations - Group 2', function () {
     before(async () => {
-      await svlCommonPage.login();
-    });
-
-    after(async () => {
-      await svlCommonPage.forceLogout();
+      await svlCommonPage.loginWithRole('viewer');
     });
 
     loadTestFile(require.resolve('./open_in_lens/agg_based'));

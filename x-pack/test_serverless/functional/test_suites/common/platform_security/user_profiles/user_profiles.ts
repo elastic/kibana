@@ -13,7 +13,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   describe('User Profile Page', async () => {
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     describe('Theme', async () => {

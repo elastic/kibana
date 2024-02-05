@@ -45,7 +45,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,
       });
-      await pageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
       await pageObjects.common.navigateToApp('settings');
     });
 
@@ -54,7 +55,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE,
       });
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('renders the page', async () => {

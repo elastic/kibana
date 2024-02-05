@@ -13,8 +13,8 @@ export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext)
     const svlCommonPage = getPageObject('svlCommonPage');
 
     before(async () => {
-      // TODO: Serverless tests require login first
-      await svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await svlCommonPage.loginWithRole('system_indices_superuser');
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
     });

@@ -21,7 +21,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   describe('Data Streams', function () {
     before(async () => {
-      await log.debug('Creating required data stream');
+      log.debug('Creating required data stream');
       try {
         await es.cluster.putComponentTemplate({
           name: `${TEST_DS_NAME}_mapping`,
@@ -57,7 +57,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await security.testUser.setRoles(['index_management_user']);
       // Navigate to the index management page
-      await pageObjects.svlCommonPage.login();
+      // TODO: Update with valid SAML role
+      await pageObjects.svlCommonPage.loginWithRole('system_indices_superuser');
       await pageObjects.common.navigateToApp('indexManagement');
       // Navigate to the indices tab
       await pageObjects.indexManagement.changeTabs('data_streamsTab');
@@ -65,7 +66,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     after(async () => {
-      await log.debug('Cleaning up created data stream');
+      log.debug('Cleaning up created data stream');
 
       try {
         await es.indices.deleteDataStream({ name: TEST_DS_NAME });
