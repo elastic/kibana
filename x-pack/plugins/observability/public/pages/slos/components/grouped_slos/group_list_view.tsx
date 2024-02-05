@@ -149,7 +149,7 @@ export function GroupListView({
                               {
                                 defaultMessage: 'SLO: {name}',
                                 values: {
-                                  name: summary.worst.slo.name,
+                                  name: summary.worst.slo?.name,
                                 },
                               }
                             )}
@@ -160,7 +160,7 @@ export function GroupListView({
                               {
                                 defaultMessage: 'Instance: {instance}',
                                 values: {
-                                  instance: summary.worst.slo.instanceId,
+                                  instance: summary.worst.slo?.instanceId,
                                 },
                               }
                             )}
@@ -172,8 +172,8 @@ export function GroupListView({
                         data-test-subj="o11yGroupListViewLink"
                         href={basePath.prepend(
                           paths.observability.sloDetails(
-                            summary.worst.slo.id,
-                            summary.worst.slo.instanceId
+                            summary.worst.slo?.id,
+                            summary.worst.slo?.instanceId
                           )
                         )}
                       >
