@@ -13,9 +13,9 @@ import type { CustomizationCallback } from '@kbn/discover-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { waitFor } from 'xstate/lib/waitFor';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { LogExplorerController } from '../controller';
-import { LogExplorerControllerProvider } from '../controller/provider';
-import type { LogExplorerStartDeps } from '../types';
+import type { LogsExplorerController } from '../controller';
+import { LogsExplorerControllerProvider } from '../controller/provider';
+import type { LogsExplorerStartDeps } from '../types';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 import { createCustomSearchBar } from './custom_search_bar';
 import { createCustomCellRenderer } from './custom_cell_renderer';
@@ -25,18 +25,18 @@ const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
 const LazyCustomFlyoutContent = dynamic(() => import('./custom_flyout_content'));
 
-export interface CreateLogExplorerProfileCustomizationsDeps {
+export interface CreateLogsExplorerProfileCustomizationsDeps {
   core: CoreStart;
-  plugins: LogExplorerStartDeps;
-  controller: LogExplorerController;
+  plugins: LogsExplorerStartDeps;
+  controller: LogsExplorerController;
 }
 
-export const createLogExplorerProfileCustomizations =
+export const createLogsExplorerProfileCustomizations =
   ({
     core,
     plugins,
     controller,
-  }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
+  }: CreateLogsExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
     const { discoverServices, service } = controller;
     const pluginsWithOverrides = {
@@ -68,13 +68,13 @@ export const createLogExplorerProfileCustomizations =
               datasetsClient={controller.datasetsClient}
               dataViews={dataViews}
               discover={discover}
-              logExplorerControllerStateService={service}
+              logsExplorerControllerStateService={service}
             />
           </KibanaContextProviderForPlugin>
         );
       },
       PrependFilterBar: () => (
-        <LazyCustomDatasetFilters logExplorerControllerStateService={service} data={data} />
+        <LazyCustomDatasetFilters logsExplorerControllerStateService={service} data={data} />
       ),
       CustomSearchBar: createCustomSearchBar({
         data,
@@ -131,9 +131,9 @@ export const createLogExplorerProfileCustomizations =
 
             return (
               <KibanaContextProviderForPlugin>
-                <LogExplorerControllerProvider controller={controller}>
+                <LogsExplorerControllerProvider controller={controller}>
                   <LazyCustomFlyoutContent {...props} />
-                </LogExplorerControllerProvider>
+                </LogsExplorerControllerProvider>
               </KibanaContextProviderForPlugin>
             );
           },

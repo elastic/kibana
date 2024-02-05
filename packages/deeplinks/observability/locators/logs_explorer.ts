@@ -25,9 +25,9 @@ export type ListFilterControl = {
   values: string[];
 };
 
-export const LOG_EXPLORER_LOCATOR_ID = 'LOG_EXPLORER_LOCATOR';
+export const LOGS_EXPLORER_LOCATOR_ID = 'LOGS_EXPLORER_LOCATOR';
 
-export interface LogExplorerNavigationParams extends SerializableRecord {
+export interface LogsExplorerNavigationParams extends SerializableRecord {
   /**
    * Optionally set the time range in the time picker.
    */
@@ -54,7 +54,7 @@ export interface LogExplorerNavigationParams extends SerializableRecord {
   filterControls?: FilterControls;
 }
 
-export interface LogExplorerLocatorParams extends LogExplorerNavigationParams {
+export interface LogsExplorerLocatorParams extends LogsExplorerNavigationParams {
   /**
    * Dataset name to be selected.
    */

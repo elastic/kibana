@@ -8,6 +8,6 @@
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 
-export interface LogExplorerLocatorDependencies {
+export interface LogsExplorerLocatorDependencies {
   discoverAppLocator?: LocatorPublic<DiscoverAppLocatorParams>;
 }

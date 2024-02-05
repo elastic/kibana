@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './log_explorer';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+
+export type ExportableRule = Omit<RuleResponse, 'execution_summary'>;
