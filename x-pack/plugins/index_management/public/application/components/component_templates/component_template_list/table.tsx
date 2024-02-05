@@ -70,9 +70,18 @@ export const ComponentTable: FunctionComponent<Props> = ({
 
   // By default, we want to show all the component templates that are not deprecated.
   const [filterOptions, setFilterOptions] = useState<EuiSelectableOption[]>([
-    { key: 'inUse', label: inUseFilterLabel },
-    { key: 'managed', label: managedFilterLabel },
-    { key: 'deprecated', label: deprecatedFilterLabel, checked: 'off' },
+    { key: 'inUse', label: inUseFilterLabel, 'data-test-subj': 'componentTemplates--inUseFilter' },
+    {
+      key: 'managed',
+      label: managedFilterLabel,
+      'data-test-subj': 'componentTemplates--managedFilter',
+    },
+    {
+      key: 'deprecated',
+      label: deprecatedFilterLabel,
+      'data-test-subj': 'componentTemplates--deprecatedFilter',
+      checked: 'off',
+    },
   ]);
 
   const [selection, setSelection] = useState<ComponentTemplateListItem[]>([]);
@@ -102,6 +111,7 @@ export const ComponentTable: FunctionComponent<Props> = ({
   };
   const button = (
     <EuiFilterButton
+      data-test-subj="componentTemplatesFiltersButton"
       iconType="arrowDown"
       badgeColor="success"
       onClick={onButtonClick}

@@ -110,9 +110,8 @@ describe('<ComponentTemplateList />', () => {
       let deprecatedList = find('deprecatedComponentTemplateBadge');
       expect(deprecatedList.length).toBe(0);
 
-      const searchInput = component.find('.euiFieldSearch').first();
-      (searchInput.instance() as unknown as HTMLInputElement).value = 'is:isDeprecated';
-      searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+      testBed.find('componentTemplatesFiltersButton').simulate('click');
+      testBed.find('componentTemplates--deprecatedFilter').simulate('click');
 
       component.update();
 
