@@ -5,10 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { BehaviorSubject, combineLatestWith, distinctUntilChanged, map, Subject } from 'rxjs';
-import { v4 } from 'uuid';
-
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
@@ -21,10 +17,17 @@ import {
   type ControlGroupContainer,
 } from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-import { EmbeddableFactory, isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableFactory,
+  isErrorEmbeddable,
+  reactEmbeddableRegistryHasKey,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-
+import { cloneDeep, identity, omit, pickBy } from 'lodash';
+import { Subject } from 'rxjs';
+import { v4 } from 'uuid';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -38,6 +41,7 @@ import {
 } from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
 import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
+import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
 import { DashboardPublicState } from '../../types';
 import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
@@ -78,15 +82,11 @@ export const createDashboard = async (
   const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
   const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
-  const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
+  const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
     reduxEmbeddablePackagePromise,
     dashboardSavedObjectPromise,
-    defaultDataViewExistsPromise,
+    defaultDataViewExistsPromise /* the result is not used, but the side effect of setting the default data view is needed. */,
   ]);
-
-  if (!defaultDataView) {
-    throw new Error('Dashboard requires at least one data view before it can be initialized.');
-  }
 
   // --------------------------------------------------------------------------------------
   // Initialize Dashboard integrations
@@ -100,7 +100,7 @@ export const createDashboard = async (
   const { input, searchSessionId } = initializeResult;
 
   // --------------------------------------------------------------------------------------
-  // Build and return the dashboard container.
+  // Build the dashboard container.
   // --------------------------------------------------------------------------------------
   const initialComponentState: DashboardPublicState = {
     lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
@@ -124,6 +124,14 @@ export const createDashboard = async (
     creationOptions,
     initialComponentState
   );
+
+  // --------------------------------------------------------------------------------------
+  // Start the diffing integration after all other integrations are set up.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((container) => {
+    startDiffingDashboardState.bind(container)(creationOptions);
+  });
+
   dashboardContainerReady$.next(dashboardContainer);
   return dashboardContainer;
 };
@@ -353,6 +361,9 @@ export const initializeDashboard = async ({
               [newPanelState.explicitInput.id]: newPanelState,
             },
           });
+          if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+            return { id: embeddableId };
+          }
 
           return await container.untilEmbeddableLoaded(embeddableId);
         })();
@@ -450,50 +461,6 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) =>
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
-
-  // --------------------------------------------------------------------------------------
-  // Start diffing subscription to keep track of unsaved changes
-  // --------------------------------------------------------------------------------------
-  untilDashboardReady().then((dashboard) => {
-    // subscription that handles the unsaved changes badge
-    dashboard.integrationSubscriptions.add(
-      dashboard.hasUnsavedChanges
-        .pipe(
-          combineLatestWith(
-            dashboard.controlGroup?.unsavedChanges.pipe(
-              map((unsavedControlchanges) => Boolean(unsavedControlchanges))
-            ) ?? new BehaviorSubject(false)
-          ),
-          distinctUntilChanged(
-            (
-              [dashboardHasChanges1, controlHasChanges1],
-              [dashboardHasChanges2, controlHasChanges2]
-            ) =>
-              (dashboardHasChanges1 || controlHasChanges1) ===
-              (dashboardHasChanges2 || controlHasChanges2)
-          )
-        )
-        .subscribe(([dashboardHasChanges, controlGroupHasChanges]) => {
-          dashboard.dispatch.setHasUnsavedChanges(dashboardHasChanges || controlGroupHasChanges);
-        })
-    );
-
-    // subscription that handles backing up the unsaved changes to the session storage
-    dashboard.integrationSubscriptions.add(
-      dashboard.backupUnsavedChanges
-        .pipe(
-          combineLatestWith(
-            dashboard.controlGroup?.unsavedChanges ?? new BehaviorSubject(undefined)
-          )
-        )
-        .subscribe(([dashboardChanges, controlGroupChanges]) => {
-          dashboardBackup.setState(dashboard.getDashboardSavedObjectId(), {
-            ...dashboardChanges,
-            controlGroupInput: controlGroupChanges,
-          });
-        })
-    );
-  });
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

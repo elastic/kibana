@@ -86,7 +86,7 @@ export interface KnowledgeBaseEntry {
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   public: boolean;
-  labels: Record<string, string>;
+  labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
 }
 
@@ -105,8 +105,9 @@ export type FunctionResponse =
   | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
 export enum FunctionVisibility {
-  System = 'system',
-  User = 'user',
+  AssistantOnly = 'assistantOnly',
+  UserOnly = 'userOnly',
+  Internal = 'internal',
   All = 'all',
 }
 
