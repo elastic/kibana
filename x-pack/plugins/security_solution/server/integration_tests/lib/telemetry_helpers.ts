@@ -194,29 +194,21 @@ export async function cleanupMockedExceptionLists(
   so: SavedObjectsServiceStart
 ) {
   const savedObjectsClient = so.getScopedClient(fakeKibanaRequest);
-  asyncForEach(exceptionsListItem, async (exceptionListItem) => {
-    try {
-      await deleteExceptionListItem({
-        itemId: exceptionListItem.item_id,
-        id: exceptionListItem.id,
-        namespaceType: NAMESPACE_TYPE,
-        savedObjectsClient,
-      });
-    } catch (e) {
-      // just ignore...
-    }
+  await asyncForEach(exceptionsListItem, async (exceptionListItem) => {
+    await deleteExceptionListItem({
+      itemId: exceptionListItem.item_id,
+      id: exceptionListItem.id,
+      namespaceType: NAMESPACE_TYPE,
+      savedObjectsClient,
+    });
   });
-  asyncForEach(exceptionsList, async (exceptionList) => {
-    try {
-      await deleteExceptionList({
-        listId: exceptionList.list_id,
-        id: exceptionList.id,
-        namespaceType: NAMESPACE_TYPE,
-        savedObjectsClient,
-      });
-    } catch (e) {
-      // just ignore...
-    }
+  await asyncForEach(exceptionsList, async (exceptionList) => {
+    await deleteExceptionList({
+      listId: exceptionList.list_id,
+      id: exceptionList.id,
+      namespaceType: NAMESPACE_TYPE,
+      savedObjectsClient,
+    });
   });
 }
 
