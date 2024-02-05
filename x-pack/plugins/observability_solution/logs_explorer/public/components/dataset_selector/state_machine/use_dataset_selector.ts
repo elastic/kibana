@@ -11,7 +11,6 @@ import {
   ChangePanelHandler,
   DatasetSelectionHandler,
   DatasetsSelectorSearchHandler,
-  DataViewSelectionHandler,
   ExplorerDataViewSelectionHandler,
   PanelId,
 } from '../types';

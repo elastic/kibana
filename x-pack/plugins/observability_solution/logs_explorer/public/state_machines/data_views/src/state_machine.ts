@@ -8,7 +8,6 @@
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { isError } from 'lodash';
 import { assign, createMachine } from 'xstate';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { ExplorerDataView } from '../../../../common/data_views/models/explorer_data_view';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
 import { createDefaultContext } from './defaults';

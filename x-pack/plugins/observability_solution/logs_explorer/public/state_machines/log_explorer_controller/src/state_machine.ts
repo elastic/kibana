@@ -120,10 +120,21 @@ export const createPureLogExplorerControllerStateMachine = (
                     LISTEN_TO_CHANGES: {
                       target: 'idle',
                     },
-                    UPDATE_DATASET_SELECTION: {
-                      target: 'updatingDataView',
-                      actions: ['storeDatasetSelection'],
-                    },
+                    UPDATE_DATASET_SELECTION: [
+                      {
+                        cond: 'isUnknownExplorerDataView',
+                        actions: ['redirectToDiscover'],
+                      },
+                      {
+                        cond: 'isLogsExplorerDataView',
+                        target: 'changingDataView',
+                        actions: ['storeDatasetSelection'],
+                      },
+                      {
+                        target: 'updatingDataView',
+                        actions: ['storeDatasetSelection'],
+                      },
+                    ],
                     DATASET_SELECTION_RESTORE_FAILURE: {
                       target: 'updatingDataView',
                       actions: ['notifyDatasetSelectionRestoreFailed'],
@@ -278,7 +289,7 @@ export const createPureLogExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
-        isLogsExplorerDataView: (context, event) => {
+        isLogsExplorerDataView: (_context, event) => {
           if (
             event.type === 'UPDATE_DATASET_SELECTION' &&
             isExplorerDataViewSelection(event.data)
@@ -287,7 +298,7 @@ export const createPureLogExplorerControllerStateMachine = (
           }
           return false;
         },
-        isUnknownExplorerDataView: (context, event) => {
+        isUnknownExplorerDataView: (_context, event) => {
           if (
             event.type === 'UPDATE_DATASET_SELECTION' &&
             isExplorerDataViewSelection(event.data)

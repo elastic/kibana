@@ -7,7 +7,10 @@
 
 import { InvokeCreator } from 'xstate';
 import { Dataset } from '../../../../../common/datasets';
-import { SingleDatasetSelection } from '../../../../../common/dataset_selection';
+import {
+  isDatasetSelection,
+  SingleDatasetSelection,
+} from '../../../../../common/dataset_selection';
 import { IDatasetsClient } from '../../../../services/datasets';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
@@ -25,8 +28,12 @@ export const validateSelection =
   (context) =>
   async (send) => {
     const unresolvedIntegrationName =
+      isDatasetSelection(context.datasetSelection) &&
       context.datasetSelection.selection.dataset.parentIntegration?.name;
-    const unresolvedDatasetName = context.datasetSelection.selection.dataset.name;
+
+    const unresolvedDatasetName =
+      isDatasetSelection(context.datasetSelection) &&
+      context.datasetSelection.selection.dataset.name;
 
     if (context.datasetSelection.selectionType !== 'unresolved' || !unresolvedIntegrationName) {
       return send('LISTEN_TO_CHANGES');

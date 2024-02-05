@@ -82,6 +82,14 @@ export type LogExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
+      value: 'initialized.datasetSelection.changingDataView';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
+    }
+  | {
       value: 'initialized.datasetSelection.updatingDataView';
       context: WithDatasetSelection &
         WithControlPanels &

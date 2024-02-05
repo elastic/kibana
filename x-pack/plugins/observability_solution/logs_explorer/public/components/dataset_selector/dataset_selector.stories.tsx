@@ -11,10 +11,11 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { ExplorerDataView } from '../../../common/data_views/models/explorer_data_view';
 import {
   AllDatasetSelection,
   DatasetSelection,
+  ExplorerDataViewSelection,
   SelectionChange,
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
@@ -43,9 +44,9 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection>(() =>
-    AllDatasetSelection.create()
-  );
+  const [datasetSelection, setDatasetSelection] = useState<
+    DatasetSelection | ExplorerDataViewSelection
+  >(() => AllDatasetSelection.create());
 
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
     sortOrder: 'asc',
@@ -123,7 +124,6 @@ Basic.args = {
   isLoadingUncategorized: false,
   isSearchingIntegrations: false,
   onDataViewsReload: () => alert('Reload data views...'),
-  onDataViewSelection: (dataView) => alert(`Navigate to data view "${dataView.name}"`),
   onDataViewsTabClick: () => console.log('Load data views...'),
   onIntegrationsReload: () => alert('Reload integrations...'),
   onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
@@ -508,7 +508,7 @@ const mockDatasets: Dataset[] = [
   { name: 'data-scaling-logs-*' as IndexPattern },
 ].map((dataset) => Dataset.create(dataset));
 
-const mockDataViews: DataViewListItem[] = [
+const mockDataViews: ExplorerDataView[] = [
   {
     id: 'logs-*',
     namespaces: ['default'],
@@ -528,4 +528,4 @@ const mockDataViews: DataViewListItem[] = [
     typeMeta: {},
     name: 'synthetics-dashboard',
   },
-];
+].map((dataView) => ExplorerDataView.create(dataView));
