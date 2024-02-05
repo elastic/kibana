@@ -52,8 +52,6 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
-    // Embedded Developer Console is disabled by default
-    enableEmbeddedConsole: schema.boolean({ defaultValue: false }),
   },
   { defaultValue: undefined }
 );
@@ -66,7 +64,6 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     enableIndexStats: true,
     editableIndexSettings: true,
     enableDataStreamsStorageColumn: true,
-    enableEmbeddedConsole: true,
   },
   schema: schemaLatest,
   deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],

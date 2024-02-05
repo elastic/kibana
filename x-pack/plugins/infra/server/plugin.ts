@@ -175,6 +175,7 @@ export class InfraServerPlugin
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
     const framework = new KibanaFramework(core, this.config, plugins);
     const metricsClient = plugins.metricsDataAccess.client;
+    const getApmIndices = plugins.apmDataAccess.getApmIndices;
     metricsClient.setDefaultMetricIndicesHandler(async (options: GetMetricIndicesOptions) => {
       const sourceConfiguration = await sources.getInfraSourceConfiguration(
         options.savedObjectsClient,
@@ -219,6 +220,7 @@ export class InfraServerPlugin
       sources,
       sourceStatus,
       metricsClient,
+      getApmIndices,
       ...domainLibs,
       handleEsError,
       logsRules: this.logsRules.setup(core, plugins),

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 
 import {
   ContactCardEmbeddable,
@@ -30,13 +30,11 @@ import { pluginServices } from '../../../services/plugin_services';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
 import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
 
-test('throws error when no data views are available', async () => {
+test("doesn't throw error when no data views are available", async () => {
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
     .fn()
     .mockReturnValue(false);
-  await expect(async () => {
-    await createDashboard();
-  }).rejects.toThrow('Dashboard requires at least one data view before it can be initialized.');
+  expect(await createDashboard()).toBeDefined();
 
   // reset get default data view
   pluginServices.getServices().data.dataViews.defaultDataViewExists = jest
@@ -431,6 +429,7 @@ test('creates a control group from the control group factory and waits for it to
     getInput: jest.fn().mockReturnValue({}),
     getInput$: jest.fn().mockReturnValue(new Observable()),
     getOutput$: jest.fn().mockReturnValue(new Observable()),
+    unsavedChanges: new BehaviorSubject(undefined),
   } as unknown as ControlGroupContainer;
   const mockControlGroupFactory = {
     create: jest.fn().mockReturnValue(mockControlGroupContainer),
@@ -450,7 +449,9 @@ test('creates a control group from the control group factory and waits for it to
     'control_group'
   );
   expect(mockControlGroupFactory.create).toHaveBeenCalledWith(
-    expect.objectContaining({ controlStyle: 'twoLine' })
+    expect.objectContaining({ controlStyle: 'twoLine' }),
+    undefined,
+    { lastSavedInput: expect.objectContaining({ controlStyle: 'oneLine' }) }
   );
   expect(mockControlGroupContainer.untilInitialized).toHaveBeenCalled();
 });

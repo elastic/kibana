@@ -25,7 +25,7 @@ export function getDiscoverStateMock({
     history,
     customizationContext: {
       displayMode: 'standalone',
-      showLogExplorerTabs: false,
+      showLogsExplorerTabs: false,
     },
   });
   container.savedSearchState.set(

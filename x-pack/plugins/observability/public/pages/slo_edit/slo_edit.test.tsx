@@ -5,18 +5,19 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { ILicense } from '@kbn/licensing-plugin/common/types';
+import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-
+import { BehaviorSubject } from 'rxjs';
 import { paths } from '../../../common/locators/paths';
 import { buildSlo } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
 import { useCreateSlo } from '../../hooks/slo/use_create_slo';
 import { useFetchApmSuggestions } from '../../hooks/slo/use_fetch_apm_suggestions';
-import { useFetchIndexPatternFields } from '../../hooks/slo/use_fetch_index_pattern_fields';
 import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { useUpdateSlo } from '../../hooks/slo/use_update_slo';
 import { useFetchDataViews } from '../../hooks/use_fetch_data_views';
@@ -26,9 +27,6 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from './constants';
 import { SloEditPage } from './slo_edit';
-import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
-import { BehaviorSubject } from 'rxjs';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -43,7 +41,6 @@ jest.mock('../../hooks/slo/use_create_slo');
 jest.mock('../../hooks/slo/use_update_slo');
 jest.mock('../../hooks/slo/use_fetch_apm_suggestions');
 jest.mock('../../hooks/slo/use_capabilities');
-jest.mock('../../hooks/slo/use_fetch_index_pattern_fields');
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
@@ -58,7 +55,6 @@ const useFetchSloMock = useFetchSloDetails as jest.Mock;
 const useCreateSloMock = useCreateSlo as jest.Mock;
 const useUpdateSloMock = useUpdateSlo as jest.Mock;
 const useFetchApmSuggestionsMock = useFetchApmSuggestions as jest.Mock;
-const useFetchIndexPatternFieldsMock = useFetchIndexPatternFields as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
 
 const mockAddSuccess = jest.fn();
@@ -159,13 +155,6 @@ describe('SLO Edit Page', () => {
       isLoading: false,
       data: ['some-index', 'index-2'],
     });
-    useFetchIndexPatternFieldsMock.mockReturnValue({
-      isLoading: false,
-      data: [
-        { name: 'field', type: 'date', aggregatable: false, searchable: false },
-        { name: 'field_text', type: 'text', aggregatable: true, searchable: true },
-      ],
-    });
 
     useCreateSloMock.mockReturnValue({
       isLoading: false,
@@ -197,7 +186,7 @@ describe('SLO Edit Page', () => {
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
       jest
         .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+        .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
 
       useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
@@ -220,7 +209,7 @@ describe('SLO Edit Page', () => {
       jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
       jest
         .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+        .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
 
       useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
@@ -251,7 +240,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '1234' });
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: undefined });
 
@@ -270,7 +259,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/1234/edit', search: '', state: '', hash: '' });
 
         const { queryByTestId } = render(<SloEditPage />);
 
@@ -295,7 +284,7 @@ describe('SLO Edit Page', () => {
         );
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
 
         useFetchApmSuggestionsMock.mockReturnValue({
           suggestions: ['cartService'],
@@ -327,7 +316,7 @@ describe('SLO Edit Page', () => {
 
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/123Foo/edit', search: '', state: '', hash: '' });
 
         const { queryByTestId } = render(<SloEditPage />);
 
@@ -373,7 +362,7 @@ describe('SLO Edit Page', () => {
         );
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
@@ -410,7 +399,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
@@ -432,7 +421,7 @@ describe('SLO Edit Page', () => {
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
         jest
           .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: '', state: '', hash: '' });
+          .mockReturnValue({ pathname: '/slos/123/edit', search: '', state: '', hash: '' });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 
@@ -456,9 +445,12 @@ describe('SLO Edit Page', () => {
         const slo = buildSlo();
 
         jest.spyOn(Router, 'useParams').mockReturnValue({ sloId: '123' });
-        jest
-          .spyOn(Router, 'useLocation')
-          .mockReturnValue({ pathname: 'foo', search: 'create-rule=true', state: '', hash: '' });
+        jest.spyOn(Router, 'useLocation').mockReturnValue({
+          pathname: '/slos/123/edit',
+          search: 'create-rule=true',
+          state: '',
+          hash: '',
+        });
 
         useFetchSloMock.mockReturnValue({ isLoading: false, data: slo });
 

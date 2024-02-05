@@ -11,16 +11,12 @@ import type {
   Middleware,
   Dispatch,
   PreloadedState,
-  CombinedState,
   AnyAction,
   Reducer,
 } from 'redux';
 import { applyMiddleware, createStore as createReduxStore } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
 import type { EnhancerOptions } from 'redux-devtools-extension';
-import { createEpicMiddleware } from 'redux-observable';
-import type { Observable } from 'rxjs';
-import { BehaviorSubject, pluck } from 'rxjs';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import reduceReducers from 'reduce-reducers';
@@ -33,21 +29,17 @@ import {
   SERVER_APP_ID,
 } from '../../../common/constants';
 import { telemetryMiddleware } from '../lib/telemetry';
-import { appSelectors } from './app';
-import { timelineSelectors } from '../../timelines/store';
 import * as timelineActions from '../../timelines/store/actions';
 import type { TimelineModel } from '../../timelines/store/model';
-import { inputsSelectors } from './inputs';
 import type { SubPluginsInitReducer } from './reducer';
 import { createInitialState, createReducer } from './reducer';
-import { createRootEpic } from './epic';
 import type { AppAction } from './actions';
 import type { Immutable } from '../../../common/endpoint/types';
 import type { State } from './types';
-import type { TimelineEpicDependencies, TimelineState } from '../../timelines/store/types';
+import type { TimelineState } from '../../timelines/store/types';
 import type { KibanaDataView, SourcererModel, SourcererDataView } from './sourcerer/model';
 import { initDataView } from './sourcerer/model';
-import type { AppObservableLibs, StartedSubPlugins, StartPlugins } from '../../types';
+import type { StartedSubPlugins, StartPlugins } from '../../types';
 import type { ExperimentalFeatures } from '../../../common/experimental_features';
 import { createSourcererDataView } from '../containers/sourcerer/create_sourcerer_data_view';
 import type { AnalyzerState } from '../../resolver/types';
@@ -102,8 +94,6 @@ export const createStoreFactory = async (
     defaultDataView = { ...initDataView, error };
     kibanaDataViews = [];
   }
-  const appLibs: AppObservableLibs = { kibana: coreStart };
-  const libs$ = new BehaviorSubject(appLibs);
 
   const timelineInitialState = {
     timeline: {
@@ -167,7 +157,7 @@ export const createStoreFactory = async (
     ...subPlugins.management.store.reducer,
   };
 
-  return createStore(initialState, rootReducer, libs$.pipe(pluck('kibana')), storage, [
+  return createStore(initialState, rootReducer, coreStart, storage, [
     ...(subPlugins.management.store.middleware ?? []),
     ...(subPlugins.explore.store.middleware ?? []),
     ...[resolverMiddlewareFactory(dataAccessLayerFactory(coreStart)) ?? []],
@@ -255,7 +245,7 @@ const stateSanitizer = (state: State) => {
 export const createStore = (
   state: State,
   pluginsReducer: SubPluginsInitReducer,
-  kibana: Observable<CoreStart>,
+  kibana: CoreStart,
   storage: Storage,
   additionalMiddleware?: Array<Middleware<{}, State, Dispatch<AppAction | Immutable<AppAction>>>>
 ): Store<State, Action> => {
@@ -272,23 +262,8 @@ export const createStore = (
 
   const composeEnhancers = composeWithDevTools(enhancerOptions);
 
-  const middlewareDependencies: TimelineEpicDependencies<State> = {
-    kibana$: kibana,
-    selectAllTimelineQuery: inputsSelectors.globalQueryByIdSelector,
-    selectNotesByIdSelector: appSelectors.selectNotesByIdSelector,
-    timelineByIdSelector: timelineSelectors.timelineByIdSelector,
-    timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
-  };
-
-  const epicMiddleware = createEpicMiddleware<Action, Action, State, typeof middlewareDependencies>(
-    {
-      dependencies: middlewareDependencies,
-    }
-  );
-
   const middlewareEnhancer = applyMiddleware(
-    ...createMiddlewares(storage),
-    epicMiddleware,
+    ...createMiddlewares(kibana, storage),
     telemetryMiddleware,
     ...(additionalMiddleware ?? [])
   );
@@ -298,8 +273,6 @@ export const createStore = (
     state as PreloadedState<State>,
     composeEnhancers(middlewareEnhancer)
   );
-
-  epicMiddleware.run(createRootEpic<CombinedState<State>>());
 
   return store;
 };

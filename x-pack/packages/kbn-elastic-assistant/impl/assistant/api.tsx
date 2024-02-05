@@ -16,7 +16,6 @@ import {
   getOptionalRequestParams,
   hasParsableResponse,
 } from './helpers';
-import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
 
 export interface FetchConnectorExecuteAction {
   isEnabledRAGAlerts: boolean;
@@ -331,64 +330,6 @@ export const deleteKnowledgeBase = async ({
     });
 
     return response as DeleteKnowledgeBaseResponse;
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
-};
-
-export interface PostEvaluationParams {
-  http: HttpSetup;
-  evalParams?: PerformEvaluationParams;
-  signal?: AbortSignal | undefined;
-}
-
-export interface PostEvaluationResponse {
-  evaluationId: string;
-  success: boolean;
-}
-
-/**
- * API call for evaluating models.
- *
- * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.evalParams] - Params necessary for evaluation
- * @param {AbortSignal} [options.signal] - AbortSignal
- *
- * @returns {Promise<PostEvaluationResponse | IHttpFetchError>}
- */
-export const postEvaluation = async ({
-  http,
-  evalParams,
-  signal,
-}: PostEvaluationParams): Promise<PostEvaluationResponse | IHttpFetchError> => {
-  try {
-    const path = `/internal/elastic_assistant/evaluate`;
-    const query = {
-      agents: evalParams?.agents.sort()?.join(','),
-      datasetName: evalParams?.datasetName,
-      evaluationType: evalParams?.evaluationType.sort()?.join(','),
-      evalModel: evalParams?.evalModel.sort()?.join(','),
-      outputIndex: evalParams?.outputIndex,
-      models: evalParams?.models.sort()?.join(','),
-      projectName: evalParams?.projectName,
-      runName: evalParams?.runName,
-    };
-
-    const response = await http.fetch(path, {
-      method: 'POST',
-      body: JSON.stringify({
-        dataset: JSON.parse(evalParams?.dataset ?? '[]'),
-        evalPrompt: evalParams?.evalPrompt ?? '',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      query,
-      signal,
-    });
-
-    return response as PostEvaluationResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }

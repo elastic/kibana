@@ -72,10 +72,24 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     signature: {
       multipleParams: true,
-      params: [{ name: 'expression', type: 'function' }],
+      params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
     modes: [],
+    validate: (command: ESQLCommand) => {
+      const messages: ESQLMessage[] = [];
+      if (!command.args.length) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate('monaco.esql.validation.statsNoArguments', {
+            defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
+          }),
+          type: 'error',
+          code: 'statsNoArguments',
+        });
+      }
+      return messages;
+    },
   },
   {
     name: 'eval',
@@ -146,6 +160,7 @@ export const commandDefinitions: CommandDefinition[] = [
             defaultMessage: 'PROJECT command is no longer supported, please use KEEP instead',
           }),
           type: 'warning',
+          code: 'projectCommandDeprecated',
         });
       }
       return messages;
@@ -174,6 +189,7 @@ export const commandDefinitions: CommandDefinition[] = [
               defaultMessage: 'Removing all fields is not allowed [*]',
             }),
             type: 'error' as const,
+            code: 'dropAllColumnsError',
           }))
         );
       }
@@ -187,6 +203,7 @@ export const commandDefinitions: CommandDefinition[] = [
             defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
           }),
           type: 'warning',
+          code: 'dropTimestampWarning',
         });
       }
       return messages;
@@ -272,7 +289,7 @@ export const commandDefinitions: CommandDefinition[] = [
     modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'list' }],
+      params: [{ name: 'column', type: 'column', innerType: 'any' }],
     },
   },
   {
@@ -317,6 +334,7 @@ export const commandDefinitions: CommandDefinition[] = [
               },
             }),
             type: 'warning' as const,
+            code: 'duplicateSettingWarning',
           }))
         );
       }
