@@ -80,7 +80,6 @@ export function deserializeTemplate(
     allowAutoCreate,
     _meta,
     deprecated,
-    // deprecated: name.includes('logs'),
     _kbnMeta: {
       type,
       hasDatastream: Boolean(dataStream),
