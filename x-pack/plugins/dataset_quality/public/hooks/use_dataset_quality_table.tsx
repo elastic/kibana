@@ -115,10 +115,15 @@ export const useDatasetQualityTable = () => {
     ]
   );
 
+  const filteredItems = useMemo(
+    () => (showInactiveDatasets ? datasets : filterInactiveDatasets({ datasets, timeRange })),
+    [showInactiveDatasets, datasets, timeRange]
+  );
+
   const pagination = {
     pageIndex: page,
     pageSize: rowsPerPage,
-    totalItemCount: datasets.length,
+    totalItemCount: filteredItems.length,
     hidePerPageOptions: true,
   };
 
@@ -143,14 +148,11 @@ export const useDatasetQualityTable = () => {
   );
 
   const renderedItems = useMemo(() => {
-    const filteredItems = showInactiveDatasets
-      ? datasets
-      : filterInactiveDatasets({ datasets, timeRange });
     const overridenSortingField = sortingOverrides[sort.field] || sort.field;
     const sortedItems = orderBy(filteredItems, overridenSortingField, sort.direction);
 
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [showInactiveDatasets, datasets, timeRange, sort.field, sort.direction, page, rowsPerPage]);
+  }, [sort.field, sort.direction, filteredItems, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
