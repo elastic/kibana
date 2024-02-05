@@ -80,7 +80,7 @@ export const getRiskScoreSummaryAttributes: (
                 [columnIds[0]]: {
                   label: 'Risk',
                   dataType: 'number',
-                  operationType: 'max',
+                  operationType: 'last_value',
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField,
