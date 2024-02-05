@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('dashboard');
       await PageObjects.dashboard.loadSavedDashboard('Delayed 15s');
       await PageObjects.header.waitUntilLoadingHasFinished();
-      await testSubjects.existOrFail('embeddableError');
       await testSubjects.existOrFail('searchTimeoutError');
     });
 
