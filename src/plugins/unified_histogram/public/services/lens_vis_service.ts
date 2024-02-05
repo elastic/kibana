@@ -716,7 +716,7 @@ const getSuggestionDeps = ({
   columns?: DatatableColumn[];
   breakdownField: DataViewField | undefined;
 }): UnifiedHistogramSuggestionContext['suggestionDeps'] => [
-  dataView.id,
+  `${dataView.id}-${dataView.getIndexPattern()}-${dataView.timeFieldName ?? 'noTimeField'}`,
   columns,
   query,
   breakdownField?.name,
