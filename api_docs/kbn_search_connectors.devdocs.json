@@ -544,6 +544,76 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.createConnectorSecret",
+        "type": "Function",
+        "tags": [],
+        "label": "createConnectorSecret",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", value: string) => Promise<",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorSecretCreateResponse",
+            "text": "ConnectorSecretCreateResponse"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-search-connectors/lib/create_connector_secret.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.createConnectorSecret.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/create_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.createConnectorSecret.$2",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/create_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.deleteConnectorById",
         "type": "Function",
         "tags": [],
@@ -1634,6 +1704,100 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.updateConnectorApiKeyId",
+        "type": "Function",
+        "tags": [],
+        "label": "updateConnectorApiKeyId",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", connectorId: string, apiKeyId: string | null, apiKeySecretId: string | null) => Promise<",
+          "Result",
+          ">"
+        ],
+        "path": "packages/kbn-search-connectors/lib/update_connector_api_key_id.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorApiKeyId.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_api_key_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorApiKeyId.$2",
+            "type": "string",
+            "tags": [],
+            "label": "connectorId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_api_key_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorApiKeyId.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "apiKeyId",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_api_key_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorApiKeyId.$4",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "apiKeySecretId",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_api_key_id.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.updateConnectorConfiguration",
         "type": "Function",
         "tags": [],
@@ -2631,6 +2795,20 @@
           },
           {
             "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.Connector.api_key_secret_id",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "api_key_secret_id",
+            "description": [],
+            "signature": [
+              "string | null"
+            ],
+            "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
             "id": "def-common.Connector.configuration",
             "type": "CompoundType",
             "tags": [],
@@ -3452,6 +3630,31 @@
             "label": "interval",
             "description": [],
             "path": "packages/kbn-search-connectors/types/connectors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.ConnectorSecretCreateResponse",
+        "type": "Interface",
+        "tags": [],
+        "label": "ConnectorSecretCreateResponse",
+        "description": [],
+        "path": "packages/kbn-search-connectors/types/connectors_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.ConnectorSecretCreateResponse.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-search-connectors/types/connectors_api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5018,7 +5221,7 @@
             "section": "def-common.IngestPipelineParams",
             "text": "IngestPipelineParams"
           },
-          " | null | undefined; api_key_id: string | null; custom_scheduling: ",
+          " | null | undefined; api_key_id: string | null; api_key_secret_id: string | null; custom_scheduling: ",
           {
             "pluginId": "@kbn/search-connectors",
             "scope": "common",
