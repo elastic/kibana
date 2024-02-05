@@ -199,7 +199,7 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async clickHistogramBar() {
-    await this.elasticChart.waitForRenderComplete();
+    await this.elasticChart.waitForRenderComplete(undefined, 5000);
     const el = await this.elasticChart.getCanvas();
 
     await this.browser.getActions().move({ x: 0, y: 0, origin: el._webElement }).click().perform();
