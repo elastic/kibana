@@ -9,7 +9,7 @@ import { setMockValues } from '../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import { shallow } from 'enzyme';
+import { mount, shallow } from 'enzyme';
 
 import { EuiSelectable } from '@elastic/eui';
 
@@ -29,9 +29,95 @@ describe('PipelineSelect', () => {
     jest.clearAllMocks();
     setMockValues({});
   });
-  it('limits height to 4.5 options', () => {
+  it('renders pipeline select with no options', () => {
+    setMockValues(DEFAULT_VALUES);
+
+    const wrapper = shallow(<PipelineSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    expect(selectable.prop('options')).toEqual([]);
+  });
+  it('limits pipeline select height to option count', () => {
     setMockValues({
       ...DEFAULT_VALUES,
+      existingInferencePipelines: [
+        {
+          modelId: 'model_1',
+          modelType: 'model_1_type',
+          pipelineName: 'pipeline_1',
+          sourceFields: [],
+        },
+        {
+          modelId: 'model_2',
+          modelType: 'model_2_type',
+          pipelineName: 'pipeline_2',
+          sourceFields: [],
+        },
+        {
+          modelId: 'model_3',
+          modelType: 'model_3_type',
+          pipelineName: 'pipeline_3',
+          sourceFields: [],
+        },
+      ],
+    });
+
+    const wrapper = mount(<PipelineSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    expect(selectable.prop('height')).toEqual(16 * 6 * 3); // TODO: Use euiTheme.base to calculate height
+    expect(selectable.prop('options')).toHaveLength(3);
+  });
+  it('limits pipeline select height to 4.5 options', () => {
+    setMockValues({
+      ...DEFAULT_VALUES,
+      existingInferencePipelines: [
+        {
+          modelId: 'model_1',
+          modelType: 'model_1_type',
+          pipelineName: 'pipeline_1',
+          sourceFields: [],
+        },
+        {
+          modelId: 'model_2',
+          modelType: 'model_2_type',
+          pipelineName: 'pipeline_2',
+          sourceFields: [],
+        },
+        {
+          modelId: 'model_3',
+          modelType: 'model_3_type',
+          pipelineName: 'pipeline_3',
+          sourceFields: [],
+        },
+        {
+          modelId: 'model_4',
+          modelType: 'model_4_type',
+          pipelineName: 'pipeline_4',
+          sourceFields: [],
+        },
+        {
+          modelId: 'model_5',
+          modelType: 'model_5_type',
+          pipelineName: 'pipeline_5',
+          sourceFields: [],
+        },
+      ],
+    });
+
+    const wrapper = mount(<PipelineSelect />);
+    expect(wrapper.find(EuiSelectable)).toHaveLength(1);
+    const selectable = wrapper.find(EuiSelectable);
+    expect(selectable.prop('height')).toEqual(16 * 6 * 4.5); // TODO: Use euiTheme.base to calculate height
+    expect(selectable.prop('options')).toHaveLength(5);
+  });
+  it('selects the chosen option', () => {
+    setMockValues({
+      addInferencePipelineModal: {
+        configuration: {
+          pipelineName: 'pipeline_3',
+        },
+      },
       existingInferencePipelines: [
         {
           modelId: 'model_1',
@@ -48,22 +134,12 @@ describe('PipelineSelect', () => {
           modelType: 'model_3_type',
           pipelineName: 'pipeline_3',
         },
-        {
-          modelId: 'model_4',
-          modelType: 'model_4_type',
-          pipelineName: 'pipeline_4',
-        },
-        {
-          modelId: 'model_5',
-          modelType: 'model_5_type',
-          pipelineName: 'pipeline_5',
-        },
       ],
     });
 
     const wrapper = shallow(<PipelineSelect />);
     expect(wrapper.find(EuiSelectable)).toHaveLength(1);
     const selectable = wrapper.find(EuiSelectable);
-    expect(selectable.prop('height')).toEqual(16 * 6 * 4.5); // TODO: Use euiTheme.base to calculate height
+    expect(selectable.prop('options')[2].checked).toEqual('on');
   });
 });
