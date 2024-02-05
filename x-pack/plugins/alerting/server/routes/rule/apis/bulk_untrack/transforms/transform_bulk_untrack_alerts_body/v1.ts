@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { RewriteRequestCase } from '../../../../../lib';
-import { BulkUntrackBody } from '../../../../../../application/rule/methods/bulk_untrack/types';
+import type { BulkUntrackRequestBodyV1 } from '../../../../../../../common/routes/rule/apis/bulk_untrack';
 
-export const transformRequestBodyToApplication: RewriteRequestCase<BulkUntrackBody> = ({
+export const transformBulkUntrackAlertsBody = ({
   indices,
   alert_uuids: alertUuids,
-}) => ({
+}: BulkUntrackRequestBodyV1) => ({
   indices,
   alertUuids,
 });
