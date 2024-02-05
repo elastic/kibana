@@ -154,7 +154,7 @@ export default function (providerContext: FtrProviderContext) {
         body: {
           doc: {
             [PACKAGES_SAVED_OBJECT_TYPE]: {
-              install_format_schema_version: 999,
+              install_format_schema_version: '99.99.99',
             },
           },
         },
