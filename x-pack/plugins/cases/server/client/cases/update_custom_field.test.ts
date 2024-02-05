@@ -177,7 +177,7 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update case, id: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
+      `"Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
     );
   });
 
@@ -199,7 +199,7 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update case, id: mock-id-1 version:WzAsMV0= : Error: Invalid custom field keys: missing_key"`
+      `"Failed to update customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid custom field keys: missing_key"`
     );
   });
 
@@ -221,7 +221,7 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update case, id: mock-id-1 version:WzAsMV0= : Error: The following custom fields have the wrong type in the request: second_key"`
+      `"Failed to update customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: The following custom fields have the wrong type in the request: second_key"`
     );
   });
 });

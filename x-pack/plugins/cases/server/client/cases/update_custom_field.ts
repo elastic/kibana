@@ -150,7 +150,7 @@ export const updateCustomField = async (
     return decodeOrThrow(CasesRt)([returnUpdatedCase]);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to update case, id: ${args.caseId} version:${args.customFieldPatchDetails.version} : ${error}`,
+      message: `Failed to update customField, id: ${args.customFieldId} of case: ${args.caseId} version:${args.customFieldPatchDetails.version} : ${error}`,
       error,
       logger,
     });
