@@ -13,7 +13,6 @@ import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '@kbn/cases-plugin
 import type { IExternalReferenceMetaDataProps } from './types';
 import { getEndpointDetailsPath } from '../../management/common/routing';
 
-
 const AttachmentContentEvent = (props: {
   externalReferenceMetadata: {
     command: IExternalReferenceMetaDataProps['externalReferenceMetadata']['command'];
