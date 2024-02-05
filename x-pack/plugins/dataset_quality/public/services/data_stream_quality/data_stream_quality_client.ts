@@ -17,6 +17,9 @@ import {
   getDataStreamChecksPath,
   getDatastreamChecksRequestPayloadRT,
   getDatastreamChecksResponsePayloadRT,
+  getDataStreamMitigationPath,
+  MitigationParams,
+  postDatastreamMitigationRequestPayloadRT,
 } from '../../../common';
 import { IDataStreamQualityClient } from './types';
 
@@ -54,5 +57,19 @@ export class DataStreamQualityClient implements IDataStreamQualityClient {
     });
 
     return decodeOrThrow(getDatastreamCheckResponsePayloadRT)(response).result;
+  }
+
+  public async applyMitigation(dataStream: string, mitigation: MitigationParams): Promise<void> {
+    const response = await this.services.http.post(getDataStreamMitigationPath(dataStream), {
+      body: JSON.stringify(
+        postDatastreamMitigationRequestPayloadRT.encode({
+          mitigation,
+        })
+      ),
+      version: '1',
+    });
+
+    // return decodeOrThrow(getDatastreamCheckResponsePayloadRT)(response).result;
+    return;
   }
 }

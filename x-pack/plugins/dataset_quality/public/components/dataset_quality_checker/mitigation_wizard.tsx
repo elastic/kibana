@@ -16,7 +16,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { useActor } from '@xstate/react';
-import React, { useCallback } from 'react';
+import React, { useCallback, useState } from 'react';
 import { Mitigation, QualityProblemCause } from '../../../common';
 import { DetailsPreJson, PreJson } from './json_details';
 import {
@@ -127,33 +127,71 @@ const ConnectedConfiguringMitigationPanel = React.memo(() => {
   }, [send]);
 
   const applyMitigation = useCallback(
-    // (cause: QualityProblemCause, mitigation: Mitigation) => {
-    () => {
+    (cause: QualityProblemCause, mitigation: Mitigation) => {
       send({
         type: 'applyMitigation',
+        cause,
+        mitigation,
       });
     },
     [send]
   );
 
+  const {
+    context: { currentMitigation },
+  } = mitigationState;
+
+  if (currentMitigation == null) {
+    return null;
+  }
+
   return (
-    <EuiPanel hasShadow={false}>
-      <EuiTitle size="s">
-        <div>
-          <EuiButtonIcon
-            iconType="arrowLeft"
-            display="empty"
-            onClick={gotoPrevious}
-            aria-label="return to previous step"
-          />
-          Mitigation
-        </div>
-      </EuiTitle>
-      <EuiSpacer />
-      <EuiButton onClick={applyMitigation}>Apply</EuiButton>
-    </EuiPanel>
+    <ConfigurationMitigationPanel
+      cause={currentMitigation.cause}
+      mitigation={currentMitigation.mitigation}
+      onGotoPrevious={gotoPrevious}
+      onApplyMitigation={applyMitigation}
+    />
   );
 });
+
+const ConfigurationMitigationPanel = React.memo(
+  ({
+    cause,
+    mitigation,
+    onGotoPrevious,
+    onApplyMitigation,
+  }: {
+    cause: QualityProblemCause;
+    mitigation: Mitigation;
+    onGotoPrevious: () => void;
+    onApplyMitigation: (cause: QualityProblemCause, mitigation: Mitigation) => void;
+  }) => {
+    const [configuredMitigation, setConfiguredMitigation] = useState(mitigation);
+
+    return (
+      <EuiPanel hasShadow={false}>
+        <EuiTitle size="s">
+          <div>
+            <EuiButtonIcon
+              iconType="arrowLeft"
+              display="empty"
+              onClick={onGotoPrevious}
+              aria-label="return to previous step"
+            />
+            {`Mitigation ${mitigation.type}`}
+          </div>
+        </EuiTitle>
+        <EuiSpacer />
+        <DetailsPreJson title={`Cause: ${cause.type}`} value={cause} />
+        <EuiSpacer />
+        TODO: add form here
+        <EuiSpacer />
+        <EuiButton onClick={() => onApplyMitigation(cause, configuredMitigation)}>Apply</EuiButton>
+      </EuiPanel>
+    );
+  }
+);
 
 const ConnectedAppliedMitigationPanel = React.memo(() => {
   const [mitigationState, send] = useActor(useDataStreamQualityMitigationStateContext());

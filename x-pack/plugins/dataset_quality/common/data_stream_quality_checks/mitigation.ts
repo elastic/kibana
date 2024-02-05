@@ -62,6 +62,8 @@ export const mitigationParamsRT = rt.union([
   removeFieldMitigationParamsRT,
 ]);
 
+export type MitigationParams = rt.TypeOf<typeof mitigationParamsRT>;
+
 export const mitigationRT = rt.union([
   increaseIgnoreAboveMitigationRT,
   truncateValueMitigationRT,

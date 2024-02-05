@@ -35,6 +35,7 @@ export type {
   IncreaseIgnoreAboveMitigation,
   Mitigation,
   MitigationForCause,
+  MitigationParams,
   MitigationType,
   QualityProblem,
   QualityProblemCause,

@@ -29,7 +29,6 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
 
         // derive @custom mapping component template
         const componentTemplateName = `${indexTemplateName}@custom`;
-
         const updatedFieldMapping: MappingTypeMapping = {
           properties: {
             [args.field]: {
@@ -54,6 +53,10 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
         await elasticsearchClient.asCurrentUser.cluster.putComponentTemplate(nextComponentTemplate);
 
         // update mapping in write index
+        await elasticsearchClient.asCurrentUser.indices.putMapping({
+          index: args.data_stream,
+          ...updatedFieldMapping,
+        });
 
         return;
       },
