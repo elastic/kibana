@@ -59,8 +59,8 @@ interface BaseOptions extends ImageOptions {
   files?: string | string[];
 }
 
-const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
-const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
+export const serverlessProjectTypes = new Set<string>(['es', 'oblt', 'security']);
+export const isServerlessProjectType = (value: string): value is ServerlessProjectType => {
   return serverlessProjectTypes.has(value);
 };
 
@@ -74,7 +74,7 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   /** Publish ES docker container on additional host IP */
   host?: string;
   /**  Serverless project type */
-  projectType?: ServerlessProjectType;
+  projectType: ServerlessProjectType;
   /** Clean (or delete) all data created by the ES cluster after it is stopped */
   clean?: boolean;
   /** Path to the directory where the ES cluster will store data */
@@ -599,16 +599,8 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
       }, {} as Record<string, string>)
     : {};
 
-  // Check if projectType is valid
-  if (projectType && !isServerlessProjectType(projectType)) {
-    throw new Error(
-      `Incorrect serverless project type: ${projectType}, use one of ${Array.from(
-        serverlessProjectTypes
-      ).join(', ')}`
-    );
-  }
-  // Read roles for the specified projectType, 'es' if it is not defined
-  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType ?? 'es', 'roles.yml');
+  // Read roles for the specified projectType
+  const rolesResourcePath = resolve(SERVERLESS_ROLES_ROOT_PATH, projectType, 'roles.yml');
 
   const resourcesPaths = [...SERVERLESS_RESOURCES_PATHS, rolesResourcePath];
 
