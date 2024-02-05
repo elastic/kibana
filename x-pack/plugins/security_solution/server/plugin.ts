@@ -204,7 +204,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaBranch: pluginContext.env.packageInfo.branch,
     });
 
-    appFeaturesService.registerApiAuthorization(core.http);
+    appFeaturesService.registerApiAccessControl(core.http);
     const router = core.http.createRouter<SecuritySolutionRequestHandlerContext>();
     core.http.registerRouteHandlerContext<SecuritySolutionRequestHandlerContext, typeof APP_ID>(
       APP_ID,

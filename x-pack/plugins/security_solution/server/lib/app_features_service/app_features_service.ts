@@ -115,7 +115,7 @@ export class AppFeaturesService {
     return this.isActionRegistered(this.getApiActionName(apiPrivilege));
   }
 
-  public registerApiAuthorization(http: HttpServiceSetup) {
+  public registerApiAccessControl(http: HttpServiceSetup) {
     // The `securitySolutionAppFeature:` prefix is used for AppFeature based control.
     // Should be used only by routes that do not need RBAC, only direct appFeature control.
     const APP_FEATURE_TAG_PREFIX = 'securitySolutionAppFeature:';
