@@ -12,6 +12,7 @@ import {
   EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiPanel,
   EuiPopover,
   EuiSpacer,
@@ -68,10 +69,18 @@ export function InsightBase({
               <AssistantAvatar size="xs" />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText css={{ marginTop: 2, marginBottom: 1 }}>
-                <h5>{title}</h5>
-              </EuiText>
+              <EuiFlexGroup gutterSize="s" alignItems="center">
+                <EuiText css={{ marginTop: 2, marginBottom: 1 }}>
+                  <h5>{title}</h5>
+                </EuiText>
 
+                <EuiIconTip
+                  content={
+                    'Every contextual insight can be changed with a custom prompt defined by the user. You can always reset it to the default.'
+                  }
+                  position="right"
+                />
+              </EuiFlexGroup>
               <EuiText size="s" css={{ color: euiTheme.colors.subduedText }}>
                 <span>{description}</span>
               </EuiText>

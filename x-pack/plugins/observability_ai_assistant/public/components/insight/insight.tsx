@@ -4,7 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTextArea } from '@elastic/eui';
+import {
+  EuiHorizontalRule,
+  EuiButtonEmpty,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiTextArea,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { cloneDeep, last } from 'lodash';
 import React, { useEffect, useRef, useState } from 'react';
 import { MessageRole, type Message } from '../../../common/types';
@@ -181,6 +189,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
+  const [updatedPrompt, setUpdatedPrompt] = useState('');
 
   const connectors = useGenAIConnectors();
 
@@ -204,27 +213,60 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     ((!isInsightOpen && hasOpened) || (isInsightOpen && !isEditingPrompt))
   ) {
     children = (
-      <ChatContent
-        title={title}
-        initialMessages={initialMessages}
-        connectorId={connectors.selectedConnector}
-      />
+      <>
+        {updatedPrompt ? (
+          <>
+            <EuiFlexGroup alignItems="center" gutterSize="none">
+              <EuiFlexItem grow={false}>
+                {i18n.translate('xpack.observabilityAiAssistant.insightModifiedPrompt', {
+                  defaultMessage: 'This insight has been modified.',
+                })}
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiButtonEmpty
+                  data-test-subj="observabilityAiAssistantInsightResetDefaultPrompt"
+                  onClick={() => {
+                    setUpdatedPrompt('');
+                    setHasOpened(false);
+                    setInsightOpen(false);
+                    setInitialMessages(messages);
+                  }}
+                >
+                  {i18n.translate('xpack.observabilityAiAssistant.resetDefaultPrompt', {
+                    defaultMessage: 'Reset to default',
+                  })}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+
+            <EuiHorizontalRule size="full" margin="s" />
+          </>
+        ) : null}
+
+        <ChatContent
+          title={title}
+          initialMessages={initialMessages}
+          connectorId={connectors.selectedConnector}
+        />
+      </>
     );
   } else if (isEditingPrompt) {
     children = (
       <PromptEdit
         initialPrompt={
+          updatedPrompt ||
           last(messages.filter((msg) => msg.message.role === MessageRole.User))?.message.content ||
           ''
         }
-        onSend={(updatedPrompt) => {
+        onSend={(newPrompt) => {
           const clonedMessages = cloneDeep(messages);
           const message = last(
             clonedMessages.filter((msg) => msg.message.role === MessageRole.User)
           );
           if (!message) return false;
 
-          message.message.content = updatedPrompt;
+          message.message.content = newPrompt;
+          setUpdatedPrompt(newPrompt);
           setInitialMessages(clonedMessages);
           setEditingPrompt(false);
           return true;
