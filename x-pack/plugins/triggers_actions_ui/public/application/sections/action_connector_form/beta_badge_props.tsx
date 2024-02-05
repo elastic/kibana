@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const betaBadgeProps = {
+  label: i18n.translate('xpack.triggersActionsUI.betaBadgeLabel', {
+    defaultMessage: 'Beta',
+  }),
+  tooltipContent: i18n.translate('xpack.triggersActionsUI.betaBadgeDescription', {
+    defaultMessage:
+      'This functionality is in beta and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in beta are not subject to the support SLA of official GA features.',
+  }),
+};
+
+export const technicalPreviewBadgeProps = {
   label: i18n.translate('xpack.triggersActionsUI.technicalPreviewBadgeLabel', {
     defaultMessage: 'Technical preview',
   }),

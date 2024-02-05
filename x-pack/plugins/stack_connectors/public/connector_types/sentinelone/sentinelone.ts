@@ -17,9 +17,9 @@ import {
   SUB_ACTION,
 } from '../../../common/sentinelone/constants';
 import type {
+  SentinelOneActionParams,
   SentinelOneConfig,
   SentinelOneSecrets,
-  SentinelOneActionParams,
 } from '../../../common/sentinelone/types';
 
 interface ValidationErrors {
@@ -35,7 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
     id: SENTINELONE_CONNECTOR_ID,
     actionTypeTitle: SENTINELONE_TITLE,
     iconClass: lazy(() => import('./logo')),
-    isExperimental: true,
+    isBeta: true,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.sentinelone.config.selectMessageText',
       {
