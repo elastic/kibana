@@ -77,7 +77,7 @@ export function DatasetSelector({
     searchByName,
     selectAllLogDataset,
     selectDataset,
-    selectDataViewDescriptor,
+    selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
@@ -163,9 +163,9 @@ export function DatasetSelector({
     return dataViews.map((dataView) => ({
       'data-test-subj': getDataViewTestSubj(dataView.title),
       name: <DataViewMenuItem dataView={dataView} />,
-      onClick: () => selectDataViewDescriptor(dataView),
+      onClick: () => selectDataView(dataView),
     }));
-  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataViewDescriptor, onDataViewsReload]);
+  }, [dataViews, dataViewsError, isLoadingDataViews, selectDataView, onDataViewsReload]);
 
   const tabs = [
     {

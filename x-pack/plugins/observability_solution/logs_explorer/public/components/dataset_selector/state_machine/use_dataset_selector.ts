@@ -103,7 +103,7 @@ export const useDatasetSelector = ({
     [datasetsSelectorStateService]
   );
 
-  const selectDataViewDescriptor = useCallback<DataViewSelectionHandler>(
+  const selectDataView = useCallback<DataViewSelectionHandler>(
     (dataViewDescriptor) =>
       datasetsSelectorStateService.send({
         type: 'SELECT_DATA_VIEW',
@@ -143,7 +143,7 @@ export const useDatasetSelector = ({
     searchByName,
     selectAllLogDataset,
     selectDataset,
-    selectDataViewDescriptor,
+    selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
