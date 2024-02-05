@@ -693,7 +693,7 @@ Elastic.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
-|This plugin provides an app based on the LogExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
+|This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]

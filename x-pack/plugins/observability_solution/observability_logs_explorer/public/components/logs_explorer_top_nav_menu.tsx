@@ -27,7 +27,7 @@ import { ConnectedDiscoverLink } from './discover_link';
 import { FeedbackLink } from './feedback_link';
 import { ConnectedOnboardingLink } from './onboarding_link';
 
-export const LogExplorerTopNavMenu = () => {
+export const LogsExplorerTopNavMenu = () => {
   const {
     services: { serverless },
   } = useKibanaContextForPlugin();
