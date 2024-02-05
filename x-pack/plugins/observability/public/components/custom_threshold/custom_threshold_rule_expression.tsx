@@ -458,7 +458,7 @@ export default function Expressions(props: Props) {
                 <PreviewChart
                   metricExpression={e}
                   dataView={dataView}
-                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
+                  searchConfiguration={ruleParams.searchConfiguration}
                   groupBy={ruleParams.groupBy}
                   error={(errors[idx] as IErrorObject) || emptyError}
                 />

@@ -58,7 +58,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         dataView,
         timeFieldName,
         groupBy,
-        searchConfiguration.query.query,
+        searchConfiguration,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -72,7 +72,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         dataView,
         timeFieldName,
         groupBy,
-        searchConfiguration.query.query,
+        searchConfiguration,
         logger,
         calculatedTimerange,
         missingGroups

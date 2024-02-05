@@ -6,7 +6,11 @@
  */
 
 import moment from 'moment';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { Filter } from '@kbn/es-query';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import { getParsedSearchConfiguration } from '../../../../utils/get_parsed_filtered_query';
+import { SearchConfigurationType } from '../types';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   CONTAINER_ID,
@@ -17,7 +21,6 @@ import {
 } from '../utils';
 import { createBucketSelector } from './create_bucket_selector';
 import { wrapInCurrentPeriod } from './wrap_in_period';
-import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_query';
 
 export const calculateCurrentTimeframe = (
   metricParams: CustomMetricExpressionParams,
@@ -27,26 +30,31 @@ export const calculateCurrentTimeframe = (
   start: moment(timeframe.end).subtract(metricParams.timeSize, metricParams.timeUnit).valueOf(),
 });
 
-export const createBaseFilters = (
+const QueryDslQueryContainerToFilter = (queries: QueryDslQueryContainer[]): Filter[] => {
+  return queries.map((query) => ({
+    meta: {},
+    query,
+  }));
+};
+
+export const createBoolQuery = (
   metricParams: CustomMetricExpressionParams,
   timeframe: { start: number; end: number },
   timeFieldName: string,
-  filterQuery?: string
+  searchConfiguration: SearchConfigurationType,
+  additionalQueries: QueryDslQueryContainer[] = []
 ) => {
-  const rangeFilters = [
-    {
-      range: {
-        [timeFieldName]: {
-          gte: moment(timeframe.start).toISOString(),
-          lte: moment(timeframe.end).toISOString(),
-        },
+  const rangeQuery: QueryDslQueryContainer = {
+    range: {
+      [timeFieldName]: {
+        gte: moment(timeframe.start).toISOString(),
+        lte: moment(timeframe.end).toISOString(),
       },
     },
-  ];
+  };
+  const filters = QueryDslQueryContainerToFilter([rangeQuery, ...additionalQueries]);
 
-  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
-
-  return [...rangeFilters, ...parsedFilterQuery];
+  return getParsedSearchConfiguration(searchConfiguration, filters);
 };
 
 export const getElasticsearchMetricQuery = (
@@ -55,9 +63,9 @@ export const getElasticsearchMetricQuery = (
   timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
+  searchConfiguration: SearchConfigurationType,
   lastPeriodEnd?: number,
   groupBy?: string | string[],
-  filterQuery?: string,
   afterKey?: Record<string, string>,
   fieldsExisted?: Record<string, boolean> | null
 ) => {
@@ -184,15 +192,11 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const baseFilters = createBaseFilters(metricParams, timeframe, timeFieldName, filterQuery);
+  const query = createBoolQuery(metricParams, timeframe, timeFieldName, searchConfiguration);
 
   return {
     track_total_hits: true,
-    query: {
-      bool: {
-        filter: baseFilters,
-      },
-    },
+    query,
     size: 0,
     aggs,
   };

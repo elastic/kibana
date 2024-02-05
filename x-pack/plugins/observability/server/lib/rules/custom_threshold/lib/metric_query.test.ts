@@ -11,6 +11,7 @@ import {
   Aggregators,
   CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
+import { SearchConfigurationType } from '../types';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
@@ -27,6 +28,42 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     threshold: [1],
     comparator: Comparator.GT,
   };
+  const searchConfiguration: SearchConfigurationType = {
+    index: {
+      id: 'dataset-logs-*-*',
+      name: 'All logs',
+      timeFieldName: '@timestamp',
+      title: 'logs-*-*',
+    },
+    query: {
+      language: 'kuery',
+      query: '',
+    },
+    filter: [
+      {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          alias: null,
+          disabled: false,
+          field: 'service.name',
+          key: 'service.name',
+          negate: false,
+          params: {
+            query: 'synth-node-2',
+          },
+          type: 'phrase',
+          index: 'dataset-logs-*-*',
+        },
+        query: {
+          match_phrase: {
+            'service.name': 'synth-node-2',
+          },
+        },
+      },
+    ],
+  };
 
   const groupBy = 'host.doggoname';
   const timeFieldName = 'mockedTimeFieldName';
@@ -42,6 +79,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       timeFieldName,
       100,
       true,
+      searchConfiguration,
       void 0,
       groupBy
     );
@@ -83,6 +121,13 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     // We want to make sure it doesn't override any existing filters
     // https://github.com/elastic/kibana/issues/68492
     const filterQuery = 'NOT host.name:dv* and NOT host.name:ts*';
+    const currentSearchConfiguration = {
+      ...searchConfiguration,
+      query: {
+        language: 'kuery',
+        query: filterQuery,
+      },
+    };
 
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
@@ -90,9 +135,9 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       timeFieldName,
       100,
       true,
+      currentSearchConfiguration,
       void 0,
-      groupBy,
-      filterQuery
+      groupBy
     );
     test('includes a range filter', () => {
       expect(

@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { act } from 'react-dom/test-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -35,7 +36,7 @@ describe('Preview chart', () => {
       <PreviewChart
         metricExpression={expression}
         dataView={dataView}
-        filterQuery={''}
+        searchConfiguration={{} as SerializedSearchSourceFields}
         groupBy={[]}
         error={{}}
       />

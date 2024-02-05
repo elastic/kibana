@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { Query } from '@kbn/es-query';
 import { FillStyle, OperationType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -32,8 +35,8 @@ import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
 
 interface PreviewChartPros {
   metricExpression: MetricExpression;
+  searchConfiguration: SerializedSearchSourceFields;
   dataView?: DataView;
-  filterQuery?: string;
   groupBy?: string | string[];
   error?: IErrorObject;
 }
@@ -47,10 +50,15 @@ const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
 export const getBufferThreshold = (threshold?: number): string =>
   (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
 
+const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
+};
+
 export function PreviewChart({
   metricExpression,
+  searchConfiguration,
   dataView,
-  filterQuery,
   groupBy,
   error,
 }: PreviewChartPros) {
@@ -279,7 +287,7 @@ export function PreviewChart({
     comparator,
     dataView,
     equation,
-    filterQuery,
+    searchConfiguration,
     formula,
     formulaAsync.value,
     groupBy,
@@ -330,10 +338,8 @@ export function PreviewChart({
         timeRange={{ from: `now-${timeSize * 20}${timeUnit}`, to: 'now' }}
         attributes={attributes}
         disableTriggers={true}
-        query={{
-          language: 'kuery',
-          query: filterQuery || '',
-        }}
+        query={(searchConfiguration.query as Query) || defaultQuery}
+        filters={searchConfiguration.filter}
       />
     </div>
   );
