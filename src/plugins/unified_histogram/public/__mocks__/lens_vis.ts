@@ -15,7 +15,7 @@ import { unifiedHistogramServicesMock } from './services';
 import { histogramESQLSuggestionMock } from './suggestions';
 import { UnifiedHistogramSuggestionContext, UnifiedHistogramLensAttributesContext } from '../types';
 
-const timeRange: TimeRange = {
+const TIME_RANGE: TimeRange = {
   from: '2022-11-17T00:00:00.000Z',
   to: '2022-11-17T12:00:00.000Z',
 };
@@ -27,6 +27,7 @@ export const getLensVisMock = async ({
   columns,
   isPlainRecord,
   timeInterval,
+  timeRange,
   breakdownField,
   dataView,
   allSuggestions,
@@ -39,6 +40,7 @@ export const getLensVisMock = async ({
   columns: DatatableColumn[];
   isPlainRecord: boolean;
   timeInterval: string;
+  timeRange?: TimeRange | null;
   breakdownField: DataViewField | undefined;
   allSuggestions?: Suggestion[];
   hasHistogramSuggestionForESQL?: boolean;
@@ -77,7 +79,7 @@ export const getLensVisMock = async ({
       query,
       filters,
       dataView,
-      timeRange,
+      timeRange: timeRange ?? TIME_RANGE,
       columns,
       isPlainRecord,
     },

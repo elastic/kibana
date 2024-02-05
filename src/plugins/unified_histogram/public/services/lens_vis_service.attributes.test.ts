@@ -15,7 +15,7 @@ import {
 import { currentSuggestionMock } from '../__mocks__/suggestions';
 import { getLensVisMock } from '../__mocks__/lens_vis';
 
-describe('LensVisService', () => {
+describe('LensVisService attributes', () => {
   const dataView: DataView = dataViewWithTimefieldMock;
   const filters: Filter[] = [
     {
