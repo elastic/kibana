@@ -72,18 +72,21 @@ export const isIKibanaSearchResponse = (arg: unknown): arg is IKibanaSearchRespo
   return isPopulatedObject(arg, ['rawResponse']);
 };
 
-export interface NumericFieldStats {
+export interface NonSampledNumericFieldStats {
   fieldName: string;
   count?: number;
   min?: number;
   max?: number;
   avg?: number;
+  median?: number;
+  distribution?: Distribution;
+}
+
+export interface NumericFieldStats extends NonSampledNumericFieldStats {
   isTopValuesSampled: boolean;
   topValues: Bucket[];
   topValuesSampleSize: number;
   topValuesSamplerShardSize: number;
-  median?: number;
-  distribution?: Distribution;
 }
 
 export interface StringFieldStats {
@@ -178,6 +181,7 @@ export type ChartRequestAgg = AggHistogram | AggCardinality | AggTerms;
 export type ChartData = NumericChartData | OrdinalChartData | UnsupportedChartData;
 
 export type BatchStats =
+  | NonSampledNumericFieldStats
   | NumericFieldStats
   | StringFieldStats
   | BooleanFieldStats
@@ -186,6 +190,7 @@ export type BatchStats =
   | FieldExamples;
 
 export type FieldStats =
+  | NonSampledNumericFieldStats
   | NumericFieldStats
   | StringFieldStats
   | BooleanFieldStats
@@ -199,7 +204,6 @@ export function isValidFieldStats(arg: unknown): arg is FieldStats {
 
 export interface FieldStatsCommonRequestParams {
   index: string;
-  samplerShardSize: number;
   timeFieldName?: string;
   earliestMs?: number | undefined;
   latestMs?: number | undefined;
@@ -222,7 +226,6 @@ export interface OverallStatsSearchStrategyParams {
   aggInterval: TimeBucketsInterval;
   intervalMs?: number;
   searchQuery: Query['query'];
-  samplerShardSize: number;
   index: string;
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;

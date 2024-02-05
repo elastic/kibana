@@ -65,6 +65,10 @@ describe('CreateSourceEditor', () => {
         ],
         dateField: '@timestamp',
         esql: 'from logs | keep location | limit 10000',
+        geoField: 'location',
+        narrowByGlobalSearch: true,
+        narrowByGlobalTime: true,
+        narrowByMapBounds: true,
       })
     );
   });
@@ -87,6 +91,10 @@ describe('CreateSourceEditor', () => {
         ],
         dateField: undefined,
         esql: 'from world_countries | keep geometry | limit 10000',
+        geoField: 'geometry',
+        narrowByGlobalSearch: true,
+        narrowByGlobalTime: false,
+        narrowByMapBounds: true,
       })
     );
   });

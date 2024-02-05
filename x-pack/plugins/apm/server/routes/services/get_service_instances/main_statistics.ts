@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { keyBy, orderBy } from 'lodash';
+import { InstancesSortField } from '../../../../common/instances';
 import { LatencyAggregationType } from '../../../../common/latency_aggregation_types';
-import { joinByKey } from '../../../../common/utils/join_by_key';
-import { withApmSpan } from '../../../utils/with_apm_span';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { withApmSpan } from '../../../utils/with_apm_span';
 import { getServiceInstancesSystemMetricStatistics } from './get_service_instances_system_metric_statistics';
 import { getServiceInstancesTransactionStatistics } from './get_service_instances_transaction_statistics';
 
@@ -24,6 +25,8 @@ interface ServiceInstanceMainStatisticsParams {
   start: number;
   end: number;
   offset?: string;
+  sortField: InstancesSortField;
+  sortDirection: 'asc' | 'desc';
 }
 
 export type ServiceInstanceMainStatisticsResponse = Array<{
@@ -35,31 +38,39 @@ export type ServiceInstanceMainStatisticsResponse = Array<{
   memoryUsage?: number | null;
 }>;
 
-export async function getServiceInstancesMainStatistics(
-  params: Omit<ServiceInstanceMainStatisticsParams, 'size'>
-): Promise<ServiceInstanceMainStatisticsResponse> {
+export async function getServiceInstancesMainStatistics({
+  sortDirection,
+  sortField,
+  ...params
+}: Omit<
+  ServiceInstanceMainStatisticsParams,
+  'size'
+>): Promise<ServiceInstanceMainStatisticsResponse> {
   return withApmSpan('get_service_instances_main_statistics', async () => {
     const paramsForSubQueries = {
       ...params,
-      size: 50,
+      size: 1000,
     };
 
-    const [transactionStats, systemMetricStats] = await Promise.all([
-      getServiceInstancesTransactionStatistics({
-        ...paramsForSubQueries,
-        isComparisonSearch: false,
-      }),
-      getServiceInstancesSystemMetricStatistics({
-        ...paramsForSubQueries,
-        isComparisonSearch: false,
-      }),
-    ]);
+    const transactionStats = await getServiceInstancesTransactionStatistics({
+      ...paramsForSubQueries,
+      includeTimeseries: false,
+    });
+    const serviceNodeIds = transactionStats.map((item) => item.serviceNodeName);
+    const systemMetricStats = await getServiceInstancesSystemMetricStatistics({
+      ...paramsForSubQueries,
+      includeTimeseries: false,
+      serviceNodeIds,
+    });
 
-    const stats = joinByKey(
-      [...transactionStats, ...systemMetricStats],
-      'serviceNodeName'
-    );
+    const systemMetricStatsMap = keyBy(systemMetricStats, 'serviceNodeName');
+    const stats = transactionStats.length
+      ? transactionStats.map((item) => ({
+          ...item,
+          ...(systemMetricStatsMap[item.serviceNodeName] || {}),
+        }))
+      : systemMetricStats;
 
-    return stats;
+    return orderBy(stats, sortField, sortDirection).slice(0, 100);
   });
 }

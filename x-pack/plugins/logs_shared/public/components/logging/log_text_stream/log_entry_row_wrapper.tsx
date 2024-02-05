@@ -28,7 +28,7 @@ export const LogEntryRowWrapper = euiStyled.div.attrs(() => ({
     }
   `;
 
-interface LogEntryRowWrapperProps {
+export interface LogEntryRowWrapperProps {
   scale: TextScale;
   isHighlighted?: boolean;
 }

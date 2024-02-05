@@ -523,6 +523,7 @@
     "hosts",
     "is_default",
     "is_default_monitoring",
+    "is_internal",
     "is_preconfigured",
     "key",
     "name",
@@ -631,6 +632,7 @@
   "fleet-fleet-server-host": [
     "host_urls",
     "is_default",
+    "is_internal",
     "is_preconfigured",
     "name",
     "proxy_id"
