@@ -81,7 +81,9 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/serverless",
     "@kbn/deeplinks-observability",
-    "@kbn/managed-content-badge"
+    "@kbn/esql-utils",
+    "@kbn/managed-content-badge",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

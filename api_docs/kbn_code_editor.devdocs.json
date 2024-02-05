@@ -333,6 +333,23 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.codeActions",
+            "type": "Object",
+            "tags": [],
+            "label": "codeActions",
+            "description": [
+              "\nCodeAction provider for code actions on markers feedback\nDocumentation for the provider can be found here:\nhttps://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html"
+            ],
+            "signature": [
+              "languages",
+              ".CodeActionProvider | undefined"
+            ],
+            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorProps.editorWillMount",
             "type": "Function",
             "tags": [],

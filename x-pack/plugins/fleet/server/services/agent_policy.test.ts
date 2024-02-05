@@ -387,6 +387,18 @@ describe('agent policy', () => {
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
+
+    it('should throw error if active agents are assigned to the policy', async () => {
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 2,
+        page: 1,
+        perPage: 10,
+      });
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+        'Cannot delete an agent policy that is assigned to any active or inactive agents'
+      );
+    });
   });
 
   describe('bumpRevision', () => {

@@ -12,6 +12,7 @@ import { Filter } from '@kbn/es-query';
 import { useEffect, useRef, useState } from 'react';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/slo/constants';
 import type { SortField, SortDirection } from '../components/slo_list_search_bar';
+import type { GroupByField } from '../components/slo_list_group_by';
 import type { SLOView } from '../components/toggle_slo_view';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
@@ -25,13 +26,11 @@ export interface SearchState {
     direction: SortDirection;
   };
   view: SLOView;
-  compact: boolean;
+  groupBy: GroupByField;
   filters: Filter[];
   lastRefresh?: number;
-  tags?: {
-    included?: string[];
-    excluded?: string[];
-  };
+  tagsFilter?: Filter;
+  statusFilter?: Filter;
 }
 
 export const DEFAULT_STATE = {
@@ -40,7 +39,7 @@ export const DEFAULT_STATE = {
   perPage: DEFAULT_SLO_PAGE_SIZE,
   sort: { by: 'status' as const, direction: 'desc' as const },
   view: 'cardView' as const,
-  compact: true,
+  groupBy: 'ungrouped' as const,
   filters: [],
   lastRefresh: 0,
 };
@@ -76,7 +75,6 @@ export function useUrlSearchState(): {
       sub?.unsubscribe();
     };
   }, [urlStateStorage]);
-
   return {
     state: deepmerge(DEFAULT_STATE, state),
     store: (newState: Partial<SearchState>) =>
