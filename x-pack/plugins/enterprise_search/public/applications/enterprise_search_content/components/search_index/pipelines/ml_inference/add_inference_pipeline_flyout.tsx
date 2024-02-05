@@ -41,7 +41,6 @@ import { IndexViewLogic } from '../../index_view_logic';
 import { ConfigureFields } from './configure_fields';
 import { ConfigurePipeline } from './configure_pipeline';
 import { MLInferenceLogic } from './ml_inference_logic';
-import { NoModelsPanel } from './no_models';
 import { ReviewPipeline } from './review_pipeline';
 import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
@@ -82,7 +81,6 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
   const { ingestionMethod } = useValues(IndexViewLogic);
   const {
     createErrors,
-    selectableModels,
     isLoading,
     addInferencePipelineModal: { step },
   } = useValues(MLInferenceLogic);
@@ -102,9 +100,6 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         <EuiLoadingSpinner size="xl" />
       </EuiFlyoutBody>
     );
-  }
-  if (selectableModels.length === 0) {
-    return <NoModelsPanel />;
   }
 
   return (
