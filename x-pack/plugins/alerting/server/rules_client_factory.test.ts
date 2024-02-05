@@ -60,6 +60,8 @@ const rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts> = {
     alertingAuthorizationClientFactory as unknown as AlertingAuthorizationClientFactory,
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
 };
 
 const actionsAuthorization = actionsAuthorizationMock.create();

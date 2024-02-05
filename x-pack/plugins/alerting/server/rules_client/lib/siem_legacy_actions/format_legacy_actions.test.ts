@@ -610,6 +610,7 @@ describe('formatLegacyActions', () => {
             group: 'group_1',
             id: 'action-123',
             params: {},
+            type: 'default',
           },
         ],
         id: 'alert-123',

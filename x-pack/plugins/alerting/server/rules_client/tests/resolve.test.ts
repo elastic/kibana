@@ -124,11 +124,14 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -304,11 +307,14 @@ describe('resolve()', () => {
       Object {
         "actions": Array [
           Object {
+            "actionTypeId": undefined,
             "group": "default",
             "id": "1",
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",

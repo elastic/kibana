@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { pick } from 'lodash';
+import { omit, pick } from 'lodash';
 import { updateRuleRoute } from './update_rule';
 import { httpServiceMock } from '@kbn/core/server/mocks';
 import { licenseStateMock } from '../lib/license_state.mock';
@@ -16,7 +16,6 @@ import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { RuleActionTypes, RuleNotifyWhen, SanitizedDefaultRuleAction } from '../../common';
 import { AsApiContract } from './lib';
-import { PartialRule } from '../types';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
@@ -78,14 +77,14 @@ describe('updateRuleRoute', () => {
     ],
   };
 
-  const updateResult: AsApiContract<PartialRule<{ otherField: boolean }>> = {
+  const updateResult = {
     ...updateRequest,
     id: mockedAlert.id,
     updated_at: mockedAlert.updatedAt,
     created_at: mockedAlert.createdAt,
     rule_type_id: mockedAlert.alertTypeId,
     actions: mockedAlert.actions.map(({ actionTypeId, alertsFilter, ...rest }) => ({
-      ...rest,
+      ...omit(rest, 'type'),
       connector_type_id: actionTypeId,
       alerts_filter: alertsFilter,
     })),
@@ -135,6 +134,7 @@ describe('updateRuleRoute', () => {
                 "params": Object {
                   "baz": true,
                 },
+                "type": "default",
                 "uuid": "1234-5678",
               },
             ],
