@@ -82,7 +82,8 @@
     "@kbn/serverless",
     "@kbn/deeplinks-observability",
     "@kbn/esql-utils",
-    "@kbn/managed-content-badge"
+    "@kbn/managed-content-badge",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }
