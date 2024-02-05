@@ -74,7 +74,7 @@ export const UNSAVED_TIMELINE_SAVE_PROMPT_TITLE = i18n.translate(
   }
 );
 
-const getAgentTypeName = (agentType: ResponseActionAgentType) => {
+export const getAgentTypeName = (agentType: ResponseActionAgentType) => {
   switch (agentType) {
     case 'endpoint':
       return 'Endpoint';
