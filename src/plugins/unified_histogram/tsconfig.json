@@ -30,6 +30,7 @@
     "@kbn/i18n-react",
     "@kbn/field-utils",
     "@kbn/esql-utils",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",
