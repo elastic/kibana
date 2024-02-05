@@ -6,13 +6,13 @@ env:
 
 steps:
   - label: ':label: Create tag'
-    command: .buildkite/scripts/steps/serverless/tag.sh
-    if: build.branch =~ /^deploy-fix.*\$/
+    command: .buildkite/scripts/serverless/create_deploy_tag/create_fix_tag.sh
+    if: build.branch =~ /^deploy-fix@.*\$/
 
-  # - label: ':argo: Emergency Release'
-  #   if: build.tag =~ /^deploy-hotfix-.*\$/ && build.branch =~ /^hotfix-.*\$/
-  #   trigger: gpctl-promote
-  #   build:
-  #     env:
-  #       REMOTE_SERVICE_CONFIG: "${EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG}"
-  #       SERVICE_COMMIT_HASH: "${VERSION}"
+  - label: ':argo: Emergency Release'
+    if: build.tag =~ /^deploy-fix@-.*\$/ && build.branch =~ /^deploy-fix@.*\$/
+    trigger: gpctl-promote
+    build:
+      env:
+        REMOTE_SERVICE_CONFIG: "${EMERGENCY_RELEASE_REMOTE_SERVICE_CONFIG}"
+        SERVICE_COMMIT_HASH: "${VERSION}"
