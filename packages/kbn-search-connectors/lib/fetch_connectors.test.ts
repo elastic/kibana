@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CONNECTORS_INDEX } from '..';
+import { CONNECTORS_INDEX, listConnectors } from '..';
 
 import { fetchConnectorById, fetchConnectorByIndexName, fetchConnectors } from './fetch_connectors';
 
@@ -34,6 +34,9 @@ describe('fetchConnectors lib', () => {
   const mockClient = {
     get: jest.fn(),
     search: jest.fn(),
+    transport: {
+      request: jest.fn(),
+    },
   };
 
   beforeEach(() => {
@@ -186,6 +189,30 @@ describe('fetchConnectors lib', () => {
         index: CONNECTORS_INDEX,
         query: { match_all: {} },
         size: 1000,
+      });
+    });
+  });
+  describe('list connectors', () => {
+    it('should list connectors', async () => {
+      mockClient.transport.request.mockImplementationOnce(() => ({
+        count: 22,
+        results: [],
+      }));
+      await expect(listConnectors(mockClient as any, 0, 10)).resolves.toEqual({
+        _meta: {
+          page: {
+            from: 0,
+            has_more_hits_than_total: true,
+            size: 10,
+            total: 22,
+          },
+        },
+        data: [],
+      });
+      expect(mockClient.transport.request).toHaveBeenCalledWith({
+        method: 'GET',
+        path: '/_connector',
+        querystring: 'from=0&size=10',
       });
     });
   });

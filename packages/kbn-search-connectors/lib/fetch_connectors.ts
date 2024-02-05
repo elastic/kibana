@@ -13,7 +13,12 @@ import { OptimisticConcurrency } from '../types/optimistic_concurrency';
 import { Connector, ConnectorDocument } from '../types/connectors';
 
 import { isIndexNotFoundException } from '../utils/identify_exceptions';
-import { CONNECTORS_INDEX, CRAWLER_SERVICE_TYPE } from '..';
+import {
+  CONNECTORS_INDEX,
+  ConnectorsAPIConnectorResponse,
+  CRAWLER_SERVICE_TYPE,
+  Paginate,
+} from '..';
 import { isNotNullish } from '../utils/is_not_nullish';
 
 export const fetchConnectorById = async (
@@ -128,4 +133,28 @@ export const fetchConnectors = async (
     }
     throw error;
   }
+};
+
+export const listConnectors = async (
+  client: ElasticsearchClient,
+  from: number = 0,
+  size: number = 100
+): Promise<Paginate<Connector>> => {
+  const result = await client.transport.request<ConnectorsAPIConnectorResponse>({
+    method: 'GET',
+    path: `/_connector`,
+    querystring: `from=${from}&size=${size}`,
+  });
+
+  return {
+    _meta: {
+      page: {
+        from,
+        has_more_hits_than_total: result.count > from + size,
+        size,
+        total: result.count,
+      },
+    },
+    data: result.results,
+  };
 };
