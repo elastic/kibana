@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
+import React, { FC, useEffect, useState, useCallback, useContext, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
@@ -14,7 +14,7 @@ import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs'
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../../common/constants/search';
 import { Annotation } from '../../../../../common/types/annotations';
 import { useMlKibana, useNotifications } from '../../../contexts/kibana';
-import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
+import { timeBucketsProvider } from '../../../util/time_buckets_util';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
@@ -49,7 +49,8 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   const { toasts: toastNotifications } = useNotifications();
   const {
     services: {
-      mlServices: { mlApiServices, mlUtilsService },
+      mlServices: { mlApiServices },
+      uiSettings,
     },
   } = useMlKibana();
 
@@ -70,19 +71,18 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const getBoundsRoundedToInterval = useMemo(
+    () => timeBucketsProvider(uiSettings).getBoundsRoundedToInterval,
+    [uiSettings]
+  );
+
   useEffect(() => {
     let unmounted = false;
     const entities = getControlsForDetector(detectorIndex, selectedEntities, selectedJob.job_id);
     const nonBlankEntities = Array.isArray(entities)
       ? entities.filter((entity) => entity.fieldValue !== null)
       : undefined;
-    const searchBounds = mlUtilsService
-      ? mlUtilsService.mlTimeBuckets.getBoundsRoundedToInterval(
-          bounds,
-          contextAggregationInterval,
-          false
-        )
-      : getBoundsRoundedToInterval(bounds, contextAggregationInterval, false);
+    const searchBounds = getBoundsRoundedToInterval(bounds, contextAggregationInterval, false);
 
     /**
      * Loads the full list of annotations for job without any aggs or time boundaries

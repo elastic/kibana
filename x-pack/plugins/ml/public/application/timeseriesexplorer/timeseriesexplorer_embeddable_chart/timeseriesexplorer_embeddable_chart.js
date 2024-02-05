@@ -52,6 +52,8 @@ import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMetricDetector } from '../get_function_description';
 import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
+import { timeBucketsProvider } from '../../util/time_buckets_util';
+import { timeSeriesExplorerProvider } from '../../util/timeseriesexplorer_utils';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -132,6 +134,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
    * Access ML services in react context.
    */
   static contextType = context;
+
+  getBoundsRoundedToInterval;
+  mlTimeSeriesExplorer;
 
   /**
    * Returns field names that don't have a selection yet.
@@ -216,7 +221,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     // Calculate the aggregation interval for the focus chart.
     const bounds = { min: moment(selection.from), max: moment(selection.to) };
 
-    return this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.calculateAggregationInterval(
+    return this.mlTimeSeriesExplorer.calculateAggregationInterval(
       bounds,
       CHARTS_POINT_TARGET,
       selectedJob
@@ -242,14 +247,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
     // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
     // to some extent with all detector functions if not searching complete buckets.
-    const searchBounds =
-      this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getBoundsRoundedToInterval(
-        bounds,
-        focusAggregationInterval,
-        false
-      );
+    const searchBounds = this.getBoundsRoundedToInterval(bounds, focusAggregationInterval, false);
 
-    return this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.getFocusData(
+    return this.mlTimeSeriesExplorer.getFocusData(
       this.getCriteriaFields(selectedDetectorIndex, entityControls),
       selectedDetectorIndex,
       focusAggregationInterval,
@@ -369,23 +369,21 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
               this.arePartitioningFieldsProvided() === true
             ) {
               // Check for a zoom parameter in the appState (URL).
-              let focusRange =
-                this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.calculateInitialFocusRange(
-                  zoom,
-                  stateUpdate.contextAggregationInterval,
-                  bounds
-                );
+              let focusRange = this.mlTimeSeriesExplorer.calculateInitialFocusRange(
+                zoom,
+                stateUpdate.contextAggregationInterval,
+                bounds
+              );
               if (
                 focusRange === undefined ||
                 this.previousSelectedForecastId !== this.props.selectedForecastId
               ) {
-                focusRange =
-                  this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.calculateDefaultFocusRange(
-                    autoZoomDuration,
-                    stateUpdate.contextAggregationInterval,
-                    stateUpdate.contextChartData,
-                    stateUpdate.contextForecastData
-                  );
+                focusRange = this.mlTimeSeriesExplorer.calculateDefaultFocusRange(
+                  autoZoomDuration,
+                  stateUpdate.contextAggregationInterval,
+                  stateUpdate.contextChartData,
+                  stateUpdate.contextForecastData
+                );
                 this.previousSelectedForecastId = this.props.selectedForecastId;
               }
 
@@ -420,7 +418,7 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         // Calculate the aggregation interval for the context chart.
         // Context chart swimlane will display bucket anomaly score at the same interval.
         stateUpdate.contextAggregationInterval =
-          this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.calculateAggregationInterval(
+          this.mlTimeSeriesExplorer.calculateAggregationInterval(
             bounds,
             CHARTS_POINT_TARGET,
             selectedJob
@@ -429,12 +427,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
         // Ensure the search bounds align to the bucketing interval so that the first and last buckets are complete.
         // For sum or count detectors, short buckets would hold smaller values, and model bounds would also be affected
         // to some extent with all detector functions if not searching complete buckets.
-        const searchBounds =
-          this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getBoundsRoundedToInterval(
-            bounds,
-            stateUpdate.contextAggregationInterval,
-            false
-          );
+        const searchBounds = this.getBoundsRoundedToInterval(
+          bounds,
+          stateUpdate.contextAggregationInterval,
+          false
+        );
 
         // Query 1 - load metric data at low granularity across full time range.
         // Pass a counter flag into the finish() function to make sure we only process the results
@@ -453,11 +450,10 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
           )
           .toPromise()
           .then((resp) => {
-            const fullRangeChartData =
-              this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.processMetricPlotResults(
-                resp.results,
-                modelPlotEnabled
-              );
+            const fullRangeChartData = this.mlTimeSeriesExplorer.processMetricPlotResults(
+              resp.results,
+              modelPlotEnabled
+            );
             stateUpdate.contextChartData = fullRangeChartData;
             finish(counter);
           })
@@ -480,10 +476,9 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
             functionToPlotByIfMetric
           )
           .then((resp) => {
-            const fullRangeRecordScoreData =
-              this.context.services.mlServices.mlUtilsService.mlTimeSeriesExplorer.processRecordScoreResults(
-                resp.results
-              );
+            const fullRangeRecordScoreData = this.mlTimeSeriesExplorer.processRecordScoreResults(
+              resp.results
+            );
             stateUpdate.swimlaneData = fullRangeRecordScoreData;
             finish(counter);
           })
@@ -555,6 +550,16 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   }
 
   async componentDidMount() {
+    this.getBoundsRoundedToInterval = timeBucketsProvider(
+      this.context.services.uiSettings
+    ).getBoundsRoundedToInterval;
+
+    this.mlTimeSeriesExplorer = timeSeriesExplorerProvider(
+      this.context.services.uiSettings,
+      this.context.services.mlServices.mlApiServices,
+      this.context.services.mlServices.mlResultsService
+    );
+
     // Listen for context chart updates.
     this.subscriptions.add(
       this.contextChart$

@@ -7,7 +7,7 @@
 
 import { mlJobService } from '../services/job_service';
 import { Entity } from './components/entity_control/entity_control';
-import { JobId, CombinedJob } from '../../../common/types/anomaly_detection_jobs';
+import type { JobId, CombinedJob } from '../../../common/types/anomaly_detection_jobs';
 
 /**
  * Extracts entities from the detector configuration

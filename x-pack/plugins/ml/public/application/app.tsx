@@ -33,8 +33,6 @@ import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
-import type { TimeBucketsService } from './util/time_buckets_util';
-import type { TimeSeriesExplorerService } from './util/timeseriesexplorer_utils';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -72,12 +70,7 @@ export interface MlServicesContext {
   mlServices: MlGlobalServices;
 }
 
-export type MlGlobalServices = ReturnType<typeof getMlGlobalServices> & {
-  mlUtilsService?: {
-    mlTimeBuckets: TimeBucketsService;
-    mlTimeSeriesExplorer: TimeSeriesExplorerService;
-  };
-};
+export type MlGlobalServices = ReturnType<typeof getMlGlobalServices>;
 
 const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFeatures }) => {
   const pageDeps: PageDependencies = {

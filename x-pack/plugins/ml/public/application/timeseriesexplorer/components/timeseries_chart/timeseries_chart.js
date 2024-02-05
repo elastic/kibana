@@ -34,7 +34,7 @@ import {
   showMultiBucketAnomalyTooltip,
   getMultiBucketImpactTooltipValue,
 } from '../../../util/chart_utils';
-import { getTimeBucketsFromCache } from '../../../util/time_buckets';
+import { timeBucketsProvider } from '../../../util/time_buckets_util';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -108,7 +108,7 @@ class TimeseriesChartIntl extends Component {
     contextForecastData: PropTypes.array,
     contextChartSelected: PropTypes.func.isRequired,
     detectorIndex: PropTypes.number,
-    embeddableMode: PropTypes.boolean,
+    embeddableMode: PropTypes.bool,
     focusAggregationInterval: PropTypes.object,
     focusAnnotationData: PropTypes.array,
     focusChartData: PropTypes.array,
@@ -128,6 +128,7 @@ class TimeseriesChartIntl extends Component {
   };
 
   static contextType = context;
+  getTimeBucketsFromCache;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
@@ -145,6 +146,10 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
+    this.getTimeBucketsFromCache = timeBucketsProvider(
+      this.context.services.uiSettings
+    ).getTimeBucketsFromCache;
+
     const { svgWidth } = this.props;
 
     this.vizWidth = svgWidth - margin.left - margin.right;
@@ -720,9 +725,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = this.context?.services?.mlServices?.mlUtilsService?.mlTimeBuckets
-      ? this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getTimeBucketsFromCache()
-      : getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBucketsFromCache();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1110,9 +1113,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', brushChartHeight);
 
     // Add x axis.
-    const timeBuckets = this.context?.services?.mlServices?.mlUtilsService?.mlTimeBuckets
-      ? this.context.services.mlServices.mlUtilsService.mlTimeBuckets.getTimeBucketsFromCache()
-      : getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBucketsFromCache();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

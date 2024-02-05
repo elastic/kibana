@@ -85,12 +85,6 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
       showFrozenDataTierChoice: false,
     };
 
-    const { mlTimeBuckets, mlTimeSeriesExplorer } = this.services[2];
-    const mlUtilsService = {
-      mlTimeBuckets,
-      mlTimeSeriesExplorer,
-    };
-
     ReactDOM.render(
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
@@ -98,7 +92,6 @@ export class SingleMetricViewerEmbeddable extends Embeddable<
             services={{
               mlServices: {
                 ...this.services[2],
-                mlUtilsService,
               },
               ...this.services[0],
             }}

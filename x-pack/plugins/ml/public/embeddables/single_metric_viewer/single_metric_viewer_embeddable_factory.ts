@@ -72,47 +72,34 @@ export class SingleMetricViewerEmbeddableFactory
   }
 
   private async getServices(): Promise<SingleMetricViewerEmbeddableServices> {
-    const [coreStart, pluginsStart] = await this.getStartServices();
-
-    const { AnomalyDetectorService } = await import(
-      '../../application/services/anomaly_detector_service'
-    );
-    const { fieldFormatServiceProvider } = await import(
-      '../../application/services/field_format_service_provider'
-    );
-    const { forecastServiceProvider } = await import(
-      '../../application/services/forecast_service_provider'
-    );
-
-    const { indexUtilsProvider } = await import('../../application/util/index_utils_provider');
-    const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
-    const { mlResultsServiceProvider } = await import('../../application/services/results_service');
-    const { timeBucketsProvider } = await import('../../application/util/time_buckets_util');
-    const { timeSeriesExplorerProvider } = await import(
-      '../../application/util/timeseriesexplorer_utils'
-    );
-    const { timeSeriesSearchServiceProvider } = await import(
-      '../../application/timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider'
-    );
+    const [
+      [coreStart, pluginsStart],
+      { AnomalyDetectorService },
+      { fieldFormatServiceProvider },
+      { indexUtilsProvider },
+      { mlApiServicesProvider },
+      { mlResultsServiceProvider },
+      { timeSeriesSearchServiceProvider },
+    ] = await Promise.all([
+      await this.getStartServices(),
+      await import('../../application/services/anomaly_detector_service'),
+      await import('../../application/services/field_format_service_provider'),
+      await import('../../application/util/index_utils_provider'),
+      await import('../../application/services/ml_api_service'),
+      await import('../../application/services/results_service'),
+      await import(
+        '../../application/timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider'
+      ),
+    ]);
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
-    const mlTimeBuckets = timeBucketsProvider(coreStart.uiSettings);
     const mlIndexUtils = indexUtilsProvider(pluginsStart.data.dataViews);
     const mlTimeSeriesSearchService = timeSeriesSearchServiceProvider(
       mlResultsService,
       mlApiServices
-    );
-    const mlForecastService = forecastServiceProvider(mlApiServices);
-    const mlTimeSeriesExplorer = timeSeriesExplorerProvider(
-      coreStart.uiSettings,
-      mlApiServices.annotations,
-      mlApiServices.results,
-      mlResultsService,
-      mlTimeSeriesSearchService,
-      mlForecastService
     );
     const mlFieldFormatService = fieldFormatServiceProvider(mlApiServices, mlIndexUtils);
 
@@ -130,8 +117,6 @@ export class SingleMetricViewerEmbeddableFactory
         anomalyExplorerService,
         mlResultsService,
         mlApiServices,
-        mlTimeBuckets,
-        mlTimeSeriesExplorer,
         mlTimeSeriesSearchService,
         mlFieldFormatService,
       },

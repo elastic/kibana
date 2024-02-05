@@ -60,7 +60,7 @@ export function forecastServiceProvider(mlApiServices: MlApiServices) {
         mlApiServices.results
           .anomalySearch(
             {
-              // @ts-ignore
+              // @ts-expect-error SearchRequest type has not been updated to include size
               size: maxResults,
               body: {
                 query: {
@@ -120,7 +120,7 @@ export function forecastServiceProvider(mlApiServices: MlApiServices) {
         mlApiServices.results
           .anomalySearch(
             {
-              // @ts-ignore
+              // @ts-expect-error SearchRequest type has not been updated to include size
               size: 0,
               body: {
                 query: {
@@ -260,7 +260,7 @@ export function forecastServiceProvider(mlApiServices: MlApiServices) {
       return mlApiServices.results
         .anomalySearch$(
           {
-            // @ts-ignore
+            // @ts-expect-error SearchRequest type has not been updated to include size
             size: 0,
             body: {
               query: {
@@ -363,7 +363,7 @@ export function forecastServiceProvider(mlApiServices: MlApiServices) {
         mlApiServices.results
           .anomalySearch(
             {
-              // @ts-ignore
+              // @ts-expect-error SearchRequest type has not been updated to include size
               size: 1,
               body: {
                 query: {
