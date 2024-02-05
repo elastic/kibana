@@ -34,6 +34,11 @@ import {
   MappingsApiLogic,
 } from '../../../../api/mappings/mappings_logic';
 import {
+  CachedFetchModelsApiLogic,
+  CachedFetchModlesApiLogicActions,
+} from '../../../../api/ml_models/cached_fetch_models_api_logic';
+import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
+import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
 } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
@@ -78,11 +83,6 @@ import {
   validateInferencePipelineFields,
   validatePipelineNameIsAvailable,
 } from './utils';
-import {
-  CachedFetchModelsApiLogic,
-  CachedFetchModlesApiLogicActions,
-} from '../../../../api/ml_models/cached_fetch_models_api_logic';
-import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
 
 export const EMPTY_PIPELINE_CONFIGURATION: InferencePipelineConfiguration = {
   modelID: '',
@@ -235,10 +235,7 @@ export const MLInferenceLogic = kea<
   connect: {
     actions: [
       CachedFetchModelsApiLogic,
-      [
-        'apiSuccess as fetchModelsApiSuccess',
-        'startPolling as startPollingModels',
-      ],
+      ['apiSuccess as fetchModelsApiSuccess', 'startPolling as startPollingModels'],
       FetchMlInferencePipelinesApiLogic,
       [
         'makeRequest as makeMlInferencePipelinesRequest',

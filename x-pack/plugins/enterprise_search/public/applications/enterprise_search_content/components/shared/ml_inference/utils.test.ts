@@ -5,12 +5,7 @@
  * 2.0.
  */
 
-import {
-  getMLType,
-  getModelDisplayTitle,
-  sortSourceFields,
-  NLP_CONFIG_KEYS,
-} from './utils';
+import { getMLType, getModelDisplayTitle, sortSourceFields, NLP_CONFIG_KEYS } from './utils';
 
 describe('ml inference utils', () => {
   describe('sortSourceFields', () => {

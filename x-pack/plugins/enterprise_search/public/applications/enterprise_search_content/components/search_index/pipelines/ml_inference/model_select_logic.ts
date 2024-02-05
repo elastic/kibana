@@ -78,7 +78,7 @@ export const ModelSelectLogic = kea<MakeLogicType<ModelSelectValues, ModelSelect
       [
         'clearModelPlaceholderFlag as clearModelPlaceholderFlagFromMLInferenceLogic',
         'setInferencePipelineConfiguration as setInferencePipelineConfigurationFromMLInferenceLogic',
-        'startPollingModels'
+        'startPollingModels',
       ],
       StartModelApiLogic,
       [

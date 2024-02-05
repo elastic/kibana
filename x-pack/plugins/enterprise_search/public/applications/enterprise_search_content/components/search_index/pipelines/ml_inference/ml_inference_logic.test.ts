@@ -15,6 +15,7 @@ import { TrainedModelState } from '../../../../../../../common/types/pipelines';
 
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import { MappingsApiLogic } from '../../../../api/mappings/mappings_logic';
+import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 import { AttachMlInferencePipelineApiLogic } from '../../../../api/pipelines/attach_ml_inference_pipeline';
 import { CreateMlInferencePipelineApiLogic } from '../../../../api/pipelines/create_ml_inference_pipeline';
@@ -29,7 +30,6 @@ import {
   MLInferenceProcessorsValues,
 } from './ml_inference_logic';
 import { AddInferencePipelineSteps } from './types';
-import { CachedFetchModelsApiLogic } from '../../../../api/ml_models/cached_fetch_models_api_logic';
 
 const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   addInferencePipelineModal: {
@@ -65,20 +65,22 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
   sourceFields: undefined,
 };
 
-const MODELS: MlModel[] = [{
-  modelId: 'model_1',
-  title: 'Model 1',
-  type: 'ner',
-  deploymentState: MlModelDeploymentState.NotDeployed,
-  startTime: 0,
-  targetAllocationCount: 0,
-  nodeAllocationCount: 0,
-  threadsPerAllocation: 0,
-  isPlaceholder: false,
-  hasStats: false,
-  types: [],
-  inputFieldNames: [],
-}];
+const MODELS: MlModel[] = [
+  {
+    modelId: 'model_1',
+    title: 'Model 1',
+    type: 'ner',
+    deploymentState: MlModelDeploymentState.NotDeployed,
+    startTime: 0,
+    targetAllocationCount: 0,
+    nodeAllocationCount: 0,
+    threadsPerAllocation: 0,
+    isPlaceholder: false,
+    hasStats: false,
+    types: [],
+    inputFieldNames: [],
+  },
+];
 
 describe('MlInferenceLogic', () => {
   const { mount } = new LogicMounter(MLInferenceLogic);
@@ -495,7 +497,7 @@ describe('MlInferenceLogic', () => {
         expect(MLInferenceLogic.values.mlInferencePipeline).not.toBeUndefined();
         expect(MLInferenceLogic.values.mlInferencePipeline).toEqual(existingPipeline);
       });
-    });    
+    });
     describe('selectableModels', () => {
       it('makes fetch models request', () => {
         MLInferenceLogic.actions.fetchModelsApiSuccess(MODELS);
