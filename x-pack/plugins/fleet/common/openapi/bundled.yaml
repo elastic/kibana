@@ -3171,6 +3171,8 @@ paths:
                   type: string
                 is_default:
                   type: boolean
+                is_internal:
+                  type: boolean
                 host_urls:
                   type: array
                   items:
@@ -3240,6 +3242,8 @@ paths:
                 name:
                   type: string
                 is_default:
+                  type: boolean
+                is_internal:
                   type: boolean
                 host_urls:
                   type: array
@@ -5761,6 +5765,8 @@ components:
         name:
           type: string
         is_default:
+          type: boolean
+        is_internal:
           type: boolean
         is_preconfigured:
           type: boolean

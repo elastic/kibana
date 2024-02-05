@@ -7,29 +7,29 @@
 
 import { QueryState } from '@kbn/data-plugin/common';
 import {
-  LogExplorerController,
-  LogExplorerPublicState,
-  LogExplorerPublicStateUpdate,
+  LogsExplorerController,
+  LogsExplorerPublicState,
+  LogsExplorerPublicStateUpdate,
 } from '@kbn/logs-explorer-plugin/public';
 
 export type ObservabilityLogExplorerContext = ObservabilityLogExplorerTypeState['context'];
 
 export interface CommonObservabilityLogExplorerContext {
-  initialLogExplorerState: LogExplorerPublicStateUpdate;
+  initialLogExplorerState: LogsExplorerPublicStateUpdate;
 }
 
 export interface WithLogExplorerState {
-  logExplorerState: LogExplorerPublicState;
+  logExplorerState: LogsExplorerPublicState;
 }
 
 export interface WithController {
-  controller: LogExplorerController;
+  controller: LogsExplorerController;
 }
 
 export type ObservabilityLogExplorerEvent =
   | {
       type: 'INITIALIZED_FROM_URL';
-      stateFromUrl?: LogExplorerPublicStateUpdate;
+      stateFromUrl?: LogsExplorerPublicStateUpdate;
     }
   | {
       type: 'INITIALIZED_FROM_TIME_FILTER_SERVICE';
@@ -38,11 +38,11 @@ export type ObservabilityLogExplorerEvent =
     }
   | {
       type: 'CONTROLLER_CREATED';
-      controller: LogExplorerController;
+      controller: LogsExplorerController;
     }
   | {
       type: 'LOG_EXPLORER_STATE_CHANGED';
-      state: LogExplorerPublicState;
+      state: LogsExplorerPublicState;
     };
 
 export type ObservabilityLogExplorerTypeState =

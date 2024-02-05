@@ -35,8 +35,8 @@ export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCance
   defaultMessage: 'Cancel',
 });
 
-export const flyoutOpenInLogExplorerText = i18n.translate(
-  'xpack.datasetQuality.flyoutOpenInLogExplorerText',
+export const flyoutOpenInLogsExplorerText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInLogsExplorerText',
   {
     defaultMessage: 'Open in Logs Explorer',
   }
