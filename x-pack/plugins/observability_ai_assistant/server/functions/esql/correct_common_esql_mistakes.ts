@@ -5,56 +5,75 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import { isArray } from 'lodash';
+import type { Logger } from '@kbn/logging';
 
-const DELIMITER_TOKENS = ['`', "'", '"'];
+const DELIMITER_TOKENS = ['`', "'", '"', ['(', ')']];
 const ESCAPE_TOKEN = '\\\\';
 
-function splitIntoCommands(query: string) {
-  const commands: string[] = [];
+// this function splits statements by a certain token,
+// and takes into account escaping, or function calls
+
+function split(value: string, splitToken: string) {
+  const statements: string[] = [];
 
   let delimiterToken: string | undefined;
-  let currentCommand: string = '';
+  let currentStatement: string = '';
 
-  const trimmed = query.trim();
+  const trimmed = value.trim().split('');
 
-  // @ts-expect-error
-  // eslint-disable-next-line guard-for-in
-  for (const indexAsString in trimmed) {
-    const index = Number(indexAsString);
+  for (let index = 0; index < trimmed.length; index++) {
     const char = trimmed[index];
 
-    if (!delimiterToken && char === '|') {
-      commands.push(currentCommand.trim());
-      currentCommand = '';
+    if (
+      !delimiterToken &&
+      trimmed.slice(index, index + splitToken.length).join('') === splitToken
+    ) {
+      index += splitToken.length - 1;
+      statements.push(currentStatement.trim());
+      currentStatement = '';
       continue;
     }
 
-    currentCommand += char;
+    currentStatement += char;
 
     if (delimiterToken === char) {
       // end identifier
       delimiterToken = undefined;
-    } else if (
-      !delimiterToken &&
-      DELIMITER_TOKENS.includes(char) &&
-      trimmed.substring(index - 2, index - 1) !== ESCAPE_TOKEN
-    ) {
-      // start identifier
-      delimiterToken = char;
-      continue;
+    } else if (!delimiterToken && trimmed[index - 1] !== ESCAPE_TOKEN) {
+      const applicableToken = DELIMITER_TOKENS.find(
+        (token) => token === char || (isArray(token) && token[0] === char)
+      );
+      if (applicableToken) {
+        // start identifier
+        delimiterToken = isArray(applicableToken) ? applicableToken[1] : applicableToken;
+        continue;
+      }
     }
   }
 
-  if (currentCommand) {
-    commands.push(currentCommand.trim());
+  if (currentStatement) {
+    statements.push(currentStatement.trim());
   }
 
-  return commands;
+  return statements;
+}
+
+function splitIntoCommands(query: string) {
+  const commands: string[] = split(query, '|');
+
+  return commands.map((command) => {
+    const commandName = command.match(/^([A-Za-z]+)/)?.[1];
+
+    return {
+      name: commandName,
+      command,
+    };
+  });
 }
 
 function replaceSingleQuotesWithDoubleQuotes(command: string) {
-  const regex = /(?<!\\)'/g;
+  const regex = /'(?=(?:[^"]*"[^"]*")*[^"]*$)/g;
   return command.replace(regex, '"');
 }
 
@@ -67,35 +86,97 @@ function replaceAsKeywordWithAssignments(command: string) {
   });
 }
 
+function isValidColumnName(column: string) {
+  return column.match(/^`.*`$/) || column.match(/^[@A-Za-z\._\-]+$/);
+}
+
+function verifyKeepColumns(
+  keepCommand: string,
+  nextCommands: Array<{ name?: string; command: string }>
+) {
+  const columnsInKeep = split(keepCommand.replace(/^KEEP\s*/, ''), ',').map((statement) =>
+    split(statement, '=')?.[0].trim()
+  );
+
+  const availableColumns = columnsInKeep.concat();
+
+  for (const { name, command } of nextCommands) {
+    if (['STATS', 'KEEP', 'DROP', 'DISSECT', 'GROK', 'ENRICH'].includes(name || '')) {
+      // these operations alter columns in a way that is hard to analyze, so we abort
+      break;
+    }
+
+    const commandBody = command.replace(/^[A-Za-z]+\s*/, '');
+
+    if (name === 'EVAL') {
+      // EVAL creates new columns, make them available
+      const columnsInEval = split(commandBody, ',').map((column) =>
+        split(column.trim(), '=')[0].trim()
+      );
+
+      columnsInEval.forEach((column) => {
+        availableColumns.push(column);
+      });
+    }
+
+    if (name === 'RENAME') {
+      // RENAME creates and removes columns
+      split(commandBody, ',').forEach((statement) => {
+        const [prevName, newName] = split(statement, 'AS').map((side) => side.trim());
+        availableColumns.push(newName);
+        if (!availableColumns.includes(prevName)) {
+          columnsInKeep.push(prevName);
+        }
+      });
+    }
+
+    if (name === 'SORT') {
+      const columnsInSort = split(commandBody, ',').map((column) =>
+        split(column.trim(), ' ')[0].trim()
+      );
+
+      columnsInSort.forEach((column) => {
+        if (isValidColumnName(column) && !availableColumns.includes(column)) {
+          columnsInKeep.push(column);
+        }
+      });
+    }
+  }
+
+  return `KEEP ${columnsInKeep.join(', ')}`;
+}
+
 export function correctCommonEsqlMistakes(content: string, log: Logger) {
   return content.replaceAll(/```esql\n(.*?)\n```/gms, (_, query: string) => {
     const commands = splitIntoCommands(query);
 
-    const correctedFormattedQuery = commands
-      .map((command) => {
-        const commandName = command.match(/^([A-Za-z]+)/)?.[1];
+    const formattedCommands: string[] = commands.map(({ name, command }, index) => {
+      let formattedCommand = command;
 
-        let formattedCommand = command;
+      switch (name) {
+        case 'FROM':
+          formattedCommand = formattedCommand
+            .replaceAll(/FROM "(.*)"/g, 'FROM `$1`')
+            .replaceAll(/FROM '(.*)'/g, 'FROM `$1`');
+          break;
 
-        switch (commandName) {
-          case 'FROM':
-            formattedCommand = formattedCommand
-              .replaceAll(/FROM "(.*)"/g, 'FROM `$1`')
-              .replaceAll(/FROM '(.*)'/g, 'FROM `$1`');
-            break;
+        case 'WHERE':
+        case 'EVAL':
+          formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
+          break;
 
-          case 'WHERE':
-          case 'EVAL':
-            formattedCommand = replaceSingleQuotesWithDoubleQuotes(formattedCommand);
-            break;
+        case 'STATS':
+          formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
+          break;
 
-          case 'STATS':
-            formattedCommand = replaceAsKeywordWithAssignments(formattedCommand);
-            break;
-        }
-        return formattedCommand;
-      })
-      .join('\n| ');
+        case 'KEEP':
+          formattedCommand = verifyKeepColumns(formattedCommand, commands.slice(index + 1));
+          break;
+      }
+      return formattedCommand;
+    });
+
+    const correctedFormattedQuery = formattedCommands.join('\n| ');
 
     const originalFormattedQuery = commands.join('\n| ');
 
