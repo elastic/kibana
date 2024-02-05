@@ -17,6 +17,7 @@ import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
+import { TRIGGER_SUGGESTION_COMMAND } from './factories';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -130,9 +131,12 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
-    .map(({ type, name, signatures, ...defRest }) =>
-      type === 'builtin' ? `${name} $0` : `${name}($0)`
-    );
+    .map(({ type, name, signatures }) => {
+      if (type === 'builtin') {
+        return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
+      }
+      return `${name}($0)`;
+    });
 }
 
 function getFieldNamesByType(requestedType: string) {
@@ -287,30 +291,33 @@ describe('autocomplete', () => {
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
-    testSuggestions(' ', sourceCommands);
+    testSuggestions(
+      ' ',
+      sourceCommands.map((name) => name + ' $0')
+    );
     testSuggestions(
       'from a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
     testSuggestions(
       'from a [metadata _id] | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
     testSuggestions(
       'from a | eval var0 = a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
     testSuggestions(
       'from a [metadata _id] | eval var0 = a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
   });
 
@@ -319,7 +326,10 @@ describe('autocomplete', () => {
       .filter(({ hidden }) => !hidden)
       .map(({ name, suggestedAs }) => suggestedAs || name);
     // Monaco will filter further down here
-    testSuggestions('f', sourceCommands);
+    testSuggestions(
+      'f',
+      sourceCommands.map((name) => name + ' $0')
+    );
     testSuggestions('from ', suggestedIndexes);
     testSuggestions('from a,', suggestedIndexes);
     testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
@@ -1036,6 +1046,42 @@ describe('autocomplete', () => {
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
+    });
+  });
+
+  describe('auto triggers', () => {
+    function getSuggestionsFor(statement: string) {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const triggerOffset = statement.lastIndexOf(' ') + 1; // drop <here>
+      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const { model, position } = createModelAndPosition(statement, triggerOffset + 2);
+      return suggest(
+        model,
+        position,
+        context,
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
+    }
+    it('should trigger further suggestions for functions', async () => {
+      const suggestions = await getSuggestionsFor('from a | eval ');
+      // test that all functions will retrigger suggestions
+      expect(
+        suggestions
+          .filter(({ kind }) => kind === 1)
+          .every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+      ).toBeTruthy();
+      // now test that non-function won't retrigger
+      expect(
+        suggestions.filter(({ kind }) => kind !== 1).every(({ command }) => command == null)
+      ).toBeTruthy();
+    });
+    it('should trigger further suggestions for commands', async () => {
+      const suggestions = await getSuggestionsFor('from a | ');
+      // test that all commands will retrigger suggestions
+      expect(
+        suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+      ).toBeTruthy();
     });
   });
 });

@@ -170,9 +170,11 @@ You can also run a specific test by passing the filepath as an argument, e.g.:
 yarn jest --config x-pack/plugins/fleet/jest.config.js x-pack/plugins/fleet/common/services/validate_package_policy.test.ts
 ```
 
-#### API integration tests
+#### API integration tests (stateful)
 
-You need to have `docker` to run ingest manager api integration tests.
+API integration tests are run using the functional test runner (FTR). When developing or troubleshooting tests, it is convenient to run the server and tests separately as detailed below.
+
+Note: Docker needs to be running to run these tests.
 
 1. In one terminal, run the server from the Kibana root directory with
 
@@ -188,20 +190,36 @@ You need to have `docker` to run ingest manager api integration tests.
 
 1. In a second terminal, run the tests from the Kibana root directory with
 
-   ```
+   ```bash
    FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile>
    ```
 
    Optionally, you can filter which tests you want to run using `--grep`
 
-   ```
+   ```bash
    FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config x-pack/test/fleet_api_integration/<configFile> --grep='fleet'
    ```
 
-**Note** you can also supply which docker image to use for the package registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
+Note: you can also supply which Docker image to use for the Package Registry via the `FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE` env variable. For example,
 
-```
+```bash
 FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE='docker.elastic.co/package-registry/distribution:production' FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner
+```
+
+#### API integration tests (serverless)
+
+The process for running serverless API integration tests is similar as above. Security and observability project types have Fleet enabled. At the time of writing, the same tests exist for Fleet under these two project types.
+
+Security:
+```bash
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/security/fleet/config.ts
+```
+
+Observability:
+```bash
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:server --config x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
+FLEET_PACKAGE_REGISTRY_PORT=12345 yarn test:ftr:runner --config  x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
 ```
 
 #### Cypress tests

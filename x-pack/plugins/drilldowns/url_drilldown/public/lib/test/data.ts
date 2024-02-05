@@ -6,8 +6,6 @@
  */
 
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { Query, Filter, TimeRange } from '@kbn/es-query';
-import { Embeddable, EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 
 export const createPoint = ({
   field,
@@ -154,21 +152,3 @@ export const rowClickData = {
     'e0719f1a-04fb-4036-a63c-c25deac3f011',
   ],
 };
-
-interface TestInput extends EmbeddableInput {
-  savedObjectId?: string;
-  query?: Query;
-  filters?: Filter[];
-  timeRange?: TimeRange;
-}
-
-interface TestOutput extends EmbeddableOutput {
-  indexPatterns?: Array<{ id: string }>;
-}
-
-export class TestEmbeddable extends Embeddable<TestInput, TestOutput> {
-  type = 'test';
-
-  destroy() {}
-  reload() {}
-}

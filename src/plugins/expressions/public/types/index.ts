@@ -59,7 +59,7 @@ export interface IExpressionLoaderParams {
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
   executionContext?: KibanaExecutionContext;
-
+  abortController?: AbortController;
   /**
    * The flag to toggle on emitting partial results.
    * By default, the partial results are disabled.

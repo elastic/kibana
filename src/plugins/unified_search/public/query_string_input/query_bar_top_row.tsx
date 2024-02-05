@@ -33,6 +33,8 @@ import {
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
   EuiToolTip,
+  EuiButton,
+  EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeHistoryContract, getQueryLog } from '@kbn/data-plugin/public';
@@ -66,6 +68,10 @@ export const strings = {
   getRefreshQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.refresh', {
       defaultMessage: 'Refresh query',
+    }),
+  getCancelQueryLabel: () =>
+    i18n.translate('unifiedSearch.queryBarTopRow.submitButton.cancel', {
+      defaultMessage: 'Cancel',
     }),
   getRunQueryLabel: () =>
     i18n.translate('unifiedSearch.queryBarTopRow.submitButton.run', {
@@ -127,6 +133,7 @@ export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   onSubmit: (payload: { dateRange: TimeRange; query?: Query | QT }) => void;
+  onCancel?: () => void;
   placeholder?: string;
   prepend?: React.ComponentProps<typeof EuiFieldText>['prepend'];
   query?: Query | QT;
@@ -282,6 +289,7 @@ export const QueryBarTopRow = React.memo(
     dateRangeRef.current = currentDateRange;
 
     const propsOnSubmit = props.onSubmit;
+    const propsOnCancel = props.onCancel;
 
     const toRecentlyUsedRanges = (ranges: TimeRange[]) =>
       ranges.map(({ from, to }: { from: string; to: string }) => {
@@ -337,6 +345,20 @@ export const QueryBarTopRow = React.memo(
         });
       },
       [persistedLog, onSubmit]
+    );
+
+    const onClickCancelButton = useCallback(
+      (event: React.MouseEvent<HTMLButtonElement>) => {
+        if (persistedLog && queryRef.current && isOfQueryType(queryRef.current)) {
+          persistedLog.add(queryRef.current.query);
+        }
+        event.preventDefault();
+
+        if (propsOnCancel) {
+          propsOnCancel();
+        }
+      },
+      [persistedLog, propsOnCancel]
     );
 
     const propsOnChange = props.onChange;
@@ -486,6 +508,39 @@ export const QueryBarTopRow = React.memo(
       return <EuiFlexItem className={wrapperClasses}>{component}</EuiFlexItem>;
     }
 
+    function renderCancelButton() {
+      const buttonLabelCancel = strings.getCancelQueryLabel();
+
+      if (submitButtonIconOnly) {
+        return (
+          <EuiButtonIcon
+            iconType="cross"
+            aria-label={buttonLabelCancel}
+            onClick={onClickCancelButton}
+            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+            data-test-subj="queryCancelButton"
+            color="text"
+            display="base"
+          >
+            {buttonLabelCancel}
+          </EuiButtonIcon>
+        );
+      }
+
+      return (
+        <EuiButton
+          iconType="cross"
+          aria-label={buttonLabelCancel}
+          onClick={onClickCancelButton}
+          size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+          data-test-subj="queryCancelButton"
+          color="text"
+        >
+          {buttonLabelCancel}
+        </EuiButton>
+      );
+    }
+
     function renderUpdateButton() {
       if (!shouldRenderUpdatebutton() && !shouldRenderDatePicker()) {
         return null;
@@ -501,25 +556,28 @@ export const QueryBarTopRow = React.memo(
         React.cloneElement(props.customSubmitButton, { onClick: onClickSubmitButton })
       ) : (
         <EuiFlexItem grow={false}>
-          <EuiSuperUpdateButton
-            iconType={props.isDirty ? iconDirty : 'refresh'}
-            iconOnly={submitButtonIconOnly}
-            aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
-            isDisabled={isDateRangeInvalid || props.isDisabled}
-            isLoading={props.isLoading}
-            onClick={onClickSubmitButton}
-            size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
-            color={props.isDirty ? 'success' : 'primary'}
-            fill={props.isDirty}
-            needsUpdate={props.isDirty}
-            data-test-subj="querySubmitButton"
-            // @ts-expect-error Need to fix expecting `children` in EUI
-            toolTipProps={{
-              content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
-              delay: 'long',
-              position: 'bottom',
-            }}
-          />
+          {props.isLoading && propsOnCancel && renderCancelButton()}
+          {(!props.isLoading || !propsOnCancel) && (
+            <EuiSuperUpdateButton
+              iconType={props.isDirty ? iconDirty : 'refresh'}
+              iconOnly={submitButtonIconOnly}
+              aria-label={props.isLoading ? buttonLabelUpdate : buttonLabelRefresh}
+              isDisabled={isDateRangeInvalid || props.isDisabled}
+              isLoading={props.isLoading}
+              onClick={onClickSubmitButton}
+              size={shouldShowDatePickerAsBadge() ? 's' : 'm'}
+              color={props.isDirty ? 'success' : 'primary'}
+              fill={props.isDirty}
+              needsUpdate={props.isDirty}
+              data-test-subj="querySubmitButton"
+              // @ts-expect-error Need to fix expecting `children` in EUI
+              toolTipProps={{
+                content: props.isDirty ? tooltipDirty : buttonLabelRefresh,
+                delay: 'long',
+                position: 'bottom',
+              }}
+            />
+          )}
         </EuiFlexItem>
       );
 
