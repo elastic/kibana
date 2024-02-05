@@ -119,20 +119,20 @@ export class Job {
     const status = this.status;
     let smallMessage;
     if (status === PENDING) {
-      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.pendingStatusReachedText', {
+      smallMessage = i18n.translate('reporting.jobStatusDetail.pendingStatusReachedText', {
         defaultMessage: 'Waiting for job to process.',
       });
     } else if (status === PROCESSING) {
-      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.attemptXofY', {
+      smallMessage = i18n.translate('reporting.jobStatusDetail.attemptXofY', {
         defaultMessage: 'Attempt {attempts} of {max_attempts}.',
         values: { attempts: this.attempts, max_attempts: this.max_attempts },
       });
     } else if (this.getWarnings()) {
-      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.warningsText', {
+      smallMessage = i18n.translate('reporting.jobStatusDetail.warningsText', {
         defaultMessage: 'See report info for warnings.',
       });
     } else if (this.getError()) {
-      smallMessage = i18n.translate('xpack.reporting.jobStatusDetail.errorText', {
+      smallMessage = i18n.translate('reporting.jobStatusDetail.errorText', {
         defaultMessage: 'See report info for error details.',
       });
     }
@@ -143,7 +143,7 @@ export class Job {
         <EuiText size="s">
           {' '}
           <EuiTextColor color="warning">
-            {i18n.translate('xpack.reporting.jobStatusDetail.deprecatedText', {
+            {i18n.translate('reporting.jobStatusDetail.deprecatedText', {
               defaultMessage: `This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.`,
             })}
           </EuiTextColor>
@@ -168,7 +168,7 @@ export class Job {
   public get prettyStatus(): string {
     return (
       jobStatusLabelsMap.get(this.status) ??
-      i18n.translate('xpack.reporting.jobStatusDetail.unknownText', { defaultMessage: 'Unknown' })
+      i18n.translate('reporting.jobStatusDetail.unknownText', { defaultMessage: 'Unknown' })
     );
   }
 
@@ -184,17 +184,17 @@ export class Job {
     switch (this.jobtype as JobTypes) {
       case 'printable_pdf':
       case 'printable_pdf_v2':
-        return i18n.translate('xpack.reporting.jobType.pdfOutputName', {
+        return i18n.translate('reporting.jobType.pdfOutputName', {
           defaultMessage: 'PDF',
         });
       case 'PNG':
       case 'PNGV2':
-        return i18n.translate('xpack.reporting.jobType.pngOutputName', {
+        return i18n.translate('reporting.jobType.pngOutputName', {
           defaultMessage: 'PNG',
         });
       case 'csv_v2':
       case 'csv_searchsource':
-        return i18n.translate('xpack.reporting.jobType.csvOutputName', {
+        return i18n.translate('reporting.jobType.csvOutputName', {
           defaultMessage: 'CSV',
         });
       default:
@@ -204,12 +204,12 @@ export class Job {
 
   public get prettyTimeout(): string {
     if (this.timeout == null) {
-      return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSecondsUnknown', {
+      return i18n.translate('reporting.jobStatusDetail.timeoutSecondsUnknown', {
         defaultMessage: 'Unknown',
       });
     }
     const seconds = this.timeout / 1000;
-    return i18n.translate('xpack.reporting.jobStatusDetail.timeoutSeconds', {
+    return i18n.translate('reporting.jobStatusDetail.timeoutSeconds', {
       defaultMessage: '{timeout} seconds',
       values: { timeout: seconds },
     });
@@ -228,7 +228,7 @@ export class Job {
   getCreatedBy(): string {
     return (
       this.created_by ||
-      i18n.translate('xpack.reporting.jobCreatedBy.unknownUserPlaceholderText', {
+      i18n.translate('reporting.jobCreatedBy.unknownUserPlaceholderText', {
         defaultMessage: 'Unknown',
       })
     );
@@ -260,7 +260,7 @@ export class Job {
 
   getDeprecatedMessage(): undefined | string {
     if (this.isDeprecated) {
-      return i18n.translate('xpack.reporting.jobWarning.exportTypeDeprecated', {
+      return i18n.translate('reporting.jobWarning.exportTypeDeprecated', {
         defaultMessage:
           'This is a deprecated export type. Automation of this report will need to be re-created for compatibility with future versions of Kibana.',
       });
@@ -276,7 +276,7 @@ export class Job {
 
     if (this.csv_contains_formulas) {
       warnings.push(
-        i18n.translate('xpack.reporting.jobWarning.csvContainsFormulas', {
+        i18n.translate('reporting.jobWarning.csvContainsFormulas', {
           defaultMessage:
             'Your CSV contains characters that spreadsheet applications might interpret as formulas.',
         })
@@ -284,7 +284,7 @@ export class Job {
     }
     if (this.max_size_reached) {
       warnings.push(
-        i18n.translate('xpack.reporting.jobWarning.maxSizeReachedTooltip', {
+        i18n.translate('reporting.jobWarning.maxSizeReachedTooltip', {
           defaultMessage: 'Your search reached the max size and contains partial data.',
         })
       );
@@ -336,31 +336,31 @@ export class Job {
 const jobStatusLabelsMap = new Map<JOB_STATUS, string>([
   [
     PENDING,
-    i18n.translate('xpack.reporting.jobStatuses.pendingText', {
+    i18n.translate('reporting.jobStatuses.pendingText', {
       defaultMessage: 'Pending',
     }),
   ],
   [
     PROCESSING,
-    i18n.translate('xpack.reporting.jobStatuses.processingText', {
+    i18n.translate('reporting.jobStatuses.processingText', {
       defaultMessage: 'Processing',
     }),
   ],
   [
     COMPLETED,
-    i18n.translate('xpack.reporting.jobStatuses.completedText', {
+    i18n.translate('reporting.jobStatuses.completedText', {
       defaultMessage: 'Completed', // NOTE: a job is `completed` not `completed_with_warings` if it has reached max size or possibly contains csv characters
     }),
   ],
   [
     WARNINGS,
-    i18n.translate('xpack.reporting.jobStatuses.warningText', {
+    i18n.translate('reporting.jobStatuses.warningText', {
       defaultMessage: 'Completed',
     }),
   ],
   [
     FAILED,
-    i18n.translate('xpack.reporting.jobStatuses.failedText', {
+    i18n.translate('reporting.jobStatuses.failedText', {
       defaultMessage: 'Failed',
     }),
   ],

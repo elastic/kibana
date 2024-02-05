@@ -145,7 +145,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
             data-test-subj="shareReportingCopyURL"
           >
             <FormattedMessage
-              id="xpack.reporting.panelContent.copyUrlButtonLabel"
+              id="share.panelContent.copyUrlButtonLabel"
               defaultMessage="Copy POST URL"
             />
           </EuiButton>
@@ -163,7 +163,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           <EuiFormRow
             helpText={
               <FormattedMessage
-                id="xpack.reporting.panelContent.saveWorkDescription"
+                id="share.panelContent.saveWorkDescription"
                 defaultMessage="Please save your work before generating a report."
               />
             }
@@ -181,7 +181,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         <EuiText size="s">
           <p>
             <FormattedMessage
-              id="xpack.reporting.panelContent.generationTimeDescription"
+              id="share.panelContent.generationTimeDescription"
               defaultMessage="{reportingType}s can take a minute or two to generate based upon the size of your {objectType}."
               description="Here 'reportingType' can be 'PDF' or 'CSV'"
               values={{
@@ -204,7 +204,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
 
         <EuiAccordion
           id="advanced-options"
-          buttonContent={i18n.translate('xpack.reporting.panelContent.advancedOptions', {
+          buttonContent={i18n.translate('share.panelContent.advancedOptions', {
             defaultMessage: 'Advanced options',
           })}
           paddingSize="none"
@@ -214,7 +214,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
           <EuiText size="s">
             <p>
               <FormattedMessage
-                id="xpack.reporting.panelContent.howToCallGenerationDescription"
+                id="share.panelContent.howToCallGenerationDescription"
                 defaultMessage="Alternatively, copy this POST URL to call generation from outside Kibana or from Watcher."
               />
             </p>
@@ -238,7 +238,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
         isLoading={this.state.isCreatingReportJob}
       >
         <FormattedMessage
-          id="xpack.reporting.panelContent.generateButtonLabel"
+          id="share.panelContent.generateButtonLabel"
           defaultMessage="Generate {reportingType}"
           values={{ reportingType: this.prettyPrintReportingType() }}
         />
@@ -292,20 +292,20 @@ class ReportingPanelContentUi extends Component<Props, State> {
         this.props.toasts.addSuccess({
           title: intl.formatMessage(
             {
-              id: 'xpack.reporting.panelContent.successfullyQueuedReportNotificationTitle',
+              id: 'share.panelContent.successfullyQueuedReportNotificationTitle',
               defaultMessage: 'Queued report for {objectType}',
             },
             { objectType: this.state.objectType }
           ),
           text: toMountPoint(
             <FormattedMessage
-              id="xpack.reporting.panelContent.successfullyQueuedReportNotificationDescription"
+              id="share.panelContent.successfullyQueuedReportNotificationDescription"
               defaultMessage="Track its progress in {path}."
               values={{
                 path: (
                   <a href={this.props.apiClient.getManagementLink()}>
                     <FormattedMessage
-                      id="xpack.reporting.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
+                      id="share.publicNotifier.reportLink.reportingSectionUrlLinkLabel"
                       defaultMessage="Stack Management &gt; Reporting"
                     />
                   </a>
@@ -326,7 +326,7 @@ class ReportingPanelContentUi extends Component<Props, State> {
       .catch((error) => {
         this.props.toasts.addError(error, {
           title: intl.formatMessage({
-            id: 'xpack.reporting.panelContent.notification.reportingErrorTitle',
+            id: 'share.panelContent.notification.reportingErrorTitle',
             defaultMessage: 'Unable to create report',
           }),
           toastMessage: (

@@ -102,7 +102,7 @@
     "savedObjectsManagement": "src/plugins/saved_objects_management",
     "searchConnectors": "packages/kbn-search-connectors",
     "server": "src/legacy/server",
-    "share": "src/plugins/share",
+    "share": ["src/plugins/share", "packages/kbn-reporting-share"],
     "sharedUXPackages": "packages/shared-ux",
     "searchApiPanels": "packages/kbn-search-api-panels/",
     "searchErrors": "packages/kbn-search-errors",

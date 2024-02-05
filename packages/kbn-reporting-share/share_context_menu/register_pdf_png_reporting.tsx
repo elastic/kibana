@@ -116,7 +116,7 @@ export const reportingScreenshotShareProvider = ({
     const { sharingData } = shareOpts as unknown as { sharingData: ReportingSharingData };
     const shareActions = [];
 
-    const pngPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pngReportsButtonLabel', {
+    const pngPanelTitle = i18n.translate('share.shareContextMenu.pngReportsButtonLabel', {
       defaultMessage: 'PNG Reports',
     });
 
@@ -163,7 +163,7 @@ export const reportingScreenshotShareProvider = ({
       },
     };
 
-    const pdfPanelTitle = i18n.translate('xpack.reporting.shareContextMenu.pdfReportsButtonLabel', {
+    const pdfPanelTitle = i18n.translate('share.shareContextMenu.pdfReportsButtonLabel', {
       defaultMessage: 'PDF Reports',
     });
 
