@@ -66,7 +66,6 @@ export function LoadAnnotationLibraryFlyout({
       })}
       handleClose={() => {
         setLoadLibraryFlyoutVisible(false);
-        return true;
       }}
       isInlineEditing={isInlineEditing}
     >
