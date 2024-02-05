@@ -7,26 +7,36 @@
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { Logger } from '@kbn/logging';
-import { latestFindingsDataViewLabels } from './latest_findings_data_view';
-
-const latestFindingsDataViewId = 'cloud_security_posture-303eea10-c475-11ec-af18-c5b9b437dbbe';
+import {
+  LATEST_FINDINGS_INDEX_PATTERN_ID,
+  LATEST_VULNERABILITIES_INDEX_PATTERN_ID,
+} from '../../common/constants';
+import { latestFindingsDataViewLabels } from './latest_findings_data_view_labels';
+import { latestVulnerabilitiesDataViewLabels } from './latest_vulnerabilities_data_view_labels';
 
 export const updateCspDataViews = async (dataViewsService: DataViewsService, logger: Logger) => {
-  const [updateFindingsLatestDataViewPromise] = await Promise.allSettled([
-    updateDataView(
-      dataViewsService,
-      latestFindingsDataViewId,
-      latestFindingsDataViewLabels,
-      logger
-    ),
-  ]);
+  const [updateFindingsLatestDataViewPromise, updateVulnerabilitiesLatestDataViewPromise] =
+    await Promise.allSettled([
+      updateDataView(
+        dataViewsService,
+        LATEST_FINDINGS_INDEX_PATTERN_ID,
+        latestFindingsDataViewLabels,
+        logger
+      ),
+      updateDataView(
+        dataViewsService,
+        LATEST_VULNERABILITIES_INDEX_PATTERN_ID,
+        latestVulnerabilitiesDataViewLabels,
+        logger
+      ),
+    ]);
 
   if (updateFindingsLatestDataViewPromise.status === 'rejected') {
     logger.error(updateFindingsLatestDataViewPromise.reason);
   }
-  // if (updateVulnerabilitiesLatestDataViewPromise.status === 'rejected') {
-  //   logger.error(updateVulnerabilitiesLatestDataViewPromise.reason);
-  // }
+  if (updateVulnerabilitiesLatestDataViewPromise.status === 'rejected') {
+    logger.error(updateVulnerabilitiesLatestDataViewPromise.reason);
+  }
 };
 
 const updateDataView = async (
@@ -36,16 +46,21 @@ const updateDataView = async (
   logger: Logger
 ) => {
   try {
-    const latestFindingsDataView = await dataViewsService.get(dataViewId);
+    const dataView = await dataViewsService.get(dataViewId);
 
     Object.entries(labels).forEach(([field, label]) => {
-      latestFindingsDataView.setFieldCustomLabel(field, label);
+      const fieldCustomLabel = dataView.getFieldAttrs()[field]?.customLabel;
+      // If the field has a custom label and it's different from the field name, don't update it
+      if (fieldCustomLabel && fieldCustomLabel !== field) {
+        return;
+      }
+      dataView.setFieldCustomLabel(field, label);
     });
 
-    return await dataViewsService.updateSavedObject(latestFindingsDataView);
+    return await dataViewsService.updateSavedObject(dataView);
   } catch (e) {
-    logger.error(`Failed to update data view ${dataViewId}`);
-    logger.error(e);
+    logger.warn(`Failed to update data view ${dataViewId}`);
+    logger.warn(e);
     return false;
   }
 };
