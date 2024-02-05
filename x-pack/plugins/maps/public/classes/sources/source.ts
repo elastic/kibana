@@ -65,8 +65,6 @@ export interface ISource {
   getApplyGlobalQuery(): boolean;
   getApplyGlobalTime(): boolean;
   getApplyForceRefresh(): boolean;
-  getIndexPatternIds(): string[];
-  getQueryableIndexPatternIds(): string[];
   createFieldFormatter(field: IField): Promise<FieldFormatter | null>;
   getValueSuggestions(field: IField, query: string): Promise<string[]>;
   getMinZoom(): number;
@@ -132,14 +130,6 @@ export class AbstractSource implements ISource {
 
   getApplyForceRefresh(): boolean {
     return false;
-  }
-
-  getIndexPatternIds(): string[] {
-    return [];
-  }
-
-  getQueryableIndexPatternIds(): string[] {
-    return [];
   }
 
   // Returns function used to format value

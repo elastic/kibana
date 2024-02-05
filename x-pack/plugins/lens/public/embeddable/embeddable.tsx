@@ -184,6 +184,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  abortController?: AbortController;
 }
 
 export type LensByValueInput = {
@@ -1146,6 +1147,7 @@ export class Embeddable
               className={input.className}
               style={input.style}
               executionContext={this.getExecutionContext()}
+              abortController={this.input.abortController}
               addUserMessages={(messages) => this.addUserMessages(messages)}
               onRuntimeError={(error) => {
                 this.updateOutput({ error });
