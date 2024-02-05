@@ -10,23 +10,23 @@ import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { DatasetQualityRoute, ObservabilityLogExplorerMainRoute } from '../routes/main';
+import { DatasetQualityRoute, ObservabilityLogsExplorerMainRoute } from '../routes/main';
 import {
-  ObservabilityLogExplorerAppMountParameters,
-  ObservabilityLogExplorerPluginStart,
-  ObservabilityLogExplorerStartDeps,
+  ObservabilityLogsExplorerAppMountParameters,
+  ObservabilityLogsExplorerPluginStart,
+  ObservabilityLogsExplorerStartDeps,
 } from '../types';
 import { KbnUrlStateStorageFromRouterProvider } from '../utils/kbn_url_state_context';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
 
-export const renderObservabilityLogExplorer = (
+export const renderObservabilityLogsExplorer = (
   core: CoreStart,
-  pluginsStart: ObservabilityLogExplorerStartDeps,
-  ownPluginStart: ObservabilityLogExplorerPluginStart,
-  appParams: ObservabilityLogExplorerAppMountParameters
+  pluginsStart: ObservabilityLogsExplorerStartDeps,
+  ownPluginStart: ObservabilityLogsExplorerPluginStart,
+  appParams: ObservabilityLogsExplorerAppMountParameters
 ) => {
   ReactDOM.render(
-    <ObservabilityLogExplorerApp
+    <ObservabilityLogsExplorerApp
       appParams={appParams}
       core={core}
       plugins={pluginsStart}
@@ -44,19 +44,19 @@ export const renderObservabilityLogExplorer = (
   };
 };
 
-export interface ObservabilityLogExplorerAppProps {
-  appParams: ObservabilityLogExplorerAppMountParameters;
+export interface ObservabilityLogsExplorerAppProps {
+  appParams: ObservabilityLogsExplorerAppMountParameters;
   core: CoreStart;
-  plugins: ObservabilityLogExplorerStartDeps;
-  pluginStart: ObservabilityLogExplorerPluginStart;
+  plugins: ObservabilityLogsExplorerStartDeps;
+  pluginStart: ObservabilityLogsExplorerPluginStart;
 }
 
-export const ObservabilityLogExplorerApp = ({
+export const ObservabilityLogsExplorerApp = ({
   appParams,
   core,
   plugins,
   pluginStart,
-}: ObservabilityLogExplorerAppProps) => {
+}: ObservabilityLogsExplorerAppProps) => {
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -70,7 +70,7 @@ export const ObservabilityLogExplorerApp = ({
         <KbnUrlStateStorageFromRouterProvider>
           <Router history={appParams.history}>
             <Routes>
-              <Route path="/" exact={true} render={() => <ObservabilityLogExplorerMainRoute />} />
+              <Route path="/" exact={true} render={() => <ObservabilityLogsExplorerMainRoute />} />
               <Route path="/dataset-quality" exact={true} render={() => <DatasetQualityRoute />} />
             </Routes>
           </Router>

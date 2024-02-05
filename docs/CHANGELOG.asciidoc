@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.12.1>>
 * <<release-notes-8.12.0>>
 * <<release-notes-8.11.4>>
 * <<release-notes-8.11.3>>
@@ -58,6 +59,51 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.12.1]]
+== {kib} 8.12.1
+
+The 8.12.1 release includes the following enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.12.1]]
+=== Enhancements
+
+Elastic Security::
+For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_]. 
+Observability::
+* Adds `defer_validation: true` to transforms on creation to stop errors when the destination index doesn't exist yet ({kibana-pull}174463[#174463]).
+
+[float]
+[[fixes-v8.12.1]]
+=== Bug Fixes
+Alerting::
+* Fixes context variables not being passed in to the action parameters when an alert- as-data document is available ({kibana-pull}175682[#175682]).
+* Fixes the Rules page loosing user selections when navigating back ({kibana-pull}174954[#174954]).
+* Fixes the custom threshold rendering in the create rule flyout ({kibana-pull}174982[#174982]).
+APM::
+* Fixes a transactions error link for mobile ({kibana-pull}174655[#174655]).
+* Increases the number of maximum function calls from 3 to 5 ({kibana-pull}175588[#175588]).
+Dashboard::
+* Fixes a caching issue that caused problems updating dashboard information ({kibana-pull}175635[#175635]).
+Elastic Security::
+For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes the display of category label on the Integration overview page ({kibana-pull}176141[#176141]).
+* Fixes conflicting dynamic template mappings for intermediate objects ({kibana-pull}175970[#175970]).
+* Fixes reserved keys for Elasticsearch output YAML box ({kibana-pull}175901[#175901]).
+* Prevent deletion of agent policies with inactive agents from UI ({kibana-pull}175815[#175815]).
+* Fixes incorrect count of agents in bulk actions ({kibana-pull}175318[#175318]).
+* Fixes a custom integrations not displaying on the Installed integrations page ({kibana-pull}174804[#174804]).
+Lens & Visualizations::
+* Fixes a validation error for invalid formula and math columns in *Lens* ({kibana-pull}175644[#175644]).
+Machine Learning::
+* Fixes Allocation rendering for failed deployments ({kibana-pull}174882[#174882]).
+* Fixes an issue where a user could create an anomaly rule but couldn't see it or interact with the rule via stack management ({kibana-pull}174791[#174791]).
+Security::
+* Fixes API Key table sorting ({kibana-pull}175813[#175813]).
+* Ensures all API Keys have a defined name ({kibana-pull}175721[#175721]).
+* Fixes an issue with `@kbn-handlebars`, where nested inputs were not being escaped properly ({kibana-pull}175490[#175490]).
+
 [[release-notes-8.12.0]]
 == {kib} 8.12.0
 

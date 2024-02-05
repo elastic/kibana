@@ -5,4 +5,8 @@
  * 2.0.
  */
 
-export const CMDLINE_FIELD = 'system.process.cmdline';
+import { CommonObservabilityLogsExplorerContext } from './types';
+
+export const DEFAULT_CONTEXT: CommonObservabilityLogsExplorerContext = {
+  initialLogsExplorerState: {},
+};
