@@ -221,7 +221,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'words', type: 'string' },
           { name: 'separator', type: 'string' },
         ],
-        returnType: 'string[]',
+        returnType: 'string',
         examples: [`ROW words="foo;bar;baz;qux;quux;corge" | EVAL word = SPLIT(words, ";")`],
       },
     ],
@@ -264,6 +264,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'field', type: 'any' }],
         returnType: 'cartesian_point',
         examples: [`from index | EVAL point = to_cartesianpoint(field)`],
+      },
+    ],
+  },
+  {
+    name: 'to_cartesianshape',
+    description: i18n.translate('monaco.esql.definitions.toCartesianshapeDoc', {
+      defaultMessage: 'Converts an input value to a cartesian_shape value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'cartesian_shape',
+        examples: [`from index | EVAL cartesianshape = to_cartesianshape(field)`],
       },
     ],
   },
@@ -318,6 +331,19 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [{ name: 'field', type: 'any' }],
         returnType: 'geo_point',
         examples: [`from index | EVAL geopoint = to_geopoint(field)`],
+      },
+    ],
+  },
+  {
+    name: 'to_geoshape',
+    description: i18n.translate('monaco.esql.definitions.toGeoshapeDoc', {
+      defaultMessage: 'Converts an input value to a geo_shape value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'field', type: 'any' }],
+        returnType: 'geo_shape',
+        examples: [`from index | EVAL geoshape = to_geoshape(field)`],
       },
     ],
   },
@@ -847,9 +873,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
-        examples: ['row a = [1, 2, 3] | mv_avg(a)'],
+        examples: ['row a = [1, 2, 3] | eval mv_avg(a)'],
       },
     ],
   },
@@ -862,11 +888,11 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'multivalue', type: 'string[]' },
+          { name: 'multivalue', type: 'string' },
           { name: 'delimeter', type: 'string' },
         ],
         returnType: 'string',
-        examples: ['row a = ["1", "2", "3"] | mv_concat(a, ", ")'],
+        examples: ['row a = ["1", "2", "3"] | eval mv_concat(a, ", ")'],
       },
     ],
   },
@@ -878,7 +904,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'any[]' }],
+        params: [{ name: 'multivalue', type: 'any' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_count(a)'],
       },
@@ -891,9 +917,37 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'any[]' }],
-        returnType: 'any[]',
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
         examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_first',
+    description: i18n.translate('monaco.esql.definitions.mvFirstDoc', {
+      defaultMessage:
+        'Reduce a multivalued field to a single valued field containing the first value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
+        examples: ['row a = [1, 2, 3] | eval one = mv_first(a)'],
+      },
+    ],
+  },
+  {
+    name: 'mv_last',
+    description: i18n.translate('monaco.esql.definitions.mvLastDoc', {
+      defaultMessage:
+        'Reduce a multivalued field to a single valued field containing the last value.',
+    }),
+    signatures: [
+      {
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
+        examples: ['row a = [1, 2, 3] | eval three = mv_last(a)'],
       },
     ],
   },
@@ -905,7 +959,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
       },
@@ -919,7 +973,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
       },
@@ -933,7 +987,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_median(a)'],
       },
@@ -947,7 +1001,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_sum(a)'],
       },
@@ -994,4 +1048,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   },
 ]
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
-  .map((def) => ({ ...def, supportedCommands: ['eval', 'where', 'row'] }));
+  .map((def) => ({
+    ...def,
+    supportedCommands: ['eval', 'where', 'row'],
+    supportedOptions: ['by'],
+    type: 'eval',
+  }));

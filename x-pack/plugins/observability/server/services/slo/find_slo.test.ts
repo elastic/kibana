@@ -36,6 +36,7 @@ describe('FindSLO', () => {
       expect(mockSummarySearchClient.search.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "",
+          "",
           Object {
             "direction": "asc",
             "field": "status",
@@ -129,6 +130,7 @@ describe('FindSLO', () => {
       expect(mockSummarySearchClient.search.mock.calls[0]).toMatchInlineSnapshot(`
         Array [
           "slo.name:'Service*' and slo.indicator.type:'sli.kql.custom'",
+          "",
           Object {
             "direction": "asc",
             "field": "error_budget_consumed",

@@ -62,13 +62,18 @@ const createSLOResponseSchema = t.type({
 });
 
 const getPreviewDataParamsSchema = t.type({
-  body: t.type({
-    indicator: indicatorSchema,
-    range: t.type({
-      start: t.number,
-      end: t.number,
+  body: t.intersection([
+    t.type({
+      indicator: indicatorSchema,
+      range: t.type({
+        start: t.number,
+        end: t.number,
+      }),
     }),
-  }),
+    t.partial({
+      objective: objectiveSchema,
+    }),
+  ]),
 });
 
 const getPreviewDataResponseSchema = t.array(previewDataSchema);
@@ -89,6 +94,7 @@ const sortBySchema = t.union([
 
 const findSLOParamsSchema = t.partial({
   query: t.partial({
+    filters: t.string,
     kqlQuery: t.string,
     page: t.string,
     perPage: t.string,
@@ -285,6 +291,7 @@ type BudgetingMethod = t.OutputOf<typeof budgetingMethodSchema>;
 type TimeWindow = t.OutputOf<typeof timeWindowTypeSchema>;
 type IndicatorType = t.OutputOf<typeof indicatorTypesSchema>;
 type Indicator = t.OutputOf<typeof indicatorSchema>;
+type Objective = t.OutputOf<typeof objectiveSchema>;
 type APMTransactionErrorRateIndicator = t.OutputOf<typeof apmTransactionErrorRateIndicatorSchema>;
 type APMTransactionDurationIndicator = t.OutputOf<typeof apmTransactionDurationIndicatorSchema>;
 type MetricCustomIndicator = t.OutputOf<typeof metricCustomIndicatorSchema>;
@@ -353,6 +360,7 @@ export type {
   GetSLOInstancesResponse,
   IndicatorType,
   Indicator,
+  Objective,
   MetricCustomIndicator,
   TimesliceMetricIndicator,
   TimesliceMetricBasicMetricWithField,

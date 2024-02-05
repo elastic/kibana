@@ -47,8 +47,8 @@ import {
   TOGGLE_TIMELINE_EXPAND_EVENT,
   CREATE_NEW_TIMELINE_TEMPLATE,
   TIMELINE_SAVE_MODAL,
-  TIMELINE_EDIT_MODAL_SAVE_BUTTON,
-  TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
+  TIMELINE_SAVE_MODAL_SAVE_BUTTON,
+  TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
   TIMELINE_ADD_FIELD_BUTTON,
@@ -105,7 +105,7 @@ export const addDescriptionToTimeline = (
   }
   cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
-  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
@@ -114,7 +114,7 @@ export const addNameToTimelineAndSave = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
-  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
@@ -123,9 +123,9 @@ export const addNameToTimelineAndSaveAsNew = (name: string) => {
   cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled').clear();
   cy.get(TIMELINE_TITLE_INPUT).type(`${name}{enter}`);
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', name);
-  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
-  cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).click();
-  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
+  cy.get(TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH).click();
+  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
@@ -140,7 +140,7 @@ export const addNameAndDescriptionToTimeline = (
   cy.get(TIMELINE_TITLE_INPUT).should('have.attr', 'value', timeline.title);
   cy.get(TIMELINE_DESCRIPTION_INPUT).type(timeline.description);
   cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', timeline.description);
-  cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
   cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
 };
 
@@ -316,8 +316,8 @@ export const closeTimeline = () => {
 };
 
 export const createNewTimeline = () => {
-  cy.get(NEW_TIMELINE_ACTION).click();
-  cy.get(CREATE_NEW_TIMELINE).eq(0).click();
+  openCreateTimelineOptionsPopover();
+  cy.get(CREATE_NEW_TIMELINE).click();
 };
 
 export const openCreateTimelineOptionsPopover = () => {
@@ -377,8 +377,8 @@ export const saveTimeline = () => {
     cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
     cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
 
-    cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).should('not.be.disabled');
-    cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+    cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).should('not.be.disabled');
+    cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
 
     cy.get(TIMELINE_PROGRESS_BAR).should('exist');
     cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');

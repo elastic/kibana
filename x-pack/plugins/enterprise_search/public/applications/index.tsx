@@ -106,6 +106,7 @@ export const renderApp = (
     charts,
     cloud,
     config,
+    console: plugins.console,
     esConfig,
     data: plugins.data,
     guidedOnboarding,

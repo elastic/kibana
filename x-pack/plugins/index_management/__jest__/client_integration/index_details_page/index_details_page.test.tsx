@@ -227,6 +227,13 @@ describe('<IndexDetailsPage />', () => {
     expect(header).toEqual(testIndexName);
   });
 
+  it('changes the tab when its header is clicked', async () => {
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+    expect(testBed.exists('indexDetailsMappingsCodeBlock')).toBe(true);
+    await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Settings);
+    expect(testBed.exists('indexDetailsSettingsCodeBlock')).toBe(true);
+  });
+
   describe('Overview tab', () => {
     it('updates the breadcrumbs to index details overview', async () => {
       expect(breadcrumbService.setBreadcrumbs).toHaveBeenLastCalledWith(
@@ -499,6 +506,21 @@ describe('<IndexDetailsPage />', () => {
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests);
         await testBed.actions.mappings.clickErrorReloadButton();
         expect(httpSetup.get).toHaveBeenCalledTimes(numberOfRequests + 1);
+      });
+
+      it('handles errors from json.stringify function', async () => {
+        const circularReference: any = { otherData: 123 };
+        circularReference.myself = circularReference;
+        httpRequestsMockHelpers.setLoadIndexMappingResponse(testIndexName, {
+          mappings: circularReference,
+        });
+        await act(async () => {
+          testBed = await setup({ httpSetup });
+        });
+
+        testBed.component.update();
+        await testBed.actions.clickIndexDetailsTab(IndexDetailsSection.Mappings);
+        expect(testBed.actions.mappings.isErrorDisplayed()).toBe(true);
       });
     });
 

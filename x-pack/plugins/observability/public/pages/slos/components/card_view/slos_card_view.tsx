@@ -24,47 +24,37 @@ export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  cardsPerRow?: string;
   activeAlertsBySlo: ActiveAlerts;
   rulesBySlo?: UseFetchRulesForSloResponse['data'];
 }
 
-const useColumns = (cardsPerRow: string | undefined) => {
+const useColumns = () => {
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
   const isMedium = useIsWithinBreakpoints(['m']);
-  const isLarge = useIsWithinBreakpoints(['l']);
-
-  const columns = (Number(cardsPerRow) as EuiFlexGridProps['columns']) ?? 3;
+  const isLarge = useIsWithinBreakpoints(['l', 'xl']);
 
   switch (true) {
     case isMobile:
       return 1;
     case isMedium:
-      return columns > 2 ? 2 : columns;
+      return 3;
     case isLarge:
-      return columns > 3 ? 3 : columns;
+      return 4;
     default:
-      return columns;
+      return 3;
   }
 };
 
-export function SloListCardView({
-  sloList,
-  loading,
-  error,
-  cardsPerRow,
-  rulesBySlo,
-  activeAlertsBySlo,
-}: Props) {
+export function SloListCardView({ sloList, loading, error, rulesBySlo, activeAlertsBySlo }: Props) {
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
     });
 
-  const columns = useColumns(cardsPerRow);
+  const columns = useColumns();
 
   if (loading && sloList.length === 0) {
-    return <LoadingSloGrid gridSize={Number(cardsPerRow)} />;
+    return <LoadingSloGrid gridSize={columns} />;
   }
 
   return (
@@ -87,7 +77,7 @@ export function SloListCardView({
                 )?.data
               }
               historicalSummaryLoading={historicalSummaryLoading}
-              cardsPerRow={Number(cardsPerRow)}
+              cardsPerRow={Number(columns)}
             />
           </EuiFlexItem>
         ))}

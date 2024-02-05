@@ -22,8 +22,8 @@ export interface TextBasedField {
 }
 
 export interface TextBasedLayer {
-  index: string;
-  query: AggregateQuery | undefined;
+  index?: string;
+  query?: AggregateQuery | undefined;
   table?: Datatable;
   columns: TextBasedLayerColumn[];
   timeField?: string;

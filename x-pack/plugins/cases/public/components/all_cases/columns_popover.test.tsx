@@ -8,15 +8,13 @@
 import React from 'react';
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { ColumnsPopover } from './columns_popover';
 
-// FLAKY: https://github.com/elastic/kibana/issues/174682
-// FLAKY: https://github.com/elastic/kibana/issues/174683
-// FLAKY: https://github.com/elastic/kibana/issues/174684
-describe.skip('ColumnsPopover', () => {
+describe('ColumnsPopover', () => {
   let appMockRenderer: AppMockRenderer;
 
   beforeEach(() => {
@@ -36,6 +34,8 @@ describe.skip('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+
+    await waitForEuiPopoverOpen();
 
     expect(await screen.findByTestId('column-selection-popover')).toBeInTheDocument();
 
@@ -85,7 +85,13 @@ describe.skip('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(await screen.findByTestId('column-selection-popover-show-all-button'));
+    userEvent.click(
+      await screen.findByTestId('column-selection-popover-show-all-button'),
+      undefined,
+      {
+        skipPointerEventsCheck: true,
+      }
+    );
 
     const onSelectedColumnsChangeCallParams = selectedColumns.map((column) => ({
       ...column,
@@ -108,7 +114,13 @@ describe.skip('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
-    userEvent.click(await screen.findByTestId('column-selection-popover-hide-all-button'));
+    userEvent.click(
+      await screen.findByTestId('column-selection-popover-hide-all-button'),
+      undefined,
+      {
+        skipPointerEventsCheck: true,
+      }
+    );
 
     await waitFor(() => {
       expect(onSelectedColumnsChange).toHaveBeenCalledWith(
@@ -123,6 +135,7 @@ describe.skip('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await waitForEuiPopoverOpen();
     userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Title');
 
     expect(await screen.findByTestId('column-selection-switch-title')).toBeInTheDocument();
@@ -141,9 +154,12 @@ describe.skip('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    await waitForEuiPopoverOpen();
     userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Category');
 
-    expect(onSelectedColumnsChange).not.toHaveBeenCalled();
+    await waitFor(() => {
+      expect(onSelectedColumnsChange).not.toHaveBeenCalled();
+    });
   });
 
   it('searching for text hides the drag and drop icons', async () => {
@@ -168,6 +184,9 @@ describe.skip('ColumnsPopover', () => {
     );
 
     userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+
+    await waitForEuiPopoverOpen();
+
     userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Foobar');
 
     expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeDisabled();

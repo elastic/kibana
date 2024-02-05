@@ -471,15 +471,15 @@
         "label": "getTableByIdSelector",
         "description": [],
         "signature": [
-          "() => ((state: { dataTable: ",
+          "() => ((state: ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
             "docId": "kibKbnSecuritysolutionDataTablePluginApi",
-            "section": "def-common.TableState",
-            "text": "TableState"
+            "section": "def-common.DataTableState",
+            "text": "DataTableState"
           },
-          "; }, params_0: string) => ",
+          ", tableId: string) => ",
           {
             "pluginId": "@kbn/securitysolution-data-table",
             "scope": "common",
@@ -505,7 +505,7 @@
             "section": "def-common.DataTableModel",
             "text": "DataTableModel"
           },
-          " & { clearCache: () => void; }> & { clearCache: () => void; }"
+          ", { clearCache: () => void; }> & { clearCache: () => void; }"
         ],
         "path": "x-pack/packages/security-solution/data_table/store/data_table/selectors.ts",
         "deprecated": false,

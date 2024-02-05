@@ -54,7 +54,7 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
     NO_DATA: useEuiBackgroundColor('subdued'),
   };
 
-  return colors[status ?? 'NO_DATA'];
+  return { cardColor: colors[status ?? 'NO_DATA'], colors };
 };
 
 const getSubTitle = (slo: SLOWithSummaryResponse) => {
@@ -179,7 +179,7 @@ export function SloCardChart({
     application: { navigateToUrl },
   } = useKibana().services;
 
-  const cardColor = useSloCardColor(slo.summary.status);
+  const { cardColor } = useSloCardColor(slo.summary.status);
   const subTitle = getSubTitle(slo);
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
 

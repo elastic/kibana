@@ -4,23 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { HttpSetup } from '@kbn/core/public';
-import { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
+import type { HttpSetup } from '@kbn/core/public';
+import type { MaintenanceWindow } from '../../../common';
+import type { MaintenanceWindowResponse } from '../../../common/routes/maintenance_window/response';
 
-import { MaintenanceWindow } from '../../pages/maintenance_windows/types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../common';
-
-const rewriteBodyRes: RewriteRequestCase<MaintenanceWindow> = ({
-  r_rule: rRule,
-  category_ids: categoryIds,
-  scoped_query: scopedQuery,
-  ...rest
-}) => ({
-  ...rest,
-  scopedQuery,
-  categoryIds,
-  rRule,
-});
+import { transformMaintenanceWindowResponse } from './transform_maintenance_window_response';
 
 export async function getMaintenanceWindow({
   http,
@@ -29,11 +18,11 @@ export async function getMaintenanceWindow({
   http: HttpSetup;
   maintenanceWindowId: string;
 }): Promise<MaintenanceWindow> {
-  const res = await http.get<AsApiContract<MaintenanceWindow>>(
+  const res = await http.get<MaintenanceWindowResponse>(
     `${INTERNAL_BASE_ALERTING_API_PATH}/rules/maintenance_window/${encodeURIComponent(
       maintenanceWindowId
     )}`
   );
 
-  return rewriteBodyRes(res);
+  return transformMaintenanceWindowResponse(res);
 }

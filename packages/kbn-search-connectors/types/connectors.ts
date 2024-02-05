@@ -215,6 +215,7 @@ export interface SchedulingConfiguraton {
 
 export interface Connector {
   api_key_id: string | null;
+  api_key_secret_id: string | null;
   configuration: ConnectorConfiguration;
   custom_scheduling: ConnectorCustomScheduling;
   description: string | null;

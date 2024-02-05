@@ -60,6 +60,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  NotificationDelay,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -409,6 +410,7 @@ export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+export interface RawNotificationDelay extends SavedObjectAttributes, NotificationDelay {}
 
 export interface RawRuleAlertsFilter extends AlertsFilter {
   query?: {
@@ -485,6 +487,7 @@ export interface RawRule extends SavedObjectAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  notificationDelay?: RawNotificationDelay;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

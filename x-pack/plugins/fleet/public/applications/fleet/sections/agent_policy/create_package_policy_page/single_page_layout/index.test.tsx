@@ -659,6 +659,23 @@ describe('when on the package policy create page', () => {
           expect(renderResult.getByText('Nginx integration added')).toBeInTheDocument();
         });
       });
+
+      test('should not show confirmation modal', async () => {
+        (sendGetAgentStatus as jest.MockedFunction<any>).mockResolvedValueOnce({
+          data: { results: { total: 1 } },
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText('Existing hosts')!);
+        });
+
+        await act(async () => {
+          fireEvent.click(renderResult.getByText(/Save and continue/).closest('button')!);
+        });
+
+        expect(sendCreateAgentPolicy as jest.MockedFunction<any>).not.toHaveBeenCalled();
+        expect(sendCreatePackagePolicy as jest.MockedFunction<any>).toHaveBeenCalled();
+      });
     });
   });
 });

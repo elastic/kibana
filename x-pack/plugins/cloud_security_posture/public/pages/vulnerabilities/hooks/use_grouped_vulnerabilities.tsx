@@ -34,6 +34,21 @@ export interface VulnerabilitiesGroupingAggregation {
     buckets?: GenericBuckets[];
   };
   isLoading?: boolean;
+  critical?: {
+    doc_count?: NumberOrNull;
+  };
+  high?: {
+    doc_count?: NumberOrNull;
+  };
+  medium?: {
+    doc_count?: NumberOrNull;
+  };
+  low?: {
+    doc_count?: NumberOrNull;
+  };
+  cloudProvider?: {
+    buckets?: GenericBuckets[];
+  };
 }
 
 export type VulnerabilitiesRootGroupingAggregation =

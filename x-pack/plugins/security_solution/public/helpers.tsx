@@ -176,7 +176,7 @@ export const isDetectionsPath = (pathname: string): boolean => {
 
 export const isDashboardViewPath = (pathname: string): boolean =>
   matchPath(pathname, {
-    path: `/${DASHBOARDS_PATH}/:id`,
+    path: `${DASHBOARDS_PATH}/:detailName`,
     exact: false,
     strict: false,
   }) != null;

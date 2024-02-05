@@ -5,17 +5,35 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
+import numeral from '@elastic/numeral';
+import { i18n } from '@kbn/i18n';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import { ALL_VALUE, SLOResponse, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
+import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+import moment from 'moment';
+import { v4 as uuidv4 } from 'uuid';
 import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../common/slo/constants';
 
-export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attributes'] {
+export interface TimeRange {
+  from: Date;
+  to: Date;
+}
+
+export interface AlertAnnotation {
+  date: Date;
+  total: number;
+}
+
+export function useLensDefinition(
+  slo: SLOResponse,
+  threshold: number,
+  alertTimeRange?: TimeRange,
+  annotations?: AlertAnnotation[],
+  showErrorRateAsLine?: boolean
+): TypedLensByValueInput['attributes'] {
   const { euiTheme } = useEuiTheme();
 
-  const interval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? slo.objective.timesliceWindow
-    : '60s';
+  const interval = 'auto';
 
   return {
     title: 'SLO Error Rate',
@@ -58,26 +76,21 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
             layerId: '8730e8af-7dac-430e-9cef-3b9989ff0866',
             accessors: ['9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14'],
             position: 'top',
-            seriesType: 'area',
+            seriesType: !!showErrorRateAsLine ? 'line' : 'area',
             showGridlines: false,
             layerType: 'data',
             xAccessor: '627ded04-eae0-4437-83a1-bbb6138d2c3b',
             yConfig: [
               {
                 forAccessor: '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14',
-                color: euiTheme.colors.danger,
+                color: !!showErrorRateAsLine ? euiTheme.colors.primary : euiTheme.colors.danger,
               },
             ],
           },
           {
             layerId: '34298f84-681e-4fa3-8107-d6facb32ed92',
             layerType: 'referenceLine',
-            accessors: [
-              '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
-              '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762',
-              'c531a6b1-70dd-4918-bdd0-a21535a7af05',
-              '61f9e663-10eb-41f7-b584-1f0f95418489',
-            ],
+            accessors: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6'],
             yConfig: [
               {
                 forAccessor: '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
@@ -86,29 +99,75 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
                 color: euiTheme.colors.danger,
                 iconPosition: 'right',
               },
-              {
-                forAccessor: '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-              {
-                forAccessor: 'c531a6b1-70dd-4918-bdd0-a21535a7af05',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
-              {
-                forAccessor: '61f9e663-10eb-41f7-b584-1f0f95418489',
-                axisMode: 'left',
-                textVisibility: true,
-                color: euiTheme.colors.danger,
-                iconPosition: 'right',
-              },
             ],
           },
+          ...(!!alertTimeRange
+            ? [
+                {
+                  layerId: uuidv4(),
+                  layerType: 'annotations',
+                  annotations: [
+                    {
+                      type: 'manual',
+                      id: uuidv4(),
+                      label: i18n.translate('xpack.observability.slo.errorRateChart.alertLabel', {
+                        defaultMessage: 'Alert',
+                      }),
+                      key: {
+                        type: 'point_in_time',
+                        timestamp: moment(alertTimeRange.from).toISOString(),
+                      },
+                      lineWidth: 2,
+                      color: euiTheme.colors.danger,
+                      icon: 'alert',
+                    },
+                    {
+                      type: 'manual',
+                      label: i18n.translate(
+                        'xpack.observability.slo.errorRateChart.activeAlertLabel',
+                        {
+                          defaultMessage: 'Active alert',
+                        }
+                      ),
+                      key: {
+                        type: 'range',
+                        timestamp: moment(alertTimeRange.from).toISOString(),
+                        endTimestamp: moment(alertTimeRange.to).toISOString(),
+                      },
+                      id: uuidv4(),
+                      color: transparentize(euiTheme.colors.danger, 0.2),
+                    },
+                  ],
+                  ignoreGlobalFilters: true,
+                  persistanceType: 'byValue',
+                },
+              ]
+            : []),
+          ...(!!annotations && annotations.length > 0
+            ? annotations.map((annotation) => ({
+                layerId: uuidv4(),
+                layerType: 'annotations',
+                annotations: [
+                  {
+                    type: 'manual',
+                    id: uuidv4(),
+                    label: i18n.translate(
+                      'xpack.observability.slo.errorRateChart.alertAnnotationLabel',
+                      { defaultMessage: '{total} alert', values: { total: annotation.total } }
+                    ),
+                    key: {
+                      type: 'point_in_time',
+                      timestamp: moment(annotation.date).toISOString(),
+                    },
+                    lineWidth: 2,
+                    color: euiTheme.colors.danger,
+                    icon: 'alert',
+                  },
+                ],
+                ignoreGlobalFilters: true,
+                persistanceType: 'byValue',
+              }))
+            : []),
         ],
       },
       query: {
@@ -203,7 +262,9 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
                     customLabel: true,
                   },
                   '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14': {
-                    label: 'Error rate',
+                    label: i18n.translate('xpack.observability.slo.errorRateChart.errorRateLabel', {
+                      defaultMessage: 'Error rate',
+                    }),
                     dataType: 'number',
                     operationType: 'formula',
                     isBucketed: false,
@@ -291,7 +352,9 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
                     customLabel: true,
                   },
                   '9f69a7b0-34b9-4b76-9ff7-26dc1a06ec14': {
-                    label: 'Error rate',
+                    label: i18n.translate('xpack.observability.slo.errorRateChart.errorRateLabel', {
+                      defaultMessage: 'Error rate',
+                    }),
                     dataType: 'number',
                     operationType: 'formula',
                     isBucketed: false,
@@ -326,7 +389,7 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
               linkToLayers: [],
               columns: {
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0': {
-                  label: 'Part of 14.4x',
+                  label: `Part of ${threshold}x`,
                   dataType: 'number',
                   operationType: 'math',
                   isBucketed: false,
@@ -347,186 +410,36 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
                           },
                           text: `1 - ${slo.objective.target}`,
                         },
-                        14.4,
+                        threshold,
                       ],
                       location: {
                         min: 0,
                         max: 17,
                       },
-                      text: `(1 - ${slo.objective.target}) * 14.4`,
+                      text: `(1 - ${slo.objective.target}) * ${threshold}`,
                     },
                   },
                   references: [],
                   customLabel: true,
                 },
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6': {
-                  label: '14.4x',
+                  label: `${numeral(threshold).format('0.[00]')}x`,
                   dataType: 'number',
                   operationType: 'formula',
                   isBucketed: false,
                   scale: 'ratio',
                   params: {
                     // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 14.4`,
+                    formula: `(1 - ${slo.objective.target}) * ${threshold}`,
                     isFormulaBroken: false,
                   },
                   references: ['0a42b72b-cd5a-4d59-81ec-847d97c268e6X0'],
-                  customLabel: true,
-                },
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762X0': {
-                  label: 'Part of 6x',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
-                          },
-                          text: `1 - ${slo.objective.target}`,
-                        },
-                        6,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 14,
-                      },
-                      text: `(1 - ${slo.objective.target}) * 6`,
-                    },
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762': {
-                  label: '6x',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 6`,
-                    isFormulaBroken: false,
-                  },
-                  references: ['76d3bcc9-7d45-4b08-b2b1-8d3866ca0762X0'],
-                  customLabel: true,
-                },
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05X0': {
-                  label: 'Part of 3x',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
-                          },
-                          text: `1 - ${slo.objective.target}`,
-                        },
-                        3,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 14,
-                      },
-                      text: `(1 - ${slo.objective.target}) * 3`,
-                    },
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05': {
-                  label: '3x',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 3`,
-                    isFormulaBroken: false,
-                  },
-                  references: ['c531a6b1-70dd-4918-bdd0-a21535a7af05X0'],
-                  customLabel: true,
-                },
-                '61f9e663-10eb-41f7-b584-1f0f95418489X0': {
-                  label: 'Part of 1x',
-                  dataType: 'number',
-                  operationType: 'math',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    tinymathAst: {
-                      type: 'function',
-                      name: 'multiply',
-                      args: [
-                        {
-                          type: 'function',
-                          name: 'subtract',
-                          args: [1, slo.objective.target],
-                          location: {
-                            min: 1,
-                            max: 9,
-                          },
-                          text: `1 - ${slo.objective.target}`,
-                        },
-                        1,
-                      ],
-                      location: {
-                        min: 0,
-                        max: 14,
-                      },
-                      text: `(1 - ${slo.objective.target}) * 1`,
-                    },
-                  },
-                  references: [],
-                  customLabel: true,
-                },
-                '61f9e663-10eb-41f7-b584-1f0f95418489': {
-                  label: '1x',
-                  dataType: 'number',
-                  operationType: 'formula',
-                  isBucketed: false,
-                  scale: 'ratio',
-                  params: {
-                    // @ts-ignore
-                    formula: `(1 - ${slo.objective.target}) * 1`,
-                    isFormulaBroken: false,
-                  },
-                  references: ['61f9e663-10eb-41f7-b584-1f0f95418489X0'],
                   customLabel: true,
                 },
               },
               columnOrder: [
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6',
                 '0a42b72b-cd5a-4d59-81ec-847d97c268e6X0',
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762X0',
-                '76d3bcc9-7d45-4b08-b2b1-8d3866ca0762',
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05X0',
-                'c531a6b1-70dd-4918-bdd0-a21535a7af05',
-                '61f9e663-10eb-41f7-b584-1f0f95418489X0',
-                '61f9e663-10eb-41f7-b584-1f0f95418489',
               ],
               sampling: 1,
               ignoreGlobalFilters: false,
