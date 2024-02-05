@@ -24,7 +24,7 @@ export const navigationTree: NavigationTreeDefinition = {
           title: i18n.translate('xpack.serverlessObservability.nav.discover', {
             defaultMessage: 'Discover',
           }),
-          link: 'observability-log-explorer',
+          link: 'observability-logs-explorer',
           // avoid duplicate "Discover" breadcrumbs
           breadcrumbStatus: 'hidden',
           renderAs: 'item',
@@ -33,7 +33,7 @@ export const navigationTree: NavigationTreeDefinition = {
               link: 'discover',
               children: [
                 {
-                  link: 'observability-log-explorer',
+                  link: 'observability-logs-explorer',
                 },
               ],
             },

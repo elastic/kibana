@@ -6,12 +6,12 @@
  */
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
 import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
 import { act, fireEvent, render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 
+import { TestProviders } from '../../../mock';
 import type {
   UseBulkAlertAssigneesItemsProps,
   UseBulkAlertAssigneesPanel,

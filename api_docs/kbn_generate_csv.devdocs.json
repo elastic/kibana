@@ -448,25 +448,7 @@
       }
     ],
     "enums": [],
-    "misc": [
-      {
-        "parentPluginId": "@kbn/generate-csv",
-        "id": "def-server.CsvPagingStrategy",
-        "type": "Type",
-        "tags": [],
-        "label": "CsvPagingStrategy",
-        "description": [
-          "\nDuplicated from @kbn/reporting-export-types-csv-common to reduce dependencies"
-        ],
-        "signature": [
-          "\"scroll\" | \"pit\""
-        ],
-        "path": "packages/kbn-generate-csv/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ],
+    "misc": [],
     "objects": []
   },
   "common": {

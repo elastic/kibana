@@ -16,6 +16,7 @@ import { registerIndexPatternsUsageCollector } from './register_index_pattern_us
 import { createScriptedFieldsDeprecationsConfig } from './deprecations';
 import { DATA_VIEW_SAVED_OBJECT_TYPE, LATEST_VERSION } from '../common';
 import type { ClientConfigType } from '../common/types';
+import { dataTiersUiSettingsConfig } from './ui_settings';
 import {
   DataViewsServerPluginSetup,
   DataViewsServerPluginStart,
@@ -50,6 +51,9 @@ export class DataViewsServerPlugin
 
     const config = this.initializerContext.config.get<ClientConfigType>();
 
+    if (config.dataTiersExcludedForFields) {
+      core.uiSettings.register(dataTiersUiSettingsConfig);
+    }
     if (config.fieldListCachingEnabled) {
       core.uiSettings.register(cacheMaxAge);
     }

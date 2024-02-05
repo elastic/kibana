@@ -77,7 +77,7 @@ export interface LogRateAnalysisContentProps {
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional callback that exposes current window parameters */
-  onWindowParametersChange?: (wp?: WindowParameters) => void;
+  onWindowParametersChange?: (wp?: WindowParameters, replace?: boolean) => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
 }
@@ -126,7 +126,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     windowParametersTouched.current = true;
 
     if (onWindowParametersChange) {
-      onWindowParametersChange(windowParameters);
+      onWindowParametersChange(windowParameters, true);
     }
   }, [onWindowParametersChange, windowParameters]);
 

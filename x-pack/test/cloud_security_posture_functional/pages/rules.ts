@@ -13,6 +13,7 @@ import {
   RULES_BULK_ACTION_OPTION_DISABLE,
   RULES_BULK_ACTION_OPTION_ENABLE,
 } from '../page_objects/rule_page';
+import { k8sFindingsMock } from '../mocks/latest_findings_mock';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
@@ -27,14 +28,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'findings',
   ]);
 
-  describe('Cloud Posture Rules Page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/175905
+  describe.skip('Cloud Posture Rules Page', function () {
     this.tags(['cloud_security_posture_rules_page']);
     let rule: typeof pageObjects.rule;
-
+    let findings: typeof pageObjects.findings;
     let agentPolicyId: string;
 
     beforeEach(async () => {
       rule = pageObjects.rule;
+      findings = pageObjects.findings;
+
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
 
@@ -58,15 +62,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         'kspm'
       );
       await rule.waitForPluginInitialized();
+      await findings.index.add(k8sFindingsMock);
       await rule.navigateToRulePage('cis_k8s', '1.0.1');
     });
 
     afterEach(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await findings.index.remove();
     });
 
-    describe('Rules Page - Bulk Action buttons', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/175614
+    describe.skip('Rules Page - Bulk Action buttons', () => {
       it('It should disable both Enable and Disable options when there are no rules selected', async () => {
         await rule.rulePage.toggleBulkActionButton();
         expect(
@@ -177,6 +184,79 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await rule.rulePage.clickTakeActionButtonOption('enable');
         await pageObjects.header.waitUntilLoadingHasFinished();
         expect((await rule.rulePage.getEnableSwitchButtonState()) === 'true').to.be(true);
+      });
+    });
+
+    describe('Rules Page - Rules Counters', () => {
+      it('Shows posture score when there are findings', async () => {
+        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        expect(isEmptyStateVisible).to.be(false);
+
+        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
+        expect((await postureScoreCounter.getVisibleText()).includes('33%')).to.be(true);
+      });
+
+      it('Clicking the posture score button leads to the dashboard', async () => {
+        await rule.rulePage.clickPostureScoreButton();
+        await pageObjects.common.waitUntilUrlIncludes('cloud_security_posture/dashboard');
+      });
+
+      it('Shows integrations count when there are findings', async () => {
+        const integrationsCounter = await rule.rulePage.getIntegrationsEvaluatedCounter();
+        expect((await integrationsCounter.getVisibleText()).includes('1')).to.be(true);
+      });
+
+      it('Clicking the integrations counter button leads to the integration page', async () => {
+        await rule.rulePage.clickIntegrationsEvaluatedButton();
+        await pageObjects.common.waitUntilUrlIncludes(
+          'cloud_security_posture/add-integration/kspm'
+        );
+      });
+
+      it('Shows the failed findings counter when there are findings', async () => {
+        const failedFindingsCounter = await rule.rulePage.getFailedFindingsCounter();
+        expect((await failedFindingsCounter.getVisibleText()).includes('2')).to.be(true);
+      });
+
+      it('Clicking the failed findings button leads to the findings page', async () => {
+        await rule.rulePage.clickFailedFindingsButton();
+        await pageObjects.common.waitUntilUrlIncludes(
+          'cloud_security_posture/findings/configurations'
+        );
+      });
+
+      it('Shows the disabled rules count', async () => {
+        const disabledRulesCounter = await rule.rulePage.getDisabledRulesCounter();
+        expect((await disabledRulesCounter.getVisibleText()).includes('0')).to.be(true);
+
+        // disable rule 1.1.1 (k8s findings mock contains a findings from that rule)
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await disabledRulesCounter.getVisibleText()).includes('1')).to.be(true);
+
+        const postureScoreCounter = await rule.rulePage.getPostureScoreCounter();
+        expect((await postureScoreCounter.getVisibleText()).includes('0%')).to.be(true);
+
+        // enable rule back
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+      });
+
+      it('Clicking the disabled rules button shows enables the disabled filter', async () => {
+        await rule.rulePage.clickEnableRulesRowSwitchButton(0);
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await rule.rulePage.clickDisabledRulesButton();
+        await pageObjects.header.waitUntilLoadingHasFinished();
+        expect((await rule.rulePage.getEnableRulesRowSwitchButton()) === 1).to.be(true);
+      });
+
+      it('Shows empty state when there are no findings', async () => {
+        // Ensure there are no findings initially
+        await findings.index.remove();
+        await rule.navigateToRulePage('cis_k8s', '1.0.1');
+
+        const isEmptyStateVisible = await rule.rulePage.getCountersEmptyState();
+        expect(isEmptyStateVisible).to.be(true);
       });
     });
   });
