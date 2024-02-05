@@ -19,7 +19,7 @@ import {
 import type { DataProvider, QueryOperator } from '../../../../../common/types/timeline';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
-import { useCreateTimeline } from '../../../../timelines/components/timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { updateProviders } from '../../../../timelines/store/actions';
 import { sourcererSelectors } from '../../../../common/store';
 import type { TimeRange } from '../../../../common/store/inputs/model';

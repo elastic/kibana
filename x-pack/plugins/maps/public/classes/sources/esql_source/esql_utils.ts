@@ -7,11 +7,20 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { ESQLColumn } from '@kbn/es-types';
+import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
+// ESQL_GEO_POINT_TYPE !== ES_GEO_FIELD_TYPE.GEO_POINT
+// ES_GEO_FIELD_TYPE.GEO_POINT is a field type from an Elasticsearch index mapping
+// ESQL_GEO_POINT_TYPE is a column type from an ESQL response
 export const ESQL_GEO_POINT_TYPE = 'geo_point';
+
+// ESQL_GEO_SHAPE_TYPE !== ES_GEO_FIELD_TYPE.GEO_SHAPE
+// ES_GEO_FIELD_TYPE.GEO_SHAPE is a field type from an Elasticsearch index mapping
+// ESQL_GEO_SHAPE_TYPE is a column type from an ESQL response
+export const ESQL_GEO_SHAPE_TYPE = 'geo_shape';
 
 const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate(
   'xpack.maps.source.esql.noGeometryColumnErrorMsg',
@@ -20,8 +29,8 @@ const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate(
   }
 );
 
-function isGeometryColumn(column: ESQLColumn) {
-  return column.type === ESQL_GEO_POINT_TYPE;
+export function isGeometryColumn(column: ESQLColumn) {
+  return [ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE].includes(column.type);
 }
 
 export function verifyGeometryColumn(columns: ESQLColumn[]) {
@@ -51,9 +60,10 @@ export function getGeometryColumnIndex(columns: ESQLColumn[]) {
 }
 
 export async function getESQLMeta(esql: string) {
+  const fields = await getFields(esql);
   return {
     columns: await getColumns(esql),
-    dateFields: await getDateFields(esql),
+    ...fields,
   };
 }
 
@@ -105,21 +115,26 @@ async function getColumns(esql: string) {
   }
 }
 
-export async function getDateFields(esql: string) {
+export async function getFields(esql: string) {
+  const dateFields: string[] = [];
+  const geoFields: string[] = [];
   const pattern: string = getIndexPatternFromESQLQuery(esql);
   try {
     // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported
-    return (await getIndexPatternService().getFieldsForWildcard({ pattern }))
-      .filter((field) => {
-        return field.type === 'date';
-      })
-      .map((field) => {
-        return field.name;
-      });
+    (await getIndexPatternService().getFieldsForWildcard({ pattern })).forEach((field) => {
+      if (field.type === 'date') {
+        dateFields.push(field.name);
+      } else if (
+        field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
+        field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+      ) {
+        geoFields.push(field.name);
+      }
+    });
   } catch (error) {
     throw new Error(
       i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
-        defaultMessage: `Unable to load date fields from index pattern: {pattern}. {errorMessage}`,
+        defaultMessage: `Unable to load fields from index pattern: {pattern}. {errorMessage}`,
         values: {
           errorMessage: error.message,
           pattern,
@@ -127,4 +142,9 @@ export async function getDateFields(esql: string) {
       })
     );
   }
+
+  return {
+    dateFields,
+    geoFields,
+  };
 }

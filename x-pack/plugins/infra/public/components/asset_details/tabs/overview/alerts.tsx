@@ -6,7 +6,7 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSummaryTimeRange } from '@kbn/observability-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
@@ -23,6 +23,7 @@ import { useBoolean } from '../../../../hooks/use_boolean';
 import { ALERT_STATUS_ALL } from '../../../../common/alerts/constants';
 import { AlertsSectionTitle } from '../../components/section_titles';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
+import { CollapsibleSection } from './section/collapsible_section';
 
 export const AlertsSummaryContent = ({
   assetName,
@@ -49,25 +50,30 @@ export const AlertsSummaryContent = ({
 
   return (
     <>
-      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <AlertsSectionTitle />
-        </EuiFlexItem>
-        {featureFlags.inventoryThresholdAlertRuleEnabled && (
-          <EuiFlexItem grow={false}>
-            <LinkToAlertsRule onClick={toggleAlertFlyout} />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <LinkToAlertsPage
-            assetName={assetName}
-            queryField={`${assetType}.name`}
-            dateRange={dateRange}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="s" />
-      <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
+      <CollapsibleSection
+        title={AlertsSectionTitle}
+        collapsible
+        data-test-subj="infraAssetDetailsAlertsCollapsible"
+        id="alerts"
+        extraAction={
+          <EuiFlexGroup alignItems="center" responsive={false}>
+            {featureFlags.inventoryThresholdAlertRuleEnabled && (
+              <EuiFlexItem grow={false}>
+                <LinkToAlertsRule onClick={toggleAlertFlyout} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <LinkToAlertsPage
+                assetName={assetName}
+                queryField={`${assetType}.name`}
+                dateRange={dateRange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        }
+      >
+        <MemoAlertSummaryWidget alertsQuery={alertsEsQueryByStatus} dateRange={dateRange} />
+      </CollapsibleSection>
 
       {featureFlags.inventoryThresholdAlertRuleEnabled && (
         <AlertFlyout

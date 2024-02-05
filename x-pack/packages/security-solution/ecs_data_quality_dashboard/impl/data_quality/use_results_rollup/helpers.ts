@@ -87,17 +87,6 @@ export const getTotalIndicesChecked = (patternRollups: Record<string, PatternRol
   );
 };
 
-export const onPatternRollupUpdated = ({
-  patternRollup,
-  patternRollups,
-}: {
-  patternRollup: PatternRollup;
-  patternRollups: Record<string, PatternRollup>;
-}): Record<string, PatternRollup> => ({
-  ...patternRollups,
-  [patternRollup.pattern]: patternRollup,
-});
-
 export const updateResultOnCheckCompleted = ({
   error,
   formatBytes,

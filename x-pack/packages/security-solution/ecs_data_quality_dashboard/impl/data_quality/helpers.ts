@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import type { HttpHandler } from '@kbn/core-http-browser';
 import type {
   IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndicesStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import { has, sortBy } from 'lodash/fp';
+import { IToasts } from '@kbn/core-notifications-browser';
 import { getIlmPhase } from './data_quality_panel/pattern/helpers';
 import { getFillColor } from './data_quality_panel/tabs/summary_tab/helpers';
 
@@ -17,6 +19,7 @@ import * as i18n from './translations';
 
 import type {
   DataQualityCheckResult,
+  DataQualityIndexCheckedParams,
   EcsMetadata,
   EnrichedFieldMetadata,
   ErrorSummary,
@@ -443,3 +446,58 @@ export const getErrorSummaries = (
     []
   );
 };
+
+export const RESULTS_API_ROUTE = '/internal/ecs_data_quality_dashboard/results';
+
+export interface ResultData {
+  meta: DataQualityIndexCheckedParams;
+  rollup: PatternRollup;
+}
+
+export async function postResult({
+  result,
+  httpFetch,
+  toasts,
+  abortController,
+}: {
+  result: ResultData;
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
+}): Promise<void> {
+  try {
+    await httpFetch<void>(RESULTS_API_ROUTE, {
+      method: 'POST',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      body: JSON.stringify(result),
+    });
+  } catch (err) {
+    toasts.addError(err, { title: i18n.POST_RESULT_ERROR_TITLE });
+  }
+}
+
+export async function getResults({
+  patterns,
+  httpFetch,
+  toasts,
+  abortController,
+}: {
+  patterns: string[];
+  httpFetch: HttpHandler;
+  toasts: IToasts;
+  abortController: AbortController;
+}): Promise<ResultData[]> {
+  try {
+    const results = await httpFetch<ResultData[]>(RESULTS_API_ROUTE, {
+      method: 'GET',
+      signal: abortController.signal,
+      version: INTERNAL_API_VERSION,
+      query: { patterns: patterns.join(',') },
+    });
+    return results;
+  } catch (err) {
+    toasts.addError(err, { title: i18n.GET_RESULTS_ERROR_TITLE });
+    return [];
+  }
+}

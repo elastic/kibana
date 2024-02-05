@@ -6,14 +6,17 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
 import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
-  EndpointCapabilities,
   ConsoleResponseActionCommands,
+  EndpointCapabilities,
+  ResponseActionAgentType,
 } from '../../../../../common/endpoint/service/response_actions/constants';
+import { RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY } from '../../../../../common/endpoint/service/response_actions/constants';
 import { GetFileActionResult } from '../command_render_components/get_file_action';
 import type { Command, CommandDefinition } from '../../console';
 import { IsolateActionResult } from '../command_render_components/isolate_action';
@@ -29,15 +32,11 @@ import {
 import type { EndpointPrivileges, ImmutableArray } from '../../../../../common/endpoint/types';
 import {
   INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
-  UPGRADE_ENDPOINT_FOR_RESPONDER,
+  UPGRADE_AGENT_FOR_RESPONDER,
 } from '../../../../common/translations';
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
-import {
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
-} from '../../../../../common/endpoint/service/response_actions/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -73,39 +72,34 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-export const getRbacControl = ({
-  commandName,
-  privileges,
-}: {
-  commandName: ConsoleResponseActionCommands;
-  privileges: EndpointPrivileges;
-}): boolean => {
-  return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
-};
-
-const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
-  const privileges = command.commandDefinition.meta.privileges;
-  const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
-  const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
-  let errorMessage = '';
-  if (!responderCapability) {
-    errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
-  }
-  if (responderCapability) {
-    if (!endpointCapabilities.includes(responderCapability)) {
-      errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
+const capabilitiesAndPrivilegesValidator = (
+  agentType: ResponseActionAgentType
+): ((command: Command) => string | true) => {
+  return (command: Command) => {
+    const privileges = command.commandDefinition.meta.privileges;
+    const agentCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
+    const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
+    const responderCapability =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
+    let errorMessage = '';
+    if (!responderCapability) {
+      errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
     }
-  }
-  if (getRbacControl({ commandName, privileges }) !== true) {
-    errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
-  }
+    if (responderCapability) {
+      if (!agentCapabilities.includes(responderCapability)) {
+        errorMessage = errorMessage.concat(UPGRADE_AGENT_FOR_RESPONDER(agentType, commandName));
+      }
+    }
+    if (!getRbacControl({ commandName, privileges })) {
+      errorMessage = errorMessage.concat(INSUFFICIENT_PRIVILEGES_FOR_COMMAND);
+    }
 
-  if (errorMessage.length) {
-    return errorMessage;
-  }
+    if (errorMessage.length) {
+      return errorMessage;
+    }
 
-  return true;
+    return true;
+  };
 };
 
 export const HELP_GROUPS = Object.freeze({
@@ -134,10 +128,12 @@ const COMMENT_ARG_ABOUT = i18n.translate(
 
 export const getEndpointConsoleCommands = ({
   endpointAgentId,
+  agentType,
   endpointCapabilities,
   endpointPrivileges,
 }: {
   endpointAgentId: string;
+  agentType: ResponseActionAgentType;
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
@@ -165,13 +161,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: IsolateActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'isolate --comment "isolate this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -195,13 +192,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: ReleaseActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'release --comment "release this host"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -228,13 +226,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: KillProcessActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'kill-process --pid 123 --comment "kill this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -283,13 +282,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: SuspendProcessActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'suspend-process --pid 123 --comment "suspend this process"',
       exampleInstruction: ENTER_PID_OR_ENTITY_ID_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         comment: {
@@ -357,13 +357,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: GetProcessesActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'processes --comment "get the processes"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       args: {
         comment: {
           required: false,
@@ -387,13 +388,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: GetFileActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'get-file --path "/full/path/to/file.txt" --comment "Possible malware"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         path: {
@@ -434,13 +436,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: ExecuteActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'execute --command "ls -al" --timeout 2s --comment "Get list of all files"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         command: {
@@ -492,13 +495,14 @@ export const getEndpointConsoleCommands = ({
       }),
       RenderComponent: UploadActionResult,
       meta: {
+        agentType,
         endpointId: endpointAgentId,
         capabilities: endpointCapabilities,
         privileges: endpointPrivileges,
       },
       exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
       exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
-      validate: capabilitiesAndPrivilegesValidator,
+      validate: capabilitiesAndPrivilegesValidator(agentType),
       mustHaveArgs: true,
       args: {
         file: {

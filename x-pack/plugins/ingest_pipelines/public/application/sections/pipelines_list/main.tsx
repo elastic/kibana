@@ -60,11 +60,13 @@ export const PipelinesList: React.FunctionComponent<RouteComponentProps> = ({
   }, [pipelineNameFromLocation, data]);
 
   const goToEditPipeline = (pipelineName: string) => {
-    history.push(getEditPath({ pipelineName }));
+    const encodedParam = encodeURIComponent(pipelineName);
+    history.push(getEditPath({ pipelineName: encodedParam }));
   };
 
   const goToClonePipeline = (clonedPipelineName: string) => {
-    history.push(getClonePath({ clonedPipelineName }));
+    const encodedParam = encodeURIComponent(clonedPipelineName);
+    history.push(getClonePath({ clonedPipelineName: encodedParam }));
   };
 
   const goHome = () => {

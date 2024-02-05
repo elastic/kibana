@@ -41,46 +41,43 @@ export default function (providerContext: FtrProviderContext) {
       skipIfNoDockerRegistry(providerContext);
       setupFleetAndAgents(providerContext);
 
-      const writeMetricsDoc = (namespace: string) =>
-        es.transport.request(
-          {
-            method: 'POST',
-            path: `/${metricsTemplateName}-${namespace}/_doc?refresh=true`,
-            body: {
-              '@timestamp': new Date().toISOString(),
-              logs_test_name: 'test',
-              data_stream: {
-                dataset: `${pkgName}.test_metrics`,
-                namespace,
-                type: 'metrics',
-              },
-            },
-          },
-          { meta: true }
-        );
-
-      const writeLogsDoc = (namespace: string) =>
-        es.transport.request(
-          {
-            method: 'POST',
-            path: `/${logsTemplateName}-${namespace}/_doc?refresh=true`,
-            body: {
-              '@timestamp': new Date().toISOString(),
-              logs_test_name: 'test',
-              data_stream: {
-                dataset: `${pkgName}.test_logs`,
-                namespace,
-                type: 'logs',
-              },
-            },
-          },
-          { meta: true }
-        );
       beforeEach(async () => {
         await installPackage(pkgName, pkgVersion);
         await Promise.all(
           namespaces.map(async (namespace) => {
-            return Promise.all([writeLogsDoc(namespace), writeMetricsDoc(namespace)]);
+            const createLogsRequest = es.transport.request(
+              {
+                method: 'POST',
+                path: `/${logsTemplateName}-${namespace}/_doc`,
+                body: {
+                  '@timestamp': '2015-01-01',
+                  logs_test_name: 'test',
+                  data_stream: {
+                    dataset: `${pkgName}.test_logs`,
+                    namespace,
+                    type: 'logs',
+                  },
+                },
+              },
+              { meta: true }
+            );
+            const createMetricsRequest = es.transport.request(
+              {
+                method: 'POST',
+                path: `/${metricsTemplateName}-${namespace}/_doc`,
+                body: {
+                  '@timestamp': '2015-01-01',
+                  logs_test_name: 'test',
+                  data_stream: {
+                    dataset: `${pkgName}.test_metrics`,
+                    namespace,
+                    type: 'metrics',
+                  },
+                },
+              },
+              { meta: true }
+            );
+            return Promise.all([createLogsRequest, createMetricsRequest]);
           })
         );
       });
@@ -144,11 +141,7 @@ export default function (providerContext: FtrProviderContext) {
 
       it('after update, it should have rolled over logs datastream because mappings are not compatible and not metrics', async function () {
         await installPackage(pkgName, pkgUpdateVersion);
-
         await asyncForEach(namespaces, async (namespace) => {
-          // write doc as rollover is lazy
-          await writeLogsDoc(namespace);
-          await writeMetricsDoc(namespace);
           const resLogsDatastream = await es.transport.request<any>(
             {
               method: 'GET',
@@ -273,8 +266,6 @@ export default function (providerContext: FtrProviderContext) {
             })
             .expect(200);
 
-          // Write a doc to trigger lazy rollover
-          await writeLogsDoc('default');
           // Datastream should have been rolled over
           expect(await getLogsDefaultBackingIndicesLength()).to.be(2);
         });
@@ -312,29 +303,26 @@ export default function (providerContext: FtrProviderContext) {
       skipIfNoDockerRegistry(providerContext);
       setupFleetAndAgents(providerContext);
 
-      const writeMetricDoc = (body: any = {}) =>
-        es.transport.request(
+      beforeEach(async () => {
+        await installPackage(pkgName, pkgVersion);
+
+        // Create a sample document so the data stream is created
+        await es.transport.request(
           {
             method: 'POST',
-            path: `/${metricsTemplateName}-${namespace}/_doc?refresh=true`,
+            path: `/${metricsTemplateName}-${namespace}/_doc`,
             body: {
-              '@timestamp': new Date().toISOString(),
+              '@timestamp': '2015-01-01',
               logs_test_name: 'test',
               data_stream: {
                 dataset: `${pkgName}.test_logs`,
                 namespace,
                 type: 'logs',
               },
-              ...body,
             },
           },
           { meta: true }
         );
-      beforeEach(async () => {
-        await installPackage(pkgName, pkgVersion);
-
-        // Create a sample document so the data stream is created
-        await writeMetricDoc();
       });
 
       afterEach(async () => {
@@ -352,10 +340,6 @@ export default function (providerContext: FtrProviderContext) {
       it('rolls over data stream when index_mode: time_series is set in the updated package version', async () => {
         await installPackage(pkgName, pkgUpdateVersion);
 
-        // Write a doc so lazy rollover can happen
-        await writeMetricDoc({
-          some_field: 'test',
-        });
         const resMetricsDatastream = await es.transport.request<any>(
           {
             method: 'GET',

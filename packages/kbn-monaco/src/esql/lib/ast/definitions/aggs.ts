@@ -21,6 +21,7 @@ function createNumericAggDefinition({
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
     name,
+    type: 'agg',
     description,
     supportedCommands: ['stats'],
     signatures: [
@@ -93,6 +94,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
   .concat([
     {
       name: 'count',
+      type: 'agg',
       description: i18n.translate('monaco.esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
@@ -115,6 +117,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     },
     {
       name: 'count_distinct',
+      type: 'agg',
       description: i18n.translate('monaco.esql.definitions.countDistinctDoc', {
         defaultMessage: 'Returns the count of distinct values in a field.',
       }),
@@ -126,6 +129,32 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
           examples: [
             `from index | stats result = count_distinct(field)`,
             `from index | stats count_distinct(field)`,
+          ],
+        },
+      ],
+    },
+    {
+      name: 'st_centroid',
+      type: 'agg',
+      description: i18n.translate('monaco.esql.definitions.stCentroidDoc', {
+        defaultMessage: 'Returns the count of distinct values in a field.',
+      }),
+      supportedCommands: ['stats'],
+      signatures: [
+        {
+          params: [{ name: 'column', type: 'cartesian_point', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [
+            `from index | stats result = st_centroid(cartesian_field)`,
+            `from index | stats st_centroid(cartesian_field)`,
+          ],
+        },
+        {
+          params: [{ name: 'column', type: 'geo_point', noNestingFunctions: true }],
+          returnType: 'number',
+          examples: [
+            `from index | stats result = st_centroid(geo_field)`,
+            `from index | stats st_centroid(geo_field)`,
           ],
         },
       ],

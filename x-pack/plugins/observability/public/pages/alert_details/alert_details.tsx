@@ -61,22 +61,22 @@ export function AlertDetails() {
 
   const { ObservabilityPageTemplate, config } = usePluginContext();
   const { alertId } = useParams<AlertDetailsPathParams>();
-  const [isLoading, alert] = useFetchAlertDetail(alertId);
+  const [isLoading, alertDetail] = useFetchAlertDetail(alertId);
   const [ruleTypeModel, setRuleTypeModel] = useState<RuleTypeModel | null>(null);
   const CasesContext = getCasesContext();
   const userCasesPermissions = canUseCases([observabilityFeatureId]);
   const { rule } = useFetchRule({
-    ruleId: alert?.fields[ALERT_RULE_UUID],
+    ruleId: alertDetail?.formatted.fields[ALERT_RULE_UUID],
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
 
   useEffect(() => {
-    if (alert) {
-      setRuleTypeModel(ruleTypeRegistry.get(alert?.fields[ALERT_RULE_TYPE_ID]!));
-      setAlertStatus(alert?.fields[ALERT_STATUS] as AlertStatus);
+    if (alertDetail) {
+      setRuleTypeModel(ruleTypeRegistry.get(alertDetail?.formatted.fields[ALERT_RULE_TYPE_ID]!));
+      setAlertStatus(alertDetail?.formatted?.fields[ALERT_STATUS] as AlertStatus);
     }
-  }, [alert, ruleTypeRegistry]);
+  }, [alertDetail, ruleTypeRegistry]);
   useBreadcrumbs([
     {
       href: http.basePath.prepend(paths.observability.alerts),
@@ -86,7 +86,9 @@ export function AlertDetails() {
       deepLinkId: 'observability-overview:alerts',
     },
     {
-      text: alert ? pageTitleContent(alert.fields[ALERT_RULE_CATEGORY]) : defaultBreadcrumb,
+      text: alertDetail
+        ? pageTitleContent(alertDetail.formatted.fields[ALERT_RULE_CATEGORY])
+        : defaultBreadcrumb,
     },
   ]);
 
@@ -99,11 +101,11 @@ export function AlertDetails() {
   }
 
   // Redirect to the 404 page when the user hit the page url directly in the browser while the feature flag is off.
-  if (alert && !isAlertDetailsEnabledPerApp(alert, config)) {
+  if (alertDetail && !isAlertDetailsEnabledPerApp(alertDetail.formatted, config)) {
     return <PageNotFound />;
   }
 
-  if (!isLoading && !alert)
+  if (!isLoading && !alertDetail)
     return (
       <EuiPanel data-test-subj="alertDetailsError">
         <EuiEmptyPrompt
@@ -134,7 +136,7 @@ export function AlertDetails() {
       pageHeader={{
         pageTitle: (
           <PageTitle
-            alert={alert}
+            alert={alertDetail?.formatted ?? null}
             alertStatus={alertStatus}
             dataTestSubj={rule?.ruleTypeId || 'alertDetailsPageTitle'}
           />
@@ -146,7 +148,7 @@ export function AlertDetails() {
             features={{ alerts: { sync: false } }}
           >
             <HeaderActions
-              alert={alert}
+              alert={alertDetail?.formatted ?? null}
               alertStatus={alertStatus}
               onUntrackAlert={onUntrackAlert}
             />
@@ -159,9 +161,9 @@ export function AlertDetails() {
       <HeaderMenu />
       <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
-      {AlertDetailsAppSection && rule && (
+      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
         <AlertDetailsAppSection
-          alert={alert}
+          alert={alertDetail.formatted}
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}

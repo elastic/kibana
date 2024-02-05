@@ -115,6 +115,31 @@ describe('Service inventory', () => {
     });
   });
 
+  describe('Table search', () => {
+    beforeEach(() => {
+      cy.updateAdvancedSettings({
+        'observability:apmEnableTableSearchBar': true,
+      });
+
+      cy.loginAsEditorUser();
+    });
+
+    it('filters for java service on the table', () => {
+      cy.visitKibana(serviceInventoryHref);
+      cy.contains('opbeans-node');
+      cy.contains('opbeans-java');
+      cy.contains('opbeans-rum');
+      cy.get('[data-test-subj="tableSearchInput"]').type('java');
+      cy.contains('opbeans-node').should('not.exist');
+      cy.contains('opbeans-java');
+      cy.contains('opbeans-rum').should('not.exist');
+      cy.get('[data-test-subj="tableSearchInput"]').clear();
+      cy.contains('opbeans-node');
+      cy.contains('opbeans-java');
+      cy.contains('opbeans-rum');
+    });
+  });
+
   describe('Check detailed statistics API with multiple services', () => {
     before(() => {
       // clean previous data created

@@ -28,12 +28,14 @@ export function getAlertsForNotification<
 
   for (const id of keys(activeAlerts)) {
     const alert = activeAlerts[id];
+    alert.incrementActiveCount();
     alert.resetPendingRecoveredCount();
     currentActiveAlerts[id] = alert;
   }
 
   for (const id of keys(currentRecoveredAlerts)) {
     const alert = recoveredAlerts[id];
+    alert.resetActiveCount();
     if (flappingSettings.enabled) {
       const flapping = alert.getFlapping();
       if (flapping) {

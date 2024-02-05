@@ -304,12 +304,7 @@
           "path": "x-pack/plugins/serverless/public/types.ts",
           "deprecated": true,
           "trackAdoption": false,
-          "references": [
-            {
-              "plugin": "securitySolutionServerless",
-              "path": "x-pack/plugins/security_solution_serverless/public/navigation/index.ts"
-            }
-          ],
+          "references": [],
           "children": [
             {
               "parentPluginId": "serverless",

@@ -85,6 +85,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    profilingIntegrationAvailable: false,
   },
   serverless: { enabled: false },
 };
@@ -131,7 +132,7 @@ const mockPlugin = {
   },
 };
 
-export const observabilityLogExplorerLocatorsMock = {
+export const observabilityLogsExplorerLocatorsMock = {
   allDatasetsLocator: sharePluginMock.createLocator(),
   singleDatasetLocator: sharePluginMock.createLocator(),
 };

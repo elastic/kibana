@@ -18,3 +18,4 @@ export { archiveForPlatform } from './build_snapshot';
 export * from './parse_timeout_to_ms';
 export * from './docker';
 export * from './serverless_file_realm';
+export * from './read_roles_from_resource';

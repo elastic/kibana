@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React, { useState, useMemo } from 'react';
-import { EuiPanel, EuiSpacer } from '@elastic/eui';
+import compareVersions from 'compare-versions';
+import { EuiSpacer } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { buildRuleKey } from '../../../common/utils/rules_states';
 import { extractErrorMessage } from '../../../common/utils/helpers';
@@ -22,6 +23,7 @@ import type {
   RuleStateAttributes,
 } from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
+import { RulesCounters } from './rules_counters';
 
 export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];
@@ -65,9 +67,8 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
-  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
-
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
 
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
@@ -75,6 +76,8 @@ export const RulesContainer = () => {
     search: '',
     page: 0,
     perPage: pageSize || 10,
+    sortField: 'metadata.benchmark.rule_number',
+    sortOrder: 'asc',
   });
 
   const { data, status, error } = useFindCspBenchmarkRule(
@@ -84,6 +87,8 @@ export const RulesContainer = () => {
       search: rulesQuery.search,
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: rulesQuery.sortOrder,
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -94,6 +99,8 @@ export const RulesContainer = () => {
     {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
+      sortField: 'metadata.benchmark.rule_number',
+      sortOrder: 'asc',
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -101,6 +108,7 @@ export const RulesContainer = () => {
 
   const rulesStates = useCspGetRulesStates();
   const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
+
   const filteredRulesStates: RuleStateAttributes[] = arrayRulesStates.filter(
     (ruleState: RuleStateAttributes) =>
       ruleState.benchmark_id === params.benchmarkId &&
@@ -116,7 +124,7 @@ export const RulesContainer = () => {
         const rulesKey = buildRuleKey(
           rule.metadata.benchmark.id,
           rule.metadata.benchmark.version,
-          /* Since Packages are automatically upgraded, we can be sure that rule_number will Always exist */
+          /* Rule number always exists* from 8.7 */
           rule.metadata.benchmark.rule_number!
         );
 
@@ -126,6 +134,8 @@ export const RulesContainer = () => {
         return { ...rule, state: rulesState || 'unmuted' };
       });
   }, [data, rulesStates?.data]);
+
+  const mutedRulesCount = rulesWithStates.filter((rule) => rule.state === 'muted').length;
 
   const filteredRulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'disabled')
@@ -139,14 +149,17 @@ export const RulesContainer = () => {
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
   );
+
   const ruleNumberList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
+
   const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
-  const cleanedRuleNumberList = [...new Set(ruleNumberList)];
+
+  const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
 
   const rulesPageData = useMemo(
     () => getRulesPage(filteredRulesWithStates, status, error, rulesQuery),
@@ -173,47 +186,53 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <EuiPanel hasBorder={false} hasShadow={false}>
-        <RulesTableHeader
-          onSectionChange={(value) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
-          }
-          onRuleNumberChange={(value) =>
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
-          }
-          sectionSelectOptions={cleanedSectionList}
-          ruleNumberSelectOptions={cleanedRuleNumberList}
-          search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
-          searchValue={rulesQuery.search || ''}
-          totalRulesCount={rulesPageData.all_rules.length}
-          pageSize={rulesPageData.rules_page.length}
-          isSearching={status === 'loading'}
-          selectedRules={selectedRules}
-          refetchRulesStates={rulesStates.refetch}
-          setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
-          currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
-          setSelectAllRules={setSelectAllRules}
-          setSelectedRules={setSelectedRules}
-        />
-        <EuiSpacer />
-        <RulesTable
-          rules_page={rulesPageData.rules_page}
-          total={rulesPageData.total}
-          error={rulesPageData.error}
-          loading={rulesPageData.loading}
-          perPage={pageSize || rulesQuery.perPage}
-          page={rulesQuery.page}
-          setPagination={(paginationQuery) => {
-            setPageSize(paginationQuery.perPage);
-            setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
-          }}
-          setSelectedRuleId={setSelectedRuleId}
-          selectedRuleId={selectedRuleId}
-          refetchRulesStates={rulesStates.refetch}
-          selectedRules={selectedRules}
-          setSelectedRules={setSelectedRules}
-        />
-      </EuiPanel>
+      <RulesCounters
+        mutedRulesCount={mutedRulesCount}
+        setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
+      />
+      <EuiSpacer />
+      <RulesTableHeader
+        onSectionChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, section: value }))
+        }
+        onRuleNumberChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, ruleNumber: value }))
+        }
+        sectionSelectOptions={cleanedSectionList}
+        ruleNumberSelectOptions={cleanedRuleNumberList}
+        search={(value) => setRulesQuery((currentQuery) => ({ ...currentQuery, search: value }))}
+        searchValue={rulesQuery.search || ''}
+        totalRulesCount={rulesPageData.all_rules.length}
+        pageSize={rulesPageData.rules_page.length}
+        isSearching={status === 'loading'}
+        selectedRules={selectedRules}
+        refetchRulesStates={rulesStates.refetch}
+        setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
+        enabledDisabledItemsFilterState={enabledDisabledItemsFilter}
+        setSelectAllRules={setSelectAllRules}
+        setSelectedRules={setSelectedRules}
+      />
+      <EuiSpacer />
+      <RulesTable
+        onSortChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, sortOrder: value }))
+        }
+        rules_page={rulesPageData.rules_page}
+        total={rulesPageData.total}
+        error={rulesPageData.error}
+        loading={rulesPageData.loading}
+        perPage={pageSize || rulesQuery.perPage}
+        page={rulesQuery.page}
+        setPagination={(paginationQuery) => {
+          setPageSize(paginationQuery.perPage);
+          setRulesQuery((currentQuery) => ({ ...currentQuery, ...paginationQuery }));
+        }}
+        setSelectedRuleId={setSelectedRuleId}
+        selectedRuleId={selectedRuleId}
+        refetchRulesStates={rulesStates.refetch}
+        selectedRules={selectedRules}
+        setSelectedRules={setSelectedRules}
+      />
       {selectedRuleId && (
         <RuleFlyout
           rule={rulesFlyoutData}

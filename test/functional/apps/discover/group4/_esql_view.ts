@@ -133,6 +133,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const cell = await dataGrid.getCellElement(0, 2);
         expect(await cell.getVisibleText()).to.be('1');
       });
+
+      it('should render correctly if there are empty fields', async function () {
+        await PageObjects.discover.selectTextBaseLang();
+        const testQuery = `from logstash-* | limit 10 | keep machine.ram_range, bytes`;
+
+        await monacoEditor.setCodeEditorValue(testQuery);
+        await testSubjects.click('querySubmitButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        await PageObjects.discover.waitUntilSearchingHasFinished();
+        const cell = await dataGrid.getCellElement(0, 3);
+        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await dataGrid.getHeaders()).to.eql([
+          'Control column',
+          'Select column',
+          'Numberbytes',
+          'machine.ram_range',
+        ]);
+      });
     });
     describe('errors', () => {
       it('should show error messages for syntax errors in query', async function () {

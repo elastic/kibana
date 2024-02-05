@@ -13,34 +13,12 @@ import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 
 import * as i18n from './translations';
-import { useCreateTimelineButton } from './use_create_timeline';
 
 const NotesCountBadge = styled(EuiBadge)`
   margin-left: 5px;
 ` as unknown as typeof EuiBadge;
 
 NotesCountBadge.displayName = 'NotesCountBadge';
-
-export interface NewTimelineProps {
-  onClick?: () => void;
-  outline?: boolean;
-  timelineId: string;
-  title?: string;
-}
-
-export const NewTimeline = React.memo<NewTimelineProps>(
-  ({ onClick, outline = false, timelineId, title = i18n.NEW_TIMELINE }) => {
-    const { getButton } = useCreateTimelineButton({
-      timelineId,
-      timelineType: TimelineType.default,
-      onClick,
-    });
-    const button = getButton({ outline, title });
-
-    return button;
-  }
-);
-NewTimeline.displayName = 'NewTimeline';
 
 interface NotesButtonProps {
   ariaLabel?: string;

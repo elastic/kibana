@@ -125,7 +125,7 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      expect(res.items.length).equal(3);
+      expect(res.items.length).equal(5);
     });
   });
 }

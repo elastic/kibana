@@ -78,6 +78,17 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       return await testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
     },
 
+    // Collapsable sections
+    async metadataSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsMetadataCollapsible');
+    },
+    async alertsSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsCollapsible');
+    },
+    async metricsSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsMetricsCollapsible');
+    },
+
     // Metadata
     async clickMetadataTab() {
       return testSubjects.click('infraAssetDetailsMetadataTab');

@@ -57,6 +57,7 @@ function createEditorInstance() {
     onKeyDown: jest.fn((listener) => {
       keyDownListeners.push(listener);
     }),
+    onDidAttemptReadOnlyEdit: jest.fn(),
     onDidBlurEditorText: jest.fn(),
     onDidChangeModelContent: jest.fn((cb) => cb()),
     onDidFocusEditorText: jest.fn((cb) => cb()),
@@ -101,7 +102,8 @@ export const MockedMonacoEditor = ({
   onChange,
   value,
   ...rest
-}: MonacoEditorProps & {
+}: Omit<MonacoEditorProps, 'className'> & {
+  className?: string;
   ['data-test-subj']?: string;
 }) => {
   editorWillMount?.(monaco);

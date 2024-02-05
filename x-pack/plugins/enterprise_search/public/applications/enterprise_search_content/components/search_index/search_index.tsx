@@ -221,6 +221,7 @@ export const SearchIndex: React.FC = () => {
       )
     );
   };
+
   return (
     <EnterpriseSearchContentPageTemplate
       pageChrome={[...baseBreadcrumbs, indexName]}

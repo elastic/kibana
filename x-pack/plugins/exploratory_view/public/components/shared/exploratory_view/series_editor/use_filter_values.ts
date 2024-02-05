@@ -8,7 +8,7 @@ import { ExistsFilter, isExistsFilter } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESFilter } from '@kbn/es-types';
 import { PersistableFilter } from '@kbn/lens-plugin/common';
-import { useValuesList } from '../../../../hooks/use_values_list';
+import { useValuesList } from '@kbn/observability-shared-plugin/public';
 import { FilterProps } from './columns/filter_expanded';
 import { useAppDataViewContext } from '../hooks/use_app_data_view';
 

@@ -2822,7 +2822,7 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Readonly<{ frequency?: Readonly<{} & { summary: boolean; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: \"appState\" | \"globalState\"; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
+              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: \"appState\" | \"globalState\"; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -3139,6 +3139,20 @@
             "description": [],
             "signature": [
               "string | null | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-server.Rule.notificationDelay",
+            "type": "Object",
+            "tags": [],
+            "label": "notificationDelay",
+            "description": [],
+            "signature": [
+              "Readonly<{} & { active: number; }> | undefined"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -4580,7 +4594,7 @@
         "label": "BulkEditOperation",
         "description": [],
         "signature": [
-          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: Readonly<{ frequency?: Readonly<{} & { summary: boolean; throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; }> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; group: string; }>[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 3 | 1 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
+          "Readonly<{} & { value: string[]; operation: \"delete\" | \"add\" | \"set\"; field: \"tags\"; }> | Readonly<{} & { value: Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; group: string; }>[]; operation: \"add\" | \"set\"; field: \"actions\"; }> | Readonly<{} & { value: Readonly<{} & { interval: string; }>; operation: \"set\"; field: \"schedule\"; }> | Readonly<{} & { value: string | null; operation: \"set\"; field: \"throttle\"; }> | Readonly<{} & { value: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; operation: \"set\"; field: \"notifyWhen\"; }> | Readonly<{} & { value: Readonly<{ id?: string | undefined; } & { duration: number; rRule: Readonly<{ count?: number | undefined; interval?: number | undefined; freq?: 0 | 2 | 3 | 1 | undefined; until?: string | undefined; byweekday?: string[] | undefined; bymonthday?: number[] | undefined; bymonth?: number[] | undefined; } & { dtstart: string; tzid: string; }>; }>; operation: \"set\"; field: \"snoozeSchedule\"; }> | Readonly<{ value?: string[] | undefined; } & { operation: \"delete\"; field: \"snoozeSchedule\"; }> | Readonly<{} & { operation: \"set\"; field: \"apiKey\"; }>"
         ],
         "path": "x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/types/bulk_edit_rules_options.ts",
         "deprecated": false,
@@ -4968,7 +4982,7 @@
           },
           "<Params>>; getAlertState: (params: ",
           "GetAlertStateParams",
-          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
+          ") => Promise<void | Readonly<{ alertTypeState?: Record<string, any> | undefined; alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; previousStartedAt?: string | null | undefined; summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; } & {}>>; getAlertSummary: (params: ",
           "GetAlertSummaryParams",
           ") => Promise<",
           {
@@ -5084,7 +5098,7 @@
             "section": "def-server.AuditLogger",
             "text": "AuditLogger"
           },
-          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; data: string[]; perPage: number; total: number; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
+          " | undefined; getTags: (params: Readonly<{ search?: string | undefined; perPage?: number | undefined; } & { page: number; }>) => Promise<Readonly<{} & { page: number; perPage: number; total: number; data: string[]; }>>; getScheduleFrequency: () => Promise<Readonly<{} & { totalScheduledPerMinute: number; remainingSchedulesPerMinute: number; }>>; getAlertFromRaw: (params: ",
           "GetAlertFromRawParams",
           ") => ",
           {
@@ -7811,6 +7825,31 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.NotificationDelay",
+        "type": "Interface",
+        "tags": [],
+        "label": "NotificationDelay",
+        "description": [],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.NotificationDelay.active",
+            "type": "number",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.Rule",
         "type": "Interface",
         "tags": [],
@@ -8299,6 +8338,27 @@
             "description": [],
             "signature": [
               "string | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.Rule.notificationDelay",
+            "type": "Object",
+            "tags": [],
+            "label": "notificationDelay",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "alerting",
+                "scope": "common",
+                "docId": "kibAlertingPluginApi",
+                "section": "def-common.NotificationDelay",
+                "text": "NotificationDelay"
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
@@ -10346,7 +10406,7 @@
         "label": "LatestAlertInstanceMetaSchema",
         "description": [],
         "signature": [
-          "{ readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly flapping?: boolean | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; }"
+          "{ readonly uuid?: string | undefined; readonly lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; readonly flappingHistory?: boolean[] | undefined; readonly flapping?: boolean | undefined; readonly maintenanceWindowIds?: string[] | undefined; readonly pendingRecoveredCount?: number | undefined; readonly activeCount?: number | undefined; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -10391,7 +10451,7 @@
         "label": "LatestRawAlertInstanceSchema",
         "description": [],
         "signature": [
-          "{ readonly meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
+          "{ readonly meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; readonly state?: Record<string, any> | undefined; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
@@ -10406,7 +10466,7 @@
         "label": "LatestTaskStateSchema",
         "description": [],
         "signature": [
-          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
+          "{ readonly alertTypeState?: Record<string, any> | undefined; readonly alertInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly alertRecoveredInstances?: Record<string, Readonly<{ meta?: Readonly<{ uuid?: string | undefined; lastScheduledActions?: Readonly<{ actions?: Record<string, Readonly<{} & { date: string; }>> | undefined; subgroup?: string | undefined; } & { date: string; group: string; }> | undefined; flappingHistory?: boolean[] | undefined; flapping?: boolean | undefined; maintenanceWindowIds?: string[] | undefined; pendingRecoveredCount?: number | undefined; activeCount?: number | undefined; } & {}> | undefined; state?: Record<string, any> | undefined; } & {}>> | undefined; readonly previousStartedAt?: string | null | undefined; readonly summaryActions?: Record<string, Readonly<{} & { date: string; }>> | undefined; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/task_state/index.ts",
         "deprecated": false,
