@@ -89,9 +89,18 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    if (
+      error.response.status === 400 &&
+      error.response?.data?.message === 'The requested operation is not recognized by the service.'
+    ) {
+      // Leave space in the string below, \n is not being rendered in the UI
+      return `API Error: ${error.response.data.message}
+
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`;
+    }
     if (error.response.status === 401) {
       return `Unauthorized API Error${
-        error.response?.data?.message ? ` - ${error.response.data.message}` : ''
+        error.response?.data?.message ? `: ${error.response.data.message}` : ''
       }`;
     }
     return `API Error: ${error.response?.statusText}${
