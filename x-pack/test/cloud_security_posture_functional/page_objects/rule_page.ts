@@ -52,7 +52,7 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
     toggleBulkActionButton: async () => {
       const bulkActionButtonToBeClicked = await testSubjects.find(RULES_BULK_ACTION_BUTTON);
 
-      retry.waitFor('bulk action options to be displayed', async () => {
+      await retry.waitFor('bulk action options to be displayed', async () => {
         await bulkActionButtonToBeClicked.click();
         const bulkActionOptions = await testSubjects.findAll(RULES_BULK_ACTION_OPTION_DISABLE);
         return bulkActionOptions.length > 0;
