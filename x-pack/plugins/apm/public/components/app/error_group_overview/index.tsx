@@ -13,166 +13,29 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { orderBy } from 'lodash';
 import React from 'react';
-import { v4 as uuidv4 } from 'uuid';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ChartPointerEventContextProvider } from '../../../context/chart_pointer_event/chart_pointer_event_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useErrorGroupDistributionFetcher } from '../../../hooks/use_error_group_distribution_fetcher';
-import {
-  FETCH_STATUS,
-  isPending,
-  useFetcher,
-} from '../../../hooks/use_fetcher';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { FailedTransactionRateChart } from '../../shared/charts/failed_transaction_rate_chart';
-import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ErrorGroupList } from './error_group_list';
-
-type ErrorGroupMainStatistics =
-  APIReturnType<'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics'>;
-type ErrorGroupDetailedStatistics =
-  APIReturnType<'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics'>;
-
-const INITIAL_STATE_MAIN_STATISTICS: {
-  errorGroupMainStatistics: ErrorGroupMainStatistics['errorGroups'];
-  requestId?: string;
-  currentPageGroupIds: ErrorGroupMainStatistics['errorGroups'];
-} = {
-  errorGroupMainStatistics: [],
-  requestId: undefined,
-  currentPageGroupIds: [],
-};
-
-const INITIAL_STATE_DETAILED_STATISTICS: ErrorGroupDetailedStatistics = {
-  currentPeriod: {},
-  previousPeriod: {},
-};
 
 export function ErrorGroupOverview() {
   const { serviceName } = useApmServiceContext();
 
   const {
-    query: {
-      environment,
-      kuery,
-      sortField = 'occurrences',
-      sortDirection = 'desc',
-      rangeFrom,
-      rangeTo,
-      offset,
-      comparisonEnabled,
-      page = 0,
-      pageSize = 25,
-    },
+    query: { environment, kuery, comparisonEnabled },
   } = useApmParams('/services/{serviceName}/errors');
 
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
-    serviceName,
-    groupId: undefined,
-    environment,
-    kuery,
-  });
-
-  const {
-    data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
-    status: errorGroupListDataStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
-
-      if (start && end) {
-        return callApmApi(
-          'GET /internal/apm/services/{serviceName}/errors/groups/main_statistics',
-          {
-            params: {
-              path: {
-                serviceName,
-              },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                sortField,
-                sortDirection: normalizedSortDirection,
-              },
-            },
-          }
-        ).then((response) => {
-          const currentPageGroupIds = orderBy(
-            response.errorGroups,
-            sortField,
-            sortDirection
-          )
-            .slice(page * pageSize, (page + 1) * pageSize)
-            .map(({ groupId }) => groupId)
-            .sort();
-
-          return {
-            // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
-            requestId: uuidv4(),
-            errorGroupMainStatistics: response.errorGroups,
-            currentPageGroupIds,
-          };
-        });
-      }
-    },
-    [
+  const { errorDistributionData, errorDistributionStatus } =
+    useErrorGroupDistributionFetcher({
+      serviceName,
+      groupId: undefined,
       environment,
       kuery,
-      serviceName,
-      start,
-      end,
-      sortField,
-      sortDirection,
-      page,
-      pageSize,
-    ]
-  );
-
-  const { requestId, errorGroupMainStatistics, currentPageGroupIds } =
-    errorGroupListData;
-
-  const {
-    data: errorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: errorGroupDetailedStatisticsStatus,
-  } = useFetcher(
-    (callApmApi) => {
-      if (requestId && currentPageGroupIds.length && start && end) {
-        return callApmApi(
-          'POST /internal/apm/services/{serviceName}/errors/groups/detailed_statistics',
-          {
-            params: {
-              path: { serviceName },
-              query: {
-                environment,
-                kuery,
-                start,
-                end,
-                numBuckets: 20,
-                offset:
-                  comparisonEnabled && isTimeComparison(offset)
-                    ? offset
-                    : undefined,
-              },
-              body: {
-                groupIds: JSON.stringify(currentPageGroupIds),
-              },
-            },
-          }
-        );
-      }
-    },
-    // only fetches agg results when requestId changes
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [requestId],
-    { preservePreviousData: false }
-  );
+    });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
@@ -182,7 +45,7 @@ export function ErrorGroupOverview() {
             <EuiFlexItem>
               <EuiPanel hasBorder={true}>
                 <ErrorDistribution
-                  fetchStatus={status}
+                  fetchStatus={errorDistributionStatus}
                   distribution={errorDistributionData}
                   title={i18n.translate(
                     'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
@@ -211,16 +74,9 @@ export function ErrorGroupOverview() {
           <EuiSpacer size="s" />
 
           <ErrorGroupList
-            mainStatistics={errorGroupMainStatistics}
             serviceName={serviceName}
-            detailedStatisticsLoading={isPending(
-              errorGroupDetailedStatisticsStatus
-            )}
-            detailedStatistics={errorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
-            initialSortField={sortField}
-            initialSortDirection={sortDirection}
-            isLoading={errorGroupListDataStatus === FETCH_STATUS.LOADING}
+            initialPageSize={10}
           />
         </EuiPanel>
       </EuiFlexItem>

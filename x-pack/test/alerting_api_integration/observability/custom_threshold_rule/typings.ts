@@ -18,7 +18,7 @@ export interface ActionDocument {
   group?: string;
 }
 
-export interface LogExplorerLocatorParsedParams extends SerializableRecord {
+export interface LogsExplorerLocatorParsedParams extends SerializableRecord {
   dataset: string;
   timeRange: TimeRange;
   query: Query;

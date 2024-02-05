@@ -23,6 +23,11 @@ import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal
 import { ActionsConfig } from '../config';
 import { ActionsConfigurationUtilities, getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
+import {
+  DEFAULT_MICROSOFT_EXCHANGE_URL,
+  DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  DEFAULT_MICROSOFT_GRAPH_API_URL,
+} from '../../common';
 
 const logger = loggingSystemMock.create().get() as jest.Mocked<Logger>;
 
@@ -683,6 +688,9 @@ const BaseActionsConfig: ActionsConfig = {
   responseTimeout: momentDuration(1000 * 30),
   customHostSettings: undefined,
   enableFooterInEmail: true,
+  microsoftGraphApiUrl: DEFAULT_MICROSOFT_GRAPH_API_URL,
+  microsoftGraphApiScope: DEFAULT_MICROSOFT_GRAPH_API_SCOPE,
+  microsoftExchangeUrl: DEFAULT_MICROSOFT_EXCHANGE_URL,
 };
 
 function getACUfromConfig(config: Partial<ActionsConfig> = {}): ActionsConfigurationUtilities {
