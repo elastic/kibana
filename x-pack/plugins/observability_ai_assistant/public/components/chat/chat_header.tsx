@@ -35,6 +35,7 @@ export function ChatHeader({
   licenseInvalid,
   connectors,
   conversationId,
+  showLinkToConversationsApp,
   onCopyConversation,
   onSaveTitle,
 }: {
@@ -43,6 +44,7 @@ export function ChatHeader({
   licenseInvalid: boolean;
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
+  showLinkToConversationsApp: boolean;
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
 }) {
@@ -53,6 +55,11 @@ export function ChatHeader({
   useEffect(() => {
     setNewTitle(title);
   }, [title]);
+
+  const chatActionsMenuWrapper = css`
+    position: absolute;
+    right: 46px;
+  `;
 
   return (
     <EuiPanel
@@ -98,11 +105,15 @@ export function ChatHeader({
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          className={showLinkToConversationsApp ? chatActionsMenuWrapper : ''}
+        >
           <ChatActionsMenu
             connectors={connectors}
-            disabled={licenseInvalid}
             conversationId={conversationId}
+            disabled={licenseInvalid}
+            showLinkToConversationsApp={showLinkToConversationsApp}
             onCopyConversationClick={onCopyConversation}
           />
         </EuiFlexItem>

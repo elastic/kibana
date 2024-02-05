@@ -62,6 +62,7 @@ export type UnifiedHistogramContainerProps = {
   | 'onFilter'
   | 'withDefaultActions'
   | 'disabledActions'
+  | 'abortController'
 >;
 
 /**

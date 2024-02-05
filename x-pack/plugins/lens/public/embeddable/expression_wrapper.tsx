@@ -47,6 +47,7 @@ export interface ExpressionWrapperProps {
   lensInspector: LensInspector;
   noPadding?: boolean;
   shouldUseSizeTransitionVeil?: boolean;
+  abortController?: AbortController;
 }
 
 export function ExpressionWrapper({
@@ -73,6 +74,7 @@ export function ExpressionWrapper({
   lensInspector,
   noPadding,
   shouldUseSizeTransitionVeil,
+  abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -94,6 +96,7 @@ export function ExpressionWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
           executionContext={executionContext}
+          abortController={abortController}
           shouldUseSizeTransitionVeil={shouldUseSizeTransitionVeil ?? true}
           renderError={(errorMessage, error) => {
             const messages = getOriginalRequestErrorMessages(error || null);

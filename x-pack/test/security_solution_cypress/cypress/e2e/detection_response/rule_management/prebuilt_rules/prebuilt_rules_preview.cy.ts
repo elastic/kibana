@@ -280,6 +280,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     ],
     threat_language: 'kuery',
     threat_indicator_path: 'threat.indicator',
+    alert_suppression: undefined,
   });
 
   const NEW_TERMS_INDEX_PATTERN_RULE = createRuleAssetSavedObject({
