@@ -36,7 +36,8 @@ export const esqlSearchStrategyProvider = (
         const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
-            path: '/_query',
+            path: `/_query`,
+            querystring: 'drop_null_columns',
             body: {
               ...requestParams,
             },

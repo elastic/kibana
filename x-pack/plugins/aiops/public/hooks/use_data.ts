@@ -54,9 +54,14 @@ export const useData = (
     timeRangeSelector: selectedDataView?.timeFieldName !== undefined,
     autoRefreshSelector: true,
   });
+  const timeRangeMemoized = useMemo(
+    () => timefilter.getActiveBounds(),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(timefilter.getActiveBounds())]
+  );
 
   const fieldStatsRequest: DocumentStatsSearchStrategyParams | undefined = useMemo(() => {
-    const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
+    const timefilterActiveBounds = timeRange ?? timeRangeMemoized;
     if (timefilterActiveBounds !== undefined) {
       _timeBuckets.setInterval('auto');
       _timeBuckets.setBounds(timefilterActiveBounds);
@@ -72,7 +77,7 @@ export const useData = (
       };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lastRefresh, searchQuery, timeRange]);
+  }, [lastRefresh, searchQuery, timeRange, timeRangeMemoized]);
 
   const overallStatsRequest = useMemo(() => {
     return fieldStatsRequest

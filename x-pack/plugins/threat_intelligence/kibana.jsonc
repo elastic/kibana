@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/threat-intelligence-plugin",
-  "owner": "@elastic/protections-experience",
+  "owner": "@elastic/security-threat-hunting-investigations",
   "description": "Elastic threat intelligence helps you see if you are open to or have been subject to current or historical known threats",
   "plugin": {
     "id": "threatIntelligence",
