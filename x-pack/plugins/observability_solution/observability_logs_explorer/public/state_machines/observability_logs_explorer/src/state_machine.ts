@@ -12,27 +12,27 @@ import { actions, createMachine, InterpreterFrom } from 'xstate';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
-  ObservabilityLogExplorerContext,
-  ObservabilityLogExplorerEvent,
-  ObservabilityLogExplorerTypeState,
+  ObservabilityLogsExplorerContext,
+  ObservabilityLogsExplorerEvent,
+  ObservabilityLogsExplorerTypeState,
 } from './types';
-import { initializeFromUrl, updateUrlFromLogExplorerState } from './url_state_storage_service';
-import { createController, subscribeToLogExplorerState } from './controller_service';
+import { initializeFromUrl, updateUrlFromLogsExplorerState } from './url_state_storage_service';
+import { createController, subscribeToLogsExplorerState } from './controller_service';
 import { initializeFromTimeFilterService } from './time_filter_service';
 
-export const createPureObservabilityLogExplorerStateMachine = (
-  initialContext: ObservabilityLogExplorerContext
+export const createPureObservabilityLogsExplorerStateMachine = (
+  initialContext: ObservabilityLogsExplorerContext
 ) =>
   /** @xstate-layout N4IgpgJg5mDOIC5QHkBGswCcBuBDVAlgDYEAuAngDID2UAogB4AOR1mWAdAK4B2BfpArhIAvSAGIA2gAYAuolBNqsMgWo8FIBogDMOjgFYAbAEZpAdgCcRgwBYAHAcsGANCHK7bHWztsGTRjomevbmRpYAvhFuaBg4+MRkVLSMLGyc-KrCBCL8UABimNQAtgAqBMVg+cSkWADKWNgEAMZg4gCSAHLtpe0AgpTtAFp0ACIA+vkASsgAsuO9s3ST7ZSldFPjdRsAau0AwnQy8kggSiqC6praCAC0ZvrhRua24Tp2jiZuHggATEb2Dj-aQ2PQmcEGSFRGLoRoJEgUGj0ZisdiYDiZQTZXI8ApFYoAVUwRA63V6A2GY0mM3mBKmlGOmnOqiupxutx0Rg49ksv2kBl+9hMQp0oV+30QBnsXgsAX8lhevx0lki0RAsThhARyWRaTRHGa7Fwglx+3UpCKRCIWHE+2QnVKM0olA2432UzofXWo0Zp2Zlw0bMQt0FHCMAN85jC9k5tl+cYlCFCJg4QRMxnM0lsZkcRmh6th8S1SSRqVRGQEQlEkG4PAA1jxqAB3HillHpTB1UjGtqUZAAcXGdAAGgAFPsezZ1Upe5b7AASfU6-bGvsUyhZgdANyVBg4JmzRl+UtFFks9nsiYh0n3tn59lM-2FNnzGqLiURKXb+sxVZyNbwEgIDbPV6m7WpxD7QcR3HZBJy2Gd1jdRdl1XOQmQ3ANrklUxDFCSxDwVX4TAIq9BXMIFnnTc9gXseMojVRsIDgTQ3zwYtP11ctMAwi41C3LRg3TFMnheN4Pn8RN7h0CjpDk6QDyFcxiOkX5VRhOJ2I-HUyw7Wtf2xSBeM3bCEAot4LyFHl42cEEpNsSxDHkkwlTMKwH2cV9Cy07UQO4jFK2xPJChKcpKmqIhak7RoWjAYysKDO57Bvayswc0EDxeMiuVscwdEFAUBRci9fi8zT4RLL9QPRAzRGC-EiSIeL+NMjkuXeNT3PDF5fFcdxEDjFNlNBSxwQvXKdDKzVtL8vTDTAY08jNHgLWoK0sGa1lt2DTkOGsJUHNGuSSJ8RMXhTEw8t8S61LkpwpvfXyqv82r-wgTaBPZOjvGSz49F5RxzEvfqEDMdMwzvBwAnMAwoxIh6fMqri9NesQIFrBtm1bZ6Oy7HsPta3wfukP7lQKoGr2fDhpEsTllNCAwdAUya1TYirON0n9AurdHAIIYCcbRPHagJxKjBp-cDCzA9LDuqxLEph9qdp55yMZhSDAYiIgA */
   createMachine<
-    ObservabilityLogExplorerContext,
-    ObservabilityLogExplorerEvent,
-    ObservabilityLogExplorerTypeState
+    ObservabilityLogsExplorerContext,
+    ObservabilityLogsExplorerEvent,
+    ObservabilityLogsExplorerTypeState
   >(
     {
       context: initialContext,
       predictableActionArguments: true,
-      id: 'ObservabilityLogExplorer',
+      id: 'ObservabilityLogsExplorer',
       initial: 'uninitialized',
       states: {
         uninitialized: {
@@ -74,31 +74,31 @@ export const createPureObservabilityLogExplorerStateMachine = (
         },
         initialized: {
           invoke: {
-            src: 'subscribeToLogExplorerState',
+            src: 'subscribeToLogsExplorerState',
           },
 
           states: {
-            unknownLogExplorerState: {
+            unknownLogsExplorerState: {
               on: {
-                LOG_EXPLORER_STATE_CHANGED: {
-                  target: 'validLogExplorerState',
-                  actions: ['storeLogExplorerState', 'updateUrlFromLogExplorerState'],
+                LOGS_EXPLORER_STATE_CHANGED: {
+                  target: 'validLogsExplorerState',
+                  actions: ['storeLogsExplorerState', 'updateUrlFromLogsExplorerState'],
                 },
               },
             },
 
-            validLogExplorerState: {
+            validLogsExplorerState: {
               on: {
-                LOG_EXPLORER_STATE_CHANGED: {
-                  actions: ['storeLogExplorerState', 'updateUrlFromLogExplorerState'],
-                  target: 'validLogExplorerState',
+                LOGS_EXPLORER_STATE_CHANGED: {
+                  actions: ['storeLogsExplorerState', 'updateUrlFromLogsExplorerState'],
+                  target: 'validLogsExplorerState',
                   internal: true,
                 },
               },
             },
           },
 
-          initial: 'unknownLogExplorerState',
+          initial: 'unknownLogsExplorerState',
         },
       },
     },
@@ -114,8 +114,10 @@ export const createPureObservabilityLogExplorerStateMachine = (
             'refreshInterval' in event &&
             event.type === 'INITIALIZED_FROM_TIME_FILTER_SERVICE'
             ? {
-                initialLogExplorerState: {
-                  ...('initialLogExplorerState' in context ? context.initialLogExplorerState : {}),
+                initialLogsExplorerState: {
+                  ...('initialLogsExplorerState' in context
+                    ? context.initialLogsExplorerState
+                    : {}),
                   ...{ time: event.time, refreshInterval: event.refreshInterval },
                 },
               }
@@ -124,16 +126,18 @@ export const createPureObservabilityLogExplorerStateMachine = (
         storeInitialUrlState: actions.assign((context, event) => {
           return 'stateFromUrl' in event && event.type === 'INITIALIZED_FROM_URL'
             ? {
-                initialLogExplorerState: {
-                  ...('initialLogExplorerState' in context ? context.initialLogExplorerState : {}),
+                initialLogsExplorerState: {
+                  ...('initialLogsExplorerState' in context
+                    ? context.initialLogsExplorerState
+                    : {}),
                   ...event.stateFromUrl,
                 },
               }
             : {};
         }),
-        storeLogExplorerState: actions.assign((context, event) => {
-          return 'state' in event && event.type === 'LOG_EXPLORER_STATE_CHANGED'
-            ? { logExplorerState: event.state }
+        storeLogsExplorerState: actions.assign((context, event) => {
+          return 'state' in event && event.type === 'LOGS_EXPLORER_STATE_CHANGED'
+            ? { logsExplorerState: event.state }
             : {};
         }),
       },
@@ -141,33 +145,33 @@ export const createPureObservabilityLogExplorerStateMachine = (
     }
   );
 
-export interface ObservabilityLogExplorerStateMachineDependencies {
-  createLogExplorerController: CreateLogsExplorerController;
-  initialContext?: ObservabilityLogExplorerContext;
+export interface ObservabilityLogsExplorerStateMachineDependencies {
+  createLogsExplorerController: CreateLogsExplorerController;
+  initialContext?: ObservabilityLogsExplorerContext;
   timeFilterService: TimefilterContract;
   toasts: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
 }
 
-export const createObservabilityLogExplorerStateMachine = ({
+export const createObservabilityLogsExplorerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   urlStateStorageContainer,
-  createLogExplorerController,
+  createLogsExplorerController,
   timeFilterService,
-}: ObservabilityLogExplorerStateMachineDependencies) =>
-  createPureObservabilityLogExplorerStateMachine(initialContext).withConfig({
+}: ObservabilityLogsExplorerStateMachineDependencies) =>
+  createPureObservabilityLogsExplorerStateMachine(initialContext).withConfig({
     actions: {
-      updateUrlFromLogExplorerState: updateUrlFromLogExplorerState({ urlStateStorageContainer }),
+      updateUrlFromLogsExplorerState: updateUrlFromLogsExplorerState({ urlStateStorageContainer }),
     },
     services: {
-      createController: createController({ createLogExplorerController }),
+      createController: createController({ createLogsExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
-      subscribeToLogExplorerState,
+      subscribeToLogsExplorerState,
     },
   });
 
-export type ObservabilityLogExplorerService = InterpreterFrom<
-  typeof createObservabilityLogExplorerStateMachine
+export type ObservabilityLogsExplorerService = InterpreterFrom<
+  typeof createObservabilityLogsExplorerStateMachine
 >;

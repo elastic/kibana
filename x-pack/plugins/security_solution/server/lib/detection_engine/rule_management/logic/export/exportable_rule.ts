@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export const CMDLINE_FIELD = 'system.process.cmdline';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
+
+export type ExportableRule = Omit<RuleResponse, 'execution_summary'>;

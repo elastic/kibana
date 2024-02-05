@@ -7,18 +7,18 @@
 
 import type { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import type { InvokeCreator } from 'xstate';
-import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
+import type { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 
 export const createController =
   ({
-    createLogExplorerController,
+    createLogsExplorerController,
   }: {
-    createLogExplorerController: CreateLogsExplorerController;
-  }): InvokeCreator<ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent> =>
+    createLogsExplorerController: CreateLogsExplorerController;
+  }): InvokeCreator<ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent> =>
   (context, event) =>
   (send) => {
-    createLogExplorerController({
-      initialState: context.initialLogExplorerState,
+    createLogsExplorerController({
+      initialState: context.initialLogsExplorerState,
     }).then((controller) => {
       send({
         type: 'CONTROLLER_CREATED',
@@ -27,9 +27,9 @@ export const createController =
     });
   };
 
-export const subscribeToLogExplorerState: InvokeCreator<
-  ObservabilityLogExplorerContext,
-  ObservabilityLogExplorerEvent
+export const subscribeToLogsExplorerState: InvokeCreator<
+  ObservabilityLogsExplorerContext,
+  ObservabilityLogsExplorerEvent
 > = (context, event) => (send) => {
   if (!('controller' in context)) {
     throw new Error('Failed to subscribe to controller: no controller in context');
@@ -39,7 +39,7 @@ export const subscribeToLogExplorerState: InvokeCreator<
 
   const subscription = controller.state$.subscribe({
     next: (state) => {
-      send({ type: 'LOG_EXPLORER_STATE_CHANGED', state });
+      send({ type: 'LOGS_EXPLORER_STATE_CHANGED', state });
     },
   });
 
