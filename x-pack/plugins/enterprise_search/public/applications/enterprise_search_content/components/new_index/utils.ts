@@ -7,9 +7,11 @@
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
-import connectorLogo from '../../../../assets/source_icons/connector.svg';
-
-import crawlerLogo from '../../../../assets/source_icons/crawler.svg';
+import apiLogo from '../../../../assets/images/api_image.png';
+import connectorLogo from '../../../../assets/images/search_connector.svg';
+import crawlerLogo from '../../../../assets/images/search_crawler.svg';
+import { ConnectorIcon } from '../../../shared/icons/connector';
+import { CrawlerIcon } from '../../../shared/icons/crawler';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
 import { LanguageForOptimization } from './types';
@@ -26,6 +28,17 @@ export function getIngestionMethodIconType(type: string): string {
     case INGESTION_METHOD_IDS.CONNECTOR:
       return connectorLogo;
     default:
-      return 'consoleApp';
+      return apiLogo;
+  }
+}
+
+export function getIngestionMethodButtonIcon(type: string): React.FC | string {
+  switch (type) {
+    case INGESTION_METHOD_IDS.CRAWLER:
+      return CrawlerIcon;
+    case INGESTION_METHOD_IDS.CONNECTOR:
+      return ConnectorIcon;
+    default:
+      return 'console';
   }
 }

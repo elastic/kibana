@@ -31,6 +31,10 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import {
+  ApmDataAccessPluginSetup,
+  ApmDataAccessPluginStart,
+} from '@kbn/apm-data-access-plugin/server';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingPluginContract;
@@ -47,6 +51,7 @@ export interface InfraServerPluginSetupDeps {
   logsShared: LogsSharedPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  apmDataAccess: ApmDataAccessPluginSetup;
 }
 
 export interface InfraServerPluginStartDeps {
@@ -54,6 +59,7 @@ export interface InfraServerPluginStartDeps {
   dataViews: DataViewsPluginStart;
   logsShared: LogsSharedPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  apmDataAccess: ApmDataAccessPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {

@@ -58,7 +58,7 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
       path: '/api/infra/profiling/flamegraph',
       validate: {
         query: schema.object({
-          hostname: schema.string(),
+          kuery: schema.string(),
           from: schema.number(),
           to: schema.number(),
         }),
@@ -93,7 +93,7 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
       path: '/api/infra/profiling/functions',
       validate: {
         query: schema.object({
-          hostname: schema.string(),
+          kuery: schema.string(),
           from: schema.number(),
           to: schema.number(),
           startIndex: schema.number(),

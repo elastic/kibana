@@ -185,7 +185,7 @@ export async function mountApp(
     locator
   );
 
-  const { stateTransfer, data, savedObjectStore } = lensServices;
+  const { stateTransfer, data, savedObjectStore, share } = lensServices;
 
   const embeddableEditorIncomingState = stateTransfer?.getIncomingEditorState(APP_ID);
 
@@ -343,6 +343,7 @@ export async function mountApp(
           coreStart,
           dataViews: data.dataViews,
           dataViewEditor: startDependencies.dataViewEditor,
+          share,
         };
         const importPromise = import('@kbn/shared-ux-page-analytics-no-data');
         const AnalyticsNoDataPageKibanaProvider = withSuspense(

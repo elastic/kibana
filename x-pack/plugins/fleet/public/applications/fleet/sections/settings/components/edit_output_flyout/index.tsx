@@ -65,18 +65,20 @@ import { OutputFormLogstashSection } from './output_form_logstash';
 import { OutputFormElasticsearchSection } from './output_form_elasticsearch';
 
 export interface EditOutputFlyoutProps {
+  defaultOuput?: Output;
   output?: Output;
   onClose: () => void;
   proxies: FleetProxy[];
 }
 
 export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = ({
+  defaultOuput,
   onClose,
   output,
   proxies,
 }) => {
   useBreadcrumbs('settings');
-  const form = useOutputForm(onClose, output);
+  const form = useOutputForm(onClose, output, defaultOuput);
   const inputs = form.inputs;
   const { docLinks, cloud } = useStartServices();
   const { euiTheme } = useEuiTheme();
@@ -335,7 +337,21 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.editOutputFlyout.proxyIdLabel"
-                  defaultMessage="Proxy"
+                  defaultMessage="Proxy {badge}"
+                  values={{
+                    badge: (
+                      <EuiBetaBadge
+                        size="s"
+                        className="eui-alignTop"
+                        label={i18n.translate(
+                          'xpack.fleet.settings.editDownloadSourcesFlyout.proxyIdBetaBadge',
+                          {
+                            defaultMessage: 'Beta',
+                          }
+                        )}
+                      />
+                    ),
+                  }}
                 />
               }
             >

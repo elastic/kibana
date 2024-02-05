@@ -80,7 +80,10 @@
     "@kbn/core-plugins-server",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/serverless",
-    "@kbn/deeplinks-observability"
+    "@kbn/deeplinks-observability",
+    "@kbn/esql-utils",
+    "@kbn/managed-content-badge",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

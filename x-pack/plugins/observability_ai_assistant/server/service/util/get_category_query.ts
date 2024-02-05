@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export function getCategoryQuery({ contexts }: { contexts?: string[] }) {
+export function getCategoryQuery({ categories }: { categories?: string[] }) {
   const noCategoryFilter = {
     bool: {
       must_not: {
@@ -16,7 +16,7 @@ export function getCategoryQuery({ contexts }: { contexts?: string[] }) {
     },
   };
 
-  if (!contexts) {
+  if (!categories) {
     return [noCategoryFilter];
   }
 
@@ -27,7 +27,7 @@ export function getCategoryQuery({ contexts }: { contexts?: string[] }) {
           noCategoryFilter,
           {
             terms: {
-              'labels.category': contexts,
+              'labels.category': categories,
             },
           },
         ],

@@ -9,7 +9,7 @@
 import { EuiFlexGroup, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
-  apiFiresPhaseEvents,
+  apiPublishesPhaseEvents,
   apiHasParentApi,
   apiPublishesViewMode,
   useBatchedPublishingSubjects,
@@ -47,27 +47,25 @@ export const PresentationPanelInternal = <
     if (apiHasParentApi(api) && apiPublishesViewMode(api.parentApi)) return api.parentApi.viewMode;
   })();
 
-  const {
-    rawViewMode,
+  const [
+    dataLoading,
     blockingError,
     panelTitle,
-    dataLoading,
     hidePanelTitle,
     panelDescription,
     defaultPanelTitle,
+    rawViewMode,
     parentHidePanelTitle,
-  } = useBatchedPublishingSubjects({
-    dataLoading: api?.dataLoading,
-    blockingError: api?.blockingError,
-
-    panelTitle: api?.panelTitle,
-    hidePanelTitle: api?.hidePanelTitle,
-    panelDescription: api?.panelDescription,
-    defaultPanelTitle: api?.defaultPanelTitle,
-
-    rawViewMode: viewModeSubject,
-    parentHidePanelTitle: api?.parentApi?.hidePanelTitle,
-  });
+  ] = useBatchedPublishingSubjects(
+    api?.dataLoading,
+    api?.blockingError,
+    api?.panelTitle,
+    api?.hidePanelTitle,
+    api?.panelDescription,
+    api?.defaultPanelTitle,
+    viewModeSubject,
+    api?.parentApi?.hidePanelTitle
+  );
   const viewMode = rawViewMode ?? 'view';
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
@@ -82,8 +80,10 @@ export const PresentationPanelInternal = <
 
   useEffect(() => {
     let subscription: Subscription;
-    if (api && onPanelStatusChange && apiFiresPhaseEvents(api)) {
-      subscription = api.onPhaseChange.subscribe((phase) => onPanelStatusChange(phase));
+    if (api && onPanelStatusChange && apiPublishesPhaseEvents(api)) {
+      subscription = api.onPhaseChange.subscribe((phase) => {
+        if (phase) onPanelStatusChange(phase);
+      });
     }
     return () => subscription?.unsubscribe();
   }, [api, onPanelStatusChange]);
