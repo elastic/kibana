@@ -16,7 +16,12 @@ import { customFieldsConfigurationMock } from '../../containers/mock';
 import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '../../../common/constants';
 import * as i18n from './translations';
 
-describe('CustomFieldFlyout ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174285
+// FLAKY: https://github.com/elastic/kibana/issues/174286
+// FLAKY: https://github.com/elastic/kibana/issues/174287
+// FLAKY: https://github.com/elastic/kibana/issues/174288
+// FLAKY: https://github.com/elastic/kibana/issues/174289
+describe.skip('CustomFieldFlyout ', () => {
   let appMockRender: AppMockRenderer;
 
   const props = {

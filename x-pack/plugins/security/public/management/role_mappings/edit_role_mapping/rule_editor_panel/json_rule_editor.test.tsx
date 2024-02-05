@@ -28,6 +28,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
   }),
+  useDarkMode: jest.fn().mockReturnValue(false),
 }));
 
 describe('JSONRuleEditor', () => {

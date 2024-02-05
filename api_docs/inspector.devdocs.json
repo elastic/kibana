@@ -291,7 +291,8 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,
@@ -764,7 +765,48 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.apiHasInspectorAdapters",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasInspectorAdapters",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "inspector",
+            "scope": "public",
+            "docId": "kibInspectorPluginApi",
+            "section": "def-public.HasInspectorAdapters",
+            "text": "HasInspectorAdapters"
+          }
+        ],
+        "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.apiHasInspectorAdapters.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "inspector",
@@ -813,6 +855,44 @@
             "path": "src/plugins/inspector/common/adapters/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "inspector",
+        "id": "def-public.HasInspectorAdapters",
+        "type": "Interface",
+        "tags": [],
+        "label": "HasInspectorAdapters",
+        "description": [],
+        "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "inspector",
+            "id": "def-public.HasInspectorAdapters.getInspectorAdapters",
+            "type": "Function",
+            "tags": [],
+            "label": "getInspectorAdapters",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "inspector",
+                "scope": "common",
+                "docId": "kibInspectorPluginApi",
+                "section": "def-common.Adapters",
+                "text": "Adapters"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/inspector/public/adapters/has_inspector_adapters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1623,7 +1703,8 @@
             "section": "def-common.RequestAdapter",
             "text": "RequestAdapter"
           },
-          " extends EventEmitter"
+          " extends ",
+          "events"
         ],
         "path": "src/plugins/inspector/common/adapters/request/request_adapter.ts",
         "deprecated": false,

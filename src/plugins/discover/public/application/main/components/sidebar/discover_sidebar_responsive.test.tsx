@@ -13,13 +13,13 @@ import { EuiProgress } from '@elastic/eui';
 import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hits';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import React, { useState } from 'react';
+import React from 'react';
 import {
   DiscoverSidebarResponsive,
   DiscoverSidebarResponsiveProps,
 } from './discover_sidebar_responsive';
 import { DiscoverServices } from '../../../../build_services';
-import { FetchStatus } from '../../../types';
+import { FetchStatus, SidebarToggleState } from '../../../types';
 import {
   AvailableFields$,
   DataDocuments$,
@@ -37,7 +37,6 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import type { SearchBarCustomization } from '../../../../customizations';
-import type { UnifiedFieldListSidebarContainerApi } from '@kbn/unified-field-list';
 
 const mockSearchBarCustomization: SearchBarCustomization = {
   id: 'search_bar',
@@ -169,8 +168,10 @@ function getCompProps(options?: { hits?: DataTableRecord[] }): DiscoverSidebarRe
     trackUiMetric: jest.fn(),
     onFieldEdited: jest.fn(),
     onDataViewCreated: jest.fn(),
-    unifiedFieldListSidebarContainerApi: null,
-    setUnifiedFieldListSidebarContainerApi: jest.fn(),
+    sidebarToggleState$: new BehaviorSubject<SidebarToggleState>({
+      isCollapsed: false,
+      toggle: () => {},
+    }),
   };
 }
 
@@ -202,21 +203,10 @@ async function mountComponent(
   mockedServices.data.query.getState = jest.fn().mockImplementation(() => appState.getState());
 
   await act(async () => {
-    const SidebarWrapper = () => {
-      const [api, setApi] = useState<UnifiedFieldListSidebarContainerApi | null>(null);
-      return (
-        <DiscoverSidebarResponsive
-          {...props}
-          unifiedFieldListSidebarContainerApi={api}
-          setUnifiedFieldListSidebarContainerApi={setApi}
-        />
-      );
-    };
-
     comp = mountWithIntl(
       <KibanaContextProvider services={mockedServices}>
         <DiscoverAppStateProvider value={appState}>
-          <SidebarWrapper />
+          <DiscoverSidebarResponsive {...props} />
         </DiscoverAppStateProvider>
       </KibanaContextProvider>
     );

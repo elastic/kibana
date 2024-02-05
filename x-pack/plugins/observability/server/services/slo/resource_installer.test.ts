@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -15,13 +16,49 @@ import {
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
+  SLO_RESOURCES_VERSION,
 } from '../../../common/slo/constants';
 import { DefaultResourceInstaller } from './resource_installer';
 
 describe('resourceInstaller', () => {
-  it('installs the common resources', async () => {
+  it('installs the common resources when there is a version mismatch', async () => {
     const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockClusterClient.indices.getIndexTemplate.mockResponseOnce({ index_templates: [] });
+    mockClusterClient.cluster.getComponentTemplate.mockResponse({
+      component_templates: [
+        {
+          name: SLO_INDEX_TEMPLATE_NAME,
+          component_template: {
+            _meta: {
+              version: 2,
+            },
+            template: {
+              settings: {},
+            },
+          },
+        },
+      ],
+    });
+    mockClusterClient.indices.getIndexTemplate.mockResponse({
+      index_templates: [
+        {
+          name: SLO_INDEX_TEMPLATE_NAME,
+          index_template: {
+            index_patterns: SLO_INDEX_TEMPLATE_NAME,
+            composed_of: [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
+            _meta: {
+              version: 2,
+            },
+          },
+        },
+      ],
+    });
+    mockClusterClient.ingest.getPipeline.mockResponse({
+      [SLO_INGEST_PIPELINE_NAME]: {
+        _meta: {
+          version: 2,
+        },
+      } as IngestPipeline,
+    });
     const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
 
     await installer.ensureCommonResourcesInstalled();
@@ -58,5 +95,53 @@ describe('resourceInstaller', () => {
       1,
       expect.objectContaining({ id: SLO_INGEST_PIPELINE_NAME })
     );
+  });
+
+  it('does not install the common resources when there is a version match', async () => {
+    const mockClusterClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockClusterClient.cluster.getComponentTemplate.mockResponse({
+      component_templates: [
+        {
+          name: SLO_INDEX_TEMPLATE_NAME,
+          component_template: {
+            _meta: {
+              version: SLO_RESOURCES_VERSION,
+            },
+            template: {
+              settings: {},
+            },
+          },
+        },
+      ],
+    });
+    mockClusterClient.indices.getIndexTemplate.mockResponse({
+      index_templates: [
+        {
+          name: SLO_INDEX_TEMPLATE_NAME,
+          index_template: {
+            index_patterns: SLO_INDEX_TEMPLATE_NAME,
+            composed_of: [SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME],
+            _meta: {
+              version: SLO_RESOURCES_VERSION,
+            },
+          },
+        },
+      ],
+    });
+    mockClusterClient.ingest.getPipeline.mockResponse({
+      [SLO_INGEST_PIPELINE_NAME]: {
+        _meta: {
+          version: SLO_RESOURCES_VERSION,
+        },
+      } as IngestPipeline,
+    });
+    const installer = new DefaultResourceInstaller(mockClusterClient, loggerMock.create());
+
+    await installer.ensureCommonResourcesInstalled();
+
+    expect(mockClusterClient.cluster.putComponentTemplate).not.toHaveBeenCalled();
+    expect(mockClusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
+
+    expect(mockClusterClient.ingest.putPipeline).not.toHaveBeenCalled();
   });
 });

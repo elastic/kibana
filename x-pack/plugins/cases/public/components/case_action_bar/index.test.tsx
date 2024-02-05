@@ -10,7 +10,7 @@ import { mount } from 'enzyme';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { basicCase } from '../../containers/mock';
+import { basicCase, basicCaseClosed } from '../../containers/mock';
 import type { CaseActionBarProps } from '.';
 import { CaseActionBar } from '.';
 import {
@@ -71,6 +71,18 @@ describe('CaseActionBar', () => {
 
     expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
       'Open'
+    );
+  });
+
+  it('should show the status as closed when the case is closed', () => {
+    const wrapper = mount(
+      <TestProviders>
+        <CaseActionBar {...defaultProps} caseData={basicCaseClosed} />
+      </TestProviders>
+    );
+
+    expect(wrapper.find(`[data-test-subj="case-view-status-dropdown"]`).first().text()).toBe(
+      'Closed'
     );
   });
 

@@ -27,7 +27,7 @@
         "label": "KibanaSettingsApplication",
         "description": [],
         "signature": [
-          "({ docLinks, i18n, notifications, settings, theme, history, }: ",
+          "({ docLinks, i18n, notifications, settings, theme, history, sectionRegistry, application, chrome, }: ",
           {
             "pluginId": "@kbn/management-settings-application",
             "scope": "common",
@@ -46,7 +46,7 @@
             "id": "def-common.KibanaSettingsApplication.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  theme,\n  history,\n}",
+            "label": "{\n  docLinks,\n  i18n,\n  notifications,\n  settings,\n  theme,\n  history,\n  sectionRegistry,\n  application,\n  chrome,\n}",
             "description": [],
             "signature": [
               {

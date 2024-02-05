@@ -19,7 +19,7 @@ import {
   VisualizeEmbeddableContract,
   VisualizeInput,
 } from '../..';
-import type { VisualizeServices } from '../types';
+import type { VisInstance, VisualizeServices } from '../types';
 
 function isErrorRelatedToRuntimeFields(error: ExpressionValueError['error']) {
   const originalError = error.original || error;
@@ -120,7 +120,7 @@ export const getVisualizationInstance = async (
    * Both come from url search query
    */
   opts?: Record<string, unknown> | string
-) => {
+): Promise<VisInstance> => {
   const { data, spaces, savedObjectsTagging } = visualizeServices;
 
   const savedVis: VisSavedObject = await getSavedVisualization(

@@ -50,7 +50,6 @@ export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
       gettingStarted: schema.maybe(schema.boolean()),
     }),
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, savedObjectsClient, server } = routeContext;
     // usually id is auto generated, but this is useful for testing

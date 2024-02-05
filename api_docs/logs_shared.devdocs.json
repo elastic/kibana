@@ -270,7 +270,15 @@
         "label": "LogAIAssistant",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "logsShared",
+            "scope": "public",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-public.LogAIAssistantProps",
+            "text": "LogAIAssistantProps"
+          },
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -280,14 +288,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogAIAssistant.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -302,7 +310,9 @@
         "label": "LogColumnHeader",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<{ columnWidth: ",
+          "LogEntryColumnWidth",
+          "; 'data-test-subj'?: string | undefined; } & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -312,14 +322,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogColumnHeader.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -334,7 +344,23 @@
         "label": "LogColumnHeadersWrapper",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -344,14 +370,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogColumnHeadersWrapper.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -366,7 +392,23 @@
         "label": "LogEntryColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -376,14 +418,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -398,7 +440,9 @@
         "label": "LogEntryContextMenu",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<",
+          "LogEntryContextMenuProps",
+          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -408,14 +452,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryContextMenu.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -430,7 +474,9 @@
         "label": "LogEntryFieldColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<",
+          "LogEntryFieldColumnProps",
+          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -440,14 +486,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryFieldColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -497,7 +543,9 @@
         "label": "LogEntryMessageColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<",
+          "LogEntryMessageColumnProps",
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -507,14 +555,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryMessageColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -529,7 +577,23 @@
         "label": "LogEntryRowWrapper",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -539,14 +603,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryRowWrapper.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -561,7 +625,9 @@
         "label": "LogEntryTimestampColumn",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<",
+          "LogEntryTimestampColumnProps",
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -571,14 +637,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogEntryTimestampColumn.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -689,7 +755,15 @@
         "label": "LogStream",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "logsShared",
+            "scope": "public",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-public.LogStreamProps",
+            "text": "LogStreamProps"
+          },
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -699,14 +773,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.LogStream.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -991,7 +1065,19 @@
         "label": "ScrollableLogTextStreamView",
         "description": [],
         "signature": [
-          "(props: any) => JSX.Element"
+          "React.ForwardRefExoticComponent<Pick<",
+          "ScrollableLogTextStreamViewProps",
+          " & React.RefAttributes<",
+          {
+            "pluginId": "logsShared",
+            "scope": "public",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-public.ScrollableLogTextStreamView",
+            "text": "ScrollableLogTextStreamView"
+          },
+          ">, \"key\" | \"css\" | keyof ",
+          "ScrollableLogTextStreamViewProps",
+          "> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -1001,14 +1087,14 @@
           {
             "parentPluginId": "logsShared",
             "id": "def-public.ScrollableLogTextStreamView.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "any"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3005,7 +3091,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -6315,7 +6409,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",

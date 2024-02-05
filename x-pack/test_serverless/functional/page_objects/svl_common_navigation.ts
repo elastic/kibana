@@ -271,6 +271,22 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
         expect(noReload).to.be(true);
       };
     },
+
+    // embedded dev console
+    devConsole: {
+      async expectEmbeddedConsoleControlBarExists() {
+        await testSubjects.existOrFail('consoleEmbeddedSection');
+      },
+      async expectEmbeddedConsoleToBeOpen() {
+        await testSubjects.existOrFail('consoleEmbeddedBody');
+      },
+      async expectEmbeddedConsoleToBeClosed() {
+        await testSubjects.missingOrFail('consoleEmbeddedBody');
+      },
+      async clickEmbeddedConsoleControlBar() {
+        await testSubjects.click('consoleEmbeddedControlBar');
+      },
+    },
   };
 }
 

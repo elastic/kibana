@@ -41,11 +41,12 @@ describe('useInstalledIntegrations', () => {
     return wrapper;
   };
 
-  const render = () =>
+  const render = ({ skip } = { skip: false }) =>
     renderHook(
       () =>
         useInstalledIntegrations({
           packages: [],
+          skip,
         }),
       {
         wrapper: createReactQueryWrapper(),
@@ -66,6 +67,17 @@ describe('useInstalledIntegrations', () => {
     expect(fetchInstalledIntegrations).toHaveBeenLastCalledWith(
       expect.objectContaining({ packages: [] })
     );
+  });
+
+  it('does not call the API when skip is true', async () => {
+    const fetchInstalledIntegrations = jest.spyOn(
+      fleetIntegrationsApi,
+      'fetchInstalledIntegrations'
+    );
+
+    render({ skip: true });
+
+    expect(fetchInstalledIntegrations).toHaveBeenCalledTimes(0);
   });
 
   it('fetches data from the API', async () => {

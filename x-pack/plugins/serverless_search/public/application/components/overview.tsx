@@ -57,8 +57,7 @@ import { PipelineButtonOverview } from './pipeline_button_overview';
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
   const [clientApiKey, setClientApiKey] = useState<string>(API_KEY_PLACEHOLDER);
-  const { application, cloud, http, user, share } = useKibanaServices();
-
+  const { application, cloud, http, user, share, console: consolePlugin } = useKibanaServices();
   const { elasticsearchURL, cloudId } = useMemo(() => {
     return {
       elasticsearchURL: cloud?.elasticsearchUrl ?? ELASTICSEARCH_URL_PLACEHOLDER,
@@ -66,11 +65,6 @@ export const ElasticsearchOverview = () => {
     };
   }, [cloud]);
   const assetBasePath = useAssetBasePath();
-  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
-    url: elasticsearchURL,
-    apiKey: clientApiKey,
-    cloudId,
-  };
   const { hash } = useLocation();
   useEffect(() => {
     if (hash) {
@@ -81,6 +75,16 @@ export const ElasticsearchOverview = () => {
       }
     }
   }, [hash]);
+  const embeddableConsole = useMemo(
+    () => consolePlugin?.renderEmbeddableConsole?.() ?? <></>,
+    [consolePlugin]
+  );
+
+  const codeSnippetArguments: LanguageDefinitionSnippetArguments = {
+    url: elasticsearchURL,
+    apiKey: clientApiKey,
+    cloudId,
+  };
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -341,6 +345,7 @@ export const ElasticsearchOverview = () => {
           links={[]}
           overviewPanelProps={{ color: 'transparent', hasShadow: false }}
         />
+        {embeddableConsole}
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

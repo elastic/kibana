@@ -1947,6 +1947,11 @@ const mockTimelineModelColumns: TimelineModel['columns'] = [
     id: 'user.name',
     initialWidth: 180,
   },
+  {
+    columnHeaderType: 'not-filtered',
+    id: 'kibana.alert.workflow_assignee_ids',
+    initialWidth: 180,
+  },
 ];
 export const mockTimelineModel: TimelineModel = {
   activeTab: TimelineTabs.query,

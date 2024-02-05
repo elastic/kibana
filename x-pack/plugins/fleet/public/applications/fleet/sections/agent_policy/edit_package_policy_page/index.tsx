@@ -46,6 +46,7 @@ import {
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
 } from '../create_package_policy_page/components';
+import { AGENTLESS_POLICY_ID } from '../create_package_policy_page/single_page_layout/hooks/setup_technology';
 
 import { HIDDEN_API_REFERENCE_PACKAGES } from '../../../../../../common/constants';
 import type { PackagePolicyEditExtensionComponentProps } from '../../../types';
@@ -187,7 +188,7 @@ export const EditPackagePolicyForm = memo<{
       setFormState('INVALID');
       return;
     }
-    if (agentCount !== 0 && formState !== 'CONFIRM') {
+    if (agentCount !== 0 && policyId !== AGENTLESS_POLICY_ID && formState !== 'CONFIRM') {
       setFormState('CONFIRM');
       return;
     }

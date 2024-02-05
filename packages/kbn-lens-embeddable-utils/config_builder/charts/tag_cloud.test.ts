@@ -50,7 +50,7 @@ function mockDataViewsService() {
   } as unknown as Pick<DataViewsContract, 'get' | 'create'>;
 }
 
-test('generates metric chart config', async () => {
+test('generates tag cloud chart config', async () => {
   const result = await buildTagCloud(
     {
       chartType: 'tagcloud',

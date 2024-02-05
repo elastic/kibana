@@ -5,14 +5,15 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
 import type { Suggestion } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
-import { fetchFieldsFromESQL } from '../../../datasources/text_based/fetch_fields_from_esql';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
 export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginStartDependencies) => {
@@ -48,11 +49,10 @@ export const getSuggestions = async (
       return adHoc.name === indexPattern;
     });
 
-    const dataView = await deps.dataViews.create(
-      dataViewSpec ?? {
-        title: indexPattern,
-      }
-    );
+    const dataView = dataViewSpec
+      ? await deps.dataViews.create(dataViewSpec)
+      : await getESQLAdHocDataview(indexPattern, deps.dataViews);
+
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import { createMockStartDependencies } from '../../../editor_frame_service/mocks';
 import {
@@ -14,7 +15,6 @@ import {
   mockAllSuggestions,
 } from '../../../mocks';
 import { suggestionsApi } from '../../../lens_suggestions_api';
-import { fetchFieldsFromESQL } from '../../../datasources/text_based/fetch_fields_from_esql';
 import { getSuggestions } from './helpers';
 
 const mockSuggestionApi = suggestionsApi as jest.Mock;
@@ -24,7 +24,7 @@ jest.mock('../../../lens_suggestions_api', () => ({
   suggestionsApi: jest.fn(() => mockAllSuggestions),
 }));
 
-jest.mock('../../../datasources/text_based/fetch_fields_from_esql', () => ({
+jest.mock('@kbn/text-based-editor', () => ({
   fetchFieldsFromESQL: jest.fn(() => {
     return {
       columns: [

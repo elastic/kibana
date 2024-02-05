@@ -21,7 +21,7 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import { TaskRunResult } from '@kbn/reporting-common/types';
+import { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPDFDeprecated,
   PDF_JOB_TYPE,
@@ -73,6 +73,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   public runTask = async (
     jobId: string,
     job: TaskPayloadPDF,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -108,6 +109,8 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             browserTimezone,
             headers,
             layout,
+            taskInstanceFields,
+            logger,
           })
           .pipe(
             tap(({ metrics }) => {

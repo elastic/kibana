@@ -7,6 +7,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -61,6 +62,7 @@ interface PluginsSetup {
 export interface PluginsStart {
   charts: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;

@@ -227,6 +227,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('groups findings by rule name and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Rule name');
 
         const grouping = await findings.findingsGrouping();
@@ -283,7 +285,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups findings by cloud account and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
-
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Cloud account');
 
         const grouping = await findings.findingsGrouping();
@@ -338,6 +342,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
       it('groups findings by Kubernetes cluster and sort by compliance score desc', async () => {
         const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Kubernetes cluster');
 
         const grouping = await findings.findingsGrouping();
@@ -391,6 +398,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     describe('SearchBar', () => {
       it('add filter', async () => {
         const groupSelector = await findings.groupSelector();
+        await groupSelector.openDropDown();
+        await groupSelector.setValue('None');
+        await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
         // Filter bar uses the field's customLabel in the DataView

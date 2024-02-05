@@ -16,6 +16,7 @@ Object {
     "scroll": Object {
       "duration": "30s",
       "size": 500,
+      "strategy": "pit",
     },
     "useByteOrderMarkEncoding": false,
   },
@@ -78,6 +79,7 @@ Object {
     "scroll": Object {
       "duration": "30s",
       "size": 500,
+      "strategy": "pit",
     },
     "useByteOrderMarkEncoding": false,
   },

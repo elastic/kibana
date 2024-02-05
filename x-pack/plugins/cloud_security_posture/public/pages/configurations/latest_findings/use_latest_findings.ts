@@ -29,6 +29,7 @@ import { buildMutedRulesFilter } from '../../../../common/utils/rules_states';
 interface UseFindingsOptions extends FindingsBaseEsQuery {
   sort: string[][];
   enabled: boolean;
+  pageSize: number;
 }
 
 export interface FindingsGroupByNoneQuery {
@@ -76,7 +77,7 @@ export const getFindingsQuery = (
         must_not: mutedRulesFilterQuery,
       },
     },
-    ...(pageParam ? { search_after: pageParam } : {}),
+    ...(pageParam ? { from: pageParam } : {}),
   };
 };
 
@@ -125,8 +126,14 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
   } = useKibana().services;
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
 
+  /**
+   * We're using useInfiniteQuery in this case to allow the user to fetch more data (if available and up to 10k)
+   * useInfiniteQuery differs from useQuery because it accumulates and caches a chunk of data from the previous fetches into an array
+   * it uses the getNextPageParam to know if there are more pages to load and retrieve the position of
+   * the last loaded record to be used as a from parameter to fetch the next chunk of data.
+   */
   return useInfiniteQuery(
-    ['csp_findings', { params: options }],
+    ['csp_findings', { params: options }, rulesStates],
     async ({ pageParam }) => {
       const {
         rawResponse: { hits, aggregations },
@@ -149,9 +156,11 @@ export const useLatestFindings = (options: UseFindingsOptions) => {
       enabled: options.enabled && !!rulesStates,
       keepPreviousData: true,
       onError: (err: Error) => showErrorToast(toasts, err),
-      getNextPageParam: (lastPage) => {
-        if (lastPage.page.length === 0) return undefined;
-        return lastPage.page[lastPage.page.length - 1].raw.sort;
+      getNextPageParam: (lastPage, allPages) => {
+        if (lastPage.page.length < options.pageSize) {
+          return undefined;
+        }
+        return allPages.length * options.pageSize;
       },
     }
   );

@@ -28,6 +28,8 @@ type MapDoc = MapAttributes & {
 };
 export interface MapUnwrapMetaInfo {
   sharingSavedObjectProps: SharingSavedObjectProps;
+  // Is this map managed by the system?
+  managed: boolean;
 }
 
 export type MapAttributeService = AttributeService<
@@ -101,6 +103,7 @@ export function getMapAttributeService(): MapAttributeService {
             aliasPurpose,
             sourceId: savedObjectId,
           },
+          managed: Boolean(savedObject.managed),
         },
       };
     },

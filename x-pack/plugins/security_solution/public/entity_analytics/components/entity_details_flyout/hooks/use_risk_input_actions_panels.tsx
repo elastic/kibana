@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useRiskInputActions } from './use_risk_input_actions';
-import type { AlertRawData } from '../tabs/risk_inputs';
+import type { AlertRawData } from '../tabs/risk_inputs/risk_inputs_tab';
 
 export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: () => void) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;

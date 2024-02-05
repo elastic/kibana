@@ -73,8 +73,8 @@ import type {
 } from './lib/detection_engine/rule_types/types';
 // eslint-disable-next-line no-restricted-imports
 import {
-  legacyIsNotificationAlertExecutor,
-  legacyRulesNotificationAlertType,
+  isLegacyNotificationRuleExecutor,
+  legacyRulesNotificationRuleType,
 } from './lib/detection_engine/rule_actions_legacy';
 import {
   createSecurityRuleTypeWrapper,
@@ -115,6 +115,7 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
+import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -354,9 +355,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     );
 
     if (plugins.alerting != null) {
-      const ruleNotificationType = legacyRulesNotificationAlertType({ logger });
+      const ruleNotificationType = legacyRulesNotificationRuleType({ logger });
 
-      if (legacyIsNotificationAlertExecutor(ruleNotificationType)) {
+      if (isLegacyNotificationRuleExecutor(ruleNotificationType)) {
         plugins.alerting.registerType(ruleNotificationType);
       }
     }
@@ -550,6 +551,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         }
 
         turnOffPolicyProtectionsIfNotSupported(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          appFeaturesService,
+          logger
+        );
+
+        turnOffAgentPolicyFeatures(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
           appFeaturesService,

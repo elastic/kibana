@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
+import { EuiDataGridCellValueElementProps, type EuiDataGridColumn } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
@@ -44,4 +44,14 @@ export type DataGridCellValueElementProps = EuiDataGridCellValueElementProps & {
 export type CustomCellRenderer = Record<
   string,
   (props: DataGridCellValueElementProps) => React.ReactNode
+>;
+
+export interface CustomGridColumnProps {
+  column: EuiDataGridColumn;
+  headerRowHeight?: number;
+}
+
+export type CustomGridColumnsConfiguration = Record<
+  string,
+  (props: CustomGridColumnProps) => EuiDataGridColumn
 >;

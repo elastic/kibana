@@ -14,7 +14,9 @@ import {
   parseGroupingQuery,
 } from '@kbn/securitysolution-grouping/src';
 import { useMemo } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { buildEsQuery, Filter } from '@kbn/es-query';
+import { LOCAL_STORAGE_FINDINGS_GROUPING_KEY } from '../../../common/constants';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { Evaluation } from '../../../../common/types_old';
 import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import {
@@ -124,20 +126,25 @@ export const isFindingsRootGroupingAggregation = (
  * for the findings page
  */
 export const useLatestFindingsGrouping = ({
-  dataView,
   groupPanelRenderer,
   groupStatsRenderer,
+  groupingLevel = 0,
+  groupFilters = [],
+  selectedGroup,
 }: {
-  dataView: DataView;
   groupPanelRenderer?: GroupPanelRenderer<FindingsGroupingAggregation>;
   groupStatsRenderer?: GroupStatsRenderer<FindingsGroupingAggregation>;
+  groupingLevel?: number;
+  groupFilters?: Filter[];
+  selectedGroup?: string;
 }) => {
+  const { dataView } = useDataViewContext();
+
   const {
     activePageIndex,
     grouping,
     pageSize,
     query,
-    selectedGroup,
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
     setUrlQuery,
@@ -146,6 +153,7 @@ export const useLatestFindingsGrouping = ({
     onResetFilters,
     error,
     filters,
+    setActivePageIndex,
   } = useCloudSecurityGrouping({
     dataView,
     groupingTitle,
@@ -154,21 +162,26 @@ export const useLatestFindingsGrouping = ({
     unit: FINDINGS_UNIT,
     groupPanelRenderer,
     groupStatsRenderer,
+    groupingLocalStorageKey: LOCAL_STORAGE_FINDINGS_GROUPING_KEY,
+    groupingLevel,
   });
+
+  const additionalFilters = buildEsQuery(dataView, [], groupFilters);
+  const currentSelectedGroup = selectedGroup || grouping.selectedGroups[0];
 
   const { data: rulesStates } = useGetCspBenchmarkRulesStatesApi();
   const mutedRulesFilterQuery = rulesStates ? buildMutedRulesFilter(rulesStates) : [];
 
   const groupingQuery = getGroupingQuery({
-    additionalFilters: query ? [query] : [],
-    groupByField: selectedGroup,
+    additionalFilters: query ? [query, additionalFilters] : [additionalFilters],
+    groupByField: currentSelectedGroup,
     uniqueValue,
     from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
     to: 'now',
     pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ groupByField: { order: 'desc' } }, { complianceScore: { order: 'asc' } }],
-    statsAggregations: getAggregationsByGroupField(selectedGroup),
+    statsAggregations: getAggregationsByGroupField(currentSelectedGroup),
     rootAggregations: [
       {
         failedFindings: {
@@ -205,11 +218,11 @@ export const useLatestFindingsGrouping = ({
   const groupData = useMemo(
     () =>
       parseGroupingQuery(
-        selectedGroup,
+        currentSelectedGroup,
         uniqueValue,
         data as GroupingAggregation<FindingsGroupingAggregation>
       ),
-    [data, selectedGroup, uniqueValue]
+    [data, currentSelectedGroup, uniqueValue]
   );
 
   const totalPassedFindings = isFindingsRootGroupingAggregation(groupData)
@@ -239,6 +252,7 @@ export const useLatestFindingsGrouping = ({
     grouping,
     isFetching,
     activePageIndex,
+    setActivePageIndex,
     pageSize,
     selectedGroup,
     onChangeGroupsItemsPerPage,

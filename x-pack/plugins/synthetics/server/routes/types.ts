@@ -32,6 +32,7 @@ export type SyntheticsRequest = KibanaRequest<
 export interface UMServerRoute<T> {
   method: 'GET' | 'PUT' | 'POST' | 'DELETE';
   writeAccess?: boolean;
+  writeAccessOverride?: boolean;
   handler: T;
   validation?: FullValidationConfig<any, any, any>;
   streamHandler?: (

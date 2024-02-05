@@ -262,7 +262,11 @@ export interface DataViewsServicePublicMethods {
    * Refresh fields for data view instance
    * @params dataView - Data view instance
    */
-  refreshFields: (indexPattern: DataView, displayErrors?: boolean) => Promise<void>;
+  refreshFields: (
+    indexPattern: DataView,
+    displayErrors?: boolean,
+    forceRefresh?: boolean
+  ) => Promise<void>;
   /**
    * Converts data view saved object to spec
    * @params savedObject - Data view saved object
@@ -555,7 +559,10 @@ export class DataViewsService {
         (indexPattern as DataViewSpec).allowHidden || (indexPattern as DataView)?.getAllowHidden(),
     });
 
-  private getFieldsAndIndicesForDataView = async (dataView: DataView) => {
+  private getFieldsAndIndicesForDataView = async (
+    dataView: DataView,
+    forceRefresh: boolean = false
+  ) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
     return this.apiClient.getFieldsForWildcard({
       type: dataView.type,
@@ -563,7 +570,8 @@ export class DataViewsService {
       allowNoIndex: true,
       pattern: dataView.getIndexPattern(),
       metaFields,
-      allowHidden: dataView.getAllowHidden(),
+      forceRefresh,
+      allowHidden: dataView.getAllowHidden() || undefined,
     });
   };
 
@@ -580,8 +588,18 @@ export class DataViewsService {
     });
   };
 
-  private refreshFieldsFn = async (indexPattern: DataView) => {
-    const { fields, indices } = await this.getFieldsAndIndicesForDataView(indexPattern);
+  private refreshFieldsFn = async (indexPattern: DataView, forceRefresh: boolean = false) => {
+    const { fields, indices, etag } = await this.getFieldsAndIndicesForDataView(
+      indexPattern,
+      forceRefresh
+    );
+
+    if (indexPattern.getEtag() && etag === indexPattern.getEtag()) {
+      return;
+    } else {
+      indexPattern.setEtag(etag);
+    }
+
     fields.forEach((field) => (field.isMapped = true));
     const scripted = this.scriptedFieldsEnabled
       ? indexPattern.getScriptedFields().map((field) => field.spec)
@@ -607,13 +625,17 @@ export class DataViewsService {
    * @param dataView
    * @param displayErrors  - If set false, API consumer is responsible for displaying and handling errors.
    */
-  refreshFields = async (dataView: DataView, displayErrors: boolean = true) => {
+  refreshFields = async (
+    dataView: DataView,
+    displayErrors: boolean = true,
+    forceRefresh: boolean = false
+  ) => {
     if (!displayErrors) {
-      return this.refreshFieldsFn(dataView);
+      return this.refreshFieldsFn(dataView, forceRefresh);
     }
 
     try {
-      await this.refreshFieldsFn(dataView);
+      await this.refreshFieldsFn(dataView, forceRefresh);
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         // not considered an error, check dataView.matchedIndices.length to be 0
@@ -654,7 +676,11 @@ export class DataViewsService {
       : [];
     try {
       let updatedFieldList: FieldSpec[];
-      const { fields: newFields, indices } = await this.getFieldsAndIndicesForWildcard(options);
+      const {
+        fields: newFields,
+        indices,
+        etag,
+      } = await this.getFieldsAndIndicesForWildcard(options);
       newFields.forEach((field) => (field.isMapped = true));
 
       // If allowNoIndex, only update field list if field caps finds fields. To support
@@ -665,7 +691,7 @@ export class DataViewsService {
         updatedFieldList = fieldsAsArr;
       }
 
-      return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices };
+      return { fields: this.fieldArrayToMap(updatedFieldList, fieldAttrs), indices, etag };
     } catch (err) {
       if (err instanceof DataViewMissingIndices) {
         // not considered an error, check dataView.matchedIndices.length to be 0
@@ -779,7 +805,7 @@ export class DataViewsService {
     displayErrors?: boolean;
   }) => {
     const { title, type, typeMeta, runtimeFieldMap } = spec;
-    const { fields, indices } = await this.refreshFieldSpecMap(
+    const { fields, indices, etag } = await this.refreshFieldSpecMap(
       spec.fields || {},
       savedObjectId,
       spec.title as string,
@@ -797,7 +823,7 @@ export class DataViewsService {
 
     const runtimeFieldSpecs = this.getRuntimeFields(runtimeFieldMap, spec.fieldAttrs);
     // mapped fields overwrite runtime fields
-    return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [] };
+    return { fields: { ...runtimeFieldSpecs, ...fields }, indices: indices || [], etag };
   };
 
   private initFromSavedObject = async (
@@ -811,6 +837,7 @@ export class DataViewsService {
 
     let fields: Record<string, FieldSpec> = {};
     let indices: string[] = [];
+    let etag: string | undefined;
 
     if (!displayErrors) {
       const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
@@ -820,6 +847,7 @@ export class DataViewsService {
       });
       fields = fieldsAndIndices.fields;
       indices = fieldsAndIndices.indices;
+      etag = fieldsAndIndices.etag;
     } else {
       try {
         const fieldsAndIndices = await this.initFromSavedObjectLoadFields({
@@ -829,6 +857,7 @@ export class DataViewsService {
         });
         fields = fieldsAndIndices.fields;
         indices = fieldsAndIndices.indices;
+        etag = fieldsAndIndices.etag;
       } catch (err) {
         if (err instanceof DataViewMissingIndices) {
           // not considered an error, check dataView.matchedIndices.length to be 0
@@ -853,6 +882,7 @@ export class DataViewsService {
       : {};
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);
+    indexPattern.setEtag(etag);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;

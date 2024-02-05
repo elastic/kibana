@@ -17,7 +17,7 @@ export type MigrationInfoRecord = Pick<
 
 export interface MigrationSnapshotMeta {
   date: string;
-  kibanaCommitHash: string | null;
+  kibanaCommitHash: string;
   buildUrl: string | null;
   pullRequestUrl: string | null;
   timestamp: number;

@@ -25,6 +25,7 @@ export type { ESQLCallbacks } from './src/esql';
 export * from './src/painless';
 /* eslint-disable-next-line @kbn/eslint/module_migration */
 import * as BarePluginApi from 'monaco-editor/esm/vs/editor/editor.api';
+export { YAML_LANG_ID, configureMonacoYamlSchema } from './src/yaml';
 
 import { registerLanguage } from './src/helpers';
 

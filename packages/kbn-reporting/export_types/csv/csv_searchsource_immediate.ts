@@ -108,9 +108,11 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
     };
     const cancellationToken = new CancellationToken();
     const csvConfig = this.config.csv;
+    const taskInstanceFields = { startedAt: null, retryAt: null };
     const csv = new CsvGenerator(
       job,
       csvConfig,
+      taskInstanceFields,
       clients,
       dependencies,
       cancellationToken,

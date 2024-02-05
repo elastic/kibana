@@ -731,7 +731,7 @@
               "SuggestionsListSize",
               " | undefined; suggestionsAbstraction?: ",
               "SuggestionsAbstraction",
-              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; timeHistory?: ",
+              " | undefined; isScreenshotMode?: boolean | undefined; submitOnBlur?: boolean | undefined; renderQueryInputAppend?: (() => React.ReactNode) | undefined; timeHistory?: ",
               {
                 "pluginId": "data",
                 "scope": "public",

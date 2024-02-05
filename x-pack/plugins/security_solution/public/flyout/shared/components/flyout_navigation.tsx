@@ -15,7 +15,7 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -46,7 +46,8 @@ export interface FlyoutNavigationProps {
 export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
   ({ flyoutIsExpandable = false, expandDetails, actions }) => {
     const { euiTheme } = useEuiTheme();
-    const { closeLeftPanel, panels } = useExpandableFlyoutContext();
+    const { closeLeftPanel } = useExpandableFlyoutApi();
+    const panels = useExpandableFlyoutState();
 
     const isExpanded: boolean = !!panels.left;
     const collapseDetails = useCallback(() => closeLeftPanel(), [closeLeftPanel]);

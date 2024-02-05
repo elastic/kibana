@@ -4306,7 +4306,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -5127,14 +5135,13 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-field-list",
-            "id": "def-common.UnifiedFieldListSidebarContainerApi.isSidebarCollapsed$",
+            "id": "def-common.UnifiedFieldListSidebarContainerApi.sidebarVisibility",
             "type": "Object",
             "tags": [],
-            "label": "isSidebarCollapsed$",
+            "label": "sidebarVisibility",
             "description": [],
             "signature": [
-              "Observable",
-              "<boolean>"
+              "SidebarVisibility"
             ],
             "path": "packages/kbn-unified-field-list/src/containers/unified_field_list_sidebar/field_list_sidebar_container.tsx",
             "deprecated": false,

@@ -304,26 +304,14 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
     return null;
   }
 
-  const sidebarToggleButton =
-    typeof isSidebarCollapsed === 'boolean' && onToggleSidebar ? (
-      <SidebarToggleButton
-        buttonSize={compressed ? 's' : 'm'}
-        isSidebarCollapsed={isSidebarCollapsed}
-        onChange={onToggleSidebar}
-      />
-    ) : null;
-
   const pageSidebarProps: Partial<EuiPageSidebarProps> = {
     className: classnames('unifiedFieldListSidebar', {
       'unifiedFieldListSidebar--collapsed': isSidebarCollapsed,
       ['unifiedFieldListSidebar--fullWidth']: fullWidth,
     }),
-    'aria-label': i18n.translate(
-      'unifiedFieldList.fieldListSidebar.indexAndFieldsSectionAriaLabel',
-      {
-        defaultMessage: 'Index and fields',
-      }
-    ),
+    'aria-label': i18n.translate('unifiedFieldList.fieldListSidebar.fieldsSidebarAriaLabel', {
+      defaultMessage: 'Fields',
+    }),
     id:
       stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
       'unifiedFieldListSidebarId',
@@ -331,6 +319,16 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
       stateService.creationOptions.dataTestSubj?.fieldListSidebarDataTestSubj ??
       'unifiedFieldListSidebarId',
   };
+
+  const sidebarToggleButton =
+    typeof isSidebarCollapsed === 'boolean' && onToggleSidebar ? (
+      <SidebarToggleButton
+        buttonSize={compressed ? 's' : 'm'}
+        isSidebarCollapsed={isSidebarCollapsed}
+        panelId={pageSidebarProps.id}
+        onChange={onToggleSidebar}
+      />
+    ) : null;
 
   if (isSidebarCollapsed && sidebarToggleButton) {
     return (
@@ -341,7 +339,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   }
 
   const hasButtonAddFieldToolbarStyle = buttonAddFieldVariant === 'toolbar';
-  const buttonAddFieldCommonProps: Partial<EuiButtonProps> = {
+  const buttonAddFieldCommonProps: Partial<Omit<EuiButtonProps, 'type'>> = {
     size: 's',
     iconType: 'indexOpen',
     'data-test-subj':

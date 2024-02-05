@@ -8,6 +8,9 @@
 import React, { useCallback, useMemo } from 'react';
 import { AlertsTableFlyoutBaseProps } from '@kbn/triggers-actions-ui-plugin/public';
 
+import { useRouteMatch } from 'react-router-dom';
+import { SLO_ALERTS_TABLE_ID } from '../../pages/slo_details/components/slo_detail_alerts';
+import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import type { ObservabilityRuleTypeRegistry } from '../../rules/create_observability_rule_type_registry';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
@@ -19,10 +22,11 @@ export { AlertsFlyout } from './alerts_flyout';
 export const useGetAlertFlyoutComponents = (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry
 ) => {
+  const isSLODetailsPage = useRouteMatch(SLO_DETAIL_PATH);
   const body = useCallback(
     (props: AlertsTableFlyoutBaseProps) => {
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);
-      return <AlertsFlyoutBody alert={alert} id={props.id} />;
+      return <AlertsFlyoutBody alert={alert} rawAlert={props.alert} id={props.id} />;
     },
     [observabilityRuleTypeRegistry]
   );
@@ -37,10 +41,11 @@ export const useGetAlertFlyoutComponents = (
 
   const footer = useCallback(
     (props: AlertsTableFlyoutBaseProps) => {
+      const isInApp = Boolean(SLO_ALERTS_TABLE_ID === props.id && isSLODetailsPage);
       const alert = parseAlert(observabilityRuleTypeRegistry)(props.alert);
-      return <AlertsFlyoutFooter isInApp={false} alert={alert} />;
+      return <AlertsFlyoutFooter isInApp={isInApp} alert={alert} />;
     },
-    [observabilityRuleTypeRegistry]
+    [isSLODetailsPage, observabilityRuleTypeRegistry]
   );
 
   return useMemo(

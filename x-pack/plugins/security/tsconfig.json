@@ -3,7 +3,12 @@
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "__mocks__/**/*"],
+  "include": [
+    "common/**/*",
+    "public/**/*",
+    "server/**/*",
+    "__mocks__/**/*"
+  ],
   "kbn_references": [
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
@@ -66,6 +71,7 @@
     "@kbn/security-plugin-types-common",
     "@kbn/security-plugin-types-public",
     "@kbn/security-plugin-types-server",
+    "@kbn/kibana-utils-plugin",
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
   ],
