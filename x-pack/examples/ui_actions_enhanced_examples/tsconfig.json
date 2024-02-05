@@ -29,5 +29,6 @@
     "@kbn/i18n",
     "@kbn/unified-search-plugin",
     "@kbn/utility-types",
+    "@kbn/presentation-publishing",
   ]
 }

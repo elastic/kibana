@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { Logger } from '@kbn/core/server';
 
 const DEFAULT_LOCALES = ['en-US'];
 
@@ -30,24 +31,28 @@ const DEFAULT_LOCALES = ['en-US'];
  * @param numberAndFormat string containing a number and formatting options
  * @returns number formatted according to the options
  */
-export function formatNumber(numberLocalesOptions: string): string {
+export function formatNumber(logger: Logger, numberLocalesOptions: string): string {
   const [numString, localesString, optionsString] = splitNumberLocalesOptions(numberLocalesOptions);
   if (localesString === undefined || optionsString === undefined) {
-    return `invalid format, missing semicolons: '${numberLocalesOptions}'`;
+    return logAndReturnErr(logger, `invalid format, missing semicolons: '${numberLocalesOptions}'`);
   }
 
   const num = parseFloat(numString);
-  if (isNaN(num)) return `invalid number: '${numString}'`;
+  if (isNaN(num)) {
+    return logAndReturnErr(logger, `invalid number: '${numString}'`);
+  }
 
   const locales = getLocales(localesString);
 
   const [options, optionsError] = getOptions(optionsString);
-  if (optionsError) return `invalid options: ${optionsError}`;
+  if (optionsError) {
+    return logAndReturnErr(logger, `invalid options: ${optionsError}`);
+  }
 
   try {
     return new Intl.NumberFormat(locales, options).format(num);
   } catch (err) {
-    return `error formatting number: ${err.message}`;
+    return logAndReturnErr(logger, `error formatting number: ${err.message}`);
   }
 }
 
@@ -109,4 +114,9 @@ function splitNumberLocalesOptions(
 ): [string, string | undefined, string | undefined] {
   const [num, locales, options] = numberLocalesOptions.split(';', 3);
   return [num.trim(), locales?.trim(), options?.trim()];
+}
+
+function logAndReturnErr(logger: Logger, errMessage: string): string {
+  logger.warn(`mustache render error: ${errMessage}`);
+  return errMessage;
 }

@@ -47,6 +47,7 @@ import { useRefetch } from './hooks/use_refetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
 
 export interface ChartProps {
+  abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   className?: string;
@@ -123,6 +124,7 @@ export function Chart({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: ChartProps) {
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
@@ -406,6 +408,7 @@ export function Chart({
               />
             )}
             <HistogramMemoized
+              abortController={abortController}
               services={services}
               dataView={dataView}
               request={request}

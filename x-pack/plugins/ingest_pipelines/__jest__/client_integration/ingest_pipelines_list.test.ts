@@ -11,6 +11,7 @@ import { API_BASE_PATH } from '../../common/constants';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { PipelineListTestBed } from './helpers/pipelines_list.helpers';
+import { Pipeline } from '../../common/types';
 
 const { setup } = pageHelpers.pipelinesList;
 
@@ -39,7 +40,14 @@ describe('<PipelinesList />', () => {
       processors: [],
     };
 
-    const pipelines = [pipeline1, pipeline2];
+    const pipeline3 = {
+      name: 'test_pipeline3',
+      description: 'test_pipeline3 description',
+      processors: [],
+      deprecated: true,
+    };
+
+    const pipelines = [pipeline1, pipeline2, pipeline3];
 
     httpRequestsMockHelpers.setLoadPipelinesResponse(pipelines);
 
@@ -64,6 +72,30 @@ describe('<PipelinesList />', () => {
 
         expect(row).toEqual(['', pipeline.name, 'EditDelete']);
       });
+    });
+
+    test('deprecated pipelines are hidden by default', async () => {
+      const { table, component } = testBed;
+      const { tableCellsValues } = table.getMetaData('pipelinesTable');
+
+      // Table should shouldnt show any deprecated pipelines by default
+      const pipelinesWithoutDeprecated = pipelines.filter(
+        (pipeline: Pipeline) => !pipeline?.deprecated
+      );
+      expect(tableCellsValues.length).toEqual(pipelinesWithoutDeprecated.length);
+
+      // Enable filtering by deprecated pipelines
+      const searchInput = component.find('.euiFieldSearch').first();
+      (searchInput.instance() as unknown as HTMLInputElement).value = 'is:deprecated';
+      searchInput.simulate('keyup', { key: 'Enter', keyCode: 13, which: 13 });
+      component.update();
+
+      // Table should now show only deprecated pipelines
+      const { tableCellsValues: tableCellValuesUpdated } = table.getMetaData('pipelinesTable');
+      const pipelinesWithDeprecated = pipelines.filter(
+        (pipeline: Pipeline) => pipeline?.deprecated
+      );
+      expect(tableCellValuesUpdated.length).toEqual(pipelinesWithDeprecated.length);
     });
 
     test('should reload the pipeline data', async () => {

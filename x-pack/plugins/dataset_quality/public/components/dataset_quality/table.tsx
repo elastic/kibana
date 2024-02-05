@@ -5,12 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
+import {
+  EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { loadingDatasetsText, noDatasetsTitle } from '../../../common/translations';
+import React from 'react';
+import {
+  fullDatasetNameDescription,
+  fullDatasetNameLabel,
+  inactiveDatasetsDescription,
+  inactiveDatasetsLabel,
+  loadingDatasetsText,
+  noDatasetsTitle,
+} from '../../../common/translations';
 import { useDatasetQualityTable } from '../../hooks';
+import { DescriptiveSwitch } from '../common/descriptive_switch';
 
 const Flyout = dynamic(() => import('../flyout/flyout'));
 
@@ -25,19 +40,39 @@ export const Table = () => {
     resultsCount,
     selectedDataset,
     closeFlyout,
+    showInactiveDatasets,
+    showFullDatasetNames,
+    toggleInactiveDatasets,
+    toggleFullDatasetNames,
   } = useDatasetQualityTable();
 
   return (
     <>
-      <EuiText size="xs">
-        <FormattedMessage
-          id="xpack.datasetQuality.tableSummary"
-          defaultMessage="Showing {items} Datasets"
-          values={{
-            items: resultsCount,
-          }}
-        />
-      </EuiText>
+      <EuiFlexGroup justifyContent="spaceBetween">
+        <EuiText size="xs">
+          <FormattedMessage
+            id="xpack.datasetQuality.tableSummary"
+            defaultMessage="Showing {items} Datasets"
+            values={{
+              items: resultsCount,
+            }}
+          />
+        </EuiText>
+        <EuiFlexGroup gutterSize="m" justifyContent="flexEnd">
+          <DescriptiveSwitch
+            label={fullDatasetNameLabel}
+            checked={showFullDatasetNames}
+            tooltipText={fullDatasetNameDescription}
+            onToggle={toggleFullDatasetNames}
+          />
+          <DescriptiveSwitch
+            label={inactiveDatasetsLabel}
+            checked={showInactiveDatasets}
+            tooltipText={inactiveDatasetsDescription}
+            onToggle={toggleInactiveDatasets}
+          />
+        </EuiFlexGroup>
+      </EuiFlexGroup>
       <EuiSpacer size="s" />
       <EuiHorizontalRule margin="none" style={{ height: 2 }} />
       <EuiBasicTable

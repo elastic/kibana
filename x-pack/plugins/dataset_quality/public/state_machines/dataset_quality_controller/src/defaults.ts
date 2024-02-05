@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getDefaultTimeRange } from '../../../utils';
 import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../../../common/constants';
 import { DefaultDatasetQualityControllerState } from './types';
 
@@ -16,6 +17,11 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       field: DEFAULT_SORT_FIELD,
       direction: DEFAULT_SORT_DIRECTION,
     },
+  },
+  filters: {
+    inactive: true,
+    fullNames: false,
+    timeRange: getDefaultTimeRange(),
   },
   flyout: {},
   datasets: [],
