@@ -187,6 +187,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        is_internal: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
@@ -347,6 +348,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                 type: 'keyword',
                 index: false,
               },
+            },
+          },
+        ],
+      },
+      '5': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
             },
           },
         ],
@@ -615,9 +626,22 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_internal: { type: 'boolean', index: false },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
         proxy_id: { type: 'keyword' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
       },
     },
   },
@@ -699,6 +723,7 @@ export function registerEncryptedSavedObjects(
       'ca_trusted_fingerprint',
       'config',
       'config_yaml',
+      'is_internal',
       'is_preconfigured',
       'proxy_id',
       'version',

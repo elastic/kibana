@@ -17,7 +17,7 @@ import styled from '@emotion/styled';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { LogExplorerTabs } from '@kbn/discover-plugin/public';
+import { LogsExplorerTabs } from '@kbn/discover-plugin/public';
 import React, { useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { filter, take } from 'rxjs';
@@ -40,10 +40,10 @@ const ServerlessTopNav = () => {
   const { ObservabilityAIAssistantActionMenuItem } = services.observabilityAIAssistant;
 
   return (
-    <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
+    <EuiHeader data-test-subj="logsExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
-          <LogExplorerTabs services={services} selectedTab="log-explorer" />
+          <LogsExplorerTabs services={services} selectedTab="logs-explorer" />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
@@ -106,7 +106,7 @@ const StatefulTopNav = () => {
       chrome.setBreadcrumbsAppendExtension({
         content: toMountPoint(
           <EuiHeaderSection
-            data-test-subj="logExplorerHeaderMenu"
+            data-test-subj="logsExplorerHeaderMenu"
             css={css`
               margin-left: ${euiThemeVars.euiSizeM};
             `}
@@ -138,7 +138,7 @@ const StatefulTopNav = () => {
 
   return (
     <HeaderMenuPortal setHeaderActionMenu={setHeaderActionMenu} theme$={theme.theme$}>
-      <EuiHeaderSection data-test-subj="logExplorerHeaderMenu">
+      <EuiHeaderSection data-test-subj="logsExplorerHeaderMenu">
         <EuiHeaderSectionItem>
           <EuiHeaderLinks gutterSize="xs">
             <ConnectedDiscoverLink />

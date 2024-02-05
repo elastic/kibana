@@ -6,6 +6,7 @@
  */
 
 import {
+  AppMountParameters,
   AppNavLinkStatus,
   CoreSetup,
   CoreStart,
@@ -13,10 +14,10 @@ import {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   AllDatasetsLocatorDefinition,
-  ObservabilityLogExplorerLocators,
+  ObservabilityLogsExplorerLocators,
   SingleDatasetLocatorDefinition,
 } from '../common/locators';
 import { type ObservabilityLogExplorerConfig } from '../common/plugin_config';
@@ -28,12 +29,11 @@ import type {
   ObservabilityLogExplorerSetupDeps,
   ObservabilityLogExplorerStartDeps,
 } from './types';
-
 export class ObservabilityLogExplorerPlugin
   implements Plugin<ObservabilityLogExplorerPluginSetup, ObservabilityLogExplorerPluginStart>
 {
   private config: ObservabilityLogExplorerConfig;
-  private locators?: ObservabilityLogExplorerLocators;
+  private locators?: ObservabilityLogsExplorerLocators;
 
   constructor(context: PluginInitializerContext<ObservabilityLogExplorerConfig>) {
     this.config = context.config.get();
@@ -47,7 +47,7 @@ export class ObservabilityLogExplorerPlugin
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
-      id: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+      id: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
       title: logExplorerAppTitle,
       category: DEFAULT_APP_CATEGORIES.observability,
       euiIconType: 'logoLogging',
@@ -71,8 +71,23 @@ export class ObservabilityLogExplorerPlugin
       },
     });
 
+    // App used solely to redirect from "/app/observability-log-explorer" to "/app/observability-logs-explorer"
+    core.application.register({
+      id: 'observability-log-explorer',
+      title: logExplorerAppTitle,
+      navLinkStatus: AppNavLinkStatus.hidden,
+      mount: async (appMountParams: AppMountParameters) => {
+        const [coreStart] = await core.getStartServices();
+        const { renderObservabilityLogExplorerRedirect } = await import(
+          './applications/redirect_to_observability_logs_explorer'
+        );
+
+        return renderObservabilityLogExplorerRedirect(coreStart, appMountParams);
+      },
+    });
+
     if (serverless) {
-      discover.showLogExplorerTabs();
+      discover.showLogsExplorerTabs();
     }
 
     // Register Locators

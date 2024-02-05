@@ -22,7 +22,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { Dispatch, SetStateAction } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
@@ -31,7 +31,8 @@ import {
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 import { IntegrationIcon } from '../common';
-import { useLinkToLogExplorer } from '../../hooks';
+import { useLinkToLogsExplorer } from '../../hooks';
+import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',
@@ -108,25 +109,25 @@ const degradedDocsColumnTooltip = (
 export const getDatasetQualityTableColumns = ({
   fieldFormats,
   selectedDataset,
-  setSelectedDataset,
+  openFlyout,
   loadingDegradedStats,
 }: {
   fieldFormats: FieldFormatsStart;
-  selectedDataset?: DataStreamStat;
+  selectedDataset?: FlyoutDataset;
   loadingDegradedStats?: boolean;
-  setSelectedDataset: Dispatch<SetStateAction<DataStreamStat | undefined>>;
+  openFlyout: (selectedDataset: FlyoutDataset) => void;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
       name: '',
       render: (dataStreamStat: DataStreamStat) => {
-        const isExpanded = dataStreamStat === selectedDataset;
+        const isExpanded = dataStreamStat.rawName === selectedDataset?.rawName;
 
         return (
           <EuiButtonIcon
             size="m"
             color="text"
-            onClick={() => setSelectedDataset(isExpanded ? undefined : dataStreamStat)}
+            onClick={() => openFlyout(dataStreamStat as FlyoutDataset)}
             iconType={isExpanded ? 'minimize' : 'expand'}
             title={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
             aria-label={!isExpanded ? expandDatasetAriaLabel : collapseDatasetAriaLabel}
@@ -207,21 +208,21 @@ export const getDatasetQualityTableColumns = ({
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogExplorerLink = ({
+const LogsExplorerLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
 
-  return <EuiLink {...logExplorerLinkProps}>{title}</EuiLink>;
+  return <EuiLink {...logsExplorerLinkProps}>{title}</EuiLink>;
 };
