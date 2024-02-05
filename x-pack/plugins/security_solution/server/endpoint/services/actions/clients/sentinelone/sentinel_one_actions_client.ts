@@ -201,7 +201,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-          agentType: 'sentinel_one',
         };
       }),
       comment: options.comment,
@@ -237,7 +236,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
         return {
           hostId: agentId,
           hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
-          agentType: 'sentinel_one',
         };
       }),
       comment: options.comment,

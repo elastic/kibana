@@ -76,7 +76,6 @@ export interface ResponseActionsClientUpdateCasesOptions {
   hosts: Array<{
     hostname: string;
     hostId: string;
-    agentType: ResponseActionAgentType;
   }>;
   caseIds?: string[];
   /** If defined, any case that the alert is included in will also receive an update */
@@ -182,11 +181,11 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
         },
         externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
         externalReferenceMetadata: {
-          targets: hosts.map(({ hostId: endpointId, hostname, agentType }) => {
+          targets: hosts.map(({ hostId: endpointId, hostname }) => {
             return {
               endpointId,
               hostname,
-              agentType,
+              agentType: this.agentType,
             };
           }),
           command,

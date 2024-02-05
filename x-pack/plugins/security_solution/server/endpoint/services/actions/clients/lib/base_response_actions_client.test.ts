@@ -125,12 +125,10 @@ describe('ResponseActionsClientImpl base class', () => {
           {
             hostId: '1-2-3',
             hostname: 'foo-one',
-            agentType: 'endpoint',
           },
           {
             hostId: '4-5-6',
             hostname: 'foo-two',
-            agentType: 'sentinel_one',
           },
         ],
       };
@@ -223,7 +221,7 @@ describe('ResponseActionsClientImpl base class', () => {
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
-                  agentType: 'sentinel_one',
+                  agentType: 'endpoint',
                 },
               ],
             },
