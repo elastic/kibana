@@ -42,5 +42,7 @@ export interface ProfilingESClient {
     pervCPUWattArm64?: number;
     awsCostDiscountRate?: number;
     costPervCPUPerHour?: number;
+    indices?: string;
+    stacktraceIdsField?: string;
   }): Promise<BaseFlameGraph>;
 }

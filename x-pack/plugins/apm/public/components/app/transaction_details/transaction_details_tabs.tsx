@@ -36,6 +36,7 @@ import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selecti
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
 import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
+import { profilingTab } from './profiling_tab';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -50,6 +51,7 @@ const tabs = [
   traceSamplesTab,
   latencyCorrelationsTab,
   failedTransactionsCorrelationsTab,
+  profilingTab,
 ];
 
 export function TransactionDetailsTabs() {

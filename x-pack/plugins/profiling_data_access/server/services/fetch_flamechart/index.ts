@@ -24,12 +24,26 @@ export interface FetchFlamechartParams {
   rangeFromMs: number;
   rangeToMs: number;
   kuery: string;
+  indices?: string;
+  stacktraceIdsField?: string;
+  serviceName?: string;
+  transactionName?: string;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
 
 export function createFetchFlamechart({ createProfilingEsClient }: RegisterServicesParams) {
-  return async ({ core, esClient, rangeFromMs, rangeToMs, kuery }: FetchFlamechartParams) => {
+  return async ({
+    core,
+    esClient,
+    rangeFromMs,
+    rangeToMs,
+    kuery,
+    indices,
+    stacktraceIdsField,
+    serviceName,
+    transactionName,
+  }: FetchFlamechartParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
 
@@ -52,10 +66,13 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     const profilingEsClient = createProfilingEsClient({ esClient });
     const totalSeconds = rangeToSecs - rangeFromSecs;
     const flamegraph = await profilingEsClient.profilingFlamegraph({
+      // TODO: caue maybe receive the query as a new argument?!
       query: {
         bool: {
           filter: [
             ...kqlQuery(kuery),
+            ...(serviceName ? [{ term: { 'service.name': serviceName } }] : []),
+            ...(transactionName ? [{ term: { 'transaction.name': transactionName } }] : []),
             {
               range: {
                 ['@timestamp']: {
@@ -76,6 +93,8 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       pervCPUWattArm64,
       awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
       costPervCPUPerHour,
+      indices,
+      stacktraceIdsField,
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };

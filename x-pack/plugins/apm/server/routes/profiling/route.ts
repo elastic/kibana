@@ -86,6 +86,46 @@ const profilingFlamegraphRoute = createApmServerRoute({
   },
 });
 
+const transactionsFlamegraphRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/flamegraph',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      rangeRt,
+      kueryRt,
+      t.type({ transactionName: t.string }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<BaseFlameGraph | undefined> => {
+    const { context, plugins, params } = resources;
+    const core = await context.core;
+    const [esClient, profilingDataAccessStart] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+    ]);
+    if (profilingDataAccessStart) {
+      const { serviceName } = params.path;
+      const { start, end, kuery, transactionName } = params.query;
+
+      return await profilingDataAccessStart?.services.fetchFlamechartData({
+        core,
+        esClient: esClient.asCurrentUser,
+        rangeFromMs: start,
+        rangeToMs: end,
+        kuery,
+        // TODO: caue fix this
+        indices: '.ds-traces-apm-default-2024.02.02-000001',
+        stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+        serviceName,
+        transactionName,
+      });
+    }
+
+    return undefined;
+  },
+});
+
 const profilingFunctionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
   params: t.type({
@@ -190,4 +230,5 @@ export const profilingRouteRepository = {
   ...profilingFlamegraphRoute,
   ...profilingStatusRoute,
   ...profilingFunctionsRoute,
+  ...transactionsFlamegraphRoute,
 };
