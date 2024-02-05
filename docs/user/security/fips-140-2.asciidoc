@@ -6,7 +6,7 @@ The Federal Information Processing Standard (FIPS) Publication 140-2, (FIPS PUB 
 titled "Security Requirements for Cryptographic Modules" is a U.S. government computer security standard
 used to approve cryptographic modules.
 
-{kib} offers a FIPS 140-2 compliant mode and as such can run in a Node.js environment configured with an FIPS 
+{kib} offers a FIPS 140-2 compliant mode and as such can run in a Node.js environment configured with a FIPS 
 140-2 compliant OpenSSL3 provider.
 
 [IMPORTANT]
@@ -24,7 +24,7 @@ For {kib}, adherence to FIPS 140-2 is ensured by:
 
 * Allowing the configuration of {kib} in a FIPS 140-2 compliant manner, as documented below.
 
-==== Configuring Node.js to use an FIPS 140-2 compliant OpenSSL3 provider
+==== Configuring Node.js to use a FIPS 140-2 compliant OpenSSL3 provider
 
 TBD
 
