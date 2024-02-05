@@ -6,10 +6,22 @@
  * Side Public License, v 1.
  */
 
+import { Type, ValidationError } from '@kbn/config-schema';
+import type { RequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { validateVersion } from '@kbn/object-versioning/lib/utils';
 import type { Version } from '@kbn/object-versioning';
-import type { StorageContext } from '../../core';
-import type { Context as RpcContext } from '../types';
+
+import type { ContentRegistry, StorageContext } from '../core';
+import type { GetTransformsFactoryFn } from '../types';
+
+export const validate = (input: unknown, schema: Type<any>): ValidationError | null => {
+  try {
+    schema.validate(input);
+    return null;
+  } catch (e: any) {
+    return e as ValidationError;
+  }
+};
 
 const validateRequestVersion = (
   requestVersion: Version | undefined,
@@ -40,7 +52,11 @@ export const getStorageContext = ({
 }: {
   contentTypeId: string;
   version?: number;
-  ctx: RpcContext;
+  ctx: {
+    contentRegistry: ContentRegistry;
+    requestHandlerContext: RequestHandlerContext;
+    getTransformsFactory: GetTransformsFactoryFn;
+  };
 }): StorageContext => {
   const contentDefinition = contentRegistry.getDefinition(contentTypeId);
   const version = validateRequestVersion(_version, contentDefinition.version.latest);
