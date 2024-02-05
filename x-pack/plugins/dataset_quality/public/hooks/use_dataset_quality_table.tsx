@@ -155,7 +155,7 @@ export const useDatasetQualityTable = () => {
   }, [sort.field, sort.direction, filteredItems, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
-    const startNumberItemsOnPage = rowsPerPage ?? 1 * page ?? 0 + (renderedItems.length ? 1 : 0);
+    const startNumberItemsOnPage = rowsPerPage * page + 1;
     const endNumberItemsOnPage = rowsPerPage * page + renderedItems.length;
 
     return rowsPerPage === 0 ? (
