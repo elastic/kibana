@@ -13,7 +13,7 @@ import { Comparator, Aggregators } from '../../../../../common/custom_threshold_
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
 import { MetricExpression } from '../../types';
-import { getBufferThreshold, PreviewChart } from './preview_chart';
+import { getBufferThreshold, RuleConditionChart } from './rule_condition_chart';
 
 jest.mock('../../../../utils/kibana_react');
 
@@ -25,19 +25,20 @@ const mockKibana = () => {
   });
 };
 
-describe('Preview chart', () => {
+describe('Rule condition chart', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockKibana();
   });
   async function setup(expression: MetricExpression, dataView?: DataView) {
     const wrapper = mountWithIntl(
-      <PreviewChart
+      <RuleConditionChart
         metricExpression={expression}
         dataView={dataView}
         filterQuery={''}
         groupBy={[]}
         error={{}}
+        timeRange={{ from: 'now-15m', to: 'now' }}
       />
     );
 
