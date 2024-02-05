@@ -188,8 +188,6 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     actionRequest: IsolationRouteRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails> {
-    // FIXME:PT support method options
-
     const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
       ...actionRequest,
       ...this.getMethodOptions(options),
@@ -254,7 +252,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
 
     if (!error) {
       try {
-        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
       } catch (err) {
         error = err;
       }

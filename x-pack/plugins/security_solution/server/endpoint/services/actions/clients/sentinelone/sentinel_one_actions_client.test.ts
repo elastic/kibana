@@ -34,8 +34,12 @@ describe('SentinelOneActionsClient class', () => {
   let s1ActionsClient: ResponseActionsClient;
   let connectorActionsMock: ActionsClientMock;
 
-  const createS1IsolationOptions = () =>
-    responseActionsClientMock.createIsolateOptions({ agent_type: 'sentinel_one' });
+  const createS1IsolationOptions = (
+    overrides: Omit<
+      Parameters<typeof responseActionsClientMock.createIsolateOptions>[0],
+      'agent_type'
+    > = {}
+  ) => responseActionsClientMock.createIsolateOptions({ ...overrides, agent_type: 'sentinel_one' });
 
   beforeEach(() => {
     classConstructorOptions = sentinelOneMock.createConstructorOptions();
@@ -187,8 +191,13 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should update cases', async () => {
-      // FIXME:PT implement
-      expect(true).toBe(false);
+      await s1ActionsClient.isolate(
+        createS1IsolationOptions({
+          case_ids: ['case-1'],
+        })
+      );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
   });
 
@@ -265,9 +274,13 @@ describe('SentinelOneActionsClient class', () => {
     });
 
     it('should update cases', async () => {
-      // FIXME:PT implement
-      // Also - look to build a generic test that tests this for all response actions
-      expect(true).toBe(false);
+      await s1ActionsClient.release(
+        createS1IsolationOptions({
+          case_ids: ['case-1'],
+        })
+      );
+
+      expect(classConstructorOptions.casesClient?.attachments.bulkCreate).toHaveBeenCalled();
     });
   });
 });
