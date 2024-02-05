@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiHealth,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -22,6 +23,7 @@ interface Props {
   onDiscardChanges: () => void;
   onSave: () => void;
   saveLabel: string;
+  areChangesInvalid?: boolean;
 }
 
 export function BottomBarActions({
@@ -30,6 +32,7 @@ export function BottomBarActions({
   onSave,
   unsavedChangesCount,
   saveLabel,
+  areChangesInvalid = false,
 }: Props) {
   return (
     <EuiBottomBar paddingSize="s" data-test-subj="profilingBottomBarActions">
@@ -64,16 +67,29 @@ export function BottomBarActions({
               </EuiButtonEmpty>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="profilingBottomBarActionsButton"
-                onClick={onSave}
-                fill
-                isLoading={isLoading}
-                color="success"
-                iconType="check"
+              <EuiToolTip
+                content={
+                  areChangesInvalid &&
+                  i18n.translate(
+                    'xpack.profiling.bottomBarActions.saveButtonTooltipWithInvalidChanges',
+                    {
+                      defaultMessage: 'Fix invalid settings before saving.',
+                    }
+                  )
+                }
               >
-                {saveLabel}
-              </EuiButton>
+                <EuiButton
+                  disabled={areChangesInvalid}
+                  data-test-subj="profilingBottomBarActionsButton"
+                  onClick={onSave}
+                  fill
+                  isLoading={isLoading}
+                  color="success"
+                  iconType="check"
+                >
+                  {saveLabel}
+                </EuiButton>
+              </EuiToolTip>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
