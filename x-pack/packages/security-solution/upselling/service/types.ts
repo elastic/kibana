@@ -15,6 +15,7 @@ export type UpsellingSectionId =
   | 'entity_analytics_panel'
   | 'endpointPolicyProtections'
   | 'osquery_automated_response_actions'
+  | 'endpoint_protection_updates'
   | 'endpoint_agent_tamper_protection'
   | 'ruleDetailsEndpointExceptions';
 

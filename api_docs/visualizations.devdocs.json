@@ -2280,7 +2280,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -4220,6 +4220,17 @@
             "signature": [
               "string[] | undefined"
             ],
+            "path": "src/plugins/visualizations/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-public.VisSavedObject.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
             "path": "src/plugins/visualizations/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6821,15 +6832,31 @@
             "section": "def-common.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; parentApi: (",
+          "<boolean | undefined>; parentApi: (Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
           },
-          " & Partial<Pick<",
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -8738,7 +8765,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -13101,6 +13128,20 @@
             "description": [],
             "signature": [
               "{ error: string; message: string; statusCode: number; metadata?: Record<string, unknown> | undefined; } | undefined"
+            ],
+            "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "visualizations",
+            "id": "def-common.VisualizationSavedObject.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/visualizations/common/content_management/v1/types.ts",
             "deprecated": false,

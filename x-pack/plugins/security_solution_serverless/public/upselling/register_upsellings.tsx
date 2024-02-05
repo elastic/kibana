@@ -20,6 +20,7 @@ import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import {
   EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
+  EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
@@ -145,6 +146,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'ruleDetailsEndpointExceptions',
     pli: AppFeatureKey.endpointExceptions,
     component: RuleDetailsEndpointExceptionsLazy,
+  },
+  {
+    id: 'endpoint_protection_updates',
+    pli: AppFeatureKey.endpointProtectionUpdates,
+    component: EndpointProtectionUpdatesLazy,
   },
 ];
 
