@@ -13,7 +13,6 @@ import { EuiTitle, EuiSpacer, EuiHorizontalRule, EuiTab, EuiTabs } from '@elasti
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import useMountedState from 'react-use/lib/useMountedState';
 import { EDITOR_MODE, JsonEditor } from '../json_editor';
-import { useDataVisualizerKibana } from '../../../kibana_context';
 import { useGrokHighlighter } from './use_text_parser';
 
 interface Props {
@@ -53,15 +52,10 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
     mode = EDITOR_MODE.JSON;
   }
   const isMounted = useMountedState();
-
-  const {
-    services: { http },
-  } = useDataVisualizerKibana();
   const grokHighlighter = useGrokHighlighter();
 
-  const showParsedData = useMemo(
-    () => semiStructureTextDataGuard(semiStructureTextData),
-    [semiStructureTextData]
+  const [showParsedData, setShowParsedData] = useState(
+    semiStructureTextDataGuard(semiStructureTextData)
   );
   const formattedData = useMemo(
     () => limitByNumberOfLines(data, numberOfLines),
@@ -85,12 +79,19 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       ecsCompatibility,
       multilineStartPattern,
       excludeLinesPattern
-    ).then((docs) => {
-      if (isMounted()) {
-        setHighlightedLines(docs);
-      }
-    });
-  }, [http, format, data, semiStructureTextData, grokHighlighter, showParsedData, isMounted]);
+    )
+      .then((docs) => {
+        if (isMounted()) {
+          setHighlightedLines(docs);
+        }
+      })
+      .catch((e) => {
+        if (isMounted()) {
+          setHighlightedLines(null);
+          setShowParsedData(false);
+        }
+      });
+  }, [data, semiStructureTextData, grokHighlighter, showParsedData, isMounted]);
 
   return (
     <>

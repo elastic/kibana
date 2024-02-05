@@ -45,7 +45,7 @@ export const FieldBadge: FC<Props> = ({ type, value, name }) => {
             <FieldIcon
               type={supportedType}
               css={{
-                marginRight: '2px',
+                marginRight: '4px',
                 marginTop: '1px',
                 border: `1px solid ${euiColorLightShade}`,
               }}

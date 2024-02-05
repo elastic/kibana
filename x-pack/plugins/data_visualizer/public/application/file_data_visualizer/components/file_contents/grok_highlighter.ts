@@ -9,15 +9,9 @@ import { MessageImporter } from '@kbn/file-upload-plugin/public';
 import type { HttpSetup } from '@kbn/core/public';
 import type { ImportFactoryOptions } from '@kbn/file-upload-plugin/public/importer';
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { TestGrokPatternResponse } from '../../../../../common/types/test_grok_pattern';
 
 const LINE_LIMIT = 5;
-
-interface TestGrokPatternResponse {
-  matches: Array<{
-    matched: boolean;
-    fields: Record<string, Array<{ match: string; offset: number; length: number }>>;
-  }>;
-}
 
 type HighlightedLine = Array<{
   word: string;

@@ -7,8 +7,9 @@
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import { StartDeps } from './types';
+import type { StartDeps } from './types';
 import { wrapError } from './error_wrapper';
+import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern';
 
 /**
  * Routes for the file upload.
@@ -37,7 +38,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
       async (context, request, response) => {
         try {
           const esClient = (await context.core).elasticsearch.client;
-          const body: any = await esClient.asCurrentUser.transport.request({
+          const body = await esClient.asCurrentUser.transport.request<TestGrokPatternResponse>({
             method: 'GET',
             path: `/_text_structure/test_grok_pattern`,
             body: {
@@ -53,6 +54,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
 
           return response.ok({ body });
         } catch (e) {
+          logger.warn(`Unable to test grok pattern ${e.message}`);
           return response.customError(wrapError(e));
         }
       }
