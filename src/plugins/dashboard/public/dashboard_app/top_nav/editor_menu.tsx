@@ -242,7 +242,7 @@ export const EditorMenu = ({
       toolTipContent,
       onClick: async () => {
         closePopover();
-        api.addNewPanel({ panelType: factory.type, initialState: {} });
+        api.addNewPanel({ panelType: factory.type });
       },
       'data-test-subj': `createNew-${factory.type}`,
     };

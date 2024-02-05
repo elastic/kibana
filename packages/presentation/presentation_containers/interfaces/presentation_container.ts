@@ -11,7 +11,7 @@ import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
   panelType: string;
-  initialState: object;
+  initialState?: object;
 }
 
 export type PresentationContainer = Partial<PublishesViewMode> &
