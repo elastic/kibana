@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { CommonObservabilityLogExplorerContext } from './types';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export const DEFAULT_CONTEXT: CommonObservabilityLogExplorerContext = {
-  initialLogExplorerState: {},
+export default ({ loadTestFile }: FtrProviderContext) => {
+  describe('Index Management: data enrichers', function () {
+    loadTestFile(require.resolve('./ilm'));
+  });
 };

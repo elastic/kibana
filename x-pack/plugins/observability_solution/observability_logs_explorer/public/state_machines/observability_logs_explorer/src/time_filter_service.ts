@@ -7,14 +7,14 @@
 
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { InvokeCreator } from 'xstate';
-import { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
+import { ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent } from './types';
 
 export const initializeFromTimeFilterService =
   ({
     timeFilterService,
   }: {
     timeFilterService: TimefilterContract;
-  }): InvokeCreator<ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent> =>
+  }): InvokeCreator<ObservabilityLogsExplorerContext, ObservabilityLogsExplorerEvent> =>
   (_context, _event) =>
   (send) => {
     const time = timeFilterService.getTime();

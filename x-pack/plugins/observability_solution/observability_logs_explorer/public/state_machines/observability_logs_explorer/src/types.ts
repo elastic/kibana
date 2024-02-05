@@ -12,21 +12,21 @@ import {
   LogsExplorerPublicStateUpdate,
 } from '@kbn/logs-explorer-plugin/public';
 
-export type ObservabilityLogExplorerContext = ObservabilityLogExplorerTypeState['context'];
+export type ObservabilityLogsExplorerContext = ObservabilityLogsExplorerTypeState['context'];
 
-export interface CommonObservabilityLogExplorerContext {
-  initialLogExplorerState: LogsExplorerPublicStateUpdate;
+export interface CommonObservabilityLogsExplorerContext {
+  initialLogsExplorerState: LogsExplorerPublicStateUpdate;
 }
 
-export interface WithLogExplorerState {
-  logExplorerState: LogsExplorerPublicState;
+export interface WithLogsExplorerState {
+  logsExplorerState: LogsExplorerPublicState;
 }
 
 export interface WithController {
   controller: LogsExplorerController;
 }
 
-export type ObservabilityLogExplorerEvent =
+export type ObservabilityLogsExplorerEvent =
   | {
       type: 'INITIALIZED_FROM_URL';
       stateFromUrl?: LogsExplorerPublicStateUpdate;
@@ -41,24 +41,24 @@ export type ObservabilityLogExplorerEvent =
       controller: LogsExplorerController;
     }
   | {
-      type: 'LOG_EXPLORER_STATE_CHANGED';
+      type: 'LOGS_EXPLORER_STATE_CHANGED';
       state: LogsExplorerPublicState;
     };
 
-export type ObservabilityLogExplorerTypeState =
+export type ObservabilityLogsExplorerTypeState =
   | {
       value:
         | 'uninitialized'
         | 'initializingFromUrl'
         | 'initializingFromTimeFilterService'
         | 'creatingController';
-      context: CommonObservabilityLogExplorerContext;
+      context: CommonObservabilityLogsExplorerContext;
     }
   | {
-      value: 'initialized' | { initialized: 'unknownLogExplorerState' };
-      context: CommonObservabilityLogExplorerContext & WithController;
+      value: 'initialized' | { initialized: 'unknownLogsExplorerState' };
+      context: CommonObservabilityLogsExplorerContext & WithController;
     }
   | {
-      value: { initialized: 'validLogExplorerState' };
-      context: CommonObservabilityLogExplorerContext & WithLogExplorerState & WithController;
+      value: { initialized: 'validLogsExplorerState' };
+      context: CommonObservabilityLogsExplorerContext & WithLogsExplorerState & WithController;
     };

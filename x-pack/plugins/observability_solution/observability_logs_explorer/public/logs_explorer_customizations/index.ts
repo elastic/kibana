@@ -8,10 +8,10 @@
 import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import { renderFlyoutContent } from './flyout_content';
 
-export const createLogExplorerControllerWithCustomizations =
-  (createLogExplorerController: CreateLogsExplorerController): CreateLogsExplorerController =>
+export const createLogsExplorerControllerWithCustomizations =
+  (createLogsExplorerController: CreateLogsExplorerController): CreateLogsExplorerController =>
   (args) =>
-    createLogExplorerController({
+    createLogsExplorerController({
       ...args,
       customizations: {
         ...args.customizations,
