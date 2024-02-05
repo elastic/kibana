@@ -33,7 +33,6 @@ import {
   RawRuleAlertsFilter,
   RuleSystemAction,
   RuleDefaultAction,
-  RuleActionTypes,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';

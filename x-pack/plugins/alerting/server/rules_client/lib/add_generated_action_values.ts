@@ -9,12 +9,12 @@ import { v4 } from 'uuid';
 import { buildEsQuery, Filter } from '@kbn/es-query';
 import Boom from '@hapi/boom';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
+import { RuleActionTypes } from '../../../common';
 import {
   NormalizedAlertAction,
   NormalizedAlertActionWithGeneratedValues,
   RulesClientContext,
 } from '..';
-import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 export async function addGeneratedActionValues(
   actions: NormalizedAlertAction[] = [],
