@@ -26,6 +26,8 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
   const { state, store: storeState } = useUrlSearchState();
   const { tagsFilter, statusFilter, filters, page, perPage, lastRefresh } = state;
 
+  console.log('state', state);
+
   const { data, isLoading, isError } = useFetchSloGroups({
     perPage,
     page: page + 1,

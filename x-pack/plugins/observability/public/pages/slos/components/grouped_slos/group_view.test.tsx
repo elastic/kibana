@@ -25,10 +25,8 @@ describe('Group View', () => {
   beforeEach(() => {
     useUrlSearchStateMock.mockImplementation(() => ({
       state: {
-        tags: {
-          included: [],
-          excluded: [],
-        },
+        page: 0,
+        perPage: DEFAULT_SLO_GROUPS_PAGE_SIZE,
       },
     }));
 
@@ -50,14 +48,7 @@ describe('Group View', () => {
       isLoading: false,
     });
     const { queryByTestId, getByTestId } = render(
-      <GroupView
-        isCompact={false}
-        groupBy="slo.tags"
-        kqlQuery=""
-        sloView="cardView"
-        sort="status"
-        direction="desc"
-      />
+      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
     );
 
     expect(queryByTestId('sloGroupView')).toBeNull();
@@ -77,14 +68,7 @@ describe('Group View', () => {
     });
 
     const { queryByTestId, getByTestId } = render(
-      <GroupView
-        isCompact={false}
-        groupBy="slo.tags"
-        kqlQuery=""
-        sloView="cardView"
-        sort="status"
-        direction="desc"
-      />
+      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
     );
 
     expect(queryByTestId('sloGroupView')).toBeNull();
@@ -97,14 +81,7 @@ describe('Group View', () => {
     });
 
     const { queryByTestId, getByTestId } = render(
-      <GroupView
-        isCompact={false}
-        groupBy="slo.tags"
-        kqlQuery=""
-        sloView="cardView"
-        sort="status"
-        direction="desc"
-      />
+      <GroupView groupBy="slo.tags" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
     );
     expect(queryByTestId('sloGroupView')).toBeNull();
     expect(getByTestId('sloGroupListLoading')).toBeInTheDocument();
@@ -141,7 +118,6 @@ describe('Group View', () => {
       });
       const { queryAllByTestId, getByTestId } = render(
         <GroupView
-          isCompact={false}
           groupBy="slo.tags"
           kqlQuery=""
           sloView="cardView"
@@ -154,10 +130,6 @@ describe('Group View', () => {
       expect(useFetchSloGroups).toHaveBeenCalledWith({
         groupBy: 'slo.tags',
         kqlQuery: '',
-        tags: {
-          included: [],
-          excluded: [],
-        },
         page: 1,
         perPage: DEFAULT_SLO_GROUPS_PAGE_SIZE,
       });
@@ -171,6 +143,8 @@ describe('Group View', () => {
             included: ['production'],
             excluded: [],
           },
+          page: 0,
+          perPage: DEFAULT_SLO_GROUPS_PAGE_SIZE,
         },
       }));
       useFetchSloGroupsMock.mockReturnValue({
@@ -193,7 +167,6 @@ describe('Group View', () => {
 
       const { queryAllByTestId } = render(
         <GroupView
-          isCompact={false}
           groupBy="slo.tags"
           kqlQuery=""
           sloView="cardView"
@@ -205,10 +178,6 @@ describe('Group View', () => {
       expect(useFetchSloGroups).toHaveBeenCalledWith({
         groupBy: 'slo.tags',
         kqlQuery: '',
-        tags: {
-          included: ['production'],
-          excluded: [],
-        },
         page: 1,
         perPage: DEFAULT_SLO_GROUPS_PAGE_SIZE,
       });
@@ -219,24 +188,13 @@ describe('Group View', () => {
   describe('group by status', () => {
     it('should render slo groups grouped by status', async () => {
       const { getByTestId } = render(
-        <GroupView
-          isCompact={false}
-          groupBy="status"
-          kqlQuery=""
-          sloView="cardView"
-          sort="status"
-          direction="desc"
-        />
+        <GroupView groupBy="status" kqlQuery="" sloView="cardView" sort="status" direction="desc" />
       );
       expect(getByTestId('sloGroupView')).toBeInTheDocument();
       expect(useFetchSloGroups).toHaveBeenCalled();
       expect(useFetchSloGroups).toHaveBeenCalledWith({
         groupBy: 'status',
         kqlQuery: '',
-        tags: {
-          included: [],
-          excluded: [],
-        },
         page: 1,
         perPage: DEFAULT_SLO_GROUPS_PAGE_SIZE,
       });
@@ -247,7 +205,6 @@ describe('Group View', () => {
     it('should render slo groups grouped by indicator type', async () => {
       const { getByTestId } = render(
         <GroupView
-          isCompact={false}
           groupBy="slo.indicator.type"
           kqlQuery=""
           sloView="cardView"
@@ -260,10 +217,6 @@ describe('Group View', () => {
       expect(useFetchSloGroups).toHaveBeenCalledWith({
         groupBy: 'slo.indicator.type',
         kqlQuery: '',
-        tags: {
-          included: [],
-          excluded: [],
-        },
         page: 1,
         perPage: DEFAULT_SLO_GROUPS_PAGE_SIZE,
       });
