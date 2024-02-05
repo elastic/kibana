@@ -57,24 +57,26 @@ export function ToggleSLOView({ sloView, onChangeView, onStateChange, sloList, s
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
-        <EuiText size="s">
-          <FormattedMessage
-            id="xpack.observability.overview.pagination.description"
-            defaultMessage="Showing {currentCount} of {total} {slos}"
-            values={{
-              currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
-              total,
-              slos: (
-                <strong>
-                  <FormattedMessage
-                    id="xpack.observability.overview.slos.label"
-                    defaultMessage="SLOs"
-                  />
-                </strong>
-              ),
-            }}
-          />
-        </EuiText>
+        {!state.groupBy && (
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.observability.overview.pagination.description"
+              defaultMessage="Showing {currentCount} of {total} {slos}"
+              values={{
+                currentCount: <strong>{`${rangeStart}-${rangeEnd}`}</strong>,
+                total,
+                slos: (
+                  <strong>
+                    <FormattedMessage
+                      id="xpack.observability.overview.slos.label"
+                      defaultMessage="SLOs"
+                    />
+                  </strong>
+                ),
+              }}
+            />
+          </EuiText>
+        )}
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <SLOSortBy state={state} onStateChange={onStateChange} />
