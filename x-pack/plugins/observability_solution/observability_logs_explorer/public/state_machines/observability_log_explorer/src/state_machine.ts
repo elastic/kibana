@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { CreateLogExplorerController } from '@kbn/logs-explorer-plugin/public';
+import { CreateLogsExplorerController } from '@kbn/logs-explorer-plugin/public';
 import { actions, createMachine, InterpreterFrom } from 'xstate';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { DEFAULT_CONTEXT } from './defaults';
@@ -142,7 +142,7 @@ export const createPureObservabilityLogExplorerStateMachine = (
   );
 
 export interface ObservabilityLogExplorerStateMachineDependencies {
-  createLogExplorerController: CreateLogExplorerController;
+  createLogExplorerController: CreateLogsExplorerController;
   initialContext?: ObservabilityLogExplorerContext;
   timeFilterService: TimefilterContract;
   toasts: IToasts;
