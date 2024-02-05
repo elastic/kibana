@@ -61,6 +61,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: rightPanel1,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
 
@@ -81,6 +82,7 @@ describe('reducer', () => {
         left: leftPanel2,
         right: rightPanel2,
         preview: [previewPanel2],
+        needsSync: true,
       });
     });
 
@@ -99,6 +101,7 @@ describe('reducer', () => {
         left: undefined,
         right: rightPanel2,
         preview: [],
+        needsSync: true,
       });
     });
   });
@@ -113,6 +116,7 @@ describe('reducer', () => {
         left: undefined,
         right: rightPanel1,
         preview: [],
+        needsSync: true,
       });
     });
 
@@ -129,6 +133,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: rightPanel2,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
   });
@@ -143,6 +148,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: undefined,
         preview: [],
+        needsSync: true,
       });
     });
 
@@ -159,6 +165,7 @@ describe('reducer', () => {
         left: leftPanel2,
         right: rightPanel1,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
   });
@@ -173,6 +180,7 @@ describe('reducer', () => {
         left: undefined,
         right: undefined,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
 
@@ -189,6 +197,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: rightPanel1,
         preview: [previewPanel1, previewPanel2],
+        needsSync: true,
       });
     });
   });
@@ -199,7 +208,7 @@ describe('reducer', () => {
       const action = closeRightPanelAction();
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it(`should return unmodified state when removing right panel when no right panel exist`, () => {
@@ -207,6 +216,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: undefined,
         preview: [previewPanel1],
+        needsSync: true,
       };
       const action = closeRightPanelAction();
       const newState: State = reducer(state, action);
@@ -228,6 +238,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: undefined,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
   });
@@ -238,7 +249,7 @@ describe('reducer', () => {
       const action = closeLeftPanelAction();
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it(`should return unmodified state when removing left panel when no left panel exist`, () => {
@@ -246,6 +257,7 @@ describe('reducer', () => {
         left: undefined,
         right: rightPanel1,
         preview: [],
+        needsSync: true,
       };
       const action = closeLeftPanelAction();
       const newState: State = reducer(state, action);
@@ -266,13 +278,14 @@ describe('reducer', () => {
         left: undefined,
         right: rightPanel1,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
   });
 
   describe('should handle closePreviewPanel action', () => {
     it('should return empty state when removing preview panel on empty state', () => {
-      const state: State = initialState;
+      const state: State = { ...initialState, needsSync: true };
       const action = closePreviewPanelAction();
       const newState: State = reducer(state, action);
 
@@ -288,7 +301,7 @@ describe('reducer', () => {
       const action = closePreviewPanelAction();
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...state, needsSync: true });
     });
 
     it('should remove all preview panels', () => {
@@ -304,6 +317,7 @@ describe('reducer', () => {
         left: rightPanel1,
         right: leftPanel1,
         preview: [],
+        needsSync: true,
       });
     });
   });
@@ -314,7 +328,7 @@ describe('reducer', () => {
       const action = previousPreviewPanelAction();
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(state);
+      expect(newState).toEqual({ ...initialState, needsSync: true });
     });
 
     it(`should return unmodified state when previous preview panel when no preview panel exist`, () => {
@@ -322,6 +336,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: rightPanel1,
         preview: [],
+        needsSync: true,
       };
       const action = previousPreviewPanelAction();
       const newState: State = reducer(state, action);
@@ -342,6 +357,7 @@ describe('reducer', () => {
         left: leftPanel1,
         right: rightPanel1,
         preview: [previewPanel1],
+        needsSync: true,
       });
     });
   });
@@ -352,7 +368,7 @@ describe('reducer', () => {
       const action = closePanelsAction();
       const newState: State = reducer(state, action);
 
-      expect(newState).toEqual(initialState);
+      expect(newState).toEqual({ ...initialState, needsSync: true });
     });
 
     it('should remove all panels', () => {
@@ -368,6 +384,7 @@ describe('reducer', () => {
         left: undefined,
         right: undefined,
         preview: [],
+        needsSync: true,
       });
     });
   });
