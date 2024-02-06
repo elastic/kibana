@@ -601,7 +601,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
               CLOUD_SERVERLESS: true,
               IS_SERVERLESS: true,
-              // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud. 
+              // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
               TEST_CLOUD: 1,
             };
 
