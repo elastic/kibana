@@ -30,10 +30,19 @@ type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue
 const MAX_CRITICALITY_RESPONSE_SIZE = 100_000;
 const DEFAULT_CRITICALITY_RESPONSE_SIZE = 1_000;
 
-const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:${idValue}`;
-
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
+
+  public static createId({ idField, idValue }: AssetCriticalityIdParts) {
+    return `${idField}:${idValue}`;
+  }
+
+  public static createIdFromRecord(record: AssetCriticalityRecord) {
+    return AssetCriticalityDataClient.createId({
+      idField: record.id_field,
+      idValue: record.id_value,
+    });
+  }
   /**
    * It will create idex for asset criticality,
    * or update mappings if index exists
@@ -96,7 +105,7 @@ export class AssetCriticalityDataClient {
   }
 
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {
-    const id = createId(idParts);
+    const id = AssetCriticalityDataClient.createId(idParts);
 
     try {
       const body = await this.options.esClient.get<AssetCriticalityRecord>({
@@ -115,7 +124,7 @@ export class AssetCriticalityDataClient {
   }
 
   public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityRecord> {
-    const id = createId(record);
+    const id = AssetCriticalityDataClient.createId(record);
     const doc = {
       id_field: record.idField,
       id_value: record.idValue,
@@ -137,7 +146,7 @@ export class AssetCriticalityDataClient {
 
   public async delete(idParts: AssetCriticalityIdParts) {
     await this.options.esClient.delete({
-      id: createId(idParts),
+      id: AssetCriticalityDataClient.createId(idParts),
       index: this.getIndex(),
     });
   }

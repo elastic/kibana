@@ -23,6 +23,7 @@ export interface AssetCriticalityService {
   getCriticalitiesByIdentifiers: (
     identifiers: CriticalityIdentifier[]
   ) => Promise<AssetCriticalityRecord[]>;
+  getCriticalitiesFromTimestamp: (from: string) => Promise<AssetCriticalityRecord[]>;
   isEnabled: () => boolean;
 }
 
@@ -86,6 +87,28 @@ const getCriticalitiesByIdentifiers = async ({
   return criticalitySearchResponse.hits.hits.map((hit) => hit._source);
 };
 
+const getCriticalitiesFromTimestamp = async ({
+  assetCriticalityDataClient,
+  from,
+}: {
+  assetCriticalityDataClient: AssetCriticalityDataClient;
+  from: string;
+}): Promise<AssetCriticalityRecord[]> => {
+  const criticalitySearchResponse = await assetCriticalityDataClient.search({
+    query: {
+      range: {
+        '@timestamp': {
+          gte: from,
+        },
+      },
+    },
+  });
+
+  return criticalitySearchResponse.hits.hits
+    .map((hit) => hit._source)
+    .filter((source): source is AssetCriticalityRecord => source !== undefined);
+};
+
 interface AssetCriticalityServiceFactoryOptions {
   assetCriticalityDataClient: AssetCriticalityDataClient;
   experimentalFeatures: ExperimentalFeatures;
@@ -97,5 +120,7 @@ export const assetCriticalityServiceFactory = ({
 }: AssetCriticalityServiceFactoryOptions): AssetCriticalityService => ({
   getCriticalitiesByIdentifiers: (identifiers: CriticalityIdentifier[]) =>
     getCriticalitiesByIdentifiers({ assetCriticalityDataClient, identifiers }),
+  getCriticalitiesFromTimestamp: (from: string) =>
+    getCriticalitiesFromTimestamp({ assetCriticalityDataClient, from }),
   isEnabled: () => experimentalFeatures.entityAnalyticsAssetCriticalityEnabled,
 });
