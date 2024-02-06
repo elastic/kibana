@@ -69,6 +69,9 @@ export const createNewTermsAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: NewTermsRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',
