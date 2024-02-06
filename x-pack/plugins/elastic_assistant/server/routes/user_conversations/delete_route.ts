@@ -5,24 +5,21 @@
  * 2.0.
  */
 
-import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
-  FindConversationsRequestQuery,
-  FindConversationsResponse,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+  DeleteConversationRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import { buildRouteValidationWithZod } from '../route_validation';
 
-export const findConversationsRoute = (router: ElasticAssistantPluginRouter, logger: Logger) => {
+export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
-    .get({
+    .delete({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
+      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -32,27 +29,35 @@ export const findConversationsRoute = (router: ElasticAssistantPluginRouter, log
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            query: buildRouteValidationWithZod(FindConversationsRequestQuery),
+            params: buildRouteValidationWithZod(DeleteConversationRequestParams),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<FindConversationsResponse>> => {
+      async (context, request, response) => {
         const assistantResponse = buildResponse(response);
         try {
-          const { query } = request;
+          const { id } = request.params;
+
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
 
-          const result = await dataClient?.findConversations({
-            perPage: query.per_page,
-            page: query.page,
-            sortField: query.sort_field,
-            sortOrder: query.sort_order,
-            filter: query.filter,
-            fields: query.fields,
-          });
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
+          const existingConversation = await dataClient?.getConversation({ id, authenticatedUser });
+          if (existingConversation == null) {
+            return assistantResponse.error({
+              body: `conversation id: "${id}" not found`,
+              statusCode: 404,
+            });
+          }
+          await dataClient?.deleteConversation(id);
 
-          return response.ok({ body: result });
+          return response.ok({ body: {} });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

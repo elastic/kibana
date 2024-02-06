@@ -10,7 +10,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   FindConversationsRequestQuery,
@@ -24,7 +24,7 @@ export const findUserConversationsRoute = (router: ElasticAssistantPluginRouter)
   router.versioned
     .get({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
       options: {
         tags: ['access:elasticAssistant'],
       },

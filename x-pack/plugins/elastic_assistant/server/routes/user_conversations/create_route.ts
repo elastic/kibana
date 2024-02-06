@@ -9,22 +9,20 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-} from '@kbn/elastic-assistant-common';
-import {
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+  ConversationCreateProps,
   ConversationResponse,
-  ConversationUpdateProps,
-} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
-import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
+} from '@kbn/elastic-assistant-common';
 import { ElasticAssistantPluginRouter } from '../../types';
-import { buildRouteValidationWithZod } from '../route_validation';
 import { buildResponse } from '../utils';
+import { buildRouteValidationWithZod } from '../route_validation';
 
-export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
+export const createConversationRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
-    .put({
+    .post({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
+      path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL,
+
       options: {
         tags: ['access:elasticAssistant'],
       },
@@ -34,41 +32,52 @@ export const updateConversationRoute = (router: ElasticAssistantPluginRouter) =>
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(ConversationUpdateProps),
-            params: buildRouteValidationWithZod(UpdateConversationRequestParams),
+            body: buildRouteValidationWithZod(ConversationCreateProps),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
-        const { id } = request.params;
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-
-          const existingConversation = await dataClient?.getConversation(id);
-          if (existingConversation == null) {
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
             return assistantResponse.error({
-              body: `conversation id: "${id}" not found`,
-              statusCode: 404,
+              body: `Authenticated user not found`,
+              statusCode: 401,
             });
           }
-          const conversation = await dataClient?.updateConversation(
-            existingConversation,
-            request.body
-          );
-          if (conversation == null) {
+
+          const result = await dataClient?.findConversations({
+            perPage: 100,
+            page: 1,
+            filter: `user.id:${authenticatedUser?.profile_uid} AND title:${request.body.title}`,
+            fields: ['title'],
+          });
+          if (result?.data != null && result.data.length > 0) {
             return assistantResponse.error({
-              body: `conversation id: "${id}" was not updated`,
+              statusCode: 409,
+              body: `conversation title: "${request.body.title}" already exists`,
+            });
+          }
+          const createdConversation = await dataClient?.createConversation({
+            conversation: request.body,
+            authenticatedUser,
+          });
+
+          if (createdConversation == null) {
+            return assistantResponse.error({
+              body: `conversation with title: "${request.body.title}" was not created`,
               statusCode: 400,
             });
           }
           return response.ok({
-            body: conversation,
+            body: ConversationResponse.parse(createdConversation),
           });
         } catch (err) {
-          const error = transformError(err);
+          const error = transformError(err as Error);
           return assistantResponse.error({
             body: error.message,
             statusCode: error.statusCode,

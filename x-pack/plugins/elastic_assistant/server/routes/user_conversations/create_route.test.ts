@@ -21,10 +21,18 @@ import {
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Create conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  const mockUser1 = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -40,6 +48,7 @@ describe('Create conversation route', () => {
     context.core.elasticsearch.client.asCurrentUser.search.mockResolvedValue(
       elasticsearchClientMock.createSuccessTransportRequestPromise(getBasicEmptySearchResponse())
     );
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     createConversationRoute(server.router);
   });
 
@@ -50,6 +59,15 @@ describe('Create conversation route', () => {
         requestContextMock.convertContext(context)
       );
       expect(response.status).toEqual(200);
+    });
+
+    test('returns 401 Unauthorized when request context getCurrentUser is not defined', async () => {
+      context.elasticAssistant.getCurrentUser.mockReturnValueOnce(null);
+      const response = await server.inject(
+        getCreateConversationRequest(),
+        requestContextMock.convertContext(context)
+      );
+      expect(response.status).toEqual(401);
     });
   });
 

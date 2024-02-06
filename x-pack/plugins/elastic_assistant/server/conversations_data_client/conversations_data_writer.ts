@@ -6,13 +6,18 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import type { BulkOperationContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkOperationContainer,
+  BulkOperationType,
+  BulkResponseItem,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import {
   ConversationCreateProps,
   ConversationUpdateProps,
   UUID,
 } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { transformToCreateScheme } from './create_conversation';
 import { transformToUpdateScheme } from './update_conversation';
 import { SearchEsConversationSchema } from './types';
@@ -38,6 +43,7 @@ interface BulkParams {
   conversationsToUpdate?: ConversationUpdateProps[];
   conversationsToDelete?: string[];
   isPatch?: boolean;
+  authenticatedUser?: AuthenticatedUser;
 }
 
 export interface ConversationDataWriter {
@@ -71,37 +77,7 @@ export class ConversationDataWriter implements ConversationDataWriter {
       });
 
       return {
-        errors: errors
-          ? items
-              .map((item) =>
-                item.create?.error
-                  ? {
-                      message: item.create.error?.reason,
-                      status: item.create.status,
-                      conversation: {
-                        id: item.create._id,
-                      },
-                    }
-                  : item.update?.error
-                  ? {
-                      message: item.update.error?.reason,
-                      status: item.update.status,
-                      conversation: {
-                        id: item.update._id,
-                      },
-                    }
-                  : item.delete?.error
-                  ? {
-                      message: item.delete?.error?.reason,
-                      status: item.delete?.status,
-                      conversation: {
-                        id: item.delete?._id,
-                      },
-                    }
-                  : undefined
-              )
-              .filter((e) => e !== undefined)
-          : [],
+        errors: errors ? this.formatErrorsResponse(items) : [],
         docs_created: items
           .filter((item) => item.create?.status === 201 || item.create?.status === 200)
           .map((item) => item.create?._id ?? ''),
@@ -132,43 +108,74 @@ export class ConversationDataWriter implements ConversationDataWriter {
     }
   };
 
-  private buildBulkOperations = async (params: BulkParams): Promise<BulkOperationContainer[]> => {
-    const changedAt = new Date().toISOString();
-    const conversationBody =
-      params.conversationsToCreate?.flatMap((conversation) => [
-        { create: { _index: this.options.index, _id: uuidV4() } },
-        transformToCreateScheme(changedAt, this.options.spaceId, this.options.user, conversation),
-      ]) ?? [];
-
+  private getUpdateConversationsQuery = async (
+    conversationsToUpdate: ConversationUpdateProps[],
+    authenticatedUser?: AuthenticatedUser,
+    isPatch?: boolean
+  ) => {
     const updatedAt = new Date().toISOString();
-
-    const responseToUpdate = params.conversationsToUpdate
-      ? await this.options.esClient.search<SearchEsConversationSchema>({
-          body: {
-            query: {
-              ids: {
-                values: params.conversationsToUpdate?.map((c) => c.id),
-              },
+    const filterByUser = authenticatedUser
+      ? [
+          {
+            bool: {
+              should: [
+                {
+                  term: authenticatedUser.profile_uid
+                    ? {
+                        'user.id': { value: authenticatedUser.profile_uid },
+                      }
+                    : {
+                        'user.name': { value: authenticatedUser.username },
+                      },
+                },
+              ],
             },
           },
-          _source: false,
-          ignore_unavailable: true,
-          index: this.options.index,
-          seq_no_primary_term: true,
-          size: 1000,
-        })
-      : undefined;
-    const conversationUpdatedBody =
-      params.conversationsToUpdate?.flatMap((conversation) => [
-        {
-          update: {
-            _id: conversation.id,
-            _index: responseToUpdate?.hits.hits.find((c) => c._id === conversation.id)?._index,
+        ]
+      : [];
+
+    const responseToUpdate = await this.options.esClient.search<SearchEsConversationSchema>({
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      ids: {
+                        values: conversationsToUpdate?.map((c) => c.id),
+                      },
+                    },
+                  ],
+                },
+              },
+              ...filterByUser,
+            ],
           },
         },
-        {
-          script: {
-            source: `
+      },
+      _source: false,
+      ignore_unavailable: true,
+      index: this.options.index,
+      seq_no_primary_term: true,
+      size: 1000,
+    });
+
+    const availableConversationsToUpdate = conversationsToUpdate.filter((c) =>
+      responseToUpdate?.hits.hits.find((ac) => ac._id === c.id)
+    );
+
+    return availableConversationsToUpdate.flatMap((conversation) => [
+      {
+        update: {
+          _id: conversation.id,
+          _index: responseToUpdate?.hits.hits.find((c) => c._id === conversation.id)?._index,
+        },
+      },
+      {
+        script: {
+          source: `
           if (params.assignEmpty == true || params.containsKey('api_config')) {
             if (params.assignEmpty == true || params.api_config.containsKey('connector_id')) {
               ctx._source.api_config.connector_id = params.api_config.connector_id;
@@ -212,48 +219,151 @@ export class ConversationDataWriter implements ConversationDataWriter {
           }
           ctx._source.updated_at = params.updated_at;
         `,
-            lang: 'painless',
-            params: {
-              ...transformToUpdateScheme(updatedAt, conversation), // when assigning undefined in painless, it will remove property and wil set it to null
-              // for patch we don't want to remove unspecified value in payload
-              assignEmpty: !(params.isPatch ?? true),
-            },
+          lang: 'painless',
+          params: {
+            ...transformToUpdateScheme(updatedAt, conversation), // when assigning undefined in painless, it will remove property and wil set it to null
+            // for patch we don't want to remove unspecified value in payload
+            assignEmpty: !(isPatch ?? true),
           },
-          upsert: { counter: 1 },
         },
-      ]) ?? [];
+        upsert: { counter: 1 },
+      },
+    ]);
+  };
 
-    const response = params.conversationsToDelete
-      ? await this.options.esClient.search<SearchEsConversationSchema>({
-          body: {
-            query: {
-              ids: {
-                values: params.conversationsToDelete,
-              },
+  private getDeleteConversationsQuery = async (
+    conversationsToDelete: string[],
+    authenticatedUser?: AuthenticatedUser
+  ) => {
+    const filterByUser = authenticatedUser
+      ? [
+          {
+            bool: {
+              should: [
+                {
+                  term: authenticatedUser.profile_uid
+                    ? {
+                        'user.id': { value: authenticatedUser.profile_uid },
+                      }
+                    : {
+                        'user.name': { value: authenticatedUser.username },
+                      },
+                },
+              ],
             },
           },
-          _source: false,
-          ignore_unavailable: true,
-          index: this.options.index,
-          seq_no_primary_term: true,
-          size: 1000,
-        })
-      : undefined;
+        ]
+      : [];
 
-    const conversationDeletedBody =
-      params.conversationsToDelete?.flatMap((conversationId) => [
+    const responseToDelete = await this.options.esClient.search<SearchEsConversationSchema>({
+      body: {
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  should: [
+                    {
+                      ids: {
+                        values: conversationsToDelete,
+                      },
+                    },
+                  ],
+                },
+              },
+              ...filterByUser,
+            ],
+          },
+        },
+      },
+      _source: false,
+      ignore_unavailable: true,
+      index: this.options.index,
+      seq_no_primary_term: true,
+      size: 1000,
+    });
+
+    return (
+      responseToDelete?.hits.hits.map((c) => [
         {
           delete: {
-            _id: conversationId,
-            _index: response?.hits.hits.find((c) => c._id === conversationId)?._index,
+            _id: c._id,
+            _index: c._index,
           },
         },
-      ]) ?? [];
+      ]) ?? []
+    );
+  };
+
+  private buildBulkOperations = async (params: BulkParams): Promise<BulkOperationContainer[]> => {
+    const changedAt = new Date().toISOString();
+    const conversationCreateBody =
+      params.authenticatedUser && params.conversationsToCreate
+        ? params.conversationsToCreate.flatMap((conversation) => [
+            { create: { _index: this.options.index, _id: uuidV4() } },
+            transformToCreateScheme(
+              changedAt,
+              this.options.spaceId,
+              params.authenticatedUser as AuthenticatedUser,
+              conversation
+            ),
+          ])
+        : [];
+
+    const conversationDeletedBody =
+      params.conversationsToDelete && params.conversationsToDelete.length > 0
+        ? await this.getDeleteConversationsQuery(
+            params.conversationsToDelete,
+            params.authenticatedUser
+          )
+        : [];
+
+    const conversationUpdatedBody =
+      params.conversationsToUpdate && params.conversationsToUpdate.length > 0
+        ? await this.getUpdateConversationsQuery(
+            params.conversationsToUpdate,
+            params.authenticatedUser
+          )
+        : [];
 
     return [
-      ...conversationBody,
+      ...conversationCreateBody,
       ...conversationUpdatedBody,
       ...conversationDeletedBody,
     ] as BulkOperationContainer[];
+  };
+
+  private formatErrorsResponse = (
+    items: Array<Partial<Record<BulkOperationType, BulkResponseItem>>>
+  ) => {
+    return items
+      .map((item) =>
+        item.create?.error
+          ? {
+              message: item.create.error?.reason,
+              status: item.create.status,
+              conversation: {
+                id: item.create._id,
+              },
+            }
+          : item.update?.error
+          ? {
+              message: item.update.error?.reason,
+              status: item.update.status,
+              conversation: {
+                id: item.update._id,
+              },
+            }
+          : item.delete?.error
+          ? {
+              message: item.delete?.error?.reason,
+              status: item.delete?.status,
+              conversation: {
+                id: item.delete?._id,
+              },
+            }
+          : undefined
+      )
+      .filter((e) => e !== undefined);
   };
 }

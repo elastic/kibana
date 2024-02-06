@@ -116,7 +116,7 @@ describe('AIAssistantConversationsDataClient', () => {
     const assistantConversationsDataClient = new AIAssistantConversationsDataClient(
       assistantConversationsDataClientParams
     );
-    const result = await assistantConversationsDataClient.getConversation('1');
+    const result = await assistantConversationsDataClient.getConversation({ id: '1' });
 
     expect(clusterClient.search).toHaveBeenCalledTimes(1);
 
@@ -172,10 +172,10 @@ describe('AIAssistantConversationsDataClient', () => {
       assistantConversationsDataClientParams
     );
 
-    await assistantConversationsDataClient.updateConversation(
-      getConversationMock(getQueryConversationParams()),
-      getUpdateConversationSchemaMock('123345')
-    );
+    await assistantConversationsDataClient.updateConversation({
+      existingConversation: getConversationMock(getQueryConversationParams()),
+      conversationUpdateProps: getUpdateConversationSchemaMock('12345'),
+    });
 
     const params = clusterClient.updateByQuery.mock.calls[0][0] as UpdateByQueryRequest;
 

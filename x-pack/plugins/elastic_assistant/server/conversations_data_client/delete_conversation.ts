@@ -6,42 +6,35 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { UUID } from '@kbn/elastic-assistant-common';
-import { getConversation } from './get_conversation';
 
 export interface DeleteConversationParams {
   esClient: ElasticsearchClient;
   conversationIndex: string;
   id: string;
   logger: Logger;
-  user: { id?: UUID; name?: string };
 }
 export const deleteConversation = async ({
   esClient,
   conversationIndex,
   id,
   logger,
-  user,
-}: DeleteConversationParams): Promise<string | null> => {
-  const conversation = await getConversation({ esClient, conversationIndex, id, logger, user });
-  if (conversation !== null) {
-    const response = await esClient.deleteByQuery({
-      body: {
-        query: {
-          ids: {
-            values: [id],
-          },
+}: DeleteConversationParams): Promise<number | undefined> => {
+  const response = await esClient.deleteByQuery({
+    body: {
+      query: {
+        ids: {
+          values: [id],
         },
       },
-      conflicts: 'proceed',
-      index: conversationIndex,
-      refresh: true,
-    });
+    },
+    conflicts: 'proceed',
+    index: conversationIndex,
+    refresh: true,
+  });
 
-    if (!response.deleted && response.deleted === 0) {
-      throw Error('No conversation has been deleted');
-    }
-    return conversation.id ?? null;
+  if (!response.deleted && response.deleted === 0) {
+    logger.error(`Error deleting conversation by id: ${id}`);
+    throw Error('No conversation has been deleted');
   }
-  return null;
+  return response.deleted;
 };

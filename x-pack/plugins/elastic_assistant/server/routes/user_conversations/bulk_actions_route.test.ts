@@ -11,18 +11,29 @@ import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getConversationsBulkActionRequest, requestMock } from '../../__mocks__/request';
 import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION } from '@kbn/elastic-assistant-common';
-import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
+import {
+  getFindConversationsResultWithSingleHit,
+  getEmptyFindResult,
+} from '../../__mocks__/response';
 import {
   getCreateConversationSchemaMock,
   getPerformBulkActionSchemaMock,
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Perform bulk action route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   const mockConversation = getFindConversationsResultWithSingleHit().data[0];
+  const mockUser1 = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
 
   beforeEach(async () => {
     server = serverMock.create();
@@ -41,11 +52,15 @@ describe('Perform bulk action route', () => {
       docs_deleted: [],
       errors: [],
     });
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     bulkActionConversationsRoute(server.router, logger);
   });
 
   describe('status codes', () => {
     it('returns 200 when performing bulk action with all dependencies present', async () => {
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValueOnce(
+        getEmptyFindResult()
+      );
       const response = await server.inject(
         getConversationsBulkActionRequest(
           [getCreateConversationSchemaMock()],
@@ -96,7 +111,9 @@ describe('Perform bulk action route', () => {
         ],
         total: 5,
       });
-
+      clients.elasticAssistant.getAIAssistantConversationsDataClient.findConversations.mockResolvedValueOnce(
+        getEmptyFindResult()
+      );
       const response = await server.inject(
         getConversationsBulkActionRequest(
           [getCreateConversationSchemaMock()],

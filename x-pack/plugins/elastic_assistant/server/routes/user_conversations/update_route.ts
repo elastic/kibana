@@ -11,15 +11,18 @@ import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
-import { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
-import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
-import { buildResponse } from '../utils';
+import {
+  ConversationResponse,
+  ConversationUpdateProps,
+} from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { UpdateConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
+import { buildResponse } from '../utils';
 
-export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
+export const updateConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
-    .get({
+    .put({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
@@ -31,28 +34,47 @@ export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(ReadConversationRequestParams),
+            body: buildRouteValidationWithZod(ConversationUpdateProps),
+            params: buildRouteValidationWithZod(UpdateConversationRequestParams),
           },
         },
       },
       async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
-
         const { id } = request.params;
-
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
 
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const conversation = await dataClient?.getConversation(id);
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
 
-          if (conversation == null) {
+          const existingConversation = await dataClient?.getConversation({ id, authenticatedUser });
+          if (existingConversation == null) {
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
               statusCode: 404,
             });
           }
-          return response.ok({ body: conversation });
+          const conversation = await dataClient?.updateConversation({
+            existingConversation,
+            conversationUpdateProps: request.body,
+            authenticatedUser,
+          });
+          if (conversation == null) {
+            return assistantResponse.error({
+              body: `conversation id: "${id}" was not updated`,
+              statusCode: 400,
+            });
+          }
+          return response.ok({
+            body: conversation,
+          });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

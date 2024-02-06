@@ -12,6 +12,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { SearchEsConversationSchema } from './types';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 export const getConversationResponseMock = (): ConversationResponse => ({
   createdAt: '2020-04-20T15:25:31.830Z',
@@ -36,6 +37,14 @@ export const getConversationResponseMock = (): ConversationResponse => ({
   },
   replacements: undefined,
 });
+
+const mockUser1 = {
+  username: 'my_username',
+  authentication_realm: {
+    type: 'my_realm_type',
+    name: 'my_realm_name',
+  },
+} as AuthenticatedUser;
 
 export const getSearchConversationMock =
   (): estypes.SearchResponse<SearchEsConversationSchema> => ({
@@ -104,7 +113,7 @@ describe('getConversation', () => {
       conversationIndex: '.kibana-elastic-ai-assistant-conversations',
       id: '1',
       logger: loggerMock,
-      user: { name: 'test' },
+      user: mockUser1,
     });
     const expected = getConversationResponseMock();
     expect(conversation).toEqual(expected);
@@ -120,7 +129,7 @@ describe('getConversation', () => {
       conversationIndex: '.kibana-elastic-ai-assistant-conversations',
       id: '1',
       logger: loggerMock,
-      user: { name: 'test' },
+      user: mockUser1,
     });
     expect(conversation).toEqual(null);
   });

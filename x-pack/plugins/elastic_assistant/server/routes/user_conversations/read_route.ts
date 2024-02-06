@@ -5,19 +5,21 @@
  * 2.0.
  */
 
+import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
-  DeleteConversationRequestParams,
 } from '@kbn/elastic-assistant-common';
-import { ElasticAssistantPluginRouter } from '../../types';
+import { ConversationResponse } from '@kbn/elastic-assistant-common/impl/schemas/conversations/common_attributes.gen';
+import { ReadConversationRequestParams } from '@kbn/elastic-assistant-common/impl/schemas/conversations/crud_conversation_route.gen';
 import { buildResponse } from '../utils';
+import { ElasticAssistantPluginRouter } from '../../types';
 import { buildRouteValidationWithZod } from '../route_validation';
 
-export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) => {
+export const readConversationRoute = (router: ElasticAssistantPluginRouter) => {
   router.versioned
-    .delete({
+    .get({
       access: 'public',
       path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BY_ID,
       options: {
@@ -29,28 +31,35 @@ export const deleteConversationRoute = (router: ElasticAssistantPluginRouter) =>
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(DeleteConversationRequestParams),
+            params: buildRouteValidationWithZod(ReadConversationRequestParams),
           },
         },
       },
-      async (context, request, response) => {
+      async (context, request, response): Promise<IKibanaResponse<ConversationResponse>> => {
         const assistantResponse = buildResponse(response);
+
+        const { id } = request.params;
+
         try {
-          const { id } = request.params;
-
           const ctx = await context.resolve(['core', 'elasticAssistant']);
-          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
 
-          const existingConversation = await dataClient?.getConversation(id);
-          if (existingConversation == null) {
+          const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const conversation = await dataClient?.getConversation({ id, authenticatedUser });
+
+          if (conversation == null) {
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
               statusCode: 404,
             });
           }
-          await dataClient?.deleteConversation(id);
-
-          return response.ok({ body: {} });
+          return response.ok({ body: conversation });
         } catch (err) {
           const error = transformError(err);
           return assistantResponse.error({

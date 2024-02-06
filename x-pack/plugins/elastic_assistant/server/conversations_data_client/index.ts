@@ -108,14 +108,20 @@ export class AIAssistantConversationsDataClient {
     };
   };
 
-  public getConversation = async (id: string): Promise<ConversationResponse | null> => {
+  public getConversation = async ({
+    id,
+    authenticatedUser,
+  }: {
+    id: string;
+    authenticatedUser?: AuthenticatedUser | null;
+  }): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return getConversation({
       esClient,
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
       id,
-      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
+      user: authenticatedUser,
     });
   };
 
@@ -126,17 +132,18 @@ export class AIAssistantConversationsDataClient {
    * @param options.messages Set this to true if this is a conversation that is "immutable"/"pre-packaged".
    * @returns The conversation updated
    */
-  public appendConversationMessages = async (
-    existingConversation: ConversationResponse,
-    messages: Message[]
-  ): Promise<ConversationResponse | null> => {
-    const { currentUser } = this;
+  public appendConversationMessages = async ({
+    existingConversation,
+    messages,
+  }: {
+    existingConversation: ConversationResponse;
+    messages: Message[];
+  }): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return appendConversationMessages({
       esClient,
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
-      user: { id: currentUser?.profile_uid, name: currentUser?.username },
       existingConversation,
       messages,
     });
@@ -181,17 +188,20 @@ export class AIAssistantConversationsDataClient {
    * @param options.apiConfig Determines how uploaded conversation item values are parsed. By default, conversation items are parsed using named regex groups. See online docs for more information.
    * @returns The conversation created
    */
-  public createConversation = async (
-    conversation: ConversationCreateProps
-  ): Promise<ConversationResponse | null> => {
-    const { currentUser } = this;
+  public createConversation = async ({
+    conversation,
+    authenticatedUser,
+  }: {
+    conversation: ConversationCreateProps;
+    authenticatedUser: AuthenticatedUser;
+  }): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return createConversation({
       esClient,
       logger: this.options.logger,
       conversationIndex: this.indexTemplateAndPattern.alias,
       spaceId: this.spaceId,
-      user: { id: currentUser?.profile_uid, name: currentUser?.username },
+      user: authenticatedUser,
       conversation,
     });
   };
@@ -208,11 +218,17 @@ export class AIAssistantConversationsDataClient {
    * @param options.excludeFromLastConversationStorage The new value for excludeFromLastConversationStorage, or "undefined" if this should not be updated.
    * @param options.replacements The new value for replacements, or "undefined" if this should not be updated.
    */
-  public updateConversation = async (
-    existingConversation: ConversationResponse,
-    conversationUpdateProps: ConversationUpdateProps,
-    isPatch?: boolean
-  ): Promise<ConversationResponse | null> => {
+  public updateConversation = async ({
+    existingConversation,
+    conversationUpdateProps,
+    authenticatedUser,
+    isPatch,
+  }: {
+    existingConversation: ConversationResponse;
+    conversationUpdateProps: ConversationUpdateProps;
+    authenticatedUser?: AuthenticatedUser;
+    isPatch?: boolean;
+  }): Promise<ConversationResponse | null> => {
     const esClient = await this.options.elasticsearchClientPromise;
     return updateConversation({
       esClient,
@@ -221,7 +237,7 @@ export class AIAssistantConversationsDataClient {
       existingConversation,
       conversationUpdateProps,
       isPatch,
-      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
+      user: authenticatedUser,
     });
   };
 
@@ -233,12 +249,11 @@ export class AIAssistantConversationsDataClient {
    */
   public deleteConversation = async (id: string) => {
     const esClient = await this.options.elasticsearchClientPromise;
-    await deleteConversation({
+    return deleteConversation({
       esClient,
       conversationIndex: this.indexTemplateAndPattern.alias,
       id,
       logger: this.options.logger,
-      user: { id: this.currentUser?.profile_uid, name: this.currentUser?.username },
     });
   };
 }

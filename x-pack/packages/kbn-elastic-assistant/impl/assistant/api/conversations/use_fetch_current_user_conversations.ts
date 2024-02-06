@@ -8,7 +8,7 @@
 import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import {
-  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+  ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { Conversation } from '../../../assistant_context/types';
@@ -47,7 +47,7 @@ export const useFetchCurrentUserConversations = ({
   };
 
   const cachingKeys = [
-    ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+    ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
     query.page,
     query.perPage,
     ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
@@ -55,7 +55,7 @@ export const useFetchCurrentUserConversations = ({
 
   return useQuery([cachingKeys, query], async () => {
     const res = await http.fetch<FetchConversationsResponse>(
-      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
       {
         method: 'GET',
         version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,

@@ -11,10 +11,10 @@ import {
   Replacement,
   Reader,
   ConversationUpdateProps,
-  UUID,
   Provider,
   MessageRole,
 } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getConversation } from './get_conversation';
 
 export interface UpdateConversationSchema {
@@ -51,7 +51,7 @@ export interface UpdateConversationSchema {
 export interface UpdateConversationParams {
   esClient: ElasticsearchClient;
   logger: Logger;
-  user: { id?: UUID; name?: string };
+  user?: AuthenticatedUser;
   conversationIndex: string;
   existingConversation: ConversationResponse;
   conversationUpdateProps: ConversationUpdateProps;

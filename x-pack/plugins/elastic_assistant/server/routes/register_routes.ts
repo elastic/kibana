@@ -13,14 +13,13 @@ import {
   ElasticAssistantPluginSetupDependencies,
   GetElser,
 } from '../types';
-import { createConversationRoute } from './conversations/create_route';
-import { deleteConversationRoute } from './conversations/delete_route';
-import { findConversationsRoute } from './conversations/find_route';
-import { readConversationRoute } from './conversations/read_route';
-import { updateConversationRoute } from './conversations/update_route';
-import { findUserConversationsRoute } from './conversations/find_user_conversations_route';
-import { bulkActionConversationsRoute } from './conversations/bulk_actions_route';
-import { appendConversationMessageRoute } from './conversations/append_conversation_messages_route';
+import { createConversationRoute } from './user_conversations/create_route';
+import { deleteConversationRoute } from './user_conversations/delete_route';
+import { readConversationRoute } from './user_conversations/read_route';
+import { updateConversationRoute } from './user_conversations/update_route';
+import { findUserConversationsRoute } from './user_conversations/find_user_conversations_route';
+import { bulkActionConversationsRoute } from './user_conversations/bulk_actions_route';
+import { appendConversationMessageRoute } from './user_conversations/append_conversation_messages_route';
 import { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 import { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
 import { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
@@ -37,21 +36,20 @@ export const registerRoutes = (
   logger: Logger,
   plugins: ElasticAssistantPluginSetupDependencies
 ) => {
-  // Conversation CRUD
+  // Capabilities
+  getCapabilitiesRoute(router);
+
+  // User Conversations CRUD
   createConversationRoute(router);
   readConversationRoute(router);
   updateConversationRoute(router);
   deleteConversationRoute(router);
   appendConversationMessageRoute(router);
 
-  // Conversations bulk CRUD
+  // User Conversations bulk CRUD
   bulkActionConversationsRoute(router, logger);
 
-  // Capabilities
-  getCapabilitiesRoute(router);
-
-  // Conversations search
-  findConversationsRoute(router, logger);
+  // User Conversations search
   findUserConversationsRoute(router);
 
   // Knowledge Base
@@ -64,8 +62,10 @@ export const registerRoutes = (
   );
   getKnowledgeBaseStatusRoute(router, getElserId);
   postKnowledgeBaseRoute(router, getElserId);
+
   // Actions Connector Execute (LLM Wrapper)
   postActionsConnectorExecuteRoute(router, getElserId);
+
   // Evaluate
   postEvaluateRoute(router, getElserId);
 

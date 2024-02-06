@@ -147,6 +147,32 @@ export const bulkActionConversationsRoute = (
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
+
+          if (body.create && body.create.length > 0) {
+            const result = await dataClient?.findConversations({
+              perPage: 100,
+              page: 1,
+              filter: `user.id:${authenticatedUser?.profile_uid} AND (${body.create
+                .map((c) => `title:${c.title}`)
+                .join(' OR ')})`,
+              fields: ['title'],
+            });
+            if (result?.data != null && result.data.length > 0) {
+              return assistantResponse.error({
+                statusCode: 409,
+                body: `conversations titles: "${result.data
+                  .map((c) => c.title)
+                  .join(',')}" already exists`,
+              });
+            }
+          }
 
           const writer = await dataClient?.getWriter();
 
@@ -160,18 +186,19 @@ export const bulkActionConversationsRoute = (
             conversationsToCreate: body.create,
             conversationsToDelete: body.delete?.ids,
             conversationsToUpdate: body.update,
+            authenticatedUser,
           });
 
           const created = await dataClient?.findConversations({
             page: 1,
             perPage: 1000,
-            filter: docsCreated.map((updatedId) => `id:${updatedId}`).join(' OR '),
+            filter: docsCreated.map((c) => `id:${c}`).join(' OR '),
             fields: ['id'],
           });
           const updated = await dataClient?.findConversations({
             page: 1,
             perPage: 1000,
-            filter: docsUpdated.map((updatedId) => `id:${updatedId}`).join(' OR '),
+            filter: docsUpdated.map((c) => `id:${c}`).join(' OR '),
             fields: ['id'],
           });
 

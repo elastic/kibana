@@ -7,14 +7,13 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { ConversationResponse, Message, UUID } from '@kbn/elastic-assistant-common';
+import { ConversationResponse, Message } from '@kbn/elastic-assistant-common';
 import { getConversation } from './get_conversation';
 
 export interface AppendConversationMessagesParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   conversationIndex: string;
-  user: { id?: UUID; name?: string };
   existingConversation: ConversationResponse;
   messages: Message[];
 }
@@ -23,7 +22,6 @@ export const appendConversationMessages = async ({
   esClient,
   logger,
   conversationIndex,
-  user,
   existingConversation,
   messages,
 }: AppendConversationMessagesParams): Promise<ConversationResponse | null> => {
@@ -82,7 +80,6 @@ export const appendConversationMessages = async ({
       conversationIndex,
       id: existingConversation.id,
       logger,
-      user,
     });
     return updatedConversation;
   } catch (err) {

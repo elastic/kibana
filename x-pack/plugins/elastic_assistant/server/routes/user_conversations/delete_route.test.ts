@@ -15,10 +15,18 @@ import {
   getConversationMock,
   getQueryConversationParams,
 } from '../../__mocks__/conversations_schema.mock';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Delete conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  const mockUser1 = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -27,6 +35,7 @@ describe('Delete conversation route', () => {
     clients.elasticAssistant.getAIAssistantConversationsDataClient.getConversation.mockResolvedValue(
       getConversationMock(getQueryConversationParams())
     );
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     deleteConversationRoute(server.router);
   });
 

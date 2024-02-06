@@ -6,7 +6,8 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ConversationResponse, UUID } from '@kbn/elastic-assistant-common';
+import { ConversationResponse } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { SearchEsConversationSchema } from './types';
 import { transformESToConversations } from './transforms';
 
@@ -15,19 +16,52 @@ export interface GetConversationParams {
   logger: Logger;
   conversationIndex: string;
   id: string;
-  user: { id?: UUID; name?: string };
+  user?: AuthenticatedUser | null;
 }
 
 export const getConversation = async ({
   esClient,
   conversationIndex,
   id,
+  user,
 }: GetConversationParams): Promise<ConversationResponse | null> => {
+  const filterByUser = user
+    ? [
+        {
+          bool: {
+            should: [
+              {
+                term: user.profile_uid
+                  ? {
+                      'user.id': { value: user.profile_uid },
+                    }
+                  : {
+                      'user.name': { value: user.username },
+                    },
+              },
+            ],
+          },
+        },
+      ]
+    : [];
   const response = await esClient.search<SearchEsConversationSchema>({
     body: {
       query: {
-        term: {
-          _id: id,
+        bool: {
+          must: [
+            {
+              bool: {
+                should: [
+                  {
+                    term: {
+                      _id: id,
+                    },
+                  },
+                ],
+              },
+            },
+            ...filterByUser,
+          ],
         },
       },
     },

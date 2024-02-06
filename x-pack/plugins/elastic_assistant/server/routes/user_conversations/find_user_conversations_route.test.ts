@@ -6,7 +6,7 @@
  */
 
 import { getCurrentUserFindRequest, requestMock } from '../../__mocks__/request';
-import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS } from '@kbn/elastic-assistant-common';
+import { ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND } from '@kbn/elastic-assistant-common';
 import { serverMock } from '../../__mocks__/server';
 import { requestContextMock } from '../../__mocks__/request_context';
 import { getFindConversationsResultWithSingleHit } from '../../__mocks__/response';
@@ -65,7 +65,7 @@ describe('Find user conversations route', () => {
     test('allows optional query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
         query: {
           page: 2,
           per_page: 20,
@@ -81,7 +81,7 @@ describe('Find user conversations route', () => {
     test('disallows invalid sort fields', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
         query: {
           page: 2,
           per_page: 20,
@@ -99,7 +99,7 @@ describe('Find user conversations route', () => {
     test('ignores unknown query params', async () => {
       const request = requestMock.create({
         method: 'get',
-        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND_USER_CONVERSATIONS,
+        path: ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_FIND,
         query: {
           invalid_value: 'test 1',
         },

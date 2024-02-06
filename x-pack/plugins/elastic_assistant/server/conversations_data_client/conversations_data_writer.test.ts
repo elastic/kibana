@@ -12,8 +12,16 @@ import {
   getCreateConversationSchemaMock,
   getUpdateConversationSchemaMock,
 } from '../__mocks__/conversations_schema.mock';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('ConversationDataWriter', () => {
+  const mockUser1 = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
   describe('#bulk', () => {
     let writer: ConversationDataWriter;
     let esClientMock: ElasticsearchClient;
@@ -39,6 +47,7 @@ describe('ConversationDataWriter', () => {
         ],
         conversationsToUpdate: [],
         conversationsToDelete: [],
+        authenticatedUser: mockUser1,
       });
 
       const { docs_created: docsCreated } = (esClientMock.bulk as jest.Mock).mock.lastCall;
@@ -54,6 +63,7 @@ describe('ConversationDataWriter', () => {
         conversationsToCreate: [getCreateConversationSchemaMock()],
         conversationsToUpdate: [getUpdateConversationSchemaMock()],
         conversationsToDelete: ['1'],
+        authenticatedUser: mockUser1,
       });
 
       const {
@@ -145,6 +155,7 @@ describe('ConversationDataWriter', () => {
           conversationsToCreate: [getCreateConversationSchemaMock()],
           conversationsToUpdate: [],
           conversationsToDelete: [],
+          authenticatedUser: mockUser1,
         });
 
         expect(docsCreated.length).toEqual(1);

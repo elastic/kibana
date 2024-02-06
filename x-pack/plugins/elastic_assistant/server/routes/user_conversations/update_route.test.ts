@@ -14,10 +14,18 @@ import {
   getUpdateConversationSchemaMock,
 } from '../../__mocks__/conversations_schema.mock';
 import { updateConversationRoute } from './update_route';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 describe('Update conversation route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();
+  const mockUser1 = {
+    username: 'my_username',
+    authentication_realm: {
+      type: 'my_realm_type',
+      name: 'my_realm_name',
+    },
+  } as AuthenticatedUser;
 
   beforeEach(() => {
     server = serverMock.create();
@@ -30,6 +38,7 @@ describe('Update conversation route', () => {
       getConversationMock(getQueryConversationParams())
     ); // successful update
 
+    context.elasticAssistant.getCurrentUser.mockReturnValue(mockUser1);
     updateConversationRoute(server.router);
   });
 

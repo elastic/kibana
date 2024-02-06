@@ -34,12 +34,20 @@ const ASSISTANT_TITLE = i18n.translate('xpack.securitySolution.assistant.title',
   defaultMessage: 'Elastic AI Assistant',
 });
 
+const LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE = i18n.translate(
+  'xpack.securitySolution.assistant.conversationMigrationStatus.title',
+  {
+    defaultMessage: 'Local storage conversations persisted successfuly.',
+  }
+);
+
 /**
  * This component configures the Elastic AI Assistant context provider for the Security Solution app.
  */
 export const AssistantProvider: React.FC = ({ children }) => {
   const {
     http,
+    notifications,
     storage,
     triggersActionsUi: { actionTypeRegistry },
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
@@ -85,19 +93,27 @@ export const AssistantProvider: React.FC = ({ children }) => {
           conversations as Record<string, Conversation>
         ).filter((c) => c.messages && c.messages.length > 0);
         // post bulk create
-        const bulkResult = await bulkChangeConversations(http, {
-          create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
-            res[c.id] = { ...c, title: c.id };
-            return res;
-          }, {}),
-        });
+        const bulkResult = await bulkChangeConversations(
+          http,
+          {
+            create: conversationsToCreate.reduce((res: Record<string, Conversation>, c) => {
+              res[c.id] = { ...c, title: c.id };
+              return res;
+            }, {}),
+          },
+          notifications.toasts
+        );
         if (bulkResult && bulkResult.success) {
           storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
+          notifications.toasts?.addSuccess({
+            iconType: 'check',
+            title: LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE,
+          });
         }
       }
     };
     migrateConversationsFromLocalStorage();
-  }, [conversations, conversationsData, http, isError, isLoading, storage]);
+  }, [conversations, conversationsData, http, isError, isLoading, notifications.toasts, storage]);
 
   return (
     <ElasticAssistantProvider

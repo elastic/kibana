@@ -45,10 +45,6 @@ export const getDeleteConversationOptionsMock = (): DeleteConversationParams => 
   id: 'test',
   conversationIndex: '.kibana-elastic-ai-assistant-conversations',
   logger: loggingSystemMock.createLogger(),
-  user: {
-    id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-    name: 'elastic',
-  },
 });
 
 describe('deleteConversation', () => {
@@ -64,7 +60,7 @@ describe('deleteConversation', () => {
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(null);
     const options = getDeleteConversationOptionsMock();
     const deletedConversation = await deleteConversation(options);
-    expect(deletedConversation).toEqual(null);
+    expect(deletedConversation).toEqual(undefined);
   });
 
   test('Delete returns the conversation id if a conversation is returned from getConversation', async () => {
@@ -72,8 +68,8 @@ describe('deleteConversation', () => {
     (getConversation as unknown as jest.Mock).mockResolvedValueOnce(conversation);
     const options = getDeleteConversationOptionsMock();
     options.esClient.deleteByQuery = jest.fn().mockResolvedValue({ deleted: 1 });
-    const deletedConversationId = await deleteConversation(options);
-    expect(deletedConversationId).toEqual(conversation.id);
+    const deletedConversations = await deleteConversation(options);
+    expect(deletedConversations).toEqual(1);
   });
 
   test('Delete does not call data client if the conversation returns null', async () => {

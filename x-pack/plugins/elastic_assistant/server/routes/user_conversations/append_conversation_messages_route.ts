@@ -43,7 +43,15 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant']);
           const dataClient = await ctx.elasticAssistant.getAIAssistantConversationsDataClient();
-          const existingConversation = await dataClient?.getConversation(id);
+          const authenticatedUser = ctx.elasticAssistant.getCurrentUser();
+          if (authenticatedUser == null) {
+            return assistantResponse.error({
+              body: `Authenticated user not found`,
+              statusCode: 401,
+            });
+          }
+
+          const existingConversation = await dataClient?.getConversation({ id, authenticatedUser });
           if (existingConversation == null) {
             return assistantResponse.error({
               body: `conversation id: "${id}" not found`,
@@ -51,10 +59,10 @@ export const appendConversationMessageRoute = (router: ElasticAssistantPluginRou
             });
           }
 
-          const conversation = await dataClient?.appendConversationMessages(
+          const conversation = await dataClient?.appendConversationMessages({
             existingConversation,
-            request.body.messages
-          );
+            messages: request.body.messages,
+          });
           if (conversation == null) {
             return assistantResponse.error({
               body: `conversation id: "${id}" was not updated with appended message`,

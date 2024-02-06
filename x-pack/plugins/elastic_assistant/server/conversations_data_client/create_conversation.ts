@@ -15,8 +15,8 @@ import {
   Provider,
   Reader,
   Replacement,
-  UUID,
 } from '@kbn/elastic-assistant-common';
+import { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 import { getConversation } from './get_conversation';
 
 export interface CreateMessageSchema {
@@ -63,7 +63,7 @@ export interface CreateConversationParams {
   logger: Logger;
   conversationIndex: string;
   spaceId: string;
-  user: { id?: UUID; name?: string };
+  user: AuthenticatedUser;
   conversation: ConversationCreateProps;
 }
 
@@ -94,7 +94,7 @@ export const createConversation = async ({
     });
     return createdConversation;
   } catch (err) {
-    logger.warn(`Error creating conversation: ${err} with title: ${conversation.title}`);
+    logger.error(`Error creating conversation: ${err} with title: ${conversation.title}`);
     throw err;
   }
 };
@@ -102,7 +102,7 @@ export const createConversation = async ({
 export const transformToCreateScheme = (
   createdAt: string,
   spaceId: string,
-  user: { id?: UUID; name?: string },
+  user: AuthenticatedUser,
   {
     title,
     apiConfig,
@@ -115,7 +115,10 @@ export const transformToCreateScheme = (
   return {
     '@timestamp': createdAt,
     created_at: createdAt,
-    user,
+    user: {
+      id: user.profile_uid,
+      name: user.username,
+    },
     title,
     api_config: {
       connector_id: apiConfig?.connectorId,

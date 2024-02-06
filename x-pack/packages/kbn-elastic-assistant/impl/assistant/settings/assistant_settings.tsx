@@ -63,7 +63,7 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  onSave: () => Promise<void>;
+  onSave: (success: boolean) => Promise<void>;
   selectedConversation: Conversation;
   onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
@@ -156,8 +156,8 @@ export const AssistantSettings: React.FC<Props> = React.memo(
           cTitle: newSelectedConversation.title,
         });
       }
-      await saveSettings();
-      await onSave();
+      const saveResult = await saveSettings();
+      await onSave(saveResult);
     }, [
       conversationSettings,
       defaultSelectedConversation.title,
