@@ -107,7 +107,8 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         previousVersion,
-        retry
+        retry,
+        log
       );
 
       expect(installPreviousPackageResponse._meta.install_source).toBe('registry');

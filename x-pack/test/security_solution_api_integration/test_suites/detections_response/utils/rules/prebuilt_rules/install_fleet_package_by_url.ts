@@ -9,6 +9,7 @@ import type SuperTest from 'supertest';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import { epmRouteService } from '@kbn/fleet-plugin/common';
 import { RetryService } from '@kbn/ftr-common-functional-services';
+import type { ToolingLog } from '@kbn/tooling-log';
 import expect from 'expect';
 import { retry } from '../../retry';
 import { refreshSavedObjectIndices } from '../../refresh_index';
@@ -67,25 +68,32 @@ export const installPrebuiltRulesPackageByVersion = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   version: string,
-  retryService: RetryService
+  retryService: RetryService,
+  log: ToolingLog
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await retry<InstallPackageResponse>({
     test: async () => {
-      const testResponse = await supertest
-        .post(epmRouteService.getInstallPath('security_detection_engine', version))
-        .set('kbn-xsrf', 'xxxx')
-        .set('elastic-api-version', '2023-10-31')
-        .type('application/json')
-        .send({ force: true })
-        .expect(200);
-      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+      try {
+        const testResponse = await supertest
+          .post(epmRouteService.getInstallPath('security_detection_engine', version))
+          .set('kbn-xsrf', 'xxxx')
+          .set('elastic-api-version', '2023-10-31')
+          .type('application/json')
+          .send({ force: true })
+          .expect(500);
+        expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
+        expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
 
-      return testResponse.body;
+        return testResponse.body;
+      } catch (error) {
+        log.error(`Retrying installPrebuiltRulesPackageByVersion: ${error}`);
+        throw error;
+      }
     },
     retryService,
     retries: MAX_RETRIES,
     timeout: ATTEMPT_TIMEOUT,
+    log,
   });
 
   await refreshSavedObjectIndices(es);
