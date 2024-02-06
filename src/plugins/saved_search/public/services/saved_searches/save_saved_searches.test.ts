@@ -34,6 +34,7 @@ describe('saveSavedSearch', () => {
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
+      managed: false,
     } as SavedSearch;
   });
 

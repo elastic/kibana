@@ -15,4 +15,5 @@ export type RuleCreationValidConsumer =
   | typeof AlertConsumers.LOGS
   | typeof AlertConsumers.INFRASTRUCTURE
   | typeof AlertConsumers.OBSERVABILITY
-  | typeof STACK_ALERTS_FEATURE_ID;
+  | typeof STACK_ALERTS_FEATURE_ID
+  | 'alerts';

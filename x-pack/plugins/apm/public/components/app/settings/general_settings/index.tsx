@@ -6,7 +6,7 @@
  */
 
 import { EuiSpacer } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import {
   apmLabsButton,
@@ -20,36 +20,59 @@ import {
   apmEnableContinuousRollups,
   enableAgentExplorerView,
   apmEnableProfilingIntegration,
+  apmEnableTableSearchBar,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import {
+  BottomBarActions,
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { BottomBarActions } from '../bottom_bar_actions';
 
-const apmSettingsKeys = [
-  enableComparisonByDefault,
-  defaultApmServiceEnvironment,
-  apmServiceGroupMaxNumberOfServices,
-  enableInspectEsQueries,
-  apmLabsButton,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableAgentExplorerView,
-  apmEnableProfilingIntegration,
-];
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row'))
+    .FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
+
+function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
+  const keys = [
+    enableComparisonByDefault,
+    defaultApmServiceEnvironment,
+    apmServiceGroupMaxNumberOfServices,
+    enableInspectEsQueries,
+    apmLabsButton,
+    apmAWSLambdaPriceFactor,
+    apmAWSLambdaRequestCostPerMillion,
+    apmEnableServiceMetrics,
+    apmEnableContinuousRollups,
+    enableAgentExplorerView,
+    apmEnableTableSearchBar,
+  ];
+
+  if (isProfilingIntegrationEnabled) {
+    keys.push(apmEnableProfilingIntegration);
+  }
+
+  return keys;
+}
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
-  const { docLinks, notifications } = useApmPluginContext().core;
+  const { docLinks, notifications, settings } = useApmPluginContext().core;
+  const isProfilingIntegrationEnabled = useApmFeatureFlag(
+    ApmFeatureFlagName.ProfilingIntegrationAvailable
+  );
+  const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const {
+    fields,
     handleFieldChange,
-    settingsEditableConfig,
     unsavedChanges,
     saveAll,
     isSaving,
@@ -59,7 +82,7 @@ export function GeneralSettings() {
   async function handleSave() {
     try {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return settingsEditableConfig[key].requiresPageReload;
+        return fields[key].requiresPageReload;
       });
       await saveAll();
       trackApmEvent({ metric: 'general_settings_save' });
@@ -77,21 +100,32 @@ export function GeneralSettings() {
     }
   }
 
+  const hasInvalidChanges = Object.values(unsavedChanges).some(
+    ({ isInvalid }) => isInvalid
+  );
+
   return (
     <>
       <EuiSpacer />
       {apmSettingsKeys.map((settingKey) => {
-        const editableConfig = settingsEditableConfig[settingKey];
+        const field = fields[settingKey];
         return (
-          <LazyField
-            key={settingKey}
-            setting={editableConfig}
-            handleChange={handleFieldChange}
-            enableSaving
-            docLinks={docLinks.links}
-            toasts={notifications.toasts}
-            unsavedChanges={unsavedChanges[settingKey]}
-          />
+          <FieldRowProvider
+            {...{
+              links: docLinks.links.management,
+              showDanger: (message: string) =>
+                notifications.toasts.addDanger(message),
+              validateChange: (key: string, value: any) =>
+                settings.client.validateValue(key, value),
+            }}
+          >
+            <FieldRow
+              field={field}
+              isSavingEnabled={true}
+              onFieldChange={handleFieldChange}
+              unsavedChange={unsavedChanges[settingKey]}
+            />
+          </FieldRowProvider>
         );
       })}
       {!isEmpty(unsavedChanges) && (
@@ -103,6 +137,8 @@ export function GeneralSettings() {
             defaultMessage: 'Save changes',
           })}
           unsavedChangesCount={Object.keys(unsavedChanges).length}
+          appTestSubj="apm"
+          areChangesInvalid={hasInvalidChanges}
         />
       )}
     </>

@@ -6,6 +6,7 @@
  */
 
 import { HistogramIndicator } from '@kbn/slo-schema';
+import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getElastichsearchQueryOrThrow } from '../transform_generators/common';
 
 type HistogramIndicatorDef =
@@ -15,7 +16,7 @@ type HistogramIndicatorDef =
 export class GetHistogramIndicatorAggregation {
   constructor(private indicator: HistogramIndicator) {}
 
-  private buildAggregation(type: 'good' | 'total', indicator: HistogramIndicatorDef) {
+  private buildAggregation(indicator: HistogramIndicatorDef): AggregationsAggregationContainer {
     const filter = indicator.filter
       ? getElastichsearchQueryOrThrow(indicator.filter)
       : { match_all: {} };
@@ -43,15 +44,6 @@ export class GetHistogramIndicatorAggregation {
       throw new Error('Invalid Range: "from" should be less that "to".');
     }
 
-    const range: { from?: number; to?: number } = {};
-    if (indicator.from != null) {
-      range.from = indicator.from;
-    }
-
-    if (indicator.to != null) {
-      range.to = indicator.to;
-    }
-
     return {
       filter,
       aggs: {
@@ -59,24 +51,23 @@ export class GetHistogramIndicatorAggregation {
           range: {
             field: indicator.field,
             keyed: true,
-            ranges: [range],
+            ranges: [
+              {
+                key: 'target',
+                from: indicator.from,
+                to: indicator.to,
+              },
+            ],
           },
         },
       },
     };
   }
 
-  private formatNumberAsFloatString(value: number) {
-    return value % 1 === 0 ? `${value}.0` : `${value}`;
-  }
-
-  private buildRangeKey(from: number | undefined, to: number | undefined) {
-    const fromString = from != null ? this.formatNumberAsFloatString(from) : '*';
-    const toString = to != null ? this.formatNumberAsFloatString(to) : '*';
-    return `${fromString}-${toString}`;
-  }
-
-  private buildBucketScript(type: 'good' | 'total', indicator: HistogramIndicatorDef) {
+  private buildBucketScript(
+    type: 'good' | 'total',
+    indicator: HistogramIndicatorDef
+  ): AggregationsAggregationContainer {
     if (indicator.aggregation === 'value_count') {
       return {
         bucket_script: {
@@ -87,11 +78,10 @@ export class GetHistogramIndicatorAggregation {
         },
       };
     }
-    const rangeKey = this.buildRangeKey(indicator.from, indicator.to);
     return {
       bucket_script: {
         buckets_path: {
-          value: `_${type}>total['${rangeKey}']>_count`,
+          value: `_${type}>total['target']>_count`,
         },
         script: 'params.value',
       },
@@ -101,7 +91,7 @@ export class GetHistogramIndicatorAggregation {
   public execute({ type, aggregationKey }: { type: 'good' | 'total'; aggregationKey: string }) {
     const indicatorDef = this.indicator.params[type];
     return {
-      [`_${type}`]: this.buildAggregation(type, indicatorDef),
+      [`_${type}`]: this.buildAggregation(indicatorDef),
       [aggregationKey]: this.buildBucketScript(type, indicatorDef),
     };
   }

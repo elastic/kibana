@@ -1848,6 +1848,158 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           expect(hasActions).eql(false);
         });
+
+        it('should generate expected events with a notificationDelay', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const pattern = {
+            instance: [true, true, true, false, true],
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiring',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+                notification_delay: {
+                  active: 3,
+                },
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 5 }],
+                ['execute', { gte: 5 }],
+                ['new-instance', { equal: 2 }],
+                ['active-instance', { gte: 1 }],
+                ['recovered-instance', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const actualTriggeredActions = events
+            .filter((event) => event?.event?.action === 'execute')
+            .reduce(
+              (acc, event) =>
+                acc +
+                (event?.kibana?.alert?.rule?.execution?.metrics
+                  ?.number_of_triggered_actions as number),
+              0
+            );
+          expect(actualTriggeredActions).to.eql(1);
+        });
+
+        it('should generate expected events with a notificationDelay with AAD', async () => {
+          const { body: createdAction } = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              name: 'MY action',
+              connector_type_id: 'test.noop',
+              config: {},
+              secrets: {},
+            })
+            .expect(200);
+
+          // pattern of when the alert should fire
+          const pattern = {
+            instance: [true, true, true, false, true],
+          };
+
+          const response = await supertest
+            .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(
+              getTestRuleData({
+                rule_type_id: 'test.patternFiringAad',
+                schedule: { interval: '1s' },
+                throttle: null,
+                params: {
+                  pattern,
+                },
+                actions: [
+                  {
+                    id: createdAction.id,
+                    group: 'default',
+                    params: {},
+                  },
+                ],
+                notification_delay: {
+                  active: 3,
+                },
+              })
+            );
+
+          expect(response.status).to.eql(200);
+          const alertId = response.body.id;
+          objectRemover.add(space.id, alertId, 'rule', 'alerting');
+
+          // get the events we're expecting
+          const events = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: space.id,
+              type: 'alert',
+              id: alertId,
+              provider: 'alerting',
+              actions: new Map([
+                // make sure the counts of the # of events per type are as expected
+                ['execute-start', { gte: 5 }],
+                ['execute', { gte: 5 }],
+                ['new-instance', { equal: 2 }],
+                ['active-instance', { gte: 1 }],
+                ['recovered-instance', { equal: 1 }],
+              ]),
+            });
+          });
+
+          const actualTriggeredActions = events
+            .filter((event) => event?.event?.action === 'execute')
+            .reduce(
+              (acc, event) =>
+                acc +
+                (event?.kibana?.alert?.rule?.execution?.metrics
+                  ?.number_of_triggered_actions as number),
+              0
+            );
+          expect(actualTriggeredActions).to.eql(1);
+        });
       });
     }
   });

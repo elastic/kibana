@@ -15,7 +15,6 @@ import {
 } from './test_ids';
 import { EntitiesOverview } from './entities_overview';
 import { TestProviders } from '../../../../common/mock';
-import { useRiskScore } from '../../../../explore/containers/risk_score';
 import { useFirstLastSeen } from '../../../../common/containers/use_first_last_seen';
 import { useObservedUserDetails } from '../../../../explore/users/containers/users/observed_details';
 import { useHostDetails } from '../../../../explore/hosts/containers/hosts/details';
@@ -26,6 +25,7 @@ import {
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
+import { useRiskScore } from '../../../../entity_analytics/api/hooks/use_risk_score';
 
 const from = '2022-04-05T12:00:00.000Z';
 const to = '2022-04-08T12:00:00.;000Z';
@@ -49,7 +49,7 @@ const mockUseUserDetails = useObservedUserDetails as jest.Mock;
 jest.mock('../../../../explore/users/containers/users/observed_details');
 
 const mockUseRiskScore = useRiskScore as jest.Mock;
-jest.mock('../../../../explore/containers/risk_score');
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 
 const mockUseFirstLastSeen = useFirstLastSeen as jest.Mock;
 jest.mock('../../../../common/containers/use_first_last_seen');

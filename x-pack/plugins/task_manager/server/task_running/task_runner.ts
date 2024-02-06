@@ -14,7 +14,7 @@
 import apm from 'elastic-apm-node';
 import { v4 as uuidv4 } from 'uuid';
 import { withSpan } from '@kbn/apm-utils';
-import { defaults, flow, identity, isUndefined, omit } from 'lodash';
+import { defaults, flow, identity, isUndefined, omit, random } from 'lodash';
 import { ExecutionContextStart, Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import moment from 'moment';
@@ -931,12 +931,16 @@ export function asRan(task: InstanceOf<TaskRunningStage.RAN, RanTask>): RanTask 
 }
 
 export function calculateDelay(attempts: number) {
+  // Return 30s for the first retry attempt
   if (attempts === 1) {
-    return 30 * 1000; // 30s
+    return 30 * 1000;
   } else {
-    // get multiples of 5 min
     const defaultBackoffPerFailure = 5 * 60 * 1000;
-    return defaultBackoffPerFailure * Math.pow(2, attempts - 2);
+    const maxDelay = 60 * 60 * 1000;
+    // For each remaining attempt return an exponential delay with jitter that is capped at 1 hour.
+    // We adjust the attempts by 2 to ensure that delay starts at 5m for the second retry attempt
+    // and increases exponentially from there.
+    return random(Math.min(maxDelay, defaultBackoffPerFailure * Math.pow(2, attempts - 2)));
   }
 }
 

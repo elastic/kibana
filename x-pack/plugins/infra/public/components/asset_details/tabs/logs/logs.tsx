@@ -12,12 +12,16 @@ import { i18n } from '@kbn/i18n';
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import {
+  DEFAULT_LOG_VIEW,
+  getLogsLocatorsFromUrlService,
+  LogViewReference,
+} from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { InfraLoadingPanel } from '../../../loading';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
-import { useDataViewsProviderContext } from '../../hooks/use_data_views';
+import { useDataViewsContext } from '../../hooks/use_data_views';
 import { useDatePickerContext } from '../../hooks/use_date_picker';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
 import { useIntersectingState } from '../../hooks/use_intersecting_state';
@@ -29,12 +33,12 @@ export const Logs = () => {
   const { getDateRangeInTimestamp, dateRange, autoRefresh } = useDatePickerContext();
   const [urlState, setUrlState] = useAssetDetailsUrlState();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { logs } = useDataViewsProviderContext();
+  const { logs } = useDataViewsContext();
 
   const { loading: logViewLoading, reference: logViewReference } = logs ?? {};
 
   const { services } = useKibanaContextForPlugin();
-  const { locators } = services;
+  const { nodeLogsLocator } = getLogsLocatorsFromUrlService(services.share.url);
   const [textQuery, setTextQuery] = useState(urlState?.logsSearch ?? '');
   const [textQueryDebounced, setTextQueryDebounced] = useState(urlState?.logsSearch ?? '');
 
@@ -77,21 +81,14 @@ export const Logs = () => {
   );
 
   const logsUrl = useMemo(() => {
-    return locators.nodeLogsLocator.getRedirectUrl({
-      nodeType: asset.type,
+    return nodeLogsLocator.getRedirectUrl({
+      nodeField: findInventoryFields(asset.type).id,
       nodeId: asset.name,
       time: state.startTimestamp,
       filter: textQueryDebounced,
       logView,
     });
-  }, [
-    locators.nodeLogsLocator,
-    asset.name,
-    asset.type,
-    state.startTimestamp,
-    textQueryDebounced,
-    logView,
-  ]);
+  }, [nodeLogsLocator, asset.name, asset.type, state.startTimestamp, textQueryDebounced, logView]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="infraAssetDetailsLogsTabContent" ref={ref}>

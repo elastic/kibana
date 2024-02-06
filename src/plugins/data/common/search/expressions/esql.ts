@@ -11,6 +11,7 @@ import { castEsToKbnFieldTypeName, ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/
 import { i18n } from '@kbn/i18n';
 import type {
   Datatable,
+  DatatableColumn,
   DatatableColumnType,
   ExpressionFunctionDefinition,
 } from '@kbn/expressions-plugin/common';
@@ -20,9 +21,15 @@ import { zipObject } from 'lodash';
 import { Observable, defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs/operators';
 import { buildEsQuery } from '@kbn/es-query';
+import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  IKibanaSearchRequest,
+  ISearchGeneric,
+  KibanaContext,
+} from '..';
 import { IKibanaSearchResponse } from '../types';
 import { UiSettingsCommon } from '../..';
 
@@ -78,24 +85,6 @@ function extractTypeAndReason(attributes: any): { type?: string; reason?: string
     return extractTypeAndReason(attributes.error);
   }
   return {};
-}
-
-interface ESQLSearchParams {
-  // TODO: time_zone support was temporarily removed from ES|QL,
-  // we will need to add it back in once it is supported again.
-  // https://github.com/elastic/elasticsearch/pull/102767
-  // time_zone?: string;
-  query: string;
-  filter?: unknown;
-  locale?: string;
-}
-
-interface ESQLSearchReponse {
-  columns?: Array<{
-    name: string;
-    type: string;
-  }>;
-  values: unknown[][];
 }
 
 export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
@@ -206,12 +195,12 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchReponse>
-          >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
+          >({ params }, { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
-              if (!error.err) {
+              if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;
               } else {
-                const { type, reason } = extractTypeAndReason(error.err.attributes);
+                const { type, reason } = extractTypeAndReason(error.attributes);
                 if (type === 'parsing_exception') {
                   error.message = `Couldn't parse Elasticsearch ES|QL query. Check your query and try again. Error: ${reason}`;
                 } else {
@@ -255,7 +244,31 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               name,
               meta: { type: normalizeType(type) },
             })) ?? [];
-          const columnNames = columns.map(({ name }) => name);
+          // all_columns in the response means that there is a separation between
+          // columns with data and empty columns
+          // columns contain only columns with data while all_columns everything
+          const hasEmptyColumns =
+            body.all_columns && body.all_columns?.length > body.columns.length;
+
+          let emptyColumns: DatatableColumn[] = [];
+
+          if (hasEmptyColumns) {
+            const difference =
+              body.all_columns?.filter((col1) => {
+                return !body.columns.some((col2) => {
+                  return col1.name === col2.name;
+                });
+              }) ?? [];
+            emptyColumns =
+              difference?.map(({ name, type }) => ({
+                id: name,
+                name,
+                meta: { type: normalizeType(type) },
+                isNull: true,
+              })) ?? [];
+          }
+          const allColumns = [...columns, ...emptyColumns];
+          const columnNames = allColumns.map(({ name }) => name);
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
           return {
@@ -263,7 +276,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             meta: {
               type: 'es_ql',
             },
-            columns,
+            columns: allColumns,
             rows,
             warning,
           } as Datatable;

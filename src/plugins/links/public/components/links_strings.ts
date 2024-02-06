@@ -22,13 +22,15 @@ export const LinksStrings = {
       i18n.translate('links.editor.updateButtonLabel', {
         defaultMessage: 'Update link',
       }),
-    getEditLinkTitle: () =>
-      i18n.translate('links.editor.editLinkTitle', {
-        defaultMessage: 'Edit link',
+    getEditLinkTitle: (label?: string) =>
+      i18n.translate('links.editor.editLinkTitle.hasLabel', {
+        defaultMessage: 'Edit {label} link',
+        values: { label: label ?? '' },
       }),
-    getDeleteLinkTitle: () =>
+    getDeleteLinkTitle: (label?: string) =>
       i18n.translate('links.editor.deleteLinkTitle', {
-        defaultMessage: 'Delete link',
+        defaultMessage: 'Delete {label} link',
+        values: { label: label ?? '' },
       }),
     getCancelButtonLabel: () =>
       i18n.translate('links.editor.cancelButtonLabel', {

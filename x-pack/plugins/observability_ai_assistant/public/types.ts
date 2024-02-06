@@ -7,6 +7,14 @@
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
 import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type {
+  DataViewsPublicPluginSetup,
+  DataViewsPublicPluginStart,
+} from '@kbn/data-views-plugin/public';
+import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
+import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
@@ -16,50 +24,50 @@ import type {
   SecurityPluginSetup,
   SecurityPluginStart,
 } from '@kbn/security-plugin/public';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
 import type {
   TriggersAndActionsUIPublicPluginSetup,
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { Observable } from 'rxjs';
-import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
-import type {
-  DataViewsPublicPluginSetup,
-  DataViewsPublicPluginStart,
-} from '@kbn/data-views-plugin/public';
-import type { LicensingPluginStart, ILicense } from '@kbn/licensing-plugin/public';
-import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { ForwardRefExoticComponent, RefAttributes } from 'react';
-import { WithSuspenseExtendedDeps } from '@kbn/shared-ux-utility';
+import type { Observable } from 'rxjs';
+import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
   Message,
+  PendingMessage,
 } from '../common/types';
+import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
-import type { PendingMessage } from '../common/types';
-import type { StreamingChatResponseEvent } from '../common/conversation_complete';
-import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 import type { InsightProps } from './components/insight/insight';
+import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export type { CreateChatCompletionResponseChunk } from '../common/types';
+export type { PendingMessage };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
-  chat: (options: {
-    messages: Message[];
-    connectorId: string;
-    function?: 'none' | 'auto';
-  }) => Observable<PendingMessage>;
+  chat: (
+    name: string,
+    options: {
+      messages: Message[];
+      connectorId: string;
+      function?: 'none' | 'auto';
+      signal: AbortSignal;
+    }
+  ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
     messages: Message[];
     connectorId: string;
     persist: boolean;
     conversationId?: string;
     signal: AbortSignal;
-  }) => Observable<StreamingChatResponseEvent>;
+  }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
   hasFunction: (name: string) => boolean;
@@ -67,7 +75,9 @@ export interface ObservabilityAIAssistantChatService {
   renderFunction: (
     name: string,
     args: string | undefined,
-    response: { data?: string; content?: string }
+    response: { data?: string; content?: string },
+    onActionClick: ChatActionClickHandler,
+    chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler
   ) => React.ReactNode;
 }
 
@@ -84,6 +94,8 @@ export interface ObservabilityAIAssistantService {
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
+  onActionClick: ChatActionClickHandler;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<
@@ -97,8 +109,6 @@ export type ChatRegistrationRenderFunction = ({}: {
 
 export interface ConfigSchema {}
 
-export type { PendingMessage };
-
 export interface ObservabilityAIAssistantPluginSetupDependencies {
   dataViews: DataViewsPublicPluginSetup;
   features: FeaturesPluginSetup;
@@ -106,6 +116,7 @@ export interface ObservabilityAIAssistantPluginSetupDependencies {
   observabilityShared: ObservabilitySharedPluginSetup;
   security: SecurityPluginSetup;
   triggersActionsUi: TriggersAndActionsUIPublicPluginSetup;
+  ml: MlPluginSetup;
 }
 
 export interface ObservabilityAIAssistantPluginStartDependencies {
@@ -117,6 +128,8 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
+  ml: MlPluginStart;
 }
 
 export interface ObservabilityAIAssistantPluginSetup {}

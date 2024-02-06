@@ -14,7 +14,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import { buildExistsFilter } from '@kbn/es-query';
-import { EuiComboBox } from '@elastic/eui';
+import { EuiButton, EuiComboBox } from '@elastic/eui';
 import { SearchBar, SearchBarProps } from '../search_bar';
 import { setIndexPatterns } from '../services';
 
@@ -694,5 +694,21 @@ storiesOf('SearchBar', module)
         onChangeDataView: action('onChangeDataView'),
       },
       submitButtonStyle: 'full',
+    })
+  )
+
+  .add('with renderQueryInputAppend prop', () =>
+    wrapSearchBarInContext({
+      dataViewPickerComponentProps: {
+        currentDataViewId: '1234',
+        trigger: {
+          'data-test-subj': 'dataView-switch-link',
+          label: 'logstash-*',
+          title: 'logstash-*',
+        },
+        onChangeDataView: action('onChangeDataView'),
+      },
+      submitButtonStyle: 'full',
+      renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
     })
   );

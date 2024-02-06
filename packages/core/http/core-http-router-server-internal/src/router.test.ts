@@ -15,7 +15,10 @@ const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 const routerOptions: RouterOptions = {
   isDev: false,
-  versionedRouteResolution: 'oldest',
+  versionedRouterOptions: {
+    defaultHandlerResolutionStrategy: 'oldest',
+    useVersionResolutionStrategyForInternalPaths: [],
+  },
 };
 
 describe('Router', () => {

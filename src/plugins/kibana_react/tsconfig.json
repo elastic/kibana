@@ -11,7 +11,6 @@
   ],
   "kbn_references": [
     "@kbn/storybook",
-    "@kbn/ui-theme",
     "@kbn/core",
     "@kbn/monaco",
     "@kbn/test-jest-helpers",

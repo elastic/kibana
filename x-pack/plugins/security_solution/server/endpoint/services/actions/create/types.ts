@@ -11,6 +11,7 @@ import type { ResponseActionBodySchema } from '../../../../../common/api/endpoin
 import type {
   ActionDetails,
   EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 
@@ -30,7 +31,7 @@ export interface CreateActionMetadata {
 export interface ActionCreateService {
   createActionFromAlert: (payload: CreateActionPayload, agents: string[]) => Promise<ActionDetails>;
   createAction: <
-    TOutputContent extends object = object,
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
     TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
   >(
     payload: CreateActionPayload,

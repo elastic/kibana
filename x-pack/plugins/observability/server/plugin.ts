@@ -20,7 +20,7 @@ import {
   PluginInitializerContext,
   SavedObjectsClient,
 } from '@kbn/core/server';
-import { LogExplorerLocatorParams, LOG_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import { LogsExplorerLocatorParams, LOGS_EXPLORER_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -28,6 +28,7 @@ import { i18n } from '@kbn/i18n';
 import {
   ApmRuleType,
   ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
@@ -89,6 +90,7 @@ const o11yRuleTypes = [
   SLO_BURN_RATE_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   ES_QUERY_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   ...Object.values(ApmRuleType),
 ];
@@ -109,8 +111,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     const config = this.initContext.config.get<ObservabilityConfig>();
 
     const alertsLocator = plugins.share.url.locators.create(new AlertsLocatorDefinition());
-    const logExplorerLocator =
-      plugins.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
+    const logsExplorerLocator =
+      plugins.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
     plugins.features.registerKibanaFeature({
       id: casesFeatureId,
@@ -187,7 +189,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         },
         {
           name: i18n.translate('xpack.observability.featureRegistry.casesSettingsSubFeatureName', {
-            defaultMessage: 'Case Settings',
+            defaultMessage: 'Case settings',
           }),
           privilegeGroups: [
             {
@@ -198,7 +200,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.casesSettingsSubFeatureDetails',
                     {
-                      defaultMessage: 'Edit Case Settings',
+                      defaultMessage: 'Edit case settings',
                     }
                   ),
                   includeIn: 'all',
@@ -344,7 +346,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     registerRuleTypes(plugins.alerting, core.http.basePath, config, this.logger, ruleDataService, {
       alertsLocator,
-      logExplorerLocator,
+      logsExplorerLocator,
     });
     registerSloUsageCollector(plugins.usageCollection);
 

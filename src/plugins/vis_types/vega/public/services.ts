@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { NotificationsStart, IUiSettingsClient, DocLinksStart } from '@kbn/core/public';
+import type { NotificationsStart, DocLinksStart, ThemeServiceStart } from '@kbn/core/public';
 
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -22,7 +22,6 @@ export const [getDataViews, setDataViews] =
 export const [getNotifications, setNotifications] =
   createGetterSetter<NotificationsStart>('Notifications');
 
-export const [getUISettings, setUISettings] = createGetterSetter<IUiSettingsClient>('UISettings');
 export const [getMapsEms, setMapsEms] = createGetterSetter<MapsEmsPluginPublicStart>('mapsEms');
 
 export const [getInjectedVars, setInjectedVars] = createGetterSetter<{
@@ -35,3 +34,6 @@ export const [getDocLinks, setDocLinks] = createGetterSetter<DocLinksStart>('doc
 
 export const [getUsageCollectionStart, setUsageCollectionStart] =
   createGetterSetter<UsageCollectionStart>('UsageCollection');
+
+export const [getThemeService, setThemeService] =
+  createGetterSetter<ThemeServiceStart>('ThemeServiceStart');

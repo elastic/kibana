@@ -38,6 +38,7 @@ import { useLensProps } from './hooks/use_lens_props';
 import type { LensAttributesContext } from './utils/get_lens_attributes';
 
 export interface HistogramProps {
+  abortController?: AbortController;
   services: UnifiedHistogramServices;
   dataView: DataView;
   request?: UnifiedHistogramRequestContext;
@@ -70,9 +71,13 @@ const computeTotalHits = (
     return Object.values(adapterTables ?? {})?.[0]?.rows?.length;
   } else if (isPlainRecord && !hasLensSuggestions) {
     // ES|QL histogram case
+    const rows = Object.values(adapterTables ?? {})?.[0]?.rows;
+    if (!rows) {
+      return undefined;
+    }
     let rowsCount = 0;
-    Object.values(adapterTables ?? {})?.[0]?.rows.forEach((r) => {
-      rowsCount += r.rows;
+    rows.forEach((r) => {
+      rowsCount += r.results;
     });
     return rowsCount;
   } else {
@@ -98,6 +103,7 @@ export function Histogram({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: HistogramProps) {
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
   const [chartSize, setChartSize] = useState('100%');
@@ -177,6 +183,8 @@ export function Histogram({
   });
 
   const { euiTheme } = useEuiTheme();
+  const boxShadow = `0 2px 2px -1px ${euiTheme.colors.mediumShade},
+  0 1px 5px -2px ${euiTheme.colors.mediumShade}`;
   const chartCss = css`
     position: relative;
     flex-grow: 1;
@@ -191,6 +199,7 @@ export function Histogram({
     & .lnsExpressionRenderer {
       width: ${chartSize};
       margin: auto;
+      box-shadow: ${attributes.visualizationType === 'lnsMetric' ? boxShadow : 'none'};
     }
 
     & .echLegend .echLegendList {
@@ -216,6 +225,7 @@ export function Histogram({
       >
         <lens.EmbeddableComponent
           {...lensProps}
+          abortController={abortController}
           disableTriggers={disableTriggers}
           disabledActions={disabledActions}
           onFilter={onFilter}

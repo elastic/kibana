@@ -116,6 +116,7 @@ export const TemplateForm = ({
   const indexTemplate = defaultValue ?? {
     name: '',
     indexPatterns: [],
+    dataStream: {},
     template: {},
     _kbnMeta: {
       type: 'default',

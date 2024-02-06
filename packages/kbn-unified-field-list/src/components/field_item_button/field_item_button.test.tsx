@@ -17,7 +17,7 @@ const bytesField = dataView.getFieldByName('bytes')!;
 const scriptedField = dataView.getFieldByName('script date')!;
 const conflictField = dataView.getFieldByName('custom_user_field')!;
 
-describe('UnifiedFieldList <FieldItemButton />', () => {
+describe('UnifiedFieldList FieldItemButton', () => {
   test('renders properly', () => {
     const component = shallow(
       <FieldItemButton
@@ -115,13 +115,13 @@ describe('UnifiedFieldList <FieldItemButton />', () => {
     expect(component).toMatchSnapshot();
   });
 
-  test('renders properly with a drag handle', () => {
+  test('renders properly with a drag icon', () => {
     const component = shallow(
       <FieldItemButton
         size="xs"
         className="custom"
         dataTestSubj="test-subj"
-        dragHandle={<span>dragHandle</span>}
+        withDragIcon={true}
         field={bytesField}
         fieldSearchHighlight={undefined}
         isEmpty={false}

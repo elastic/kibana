@@ -80,6 +80,14 @@ import {
   ALERT_RULE_THREAT,
   ALERT_RULE_EXCEPTIONS_LIST,
   ALERT_RULE_IMMUTABLE,
+  LEGACY_ALERT_HOST_CRITICALITY,
+  LEGACY_ALERT_USER_CRITICALITY,
+  ALERT_HOST_CRITICALITY,
+  ALERT_USER_CRITICALITY,
+  ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM,
+  ALERT_USER_RISK_SCORE_CALCULATED_LEVEL,
+  ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM,
 } from '../../../../../../common/field_maps/field_names';
 import type { CompleteRule, RuleParams } from '../../../rule_schema';
 import { commonParamsCamelToSnake, typeSpecificCamelToSnake } from '../../../rule_management';
@@ -256,6 +264,15 @@ export const buildAlert = (
     'kibana.alert.rule.risk_score': params.riskScore,
     'kibana.alert.rule.severity': params.severity,
     'kibana.alert.rule.building_block_type': params.buildingBlockType,
+    // asset criticality fields will be enriched before ingestion
+    [LEGACY_ALERT_HOST_CRITICALITY]: undefined,
+    [LEGACY_ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_CRITICALITY]: undefined,
+    [ALERT_USER_CRITICALITY]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_LEVEL]: undefined,
+    [ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM]: undefined,
   };
 };
 

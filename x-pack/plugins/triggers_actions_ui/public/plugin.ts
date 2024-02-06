@@ -29,6 +29,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -174,6 +175,7 @@ interface PluginsStart {
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
+  lens: LensPublicStart;
 }
 
 export class Plugin
@@ -301,6 +303,7 @@ export class Plugin
           expressions: pluginsStart.expressions,
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
+          lens: pluginsStart.lens,
         });
       },
     });

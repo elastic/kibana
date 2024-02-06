@@ -73,6 +73,11 @@ export interface ExecutionContext<InspectorAdapters extends Adapters = Adapters>
   isSyncTooltipsEnabled?: () => boolean;
 
   /**
+   * Returns whether or not to use the size transition veil when resizing visualizations.
+   */
+  shouldUseSizeTransitionVeil?: () => boolean;
+
+  /**
    * Contains the meta-data about the source of the expression.
    */
   getExecutionContext: () => KibanaExecutionContext | undefined;

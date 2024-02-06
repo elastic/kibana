@@ -16,10 +16,12 @@
       "cases",
       "charts",
       "contentManagement",
+      "controls",
       "data",
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "fieldFormats",
       "uiActions",
       "presentationUtil",
       "exploratoryView",
@@ -38,7 +40,7 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logExplorer",
+      "logsExplorer",
       "licensing"
     ],
     "optionalPlugins": [
@@ -57,7 +59,8 @@
       "unifiedSearch",
       "stackAlerts",
       "spaces",
-      "embeddable"
+      "embeddable",
+      "ingestPipelines"
     ],
     "extraPublicDirs": [
       "common"

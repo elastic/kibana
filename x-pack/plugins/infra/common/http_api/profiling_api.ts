@@ -8,13 +8,13 @@
 import * as rt from 'io-ts';
 
 export const InfraProfilingFlamegraphRequestParamsRT = rt.type({
-  hostname: rt.string,
+  kuery: rt.string,
   from: rt.number,
   to: rt.number,
 });
 
 export const InfraProfilingFunctionsRequestParamsRT = rt.type({
-  hostname: rt.string,
+  kuery: rt.string,
   from: rt.number,
   to: rt.number,
   startIndex: rt.number,

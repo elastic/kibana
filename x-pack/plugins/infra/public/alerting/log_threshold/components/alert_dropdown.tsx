@@ -85,13 +85,13 @@ export const AlertDropdown = () => {
               : inlineLogViewTooltipContent
             : undefined
         }
-        toolTipTitle={
-          !canCreateAlerts
+        toolTipProps={{
+          title: !canCreateAlerts
             ? readOnly
               ? readOnlyUserTooltipTitle
               : inlineLogViewTooltipTitle
-            : undefined
-        }
+            : undefined,
+        }}
       >
         <FormattedMessage
           id="xpack.infra.alerting.logs.createAlertButton"

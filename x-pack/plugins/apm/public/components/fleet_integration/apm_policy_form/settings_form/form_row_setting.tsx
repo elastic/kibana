@@ -16,7 +16,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { FormRowOnChange } from '.';
 import { SettingsRow } from '../typings';
 

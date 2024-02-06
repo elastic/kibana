@@ -16,7 +16,7 @@ import { useDeepEqualSelector } from '../common/hooks/use_selector';
 import { useKibana } from '../common/lib/kibana';
 import { useStartTransaction } from '../common/lib/apm/use_start_transaction';
 import { timelineActions, timelineSelectors } from '../timelines/store';
-import { useCreateTimeline } from '../timelines/components/timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../timelines/hooks/use_create_timeline';
 import type { CreateTimelineProps } from '../detections/components/alerts_table/types';
 import { dispatchUpdateTimeline } from '../timelines/components/open_timeline/helpers';
 

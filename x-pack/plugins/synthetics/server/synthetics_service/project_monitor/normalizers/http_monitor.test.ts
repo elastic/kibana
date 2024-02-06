@@ -42,7 +42,7 @@ describe('http normalizers', () => {
     ];
     const monitors = [
       {
-        locations: ['localhost'],
+        locations: ['dev'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-2',
@@ -80,7 +80,7 @@ describe('http normalizers', () => {
         max_redirects: 2,
       },
       {
-        locations: ['localhost'],
+        locations: ['dev'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-3',

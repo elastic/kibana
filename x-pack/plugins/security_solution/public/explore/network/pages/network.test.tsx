@@ -12,15 +12,7 @@ import { waitFor } from '@testing-library/react';
 import '../../../common/mock/match_media';
 import type { Filter } from '@kbn/es-query';
 import { useSourcererDataView } from '../../../common/containers/sourcerer';
-import {
-  TestProviders,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../common/mock';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
+import { TestProviders, createMockStore } from '../../../common/mock';
 import { inputsActions } from '../../../common/store/inputs';
 
 import { Network } from './network';
@@ -228,9 +220,7 @@ describe('Network page - rendering', () => {
       indicesExist: true,
       indexPattern: { fields: [], title: 'title' },
     });
-    const myState: State = mockGlobalState;
-    const { storage } = createSecuritySolutionStorageMock();
-    const myStore = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const myStore = createMockStore();
     const wrapper = mount(
       <TestProviders store={myStore}>
         <Router history={mockHistory}>

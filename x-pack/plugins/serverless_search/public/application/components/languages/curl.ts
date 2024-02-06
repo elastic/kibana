@@ -55,7 +55,7 @@ export API_KEY="${apiKey}"`,
   -d'
 { "index" : { "_index" : "${indexName ?? 'index_name'}" } }
 {"name": "foo", "title": "bar" }
-`,
+'`,
   installClient: `# if cURL is not already installed on your system
 # then install it with the package manager of your choice
 

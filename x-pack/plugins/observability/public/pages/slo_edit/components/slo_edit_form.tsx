@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
+import { InspectSLOPortal } from './common/inspect_slo_portal';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { BurnRateRuleFlyout } from '../../slos/components/common/burn_rate_rule_flyout';
 import { paths } from '../../../../common/locators/paths';
@@ -191,7 +192,7 @@ export function SloEditForm({ slo }: Props) {
                         defaultMessage: 'SLO burn rate alert rule',
                       })}
                     </strong>
-                  </span>{' '}
+                  </span>
                   <EuiIconTip
                     content={
                       'Selecting this will allow you to create a new alert rule for this SLO upon saving.'
@@ -240,6 +241,7 @@ export function SloEditForm({ slo }: Props) {
             />
           </EuiFlexGroup>
         </EuiFlexGroup>
+        <InspectSLOPortal trigger={trigger} getValues={getValues} slo={slo} />
       </FormProvider>
 
       <BurnRateRuleFlyout

@@ -26,6 +26,7 @@ import { createGetSavedSearchDeps } from './create_get_saved_search_deps';
 
 export interface SavedSearchUnwrapMetaInfo {
   sharingSavedObjectProps: SavedSearch['sharingSavedObjectProps'];
+  managed: boolean | undefined;
 }
 
 export interface SavedSearchUnwrapResult {
@@ -72,6 +73,7 @@ export function getSavedSearchAttributeService(
         },
         metaInfo: {
           sharingSavedObjectProps: so.meta,
+          managed: so.item.managed,
         },
       };
     },
@@ -91,13 +93,14 @@ export const toSavedSearch = async (
   result: SavedSearchUnwrapResult,
   services: SavedSearchesServiceDeps
 ) => {
-  const { sharingSavedObjectProps } = result.metaInfo ?? {};
+  const { sharingSavedObjectProps, managed } = result.metaInfo ?? {};
 
   return await convertToSavedSearch(
     {
       ...splitReferences(result.attributes),
       savedSearchId: id,
       sharingSavedObjectProps,
+      managed,
     },
     createGetSavedSearchDeps(services)
   );

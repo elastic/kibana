@@ -15,6 +15,7 @@ import React from 'react';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { EditRoleMappingPage } from './edit_role_mapping_page';

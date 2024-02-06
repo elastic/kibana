@@ -17,8 +17,13 @@ import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
 import { ContentTabIds } from '../../types';
 import { ErrorPrompt } from './error_prompt';
 import { ProfilingLinks } from './profiling_links';
+import { EmptyDataPrompt } from './empty_data_prompt';
 
-export function Functions() {
+interface Props {
+  kuery: string;
+}
+
+export function Functions({ kuery }: Props) {
   const { services } = useKibanaContextForPlugin();
   const { asset } = useAssetDetailsRenderPropsContext();
   const { activeTabId } = useTabSwitcherContext();
@@ -32,13 +37,13 @@ export function Functions() {
 
   const params = useMemo(
     () => ({
-      hostname: asset.name,
+      kuery,
       from,
       to,
       startIndex: 0,
       endIndex: 10,
     }),
-    [asset.name, from, to]
+    [kuery, from, to]
   );
 
   const { error, loading, response } = useProfilingFunctionsData({
@@ -48,6 +53,10 @@ export function Functions() {
 
   if (error !== null) {
     return <ErrorPrompt />;
+  }
+
+  if (!loading && response?.TotalCount === 0) {
+    return <EmptyDataPrompt />;
   }
 
   return (

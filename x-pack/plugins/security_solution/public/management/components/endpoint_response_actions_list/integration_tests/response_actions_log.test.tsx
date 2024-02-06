@@ -27,7 +27,10 @@ import { MANAGEMENT_PATH } from '../../../../../common/constants';
 import { getActionListMock } from '../mocks';
 import { useGetEndpointsList } from '../../../hooks/endpoint/use_get_endpoints_list';
 import { v4 as uuidv4 } from 'uuid';
-import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../common/endpoint/service/response_actions/constants';
+import {
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+  RESPONSE_ACTION_API_COMMANDS_NAMES,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import { useUserPrivileges as _useUserPrivileges } from '../../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../../mocks/response_actions_http_mocks';
 import { getEndpointAuthzInitialStateMock } from '../../../../../common/endpoint/service/authz/mocks';
@@ -237,6 +240,7 @@ describe('Response actions history', () => {
         page: 1,
         pageSize: 10,
         agentIds: undefined,
+        agentTypes: [],
         commands: [],
         statuses: [],
         types: [],
@@ -306,6 +310,7 @@ describe('Response actions history', () => {
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
           agentIds: undefined,
+          agentTypes: [],
           commands: [],
           endDate: 'now',
           page: 1,
@@ -981,10 +986,12 @@ describe('Response actions history', () => {
 
         render();
 
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
+
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          expect.stringContaining(`${command} completed successfully`),
-          expect.stringContaining(`${command} completed successfully`),
+          expect.stringContaining(`${outputCommand} completed successfully`),
+          expect.stringContaining(`${outputCommand} completed successfully`),
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1006,10 +1013,11 @@ describe('Response actions history', () => {
         });
         render();
 
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${command} failed`,
-          `${command} failed`,
+          `${outputCommand} failed`,
+          `${outputCommand} failed`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1032,10 +1040,11 @@ describe('Response actions history', () => {
         });
         render();
 
+        const outputCommand = RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[command];
         const outputs = expandRows();
         expect(outputs.map((n) => n.textContent)).toEqual([
-          `${command} failed: action expired`,
-          `${command} failed: action expired`,
+          `${outputCommand} failed: action expired`,
+          `${outputCommand} failed: action expired`,
         ]);
         expect(
           renderResult.getAllByTestId(`${testPrefix}-column-status`).map((n) => n.textContent)
@@ -1153,6 +1162,7 @@ describe('Response actions history', () => {
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
           agentIds: undefined,
+          agentTypes: [],
           commands: [],
           endDate: 'now',
           page: 1,
@@ -1355,6 +1365,7 @@ describe('Response actions history', () => {
       expect(useGetEndpointActionListMock).toHaveBeenLastCalledWith(
         {
           agentIds: ['id-0', 'id-2', 'id-4', 'id-6'],
+          agentTypes: [],
           commands: [],
           endDate: 'now',
           page: 1,

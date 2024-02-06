@@ -18,6 +18,11 @@
     "@kbn/i18n-react",
     "@kbn/i18n",
     "@kbn/management-settings-section-registry",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-field-definition",
+    "@kbn/management-settings-types",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/core-ui-settings-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -11,6 +11,7 @@ import type {
   SavedObjectReference,
   IUiSettingsClient,
 } from '@kbn/core/server';
+import z from 'zod';
 import { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { LicenseType } from '@kbn/licensing-plugin/server';
@@ -20,9 +21,10 @@ import {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
+import type { ObjectType } from '@kbn/config-schema';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { SharePluginStart } from '@kbn/share-plugin/server';
-import type { FieldMap } from '@kbn/alerts-as-data-utils';
+import type { DefaultAlert, FieldMap } from '@kbn/alerts-as-data-utils';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { Filter } from '@kbn/es-query';
 import { RuleTypeRegistry as OrigruleTypeRegistry } from './rule_type_registry';
@@ -60,6 +62,7 @@ import {
   AlertsFilter,
   AlertsFilterTimeframe,
   RuleAlertData,
+  NotificationDelay,
 } from '../common';
 import { PublicAlertFactory } from './alert/create_alert_factory';
 import { RulesSettingsFlappingProperties } from '../common/rules_settings';
@@ -209,6 +212,12 @@ export type FormatAlert<AlertData extends RuleAlertData> = (
   alert: Partial<AlertData>
 ) => Partial<AlertData>;
 
+export const DEFAULT_AAD_CONFIG: IRuleTypeAlerts<DefaultAlert> = {
+  context: `default`,
+  mappings: { fieldMap: {} },
+  shouldWrite: true,
+};
+
 export interface IRuleTypeAlerts<AlertData extends RuleAlertData = never> {
   /**
    * Specifies the target alerts-as-data resource
@@ -279,6 +288,17 @@ export interface RuleType<
   name: string;
   validate: {
     params: RuleTypeParamsValidator<Params>;
+  };
+  schemas?: {
+    params?:
+      | {
+          type: 'zod';
+          schema: z.ZodObject<z.ZodRawShape> | z.ZodIntersection<z.ZodTypeAny, z.ZodTypeAny>;
+        }
+      | {
+          type: 'config-schema';
+          schema: ObjectType;
+        };
   };
   actionGroups: Array<ActionGroup<ActionGroupIds>>;
   defaultActionGroupId: ActionGroup<ActionGroupIds>['id'];
@@ -403,6 +423,7 @@ export type PublicRuleResultService = PublicLastRunSetters;
 
 export interface RawRuleLastRun extends SavedObjectAttributes, RuleLastRun {}
 export interface RawRuleMonitoring extends SavedObjectAttributes, RuleMonitoring {}
+export interface RawNotificationDelay extends SavedObjectAttributes, NotificationDelay {}
 
 export interface RawRuleAlertsFilter extends AlertsFilter {
   query?: {
@@ -479,6 +500,7 @@ export interface RawRule extends SavedObjectAttributes {
   nextRun?: string | null;
   revision: number;
   running?: boolean | null;
+  notificationDelay?: RawNotificationDelay;
 }
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';

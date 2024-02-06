@@ -10,13 +10,14 @@ import createContainer from 'constate';
 import { i18n } from '@kbn/i18n';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useLogViewReference } from '../../../hooks/use_log_view_reference';
-import { useDataMetricsAdHocDataView } from '../../../hooks/use_metrics_adhoc_data_view';
+import { useDataView } from '../../../hooks/use_data_view';
 import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_props';
 
 const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { dataView: metricsDataView, loading: metricsDataViewLoading } =
-    useDataMetricsAdHocDataView({ metricAlias });
+  const { dataView: metricsDataView, loading: metricsDataViewLoading } = useDataView({
+    index: metricAlias,
+  });
   const {
     logViewReference,
     getLogsDataView,
@@ -47,4 +48,4 @@ const useDataViews = ({ metricAlias }: { metricAlias: string }) => {
   };
 };
 
-export const [DataViewsProvider, useDataViewsProviderContext] = createContainer(useDataViews);
+export const [DataViewsProvider, useDataViewsContext] = createContainer(useDataViews);

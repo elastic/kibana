@@ -59,7 +59,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
 
   const checkDataViewExists = async () => {
     try {
-      const dv = (await dataViews.getIdsWithTitle()).find(({ title }) => title === indexName);
+      const dv = (await dataViews.getIdsWithTitle(true)).find(({ title }) => title === indexName);
       if (dv !== undefined) {
         setDataViewExists(true);
       } else {
@@ -132,13 +132,12 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       if ((userCanDeleteIndex && deleteTargetIndex) || (userCanDeleteIndex && deleteDataView)) {
         deleteAnalyticsAndDestIndex(
           item.config,
-          item.stats,
           deleteTargetIndex,
           dataViewExists && deleteDataView,
           toastNotificationService
         );
       } else {
-        deleteAnalytics(item.config, item.stats, toastNotificationService);
+        deleteAnalytics(item.config, toastNotificationService);
       }
     }
   };

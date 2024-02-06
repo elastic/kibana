@@ -44,6 +44,7 @@ export interface MlGenericUrlPageState extends MlIndexBasedSearchState {
 
 export type MlGenericUrlState = MLPageState<
   | typeof ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER
+  | typeof ML_PAGES.DATA_VISUALIZER_ESQL
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER
   | typeof ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_ADVANCED

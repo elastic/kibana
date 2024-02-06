@@ -7,6 +7,9 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 
 // Since version 8.4.0
+
+export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;
+
 export const cspBenchmarkRuleMetadataSchema = schema.object({
   audit: schema.string(),
   benchmark: schema.object({
@@ -34,5 +37,3 @@ export const cspBenchmarkRuleSchema = schema.object({
   metadata: cspBenchmarkRuleMetadataSchema,
   muted: schema.boolean(),
 });
-
-export type CspBenchmarkRule = TypeOf<typeof cspBenchmarkRuleSchema>;

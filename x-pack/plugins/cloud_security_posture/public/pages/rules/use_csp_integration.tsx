@@ -12,8 +12,8 @@ import {
   agentPolicyRouteService,
   API_VERSIONS,
 } from '@kbn/fleet-plugin/common';
-import { type PageUrlParams } from './rules_container';
 import { useKibana } from '../../common/hooks/use_kibana';
+import { PageUrlParams } from '../../../common/types/rules/v3';
 
 export const useCspIntegrationInfo = ({ packagePolicyId, policyId }: PageUrlParams) => {
   const { http } = useKibana().services;

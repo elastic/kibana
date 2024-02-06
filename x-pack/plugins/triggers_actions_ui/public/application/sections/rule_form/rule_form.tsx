@@ -157,6 +157,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   validConsumers?: RuleCreationValidConsumer[];
   onChangeMetaData: (metadata: MetaData) => void;
   useRuleProducer?: boolean;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 const EMPTY_ARRAY: string[] = [];
@@ -183,6 +184,7 @@ export const RuleForm = ({
   validConsumers,
   onChangeMetaData,
   useRuleProducer,
+  initialSelectedConsumer,
 }: RuleFormProps) => {
   const {
     notifications: { toasts },
@@ -818,6 +820,7 @@ export const RuleForm = ({
               onChange={setConsumer}
               errors={errors}
               selectedConsumer={selectedConsumer}
+              initialSelectedConsumer={initialSelectedConsumer}
             />
           </EuiFlexItem>
         </>

@@ -6,14 +6,18 @@
  */
 import React from 'react';
 
+import { useValues } from 'kea';
+
 import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { generateEncodedPath } from '../../../shared/encode_path_params';
+import { HttpLogic } from '../../../shared/http';
 import { KibanaLogic } from '../../../shared/kibana';
 import { NEW_INDEX_METHOD_PATH } from '../../routes';
 
 export const CrawlerEmptyState: React.FC = () => {
+  const { errorConnectingMessage } = useValues(HttpLogic);
   return (
     <EuiPanel hasBorder>
       <EuiEmptyPrompt
@@ -39,6 +43,7 @@ export const CrawlerEmptyState: React.FC = () => {
         actions={
           <EuiButton
             color="primary"
+            disabled={Boolean(errorConnectingMessage)}
             fill
             iconType="plusInCircle"
             onClick={() =>

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CriticalityLevel } from '../asset_criticality/types';
 import type { RiskCategories } from './risk_weights/types';
 
 export enum RiskScoreEntity {
@@ -38,24 +39,41 @@ export interface SimpleRiskInput {
 export interface EcsRiskScore {
   '@timestamp': string;
   host?: {
+    name: string;
     risk: Omit<RiskScore, '@timestamp'>;
   };
   user?: {
+    name: string;
     risk: Omit<RiskScore, '@timestamp'>;
   };
 }
 
 export type RiskInputs = SimpleRiskInput[];
 
+/**
+ * The API response object representing a risk score
+ */
 export interface RiskScore {
   '@timestamp': string;
   id_field: string;
   id_value: string;
-  calculated_level: string;
+  criticality_level?: CriticalityLevel;
+  criticality_modifier?: number | undefined;
+  calculated_level: RiskLevels;
   calculated_score: number;
   calculated_score_norm: number;
   category_1_score: number;
   category_1_count: number;
+  category_2_score?: number;
+  category_2_count?: number;
   notes: string[];
   inputs: RiskInputs;
+}
+
+export enum RiskLevels {
+  unknown = 'Unknown',
+  low = 'Low',
+  moderate = 'Moderate',
+  high = 'High',
+  critical = 'Critical',
 }

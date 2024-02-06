@@ -56,7 +56,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(0);
-        expect(response.body.maxServiceCountExceeded).to.be(false);
+        expect(response.body.maxCountExceeded).to.be(false);
         expect(response.body.serviceOverflowCount).to.be(0);
       });
     }

@@ -44,7 +44,7 @@ export async function fetchEsqlQuery({
 
   const response = await esClient.transport.request<EsqlTable>({
     method: 'POST',
-    path: '/_esql',
+    path: '/_query',
     body: query,
   });
 
@@ -63,6 +63,8 @@ export async function fetchEsqlQuery({
         hits: toEsQueryHits(response),
       },
       resultLimit: alertLimit,
+      sourceFieldsParams: params.sourceFields,
+      generateSourceFieldsFromHits: true,
     }),
     index: null,
   };

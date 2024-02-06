@@ -21,6 +21,8 @@ export function createOpenAiChunk(
     choices: [
       {
         delta: msg,
+        index: 0,
+        finish_reason: null,
       },
     ],
   };

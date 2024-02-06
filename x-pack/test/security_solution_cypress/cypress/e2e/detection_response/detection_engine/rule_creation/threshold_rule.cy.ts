@@ -72,15 +72,6 @@ describe(
   'Threshold rules',
   {
     tags: ['@ess', '@serverless'],
-    env: {
-      ftrConfig: {
-        kbnServerArgs: [
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'alertSuppressionForThresholdRuleEnabled',
-          ])}`,
-        ],
-      },
-    },
   },
   () => {
     const rule = getNewThresholdRule();

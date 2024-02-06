@@ -57,26 +57,9 @@ export const currentSuggestionMock = {
             },
           },
         ],
-        allColumns: [
-          {
-            columnId: '81e332d6-ee37-42a8-a646-cea4fc75d2d3',
-            fieldName: 'Dest',
-            meta: {
-              type: 'string',
-            },
-          },
-          {
-            columnId: '5b9b8b76-0836-4a12-b9c0-980c9900502f',
-            fieldName: 'AvgTicketPrice',
-            meta: {
-              type: 'number',
-            },
-          },
-        ],
         timeField: 'timestamp',
       },
     },
-    fieldList: [],
     indexPatternRefs: [],
     initialContext: {
       dataViewSpec: {
@@ -196,26 +179,9 @@ export const allSuggestionsMock = [
               },
             },
           ],
-          allColumns: [
-            {
-              columnId: '923f0681-3fe1-4987-aa27-d9c91fb95fa6',
-              fieldName: 'Dest',
-              meta: {
-                type: 'string',
-              },
-            },
-            {
-              columnId: 'b5f41c04-4bca-4abe-ae5c-b1d4d6fb00e0',
-              fieldName: 'AvgTicketPrice',
-              meta: {
-                type: 'number',
-              },
-            },
-          ],
           timeField: 'timestamp',
         },
       },
-      fieldList: [],
       indexPatternRefs: [],
       initialContext: {
         dataViewSpec: {

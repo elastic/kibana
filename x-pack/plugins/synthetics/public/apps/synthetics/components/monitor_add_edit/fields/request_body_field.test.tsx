@@ -10,34 +10,13 @@ import 'jest-canvas-mock';
 import React, { useState, useCallback } from 'react';
 import userEvent from '@testing-library/user-event';
 import { fireEvent, waitFor } from '@testing-library/react';
-import { mockGlobals } from '../../../utils/testing';
 import { render } from '../../../utils/testing/rtl_helpers';
 import { RequestBodyField } from './request_body_field';
 import { CodeEditorMode } from '../types';
 
-mockGlobals();
-
 jest.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => ({
   htmlIdGenerator: () => () => `id-${Math.random()}`,
 }));
-
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
-  return {
-    ...original,
-    // Mocking CodeEditor, which uses React Monaco under the hood
-    CodeEditor: (props: any) => (
-      <input
-        data-test-subj={props['data-test-subj'] || 'mockCodeEditor'}
-        data-currentvalue={props.value}
-        onChange={(e: any) => {
-          props.onChange(e.jsonContent);
-        }}
-        readOnly={props.readOnly}
-      />
-    ),
-  };
-});
 
 describe('<RequestBodyField />', () => {
   const defaultMode = CodeEditorMode.PLAINTEXT;
@@ -97,7 +76,7 @@ describe('<RequestBodyField />', () => {
 
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
     const textbox = getByRole('textbox');
-    userEvent.type(textbox, 'text');
+    userEvent.type(textbox, '{selectall}{del}text');
     expect(textbox).toHaveValue('text');
 
     const xmlButton = getByText('XML').closest('button');
@@ -138,7 +117,7 @@ describe('<RequestBodyField />', () => {
     expect(getByLabelText('Text code editor')).toBeInTheDocument();
     const textbox = getByRole('textbox');
     userEvent.type(textbox, 'text');
-    expect(textbox).toHaveValue('');
+    expect(textbox).toHaveValue(defaultValue);
 
     const xmlButton = getByText('XML').closest('button');
     if (xmlButton) {
@@ -147,7 +126,7 @@ describe('<RequestBodyField />', () => {
 
     expect(xmlButton).toHaveAttribute('aria-selected', 'true');
     userEvent.type(textbox, 'xml');
-    expect(textbox).toHaveValue('');
+    expect(textbox).toHaveValue(defaultValue);
 
     const jsonButton = getByText('JSON').closest('button');
     if (jsonButton) {
@@ -156,7 +135,7 @@ describe('<RequestBodyField />', () => {
 
     expect(jsonButton).toHaveAttribute('aria-selected', 'true');
     userEvent.type(textbox, 'json');
-    expect(textbox).toHaveValue('');
+    expect(textbox).toHaveValue(defaultValue);
 
     const formButton = getByText('Form').closest('button');
     if (formButton) {

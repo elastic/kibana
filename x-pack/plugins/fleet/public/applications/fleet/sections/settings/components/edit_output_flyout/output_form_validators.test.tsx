@@ -83,6 +83,12 @@ describe('Output form validation', () => {
       expect(res).toEqual([{ message: 'URL is required' }]);
     });
 
+    it('should not work with empty url', () => {
+      const res = validateESHosts(['']);
+
+      expect(res).toEqual([{ index: 0, message: 'URL is required' }]);
+    });
+
     it('should work with valid url', () => {
       const res = validateESHosts(['https://test.fr:9200']);
 
@@ -116,6 +122,11 @@ describe('Output form validation', () => {
         { index: 0, message: 'Duplicate URL' },
         { index: 1, message: 'Duplicate URL' },
       ]);
+    });
+    it('should return an error when invalid protocol', () => {
+      const res = validateESHosts(['ftp://test.fr']);
+
+      expect(res).toEqual([{ index: 0, message: 'Invalid protocol' }]);
     });
   });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { css, keyframes } from '@emotion/css';
 import {
   EuiCallOut,
@@ -20,6 +20,8 @@ import {
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
+import { findLastIndex } from 'lodash';
+import { VisualizeESQLUserIntention } from '../../../common/functions/visualize_esql';
 import { ChatState } from '../../hooks/use_chat';
 import { useConversation } from '../../hooks/use_conversation';
 import { useLicense } from '../../hooks/use_license';
@@ -28,13 +30,17 @@ import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors'
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
 import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
-import { ChatPromptEditor } from './chat_prompt_editor';
+import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
-import { ChatActionClickType } from './types';
+import {
+  ChatActionClickHandler,
+  ChatActionClickType,
+  type ChatFlyoutSecondSlotHandler,
+} from './types';
+import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
 
@@ -92,9 +98,10 @@ export function ChatBody({
   initialConversationId,
   connectors,
   knowledgeBase,
-  connectorsManagementHref,
   currentUser,
+  showLinkToConversationsApp,
   startedFrom,
+  chatFlyoutSecondSlotHandler,
   onConversationUpdate,
 }: {
   initialTitle?: string;
@@ -102,9 +109,10 @@ export function ChatBody({
   initialConversationId?: string;
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  connectorsManagementHref: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  showLinkToConversationsApp: boolean;
   startedFrom?: StartedFrom;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
   const license = useLicense();
@@ -134,6 +142,18 @@ export function ChatBody({
       conversation.loading
   );
 
+  let title = conversation.value?.conversation.title || initialTitle;
+
+  if (!title) {
+    if (!connectors.selectedConnector) {
+      title = ASSISTANT_SETUP_TITLE;
+    } else if (!hasCorrectLicense && !initialConversationId) {
+      title = UPGRADE_LICENSE_TITLE;
+    } else {
+      title = EMPTY_CONVERSATION_TITLE;
+    }
+  }
+
   const containerClassName = css`
     max-height: 100%;
     max-width: ${startedFrom === 'conversationView'
@@ -160,13 +180,13 @@ export function ChatBody({
     }
   };
 
-  const handleChangeHeight = (editorHeight: number) => {
+  const handleChangeHeight = useCallback((editorHeight: number) => {
     if (editorHeight === 0) {
       setPromptEditorHeight(0);
     } else {
       setPromptEditorHeight(editorHeight + PADDING_AND_BORDER);
     }
-  };
+  }, []);
 
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
@@ -203,6 +223,72 @@ export function ChatBody({
     navigator.clipboard?.writeText(content || '');
   };
 
+  const handleActionClick: ChatActionClickHandler = (payload) => {
+    setStickToBottom(true);
+    switch (payload.type) {
+      case ChatActionClickType.executeEsqlQuery:
+        next(
+          messages.concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'execute_query',
+                arguments: JSON.stringify({
+                  query: payload.query,
+                }),
+                trigger: MessageRole.User,
+              },
+            },
+          })
+        );
+        break;
+      case ChatActionClickType.updateVisualization:
+        const visualizeQueryMessagesIndex = messages.findIndex(
+          ({ message }) => message.name === 'visualize_query'
+        );
+        next(
+          messages.slice(0, visualizeQueryMessagesIndex).concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'visualize_query',
+                arguments: JSON.stringify({
+                  query: payload.query,
+                  userOverrides: payload.userOverrides,
+                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                }),
+                trigger: MessageRole.User,
+              },
+            },
+          })
+        );
+        break;
+      case ChatActionClickType.visualizeEsqlQuery:
+        next(
+          messages.concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'visualize_query',
+                arguments: JSON.stringify({
+                  query: payload.query,
+                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                }),
+                trigger: MessageRole.User,
+              },
+            },
+          })
+        );
+        break;
+    }
+  };
+
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
@@ -214,7 +300,7 @@ export function ChatBody({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatPromptEditor
+            <PromptEditor
               hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
               disabled
@@ -257,13 +343,13 @@ export function ChatBody({
                   chatState={state}
                   hasConnector={!!connectors.connectors?.length}
                   onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
                     const indexOf = messages.indexOf(editedMessage);
                     next(messages.slice(0, indexOf).concat(newMessage));
                   }}
                   onFeedback={handleFeedback}
                   onRegenerate={(message) => {
-                    const indexOf = messages.indexOf(message);
-                    next(messages.slice(0, indexOf));
+                    next(reverseToLastUserMessage(messages, message));
                   }}
                   onSendTelemetry={(eventWithPayload) =>
                     sendEvent(chatService.analytics, eventWithPayload)
@@ -271,29 +357,8 @@ export function ChatBody({
                   onStopGenerating={() => {
                     stop();
                   }}
-                  onActionClick={(payload) => {
-                    setStickToBottom(true);
-                    switch (payload.type) {
-                      case ChatActionClickType.executeEsqlQuery:
-                        next(
-                          messages.concat({
-                            '@timestamp': new Date().toISOString(),
-                            message: {
-                              role: MessageRole.Assistant,
-                              content: '',
-                              function_call: {
-                                name: 'execute_query',
-                                arguments: JSON.stringify({
-                                  query: payload.query,
-                                }),
-                                trigger: MessageRole.User,
-                              },
-                            },
-                          })
-                        );
-                        break;
-                    }
-                  }}
+                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
+                  onActionClick={handleActionClick}
                 />
               )}
             </EuiPanel>
@@ -313,14 +378,14 @@ export function ChatBody({
             color="subdued"
             className={promptEditorContainerClassName}
           >
-            <ChatPromptEditor
+            <PromptEditor
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
               hidden={connectors.loading || connectors.connectors?.length === 0}
               loading={isLoading}
+              onChangeHeight={handleChangeHeight}
               onSendTelemetry={(eventWithPayload) =>
                 sendEvent(chatService.analytics, eventWithPayload)
               }
-              onChangeHeight={handleChangeHeight}
               onSubmit={(message) => {
                 setStickToBottom(true);
                 return next(messages.concat(message));
@@ -382,7 +447,7 @@ export function ChatBody({
           </EuiCallOut>
         ) : null}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem grow={false} css={{ paddingRight: showLinkToConversationsApp ? '24px' : '0' }}>
         <ChatHeader
           connectors={connectors}
           conversationId={
@@ -390,12 +455,10 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
-          connectorsManagementHref={connectorsManagementHref}
-          knowledgeBase={knowledgeBase}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
-          startedFrom={startedFrom}
-          title={conversation.value?.conversation.title || initialTitle || EMPTY_CONVERSATION_TITLE}
+          showLinkToConversationsApp={showLinkToConversationsApp}
+          title={title}
           onCopyConversation={handleCopyConversation}
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
@@ -408,4 +471,20 @@ export function ChatBody({
       {footer}
     </EuiFlexGroup>
   );
+}
+
+// Exported for testing only
+export function reverseToLastUserMessage(messages: Message[], message: Message) {
+  // Drop messages after and including the one marked for regeneration
+  const indexOf = messages.indexOf(message);
+  const previousMessages = messages.slice(0, indexOf);
+
+  // Go back to the last written user message to fully regenerate function calls
+  const lastUserMessageIndex = findLastIndex(
+    previousMessages,
+    (aMessage: Message) => aMessage.message.role === 'user' && !aMessage.message.name
+  );
+  const nextMessages = previousMessages.slice(0, lastUserMessageIndex + 1);
+
+  return nextMessages;
 }

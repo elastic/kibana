@@ -14,6 +14,7 @@ import {
   fetchHistoricalSummaryParamsSchema,
   findSloDefinitionsParamsSchema,
   findSLOParamsSchema,
+  findSLOGroupsParamsSchema,
   getPreviewDataParamsSchema,
   getSLOBurnRatesParamsSchema,
   getSLOInstancesParamsSchema,
@@ -34,6 +35,7 @@ import {
   GetSLO,
   KibanaSavedObjectsSLORepository,
   UpdateSLO,
+  FindSLOGroups,
 } from '../../services/slo';
 import { FetchHistoricalSummary } from '../../services/slo/fetch_historical_summary';
 import { FindSLODefinitions } from '../../services/slo/find_slo_definitions';
@@ -91,7 +93,7 @@ const createSLORoute = createObservabilityServerRoute({
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -114,6 +116,42 @@ const createSLORoute = createObservabilityServerRoute({
   },
 });
 
+const inspectSLORoute = createObservabilityServerRoute({
+  endpoint: 'POST /internal/api/observability/slos/_inspect 2023-10-31',
+  options: {
+    tags: ['access:slo_write'],
+    access: 'public',
+  },
+  params: createSLOParamsSchema,
+  handler: async ({ context, params, logger, dependencies, request }) => {
+    await assertPlatinumLicense(context);
+
+    const spaceId =
+      (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
+
+    const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+    const soClient = (await context.core).savedObjects.client;
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
+    const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
+    const summaryTransformManager = new DefaultSummaryTransformManager(
+      new DefaultSummaryTransformGenerator(),
+      esClient,
+      logger
+    );
+
+    const createSLO = new CreateSLO(
+      esClient,
+      repository,
+      transformManager,
+      summaryTransformManager,
+      logger,
+      spaceId
+    );
+
+    return createSLO.inspect(params.body);
+  },
+});
+
 const updateSLORoute = createObservabilityServerRoute({
   endpoint: 'PUT /api/observability/slos/{id} 2023-10-31',
   options: {
@@ -129,7 +167,7 @@ const updateSLORoute = createObservabilityServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const soClient = (await context.core).savedObjects.client;
 
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -172,7 +210,7 @@ const deleteSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const rulesClient = getRulesClientWithRequest(request);
 
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
 
     const summaryTransformManager = new DefaultSummaryTransformManager(
@@ -200,12 +238,12 @@ const getSLORoute = createObservabilityServerRoute({
     access: 'public',
   },
   params: getSLOParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const summaryClient = new DefaultSummaryClient(esClient);
     const getSLO = new GetSLO(repository, summaryClient);
 
@@ -228,7 +266,7 @@ const enableSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -257,7 +295,7 @@ const disableSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -288,7 +326,7 @@ const resetSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
     const summaryTransformManager = new DefaultSummaryTransformManager(
       new DefaultSummaryTransformGenerator(),
@@ -323,15 +361,33 @@ const findSLORoute = createObservabilityServerRoute({
 
     const spaceId =
       (await dependencies.spaces?.spacesService?.getActiveSpace(request))?.id ?? 'default';
-
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const summarySearchClient = new DefaultSummarySearchClient(esClient, logger, spaceId);
     const findSLO = new FindSLO(repository, summarySearchClient);
 
     const response = await findSLO.execute(params?.query ?? {});
 
+    return response;
+  },
+});
+
+const findSLOGroupsRoute = createObservabilityServerRoute({
+  endpoint: 'GET /internal/api/observability/slos/_groups',
+  options: {
+    tags: ['access:slo_read'],
+    access: 'internal',
+  },
+  params: findSLOGroupsParamsSchema,
+  handler: async ({ context, request, params, logger, dependencies }) => {
+    await assertPlatinumLicense(context);
+    const spaceId =
+      (await dependencies.spaces?.spacesService.getActiveSpace(request))?.id ?? 'default';
+    const coreContext = context.core;
+    const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
+    const findSLOGroups = new FindSLOGroups(esClient, logger, spaceId);
+    const response = await findSLOGroups.execute(params?.query ?? {});
     return response;
   },
 });
@@ -358,11 +414,11 @@ const findSloDefinitionsRoute = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: findSloDefinitionsParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const findSloDefinitions = new FindSLODefinitions(repository);
 
     const response = await findSloDefinitions.execute(params?.query ?? {});
@@ -377,12 +433,12 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
     tags: ['access:slo_read'],
   },
   params: fetchHistoricalSummaryParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
 
     const fetchSummaryData = new FetchHistoricalSummary(repository, historicalSummaryClient);
@@ -400,12 +456,12 @@ const getSLOInstancesRoute = createObservabilityServerRoute({
     access: 'internal',
   },
   params: getSLOInstancesParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
     const soClient = (await context.core).savedObjects.client;
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
 
     const getSLOInstances = new GetSLOInstances(repository, esClient);
 
@@ -445,7 +501,7 @@ const getSloBurnRates = createObservabilityServerRoute({
     access: 'internal',
   },
   params: getSLOBurnRatesParamsSchema,
-  handler: async ({ context, params }) => {
+  handler: async ({ context, params, logger }) => {
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -457,6 +513,7 @@ const getSloBurnRates = createObservabilityServerRoute({
       {
         soClient,
         esClient,
+        logger,
       }
     );
     return { burnRates };
@@ -481,6 +538,7 @@ const getPreviewData = createObservabilityServerRoute({
 
 export const sloRouteRepository = {
   ...createSLORoute,
+  ...inspectSLORoute,
   ...deleteSLORoute,
   ...deleteSloInstancesRoute,
   ...disableSLORoute,
@@ -495,4 +553,5 @@ export const sloRouteRepository = {
   ...getPreviewData,
   ...getSLOInstancesRoute,
   ...resetSLORoute,
+  ...findSLOGroupsRoute,
 };

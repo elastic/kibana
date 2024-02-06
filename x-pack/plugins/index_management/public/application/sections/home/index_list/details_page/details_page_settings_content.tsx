@@ -24,7 +24,8 @@ import { css } from '@emotion/react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
+import { monaco as monacoEditor } from '@kbn/monaco';
 import { IndexSettingsResponse } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
@@ -39,11 +40,9 @@ import { AppDependencies, useAppContext } from '../../../../app_context';
 
 const getEditableSettings = ({
   data,
-  isIndexOpen,
   editableIndexSettings,
 }: {
   data: Props['data'];
-  isIndexOpen: boolean;
   editableIndexSettings: AppDependencies['config']['editableIndexSettings'];
 }): { originalSettings: Record<string, any>; settingsString: string } => {
   const { defaults, settings } = data;
@@ -62,23 +61,17 @@ const getEditableSettings = ({
     readOnlySettings.forEach((e) => delete newSettings[e]);
   }
 
-  // can't change codec on an open index
-  if (isIndexOpen) {
-    delete newSettings['index.codec'];
-  }
   const settingsString = JSON.stringify(newSettings, null, 2);
   return { originalSettings: newSettings, settingsString };
 };
 
 interface Props {
-  isIndexOpen: boolean;
   data: IndexSettingsResponse;
   indexName: string;
   reloadIndexSettings: () => void;
 }
 
 export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
-  isIndexOpen,
   data,
   indexName,
   reloadIndexSettings,
@@ -94,7 +87,6 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
 
   const { originalSettings, settingsString } = getEditableSettings({
     data,
-    isIndexOpen,
     editableIndexSettings,
   });
   const [editableSettings, setEditableSettings] = useState(settingsString);
@@ -152,6 +144,14 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
       });
     }
   }, [originalSettings, editableSettings, indexName, reloadIndexSettings]);
+  const settingsSchemaProperties = {} as Record<string, unknown>;
+  Object.keys(originalSettings).forEach(
+    // allow any type of value
+    (setting) =>
+      (settingsSchemaProperties[setting] = {
+        type: ['null', 'boolean', 'object', 'array', 'number', 'string'],
+      })
+  );
   return (
     // using "rowReverse" to keep the card on the left side to be on top of the code block on smaller screens
     <EuiFlexGroup
@@ -266,6 +266,21 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           {isEditMode ? (
             <CodeEditor
               languageId="json"
+              editorDidMount={(editor) => {
+                monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+                  validate: true,
+                  schemas: [
+                    {
+                      uri: editor.getModel()?.uri.toString() ?? '',
+                      fileMatch: ['*'],
+                      schema: {
+                        type: 'object',
+                        properties: settingsSchemaProperties,
+                      },
+                    },
+                  ],
+                });
+              }}
               value={editableSettings}
               data-test-subj="indexDetailsSettingsEditor"
               options={{

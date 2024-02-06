@@ -314,6 +314,7 @@ export interface GetFieldsOptions {
   includeUnmapped?: boolean;
   fields?: string[];
   allowHidden?: boolean;
+  forceRefresh?: boolean;
 }
 
 /**
@@ -322,6 +323,7 @@ export interface GetFieldsOptions {
 export interface FieldsForWildcardResponse {
   fields: FieldSpec[];
   indices: string[];
+  etag?: string;
 }
 
 /**
@@ -405,6 +407,10 @@ export type FieldSpec = DataViewFieldBase & {
    * True if field is aggregatable
    */
   aggregatable: boolean;
+  /**
+   * True if field is empty
+   */
+  isNull?: boolean;
   /**
    * True if can be read from doc values
    */
@@ -542,4 +548,6 @@ export interface HasDataService {
 
 export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
+  fieldListCachingEnabled?: boolean;
 }

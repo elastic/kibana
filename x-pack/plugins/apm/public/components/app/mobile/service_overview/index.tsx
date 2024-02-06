@@ -34,6 +34,7 @@ import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileStats } from './stats/stats';
 import { MobileLocationStats } from './stats/location_stats';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -43,6 +44,7 @@ export const chartHeight = 288;
 export function MobileServiceOverview() {
   const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
+  const { dataView } = useAdHocApmDataView();
 
   const {
     query,
@@ -122,6 +124,7 @@ export function MobileServiceOverview() {
                     end={end}
                     kuery={kueryWithMobileFilters}
                     filters={embeddableFilters}
+                    dataView={dataView}
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={3}>
