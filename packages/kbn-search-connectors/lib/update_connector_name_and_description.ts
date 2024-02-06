@@ -8,8 +8,6 @@
 
 import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-import { isNotFoundException } from '../utils/identify_exceptions';
 
 import { Connector } from '../types/connectors';
 
@@ -18,26 +16,14 @@ export const updateConnectorNameAndDescription = async (
   connectorId: string,
   connectorUpdates: Partial<Pick<Connector, 'name' | 'description'>>
 ): Promise<Result> => {
-  try {
-    const { name, description } = connectorUpdates;
-    const result = await client.transport.request<Result>({
-      method: 'PUT',
-      path: `/_connector/${connectorId}/_name`,
-      body: {
-        name,
-        description,
-      },
-    });
-    return result;
-  } catch (err) {
-    if (isNotFoundException(err)) {
-      throw new Error(
-        i18n.translate('searchConnectors.server.connectors.nameAndDescription.error', {
-          defaultMessage: 'Could not find document',
-        })
-      );
-    }
-
-    throw err;
-  }
+  const { name, description } = connectorUpdates;
+  const result = await client.transport.request<Result>({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_name`,
+    body: {
+      name,
+      description,
+    },
+  });
+  return result;
 };

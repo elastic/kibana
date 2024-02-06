@@ -68,6 +68,15 @@ describe('updateConnectorNameAndDescription lib function', () => {
           description: 'connector-description',
         }
       )
-    ).rejects.toEqual(new Error('Could not find document'));
+    ).rejects.toEqual(
+      new errors.ResponseError({
+        statusCode: 404,
+        body: {
+          error: {
+            type: `document_missing_exception`,
+          },
+        },
+      } as any)
+    );
   });
 });
