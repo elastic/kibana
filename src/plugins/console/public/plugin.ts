@@ -127,7 +127,8 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
       };
       consoleStart.isEmbeddedConsoleAvailable = () =>
         this._embeddableConsole.isEmbeddedConsoleAvailable();
-      consoleStart.openEmbeddedConsole = () => this._embeddableConsole.openEmbeddedConsole();
+      consoleStart.openEmbeddedConsole = (content?: string) =>
+        this._embeddableConsole.openEmbeddedConsole(content);
     }
 
     return consoleStart;

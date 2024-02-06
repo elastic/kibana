@@ -26,6 +26,7 @@ import {
 } from '../../../types/embeddable_console';
 
 import * as store from '../../stores/embeddable_console';
+import { setLoadFromParameter, removeLoadFromParameter } from '../../lib/load_from';
 
 import { ConsoleWrapper } from './console_wrapper';
 import './_index.scss';
@@ -50,6 +51,13 @@ export const EmbeddableConsole = ({
     setDispatch(consoleDispatch);
     return () => setDispatch(null);
   }, [setDispatch, consoleDispatch]);
+  useEffect(() => {
+    if (consoleState.isOpen && consoleState.loadFromContent) {
+      setLoadFromParameter(consoleState.loadFromContent);
+    } else if (!consoleState.isOpen) {
+      removeLoadFromParameter();
+    }
+  }, [consoleState.isOpen, consoleState.loadFromContent]);
 
   const isConsoleOpen = consoleState.isOpen;
   const setIsConsoleOpen = (value: boolean) => {

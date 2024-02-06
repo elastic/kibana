@@ -36,7 +36,7 @@ export const TryInConsoleButton = ({
       <EuiButtonEmpty
         iconType="popout"
         size="s"
-        onClick={() => consolePlugin?.openEmbeddedConsole?.()}
+        onClick={() => consolePlugin?.openEmbeddedConsole?.(request)}
       >
         <FormattedMessage
           id="searchApiPanels.welcomeBanner.tryInConsoleButton"

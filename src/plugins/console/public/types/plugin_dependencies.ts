@@ -56,5 +56,5 @@ export interface ConsolePluginStart {
    * openEmbeddedConsole is available if the embedded console can be rendered. Calling
    * this function will open the embedded console on the page if it is currently rendered.
    */
-  openEmbeddedConsole?: () => void;
+  openEmbeddedConsole?: (content?: string) => void;
 }

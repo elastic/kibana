@@ -25,12 +25,14 @@ export const reducer: Reducer<EmbeddedConsoleStore, EmbeddedConsoleAction> = (st
       case 'open':
         if (!state.isOpen) {
           draft.isOpen = true;
+          draft.loadFromContent = action.payload?.content;
           return;
         }
         break;
       case 'close':
         if (state.isOpen) {
           draft.isOpen = false;
+          draft.loadFromContent = undefined;
           return;
         }
         break;

@@ -25,7 +25,11 @@ export interface EmbeddableConsoleDependencies {
   setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
 }
 
-export type EmbeddedConsoleAction = { type: 'open' } | { type: 'close' };
+export type EmbeddedConsoleAction =
+  | { type: 'open'; payload?: { content?: string } }
+  | { type: 'close' };
+
 export interface EmbeddedConsoleStore {
   isOpen: boolean;
+  loadFromContent?: string;
 }

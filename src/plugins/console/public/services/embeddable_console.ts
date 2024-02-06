@@ -20,10 +20,10 @@ export class EmbeddableConsoleInfo {
     return this._dispatch !== null;
   }
 
-  public openEmbeddedConsole() {
+  public openEmbeddedConsole(content?: string) {
     // Embedded Console is not rendered on the page, nothing to do
     if (!this._dispatch) return;
 
-    this._dispatch({ type: 'open' });
+    this._dispatch({ type: 'open', payload: content ? { content } : undefined });
   }
 }
