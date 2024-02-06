@@ -99,7 +99,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   if (headlessBrowser === '1') {
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
-    options.headless();
+    options.addArguments('headless=old');
     options.addArguments('disable-gpu');
   }
 
@@ -109,7 +109,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
   if (remoteDebug === '1') {
     // Visit chrome://inspect in chrome to remotely view/debug
-    options.headless();
+    options.addArguments('headless=old');
     options.addArguments('disable-gpu', 'remote-debugging-port=9222');
   }
 
@@ -224,8 +224,8 @@ async function attemptToCreateCommand(
         firefoxOptions.setAcceptInsecureCerts(config.acceptInsecureCerts);
 
         if (headlessBrowser === '1') {
-          // See: https://developer.mozilla.org/en-US/docs/Mozilla/Firefox/Headless_mode
-          firefoxOptions.headless();
+          // See: https://developer.mozilla.org/en-US/docs/Web/WebDriver/Capabilities/firefoxOptions
+          firefoxOptions.addArguments('-headless');
         }
 
         // Windows issue with stout socket https://github.com/elastic/kibana/issues/52053
