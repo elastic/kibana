@@ -253,7 +253,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
 
-          // sort only in case of empty columns to correctly align columns to items in values array 
+          // sort only in case of empty columns to correctly align columns to items in values array
           if (hasEmptyColumns) {
             allColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
           }
