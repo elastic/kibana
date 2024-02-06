@@ -50,12 +50,15 @@ export type { PendingMessage };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
-  chat: (options: {
-    messages: Message[];
-    connectorId: string;
-    function?: 'none' | 'auto';
-    signal: AbortSignal;
-  }) => Observable<StreamingChatResponseEventWithoutError>;
+  chat: (
+    name: string,
+    options: {
+      messages: Message[];
+      connectorId: string;
+      function?: 'none' | 'auto';
+      signal: AbortSignal;
+    }
+  ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
     messages: Message[];
     connectorId: string;
