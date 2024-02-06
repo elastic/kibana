@@ -35,7 +35,14 @@ import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strateg
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 
-const getTableColumns = (riskEntity?: RiskScoreEntity): Array<EuiBasicTableColumn<TableItem>> => [
+interface RiskLevelTableItem {
+  range?: string;
+  level: RiskSeverity;
+}
+
+const getRiskLevelTableColumns = (
+  riskEntity?: RiskScoreEntity
+): Array<EuiBasicTableColumn<RiskLevelTableItem>> => [
   {
     field: 'level',
     name: i18n.INFORMATION_LEVEL_HEADER,
@@ -51,12 +58,7 @@ const getTableColumns = (riskEntity?: RiskScoreEntity): Array<EuiBasicTableColum
   },
 ];
 
-interface TableItem {
-  range?: string;
-  level: RiskSeverity;
-}
-
-const tableItems: TableItem[] = [
+const riskLevelTableItems: RiskLevelTableItem[] = [
   { level: RiskSeverity.critical, range: i18n.CRITICAL_RISK_DESCRIPTION },
   { level: RiskSeverity.high, range: '70 - 90 ' },
   { level: RiskSeverity.moderate, range: '40 - 70' },
@@ -235,9 +237,9 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
         </EuiText>
         <EuiSpacer />
         <EuiBasicTable
-          columns={getTableColumns()}
-          items={tableItems}
-          data-test-subj="risk-information-table"
+          columns={getRiskLevelTableColumns()}
+          items={riskLevelTableItems}
+          data-test-subj="risk-level-information-table"
         />
         <EuiSpacer size="l" />
         <RiskScoreDocLink

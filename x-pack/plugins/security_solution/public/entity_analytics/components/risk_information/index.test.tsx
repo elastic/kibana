@@ -38,7 +38,7 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
 
           fireEvent.click(getByTestId('open-risk-information-flyout-trigger'));
 
-          expect(queryByTestId('risk-information-table')).toBeInTheDocument();
+          expect(queryByTestId('risk-level-information-table')).toBeInTheDocument();
           expect(queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
         });
       }
