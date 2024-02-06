@@ -9,6 +9,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const find = getService('find');
   const config = getService('config');
   const pageObjects = getPageObjects(['security', 'common']);
   const retry = getService('retry');
@@ -38,46 +39,54 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           await pageObjects.common.sleep(2000);
           // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
           log.debug(`Navigate to /bootstrap.js`);
-          await browser.get(deployment.getHostPort() + '/bootstrap.js');
-          const alert1 = await browser.getAlert();
-          await alert1?.accept();
+          await browser.get(deployment.getHostPort() + '/bootstrap.js', false);
+          log.debug(`Wait for bootstrap page to be loaded`);
+          await find.byCssSelector('body > pre', 5000);
+          let alert = await browser.getAlert();
+          if (alert) {
+            log.debug(`Closing alert after loading /bootstrap.js`);
+            await alert.accept();
+          }
           log.debug(`Set the new cookie in the current browser context`);
           await browser.setCookie('sid', sidCookie);
+          await pageObjects.common.sleep(1000);
           // Cookie should be already set in the browsing context, navigating to the Home page
           log.debug(`Navigate to base url`);
-          await browser.get(deployment.getHostPort());
-          log.debug(`Close alert if any`);
-          const alert = await browser.getAlert();
-          await alert?.accept();
+          await browser.get(deployment.getHostPort(), false);
+          alert = await browser.getAlert();
+          if (alert) {
+            log.debug(`Closing alert after loading base url`);
+            await alert.accept();
+          }
           // Verifying that we are logged in
           if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
-            return true;
           } else {
             throw new Error(`Failed to login with cookie for '${role}' role`);
           }
+          // Validating that the new cookie in the browser is set for the correct user
+          const browserCookies = await browser.getCookies();
+          if (browserCookies.length === 0) {
+            throw new Error(`The cookie is missing in browser context`);
+          }
+          const { body } = await supertestWithoutAuth
+            .get('/internal/security/me')
+            .set(svlCommonApi.getInternalRequestHeader())
+            .set({ Cookie: `sid=${browserCookies[0].value}` });
+
+          const userData = await svlUserManager.getUserData(role);
+          // email returned from API call must match the email for the specified role
+          if (body.email === userData.email) {
+            log.debug(`The new cookie is properly set for  '${role}' role`);
+            return true;
+          } else {
+            log.debug(`API response body: ${JSON.stringify(body)}`);
+            throw new Error(
+              `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
+            );
+          }
         }
       );
-
-      // Validating that the new cookie in the browser is set for the correct user
-      const browserCookies = await browser.getCookies();
-      if (browserCookies.length === 0) {
-        throw new Error(`The cookie is missing in browser context`);
-      }
-      const { body } = await supertestWithoutAuth
-        .get('/internal/security/me')
-        .set(svlCommonApi.getInternalRequestHeader())
-        .set({ Cookie: `sid=${browserCookies[0].value}` });
-
-      const userData = await svlUserManager.getUserData(role);
-      // email returned from API call must match the email for the specified role
-      if (body.email === userData.email) {
-        log.debug(`The new cookie is properly set for  '${role}' role`);
-      } else {
-        throw new Error(
-          `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
-        );
-      }
     },
 
     async loginAsAdmin() {
