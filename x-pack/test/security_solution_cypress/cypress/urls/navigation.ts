@@ -6,7 +6,6 @@
  */
 
 export const KIBANA_HOME = '/app/home#/';
-export const KIBANA_SAVED_OBJECTS = '/app/management/kibana/objects';
 export const LOGOUT_URL = '/logout';
 
 // Common

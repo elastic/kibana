@@ -17,10 +17,15 @@ import {
   useGetFleetServerHosts,
   useFlyoutContext,
   useGetFleetProxies,
+  useStartServices,
 } from '../../hooks';
 import { FLEET_ROUTING_PATHS, pagePathGetters } from '../../constants';
 import { DefaultLayout } from '../../layouts';
 import { Loading } from '../../components';
+import {
+  SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
+  SERVERLESS_DEFAULT_OUTPUT_ID,
+} from '../../../../../common/constants';
 
 import { FleetServerFlyout } from '../../components';
 
@@ -78,6 +83,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
     history,
   ]);
 
+  const { cloud } = useStartServices();
+
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
     !outputItems ||
@@ -120,12 +127,26 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_server_hosts}>
           <EuiPortal>
-            <FleetServerFlyout onClose={onCloseCallback} />
+            {cloud?.isServerlessEnabled ? (
+              <FleetServerHostsFlyout
+                proxies={proxies.data?.items ?? []}
+                onClose={onCloseCallback}
+                defaultFleetServerHost={fleetServerHosts.data?.items.find(
+                  (o) => o.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+                )}
+              />
+            ) : (
+              <FleetServerFlyout onClose={onCloseCallback} />
+            )}
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_outputs}>
           <EuiPortal>
-            <EditOutputFlyout proxies={proxies.data.items} onClose={onCloseCallback} />
+            <EditOutputFlyout
+              proxies={proxies.data.items}
+              onClose={onCloseCallback}
+              defaultOuput={outputs.data?.items.find((o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID)}
+            />
           </EuiPortal>
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_create_fleet_proxy}>
@@ -161,6 +182,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
                   proxies={proxies.data?.items ?? []}
                   onClose={onCloseCallback}
                   output={output}
+                  defaultOuput={outputs.data?.items.find(
+                    (o) => o.id === SERVERLESS_DEFAULT_OUTPUT_ID
+                  )}
                 />
               </EuiPortal>
             );
