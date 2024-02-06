@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 
 export function ActionsMenu({
   connectors,
@@ -31,12 +33,23 @@ export function ActionsMenu({
       title: 'Actions',
       items: [
         {
-          name: `Connectors: ${connectors.selectedConnector}`,
+          name: (
+            <div className="eui-textTruncate">
+              {i18n.translate('xpack.observabilityAiAssistant.insight.actions.connector', {
+                defaultMessage: 'Connector',
+              })}{' '}
+              <strong>
+                {connectors.connectors?.find(({ id }) => id === connectors.selectedConnector)?.name}
+              </strong>
+            </div>
+          ),
           icon: 'wrench',
           panel: 1,
         },
         {
-          name: 'Edit prompt',
+          name: i18n.translate('xpack.observabilityAiAssistant.insight.actions.editPrompt', {
+            defaultMessage: 'Edit prompt',
+          }),
           icon: 'documentEdit',
           onClick: () => {
             onEditPrompt();
@@ -47,22 +60,22 @@ export function ActionsMenu({
     },
     {
       id: 1,
-      title: 'Connectors',
-      items: connectors.connectors?.map((connector) => {
-        return {
-          name: connector.name,
-          icon: connector.id === connectors.selectedConnector ? 'check' : undefined,
-          onClick: () => {
-            connectors.selectConnector(connector.id);
-            closePopover();
-          },
-        };
+      title: i18n.translate('xpack.observabilityAiAssistant.insight.actions.connector', {
+        defaultMessage: 'Connector',
       }),
+      content: (
+        <EuiPanel>
+          <ConnectorSelectorBase {...connectors} />
+        </EuiPanel>
+      ),
     },
   ];
 
   const button = (
     <EuiButtonIcon
+      aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.openActions', {
+        defaultMessage: 'Open insight actions',
+      })}
       data-test-subj="observabilityAiAssistantInsightActionsButtonIcon"
       iconType="boxesHorizontal"
       onClick={onButtonClick}

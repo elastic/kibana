@@ -10,6 +10,8 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiSpacer,
+  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -146,6 +148,11 @@ function PromptEdit({
       <EuiFlexItem grow={true}>
         <EuiTextArea
           data-test-subj="observabilityAiAssistantInsightEditPromptTextArea"
+          inputRef={(textarea) => {
+            if (textarea) {
+              setTimeout(() => textarea.focus());
+            }
+          }}
           fullWidth={true}
           defaultValue={prompt}
           onChange={(ev) => {
@@ -155,21 +162,27 @@ function PromptEdit({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonIcon
-          data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
-          iconType="kqlFunction"
-          display="fill"
-          size="m"
-          onClick={() => onSend(prompt)}
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
+          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.cancelPromptEdit', {
+            defaultMessage: 'Cancel',
+          })}
           data-test-subj="observabilityAiAssistantInsightCancelEditPromptButtonIcon"
           iconType="cross"
           display="base"
           color="danger"
           size="m"
           onClick={onCancel}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiButtonIcon
+          aria-label={i18n.translate('xpack.observabilityAiAssistant.insight.sendPromptEdit', {
+            defaultMessage: 'Send prompt',
+          })}
+          data-test-subj="observabilityAiAssistantInsightSendEditPromptButtonIcon"
+          iconType="kqlFunction"
+          display="fill"
+          size="m"
+          onClick={() => onSend(prompt)}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -200,7 +213,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     [service]
   );
 
-  const handleSend = (newPrompt) => {
+  const handleSend = (newPrompt: string) => {
     const clonedMessages = cloneDeep(messages);
     const message = last(clonedMessages.filter((msg) => msg.message.role === MessageRole.User));
     if (!message) return false;
@@ -234,9 +247,11 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
           <>
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
-                {i18n.translate('xpack.observabilityAiAssistant.insightModifiedPrompt', {
-                  defaultMessage: 'This insight has been modified.',
-                })}
+                <EuiText size="xs">
+                  {i18n.translate('xpack.observabilityAiAssistant.insightModifiedPrompt', {
+                    defaultMessage: 'This insight has been modified.',
+                  })}
+                </EuiText>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
@@ -248,14 +263,17 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
                     setInitialMessages(messages);
                   }}
                 >
-                  {i18n.translate('xpack.observabilityAiAssistant.resetDefaultPrompt', {
-                    defaultMessage: 'Reset to default',
-                  })}
+                  <EuiText size="xs">
+                    {i18n.translate('xpack.observabilityAiAssistant.resetDefaultPrompt', {
+                      defaultMessage: 'Reset to default',
+                    })}
+                  </EuiText>
                 </EuiButtonEmpty>
               </EuiFlexItem>
             </EuiFlexGroup>
 
-            <EuiHorizontalRule size="full" margin="s" />
+            <EuiHorizontalRule size="full" margin="none" />
+            <EuiSpacer size="m" />
           </>
         ) : null}
 
