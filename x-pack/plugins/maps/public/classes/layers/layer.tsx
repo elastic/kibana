@@ -109,7 +109,14 @@ export interface ILayer {
   ownsMbSourceId(mbSourceId: string): boolean;
   syncLayerWithMB(mbMap: MbMap, timeslice?: Timeslice): void;
   getLayerTypeIconName(): string;
+  /*
+   * ILayer.getIndexPatternIds returns data view ids used to populate layer data.
+   */
   getIndexPatternIds(): string[];
+  /*
+   * ILayer.getQueryableIndexPatternIds returns ILayer.getIndexPatternIds or a subset of ILayer.getIndexPatternIds.
+   * Data view ids are excluded when the global query is not applied to layer data.
+   */
   getQueryableIndexPatternIds(): string[];
   getType(): LAYER_TYPE;
   isVisible(): boolean;

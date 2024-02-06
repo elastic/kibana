@@ -562,12 +562,12 @@ async function installPackageCommon(options: {
       return { error: err, installType, installSource };
     }
 
-    const savedObjectsImporter = appContextService
-      .getSavedObjects()
-      .createImporter(savedObjectsClient, { importSizeLimit: 15_000 });
-
     // Saved object client need to be scopped with the package space for saved object tagging
     const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
+    const savedObjectsImporter = appContextService
+      .getSavedObjects()
+      .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
 
     const savedObjectTagAssignmentService = appContextService
       .getSavedObjectsTagging()

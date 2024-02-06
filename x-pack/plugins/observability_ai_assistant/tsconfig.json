@@ -62,7 +62,13 @@
     "@kbn/apm-synthtrace",
     "@kbn/code-editor",
     "@kbn/safer-lodash-set",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/ui-actions-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/visualization-utils",
+    "@kbn/field-types",
+    "@kbn/es-types",
+    "@kbn/esql-utils"
   ],
   "exclude": ["target/**/*"]
 }
