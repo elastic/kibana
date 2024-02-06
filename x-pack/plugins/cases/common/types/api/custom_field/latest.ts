@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-.enterpriseSearchNavIndexLabel {
-  margin-left: $euiSizeS;
-  padding-top: $euiSizeXS;
-  padding-bottom: $euiSizeS;
-}
+export * from './v1';
