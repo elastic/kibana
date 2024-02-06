@@ -436,17 +436,17 @@ export class TimeSeriesExplorer extends React.Component {
         chartDataError: undefined,
         ...(fullRefresh
           ? {
-              chartDetails: undefined,
-              contextChartData: undefined,
-              contextForecastData: undefined,
-              focusChartData: undefined,
-              focusForecastData: undefined,
-              modelPlotEnabled:
-                isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
-                isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
-              hasResults: false,
-              dataNotChartable: false,
-            }
+            chartDetails: undefined,
+            contextChartData: undefined,
+            contextForecastData: undefined,
+            focusChartData: undefined,
+            focusForecastData: undefined,
+            modelPlotEnabled:
+              isModelPlotChartableForDetector(currentSelectedJob, selectedDetectorIndex) &&
+              isModelPlotEnabled(currentSelectedJob, selectedDetectorIndex, entityControls),
+            hasResults: false,
+            dataNotChartable: false,
+          }
           : {}),
       },
       () => {
@@ -607,7 +607,8 @@ export class TimeSeriesExplorer extends React.Component {
             detectorIndex,
             entityControls,
             searchBounds.min.valueOf(),
-            searchBounds.max.valueOf()
+            searchBounds.max.valueOf(),
+            this.props.functionDescription
           )
           .then((resp) => {
             stateUpdate.chartDetails = resp.results;
