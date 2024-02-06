@@ -36,7 +36,8 @@ export function UpdateSourceEditor(props: Props) {
 
   useEffect(() => {
     let ignore = false;
-    getIndexPatternService().get(props.sourceDescriptor.dataViewId)
+    getIndexPatternService()
+      .get(props.sourceDescriptor.dataViewId)
       .then((dataView) => {
         if (ignore) {
           return;

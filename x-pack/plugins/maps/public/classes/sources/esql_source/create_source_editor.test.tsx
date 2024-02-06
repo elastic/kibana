@@ -14,7 +14,7 @@ jest.mock('../../../kibana_services', () => ({}));
 
 describe('CreateSourceEditor', () => {
   const DEFAULT_DATA_VIEW_INDEX_PATTERN = 'logs';
-  const defaultDataView =  {
+  const defaultDataView = {
     fields: [
       {
         name: 'location',
@@ -49,7 +49,7 @@ describe('CreateSourceEditor', () => {
       return {
         create: async (spec: DataViewSpec) => {
           return {
-            ...spec.title === DEFAULT_DATA_VIEW_INDEX_PATTERN ? defaultDataView : otherDataView,
+            ...(spec.title === DEFAULT_DATA_VIEW_INDEX_PATTERN ? defaultDataView : otherDataView),
             id: spec.id,
           };
         },

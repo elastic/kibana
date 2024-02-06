@@ -68,7 +68,7 @@ export async function getESQLMeta(esql: string) {
   return {
     columns: await getColumns(esql),
     adhocDataViewId: adhocDataView.id!,
-    ...getFields(adhocDataView)
+    ...getFields(adhocDataView),
   };
 }
 
