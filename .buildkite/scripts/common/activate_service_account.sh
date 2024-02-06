@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-source .buildkite/scripts/common/vault_fns.sh
+source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
 
 BUCKET_OR_EMAIL="${1:-}"
 
@@ -23,6 +23,11 @@ CURRENT_GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(
 # Verify that the service account proxy is activated
 if [[ "$CURRENT_GCLOUD_USER" != "$GCLOUD_SA_PROXY_EMAIL" ]]; then
     if [[ -x "$(command -v gcloud)" ]]; then
+      if [[ -z "${KIBANA_SERVICE_ACCOUNT_PROXY_KEY:-}" ]]; then
+        echo "KIBANA_SERVICE_ACCOUNT_PROXY_KEY is not set, cannot activate service account $GCLOUD_SA_PROXY_EMAIL."
+        exit 1
+      fi
+
       AUTH_RESULT=$(gcloud auth activate-service-account --key-file="$KIBANA_SERVICE_ACCOUNT_PROXY_KEY" || "FAILURE")
       if [[ "$AUTH_RESULT" == "FAILURE" ]]; then
         echo "Failed to activate service account $GCLOUD_SA_PROXY_EMAIL."

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-source .buildkite/scripts/common/vault_fns.sh
+source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
 
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
