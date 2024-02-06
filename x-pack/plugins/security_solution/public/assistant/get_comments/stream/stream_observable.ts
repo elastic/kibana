@@ -43,20 +43,21 @@ export const getStreamObservable = ({
     const chunks: string[] = [];
     // Initialize an empty string to store the OpenAI buffer.
     let openAIBuffer: string = '';
-    // Initialize an empty string to store the SSE (langchain) buffer.
-    let sseBuffer: string = '';
+    // Initialize an empty string to store the LangChain buffer.
+    let langChainBuffer: string = '';
 
     // Initialize an empty Uint8Array to store the Bedrock concatenated buffer.
     let bedrockBuffer: Uint8Array = new Uint8Array(0);
 
-    function readSSE() {
+    // read data from LangChain stream
+    function readLangChain() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
-              if (sseBuffer) {
-                const finalChunk = getSSEChunks([sseBuffer])[0];
+              if (langChainBuffer) {
+                const finalChunk = getLangChainChunks([langChainBuffer])[0];
                 if (finalChunk && finalChunk.length > 0) chunks.push(finalChunk);
               }
               observer.next({
@@ -86,10 +87,10 @@ export const getStreamObservable = ({
             } else {
               const output = decoded;
               const lines = output.split('\n');
-              lines[0] = sseBuffer + lines[0];
-              sseBuffer = lines.pop() || '';
+              lines[0] = langChainBuffer + lines[0];
+              langChainBuffer = lines.pop() || '';
 
-              nextChunks = getSSEChunks(lines);
+              nextChunks = getLangChainChunks(lines);
               nextChunks.forEach((chunk: string) => {
                 chunks.push(chunk);
                 observer.next({
@@ -103,13 +104,14 @@ export const getStreamObservable = ({
             observer.error(err);
             return;
           }
-          readSSE();
+          readLangChain();
         })
         .catch((err) => {
           observer.error(err);
         });
     }
 
+    // read data from OpenAI stream
     function readOpenAI() {
       reader
         .read()
@@ -156,6 +158,8 @@ export const getStreamObservable = ({
           observer.error(err);
         });
     }
+
+    // read data from Bedrock stream
     function readBedrock() {
       reader
         .read()
@@ -228,6 +232,7 @@ export const getStreamObservable = ({
           observer.error(err);
         });
     }
+
     // this should never actually happen
     function badConnector() {
       observer.next({
@@ -239,7 +244,7 @@ export const getStreamObservable = ({
       });
       observer.complete();
     }
-    if (isEnabledLangChain) readSSE();
+    if (isEnabledLangChain) readLangChain();
     else if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
     else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     else badConnector();
@@ -298,7 +303,12 @@ const getOpenAIChunks = (lines: string[]): string[] => {
   return nextChunk;
 };
 
-const getSSEChunks = (lines: string[]): string[] =>
+/**
+ * Parses a LangChain response from a string.
+ * @param lines
+ * @returns {string[]} - Parsed string array from the LangChain response.
+ */
+const getLangChainChunks = (lines: string[]): string[] =>
   lines.reduce((acc: string[], b: string) => {
     if (b.length) {
       try {
