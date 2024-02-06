@@ -73,6 +73,7 @@ export const saveDashboardState = async ({
   lastSavedId,
   saveOptions,
   currentState,
+  panelReferences,
   dashboardBackup,
   contentManagement,
   savedObjectsTagging,
@@ -191,7 +192,11 @@ export const saveDashboardState = async ({
     >({
       contentTypeId: DASHBOARD_CONTENT_ID,
       data: attributes,
-      options: { id: idToSaveTo, references, overwrite: true },
+      options: {
+        id: idToSaveTo,
+        references: [...references, ...(panelReferences ?? [])],
+        overwrite: true,
+      },
     });
     const newId = result.item.id;
 

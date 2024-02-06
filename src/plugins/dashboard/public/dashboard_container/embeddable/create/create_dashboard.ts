@@ -238,6 +238,13 @@ export const initializeDashboard = async ({
   };
 
   // --------------------------------------------------------------------------------------
+  // Track references
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboard) => {
+    dashboard.savedObjectReferences = loadDashboardReturn?.references;
+  });
+
+  // --------------------------------------------------------------------------------------
   // Set up unified search integration.
   // --------------------------------------------------------------------------------------
   if (useUnifiedSearchIntegration && unifiedSearchSettings?.kbnUrlStateStorage) {
