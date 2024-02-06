@@ -24,14 +24,12 @@ interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
   link?: ReactNode;
   showPerPageOptions?: boolean;
-  shouldShowSparkPlotsProp?: boolean;
 }
 
 export function ServiceOverviewDependenciesTable({
   fixedHeight,
   link,
   showPerPageOptions = true,
-  shouldShowSparkPlotsProp,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     query: {
@@ -173,7 +171,6 @@ export function ServiceOverviewDependenciesTable({
       link={link}
       showPerPageOptions={showPerPageOptions}
       initialPageSize={5}
-      shouldShowSparkPlotsProp={shouldShowSparkPlotsProp}
     />
   );
 }

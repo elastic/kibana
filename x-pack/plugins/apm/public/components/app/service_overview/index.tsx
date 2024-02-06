@@ -139,7 +139,6 @@ export function ServiceOverview() {
                     end={end}
                     showPerPageOptions={false}
                     numberOfTransactionsPerPage={5}
-                    shouldShowSparkPlotsProp={!isSingleColumn}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -209,7 +208,6 @@ export function ServiceOverview() {
                           )}
                         </EuiLink>
                       }
-                      shouldShowSparkPlotsProp={!isSingleColumn}
                     />
                   </EuiPanel>
                 </EuiFlexItem>
