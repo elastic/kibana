@@ -136,6 +136,14 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.management.addControl', {
         defaultMessage: 'Add control',
       }),
+    getApplyButtonTitle: (applyResetButtonsEnabled: boolean) =>
+      applyResetButtonsEnabled
+        ? i18n.translate('controls.controlGroup.management.applyButtonTooltip.enabled', {
+            defaultMessage: 'Apply selections',
+          })
+        : i18n.translate('controls.controlGroup.management.applyButtonTooltip.disabled', {
+            defaultMessage: 'No selections to apply',
+          }),
     getFlyoutTitle: () =>
       i18n.translate('controls.controlGroup.management.flyoutTitle', {
         defaultMessage: 'Control settings',
@@ -256,8 +264,8 @@ export const ControlGroupStrings = {
           i18n.translate('controls.controlGroup.management.validate.title', {
             defaultMessage: 'Validate user selections',
           }),
-        getValidateSelectionsSubTitle: () =>
-          i18n.translate('controls.controlGroup.management.validate.subtitle', {
+        getValidateSelectionsTooltip: () =>
+          i18n.translate('controls.controlGroup.management.validate.tooltip', {
             defaultMessage:
               'Automatically ignore any control selection that would result in no data.',
           }),
@@ -267,10 +275,21 @@ export const ControlGroupStrings = {
           i18n.translate('controls.controlGroup.management.hierarchy.title', {
             defaultMessage: 'Chain controls',
           }),
-        getHierarchySubTitle: () =>
-          i18n.translate('controls.controlGroup.management.hierarchy.subtitle', {
+        getHierarchyTooltip: () =>
+          i18n.translate('controls.controlGroup.management.hierarchy.tooltip', {
             defaultMessage:
               'Selections in one control narrow down available options in the next. Controls are chained from left to right.',
+          }),
+      },
+      showApplySelections: {
+        getShowApplySelectionsTitle: () =>
+          i18n.translate('controls.controlGroup.management.showApplySelections.title', {
+            defaultMessage: 'Apply selections automatically',
+          }),
+        getShowApplySelectionsTooltip: () =>
+          i18n.translate('controls.controlGroup.management.showApplySelections.tooltip', {
+            defaultMessage:
+              'If disabled, control selections will only take effect when the apply button is clicked.',
           }),
       },
     },

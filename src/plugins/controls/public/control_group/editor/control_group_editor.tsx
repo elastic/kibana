@@ -160,7 +160,7 @@ export const ControlGroupEditor = ({
                 label={
                   <ControlSettingTooltipLabel
                     label={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTitle()}
-                    tooltip={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsSubTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.validateSelections.getValidateSelectionsTooltip()}
                   />
                 }
                 checked={!Boolean(controlGroupEditorState.ignoreParentSettings?.ignoreValidations)}
@@ -173,7 +173,7 @@ export const ControlGroupEditor = ({
                 label={
                   <ControlSettingTooltipLabel
                     label={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTitle()}
-                    tooltip={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchySubTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.controlChaining.getHierarchyTooltip()}
                   />
                 }
                 checked={controlGroupEditorState.chainingSystem === 'HIERARCHICAL'}
@@ -189,10 +189,8 @@ export const ControlGroupEditor = ({
                 data-test-subj="control-group-auto-apply-selections"
                 label={
                   <ControlSettingTooltipLabel
-                    label={'Apply selections automatically'}
-                    tooltip={
-                      'If disabled, control selections will only take effect when the apply button is clicked.'
-                    }
+                    label={ControlGroupStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTitle()}
+                    tooltip={ControlGroupStrings.management.selectionSettings.showApplySelections.getShowApplySelectionsTooltip()}
                   />
                 }
                 checked={!controlGroupEditorState.showApplySelections}

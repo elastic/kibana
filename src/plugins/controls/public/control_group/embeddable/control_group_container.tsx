@@ -372,7 +372,11 @@ export class ControlGroupContainer extends Container<
     return filtersArray;
   }
 
-  public tryPublishFilters = ({
+  /**
+   * If apply button is enabled, add the new filters to the  unpublished filters component state;
+   * otherwise, publish new filters right away
+   */
+  private tryPublishFilters = ({
     filters,
     timeslice,
   }: {

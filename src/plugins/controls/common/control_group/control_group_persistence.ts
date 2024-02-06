@@ -107,30 +107,6 @@ const getPanelsAreEqual = (
   return true;
 };
 
-export const getSelectionsAreEqual = (
-  originalPanels: PersistableControlGroupInput['panels'],
-  newPanels: PersistableControlGroupInput['panels']
-) => {
-  const originalPanelIds = Object.keys(originalPanels);
-  const newPanelIds = Object.keys(newPanels);
-  const panelIdDiff = xor(originalPanelIds, newPanelIds);
-  if (panelIdDiff.length > 0) {
-    return false;
-  }
-
-  for (const panelId of newPanelIds) {
-    const newPanelType = newPanels[panelId].type;
-    const selectionsAreEqual = ControlPanelDiffSystems[newPanelType]
-      ? ControlPanelDiffSystems[newPanelType].getSelectionsAreEqual(
-          originalPanels[panelId],
-          newPanels[panelId]
-        )
-      : genericControlPanelDiffSystem.getPanelIsEqual(originalPanels[panelId], newPanels[panelId]);
-    if (!selectionsAreEqual) return false;
-  }
-  return true;
-};
-
 export const controlGroupInputToRawControlGroupAttributes = (
   controlGroupInput: Omit<ControlGroupInput, 'id'>
 ): RawControlGroupAttributes => {

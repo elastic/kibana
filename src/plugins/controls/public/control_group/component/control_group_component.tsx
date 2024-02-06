@@ -25,7 +25,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
@@ -170,30 +170,40 @@ export const ControlGroup = () => {
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   {showAddButton && (
                     <EuiFlexItem grow={false}>
-                      <EuiButtonIcon
-                        size="m"
-                        iconSize="m"
-                        display="base"
-                        iconType={'plusInCircle'}
-                        aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.openAddDataControlFlyout()}
-                      />
+                      <EuiToolTip content={ControlGroupStrings.management.getAddControlTitle()}>
+                        <EuiButtonIcon
+                          size="m"
+                          iconSize="m"
+                          display="base"
+                          iconType={'plusInCircle'}
+                          aria-label={ControlGroupStrings.management.getAddControlTitle()}
+                          onClick={() => controlGroup.openAddDataControlFlyout()}
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                   {showApplySelections && (
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        size="m"
-                        disabled={!applyResetButtonsEnabled}
-                        iconSize="m"
-                        display="fill"
-                        color={'success'}
-                        iconType={'kqlFunction'}
-                        aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() =>
-                          controlGroup.publishFilters({ filters: unpublishedFilters ?? [] })
-                        }
-                      />
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={ControlGroupStrings.management.getApplyButtonTitle(
+                          applyResetButtonsEnabled
+                        )}
+                      >
+                        <EuiButtonIcon
+                          size="m"
+                          disabled={!applyResetButtonsEnabled}
+                          iconSize="m"
+                          display="fill"
+                          color={'success'}
+                          iconType={'check'}
+                          aria-label={ControlGroupStrings.management.getApplyButtonTitle(
+                            applyResetButtonsEnabled
+                          )}
+                          onClick={() =>
+                            controlGroup.publishFilters({ filters: unpublishedFilters ?? [] })
+                          }
+                        />
+                      </EuiToolTip>
                     </EuiFlexItem>
                   )}
                 </EuiFlexGroup>
