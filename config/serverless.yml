@@ -58,7 +58,7 @@ guided_onboarding.enabled: false
 # Other disabled plugins
 xpack.canvas.enabled: false
 data.search.sessions.enabled: false
-advanced_settings.enabled: false
+advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
 xpack.security.showInsecureClusterWarning: false

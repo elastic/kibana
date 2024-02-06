@@ -8,13 +8,15 @@ exports[`Inspect component renders correctly 1`] = `
     Object {
       "automaticLayout": false,
       "fontSize": 12,
+      "guides": Object {
+        "indentation": false,
+      },
       "lineNumbers": "on",
       "minimap": Object {
         "enabled": false,
       },
       "overviewRulerBorder": false,
       "readOnly": true,
-      "renderIndentGuides": false,
       "scrollBeyondLastLine": false,
       "scrollbar": Object {
         "alwaysConsumeMouseWheel": false,

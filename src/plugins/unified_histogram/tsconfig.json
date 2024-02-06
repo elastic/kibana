@@ -27,8 +27,10 @@
     "@kbn/resizable-layout",
     "@kbn/shared-ux-button-toolbar",
     "@kbn/calculate-width-from-char-count",
+    "@kbn/lens-embeddable-utils",
     "@kbn/i18n-react",
     "@kbn/field-utils",
+    "@kbn/esql-utils",
   ],
   "exclude": [
     "target/**/*",

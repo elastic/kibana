@@ -1523,4 +1523,26 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
       }
     ),
   },
+  {
+    key: 'windows.advanced.events.disable_image_load_suppression_cache',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_image_load_suppression_cache',
+      {
+        defaultMessage:
+          'The image load suppression cache improves system performance by enabling Endpoint to tell its kernel driver about DLLs which are un-interesting and will never be evented upon. This feature improves system reponsiveness and reduces Endpoint CPU usage.  Use this setting only for troubleshooting if image load events are not being generated as expected. Default: false',
+      }
+    ),
+  },
+  {
+    key: 'windows.advanced.events.disable_registry_write_suppression',
+    first_supported_version: '8.12.1',
+    documentation: i18n.translate(
+      'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.disable_registry_write_suppression',
+      {
+        defaultMessage:
+          'Registry write suppression improves system performance by enabling Endpoint to tell its driver that certain types of registry operations are uninteresting. Once deemed uninteresting, the driver can quickly drop these events, improving system responsiveness and reducing Endpoint CPU usage. Use this setting only for troubleshooting if registry events are not functioning as expected. Default: false',
+      }
+    ),
+  },
 ];

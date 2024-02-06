@@ -11,10 +11,8 @@ import React, { useState } from 'react';
 import type { Message } from '../../../common/types';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
 import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { ChatBody } from './chat_body';
 
@@ -39,10 +37,6 @@ export function ChatFlyout({
   startedFrom: StartedFrom;
   onClose: () => void;
 }) {
-  const {
-    services: { http },
-  } = useKibana();
-
   const { euiTheme } = useEuiTheme();
 
   const currentUser = useCurrentUser();
@@ -105,7 +99,6 @@ export function ChatFlyout({
             initialTitle={initialTitle}
             initialMessages={initialMessages}
             currentUser={currentUser}
-            connectorsManagementHref={getConnectorsManagementHref(http)}
             knowledgeBase={knowledgeBase}
             startedFrom={startedFrom}
             onConversationUpdate={(conversation) => {

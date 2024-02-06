@@ -7,7 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import type { EcsError } from '@kbn/ecs';
-import type { FileJSON, BaseFileMetadata, FileCompression } from '@kbn/files-plugin/common';
+import type { BaseFileMetadata, FileCompression, FileJSON } from '@kbn/files-plugin/common';
 import type { ResponseActionBodySchema, UploadActionApiRequestBody } from '../../api/endpoint';
 import type { ActionStatusRequestSchema } from '../../api/endpoint/actions/action_status_route';
 import type {
@@ -15,9 +15,9 @@ import type {
   NoParametersRequestSchema,
 } from '../../api/endpoint/actions/common/base';
 import type {
-  ResponseActionStatus,
-  ResponseActionsApiCommandNames,
   ResponseActionAgentType,
+  ResponseActionsApiCommandNames,
+  ResponseActionStatus,
 } from '../service/response_actions/constants';
 
 export type ISOLATION_ACTIONS = 'isolate' | 'unisolate';
@@ -289,6 +289,7 @@ export interface ActivityLogAction {
     data: EndpointAction;
   };
 }
+
 export interface ActivityLogActionResponse {
   type: typeof ActivityLogItemTypes.FLEET_RESPONSE;
   item: {
@@ -328,6 +329,7 @@ export interface HostIsolationResponse {
 }
 
 export type ProcessesRequestBody = TypeOf<typeof NoParametersRequestSchema.body>;
+
 export interface ResponseActionApiResponse<
   TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > {
@@ -437,6 +439,7 @@ export interface ActionListApiResponse {
   page: number | undefined;
   pageSize: number | undefined;
   startDate: string | undefined;
+  agentTypes: ResponseActionAgentType[] | undefined;
   elasticAgentIds: string[] | undefined;
   endDate: string | undefined;
   userIds: string[] | undefined; // users that requested the actions

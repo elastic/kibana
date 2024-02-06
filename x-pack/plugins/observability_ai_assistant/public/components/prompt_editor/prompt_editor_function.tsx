@@ -122,7 +122,7 @@ export function PromptEditorFunction({
           fontSize: 12,
           formatOnPaste: true,
           formatOnType: true,
-          inlineHints: { enabled: true },
+          inlayHints: { enabled: 'on' },
           lineNumbers: 'on',
           minimap: { enabled: false },
           model,

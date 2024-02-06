@@ -10,23 +10,25 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { FindSLOResponse } from '@kbn/slo-schema';
-import { SLOViewSettings } from './slo_view_settings';
+import { SearchState } from '../hooks/use_url_search_state';
+import { SortBySelect } from './common/sort_by_select';
 
-export type SLOView = 'cardView' | 'listView';
+export type SLOView = 'cardView' | 'listView' | 'compactView';
 
 interface Props {
-  onToggleCompactView: () => void;
   onChangeView: (view: SLOView) => void;
-  isCompact: boolean;
   sloView: SLOView;
   sloList?: FindSLOResponse;
+  loading: boolean;
+  initialState: SearchState;
+  onStateChange: (newState: Partial<SearchState>) => void;
 }
 
 const toggleButtonsIcons = [
   {
     id: `cardView`,
     label: 'Card View',
-    iconType: 'visGauge',
+    iconType: 'apps',
     'data-test-subj': 'sloCardViewButton',
   },
   {
@@ -35,20 +37,28 @@ const toggleButtonsIcons = [
     iconType: 'list',
     'data-test-subj': 'sloListViewButton',
   },
+  {
+    iconType: 'tableDensityCompact',
+    id: 'compactView',
+    label: i18n.translate('xpack.observability.slo.listView.compactViewLabel', {
+      defaultMessage: 'Compact view',
+    }),
+  },
 ];
 
 export function ToggleSLOView({
   sloView,
   onChangeView,
-  onToggleCompactView,
-  isCompact = true,
   sloList,
+  loading,
+  initialState,
+  onStateChange,
 }: Props) {
   const total = sloList?.total ?? 0;
   const pageSize = sloList?.perPage ?? 0;
   const pageIndex = sloList?.page ?? 1;
 
-  const rangeStart = (total === 0 ? 0 : pageSize * (pageIndex - 1)) + 1;
+  const rangeStart = total === 0 ? 0 : pageSize * (pageIndex - 1) + 1;
   const rangeEnd = Math.min(total, pageSize * (pageIndex - 1) + pageSize);
 
   return (
@@ -74,7 +84,11 @@ export function ToggleSLOView({
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
+        <SortBySelect initialState={initialState} loading={loading} onStateChange={onStateChange} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiButtonGroup
+          buttonSize="compressed"
           legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
             defaultMessage: 'SLO View',
           })}
@@ -83,9 +97,6 @@ export function ToggleSLOView({
           onChange={(id) => onChangeView(id as SLOView)}
           isIconOnly
         />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SLOViewSettings toggleCompactView={onToggleCompactView} isCompact={isCompact} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

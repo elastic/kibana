@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { useApmPluginContext } from '../context/apm_plugin/use_apm_plugin_context';
 import { isPending, useFetcher } from './use_fetcher';
+import { useProfilingIntegrationSetting } from './use_profiling_integration_setting';
 
 export function useProfilingPlugin() {
-  const { plugins, core } = useApmPluginContext();
-  const isProfilingIntegrationEnabled = core.uiSettings.get<boolean>(
-    apmEnableProfilingIntegration,
-    true
-  );
+  const { plugins } = useApmPluginContext();
+  const isProfilingIntegrationEnabled = useProfilingIntegrationSetting();
 
   const { data, status } = useFetcher((callApmApi) => {
     return callApmApi('GET /internal/apm/profiling/status');

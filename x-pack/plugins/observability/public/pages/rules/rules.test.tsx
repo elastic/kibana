@@ -5,22 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
-import { render } from '@testing-library/react';
-import { CoreStart } from '@kbn/core/public';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
-import { RulesPage } from './rules';
-import { kibanaStartMock } from '../../utils/kibana_react.mock';
-import * as pluginContext from '../../hooks/use_plugin_context';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
-import { AppMountParameters } from '@kbn/core/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { render } from '@testing-library/react';
+import React from 'react';
+import { useLocation } from 'react-router-dom';
+import * as pluginContext from '../../hooks/use_plugin_context';
+import { ObservabilityPublicPluginsStart } from '../../plugin';
+import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
+import { kibanaStartMock } from '../../utils/kibana_react.mock';
+import { RulesPage } from './rules';
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
 
 jest.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -39,13 +44,14 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
   useLoadRuleTypesQuery: jest.fn(),
 }));
 
+const useLocationMock = useLocation as jest.Mock;
+
 jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},
   } as unknown as AppMountParameters,
   config: {
     unsafe: {
-      slo: { enabled: false },
       alertDetails: {
         apm: { enabled: false },
         metrics: { enabled: false },
@@ -64,6 +70,10 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 const { useLoadRuleTypesQuery } = jest.requireMock('@kbn/triggers-actions-ui-plugin/public');
 
 describe('RulesPage with all capabilities', () => {
+  beforeEach(() => {
+    useLocationMock.mockReturnValue({ pathname: '/rules', search: '', state: '', hash: '' });
+  });
+
   async function setup() {
     const ruleTypeIndex = new Map(
       Object.entries({

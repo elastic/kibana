@@ -8,8 +8,8 @@
 import { memo, useMemo } from 'react';
 import { parsedPidOrEntityIdParameter } from '../lib/utils';
 import type {
-  SuspendProcessActionOutputContent,
   KillOrSuspendProcessRequestBody,
+  SuspendProcessActionOutputContent,
 } from '../../../../../common/endpoint/types';
 import { useSendSuspendProcessRequest } from '../../../hooks/response_actions/use_send_suspend_process_endpoint_request';
 import type { ActionRequestComponentProps } from '../types';

@@ -5,17 +5,12 @@
  * 2.0.
  */
 
-import {
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiSelectable,
-} from '@elastic/eui';
+import { EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+import React from 'react';
+import { EuiSelectOption } from '@elastic/eui/src/components/form/select/select';
+import { SortField } from '../slo_list_search_bar';
 import { SearchState } from '../../hooks/use_url_search_state';
-import { Item, SortField } from '../slo_list_search_bar';
 
 interface Props {
   initialState: SearchState;
@@ -24,90 +19,50 @@ interface Props {
 }
 
 export function SortBySelect({ initialState, onStateChange, loading }: Props) {
-  const [isSortPopoverOpen, setSortPopoverOpen] = useState(false);
-  const [sortOptions, setSortOptions] = useState<Array<Item<SortField>>>(
-    SORT_OPTIONS.map((option) => ({
-      ...option,
-      checked: option.type === initialState.sort.by ? 'on' : undefined,
-    }))
-  );
-
-  const selectedSort = sortOptions.find((option) => option.checked === 'on');
-
-  const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
-  const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
-    setSortOptions(newOptions);
-    setSortPopoverOpen(false);
-    onStateChange({
-      page: 0,
-      sort: { by: newOptions.find((o) => o.checked)!.type, direction: initialState.sort.direction },
-    });
-  };
-
   return (
-    <EuiFilterGroup>
-      <EuiPopover
-        button={
-          <EuiFilterButton
-            disabled={loading}
-            iconType="arrowDown"
-            onClick={handleToggleSortButton}
-            isSelected={isSortPopoverOpen}
-          >
-            {i18n.translate('xpack.observability.slo.list.sortByType', {
-              defaultMessage: 'Sort by {type}',
-              values: { type: selectedSort?.label.toLowerCase() ?? '' },
-            })}
-          </EuiFilterButton>
-        }
-        isOpen={isSortPopoverOpen}
-        closePopover={handleToggleSortButton}
-        panelPaddingSize="none"
-        anchorPosition="downCenter"
-      >
-        <div style={{ width: 250 }}>
-          <EuiPopoverTitle paddingSize="s">
-            {i18n.translate('xpack.observability.slo.list.sortBy', {
-              defaultMessage: 'Sort by',
-            })}
-          </EuiPopoverTitle>
-          <EuiSelectable<Item<SortField>>
-            singleSelection="always"
-            options={sortOptions}
-            onChange={handleChangeSort}
-            isLoading={loading}
-          >
-            {(list) => list}
-          </EuiSelectable>
-        </div>
-      </EuiPopover>
-    </EuiFilterGroup>
+    <EuiSelect
+      data-test-subj="o11ySortBySelectSelect"
+      compressed
+      prepend={SORT_BY_LABEL}
+      options={SORT_OPTIONS}
+      value={initialState.sort.by}
+      onChange={(evt) => {
+        onStateChange({
+          page: 0,
+          sort: { by: evt.target.value as SortField, direction: initialState.sort.direction },
+        });
+      }}
+    />
   );
 }
 
-const SORT_OPTIONS: Array<Item<SortField>> = [
+const SORT_OPTIONS: EuiSelectOption[] = [
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.sliValue', {
+    text: i18n.translate('xpack.observability.slo.list.sortBy.sliValue', {
       defaultMessage: 'SLI value',
     }),
-    type: 'sli_value',
+    value: 'sli_value',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.sloStatus', {
+    text: i18n.translate('xpack.observability.slo.list.sortBy.sloStatus', {
       defaultMessage: 'SLO status',
     }),
-    type: 'status',
+    value: 'status',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
+    text: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetConsumed', {
       defaultMessage: 'Error budget consumed',
     }),
-    type: 'error_budget_consumed',
+    value: 'error_budget_consumed',
   },
   {
-    label: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetRemaining', {
+    text: i18n.translate('xpack.observability.slo.list.sortBy.errorBudgetRemaining', {
       defaultMessage: 'Error budget remaining',
     }),
-    type: 'error_budget_remaining',
+    value: 'error_budget_remaining',
   },
 ];
+
+const SORT_BY_LABEL = i18n.translate('xpack.observability.slo.list.sortByTypeLabel', {
+  defaultMessage: 'Sort by',
+});

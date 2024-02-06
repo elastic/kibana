@@ -39,7 +39,7 @@ import type { CriticalityLevel } from '../../../../common/entity_analytics/asset
 interface Props {
   entity: Entity;
 }
-export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
+const AssetCriticalityComponent: React.FC<Props> = ({ entity }) => {
   const modal = useCriticalityModal();
   const criticality = useAssetCriticalityData(entity, modal);
   const { euiTheme } = useEuiTheme();
@@ -195,3 +195,6 @@ const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
   option('important'),
   option('very_important'),
 ];
+
+export const AssetCriticalitySelector = React.memo(AssetCriticalityComponent);
+AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';

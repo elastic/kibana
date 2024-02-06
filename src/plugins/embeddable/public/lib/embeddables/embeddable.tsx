@@ -117,6 +117,7 @@ export abstract class Embeddable<
     this.destroyAPI = destroyAPI;
     ({
       uuid: this.uuid,
+      disableTriggers: this.disableTriggers,
       onEdit: this.onEdit,
       viewMode: this.viewMode,
       dataViews: this.dataViews,
@@ -126,6 +127,7 @@ export abstract class Embeddable<
       dataLoading: this.dataLoading,
       localFilters: this.localFilters,
       blockingError: this.blockingError,
+      onPhaseChange: this.onPhaseChange,
       setPanelTitle: this.setPanelTitle,
       linkToLibrary: this.linkToLibrary,
       hidePanelTitle: this.hidePanelTitle,
@@ -156,6 +158,7 @@ export abstract class Embeddable<
    */
   private destroyAPI;
   public uuid: LegacyEmbeddableAPI['uuid'];
+  public disableTriggers: LegacyEmbeddableAPI['disableTriggers'];
   public onEdit: LegacyEmbeddableAPI['onEdit'];
   public viewMode: LegacyEmbeddableAPI['viewMode'];
   public parentApi: LegacyEmbeddableAPI['parentApi'];
@@ -164,6 +167,7 @@ export abstract class Embeddable<
   public panelTitle: LegacyEmbeddableAPI['panelTitle'];
   public dataLoading: LegacyEmbeddableAPI['dataLoading'];
   public localFilters: LegacyEmbeddableAPI['localFilters'];
+  public onPhaseChange: LegacyEmbeddableAPI['onPhaseChange'];
   public linkToLibrary: LegacyEmbeddableAPI['linkToLibrary'];
   public blockingError: LegacyEmbeddableAPI['blockingError'];
   public setPanelTitle: LegacyEmbeddableAPI['setPanelTitle'];

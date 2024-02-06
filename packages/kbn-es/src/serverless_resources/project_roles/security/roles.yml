@@ -1,16 +1,3 @@
-# temporarily added for testing purpose
-system_indices_superuser:
-  cluster: ['all']
-  indices:
-    - names: ['*']
-      privileges: ['all']
-      allow_restricted_indices: true
-  applications:
-    - application: '*'
-      privileges: ['*']
-      resources: ['*']
-  run_as: ['*']
-
 # -----
 # Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
 # -----
@@ -736,3 +723,16 @@ endpoint_policy_manager:
         - feature_maps.all
         - feature_visualize.all
       resources: '*'
+
+# temporarily added for testing purpose
+system_indices_superuser:
+  cluster: ['all']
+  indices:
+    - names: ['*']
+      privileges: ['all']
+      allow_restricted_indices: true
+  applications:
+    - application: '*'
+      privileges: ['*']
+      resources: ['*']
+  run_as: ['*']

@@ -130,10 +130,6 @@ export class CustomRasterSource implements IRasterSource {
     return [];
   }
 
-  isESSource(): boolean {
-    return false;
-  }
-
   // Returns function used to format value
   async createFieldFormatter(field: IField): Promise<FieldFormatter | null> {
     return null;

@@ -336,11 +336,6 @@ export class AnomalySource implements IVectorSource {
     return [];
   }
 
-  isESSource(): boolean {
-    // IGNORE: This is only relevant if your source is backed by an index-pattern
-    return false;
-  }
-
   isFilterByMapBounds(): boolean {
     // Only implement if you can query this data with a bounding-box
     return false;

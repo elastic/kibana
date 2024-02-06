@@ -25,10 +25,15 @@ export const getPersisted = async ({
   history,
 }: {
   initialInput: LensEmbeddableInput;
-  lensServices: LensAppServices;
+  lensServices: Pick<LensAppServices, 'attributeService' | 'notifications' | 'spaces' | 'http'>;
   history?: History<unknown>;
 }): Promise<
-  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
+  | {
+      doc: Document;
+      sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'>;
+      managed: boolean;
+    }
+  | undefined
 > => {
   const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
@@ -44,6 +49,7 @@ export const getPersisted = async ({
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
+        managed: false,
       };
     }
     const { metaInfo, attributes } = result;
@@ -74,6 +80,7 @@ export const getPersisted = async ({
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,
       },
+      managed: Boolean(metaInfo?.managed),
     };
   } catch (e) {
     notifications.toasts.addDanger(
@@ -273,7 +280,7 @@ export function loadInitial(
     .then(
       (persisted) => {
         if (persisted) {
-          const { doc, sharingSavedObjectProps } = persisted;
+          const { doc, sharingSavedObjectProps, managed } = persisted;
           if (attributeService.inputIsRefType(initialInput)) {
             lensServices.chrome.recentlyAccessed.add(
               getFullPath(initialInput.savedObjectId),
@@ -361,6 +368,7 @@ export function loadInitial(
                     ),
                     isLoading: false,
                     annotationGroups,
+                    managed,
                   })
                 );
 

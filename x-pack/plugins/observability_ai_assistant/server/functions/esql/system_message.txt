@@ -54,14 +54,21 @@ pattern.
 Aggregation functions are not supported for EVAL.
 - GROK: extracts structured data out of a string, using a grok pattern
 - KEEP: keeps one or more columns, drop the ones that are not kept
+  only the colums in the KEEP command can be used after a KEEP command
 - LIMIT: returns the first n number of rows. The maximum value for this
 is 10000.
 - MV_EXPAND: expands multi-value columns into a single row per value
 - RENAME: renames a column
-- SORT: sorts the row in a table
 - STATS ... BY: groups rows according to a common value and calculates
-one or more aggregated values over the grouped rows. This commands only
-  supports aggregation functions, and no other functions or operators.
+  one or more aggregated values over the grouped rows. This commands only
+  supports single aggregation functions declared below using an alias, e.g. `STATS count = COUNT(*) by col`. 
+  It does NOT support mathematical operations (+, - , /) of aggregations (e.g. not correct: STATS rate = sum(col1)/sum(col2)), these combinations
+  must be calculated in a separate step using EVAL, (e.g. correct: STATS sum1 = sum(col1), sum2 = sum(col2) | EVAL rate = sum1/sum2)
+  It does NOT support other functions not declared below, operators, nor any mathematical operations (+, - or /)
+- SORT: sorts the row in a table. Does NOT support sorting by functions. NEVER USE: SORT COUNT(*) by col .  INSTEAD USE:  STATS count = COUNT(*) by col | SORT count
+  only supports sorting by column names or aliases, to sort by a function it must first assigned to an alias with STATS
+  If SORT is used right after a KEEP command, make sure it only uses column names in KEEP,
+  or move the SORT before the KEEP (e.g. not correct: KEEP date | SORT @timestamp,  correct: SORT @timestamp | KEEP date)
 - WHERE: produces a table that contains all the rows from the input table
   for which the provided condition returns true. WHERE supports the same
   functions as EVAL.
@@ -198,6 +205,8 @@ ROW a = "2023-01-23T12:15:00.000Z - some text - 127.0.0.1"
 ```esql
 FROM employees
 | WHERE first_name LIKE "?b*"
+| STATS doc_count = COUNT(*) by first_name, last_name
+| SORT doc_count DESC
 | KEEP first_name, last_name
 ```
 
@@ -231,4 +240,11 @@ FROM logs-*
 | STATS total_events = COUNT(*), total_failures = SUM(is_5xx) BY host.hostname, bucket
 | EVAL failure_rate_per_host = total_failures / total_events
 | DROP total_events, total_failures
+```
+
+```esql
+FROM logs-*
+| WHERE @timestamp <= NOW() - 24 hours
+| STATS count = COUNT(*) by log.level
+| SORT count DESC
 ```

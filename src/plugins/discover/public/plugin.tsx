@@ -116,7 +116,7 @@ export interface DiscoverSetup {
    * ```
    */
   readonly locator: undefined | DiscoverAppLocator;
-  readonly showLogExplorerTabs: () => void;
+  readonly showLogsExplorerTabs: () => void;
 }
 
 export interface DiscoverStart {
@@ -215,7 +215,7 @@ export class DiscoverPlugin
   private locator?: DiscoverAppLocator;
   private contextLocator?: DiscoverContextAppLocator;
   private singleDocLocator?: DiscoverSingleDocLocator;
-  private showLogExplorerTabs = false;
+  private showLogsExplorerTabs = false;
 
   setup(core: CoreSetup<DiscoverStartPlugins, DiscoverStart>, plugins: DiscoverSetupPlugins) {
     const baseUrl = core.http.basePath.prepend('/app/discover');
@@ -333,7 +333,7 @@ export class DiscoverPlugin
           profileRegistry: this.profileRegistry,
           customizationContext: {
             displayMode: 'standalone',
-            showLogExplorerTabs: this.showLogExplorerTabs,
+            showLogsExplorerTabs: this.showLogsExplorerTabs,
           },
           isDev,
         });
@@ -376,8 +376,8 @@ export class DiscoverPlugin
 
     return {
       locator: this.locator,
-      showLogExplorerTabs: () => {
-        this.showLogExplorerTabs = true;
+      showLogsExplorerTabs: () => {
+        this.showLogsExplorerTabs = true;
       },
     };
   }

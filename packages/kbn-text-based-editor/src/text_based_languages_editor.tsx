@@ -341,6 +341,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
+      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -414,6 +415,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const hoverProvider = useMemo(
     () => (language === 'esql' ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
+  );
+
+  const codeActionProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getCodeActionProvider?.(esqlCallbacks) : undefined),
     [language, esqlCallbacks]
   );
 
@@ -541,6 +547,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       vertical: 'auto',
     },
     overviewRulerBorder: false,
+    // this becomes confusing with multiple markers, so quick fixes
+    // will be proposed only within the tooltip
+    lightbulb: {
+      enabled: false,
+    },
     readOnly:
       isLoading ||
       isDisabled ||
@@ -776,6 +787,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           return hoverProvider?.provideHover(model, position, token);
                         },
                       }}
+                      codeActions={codeActionProvider}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;

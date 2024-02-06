@@ -1697,6 +1697,10 @@
         "type": "boolean",
         "index": false
       },
+      "is_internal": {
+        "type": "boolean",
+        "index": false
+      },
       "ssl": {
         "type": "binary"
       },
@@ -2086,6 +2090,10 @@
       },
       "is_default": {
         "type": "boolean"
+      },
+      "is_internal": {
+        "type": "boolean",
+        "index": false
       },
       "host_urls": {
         "type": "keyword",

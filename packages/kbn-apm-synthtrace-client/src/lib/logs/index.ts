@@ -29,6 +29,8 @@ export type LogDocument = Fields &
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'orchestrator.namespace'?: string;
+    'container.name'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
     'cloud.availability_zone'?: string;

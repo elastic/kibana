@@ -30,13 +30,11 @@ import { createExtentFilter } from '../../../../common/elasticsearch_util';
 import { copyPersistentState } from '../../../reducers/copy_persistent_state';
 import { DataRequestAbortError } from '../../util/data_request';
 import { expandToTileBoundaries } from '../../util/geo_tile_utils';
-import { IVectorSource } from '../vector_source';
 import {
   AbstractESSourceDescriptor,
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
-  StyleMetaData,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -45,43 +43,10 @@ import { IField } from '../../fields/field';
 import { FieldFormatter } from '../../../../common/constants';
 import { isValidStringConfig } from '../../util/valid_string_config';
 import { mergeExecutionContext } from '../execution_context_utils';
+import type { IESSource } from './types';
 
 export function isSearchSourceAbortError(error: Error) {
   return error.name === 'AbortError';
-}
-
-export interface IESSource extends IVectorSource {
-  isESSource(): true;
-
-  getId(): string;
-
-  getIndexPattern(): Promise<DataView>;
-
-  getIndexPatternId(): string;
-
-  getGeoFieldName(): string;
-
-  loadStylePropsMeta({
-    layerName,
-    style,
-    dynamicStyleProps,
-    registerCancelCallback,
-    sourceQuery,
-    timeFilters,
-    searchSessionId,
-    inspectorAdapters,
-    executionContext,
-  }: {
-    layerName: string;
-    style: IVectorStyle;
-    dynamicStyleProps: Array<IDynamicStyleProperty<DynamicStylePropertyOptions>>;
-    registerCancelCallback: (callback: () => void) => void;
-    sourceQuery?: Query;
-    timeFilters: TimeRange;
-    searchSessionId?: string;
-    inspectorAdapters: Adapters;
-    executionContext: KibanaExecutionContext;
-  }): Promise<{ styleMeta: StyleMetaData; warnings: SearchResponseWarning[] }>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -149,10 +114,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       return [this.getIndexPatternId()];
     }
     return [];
-  }
-
-  isESSource(): true {
-    return true;
   }
 
   cloneDescriptor(): AbstractSourceDescriptor {

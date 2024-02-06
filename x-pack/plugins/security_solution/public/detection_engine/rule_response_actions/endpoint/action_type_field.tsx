@@ -14,13 +14,15 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
+import { getRbacControl } from '../../../../common/endpoint/service/response_actions/utils';
 import { useKibana } from '../../../common/lib/kibana';
 import { CHOOSE_FROM_THE_LIST, LEARN_MORE } from './translations';
 import { EndpointActionText } from './utils';
-import { getUiCommand } from '../../../management/components/endpoint_response_actions_list/components/hooks';
-import { getRbacControl } from '../../../management/components/endpoint_responder/lib/console_commands_definition';
 import { useUserPrivileges } from '../../../common/components/user_privileges';
-import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
+import {
+  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+  RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
+} from '../../../../common/endpoint/service/response_actions/constants';
 
 interface ActionTypeFieldProps {
   basePath: string;
@@ -60,7 +62,7 @@ const ActionTypeFieldComponent = ({
     () =>
       enabledActions.map((name) => {
         const missingRbac = !getRbacControl({
-          commandName: getUiCommand(name),
+          commandName: RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP[name],
           privileges: endpointPrivileges,
         });
         const currentActions = map(data.responseActions, 'params.command');

@@ -472,6 +472,45 @@ describe('UnifiedFieldList useGroupedFields()', () => {
     expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
   });
 
+  it('should work correctly for text-based queries (no data view) with isNull fields', async () => {
+    const allFieldsEmpty = [...new Array(2)].flatMap((_, index) =>
+      allFields.map((field) => {
+        return new DataViewField({
+          ...field.toSpec(),
+          name: `${field.name}${index || ''}`,
+          isNull: true,
+        });
+      })
+    );
+    const { result } = renderHook(useGroupedFields, {
+      initialProps: {
+        dataViewId: null,
+        allFields: allFieldsEmpty,
+        services: mockedServices,
+      },
+    });
+
+    const fieldListGroupedProps = result.current.fieldListGroupedProps;
+    const fieldGroups = fieldListGroupedProps.fieldGroups;
+
+    expect(
+      Object.keys(fieldGroups!).map(
+        (key) => `${key}-${fieldGroups![key as FieldsGroupNames]?.fields.length}`
+      )
+    ).toStrictEqual([
+      'SpecialFields-0',
+      'SelectedFields-0',
+      'PopularFields-0',
+      'AvailableFields-0',
+      'UnmappedFields-0',
+      'EmptyFields-56',
+      'MetaFields-0',
+    ]);
+
+    expect(fieldListGroupedProps.fieldsExistenceStatus).toBe(ExistenceFetchStatus.succeeded);
+    expect(fieldListGroupedProps.fieldsExistInIndex).toBe(true);
+  });
+
   it('should work correctly when details are overwritten', async () => {
     const onOverrideFieldGroupDetails: GroupedFieldsParams<DataViewField>['onOverrideFieldGroupDetails'] =
       jest.fn((groupName) => {

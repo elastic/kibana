@@ -10,8 +10,10 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, compareFilters, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { isNil } from 'lodash';
+import { BehaviorSubject, map, Subscription, distinct } from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
@@ -40,6 +42,18 @@ function isVisualizeEmbeddable(
   return embeddable.type === 'visualization';
 }
 
+const getEventStatus = (output: EmbeddableOutput): PhaseEventType => {
+  if (!isNil(output.error)) {
+    return 'error';
+  } else if (output.rendered === true) {
+    return 'rendered';
+  } else if (output.loading === false) {
+    return 'loaded';
+  } else {
+    return 'loading';
+  }
+};
+
 export const legacyEmbeddableToApi = (
   embeddable: CommonLegacyEmbeddable
 ): { api: Omit<LegacyEmbeddableAPI, 'type' | 'getInspectorAdapters'>; destroyAPI: () => void } => {
@@ -65,6 +79,42 @@ export const legacyEmbeddableToApi = (
       defaultMessage: 'chart',
     });
   const isEditingEnabled = () => canEditEmbeddable(embeddable);
+
+  /**
+   * Performance tracking
+   */
+  const onPhaseChange = new BehaviorSubject<PhaseEvent | undefined>(undefined);
+
+  let loadingStartTime = 0;
+  subscriptions.add(
+    embeddable
+      .getOutput$()
+      .pipe(
+        // Map loaded event properties
+        map((output) => {
+          if (output.loading === true) {
+            loadingStartTime = performance.now();
+          }
+          return {
+            id: embeddable.id,
+            status: getEventStatus(output),
+            error: output.error,
+          };
+        }),
+        // Dedupe
+        distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
+        // Map loaded event properties
+        map((output): PhaseEvent => {
+          return {
+            ...output,
+            timeToEvent: performance.now() - loadingStartTime,
+          };
+        })
+      )
+      .subscribe((statusOutput) => {
+        onPhaseChange.next(statusOutput);
+      })
+  );
 
   /**
    * Publish state for Presentation panel
@@ -95,6 +145,7 @@ export const legacyEmbeddableToApi = (
 
   const uuid = embeddable.id;
   const parentApi = embeddable.parent;
+  const disableTriggers = embeddable.getInput().disableTriggers;
 
   /**
    * We treat all legacy embeddable types as if they can support local unified search state, because there is no programmatic way
@@ -151,9 +202,12 @@ export const legacyEmbeddableToApi = (
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
+      disableTriggers: disableTriggers ?? false,
       viewMode,
       dataLoading,
       blockingError,
+
+      onPhaseChange,
 
       onEdit,
       isEditingEnabled,

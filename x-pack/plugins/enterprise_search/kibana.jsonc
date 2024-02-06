@@ -22,7 +22,8 @@
       "esUiShared",
       "lens",
       "embeddable",
-      "share"
+      "share",
+      "console"
     ],
     "optionalPlugins": [
       "customIntegrations",

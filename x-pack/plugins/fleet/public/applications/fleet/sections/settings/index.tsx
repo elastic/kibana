@@ -49,6 +49,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
   const flyoutContext = useFlyoutContext();
 
   const { outputs, fleetServerHosts, downloadSources, proxies } = useSettingsAppData();
+  const outputItems = outputs.data?.items.filter((item) => !item.is_internal);
+  const fleetServerHostsItems = fleetServerHosts.data?.items.filter((item) => !item.is_internal);
 
   const { deleteOutput } = useDeleteOutput(outputs.resendRequest);
   const { deleteDownloadSource } = useDeleteDownloadSource(downloadSources.resendRequest);
@@ -78,9 +80,9 @@ export const SettingsApp = withConfirmModalProvider(() => {
 
   if (
     (outputs.isLoading && outputs.isInitialRequest) ||
-    !outputs.data?.items ||
+    !outputItems ||
     (fleetServerHosts.isLoading && fleetServerHosts.isInitialRequest) ||
-    !fleetServerHosts.data?.items ||
+    !fleetServerHostsItems ||
     (downloadSources.isLoading && downloadSources.isInitialRequest) ||
     !downloadSources.data?.items ||
     (proxies.isLoading && proxies.isInitialRequest) ||
@@ -98,7 +100,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
       <Routes>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_fleet_server_hosts}>
           {(route: { match: { params: { itemId: string } } }) => {
-            const fleetServerHost = fleetServerHosts.data?.items.find(
+            const fleetServerHost = fleetServerHostsItems.find(
               (o) => route.match.params.itemId === o.id
             );
             if (!fleetServerHost) {
@@ -148,7 +150,7 @@ export const SettingsApp = withConfirmModalProvider(() => {
         </Route>
         <Route path={FLEET_ROUTING_PATHS.settings_edit_outputs}>
           {(route: { match: { params: { outputId: string } } }) => {
-            const output = outputs.data?.items.find((o) => route.match.params.outputId === o.id);
+            const output = outputItems.find((o) => route.match.params.outputId === o.id);
             if (!output) {
               return <Redirect to={FLEET_ROUTING_PATHS.settings} />;
             }
@@ -196,8 +198,8 @@ export const SettingsApp = withConfirmModalProvider(() => {
       <SettingsPage
         deleteFleetProxy={deleteFleetProxy}
         proxies={proxies.data.items}
-        outputs={outputs.data.items}
-        fleetServerHosts={fleetServerHosts.data.items}
+        outputs={outputItems}
+        fleetServerHosts={fleetServerHostsItems}
         deleteOutput={deleteOutput}
         deleteFleetServerHost={deleteFleetServerHost}
         downloadSources={downloadSources.data.items}

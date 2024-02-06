@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { RegistryEntry } from '@kbn/management-settings-section-registry';
 import { CategoryCounts } from './category';
 import { FieldDefinition } from '.';
 
@@ -16,5 +17,7 @@ export interface SettingsTabs {
     categoryCounts: CategoryCounts;
     callOutTitle: string;
     callOutText: string;
+    sections: RegistryEntry[];
+    isSavingEnabled: boolean;
   };
 }

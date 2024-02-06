@@ -8,7 +8,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { getIndexPatternFromESQLQuery, type AggregateQuery } from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { CoreStart, ToastsStart } from '@kbn/core/public';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';

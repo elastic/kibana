@@ -35,7 +35,12 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
-import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
+import {
+  Datatable,
+  DefaultInspectorAdapters,
+  ErrorLike,
+  RenderMode,
+} from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -137,11 +142,13 @@ import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { TextBasedPersistedState } from '../datasources/text_based/types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
 export interface LensUnwrapMetaInfo {
   sharingSavedObjectProps?: SharingSavedObjectProps;
+  managed?: boolean;
 }
 
 export interface LensUnwrapResult {
@@ -1097,6 +1104,19 @@ export class Embeddable
 
     const input = this.getInput();
 
+    const getInternalTables = (states: Record<string, unknown>) => {
+      const result: Record<string, Datatable> = {};
+      if ('textBased' in states) {
+        const layers = (states.textBased as TextBasedPersistedState).layers;
+        for (const layer in layers) {
+          if (layers[layer] && layers[layer].table) {
+            result[layer] = layers[layer].table!;
+          }
+        }
+      }
+      return result;
+    };
+
     if (this.expression && !blockingErrors.length) {
       render(
         <>
@@ -1110,6 +1130,7 @@ export class Embeddable
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
                 ...('overrides' in input ? { overrides: input.overrides } : {}),
+                ...getInternalTables(this.savedVis.state.datasourceStates),
               }}
               searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}

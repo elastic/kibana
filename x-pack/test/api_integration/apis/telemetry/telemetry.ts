@@ -112,7 +112,12 @@ export default function ({ getService }: FtrProviderContext) {
       const toTimestamp = '2017-08-16T00:00:00.000Z';
 
       before(async () => {
-        await esArchiver.load(archive);
+        await esArchiver.load(archive, {
+          performance: {
+            batchSize: 300,
+            concurrency: 1,
+          },
+        });
         await updateMonitoringDates(esSupertest, fromTimestamp, toTimestamp, timestamp);
 
         const { body }: { body: UnencryptedTelemetryPayload } = await supertest

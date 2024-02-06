@@ -53,11 +53,7 @@ export {
   isOfQueryType,
   isOfAggregateQueryType,
   getAggregateQueryMode,
-  getIndexPatternFromSQLQuery,
-  getIndexPatternFromESQLQuery,
-  getLimitFromESQLQuery,
   getLanguageDisplayName,
-  cleanupESQLQueryForLensSuggestions,
 } from './src/es_query';
 
 export {

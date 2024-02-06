@@ -745,6 +745,7 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     related_integrations: [],
     required_fields: [],
     setup: '',
+    note: '',
     references: [],
     threat: [],
     tags: [],

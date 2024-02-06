@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import React, { memo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { useSourcererDataView } from '../../containers/sourcerer';
-import { useContractComponents } from '../../hooks/use_contract_component';
+import { getOnboardingComponent } from './onboarding';
 
 export const LandingPageComponent = memo(() => {
-  const { GetStarted } = useContractComponents();
   const { indicesExist } = useSourcererDataView();
-  return GetStarted ? <GetStarted indicesExist={indicesExist} /> : null;
+  const OnBoarding = useMemo(() => getOnboardingComponent(), []);
+  return <OnBoarding indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

@@ -51,10 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       .set('kbn-xsrf', 'true');
   };
 
-  // Flaky: https://github.com/elastic/kibana/issues/173682
-  // FLAKY: https://github.com/elastic/kibana/issues/173681
-  // FLAKY: https://github.com/elastic/kibana/issues/173682
-  describe.skip('For each artifact list under management', function () {
+  describe('For each artifact list under management', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     this.timeout(60_000 * 5);
@@ -263,7 +260,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await updateArtifact(testData, { policyId: policyInfo.packagePolicy.id });
 
           // Check edited artifact is in the list with new values (wait for list to be updated)
-          await retry.waitForWithTimeout('entry is updated in list', 10000, async () => {
+          await retry.waitForWithTimeout('entry is updated in list', 20000, async () => {
             const currentValue = await testSubjects.getVisibleText(
               `${testData.pagePrefix}-card-criteriaConditions${
                 testData.pagePrefix === 'EventFiltersListPage' ? '-condition' : ''
