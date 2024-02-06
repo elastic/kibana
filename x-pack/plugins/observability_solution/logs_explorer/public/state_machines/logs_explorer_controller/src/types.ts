@@ -7,7 +7,7 @@
 
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import {
+import type {
   DiscoverAppState,
   DiscoverStateContainer,
   DataDocumentsMsg,

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { ControlColumnsProps } from '@kbn/unified-data-table';
-import { OPEN_DETAILS, SELECT_ROW } from '@kbn/unified-data-table';
 import React, { ComponentClass } from 'react';
+import {
+  OPEN_DETAILS,
+  SELECT_ROW,
+  ControlColumnsProps,
+  DataTableRowControl,
+} from '@kbn/unified-data-table';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
-import { DataTableRowControl } from '@kbn/unified-data-table';
 import { useActor } from '@xstate/react';
 import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 import {
