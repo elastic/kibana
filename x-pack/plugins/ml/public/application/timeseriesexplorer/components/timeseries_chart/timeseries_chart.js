@@ -610,8 +610,8 @@ class TimeseriesChartIntl extends Component {
     const data = focusChartData;
 
     const contextYScale = this.contextYScale;
+    const showAnomalyPopover = this.showAnomalyPopover.bind(this);
     const showFocusChartTooltip = this.showFocusChartTooltip.bind(this);
-
     const hideFocusChartTooltip = this.props.tooltipService.hide.bind(this.props.tooltipService);
 
     const focusChart = d3.select('.focus-chart');
@@ -794,35 +794,7 @@ class TimeseriesChartIntl extends Component {
       .on('click', function (d) {
         d3.event.preventDefault();
         if (d.anomalyScore === undefined) return;
-
-        const anomalyTime = d.date.getTime();
-
-        // The table items could be aggregated, so we have to find the item
-        // that has the closest timestamp to the selected anomaly from the chart.
-        const tableItem = that.props.tableData.anomalies.reduce((closestItem, currentItem) => {
-          const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
-          const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
-          return currentItemDelta < closestItemDelta ? currentItem : closestItem;
-        }, that.props.tableData.anomalies[0]);
-
-        if (tableItem) {
-          // Overwrite the timestamp of the possibly aggregated table item with the
-          // timestamp of the anomaly clicked in the chart so we're able to pick
-          // the right baseline and deviation time ranges for Log Rate Analysis.
-          tableItem.source.timestamp = anomalyTime;
-
-          // Calculate the relative coordinates of the clicked anomaly marker
-          // so we're able to position the popover actions menu above it.
-          const dotRect = this.getBoundingClientRect();
-          const rootRect = that.rootNode.getBoundingClientRect();
-          const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
-          const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - popoverMenuOffset;
-
-          // Hide any active tooltip
-          that.props.tooltipService.hide();
-          // Set the popover state to enable the actions menu
-          that.setState({ popoverData: tableItem, popoverCoords: [x, y] });
-        }
+        showAnomalyPopover(d, this);
       })
       .on('mouseover', function (d) {
         // Show the tooltip only if the actions menu isn't active
@@ -865,6 +837,11 @@ class TimeseriesChartIntl extends Component {
       .enter()
       .append('path')
       .attr('d', d3.svg.symbol().size(MULTI_BUCKET_SYMBOL_SIZE).type('cross'))
+      .on('click', function (d) {
+        d3.event.preventDefault();
+        if (d.anomalyScore === undefined) return;
+        showAnomalyPopover(d, this);
+      })
       .on('mouseover', function (d) {
         showFocusChartTooltip(d, this);
       })
@@ -1533,6 +1510,37 @@ class TimeseriesChartIntl extends Component {
     }
 
     this.setContextBrushExtent(new Date(from), new Date(to));
+  }
+
+  showAnomalyPopover(marker, circle) {
+    const anomalyTime = marker.date.getTime();
+
+    // The table items could be aggregated, so we have to find the item
+    // that has the closest timestamp to the selected anomaly from the chart.
+    const tableItem = this.props.tableData.anomalies.reduce((closestItem, currentItem) => {
+      const closestItemDelta = Math.abs(anomalyTime - closestItem.source.timestamp);
+      const currentItemDelta = Math.abs(anomalyTime - currentItem.source.timestamp);
+      return currentItemDelta < closestItemDelta ? currentItem : closestItem;
+    }, this.props.tableData.anomalies[0]);
+
+    if (tableItem) {
+      // Overwrite the timestamp of the possibly aggregated table item with the
+      // timestamp of the anomaly clicked in the chart so we're able to pick
+      // the right baseline and deviation time ranges for Log Rate Analysis.
+      tableItem.source.timestamp = anomalyTime;
+
+      // Calculate the relative coordinates of the clicked anomaly marker
+      // so we're able to position the popover actions menu above it.
+      const dotRect = circle.getBoundingClientRect();
+      const rootRect = this.rootNode.getBoundingClientRect();
+      const x = Math.round(dotRect.x + dotRect.width / 2 - rootRect.x);
+      const y = Math.round(dotRect.y + dotRect.height / 2 - rootRect.y) - popoverMenuOffset;
+
+      // Hide any active tooltip
+      this.props.tooltipService.hide();
+      // Set the popover state to enable the actions menu
+      this.setState({ popoverData: tableItem, popoverCoords: [x, y] });
+    }
   }
 
   showFocusChartTooltip(marker, circle) {
