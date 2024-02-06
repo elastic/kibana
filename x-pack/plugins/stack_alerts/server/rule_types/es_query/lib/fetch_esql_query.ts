@@ -44,7 +44,7 @@ export async function fetchEsqlQuery({
 
   const response = await esClient.transport.request<EsqlTable>({
     method: 'POST',
-    path: '/_esql',
+    path: '/_query',
     body: query,
   });
 
