@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import type {
   CoreStart,
   ElasticsearchClient,
@@ -119,14 +120,18 @@ export async function cleanupMockedAlerts(
   const aliasInfo = await esClient.indices.getAlias({ index: alertIndex });
   const alias = Object.keys(aliasInfo);
 
-  await esClient.deleteByQuery({
-    index: alias[0],
-    body: {
-      query: {
-        match_all: {},
+  await esClient
+    .deleteByQuery({
+      index: alias[0],
+      body: {
+        query: {
+          match_all: {},
+        },
       },
-    },
-  });
+    })
+    .catch(() => {
+      // ignore errors
+    });
 }
 
 export async function createMockedExceptionList(so: SavedObjectsServiceStart) {

@@ -49,75 +49,67 @@ const mockedAxiosGet = jest.spyOn(axios, 'get');
 const mockedAxiosPost = jest.spyOn(axios, 'post');
 
 describe('telemetry tasks', () => {
+  let esServer: TestElasticsearchUtils;
+  let kibanaServer: TestKibanaUtils;
+  let taskManagerPlugin: TaskManagerStartContract;
+  let tasks: SecurityTelemetryTask[];
+  let asyncTelemetryEventSender: AsyncTelemetryEventsSender;
+  let exceptionsList: ExceptionListSchema[] = [];
+  let exceptionsListItem: ExceptionListItemSchema[] = [];
+
+  beforeAll(async () => {
+    await removeFile(logFilePath);
+
+    const servers = await setupTestServers(logFilePath);
+    esServer = servers.esServer;
+    kibanaServer = servers.kibanaServer;
+
+    expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
+    taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
+
+    expect(telemetrySenderStartSpy).toHaveBeenCalledTimes(1);
+
+    tasks = getTelemetryTasks(telemetrySenderStartSpy);
+    asyncTelemetryEventSender = getAsyncTelemetryEventSender(telemetrySenderStartSpy);
+
+    // update queue config to not wait for a long bufferTimeSpanMillis
+    asyncTelemetryEventSender.updateQueueConfig(TelemetryChannel.TASK_METRICS, {
+      bufferTimeSpanMillis: 100,
+      inflightEventsThreshold: 1_000,
+      maxPayloadSizeBytes: 1024 * 1024,
+    });
+  });
+
+  afterAll(async () => {
+    if (kibanaServer) {
+      await kibanaServer.stop();
+    }
+    if (esServer) {
+      await esServer.stop();
+    }
+  });
+
+  beforeEach(async () => {
+    jest.clearAllMocks();
+    mockAxiosGet();
+  });
+
+  afterEach(async () => {
+    await cleanupMockedExceptionLists(
+      exceptionsList,
+      exceptionsListItem,
+      kibanaServer.coreStart.savedObjects
+    );
+    await cleanupMockedAlerts(
+      kibanaServer.coreStart.elasticsearch.client.asInternalUser,
+      kibanaServer.coreStart.savedObjects
+    ).then(() => {
+      exceptionsList = [];
+      exceptionsListItem = [];
+    });
+  });
+
   describe('detection-rules', () => {
-    let esServer: TestElasticsearchUtils;
-    let kibanaServer: TestKibanaUtils;
-    let taskManagerPlugin: TaskManagerStartContract;
-    let tasks: SecurityTelemetryTask[];
-    let asyncTelemetryEventSender: AsyncTelemetryEventsSender;
-    let exceptionsList: ExceptionListSchema[] = [];
-    let exceptionsListItem: ExceptionListItemSchema[] = [];
-
-    beforeAll(async () => {
-      await removeFile(logFilePath);
-
-      const servers = await setupTestServers(logFilePath);
-      esServer = servers.esServer;
-      kibanaServer = servers.kibanaServer;
-
-      expect(taskManagerStartSpy).toHaveBeenCalledTimes(1);
-      taskManagerPlugin = taskManagerStartSpy.mock.results[0].value;
-
-      expect(telemetrySenderStartSpy).toHaveBeenCalledTimes(1);
-
-      tasks = getTelemetryTasks(telemetrySenderStartSpy);
-      asyncTelemetryEventSender = getAsyncTelemetryEventSender(telemetrySenderStartSpy);
-
-      // update queue config to not wait for a long bufferTimeSpanMillis
-      asyncTelemetryEventSender.updateQueueConfig(TelemetryChannel.TASK_METRICS, {
-        bufferTimeSpanMillis: 100,
-        inflightEventsThreshold: 1_000,
-        maxPayloadSizeBytes: 1024 * 1024,
-      });
-    });
-
-    afterAll(async () => {
-      if (kibanaServer) {
-        await kibanaServer.stop();
-      }
-      if (esServer) {
-        await esServer.stop();
-      }
-    });
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-      mockedAxiosGet.mockImplementation(async (url: string) => {
-        if (url.startsWith(ENDPOINT_STAGING) && url.endsWith('ping')) {
-          return { status: 200 };
-        }
-        return { status: 404 };
-      });
-      mockedAxiosPost.mockImplementation(async (url: string) => {
-        return { status: 201 };
-      });
-    });
-
-    afterEach(async () => {
-      await cleanupMockedExceptionLists(
-        exceptionsList,
-        exceptionsListItem,
-        kibanaServer.coreStart.savedObjects
-      );
-      await cleanupMockedAlerts(
-        kibanaServer.coreStart.elasticsearch.client.asInternalUser,
-        kibanaServer.coreStart.savedObjects
-      ).then(() => {
-        exceptionsList = [];
-        exceptionsListItem = [];
-      });
-    });
-
     it('shuld execute when scheduled', async () => {
       const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
 
@@ -202,4 +194,63 @@ describe('telemetry tasks', () => {
       expect(asJson.passed).toEqual(true);
     });
   });
+
+  describe('configuration', () => {
+    it('should send task metrics', async () => {
+      const configTaskType = 'security:telemetry-configuration';
+      const configTask = getTelemetryTask(tasks, configTaskType);
+
+      mockAxiosGet(fakeBufferAndSizesConfigAsyncEnabled);
+
+      await eventually(async () => {
+        await taskManagerPlugin.runSoon(configTask.getTaskId());
+      });
+
+      // wait until the task finishes
+      await eventually(async () => {
+        const found = (await taskManagerPlugin.fetch()).docs.find(
+          (t) => t.taskType === configTaskType
+        );
+        expect(found).toBeFalsy();
+      });
+
+      // launch a random task and verify it uses the new configuration
+    });
+  });
+
+  function mockAxiosGet(bufferConfig: unknown = fakeBufferAndSizesConfigAsyncDisabled) {
+    mockedAxiosGet.mockImplementation(async (url: string) => {
+      if (url.startsWith(ENDPOINT_STAGING) && url.endsWith('ping')) {
+        return { status: 200 };
+      } else if (url.indexOf('kibana/manifest/artifacts') !== -1) {
+        return {
+          status: 200,
+          data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
+        };
+      } else if (url.indexOf('telemetry-buffer-and-batch-sizes-v1') !== -1) {
+        return {
+          status: 200,
+          data: bufferConfig,
+        };
+      }
+      return { status: 404 };
+    });
+  }
 });
+
+const fakeBufferAndSizesConfigAsyncDisabled = {
+  telemetry_max_buffer_size: 100,
+  max_security_list_telemetry_batch: 100,
+  max_endpoint_telemetry_batch: 300,
+  max_detection_rule_telemetry_batch: 1000,
+  max_detection_alerts_batch: 50,
+};
+
+const fakeBufferAndSizesConfigAsyncEnabled = {
+  telemetry_max_buffer_size: 100,
+  max_security_list_telemetry_batch: 100,
+  max_endpoint_telemetry_batch: 300,
+  max_detection_rule_telemetry_batch: 1000,
+  max_detection_alerts_batch: 50,
+  use_async_sender: true,
+};

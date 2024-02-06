@@ -13,31 +13,35 @@ import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { artifactService } from '../artifact';
 import { telemetryConfiguration } from '../configuration';
-import { tlog } from '../helpers';
+import { newTelemetryLogger } from '../helpers';
 
 export function createTelemetryConfigurationTaskConfig() {
+  const taskName = 'Security Solution Telemetry Configuration Task';
   return {
     type: 'security:telemetry-configuration',
-    title: 'Security Solution Telemetry Configuration Task',
+    title: taskName,
     interval: '1h',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: ITelemetryReceiver,
-      sender: ITelemetryEventsSender,
+      _receiver: ITelemetryReceiver,
+      _sender: ITelemetryEventsSender,
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const taskName = 'Security Solution Telemetry Configuration Task';
+      const log = newTelemetryLogger(logger).l;
+
+      log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
+
       const trace = taskMetricsService.start(taskName);
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const configArtifact = (await artifactService.getArtifact(
           artifactName
         )) as unknown as TelemetryConfiguration;
-        tlog(logger, `New telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
+        log(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
         telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
@@ -47,10 +51,16 @@ export function createTelemetryConfigurationTaskConfig() {
           configArtifact.max_endpoint_telemetry_batch;
         telemetryConfiguration.max_security_list_telemetry_batch =
           configArtifact.max_security_list_telemetry_batch;
+
+        if (configArtifact.use_async_sender) {
+          telemetryConfiguration.use_async_sender = configArtifact.use_async_sender;
+        }
         taskMetricsService.end(trace);
+
+        log(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);
         return 0;
       } catch (err) {
-        tlog(logger, `Failed to set telemetry configuration due to ${err.message}`);
+        log(`Failed to set telemetry configuration due to ${err.message}`);
         telemetryConfiguration.resetAllToDefault();
         taskMetricsService.end(trace, err);
         return 0;

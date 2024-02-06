@@ -459,6 +459,7 @@ export interface TelemetryConfiguration {
   max_endpoint_telemetry_batch: number;
   max_detection_rule_telemetry_batch: number;
   max_detection_alerts_batch: number;
+  use_async_sender: boolean;
 }
 
 export interface TelemetryFilterListArtifact {

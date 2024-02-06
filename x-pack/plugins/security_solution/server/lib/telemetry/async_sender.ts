@@ -286,17 +286,12 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
 
       const telemetryUrl = senderMetadata.telemetryUrl;
 
-      // TODO(sebastian.zaffarano): When send events to `alerts-endpoint` using
-      // `sender.queueEvents`, it adds cluster and license information to the event:
-      // ...(licenseInfo ? { license: this.receiver?.copyLicenseFields(licenseInfo) } : {}),
-      // cluster_uuid: clusterInfo?.cluster_uuid,
-      // cluster_name: clusterInfo?.cluster_name,
-      // do we need to do it? diagnostic.ts also sends to the same channel, but
-      // using `sendOnDemand` and hence it doesn't enrich the original-body
-
       return await axios
         .post(telemetryUrl, body, {
-          headers: senderMetadata.telemetryRequestHeaders(),
+          headers: {
+            ...senderMetadata.telemetryRequestHeaders(),
+            'X-Telemetry-Sender': 'async',
+          },
           timeout: 10000,
         })
         .then((r) => {

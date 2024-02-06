@@ -9,13 +9,13 @@ import { newTelemetryLogger, type TelemetryLogger } from './helpers';
 import type { TaskMetric, ITaskMetricsService, Trace } from './task_metrics.types';
 import type { ITelemetryEventsSender } from './sender';
 import { TelemetryChannel } from './types';
+import { telemetryConfiguration } from './configuration';
 
 export class TaskMetricsService implements ITaskMetricsService {
   private readonly logger: TelemetryLogger;
-  private readonly useLegacySender: boolean = false;
 
   constructor(logger: Logger, private readonly sender: ITelemetryEventsSender) {
-    this.logger = newTelemetryLogger(logger.get('telemetry_events'));
+    this.logger = newTelemetryLogger(logger.get('telemetry_events.task_metrics'));
   }
 
   public start(name: string): Trace {
@@ -26,14 +26,14 @@ export class TaskMetricsService implements ITaskMetricsService {
   }
 
   public async end(trace: Trace, error?: Error): Promise<void> {
-    this.logger.l(`>>> Sending metric ${trace.name}...`);
+    this.logger.l(`Sending metric ${trace.name}...`);
 
     const event = this.createTaskMetric(trace, error);
 
-    if (this.useLegacySender) {
-      await this.sender.sendOnDemand(TelemetryChannel.TASK_METRICS, [event]);
-    } else {
+    if (telemetryConfiguration.use_async_sender) {
       this.sender.sendAsync(TelemetryChannel.TASK_METRICS, [event]);
+    } else {
+      await this.sender.sendOnDemand(TelemetryChannel.TASK_METRICS, [event]);
     }
   }
 

@@ -11,11 +11,13 @@ class TelemetryConfiguration {
   private readonly DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH = 300;
   private readonly DEFAULT_MAX_DETECTION_RULE_TELEMETRY_BATCH = 1_000;
   private readonly DEFAULT_MAX_DETECTION_ALERTS_BATCH = 50;
+  private readonly DEFAULT_ASYNC_SENDER = false;
   private _telemetry_max_buffer_size = this.DEFAULT_TELEMETRY_MAX_BUFFER_SIZE;
   private _max_security_list_telemetry_batch = this.DEFAULT_MAX_SECURITY_LIST_TELEMETRY_BATCH;
   private _max_endpoint_telemetry_batch = this.DEFAULT_MAX_ENDPOINT_TELEMETRY_BATCH;
   private _max_detection_rule_telemetry_batch = this.DEFAULT_MAX_DETECTION_RULE_TELEMETRY_BATCH;
   private _max_detection_alerts_batch = this.DEFAULT_MAX_DETECTION_ALERTS_BATCH;
+  private _use_async_sender = this.DEFAULT_ASYNC_SENDER;
 
   public get telemetry_max_buffer_size(): number {
     return this._telemetry_max_buffer_size;
@@ -55,6 +57,14 @@ class TelemetryConfiguration {
 
   public set max_detection_alerts_batch(num: number) {
     this._max_detection_alerts_batch = num;
+  }
+
+  public get use_async_sender(): boolean {
+    return this._use_async_sender;
+  }
+
+  public set use_async_sender(num: boolean) {
+    this._use_async_sender = num;
   }
 
   public resetAllToDefault() {

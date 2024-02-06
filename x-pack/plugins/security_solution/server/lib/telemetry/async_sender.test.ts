@@ -800,6 +800,30 @@ describe('AsyncTelemetryEventsSender', () => {
     });
   });
 
+  describe('http headers', () => {
+    it('should add X-Telemetry-Sender header', async () => {
+      service.setup(
+        DEFAULT_RETRY_CONFIG,
+        DEFAULT_QUEUE_CONFIG,
+        receiver,
+        telemetryPluginSetup,
+        telemetryUsageCounter
+      );
+      service.start(telemetryPluginStart);
+
+      service.send(ch1, ['a']);
+      await service.stop();
+
+      expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
+      const found = mockedAxiosPost.mock.calls.some(
+        ([_url, _body, config]) =>
+          config && config.headers && config.headers['X-Telemetry-Sender'] === 'async'
+      );
+
+      expect(found).not.toBeFalsy();
+    });
+  });
+
   describe('usage counter', () => {
     it('should increment the counter when sending events ok', async () => {
       service.setup(
