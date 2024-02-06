@@ -65,6 +65,7 @@ export type UnifiedHistogramContainerProps = {
   | 'externalVisContextJSON'
   | 'withDefaultActions'
   | 'disabledActions'
+  | 'abortController'
 >;
 
 /**

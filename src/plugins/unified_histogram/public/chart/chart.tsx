@@ -49,6 +49,7 @@ import type { UseRequestParamsResult } from '../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../utils/lens_vis_from_table';
 
 export interface ChartProps {
+  abortController?: AbortController;
   isChartAvailable: boolean;
   hiddenPanel?: boolean;
   className?: string;
@@ -113,6 +114,7 @@ export function Chart({
   onFilter,
   onBrushEnd,
   withDefaultActions,
+  abortController,
 }: ChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
     lensVisService.currentSuggestionContext$
@@ -378,6 +380,7 @@ export function Chart({
               />
             )}
             <HistogramMemoized
+              abortController={abortController}
               services={services}
               dataView={dataView}
               request={request}
