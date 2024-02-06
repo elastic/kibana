@@ -73,7 +73,7 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = process.env.QA_CONSOLE_URL;
+const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
@@ -598,8 +598,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               KIBANA_USERNAME: credentials.username,
               KIBANA_PASSWORD: credentials.password,
 
+              // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
               CLOUD_SERVERLESS: true,
               IS_SERVERLESS: true,
+              // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud. 
               TEST_CLOUD: 1,
             };
 
