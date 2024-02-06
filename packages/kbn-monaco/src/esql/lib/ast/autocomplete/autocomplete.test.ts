@@ -546,7 +546,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | rename stringField as ', ['var0']);
   });
 
-  for (const command of ['keep', 'drop', 'project']) {
+  for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} `, getFieldNamesByType('any'));
       testSuggestions(

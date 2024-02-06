@@ -1805,7 +1805,7 @@ describe('validation logic', () => {
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
-    it(`should fetch policies if no enrich command is found`, async () => {
+    it(`should not fetch policies if no enrich command is found`, async () => {
       const callbackMocks = getCallbackMocks();
       await validateAst(`row a = 1 | eval a`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
@@ -1849,6 +1849,34 @@ describe('validation logic', () => {
       expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
         query: `from enrichIndex1 | keep otherField, yetAnotherField`,
       });
+    });
+
+    it(`should not crash if no callbacks are available`, async () => {
+      try {
+        await validateAst(
+          `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
+          getAstAndErrors,
+          {
+            getFieldsFor: undefined,
+            getSources: undefined,
+            getPolicies: undefined,
+            getMetaFields: undefined,
+          }
+        );
+      } catch {
+        fail('Should not throw');
+      }
+    });
+
+    it(`should not crash if no callbacks are passed`, async () => {
+      try {
+        await validateAst(
+          `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
+          getAstAndErrors
+        );
+      } catch {
+        fail('Should not throw');
+      }
     });
   });
 });

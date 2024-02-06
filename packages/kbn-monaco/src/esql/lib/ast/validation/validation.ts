@@ -802,7 +802,7 @@ export async function validateAst(
     retrieveMetadataFields(callbacks),
   ]);
 
-  if (availablePolicies.size && ast.filter(({ name }) => name === 'enrich')) {
+  if (availablePolicies.size) {
     const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
   }
