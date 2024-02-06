@@ -24,7 +24,7 @@ const timeUnitToDurationFmt = (inputFormat = 'milliseconds') => {
 export const metaUnitsToFormatter: Record<string, { id: string; params?: FieldFormatParams }> = {
   percent: { id: 'percent' },
   byte: { id: 'bytes' },
-  // need to consider if we want this, 1 microsecond will display as 0.001ms
+  nanos: timeUnitToDurationFmt('nanoseconds'),
   micros: timeUnitToDurationFmt('microseconds'),
   ms: timeUnitToDurationFmt('milliseconds'),
   s: timeUnitToDurationFmt('seconds'),
