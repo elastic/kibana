@@ -57,6 +57,7 @@ interface Props {
   start: string;
   end: string;
   saveTableOptionsToUrl?: boolean;
+  shouldShowSparkPlotsProp?: boolean;
 }
 
 export function TransactionsTable({
@@ -71,6 +72,7 @@ export function TransactionsTable({
   start,
   end,
   saveTableOptionsToUrl = false,
+  shouldShowSparkPlotsProp,
 }: Props) {
   const { link } = useApmRouter();
 
@@ -92,9 +94,8 @@ export function TransactionsTable({
     latencyAggregationTypeFromQuery
   );
 
-  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
-  const { isXl, isLarge } = useBreakpoints();
-  const shouldShowSparkPlots = !isLarge || !isXl;
+  const { isLarge } = useBreakpoints();
+  const shouldShowSparkPlots = !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
