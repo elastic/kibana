@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { FC, useCallback, useEffect, useRef, useState } from 'react';
 import { EuiResizeObserver } from '@elastic/eui';
 import { Observable } from 'rxjs';
 import { throttle } from 'lodash';
@@ -13,7 +13,7 @@ import { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import usePrevious from 'react-use/lib/usePrevious';
 import { useToastNotificationService } from '../../application/services/toast_notification_service';
 import { useEmbeddableExecutionContext } from '../common/use_embeddable_execution_context';
-import { useSingleMetricViwerInputResolver } from './use_single_metric_viewer_input_resolver';
+import { useSingleMetricViewerInputResolver } from './use_single_metric_viewer_input_resolver';
 import type { ISingleMetricViewerEmbeddable } from './single_metric_viewer_embeddable';
 import type {
   SingleMetricViewerEmbeddableInput,
@@ -23,7 +23,7 @@ import type {
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import { timeSeriesExplorerProvider } from '../../application/util/timeseriesexplorer_utils';
+import { useTimeSeriesExplorerService } from '../../application/util/timeseriesexplorer_utils';
 import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;
@@ -38,7 +38,7 @@ export interface EmbeddableSingleMetricViewerContainerProps {
   embeddableContext: InstanceType<ISingleMetricViewerEmbeddable>;
   embeddableInput: Observable<SingleMetricViewerEmbeddableInput>;
   services: SingleMetricViewerEmbeddableServices;
-  refresh: Observable<any>;
+  refresh: Observable<void>;
   onInputChange: (input: Partial<SingleMetricViewerEmbeddableInput>) => void;
   onOutputChange: (output: Partial<AnomalyChartsEmbeddableOutput>) => void;
   onRenderComplete: () => void;
@@ -74,9 +74,8 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
 
-  const { uiSettings } = services[0];
-  const { mlApiServices, mlResultsService } = services[2];
-  const { data, bounds, lastRefresh } = useSingleMetricViwerInputResolver(
+  const { mlApiServices } = services[2];
+  const { data, bounds, lastRefresh } = useSingleMetricViewerInputResolver(
     embeddableInput,
     refresh,
     services[1].data.query.timefilter.timefilter,
@@ -84,10 +83,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   );
   const selectedJobId = data?.jobIds[0];
   const previousRefresh = usePrevious(lastRefresh ?? 0);
-  const mlTimeSeriesExplorer = useMemo(
-    () => timeSeriesExplorerProvider(uiSettings, mlApiServices, mlResultsService),
-    [uiSettings, mlApiServices, mlResultsService]
-  );
+  const mlTimeSeriesExplorer = useTimeSeriesExplorerService();
 
   // Holds the container height for previously fetched data
   const containerHeightRef = useRef<number>();
@@ -167,6 +163,8 @@ export const EmbeddableSingleMetricViewerContainer: FC<
     [setZoom, setDetectorIndex, setFunctionDescription, setSelectedForecastId]
   );
 
+  const containerPadding = 20;
+
   return (
     <EuiResizeObserver onResize={resizeHandler}>
       {(resizeRef) => (
@@ -184,7 +182,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
         >
           {data !== undefined && autoZoomDuration !== undefined && (
             <TimeSeriesExplorerEmbeddableChart
-              chartWidth={chartWidth}
+              chartWidth={chartWidth - containerPadding}
               dataViewsService={services[1].data.dataViews}
               toastNotificationService={toastNotificationService}
               appStateHandler={appStateHandler}

@@ -34,7 +34,7 @@ import {
   showMultiBucketAnomalyTooltip,
   getMultiBucketImpactTooltipValue,
 } from '../../../util/chart_utils';
-import { timeBucketsProvider } from '../../../util/time_buckets_util';
+import { timeBucketsServiceFactory } from '../../../util/time_buckets_service';
 import { mlTableService } from '../../../services/table_service';
 import { ContextChartMask } from '../context_chart_mask';
 import { findChartPointForAnomalyTime } from '../../timeseriesexplorer_utils';
@@ -128,7 +128,7 @@ class TimeseriesChartIntl extends Component {
   };
 
   static contextType = context;
-  getTimeBucketsFromCache;
+  getTimeBuckets;
 
   rowMouseenterSubscriber = null;
   rowMouseleaveSubscriber = null;
@@ -146,9 +146,9 @@ class TimeseriesChartIntl extends Component {
   }
 
   componentDidMount() {
-    this.getTimeBucketsFromCache = timeBucketsProvider(
+    this.getTimeBuckets = timeBucketsServiceFactory(
       this.context.services.uiSettings
-    ).getTimeBucketsFromCache;
+    ).getTimeBuckets;
 
     const { svgWidth } = this.props;
 
@@ -725,7 +725,7 @@ class TimeseriesChartIntl extends Component {
     }
 
     // Get the scaled date format to use for x axis tick labels.
-    const timeBuckets = this.getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();
@@ -1113,7 +1113,7 @@ class TimeseriesChartIntl extends Component {
       .attr('y2', brushChartHeight);
 
     // Add x axis.
-    const timeBuckets = this.getTimeBucketsFromCache();
+    const timeBuckets = this.getTimeBuckets();
     timeBuckets.setInterval('auto');
     timeBuckets.setBounds(bounds);
     const xAxisTickFormat = timeBuckets.getScaledDateFormat();

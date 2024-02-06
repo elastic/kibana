@@ -12,9 +12,9 @@ import { TimefilterContract } from '@kbn/data-plugin/public';
 import { SingleMetricViewerEmbeddableInput } from '..';
 import type { TimeRangeBounds } from '../../application/util/time_buckets';
 
-export function useSingleMetricViwerInputResolver(
+export function useSingleMetricViewerInputResolver(
   embeddableInput: Observable<SingleMetricViewerEmbeddableInput>,
-  refresh: Observable<any>,
+  refresh: Observable<void>,
   timefilter: TimefilterContract,
   onRenderComplete: () => void
 ) {

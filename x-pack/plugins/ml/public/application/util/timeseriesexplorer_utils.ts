@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMultiBucketAnomaly, ML_JOB_AGGREGATION } from '@kbn/ml-anomaly-utils';
@@ -19,7 +20,7 @@ import type { GetAnnotationsResponse } from '../../../common/types/annotations';
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../common/constants/search';
 import { CHARTS_POINT_TARGET } from '../timeseriesexplorer/timeseriesexplorer_constants';
-import { timeBucketsProvider } from './time_buckets_util';
+import { timeBucketsServiceFactory } from './time_buckets_service';
 import type { TimeRangeBounds } from './time_buckets';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 import type { TimeBucketsInterval } from './time_buckets';
@@ -34,16 +35,17 @@ import {
   TIME_FIELD_NAME,
 } from '../timeseriesexplorer/timeseriesexplorer_constants';
 import type { MlApiServices } from '../services/ml_api_service';
-import type { MlResultsService } from '../services/results_service';
+import { mlResultsServiceProvider, type MlResultsService } from '../services/results_service';
 import { forecastServiceProvider } from '../services/forecast_service_provider';
 import { timeSeriesSearchServiceProvider } from '../timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider';
+import { useMlKibana } from '../contexts/kibana';
 
-export function timeSeriesExplorerProvider(
+export function timeSeriesExplorerServiceFactory(
   uiSettings: IUiSettingsClient,
   mlApiServices: MlApiServices,
   mlResultsService: MlResultsService
 ) {
-  const timeBuckets = timeBucketsProvider(uiSettings);
+  const timeBuckets = timeBucketsServiceFactory(uiSettings);
   const mlForecastService = forecastServiceProvider(mlApiServices);
   const mlTimeSeriesSearchService = timeSeriesSearchServiceProvider(
     mlResultsService,
@@ -65,7 +67,7 @@ export function timeSeriesExplorerProvider(
 
       // Use a maxBars of 10% greater than the target.
       const maxBars = Math.floor(1.1 * CHARTS_POINT_TARGET);
-      const buckets = timeBuckets.getTimeBucketsFromCache();
+      const buckets = timeBuckets.getTimeBuckets();
       buckets.setInterval('auto');
       buckets.setBarTarget(Math.floor(CHARTS_POINT_TARGET));
       buckets.setMaxBars(maxBars);
@@ -99,7 +101,7 @@ export function timeSeriesExplorerProvider(
     const barTarget = bucketsTarget !== undefined ? bucketsTarget : 100;
     // Use a maxBars of 10% greater than the target.
     const maxBars = Math.floor(1.1 * barTarget);
-    const buckets = timeBuckets.getTimeBucketsFromCache();
+    const buckets = timeBuckets.getTimeBuckets();
     buckets.setInterval('auto');
     buckets.setBounds(bounds);
     buckets.setBarTarget(Math.floor(barTarget));
@@ -628,4 +630,20 @@ export function timeSeriesExplorerProvider(
   };
 }
 
-export type TimeSeriesExplorerService = ReturnType<typeof timeSeriesExplorerProvider>;
+export function useTimeSeriesExplorerService(): TimeSeriesExplorerService {
+  const {
+    services: {
+      uiSettings,
+      mlServices: { mlApiServices },
+    },
+  } = useMlKibana();
+  const mlResultsService = mlResultsServiceProvider(mlApiServices);
+
+  const mlTimeSeriesExplorer = useMemo(
+    () => timeSeriesExplorerServiceFactory(uiSettings, mlApiServices, mlResultsService),
+    [uiSettings, mlApiServices, mlResultsService]
+  );
+  return mlTimeSeriesExplorer;
+}
+
+export type TimeSeriesExplorerService = ReturnType<typeof timeSeriesExplorerServiceFactory>;

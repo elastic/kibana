@@ -52,8 +52,9 @@ import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
 import { isMetricDetector } from '../get_function_description';
 import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
-import { timeBucketsProvider } from '../../util/time_buckets_util';
-import { timeSeriesExplorerProvider } from '../../util/timeseriesexplorer_utils';
+import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
+import { timeSeriesExplorerServiceFactory } from '../../util/timeseriesexplorer_utils';
+import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
 
 // Used to indicate the chart is being plotted across
 // all partition field values, where the cardinality of the field cannot be
@@ -61,46 +62,6 @@ import { timeSeriesExplorerProvider } from '../../util/timeseriesexplorer_utils'
 const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
   defaultMessage: 'all',
 });
-
-function getTimeseriesexplorerDefaultState() {
-  return {
-    chartDetails: undefined,
-    contextAggregationInterval: undefined,
-    contextChartData: undefined,
-    contextForecastData: undefined,
-    // Not chartable if e.g. model plot with terms for a varp detector
-    dataNotChartable: false,
-    entitiesLoading: false,
-    entityValues: {},
-    focusAnnotationData: [],
-    focusAggregationInterval: {},
-    focusChartData: undefined,
-    focusForecastData: undefined,
-    fullRefresh: true,
-    hasResults: false,
-    // Counter to keep track of what data sets have been loaded.
-    loadCounter: 0,
-    loading: false,
-    modelPlotEnabled: false,
-    // Toggles display of annotations in the focus chart
-    showAnnotations: true,
-    showAnnotationsCheckbox: true,
-    // Toggles display of forecast data in the focus chart
-    showForecast: true,
-    showForecastCheckbox: false,
-    // Toggles display of model bounds in the focus chart
-    showModelBounds: true,
-    showModelBoundsCheckbox: false,
-    svgWidth: 0,
-    tableData: undefined,
-    zoomFrom: undefined,
-    zoomTo: undefined,
-    zoomFromFocusLoaded: undefined,
-    zoomToFocusLoaded: undefined,
-    chartDataError: undefined,
-    sourceIndicesWithGeoFields: {},
-  };
-}
 
 export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   static propTypes = {
@@ -550,11 +511,11 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
   }
 
   async componentDidMount() {
-    this.getBoundsRoundedToInterval = timeBucketsProvider(
+    this.getBoundsRoundedToInterval = timeBucketsServiceFactory(
       this.context.services.uiSettings
     ).getBoundsRoundedToInterval;
 
-    this.mlTimeSeriesExplorer = timeSeriesExplorerProvider(
+    this.mlTimeSeriesExplorer = timeSeriesExplorerServiceFactory(
       this.context.services.uiSettings,
       this.context.services.mlServices.mlApiServices,
       this.context.services.mlServices.mlResultsService

@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import moment from 'moment';
 import { type TimeRangeBounds, type TimeBucketsInterval, TimeBuckets } from './time_buckets';
+import { useMlKibana } from '../contexts/kibana';
 
-export function timeBucketsProvider(uiSettings: IUiSettingsClient) {
-  function getTimeBucketsFromCache(): InstanceType<typeof TimeBuckets> {
+export function timeBucketsServiceFactory(uiSettings: IUiSettingsClient) {
+  function getTimeBuckets(): InstanceType<typeof TimeBuckets> {
     return new TimeBuckets({
       [UI_SETTINGS.HISTOGRAM_MAX_BARS]: uiSettings.get(UI_SETTINGS.HISTOGRAM_MAX_BARS),
       [UI_SETTINGS.HISTOGRAM_BAR_TARGET]: uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET),
@@ -39,7 +41,16 @@ export function timeBucketsProvider(uiSettings: IUiSettingsClient) {
     return { min: moment(adjustedMinMs), max: moment(adjustedMaxMs) };
   }
 
-  return { getTimeBucketsFromCache, getBoundsRoundedToInterval };
+  return { getTimeBuckets, getBoundsRoundedToInterval };
 }
 
-export type TimeBucketsService = ReturnType<typeof timeBucketsProvider>;
+export type TimeBucketsService = ReturnType<typeof timeBucketsServiceFactory>;
+
+export function useTimeBucketsService(): TimeBucketsService {
+  const {
+    services: { uiSettings },
+  } = useMlKibana();
+
+  const mlTimeBucketsService = useMemo(() => timeBucketsServiceFactory(uiSettings), [uiSettings]);
+  return mlTimeBucketsService;
+}
