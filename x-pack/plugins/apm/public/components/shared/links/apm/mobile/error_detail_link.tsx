@@ -37,7 +37,7 @@ function ErrorDetailLink({ serviceName, groupId, query, ...rest }: Props) {
 
   return (
     <EuiLink
-      data-test-subj="apmErrorDetailsLink"
+      data-test-subj="apmMobileErrorDetailsLink"
       href={errorDetailsLink}
       {...rest}
     />

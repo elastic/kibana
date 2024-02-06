@@ -31,18 +31,21 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   combinedQuery,
   onAddFilter,
   totalDocuments,
+  typeAccessor = 'type',
 }: {
   item: FieldVisConfig;
   dataView: DataView | undefined;
   combinedQuery: CombinedQuery;
   totalDocuments?: number;
+  typeAccessor?: 'type' | 'secondaryType';
   /**
    * Callback to add a filter to filter bar
    */
   onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
 }) => {
   const config = { ...item, stats: { ...item.stats, totalDocuments } };
-  const { loading, type, existsInDocs, fieldName } = config;
+  const { loading, existsInDocs, fieldName } = config;
+  const type = config[typeAccessor];
   const dvExpandedRow = useExpandedRowCss();
 
   function getCardContent() {

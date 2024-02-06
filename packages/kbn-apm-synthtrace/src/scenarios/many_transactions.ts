@@ -37,7 +37,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
     generate: ({ range, clients: { apmEsClient } }) => {
       const instances = times(numServices).map((index) =>
         apm
-          .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .service({
+            name: `synthtrace-high-cardinality-${index}`,
+            environment: ENVIRONMENT,
+            agentName: 'java',
+          })
           .instance(`instance-${index}`)
       );
 
@@ -60,7 +64,11 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .failure()
             .errors(
               instance
-                .error({ message: '[ResponseError] index_not_found_exception' })
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                  culprit: 'elasticsearch',
+                })
                 .timestamp(timestamp + 50)
             )
         );

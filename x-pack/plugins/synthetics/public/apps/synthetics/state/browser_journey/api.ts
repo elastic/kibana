@@ -99,6 +99,7 @@ export async function getJourneyScreenshot(
     let backoff = initialBackoff;
     while (response?.status !== 200) {
       const imgRequest = new Request(imgSrc);
+      imgRequest.headers.set('x-elastic-internal-origin', 'Kibana');
 
       if (retryCount > maxRetry) break;
 

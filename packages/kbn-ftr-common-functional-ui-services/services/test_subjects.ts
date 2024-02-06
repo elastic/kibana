@@ -402,8 +402,13 @@ export class TestSubjects extends FtrService {
     }
   }
 
-  public async isEuiSwitchChecked(selector: string) {
-    const euiSwitch = await this.find(selector);
+  public async isEuiSwitchChecked(selector: string | WebElementWrapper) {
+    let euiSwitch: WebElementWrapper;
+    if (typeof selector === 'string') {
+      euiSwitch = await this.find(selector);
+    } else {
+      euiSwitch = selector;
+    }
     const isChecked = await euiSwitch.getAttribute('aria-checked');
     return isChecked === 'true';
   }

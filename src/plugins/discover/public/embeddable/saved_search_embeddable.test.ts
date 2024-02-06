@@ -101,6 +101,7 @@ describe('saved search embeddable', () => {
       sort: [['message', 'asc']] as Array<[string, string]>,
       searchSource,
       viewMode: viewModeMockValue,
+      managed: false,
     };
     executeTriggerActions = jest.fn();
     jest

@@ -18,10 +18,8 @@ import {
   isTab,
   onKeyDownFocusHandler,
 } from '@kbn/timelines-plugin/public';
-
 import { dataTableSelectors, tableDefaults } from '@kbn/securitysolution-data-table';
 import { isInTableScope, isTimelineScope } from '../../../helpers';
-import { ADD_TIMELINE_BUTTON_CLASS_NAME } from '../../../timelines/components/flyout/add_timeline_button';
 import { timelineSelectors } from '../../../timelines/store';
 import type { BrowserFields } from '../../containers/source';
 import { getAllFieldsByName } from '../../containers/source';
@@ -257,11 +255,6 @@ export const EventFieldsBrowser = React.memo<Props>(
       containerElement.current?.querySelector<HTMLInputElement>('input[type="search"]')?.focus();
     }, []);
 
-    const focusAddTimelineButton = useCallback(() => {
-      // the document selector below is required because we may be in a flyout or full screen timeline context
-      document.querySelector<HTMLButtonElement>(`.${ADD_TIMELINE_BUTTON_CLASS_NAME}`)?.focus();
-    }, []);
-
     const onKeyDown = useCallback(
       (keyboardEvent: React.KeyboardEvent) => {
         if (isTab(keyboardEvent)) {
@@ -269,7 +262,7 @@ export const EventFieldsBrowser = React.memo<Props>(
             containerElement: containerElement.current,
             keyboardEvent,
             onSkipFocusBeforeEventsTable: focusSearchInput,
-            onSkipFocusAfterEventsTable: focusAddTimelineButton,
+            onSkipFocusAfterEventsTable: noop,
           });
         } else {
           onKeyDownFocusHandler({
@@ -283,7 +276,7 @@ export const EventFieldsBrowser = React.memo<Props>(
           });
         }
       },
-      [data, focusAddTimelineButton, focusSearchInput]
+      [data, focusSearchInput]
     );
 
     useEffect(() => {

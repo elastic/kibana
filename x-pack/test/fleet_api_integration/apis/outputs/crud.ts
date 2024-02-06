@@ -1536,6 +1536,77 @@ export default function (providerContext: FtrProviderContext) {
 
           expect(deleteResponse.id).to.eql(outputId);
         });
+
+        it('should not modify agent policies when cannot delete an output due to default logstash', async function () {
+          let { body: apiResponse } = await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Elastic output',
+              type: 'elasticsearch',
+              hosts: ['http://localhost'],
+            })
+            .expect(200);
+          const esOutputId = apiResponse.item.id;
+
+          const agentPolicyId = '0000-agent-policy';
+          ({ body: apiResponse } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              id: agentPolicyId,
+              name: 'Agent policy 2',
+              namespace: 'default',
+              data_output_id: `${esOutputId}`,
+              monitoring_output_id: `${esOutputId}`,
+            })
+            .expect(200));
+
+          const fleetPolicyId = '1111-fleet-policy';
+          ({ body: apiResponse } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'kibana')
+            .send({
+              id: fleetPolicyId,
+              name: 'Fleet Server policy 2',
+              namespace: 'default',
+              has_fleet_server: true,
+              data_output_id: `${esOutputId}`,
+            })
+            .expect(200));
+
+          await supertest
+            .post(`/api/fleet/outputs`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Default logstash',
+              type: 'logstash',
+              hosts: ['logstash'],
+              ssl: { certificate: 'CERTIFICATE', key: 'KEY', certificate_authorities: [] },
+              is_default: true,
+              is_default_monitoring: true,
+            })
+            .expect(200);
+
+          const { body: errorResponse } = await supertest
+            .delete(`/api/fleet/outputs/${esOutputId}`)
+            .set('kbn-xsrf', 'xxxx')
+            .expect(400);
+          expect(errorResponse.message).to.eql(
+            'Output of type "logstash" is not usable with policy "Fleet Server policy 2".'
+          );
+
+          const { body: getAgentPolicyResponse } = await supertest.get(
+            `/api/fleet/agent_policies/${agentPolicyId}`
+          );
+          expect(getAgentPolicyResponse.item.data_output_id).to.eql(esOutputId);
+          expect(getAgentPolicyResponse.item.monitoring_output_id).to.eql(esOutputId);
+
+          const { body: getFleetServerAgentPolicyResponse } = await supertest.get(
+            `/api/fleet/agent_policies/${fleetPolicyId}`
+          );
+          expect(getFleetServerAgentPolicyResponse.item.data_output_id).to.eql(esOutputId);
+        });
       });
 
       describe('Kafka output', () => {

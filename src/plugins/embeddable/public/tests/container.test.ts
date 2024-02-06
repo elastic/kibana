@@ -6,92 +6,32 @@
  * Side Public License, v 1.
  */
 
+import { coreMock } from '@kbn/core/public/mocks';
 import * as Rx from 'rxjs';
 import { skip } from 'rxjs/operators';
-import {
-  isErrorEmbeddable,
-  EmbeddableOutput,
-  ContainerInput,
-  ViewMode,
-  SavedObjectEmbeddableInput,
-} from '../lib';
-import {
-  MockFilter,
-  FilterableEmbeddableInput,
-  FilterableEmbeddable,
-  FILTERABLE_EMBEDDABLE,
-} from '../lib/test_samples/embeddables/filterable_embeddable';
+import { EmbeddableOutput, isErrorEmbeddable, SavedObjectEmbeddableInput, ViewMode } from '../lib';
 import { ERROR_EMBEDDABLE_TYPE } from '../lib/embeddables/error_embeddable';
-import { FilterableEmbeddableFactory } from '../lib/test_samples/embeddables/filterable_embeddable_factory';
-import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
-import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
-import { HELLO_WORLD_EMBEDDABLE, HelloWorldEmbeddableFactoryDefinition } from './fixtures';
-import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
 import {
+  ContactCardEmbeddable,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  ContactCardEmbeddable,
 } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable';
+import { CONTACT_CARD_EMBEDDABLE } from '../lib/test_samples/embeddables/contact_card/contact_card_embeddable_factory';
+import { SlowContactCardEmbeddableFactory } from '../lib/test_samples/embeddables/contact_card/slow_contact_card_embeddable_factory';
 import {
   FilterableContainer,
   FilterableContainerInput,
 } from '../lib/test_samples/embeddables/filterable_container';
-import { coreMock } from '@kbn/core/public/mocks';
+import {
+  FilterableEmbeddable,
+  FilterableEmbeddableInput,
+  FILTERABLE_EMBEDDABLE,
+  MockFilter,
+} from '../lib/test_samples/embeddables/filterable_embeddable';
+import { HelloWorldContainer } from '../lib/test_samples/embeddables/hello_world_container';
+import { HelloWorldEmbeddableFactoryDefinition, HELLO_WORLD_EMBEDDABLE } from './fixtures';
+import { createHelloWorldContainerAndEmbeddable, of } from './helpers';
 import { testPlugin } from './test_plugin';
-import { of } from './helpers';
-import { EmbeddableContainerSettings } from '../lib/containers/i_container';
-
-async function createHelloWorldContainerAndEmbeddable(
-  containerInput: ContainerInput = { id: 'hello', panels: {} },
-  embeddableInput = {},
-  settings?: EmbeddableContainerSettings
-) {
-  const coreSetup = coreMock.createSetup();
-  const coreStart = coreMock.createStart();
-  const { setup, doStart, uiActions } = testPlugin(coreSetup, coreStart);
-  const filterableFactory = new FilterableEmbeddableFactory();
-  const slowContactCardFactory = new SlowContactCardEmbeddableFactory({
-    execAction: uiActions.executeTriggerActions,
-  });
-  const contactCardCreateSpy = jest.spyOn(slowContactCardFactory, 'create');
-
-  const helloWorldFactory = new HelloWorldEmbeddableFactoryDefinition();
-
-  setup.registerEmbeddableFactory(filterableFactory.type, filterableFactory);
-  setup.registerEmbeddableFactory(slowContactCardFactory.type, slowContactCardFactory);
-  setup.registerEmbeddableFactory(helloWorldFactory.type, helloWorldFactory);
-
-  const start = doStart();
-
-  const container = new HelloWorldContainer(
-    containerInput,
-    {
-      getEmbeddableFactory: start.getEmbeddableFactory,
-    },
-    settings
-  );
-
-  const embeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, embeddableInput);
-
-  if (isErrorEmbeddable(embeddable)) {
-    throw new Error('Error adding embeddable');
-  }
-
-  return {
-    setup,
-    start,
-    coreSetup,
-    coreStart,
-    container,
-    uiActions,
-    embeddable,
-    contactCardCreateSpy,
-  };
-}
 
 describe('container initialization', () => {
   const panels = {

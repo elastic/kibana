@@ -30,6 +30,7 @@ import {
   isUnrecoverableError,
 } from '@kbn/task-manager-plugin/server/task_running';
 import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 
 const executeParamsFields = [
   'actionId',
@@ -944,6 +945,25 @@ describe('Task Runner Factory', () => {
       await taskRunner.run();
     } catch (e) {
       expect(getErrorSource(e)).toBe(TaskErrorSource.FRAMEWORK);
+    }
+  });
+
+  test(`Should return USER error for a "not found SO"`, async () => {
+    const taskRunner = taskRunnerFactory.create({
+      taskInstance: {
+        ...mockedTaskInstance,
+        attempts: 0,
+      },
+    });
+
+    mockedEncryptedSavedObjectsClient.getDecryptedAsInternalUser.mockRejectedValue(
+      SavedObjectsErrorHelpers.createGenericNotFoundError()
+    );
+
+    try {
+      await taskRunner.run();
+    } catch (e) {
+      expect(getErrorSource(e)).toBe(TaskErrorSource.USER);
     }
   });
 

@@ -9,12 +9,13 @@ import type {
   ActionDetails,
   MaybeImmutable,
   ResponseActionExecuteOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
-  ResponseActionGetFileOutputContent,
-  ResponseActionGetFileParameters,
 } from '../../types';
+import { RESPONSE_ACTION_AGENT_TYPE, RESPONSE_ACTION_TYPE } from './constants';
 
 type SomeObjectWithCommand = Pick<ActionDetails, 'command'>;
 
@@ -38,3 +39,10 @@ export const isGetFileAction = (
 ): action is ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters> => {
   return action.command === 'get-file';
 };
+
+// type guards to ensure only the matching string values are attached to the types filter type
+export const isAgentType = (type: string): type is typeof RESPONSE_ACTION_AGENT_TYPE[number] =>
+  RESPONSE_ACTION_AGENT_TYPE.includes(type as typeof RESPONSE_ACTION_AGENT_TYPE[number]);
+
+export const isActionType = (type: string): type is typeof RESPONSE_ACTION_TYPE[number] =>
+  RESPONSE_ACTION_TYPE.includes(type as typeof RESPONSE_ACTION_TYPE[number]);

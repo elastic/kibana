@@ -304,6 +304,39 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.BottomBarActions",
+        "type": "Function",
+        "tags": [],
+        "label": "BottomBarActions",
+        "description": [],
+        "signature": [
+          "({ isLoading, onDiscardChanges, onSave, unsavedChangesCount, saveLabel, appTestSubj, areChangesInvalid, }: Props) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.BottomBarActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  isLoading,\n  onDiscardChanges,\n  onSave,\n  unsavedChangesCount,\n  saveLabel,\n  appTestSubj,\n  areChangesInvalid = false,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/bottom_bar_actions/bottom_bar_actions.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.createEsParams",
         "type": "Function",
         "tags": [],
@@ -516,6 +549,76 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSelection",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSelectionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSelection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSelectionProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSuggestions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSuggestionsProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSuggestions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSuggestionsProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -629,7 +732,15 @@
                     "section": "def-public.Action",
                     "text": "Action"
                   },
-                  "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+                  "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => ",
+                  {
+                    "pluginId": "uiActions",
+                    "scope": "public",
+                    "docId": "kibUiActionsPluginApi",
+                    "section": "def-public.FrequentCompatibilityChangeAction",
+                    "text": "FrequentCompatibilityChangeAction"
+                  },
+                  "<object>[]; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
                   {
                     "pluginId": "uiActions",
                     "scope": "public",
@@ -1235,7 +1346,15 @@
             "section": "def-common.ChromeBreadcrumb",
             "text": "ChromeBreadcrumb"
           },
-          "[], app?: { id: string; label: string; } | undefined) => void"
+          "[], app?: { id: string; label: string; } | undefined, breadcrumbsAppendExtension?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumbsAppendExtension",
+            "text": "ChromeBreadcrumbsAppendExtension"
+          },
+          " | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
         "deprecated": false,
@@ -1297,6 +1416,28 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useBreadcrumbs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "breadcrumbsAppendExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumbsAppendExtension",
+                "text": "ChromeBreadcrumbsAppendExtension"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1335,25 +1476,55 @@
         "signature": [
           "(app: ",
           "ObservabilityApp",
-          ", settingsKeys: string[]) => { settingsEditableConfig: Record<string, ",
-          "FieldSetting",
-          ">; unsavedChanges: Record<string, ",
+          ", settingsKeys: string[]) => { fields: Record<string, ",
           {
-            "pluginId": "advancedSettings",
-            "scope": "public",
-            "docId": "kibAdvancedSettingsPluginApi",
-            "section": "def-public.FieldState",
-            "text": "FieldState"
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.FieldDefinition",
+            "text": "FieldDefinition"
           },
-          ">; handleFieldChange: (key: string, fieldState: ",
+          "<",
           {
-            "pluginId": "advancedSettings",
-            "scope": "public",
-            "docId": "kibAdvancedSettingsPluginApi",
-            "section": "def-public.FieldState",
-            "text": "FieldState"
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
           },
-          ") => void; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
+          ", string | number | boolean | (string | number)[] | null | undefined>>; unsavedChanges: Record<string, ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.UnsavedFieldChange",
+            "text": "UnsavedFieldChange"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">>; handleFieldChange: ",
+          {
+            "pluginId": "@kbn/management-settings-types",
+            "scope": "common",
+            "docId": "kibKbnManagementSettingsTypesPluginApi",
+            "section": "def-common.OnFieldChangeFn",
+            "text": "OnFieldChangeFn"
+          },
+          "<",
+          {
+            "pluginId": "@kbn/core-ui-settings-common",
+            "scope": "common",
+            "docId": "kibKbnCoreUiSettingsCommonPluginApi",
+            "section": "def-common.UiSettingsType",
+            "text": "UiSettingsType"
+          },
+          ">; saveAll: () => Promise<void>; isSaving: boolean; cleanUnsavedChanges: () => void; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_editable_settings.tsx",
         "deprecated": false,
@@ -1931,6 +2102,43 @@
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useValuesList",
+        "type": "Function",
+        "tags": [],
+        "label": "useValuesList",
+        "description": [],
+        "signature": [
+          "({ sourceField, dataViewTitle, query, filters, time, label, keepHistory, cardinalityField, }: ",
+          "Props",
+          ") => { values: ",
+          "ListItem",
+          "[]; loading?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useValuesList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sourceField,\n  dataViewTitle,\n  query = '',\n  filters,\n  time,\n  label,\n  keepHistory,\n  cardinalityField,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -2915,7 +3123,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; }"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -2984,7 +3192,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; }"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3893,10 +4101,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "id": "def-common.LOGS_EXPLORER_FEEDBACK_LINK",
         "type": "string",
         "tags": [],
-        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "label": "LOGS_EXPLORER_FEEDBACK_LINK",
         "description": [],
         "signature": [
           "\"https://ela.st/explorer-feedback\""

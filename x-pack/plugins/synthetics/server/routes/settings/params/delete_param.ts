@@ -27,7 +27,6 @@ export const deleteSyntheticsParamsRoute: SyntheticsRestApiRouteFactory<
       }),
     },
   },
-  writeAccess: true,
   handler: async ({ savedObjectsClient, request }) => {
     const { ids } = request.body;
 

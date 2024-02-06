@@ -149,6 +149,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskEnginePrivilegesRouteEnabled: true,
 
+  /**
+   * Enables alerts suppression for indicator match rules
+   */
+  alertSuppressionForIndicatorMatchRuleEnabled: false,
+
   /*
    * Enables experimental Entity Analytics Asset Criticality feature
    */
@@ -162,7 +167,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables SentinelOne manual host manipulation actions
    */
-  sentinelOneManualHostActionsEnabled: false,
+  sentinelOneManualHostActionsEnabled: true,
 
   /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.

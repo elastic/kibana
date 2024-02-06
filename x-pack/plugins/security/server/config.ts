@@ -301,7 +301,6 @@ export const ConfigSchema = schema.object({
       )
     ),
   }),
-  enabled: schema.boolean({ defaultValue: true }),
 
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({

@@ -9,7 +9,6 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import '../../common/mock/react_beautiful_dnd';
-
 import { TestProviders } from '../../common/mock';
 import { TimelineId } from '../../../common/types/timeline';
 import * as timelineActions from '../store/actions';
@@ -45,7 +44,7 @@ describe('TimelineWrapper', () => {
         <TimelineWrapper {...props} />
       </TestProviders>
     );
-    expect(getByTestId('flyout-pane')).toBeInTheDocument();
+    expect(getByTestId('timeline-portal-ref')).toBeInTheDocument();
     expect(getByTestId('timeline-bottom-bar')).toBeInTheDocument();
   });
 

@@ -6,10 +6,9 @@
  */
 
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
-import { fold } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/pipeable';
-import * as t from 'io-ts';
+import { Logger } from '@kbn/core/server';
+import { ALL_VALUE, Paginated, Pagination, sloSchema } from '@kbn/slo-schema';
+import { isLeft } from 'fp-ts/lib/Either';
 import { SLO_MODEL_VERSION } from '../../../common/slo/constants';
 import { SLO, StoredSLO } from '../../domain/models';
 import { SLOIdConflict, SLONotFound } from '../../errors';
@@ -28,7 +27,7 @@ export interface SLORepository {
 }
 
 export class KibanaSavedObjectsSLORepository implements SLORepository {
-  constructor(private soClient: SavedObjectsClientContract) {}
+  constructor(private soClient: SavedObjectsClientContract, private logger: Logger) {}
 
   async save(slo: SLO, options = { throwOnConflict: false }): Promise<SLO> {
     let existingSavedObjectId;
@@ -46,12 +45,12 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       existingSavedObjectId = findResponse.saved_objects[0].id;
     }
 
-    const savedSLO = await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
+    await this.soClient.create<StoredSLO>(SO_SLO_TYPE, toStoredSLO(slo), {
       id: existingSavedObjectId,
       overwrite: true,
     });
 
-    return toSLO(savedSLO.attributes);
+    return slo;
   }
 
   async findById(id: string): Promise<SLO> {
@@ -66,7 +65,12 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       throw new SLONotFound(`SLO [${id}] not found`);
     }
 
-    return toSLO(response.saved_objects[0].attributes);
+    const slo = this.toSLO(response.saved_objects[0].attributes);
+    if (slo === undefined) {
+      throw new Error('Invalid stored SLO');
+    }
+
+    return slo;
   }
 
   async deleteById(id: string): Promise<void> {
@@ -94,7 +98,9 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       filter: `slo.attributes.id:(${ids.join(' or ')})`,
     });
 
-    return response.saved_objects.map((slo) => toSLO(slo.attributes));
+    return response.saved_objects
+      .map((slo) => this.toSLO(slo.attributes))
+      .filter((slo) => slo !== undefined) as SLO[];
   }
 
   async search(
@@ -117,26 +123,32 @@ export class KibanaSavedObjectsSLORepository implements SLORepository {
       total: response.total,
       perPage: response.per_page,
       page: response.page,
-      results: response.saved_objects.map((slo) => toSLO(slo.attributes)),
+      results: response.saved_objects
+        .map((savedObject) => this.toSLO(savedObject.attributes))
+        .filter((slo) => slo !== undefined) as SLO[],
     };
+  }
+
+  toSLO(storedSLO: StoredSLO): SLO | undefined {
+    const result = sloSchema.decode({
+      ...storedSLO,
+      // groupBy was added in 8.10.0
+      groupBy: storedSLO.groupBy ?? ALL_VALUE,
+      // version was added in 8.12.0. This is a safeguard against SO migration issue.
+      // if not present, we considered the version to be 1, e.g. not migrated.
+      // We would need to call the _reset api on this SLO.
+      version: storedSLO.version ?? 1,
+    });
+
+    if (isLeft(result)) {
+      this.logger.error(`Invalid stored SLO with id [${storedSLO.id}]`);
+      return undefined;
+    }
+
+    return result.right;
   }
 }
 
 function toStoredSLO(slo: SLO): StoredSLO {
   return sloSchema.encode(slo);
-}
-
-function toSLO(storedSLO: StoredSLO): SLO {
-  return pipe(
-    sloSchema.decode({
-      ...storedSLO,
-      // version was added in 8.12.0. This is a safeguard against SO migration issue.
-      // if not present, we considered the version to be 1, e.g. not migrated.
-      // We would need to call the _reset api on this SLO.
-      version: storedSLO.version ?? 1,
-    }),
-    fold(() => {
-      throw new Error('Invalid Stored SLO');
-    }, t.identity)
-  );
 }

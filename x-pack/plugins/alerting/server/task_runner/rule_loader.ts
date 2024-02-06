@@ -6,7 +6,13 @@
  */
 
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import { CoreKibanaRequest, FakeRawRequest, Headers, SavedObject } from '@kbn/core/server';
+import {
+  CoreKibanaRequest,
+  FakeRawRequest,
+  Headers,
+  SavedObject,
+  SavedObjectsErrorHelpers,
+} from '@kbn/core/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import {
   LoadedIndirectParams,
@@ -134,6 +140,9 @@ export async function getRuleAttributes<Params extends RuleTypeParams>(
       { namespace }
     );
   } catch (e) {
+    if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+      throw createTaskRunError(e, TaskErrorSource.USER);
+    }
     throw createTaskRunError(e, TaskErrorSource.FRAMEWORK);
   }
 

@@ -29,6 +29,7 @@ export function registerUpdateRoute({ router, lib: { handleEsError } }: RouteDep
         ignore_unavailable: true,
         allow_no_indices: false,
         expand_wildcards: 'none' as const,
+        reopen: true,
         index: indexName,
         body: request.body,
       };

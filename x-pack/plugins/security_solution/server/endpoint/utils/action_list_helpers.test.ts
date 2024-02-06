@@ -68,6 +68,7 @@ describe('action helpers', () => {
         size: 20,
         from: 5,
         startDate: 'now-10d',
+        agentTypes: ['endpoint'],
         elasticAgentIds: ['agent-123', 'agent-456'],
         endDate: 'now',
         commands: ['isolate', 'unisolate', 'get-file'],
@@ -100,6 +101,11 @@ describe('action helpers', () => {
                         {
                           terms: {
                             'data.command': ['isolate', 'unisolate', 'get-file'],
+                          },
+                        },
+                        {
+                          terms: {
+                            input_type: ['endpoint'],
                           },
                         },
                         {
@@ -272,6 +278,324 @@ describe('action helpers', () => {
 
       expect(actions.actionIds).toEqual(['123']);
       expect(actions.actionRequests?.body?.hits?.hits[0]._source?.agent.id).toEqual('agent-a');
+    });
+
+    describe('action `Types` filter', () => {
+      it('should correctly query with multiple action `types` filter options provided', async () => {
+        const esClient = mockScopedEsClient.asInternalUser;
+
+        applyActionListEsSearchMock(esClient);
+        await getActions({
+          esClient,
+          size: 20,
+          from: 5,
+          startDate: 'now-10d',
+          elasticAgentIds: ['agent-123', 'agent-456'],
+          endDate: 'now',
+          types: ['manual', 'automated'],
+          userIds: ['*elastic*', '*kibana*'],
+        });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          {
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-10d',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'now',
+                              },
+                            },
+                          },
+
+                          {
+                            terms: {
+                              agents: ['agent-123', 'agent-456'],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*elastic*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*kibana*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                },
+              },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+            from: 5,
+            index: '.logs-endpoint.actions-default',
+            size: 20,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+      });
+
+      it('should correctly query with single `manual` action `types` filter options provided', async () => {
+        const esClient = mockScopedEsClient.asInternalUser;
+
+        applyActionListEsSearchMock(esClient);
+        await getActions({
+          esClient,
+          size: 20,
+          from: 5,
+          startDate: 'now-10d',
+          elasticAgentIds: ['agent-123', 'agent-456'],
+          endDate: 'now',
+          types: ['manual'],
+          userIds: ['*elastic*', '*kibana*'],
+        });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          {
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-10d',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'now',
+                              },
+                            },
+                          },
+
+                          {
+                            terms: {
+                              agents: ['agent-123', 'agent-456'],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*elastic*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*kibana*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  must_not: {
+                    exists: {
+                      field: 'data.alert_id',
+                    },
+                  },
+                },
+              },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+            from: 5,
+            index: '.logs-endpoint.actions-default',
+            size: 20,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+      });
+
+      it('should correctly query with single `automated` action `types` filter options provided', async () => {
+        const esClient = mockScopedEsClient.asInternalUser;
+
+        applyActionListEsSearchMock(esClient);
+        await getActions({
+          esClient,
+          size: 20,
+          from: 5,
+          startDate: 'now-10d',
+          elasticAgentIds: ['agent-123', 'agent-456'],
+          endDate: 'now',
+          types: ['automated'],
+          userIds: ['*elastic*', '*kibana*'],
+        });
+
+        expect(esClient.search).toHaveBeenCalledWith(
+          {
+            body: {
+              query: {
+                bool: {
+                  must: [
+                    {
+                      bool: {
+                        filter: [
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-10d',
+                              },
+                            },
+                          },
+                          {
+                            range: {
+                              '@timestamp': {
+                                lte: 'now',
+                              },
+                            },
+                          },
+
+                          {
+                            terms: {
+                              agents: ['agent-123', 'agent-456'],
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    {
+                      bool: {
+                        should: [
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*elastic*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                          {
+                            bool: {
+                              should: [
+                                {
+                                  query_string: {
+                                    fields: ['user_id'],
+                                    query: '*kibana*',
+                                  },
+                                },
+                              ],
+                              minimum_should_match: 1,
+                            },
+                          },
+                        ],
+                        minimum_should_match: 1,
+                      },
+                    },
+                  ],
+                  filter: {
+                    exists: {
+                      field: 'data.alert_id',
+                    },
+                  },
+                },
+              },
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+            },
+            from: 5,
+            index: '.logs-endpoint.actions-default',
+            size: 20,
+          },
+          {
+            ignore: [404],
+            meta: true,
+          }
+        );
+      });
     });
   });
 });

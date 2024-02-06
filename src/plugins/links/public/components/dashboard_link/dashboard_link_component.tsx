@@ -189,6 +189,7 @@ export const DashboardLinkComponent = ({
       label={linkLabel}
       external={link.options?.openInNewTab}
       data-test-subj={error ? `${id}--error` : `${id}`}
+      aria-current={link.destination === parentDashboardId}
     />
   );
 };

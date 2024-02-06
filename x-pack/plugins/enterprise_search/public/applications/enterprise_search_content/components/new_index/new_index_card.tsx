@@ -5,33 +5,35 @@
  * 2.0.
  */
 
-import React, { MouseEventHandler } from 'react';
+import React from 'react';
 
-import { EuiCardProps, EuiIconProps, EuiTextColor } from '@elastic/eui';
-import { EuiBadge, EuiButton, EuiCard, EuiIcon, EuiSpacer } from '@elastic/eui';
+import { EuiIconProps } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
 import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 
-import { getIngestionMethodIconType } from './utils';
+import { IngestionCard } from '../shared/ingestion_card/ingestion_card';
+
+import { getIngestionMethodButtonIcon, getIngestionMethodIconType } from './utils';
 
 export interface NewIndexCardProps {
   disabled: boolean;
-  isSelected?: boolean;
-  onSelect?: MouseEventHandler<HTMLButtonElement>;
+  onSelect?: () => void;
   type: INGESTION_METHOD_IDS;
 }
 
 export interface MethodCardOptions {
-  description: EuiCardProps['description'];
+  buttonIcon: EuiIconProps['type'];
+  description: string;
   footer: Record<string, string>;
   icon: EuiIconProps['type'];
-  title: EuiCardProps['title'];
+  title: string;
 }
 
 const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
   [INGESTION_METHOD_IDS.CRAWLER]: {
+    buttonIcon: getIngestionMethodButtonIcon(INGESTION_METHOD_IDS.CRAWLER),
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.description',
       {
@@ -43,7 +45,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
       buttonLabel: i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.label',
         {
-          defaultMessage: 'Use a web crawler',
+          defaultMessage: 'Crawl URL',
         }
       ),
       label: i18n.translate(
@@ -59,36 +61,37 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     }),
   },
   [INGESTION_METHOD_IDS.CONNECTOR]: {
+    buttonIcon: getIngestionMethodButtonIcon(INGESTION_METHOD_IDS.CONNECTOR),
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.methodCard.connector.description',
       {
-        defaultMessage:
-          'Extract, transform, index and sync data from a data source via native or customized connectors',
+        defaultMessage: 'Extract, transform, index and sync data from a third-party data source',
       }
     ),
     footer: {
       buttonLabel: i18n.translate(
         'xpack.enterpriseSearch.content.newIndex.methodCard.connector.label',
         {
-          defaultMessage: 'Use a connector',
+          defaultMessage: 'Choose a source connector',
         }
       ),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.CONNECTOR),
     title: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.connector.title', {
-      defaultMessage: 'Connector',
+      defaultMessage: 'Connectors',
     }),
   },
   [INGESTION_METHOD_IDS.API]: {
+    buttonIcon: getIngestionMethodButtonIcon(INGESTION_METHOD_IDS.API),
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.methodCard.api.description',
       {
-        defaultMessage: 'Add documents programmatically by connecting with the API',
+        defaultMessage: 'Use the API to connect directly to your Elasticsearch index endpoint.',
       }
     ),
     footer: {
       buttonLabel: i18n.translate('xpack.enterpriseSearch.content.newIndex.methodCard.api.label', {
-        defaultMessage: 'Use the API',
+        defaultMessage: 'Create API Index',
       }),
     },
     icon: getIngestionMethodIconType(INGESTION_METHOD_IDS.API),
@@ -97,45 +100,23 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     }),
   },
 };
-export const NewIndexCard: React.FC<NewIndexCardProps> = ({
-  disabled,
-  onSelect,
-  isSelected,
-  type,
-}) => {
+
+export const NewIndexCard: React.FC<NewIndexCardProps> = ({ disabled, onSelect, type }) => {
   if (!METHOD_CARD_OPTIONS[type]) {
     return null;
   }
-  const { icon, title, description, footer } = METHOD_CARD_OPTIONS[type];
+  const { buttonIcon, icon, title, description, footer } = METHOD_CARD_OPTIONS[type];
 
   return (
-    <EuiCard
+    <IngestionCard
       isDisabled={disabled}
       data-test-subj="entSearch-content-newIndexCard-cardBody"
-      hasBorder
-      icon={<EuiIcon type={icon} size="xxl" />}
+      logo={icon}
+      buttonIcon={buttonIcon}
+      buttonLabel={footer.buttonLabel}
       title={title}
-      description={<EuiTextColor color="subdued">{description}</EuiTextColor>}
-      footer={
-        <>
-          {footer.label && (
-            <>
-              <EuiBadge color="hollow">{footer.label}</EuiBadge>
-              <EuiSpacer size="m" />
-            </>
-          )}
-          <EuiButton
-            isDisabled={disabled}
-            data-test-subj={`entSearchContent-newIndexCard-button-${type}`}
-            fullWidth
-            onClick={onSelect}
-            color={isSelected ? 'success' : 'primary'}
-            iconType={isSelected ? 'checkInCircleFilled' : undefined}
-          >
-            {footer.buttonLabel}
-          </EuiButton>
-        </>
-      }
+      description={description}
+      onClick={onSelect}
     />
   );
 };

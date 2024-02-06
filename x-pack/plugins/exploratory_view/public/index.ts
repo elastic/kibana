@@ -32,13 +32,7 @@ export { ALL_VALUES_SELECTED } from './components/shared/exploratory_view/config
 
 export { APP_ROUTE as EXPLORATORY_VIEW_APP_URL } from './constants';
 
-export {
-  ExploratoryView,
-  FieldValueSuggestions,
-  FieldValueSelection,
-  FilterValueLabel,
-  SelectableUrlList,
-} from './components/shared';
+export { ExploratoryView, FilterValueLabel, SelectableUrlList } from './components/shared';
 
 export { createExploratoryViewUrl } from './components/shared/exploratory_view/configurations/exploratory_view_url';
 export type { AllSeries } from './components/shared/exploratory_view/hooks/use_series_storage';

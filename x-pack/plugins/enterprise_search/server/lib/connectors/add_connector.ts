@@ -9,9 +9,11 @@ import { IScopedClusterClient } from '@kbn/core/server';
 
 import {
   createConnector,
+  createConnectorSecret,
   Connector,
-  deleteConnectorById,
   ConnectorStatus,
+  deleteConnectorById,
+  updateConnectorApiKeyId,
 } from '@kbn/search-connectors';
 
 import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/search-connectors';
@@ -19,10 +21,10 @@ import { fetchConnectorByIndexName, NATIVE_CONNECTOR_DEFINITIONS } from '@kbn/se
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../common/constants';
 
 import { ErrorCode } from '../../../common/types/error_codes';
-import { stripSearchPrefix } from '../../../common/utils/strip_search_prefix';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
 import { createIndex } from '../indices/create_index';
+import { generateApiKey } from '../indices/generate_api_key';
 import { getDefaultPipeline } from '../pipelines/get_default_pipeline';
 
 export const addConnector = async (
@@ -82,10 +84,28 @@ export const addConnector = async (
       }
     : {};
 
-  return await createConnector(client.asCurrentUser, {
+  const connector = await createConnector(client.asCurrentUser, {
     ...input,
-    name: stripSearchPrefix(input.indexName || ''),
+    name: input.indexName || '',
     ...nativeFields,
     pipeline: await getDefaultPipeline(client),
   });
+
+  // Only create API key for native connectors and if index name was provided
+  if (
+    index &&
+    input.isNative &&
+    input.serviceType !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE
+  ) {
+    const apiKey = await generateApiKey(client, index);
+    const connectorSecret = await createConnectorSecret(client.asCurrentUser, apiKey.encoded);
+    await updateConnectorApiKeyId(
+      client.asCurrentUser,
+      connector.id,
+      apiKey.id,
+      connectorSecret.id
+    );
+  }
+
+  return connector;
 };

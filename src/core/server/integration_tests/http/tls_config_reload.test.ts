@@ -62,7 +62,9 @@ describe('HttpServer - TLS config', () => {
 
     const router = new Router('', logger, enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     router.get(
       {

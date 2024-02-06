@@ -38,6 +38,7 @@ export interface Props {
   shownAgents: number;
   inactiveShownAgents: number;
   totalManagedAgentIds: string[];
+  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -51,6 +52,7 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
   shownAgents,
   inactiveShownAgents,
   totalManagedAgentIds,
+  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -91,18 +93,19 @@ export const AgentBulkActions: React.FunctionComponent<Props> = ({
     }
   }, [currentQuery, totalManagedAgentIds]);
 
+  const totalActiveAgents = shownAgents - inactiveShownAgents;
+
+  // exclude inactive agents from the count
+  const agentCount =
+    selectionMode === 'manual'
+      ? selectedAgents.length
+      : totalActiveAgents - (totalManagedAgentIds?.length - inactiveManagedAgentIds?.length);
+
   // Check if user is working with only inactive agents
   const atLeastOneActiveAgentSelected =
     selectionMode === 'manual'
       ? !!selectedAgents.find((agent) => agent.active)
-      : shownAgents > inactiveShownAgents;
-  const totalActiveAgents = shownAgents - inactiveShownAgents;
-
-  const agentCount =
-    selectionMode === 'manual'
-      ? selectedAgents.length
-      : totalActiveAgents - totalManagedAgentIds?.length;
-
+      : agentCount > 0 && shownAgents > inactiveShownAgents;
   const agents = selectionMode === 'manual' ? selectedAgents : selectionQuery;
 
   const [tagsPopoverButton, setTagsPopoverButton] = useState<HTMLElement>();

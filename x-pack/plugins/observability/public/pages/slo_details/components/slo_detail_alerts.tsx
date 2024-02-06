@@ -11,7 +11,7 @@ import { AlertConsumers } from '@kbn/rule-data-utils';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../../utils/kibana_react';
 
-const ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
+export const SLO_ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -30,7 +30,7 @@ export function SloDetailsAlerts({ slo }: Props) {
           <AlertsStateTable
             alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
             configurationId={AlertConsumers.OBSERVABILITY}
-            id={ALERTS_TABLE_ID}
+            id={SLO_ALERTS_TABLE_ID}
             data-test-subj="alertTable"
             featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
             query={{

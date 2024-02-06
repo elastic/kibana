@@ -31,7 +31,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       maxBytes: MAX_PAYLOAD_SIZE,
     },
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, server } = routeContext;
     const { projectName } = request.params;

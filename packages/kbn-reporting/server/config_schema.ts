@@ -65,6 +65,14 @@ const CsvSchema = schema.object({
   }),
   useByteOrderMarkEncoding: schema.boolean({ defaultValue: false }),
   scroll: schema.object({
+    strategy: schema.oneOf(
+      [
+        // point-in-time API or scroll API is supported
+        schema.literal('pit'),
+        schema.literal('scroll'),
+      ],
+      { defaultValue: 'pit' }
+    ),
     duration: schema.string({
       defaultValue: '30s', // this value is passed directly to ES, so string only format is preferred
       validate(value) {

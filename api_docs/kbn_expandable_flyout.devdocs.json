@@ -2,26 +2,10 @@
   "id": "@kbn/expandable-flyout",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.ExpandableFlyout",
+        "id": "def-public.ExpandableFlyout",
         "type": "Function",
         "tags": [],
         "label": "ExpandableFlyout",
@@ -32,9 +16,9 @@
           "{ ({ registeredPanels, ...flyoutProps }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/expandable-flyout",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnExpandableFlyoutPluginApi",
-            "section": "def-common.ExpandableFlyoutProps",
+            "section": "def-public.ExpandableFlyoutProps",
             "text": "ExpandableFlyoutProps"
           },
           ">): JSX.Element | null; displayName: string | undefined; }"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.ExpandableFlyout.$1",
+            "id": "def-public.ExpandableFlyout.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  registeredPanels,\n  ...flyoutProps\n}",
@@ -54,9 +38,9 @@
               "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/expandable-flyout",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.ExpandableFlyoutProps",
+                "section": "def-public.ExpandableFlyoutProps",
                 "text": "ExpandableFlyoutProps"
               },
               ">"
@@ -72,12 +56,12 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.ExpandableFlyoutProvider",
+        "id": "def-public.ExpandableFlyoutProvider",
         "type": "Function",
         "tags": [],
         "label": "ExpandableFlyoutProvider",
         "description": [
-          "\nWrap your plugin with this context for the ExpandableFlyout React component.\nStorage property allows you to specify how the flyout state works internally.\nWith \"url\", it will be persisted into url and thus allow for deep linking & will survive webpage reloads.\n\"memory\" is based on useReducer hook. The state is saved internally to the package. which means it will not be\npersisted when sharing url or reloading browser pages."
+          "\nWrap your plugin with this context for the ExpandableFlyout React component.\nStorage property allows you to specify how the flyout state works internally.\nWith \"url\", it will be persisted into url and thus allow for deep linking & will survive webpage reloads.\n\"memory\" is based on an isolated redux context. The state is saved internally to the package, which means it will not be\npersisted when sharing url or reloading browser pages."
         ],
         "signature": [
           "({ children, storage, }: React.PropsWithChildren<React.PropsWithChildren<ExpandableFlyoutProviderProps>>) => JSX.Element"
@@ -88,7 +72,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.ExpandableFlyoutProvider.$1",
+            "id": "def-public.ExpandableFlyoutProvider.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "{\n  children,\n  storage = 'url',\n}",
@@ -107,18 +91,50 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.useExpandableFlyoutContext",
+        "id": "def-public.useExpandableFlyoutApi",
         "type": "Function",
         "tags": [],
-        "label": "useExpandableFlyoutContext",
+        "label": "useExpandableFlyoutApi",
         "description": [
-          "\nRetrieve context's properties"
+          "\nThis hook allows you to interact with the flyout, open panels and previews etc."
         ],
         "signature": [
           "() => ",
-          "ExpandableFlyoutContextValue"
+          {
+            "pluginId": "@kbn/expandable-flyout",
+            "scope": "public",
+            "docId": "kibKbnExpandableFlyoutPluginApi",
+            "section": "def-public.ExpandableFlyoutApi",
+            "text": "ExpandableFlyoutApi"
+          }
         ],
-        "path": "packages/kbn-expandable-flyout/src/context.tsx",
+        "path": "packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/expandable-flyout",
+        "id": "def-public.useExpandableFlyoutState",
+        "type": "Function",
+        "tags": [],
+        "label": "useExpandableFlyoutState",
+        "description": [
+          "\nThis hook allows you to access the flyout state, read open panels and previews."
+        ],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "@kbn/expandable-flyout",
+            "scope": "public",
+            "docId": "kibKbnExpandableFlyoutPluginApi",
+            "section": "def-public.State",
+            "text": "State"
+          }
+        ],
+        "path": "packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -129,7 +145,374 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.ExpandableFlyoutProps",
+        "id": "def-public.ExpandableFlyoutApi",
+        "type": "Interface",
+        "tags": [],
+        "label": "ExpandableFlyoutApi",
+        "description": [],
+        "path": "packages/kbn-expandable-flyout/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.openFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "openFlyout",
+            "description": [
+              "\nOpen the flyout with left, right and/or preview panels"
+            ],
+            "signature": [
+              "(panels: { left?: ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              " | undefined; right?: ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              " | undefined; preview?: ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              " | undefined; }) => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/expandable-flyout",
+                "id": "def-public.ExpandableFlyoutApi.openFlyout.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panels",
+                "description": [],
+                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/expandable-flyout",
+                    "id": "def-public.ExpandableFlyoutApi.openFlyout.$1.left",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "left",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/expandable-flyout",
+                        "scope": "public",
+                        "docId": "kibKbnExpandableFlyoutPluginApi",
+                        "section": "def-public.FlyoutPanelProps",
+                        "text": "FlyoutPanelProps"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "packages/kbn-expandable-flyout/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/expandable-flyout",
+                    "id": "def-public.ExpandableFlyoutApi.openFlyout.$1.right",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "right",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/expandable-flyout",
+                        "scope": "public",
+                        "docId": "kibKbnExpandableFlyoutPluginApi",
+                        "section": "def-public.FlyoutPanelProps",
+                        "text": "FlyoutPanelProps"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "packages/kbn-expandable-flyout/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/expandable-flyout",
+                    "id": "def-public.ExpandableFlyoutApi.openFlyout.$1.preview",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "preview",
+                    "description": [],
+                    "signature": [
+                      {
+                        "pluginId": "@kbn/expandable-flyout",
+                        "scope": "public",
+                        "docId": "kibKbnExpandableFlyoutPluginApi",
+                        "section": "def-public.FlyoutPanelProps",
+                        "text": "FlyoutPanelProps"
+                      },
+                      " | undefined"
+                    ],
+                    "path": "packages/kbn-expandable-flyout/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.openRightPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "openRightPanel",
+            "description": [
+              "\nReplaces the current right panel with a new one"
+            ],
+            "signature": [
+              "(panel: ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/expandable-flyout",
+                "id": "def-public.ExpandableFlyoutApi.openRightPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/expandable-flyout",
+                    "scope": "public",
+                    "docId": "kibKbnExpandableFlyoutPluginApi",
+                    "section": "def-public.FlyoutPanelProps",
+                    "text": "FlyoutPanelProps"
+                  }
+                ],
+                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.openLeftPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "openLeftPanel",
+            "description": [
+              "\nReplaces the current left panel with a new one"
+            ],
+            "signature": [
+              "(panel: ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/expandable-flyout",
+                "id": "def-public.ExpandableFlyoutApi.openLeftPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/expandable-flyout",
+                    "scope": "public",
+                    "docId": "kibKbnExpandableFlyoutPluginApi",
+                    "section": "def-public.FlyoutPanelProps",
+                    "text": "FlyoutPanelProps"
+                  }
+                ],
+                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.openPreviewPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "openPreviewPanel",
+            "description": [
+              "\nAdd a new preview panel to the list of current preview panels"
+            ],
+            "signature": [
+              "(panel: ",
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/expandable-flyout",
+                "id": "def-public.ExpandableFlyoutApi.openPreviewPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panel",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/expandable-flyout",
+                    "scope": "public",
+                    "docId": "kibKbnExpandableFlyoutPluginApi",
+                    "section": "def-public.FlyoutPanelProps",
+                    "text": "FlyoutPanelProps"
+                  }
+                ],
+                "path": "packages/kbn-expandable-flyout/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.closeRightPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "closeRightPanel",
+            "description": [
+              "\nCloses right panel"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.closeLeftPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "closeLeftPanel",
+            "description": [
+              "\nCloses left panel"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.closePreviewPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "closePreviewPanel",
+            "description": [
+              "\nCloses all preview panels"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.previousPreviewPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "previousPreviewPanel",
+            "description": [
+              "\nGo back to previous preview panel"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.ExpandableFlyoutApi.closeFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "closeFlyout",
+            "description": [
+              "\nClose all panels and closes flyout"
+            ],
+            "signature": [
+              "() => void"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/expandable-flyout",
+        "id": "def-public.ExpandableFlyoutProps",
         "type": "Interface",
         "tags": [],
         "label": "ExpandableFlyoutProps",
@@ -137,9 +520,9 @@
         "signature": [
           {
             "pluginId": "@kbn/expandable-flyout",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnExpandableFlyoutPluginApi",
-            "section": "def-common.ExpandableFlyoutProps",
+            "section": "def-public.ExpandableFlyoutProps",
             "text": "ExpandableFlyoutProps"
           },
           " extends Omit<",
@@ -152,7 +535,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.ExpandableFlyoutProps.registeredPanels",
+            "id": "def-public.ExpandableFlyoutProps.registeredPanels",
             "type": "Array",
             "tags": [],
             "label": "registeredPanels",
@@ -172,7 +555,7 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.FlyoutPanelProps",
+        "id": "def-public.FlyoutPanelProps",
         "type": "Interface",
         "tags": [],
         "label": "FlyoutPanelProps",
@@ -183,7 +566,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanelProps.id",
+            "id": "def-public.FlyoutPanelProps.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -196,7 +579,7 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanelProps.params",
+            "id": "def-public.FlyoutPanelProps.params",
             "type": "Object",
             "tags": [],
             "label": "params",
@@ -212,7 +595,7 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanelProps.path",
+            "id": "def-public.FlyoutPanelProps.path",
             "type": "Object",
             "tags": [],
             "label": "path",
@@ -222,9 +605,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/expandable-flyout",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnExpandableFlyoutPluginApi",
-                "section": "def-common.PanelPath",
+                "section": "def-public.PanelPath",
                 "text": "PanelPath"
               },
               " | undefined"
@@ -235,7 +618,7 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.FlyoutPanelProps.state",
+            "id": "def-public.FlyoutPanelProps.state",
             "type": "Object",
             "tags": [],
             "label": "state",
@@ -254,7 +637,7 @@
       },
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.PanelPath",
+        "id": "def-public.PanelPath",
         "type": "Interface",
         "tags": [],
         "label": "PanelPath",
@@ -265,7 +648,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.PanelPath.tab",
+            "id": "def-public.PanelPath.tab",
             "type": "string",
             "tags": [],
             "label": "tab",
@@ -278,7 +661,7 @@
           },
           {
             "parentPluginId": "@kbn/expandable-flyout",
-            "id": "def-common.PanelPath.subTab",
+            "id": "def-public.PanelPath.subTab",
             "type": "string",
             "tags": [],
             "label": "subTab",
@@ -294,13 +677,112 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/expandable-flyout",
+        "id": "def-public.State",
+        "type": "Interface",
+        "tags": [],
+        "label": "State",
+        "description": [],
+        "path": "packages/kbn-expandable-flyout/src/state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.State.left",
+            "type": "Object",
+            "tags": [],
+            "label": "left",
+            "description": [
+              "\nPanel to render in the left section"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.State.right",
+            "type": "Object",
+            "tags": [],
+            "label": "right",
+            "description": [
+              "\nPanel to render in the right section"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.State.preview",
+            "type": "Array",
+            "tags": [],
+            "label": "preview",
+            "description": [
+              "\nPanels to render in the preview section"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/expandable-flyout",
+                "scope": "public",
+                "docId": "kibKbnExpandableFlyoutPluginApi",
+                "section": "def-public.FlyoutPanelProps",
+                "text": "FlyoutPanelProps"
+              },
+              "[]"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/expandable-flyout",
+            "id": "def-public.State.needsSync",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "needsSync",
+            "description": [
+              "\nIs the flyout in sync with external storage (eg. url)?\nThis value can be used in useEffect for example, to control whether we should\ncall an external state sync method."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-expandable-flyout/src/state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
     "misc": [
       {
         "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.EXPANDABLE_FLYOUT_URL_KEY",
+        "id": "def-public.EXPANDABLE_FLYOUT_URL_KEY",
         "type": "string",
         "tags": [],
         "label": "EXPANDABLE_FLYOUT_URL_KEY",
@@ -314,24 +796,22 @@
         "initialIsOpen": false
       }
     ],
-    "objects": [
-      {
-        "parentPluginId": "@kbn/expandable-flyout",
-        "id": "def-common.ExpandableFlyoutContext",
-        "type": "Object",
-        "tags": [],
-        "label": "ExpandableFlyoutContext",
-        "description": [],
-        "signature": [
-          "React.Context<",
-          "ExpandableFlyoutContextValue",
-          " | undefined>"
-        ],
-        "path": "packages/kbn-expandable-flyout/src/context.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      }
-    ]
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

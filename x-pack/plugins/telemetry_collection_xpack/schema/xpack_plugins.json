@@ -7000,6 +7000,86 @@
                       "type": "long"
                     }
                   }
+                },
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }

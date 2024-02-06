@@ -340,6 +340,13 @@ export const CANCEL_BUTTON_TEXT = i18n.translate(
   }
 );
 
+export const CLEAR_FILTERS = (numberOfFilters: number) => {
+  return i18n.translate('xpack.triggersActionsUI.sections.rulesList.clearFilterLink', {
+    values: { numberOfFilters },
+    defaultMessage: 'Clear {numberOfFilters, plural, =1 {filter} other {filters}}',
+  });
+};
+
 export const getConfirmDeletionModalText = (
   numIdsToDelete: number,
   singleTitle: string,
