@@ -204,7 +204,7 @@ describe(
         login(ROLE.rule_author);
       });
 
-      // let currentUrl 
+      // let currentUrl
       it('response actions are disabled', () => {
         fillUpNewRule(ruleName, ruleDescription);
         cy.getByTestSubj('response-actions-wrapper').within(() => {
