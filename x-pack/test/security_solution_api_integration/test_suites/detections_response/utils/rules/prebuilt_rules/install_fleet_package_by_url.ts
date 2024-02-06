@@ -82,7 +82,7 @@ export const installPrebuiltRulesPackageByVersion = async (
         .set('elastic-api-version', '2023-10-31')
         .type('application/json')
         .send({ force: true })
-        .expect(500);
+        .expect(200);
       expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
       expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
 
