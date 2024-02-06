@@ -68,8 +68,11 @@ const DEFAULT_VALUES: MLInferenceProcessorsValues = {
 const MODELS: MlModel[] = [
   {
     modelId: 'model_1',
-    title: 'Model 1',
     type: 'ner',
+    title: 'Model 1',
+    description: 'Model 1 description',
+    licenseType: 'elastic',
+    modelDetailsPageUrl: 'https://my-model.ai',
     deploymentState: MlModelDeploymentState.NotDeployed,
     startTime: 0,
     targetAllocationCount: 0,
@@ -77,8 +80,9 @@ const MODELS: MlModel[] = [
     threadsPerAllocation: 0,
     isPlaceholder: false,
     hasStats: false,
-    types: [],
-    inputFieldNames: [],
+    types: ['pytorch', 'ner'],
+    inputFieldNames: ['title'],
+    version: '1',
   },
 ];
 
@@ -260,7 +264,7 @@ describe('MlInferenceLogic', () => {
                   field_map: {
                     title: 'text_field', // Does not exist in index
                   },
-                  model_id: 'test-model',
+                  model_id: MODELS[0].modelId,
                   target_field: 'ml.inference.title',
                 },
               },
@@ -269,7 +273,7 @@ describe('MlInferenceLogic', () => {
                   field_map: {
                     body: 'text_field', // Exists in index
                   },
-                  model_id: 'test-model',
+                  model_id: MODELS[0].modelId,
                   target_field: 'ml.inference.body',
                 },
               },
@@ -278,7 +282,7 @@ describe('MlInferenceLogic', () => {
                   field_map: {
                     body_content: 'text_field', // Does not exist in index
                   },
-                  model_id: 'test-model',
+                  model_id: MODELS[0].modelId,
                   target_field: 'ml.inference.body_content',
                 },
               },
@@ -331,7 +335,7 @@ describe('MlInferenceLogic', () => {
       it('filters pipeline if pipeline already attached', () => {
         FetchMlInferencePipelineProcessorsApiLogic.actions.apiSuccess([
           {
-            modelId: 'test-model',
+            modelId: MODELS[0].modelId,
             modelState: TrainedModelState.Started,
             pipelineName: 'unit-test',
             pipelineReferences: ['test@ml-inference'],
@@ -346,7 +350,7 @@ describe('MlInferenceLogic', () => {
                   field_map: {
                     body: 'text_field',
                   },
-                  model_id: 'test-model',
+                  model_id: MODELS[0].modelId,
                   target_field: 'ml.inference.test-field',
                 },
               },
