@@ -534,20 +534,15 @@ describe('GroupedAlertsTable', () => {
     jest
       .spyOn(window.localStorage, 'getItem')
       .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
-    store = createStore(
-      {
-        ...mockGlobalState,
-        groups: {
-          [testProps.tableId]: {
-            options: mockOptions,
-            activeGroups: ['kibana.alert.rule.name'],
-          },
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name'],
         },
       },
-      SUB_PLUGINS_REDUCER,
-      kibanaObservable,
-      storage
-    );
+    });
 
     const { getByTestId } = render(
       <TestProviders store={store}>
