@@ -587,7 +587,7 @@ export class LensVisService {
     if (!suggestion || !suggestion.datasourceId) {
       return {
         shouldUpdateVisContextDueToIncompatibleSuggestion: false,
-        lensAttributesContext: undefined, // TODO: should it be synced to Discover state too?
+        lensAttributesContext: undefined,
       };
     }
 

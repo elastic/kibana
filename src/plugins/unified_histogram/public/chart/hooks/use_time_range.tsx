@@ -75,7 +75,7 @@ export const useTimeRange = ({
           },
         });
 
-    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`;
+    return `${toMoment(timeRange.from)} - ${toMoment(timeRange.to)} ${intervalText}`.trim();
   }, [bucketInterval?.description, from, isPlainRecord, timeField, timeInterval, to, toMoment]);
 
   const { euiTheme } = useEuiTheme();
