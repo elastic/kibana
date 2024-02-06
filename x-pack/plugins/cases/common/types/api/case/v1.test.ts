@@ -834,11 +834,8 @@ describe('CasesPatchRequestRt', () => {
 
 describe('CustomFieldPatchRequestRt', () => {
   const defaultRequest = {
-    version: 'WzQ3LDFd',
-    customFieldDetails: {
-      type: CustomFieldTypes.TEXT,
-      value: 'this is a text field value',
-    },
+    caseVersion: 'WzQ3LDFd',
+    value: 'this is a text field value',
   };
 
   it('has expected attributes in request', () => {
@@ -847,6 +844,19 @@ describe('CustomFieldPatchRequestRt', () => {
     expect(query).toStrictEqual({
       _tag: 'Right',
       right: defaultRequest,
+    });
+  });
+
+  it('has expected attributes of toggle field in request', () => {
+    const newRequest = {
+      caseVersion: 'WzQ3LDFd',
+      value: false,
+    };
+    const query = CustomFieldPatchRequestRt.decode(newRequest);
+
+    expect(query).toStrictEqual({
+      _tag: 'Right',
+      right: newRequest,
     });
   });
 
@@ -863,11 +873,8 @@ describe('CustomFieldPatchRequestRt', () => {
     expect(
       PathReporter.report(
         CustomFieldPatchRequestRt.decode({
-          version: 'WzQ3LDFd',
-          customFieldDetails: {
-            type: CustomFieldTypes.TEXT,
-            value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
-          },
+          caseVersion: 'WzQ3LDFd',
+          value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
         })
       )
     ).toContain(

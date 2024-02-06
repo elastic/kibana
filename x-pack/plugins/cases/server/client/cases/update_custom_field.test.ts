@@ -54,11 +54,6 @@ describe('Update custom field', () => {
   });
 
   it('can update text customField', async () => {
-    const customField = {
-      type: CustomFieldTypes.TEXT as const,
-      value: 'Updated text field value',
-    };
-
     clientArgs.services.caseService.patchCase.mockResolvedValue({
       ...theCase,
     });
@@ -68,9 +63,9 @@ describe('Update custom field', () => {
         {
           caseId: theCase.id,
           customFieldId: 'first_key',
-          customFieldPatchDetails: {
-            version: theCase.version ?? '',
-            customFieldDetails: customField,
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: 'Updated text field value',
           },
         },
         clientArgs,
@@ -107,11 +102,6 @@ describe('Update custom field', () => {
   });
 
   it('can update toggle customField', async () => {
-    const customField = {
-      type: CustomFieldTypes.TOGGLE as const,
-      value: true,
-    };
-
     clientArgs.services.caseService.patchCase.mockResolvedValue({
       ...theCase,
     });
@@ -121,9 +111,9 @@ describe('Update custom field', () => {
         {
           caseId: theCase.id,
           customFieldId: 'second_key',
-          customFieldPatchDetails: {
-            version: theCase.version ?? '',
-            customFieldDetails: customField,
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: true,
           },
         },
         clientArgs,
@@ -159,18 +149,15 @@ describe('Update custom field', () => {
     );
   });
 
-  it('throws error when customField value is null', async () => {
+  it('throws error when customField value is null and the custom field is required', async () => {
     await expect(
       updateCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'first_key',
-          customFieldPatchDetails: {
-            version: mockCases[0].version ?? '',
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: null,
-            },
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: null,
           },
         },
         clientArgs,
@@ -181,25 +168,41 @@ describe('Update custom field', () => {
     );
   });
 
+  it('does not throw error when customField value is null and the custom field is not required', async () => {
+    await expect(
+      updateCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'second_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: null,
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).resolves.not.toThrow();
+  });
+
   it('throws error when customField key is not present in configuration', async () => {
+    clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
+
     await expect(
       updateCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'missing_key',
-          customFieldPatchDetails: {
-            version: mockCases[0].version ?? '',
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: 'updated',
-            },
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: 'updated',
           },
         },
         clientArgs,
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid custom field keys: missing_key"`
+      `"Failed to update customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: cannot find custom field"`
     );
   });
 
@@ -209,19 +212,16 @@ describe('Update custom field', () => {
         {
           caseId: mockCases[0].id,
           customFieldId: 'second_key',
-          customFieldPatchDetails: {
-            version: mockCases[0].version ?? '',
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: 'foobar',
-            },
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: 'foobar',
           },
         },
         clientArgs,
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: The following custom fields have the wrong type in the request: second_key"`
+      `"Failed to update customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"foobar\\" supplied to \\"value\\""`
     );
   });
 });

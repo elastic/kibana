@@ -12,7 +12,7 @@ import { createCasesRoute } from '../create_cases_route';
 import type { caseApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 
-export const patchCustomFieldRoute = createCasesRoute({
+export const updateCustomFieldRoute = createCasesRoute({
   method: 'patch',
   path: INTERNAL_PATCH_CUSTOM_FIELDS_URL,
   params: {
@@ -29,10 +29,10 @@ export const patchCustomFieldRoute = createCasesRoute({
       const customFieldId = request.params.custom_field_id;
       const details = request.body as caseApiV1.CustomFieldPatchRequest;
 
-      const res: caseDomainV1.Cases = await casesClient.cases.updateCustomField({
+      const res: caseDomainV1.Case = await casesClient.cases.updateCustomField({
         caseId,
         customFieldId,
-        customFieldPatchDetails: details,
+        request: details,
       });
 
       return response.ok({

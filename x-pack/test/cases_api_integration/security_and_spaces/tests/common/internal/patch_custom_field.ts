@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
 
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { postCaseReq } from '../../../../common/lib/mock';
+import { postCaseReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
@@ -17,7 +17,16 @@ import {
   getConfigurationRequest,
   updateCustomField,
 } from '../../../../common/lib/api';
-import { secOnly } from '../../../../common/lib/authentication/users';
+import {
+  globalRead,
+  noKibanaPrivileges,
+  obsOnly,
+  obsOnlyRead,
+  obsSecRead,
+  secOnly,
+  secOnlyRead,
+  superUser,
+} from '../../../../common/lib/authentication/users';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
@@ -68,20 +77,17 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-        const patchedCases = await updateCustomField({
+        const patchedCase = await updateCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field_1',
           params: {
-            version: postedCase.version,
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: 'this is updated text field value',
-            },
+            value: 'this is updated text field value',
+            caseVersion: postedCase.version,
           },
         });
 
-        expect(patchedCases[0].customFields).to.eql([
+        expect(patchedCase.customFields).to.eql([
           {
             key: 'test_custom_field_1',
             type: CustomFieldTypes.TEXT,
@@ -133,20 +139,17 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-        const patchedCases = await updateCustomField({
+        const patchedCase = await updateCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field_2',
           params: {
-            version: postedCase.version,
-            customFieldDetails: {
-              type: CustomFieldTypes.TOGGLE,
-              value: false,
-            },
+            value: false,
+            caseVersion: postedCase.version,
           },
         });
 
-        expect(patchedCases[0].customFields).to.eql([
+        expect(patchedCase.customFields).to.eql([
           {
             key: 'test_custom_field_1',
             type: CustomFieldTypes.TEXT,
@@ -158,6 +161,46 @@ export default ({ getService }: FtrProviderContext): void => {
             value: false,
           },
         ]);
+      });
+
+      it('does not throw error when update a non required custom field with a null value', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          })
+        );
+
+        const postedCase = await createCase(supertest, {
+          ...postCaseReq,
+          customFields: [
+            {
+              key: 'test_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: 'hello',
+            },
+          ],
+        });
+
+        await updateCustomField({
+          supertest,
+          caseId: postedCase.id,
+          customFieldId: 'test_custom_field',
+          params: {
+            caseVersion: postedCase.version,
+            value: null,
+          },
+          expectedHttpCode: 200,
+        });
       });
     });
 
@@ -185,11 +228,9 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           customFieldId: 'random_key',
           params: {
-            version: postedCase.version,
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: 'this is updated text field value',
-            },
+            caseVersion: postedCase.version,
+
+            value: 'this is updated text field value',
           },
           expectedHttpCode: 400,
         });
@@ -228,11 +269,9 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
           params: {
-            version: postedCase.version,
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: null,
-            },
+            caseVersion: postedCase.version,
+
+            value: null,
           },
           expectedHttpCode: 400,
         });
@@ -261,11 +300,8 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
           params: {
-            version: postedCase.version,
-            customFieldDetails: {
-              type: CustomFieldTypes.TOGGLE,
-              value: null,
-            },
+            caseVersion: postedCase.version,
+            value: true,
           },
           expectedHttpCode: 400,
         });
@@ -275,7 +311,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      it('should update a case when the user has the correct permissions', async () => {
+      it('should update the custom field when the user has the correct permissions', async () => {
         await createConfiguration(
           supertestWithoutAuth,
           getConfigurationRequest({
@@ -302,21 +338,143 @@ export default ({ getService }: FtrProviderContext): void => {
           space: 'space1',
         });
 
-        const patchedCases = await updateCustomField({
+        const patchedCase = await updateCustomField({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
           params: {
-            version: postedCase.version,
-            customFieldDetails: {
-              type: CustomFieldTypes.TEXT,
-              value: 'this is updated text field value',
-            },
+            caseVersion: postedCase.version,
+
+            value: 'this is updated text field value',
           },
           auth: { user: secOnly, space: 'space1' },
         });
 
-        expect(patchedCases[0].owner).to.eql('securitySolutionFixture');
+        expect(patchedCase.owner).to.eql('securitySolutionFixture');
+      });
+
+      it('should not update a custom field when the user does not have the correct ownership', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          getConfigurationRequest({
+            overrides: {
+              owner: 'observabilityFixture',
+              customFields: [
+                {
+                  key: 'test_custom_field',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+              ],
+            },
+          }),
+          200,
+          {
+            user: obsOnly,
+            space: 'space1',
+          }
+        );
+
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({
+            owner: 'observabilityFixture',
+            customFields: [
+              {
+                key: 'test_custom_field',
+                type: CustomFieldTypes.TEXT,
+                value: 'hello',
+              },
+            ],
+          }),
+          200,
+          { user: obsOnly, space: 'space1' }
+        );
+
+        await updateCustomField({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          customFieldId: 'test_custom_field',
+          params: {
+            caseVersion: postedCase.version,
+            value: 'this is updated text field value',
+          },
+          auth: { user: secOnly, space: 'space1' },
+          expectedHttpCode: 403,
+        });
+      });
+
+      for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
+        it(`User ${
+          user.username
+        } with role(s) ${user.roles.join()} - should NOT update a custom field`, async () => {
+          await createConfiguration(
+            supertestWithoutAuth,
+            { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
+
+          const postedCase = await createCase(
+            supertestWithoutAuth,
+            getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+            200,
+            {
+              user: superUser,
+              space: 'space1',
+            }
+          );
+
+          await updateCustomField({
+            supertest: supertestWithoutAuth,
+            caseId: postedCase.id,
+            customFieldId: 'test_custom_field',
+            params: {
+              caseVersion: postedCase.version,
+              value: 'this is updated text field value',
+            },
+            auth: { user, space: 'space1' },
+            expectedHttpCode: 403,
+          });
+        });
+      }
+
+      it('should NOT update a custom field in a space with no permissions', async () => {
+        await createConfiguration(
+          supertestWithoutAuth,
+          { ...getConfigurationRequest(), owner: 'observabilityFixture' },
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
+        const postedCase = await createCase(
+          supertestWithoutAuth,
+          getPostCaseRequest({ owner: 'securitySolutionFixture' }),
+          200,
+          {
+            user: superUser,
+            space: 'space2',
+          }
+        );
+
+        await updateCustomField({
+          supertest: supertestWithoutAuth,
+          caseId: postedCase.id,
+          customFieldId: 'test_custom_field',
+          params: {
+            caseVersion: postedCase.version,
+            value: 'this is updated text field value',
+          },
+          auth: { user: secOnly, space: 'space2' },
+          expectedHttpCode: 403,
+        });
       });
     });
   });

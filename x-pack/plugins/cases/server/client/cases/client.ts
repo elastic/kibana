@@ -101,7 +101,7 @@ export interface CasesSubClient {
   /**
    * Update custom field with specific customFieldId and CaseId
    */
-  updateCustomField(params: UpdateCustomFieldArgs): Promise<Cases>;
+  updateCustomField(params: UpdateCustomFieldArgs): Promise<Case>;
 }
 
 /**

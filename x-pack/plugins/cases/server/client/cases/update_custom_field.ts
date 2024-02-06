@@ -9,15 +9,19 @@ import Boom from '@hapi/boom';
 
 import type { CasesClient, CasesClientArgs } from '..';
 
-import type { CaseRequestCustomFields, CustomFieldPatchRequest } from '../../../common/types/api';
-import { CustomFieldPatchRequestRt } from '../../../common/types/api';
+import type {
+  CaseRequestCustomField,
+  CaseRequestCustomFields,
+  CustomFieldPatchRequest,
+} from '../../../common/types/api';
+import { CustomFieldsRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
-import type { Cases } from '../../../common/types/domain';
+import type { Case } from '../../../common/types/domain';
+import { CaseRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import { CasesRt } from '../../../common/types/domain';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
@@ -30,13 +34,13 @@ export interface UpdateCustomFieldArgs {
    */
   caseId: string;
   /**
-   * The ID of an custom field to be updated
+   * The ID of a custom field to be updated
    */
   customFieldId: string;
   /**
-   * details of custom field to update
+   * value of custom field to update, case version
    */
-  customFieldPatchDetails: CustomFieldPatchRequest;
+  request: CustomFieldPatchRequest;
 }
 
 /**
@@ -45,10 +49,10 @@ export interface UpdateCustomFieldArgs {
  * @ignore
  */
 export const updateCustomField = async (
-  args: UpdateCustomFieldArgs,
+  { caseId, customFieldId, request }: UpdateCustomFieldArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<Cases> => {
+): Promise<Case> => {
   const {
     services: { caseService, userActionService },
     user,
@@ -57,15 +61,14 @@ export const updateCustomField = async (
   } = clientArgs;
 
   try {
-    const { customFieldPatchDetails, customFieldId, caseId } = args;
-    const { customFieldDetails, version } =
-      decodeWithExcessOrThrow(CustomFieldPatchRequestRt)(customFieldPatchDetails);
-    const updatedAt = new Date().toISOString();
-    // eslint-disable-next-line @typescript-eslint/naming-convention
-    const { username, full_name, email, profile_uid } = user;
+    const { value, caseVersion } = request;
 
     const caseToUpdate = await caseService.getCase({
       id: caseId,
+    });
+
+    const configurations = await casesClient.configure.get({
+      owner: caseToUpdate.attributes.owner,
     });
 
     await authorization.ensureAuthorized({
@@ -73,35 +76,51 @@ export const updateCustomField = async (
       operation: Operations.updateCase,
     });
 
-    if (customFieldDetails.value == null) {
+    const foundCustomField = configurations[0]?.customFields.find(
+      (item) => item.key === customFieldId
+    );
+
+    if (!foundCustomField) {
+      throw Boom.badRequest('cannot find custom field');
+    }
+
+    const decodedCustomFields = decodeWithExcessOrThrow(CustomFieldsRt)([
+      {
+        value,
+        type: foundCustomField.type,
+        key: customFieldId,
+      },
+      ...caseToUpdate.attributes.customFields.filter((field) => field.key !== customFieldId),
+    ]);
+
+    const updatedAt = new Date().toISOString();
+
+    if (value == null && foundCustomField.required) {
       throw Boom.badRequest('Custom field value cannot be null or undefined.');
     }
 
-    const configurations = await casesClient.configure.get({
-      owner: caseToUpdate.attributes.owner,
-    });
-
-    const customField: CaseRequestCustomFields = [{ key: customFieldId, ...customFieldDetails }];
-
-    const customFieldIndex = caseToUpdate.attributes.customFields.findIndex(
-      (cf) => cf.key === customFieldId
-    );
-
     validateCustomFieldKeysAgainstConfiguration({
-      requestCustomFields: customField,
+      requestCustomFields: decodedCustomFields,
       customFieldsConfiguration: configurations[0].customFields,
     });
 
     validateCustomFieldTypesInRequest({
-      requestCustomFields: customField,
+      requestCustomFields: decodedCustomFields,
       customFieldsConfiguration: configurations[0].customFields,
     });
 
-    const customFieldsToUpdate = [
-      ...caseToUpdate.attributes.customFields.slice(0, customFieldIndex),
-      ...customField,
-      ...caseToUpdate.attributes.customFields.slice(customFieldIndex + 1),
-    ];
+    const customFieldsToUpdate: CaseRequestCustomFields = caseToUpdate.attributes.customFields.map(
+      (cf) => {
+        if (cf.key === customFieldId) {
+          return {
+            value,
+            type: foundCustomField.type,
+            key: customFieldId,
+          } as CaseRequestCustomField;
+        }
+        return cf;
+      }
+    );
 
     const patchCasesPayload = {
       caseId,
@@ -109,9 +128,9 @@ export const updateCustomField = async (
       updatedAttributes: {
         customFields: customFieldsToUpdate,
         updated_at: updatedAt,
-        updated_by: { username, full_name, email, profile_uid },
+        updated_by: user,
       },
-      version,
+      version: caseVersion,
     };
 
     const updatedCase = await caseService.patchCase({
@@ -147,10 +166,10 @@ export const updateCustomField = async (
       builtUserActions,
     });
 
-    return decodeOrThrow(CasesRt)([returnUpdatedCase]);
+    return decodeOrThrow(CaseRt)(returnUpdatedCase);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to update customField, id: ${args.customFieldId} of case: ${args.caseId} version:${args.customFieldPatchDetails.version} : ${error}`,
+      message: `Failed to update customField, id: ${customFieldId} of case: ${caseId} version:${request.caseVersion} : ${error}`,
       error,
       logger,
     });

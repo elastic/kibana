@@ -826,7 +826,7 @@ export const updateCustomField = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
-}): Promise<Case[]> => {
+}): Promise<Case> => {
   const apiCall = supertest.patch(
     `${getSpaceUrlPrefix(
       auth?.space
@@ -835,12 +835,12 @@ export const updateCustomField = async ({
 
   setupAuth({ apiCall, headers, auth });
 
-  const { body: cases } = await apiCall
+  const { body: theCase } = await apiCall
     .set('kbn-xsrf', 'true')
     .set('x-elastic-internal-origin', 'foo')
     .set(headers)
     .send(params)
     .expect(expectedHttpCode);
 
-  return cases;
+  return theCase;
 };
