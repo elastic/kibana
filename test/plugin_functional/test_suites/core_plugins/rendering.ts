@@ -310,6 +310,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
+        'xpack.security.serverlessOverrides (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
