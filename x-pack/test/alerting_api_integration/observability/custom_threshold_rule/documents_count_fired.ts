@@ -25,7 +25,7 @@ import {
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { ISO_DATE_REGEX } from './constants';
-import { ActionDocument, LogExplorerLocatorParsedParams } from './typings';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -247,11 +247,11 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(resp.hits.hits[0]._source?.value).eql('3');
 
-        const parsedViewInAppUrl = parseSearchParams<LogExplorerLocatorParsedParams>(
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOG_EXPLORER_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
           dataset: DATA_VIEW_ID,
           timeRange: { to: 'now' },

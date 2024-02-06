@@ -19,7 +19,8 @@ import {
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
-import { AggregateQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   FieldOption,
@@ -28,6 +29,7 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { SourceFields } from '../../components/source_fields_select';
 import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
 import { DEFAULT_VALUES } from '../constants';
@@ -39,7 +41,7 @@ import { rowToDocument, toEsQueryHits, transformDatatableToEsqlTable } from '../
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http } = useTriggerUiActionServices();
+  const { expressions, http, fieldFormats } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, sourceFields } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
@@ -107,10 +109,19 @@ export const EsqlQueryExpression: React.FC<
     }
     const timeWindow = parseDuration(window);
     const now = Date.now();
-    const table = await fetchFieldsFromESQL(esqlQuery, expressions, {
-      from: new Date(now - timeWindow).toISOString(),
-      to: new Date(now).toISOString(),
-    });
+    const table = await fetchFieldsFromESQL(
+      esqlQuery,
+      expressions,
+      {
+        from: new Date(now - timeWindow).toISOString(),
+        to: new Date(now).toISOString(),
+      },
+      // create a data view with the timefield to pass into the query
+      new DataView({
+        spec: { timeFieldName: timeField },
+        fieldFormats,
+      })
+    );
     if (table) {
       const esqlTable = transformDatatableToEsqlTable(table);
       const hits = toEsQueryHits(esqlTable);
@@ -136,7 +147,15 @@ export const EsqlQueryExpression: React.FC<
       };
     }
     return emptyResult;
-  }, [timeWindowSize, timeWindowUnit, currentRuleParams, esqlQuery, expressions]);
+  }, [
+    timeWindowSize,
+    timeWindowUnit,
+    currentRuleParams,
+    esqlQuery,
+    expressions,
+    fieldFormats,
+    timeField,
+  ]);
 
   const refreshTimeFields = async (q: AggregateQuery) => {
     let hasTimestamp = false;
