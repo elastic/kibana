@@ -9,11 +9,11 @@ import React, { memo } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { ManagementEmptyStateWrapper } from './management_empty_state_wrapper';
 
-export const ManagementPageLoader = memo<{ 'data-test-subj'?: string }>(
-  ({ 'data-test-subj': dataTestSubj }) => {
+export const ManagementPageLoader = memo<{ 'data-test-subj'?: string; classname?: string }>(
+  ({ 'data-test-subj': dataTestSubj, classname }) => {
     return (
       <ManagementEmptyStateWrapper>
-        <EuiLoadingSpinner data-test-subj={dataTestSubj} size="l" />
+        <EuiLoadingSpinner data-test-subj={dataTestSubj} size="l" className={classname} />
       </ManagementEmptyStateWrapper>
     );
   }
