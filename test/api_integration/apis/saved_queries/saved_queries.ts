@@ -27,7 +27,40 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe.only('Saved queries API', function () {
+  const createQuery = (query: Partial<typeof mockSavedQuery> = mockSavedQuery) =>
+    supertest
+      .post(`${SAVED_QUERY_BASE_URL}/_create`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .send(query);
+
+  const updateQuery = (id: string, query: Partial<typeof mockSavedQuery> = mockSavedQuery) =>
+    supertest
+      .put(`${SAVED_QUERY_BASE_URL}/${id}`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .send(query);
+
+  const getQuery = (id: string) =>
+    supertest.get(`${SAVED_QUERY_BASE_URL}/${id}`).set(ELASTIC_HTTP_VERSION_HEADER, '1');
+
+  const deleteQuery = (id: string) =>
+    supertest.delete(`${SAVED_QUERY_BASE_URL}/${id}`).set(ELASTIC_HTTP_VERSION_HEADER, '1');
+
+  const findQueries = (options: { search?: string; perPage?: number; page?: number } = {}) =>
+    supertest
+      .post(`${SAVED_QUERY_BASE_URL}/_find`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .send(options);
+
+  const countQueries = () =>
+    supertest.get(`${SAVED_QUERY_BASE_URL}/_count`).set(ELASTIC_HTTP_VERSION_HEADER, '1');
+
+  const checkDuplicateTitle = (title: string, id?: string) =>
+    supertest
+      .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .send({ title, id });
+
+  describe('Saved queries API', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -42,10 +75,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should return 200 for create saved query', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(({ body }) => {
           expect(body.id).to.have.length(36);
@@ -54,40 +84,33 @@ export default function ({ getService }: FtrProviderContext) {
         }));
 
     it('should return 400 for create invalid saved query', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ description: 'my description' })
-        .expect(400));
+      createQuery({ description: 'my description' })
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.message).to.eql(
+            '[request body.title]: expected value of type [string] but got [undefined]'
+          );
+        }));
 
     it('should return 400 for create saved query with duplicate title', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(() =>
-          supertest
-            .post(`${SAVED_QUERY_BASE_URL}/_create`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send(mockSavedQuery)
+          createQuery()
             .expect(400)
+            .then(({ body }) => {
+              expect(body.message).to.eql('Query with title "my title" already exists');
+            })
         ));
 
     it('should return 200 for update saved query', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(({ body }) =>
-          supertest
-            .put(`${SAVED_QUERY_BASE_URL}/${body.id}`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send({
-              ...mockSavedQuery,
-              title: 'my updated title',
-            })
+          updateQuery(body.id, {
+            ...mockSavedQuery,
+            title: 'my updated title',
+          })
             .expect(200)
             .then((res) => {
               expect(res.body.id).to.be(body.id);
@@ -96,43 +119,30 @@ export default function ({ getService }: FtrProviderContext) {
         ));
 
     it('should return 404 for update non-existent saved query', () =>
-      supertest
-        .put(`${SAVED_QUERY_BASE_URL}/invalid_id`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
-        .expect(404));
+      updateQuery('invalid_id').expect(404));
 
     it('should return 400 for update saved query with duplicate title', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(({ body }) =>
-          supertest
-            .post(`${SAVED_QUERY_BASE_URL}/_create`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send({ ...mockSavedQuery, title: 'my duplicate title' })
+          createQuery({ ...mockSavedQuery, title: 'my duplicate title' })
             .expect(200)
             .then(() =>
-              supertest
-                .put(`${SAVED_QUERY_BASE_URL}/${body.id}`)
-                .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-                .send({ ...mockSavedQuery, title: 'my duplicate title' })
+              updateQuery(body.id, { ...mockSavedQuery, title: 'my duplicate title' })
                 .expect(400)
+                .then(({ body: body2 }) => {
+                  expect(body2.message).to.eql(
+                    'Query with title "my duplicate title" already exists'
+                  );
+                })
             )
         ));
 
     it('should return 200 for get saved query', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(({ body }) =>
-          supertest
-            .get(`${SAVED_QUERY_BASE_URL}/${body.id}`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+          getQuery(body.id)
             .expect(200)
             .then((res) => {
               expect(res.body.id).to.be(body.id);
@@ -141,274 +151,166 @@ export default function ({ getService }: FtrProviderContext) {
         ));
 
     it('should return 404 for get non-existent saved query', () =>
-      supertest
-        .get(`${SAVED_QUERY_BASE_URL}/invalid_id`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(404));
+      getQuery('invalid_id').expect(404));
 
-    it('should return 200 for saved query count', () =>
-      supertest
-        .get(`${SAVED_QUERY_BASE_URL}/_count`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200));
+    it('should return 200 for saved query count', () => countQueries().expect(200));
 
     it('should return expected counts for saved query count', async () => {
-      await supertest
-        .get(`${SAVED_QUERY_BASE_URL}/_count`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      await countQueries()
         .expect(200)
         .then((res) => {
           expect(res.text).to.be('0');
         });
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
-        .expect(200);
+      await createQuery().expect(200);
 
-      const result = await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 2' })
-        .expect(200);
+      const result = await createQuery({ ...mockSavedQuery, title: 'my title 2' }).expect(200);
 
-      await supertest
-        .get(`${SAVED_QUERY_BASE_URL}/_count`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      await countQueries()
         .expect(200)
         .then((res) => {
           expect(res.text).to.be('2');
         });
 
-      await supertest
-        .delete(`${SAVED_QUERY_BASE_URL}/${result.body.id}`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
+      await deleteQuery(result.body.id).expect(200);
 
-      await supertest
-        .get(`${SAVED_QUERY_BASE_URL}/_count`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      await countQueries()
         .expect(200)
         .then((res) => {
           expect(res.text).to.be('1');
         });
     });
 
-    it('should return 200 for find saved queries', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({})
-        .expect(200));
+    it('should return 200 for find saved queries', () => findQueries().expect(200));
 
     it('should return expected queries for find saved queries', async () => {
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
-        .expect(200);
+      await createQuery().expect(200);
 
-      const result = await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 2' })
-        .expect(200);
+      const result = await createQuery({ ...mockSavedQuery, title: 'my title 2' }).expect(200);
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({})
+      await findQueries()
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(2);
           expect(res.body.savedQueries.length).to.be(2);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql([
+            'my title',
+            'my title 2',
+          ]);
         });
 
-      await supertest
-        .delete(`${SAVED_QUERY_BASE_URL}/${result.body.id}`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
+      await deleteQuery(result.body.id).expect(200);
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({})
+      await findQueries()
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(1);
           expect(res.body.savedQueries.length).to.be(1);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql(['my title']);
         });
     });
 
     it('should return expected queries for find saved queries with a search', async () => {
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
-        .expect(200);
+      await createQuery().expect(200);
+      await createQuery({ ...mockSavedQuery, title: 'my title 2' }).expect(200);
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 2' })
-        .expect(200);
+      const result = await createQuery({ ...mockSavedQuery, title: 'my title 2 again' }).expect(
+        200
+      );
 
-      const result = await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 2 again' })
-        .expect(200);
-
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ search: 'itle 2' })
+      await findQueries({ search: 'itle 2' })
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(2);
           expect(res.body.savedQueries.length).to.be(2);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql([
+            'my title 2',
+            'my title 2 again',
+          ]);
         });
 
-      await supertest
-        .delete(`${SAVED_QUERY_BASE_URL}/${result.body.id}`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
+      await deleteQuery(result.body.id).expect(200);
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ search: 'itle 2' })
+      await findQueries({ search: 'itle 2' })
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(1);
           expect(res.body.savedQueries.length).to.be(1);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql(['my title 2']);
         });
     });
 
     it('should support pagination for find saved queries', async () => {
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
-        .expect(200);
+      await createQuery().expect(200);
+      await createQuery({ ...mockSavedQuery, title: 'my title 2' }).expect(200);
+      await createQuery({ ...mockSavedQuery, title: 'my title 3' }).expect(200);
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 2' })
-        .expect(200);
-
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 3' })
-        .expect(200);
-
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ perPage: 2 })
+      await findQueries({ perPage: 2 })
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(3);
           expect(res.body.savedQueries.length).to.be(2);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql([
+            'my title',
+            'my title 2',
+          ]);
         });
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ perPage: 2, page: 2 })
+      await findQueries({ perPage: 2, page: 2 })
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(3);
           expect(res.body.savedQueries.length).to.be(1);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql(['my title 3']);
         });
     });
 
     it('should support pagination for find saved queries with a search', async () => {
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
-        .expect(200);
+      await createQuery().expect(200);
+      await createQuery({ ...mockSavedQuery, title: 'my title 2' }).expect(200);
+      await createQuery({ ...mockSavedQuery, title: 'my title 3' }).expect(200);
+      await createQuery({ ...mockSavedQuery, title: 'not a match' }).expect(200);
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 2' })
-        .expect(200);
-
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'my title 3' })
-        .expect(200);
-
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ ...mockSavedQuery, title: 'not a match' })
-        .expect(200);
-
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ perPage: 2, search: 'itle' })
+      await findQueries({ perPage: 2, search: 'itle' })
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(3);
           expect(res.body.savedQueries.length).to.be(2);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql([
+            'my title',
+            'my title 2',
+          ]);
         });
 
-      await supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ perPage: 2, page: 2, search: 'itle' })
+      await findQueries({ perPage: 2, page: 2, search: 'itle' })
         .expect(200)
         .then((res) => {
           expect(res.body.total).to.be(3);
           expect(res.body.savedQueries.length).to.be(1);
+          expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql(['my title 3']);
         });
     });
 
     it('should return 400 for bad find saved queries request', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_find`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send({ foo: 'bar' })
-        .expect(400));
+      findQueries({ foo: 'bar' } as any)
+        .expect(400)
+        .then(({ body }) => {
+          expect(body.message).to.eql('[request body.foo]: definition for this key is missing');
+        }));
 
     it('should return 200 for delete saved query', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
-        .then(({ body }) =>
-          supertest
-            .delete(`${SAVED_QUERY_BASE_URL}/${body.id}`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .expect(200)
-        ));
+        .then(({ body }) => deleteQuery(body.id).expect(200)));
 
-    it('should return 404 for get non-existent saved query', () =>
-      supertest
-        .delete(`${SAVED_QUERY_BASE_URL}/invalid_id`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(404));
+    it('should return 404 for delete non-existent saved query', () =>
+      deleteQuery('invalid_id').expect(404));
 
     it('should return isDuplicate = true for _is_duplicate_title check with a duplicate title', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(({ body }) =>
-          supertest
-            .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send({ title: body.attributes.title })
+          checkDuplicateTitle(body.attributes.title)
             .expect(200)
             .then(({ body: body2 }) => {
               expect(body2.isDuplicate).to.be(true);
@@ -416,16 +318,10 @@ export default function ({ getService }: FtrProviderContext) {
         ));
 
     it('should return isDuplicate = false for _is_duplicate_title check with a duplicate title and matching ID', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(({ body }) =>
-          supertest
-            .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send({ title: body.attributes.title, id: body.id })
+          checkDuplicateTitle(body.attributes.title, body.id)
             .expect(200)
             .then(({ body: body2 }) => {
               expect(body2.isDuplicate).to.be(false);
@@ -433,16 +329,10 @@ export default function ({ getService }: FtrProviderContext) {
         ));
 
     it('should return isDuplicate = false for _is_duplicate_title check with a unique title', () =>
-      supertest
-        .post(`${SAVED_QUERY_BASE_URL}/_create`)
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .send(mockSavedQuery)
+      createQuery()
         .expect(200)
         .then(() =>
-          supertest
-            .post(`${SAVED_QUERY_BASE_URL}/_is_duplicate_title`)
-            .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-            .send({ title: 'my unique title' })
+          checkDuplicateTitle('my unique title')
             .expect(200)
             .then(({ body }) => {
               expect(body.isDuplicate).to.be(false);
