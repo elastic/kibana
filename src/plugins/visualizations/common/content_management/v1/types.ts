@@ -57,6 +57,7 @@ export interface VisualizationSavedObject {
     statusCode: number;
     metadata?: Record<string, unknown>;
   };
+  managed?: boolean;
 }
 
 export type PartialVisualizationSavedObject = Omit<

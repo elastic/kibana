@@ -18,7 +18,9 @@ import { UPGRADE_INVESTIGATION_GUIDE } from '@kbn/security-solution-upselling/me
 import { AppFeatureKey } from '@kbn/security-solution-features/keys';
 import type { AppFeatureKeyType } from '@kbn/security-solution-features';
 import {
+  EndpointAgentTamperProtectionLazy,
   EndpointPolicyProtectionsLazy,
+  EndpointProtectionUpdatesLazy,
   RuleDetailsEndpointExceptionsLazy,
 } from './sections/endpoint_management';
 import type { SecurityProductTypes } from '../../common/config';
@@ -131,6 +133,11 @@ export const upsellingSections: UpsellingSections = [
     ),
   },
   {
+    id: 'endpoint_agent_tamper_protection',
+    pli: AppFeatureKey.endpointAgentTamperProtection,
+    component: EndpointAgentTamperProtectionLazy,
+  },
+  {
     id: 'endpointPolicyProtections',
     pli: AppFeatureKey.endpointPolicyProtections,
     component: EndpointPolicyProtectionsLazy,
@@ -139,6 +146,11 @@ export const upsellingSections: UpsellingSections = [
     id: 'ruleDetailsEndpointExceptions',
     pli: AppFeatureKey.endpointExceptions,
     component: RuleDetailsEndpointExceptionsLazy,
+  },
+  {
+    id: 'endpoint_protection_updates',
+    pli: AppFeatureKey.endpointProtectionUpdates,
+    component: EndpointProtectionUpdatesLazy,
   },
 ];
 

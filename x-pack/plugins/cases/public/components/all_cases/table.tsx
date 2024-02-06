@@ -35,7 +35,7 @@ interface CasesTableProps {
   selectedCases: CasesUI;
   selection: EuiTableSelectionType<CaseUI>;
   sorting: EuiBasicTableProps<CaseUI>['sorting'];
-  tableRef: MutableRefObject<EuiBasicTable | null>;
+  tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
   deselectCases: () => void;
   selectedColumns: CasesColumnSelection[];

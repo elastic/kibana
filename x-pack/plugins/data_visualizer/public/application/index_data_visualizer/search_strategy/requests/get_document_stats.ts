@@ -25,7 +25,7 @@ export const getDocumentCountStats = async (
   search: DataPublicPluginStart['search'],
   params: OverallStatsSearchStrategyParams,
   searchOptions: ISearchOptions,
-  browserSessionSeed: string,
+  browserSessionSeed?: string,
   probability?: number | null,
   minimumRandomSamplerDocCount?: number
 ): Promise<DocumentCountStats> => {
@@ -193,6 +193,7 @@ export const getDocumentCountStats = async (
       }
     }
   }
+
   return result;
 };
 

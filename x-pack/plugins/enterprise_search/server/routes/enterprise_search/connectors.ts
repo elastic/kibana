@@ -11,7 +11,7 @@ import {
   deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
-  fetchSyncJobsByConnectorId,
+  fetchSyncJobs,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -248,7 +248,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchSyncJobsByConnectorId(
+      const result = await fetchSyncJobs(
         client.asCurrentUser,
         request.params.connectorId,
         request.query.from,

@@ -179,6 +179,12 @@ export function getRuleType(
     validate: {
       params: ParamsSchema,
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ParamsSchema,
+      },
+    },
     actionVariables: {
       context: [
         { name: 'message', description: actionVariableContextMessageLabel },

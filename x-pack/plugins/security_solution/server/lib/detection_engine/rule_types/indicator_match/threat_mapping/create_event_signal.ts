@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
@@ -12,6 +14,7 @@ import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_format
 import type { CreateEventSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
 import { getSignalsQueryMapFromThreatIndex } from './get_signals_map_from_threat_index';
+import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { threatEnrichmentFactory } from './threat_enrichment_factory';
 import { getSignalValueMap } from './utils';
@@ -34,6 +37,7 @@ export const createEventSignal = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
   threatQuery,
   threatFilters,
   threatLanguage,
@@ -42,6 +46,7 @@ export const createEventSignal = async ({
   threatPitId,
   reassignThreatPitId,
   runtimeMappings,
+  runOpts,
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
@@ -50,6 +55,8 @@ export const createEventSignal = async ({
   threatMatchedFields,
   inputIndexFields,
   threatIndexFields,
+  completeRule,
+  licensing,
 }: CreateEventSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFiltersFromEvents = buildThreatMappingFilter({
     threatMapping,
@@ -57,6 +64,9 @@ export const createEventSignal = async ({
     entryKey: 'field',
     allowedFieldsForTermsQuery,
   });
+
+  const license = await firstValueFrom(licensing.license$);
+  const hasPlatinumLicense = license.hasAtLeast('platinum');
 
   if (!threatFiltersFromEvents.query || threatFiltersFromEvents.query?.bool.should.length === 0) {
     // empty event list and we do not want to return everything as being
@@ -124,7 +134,12 @@ export const createEventSignal = async ({
       threatSearchParams,
     });
 
-    const result = await searchAfterAndBulkCreate({
+    const isAlertSuppressionEnabled = Boolean(
+      completeRule.ruleParams.alertSuppression?.groupBy?.length
+    );
+
+    let createResult: SearchAfterAndBulkCreateReturnType;
+    const searchAfterBulkCreateParams = {
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
       enrichment,
@@ -136,22 +151,37 @@ export const createEventSignal = async ({
       pageSize: searchAfterSize,
       ruleExecutionLogger,
       services,
-      sortOrder: 'desc',
+      sortOrder: 'desc' as const,
       trackTotalHits: false,
       tuple,
       wrapHits,
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-    });
+    };
 
+    if (
+      isAlertSuppressionEnabled &&
+      runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled &&
+      hasPlatinumLicense
+    ) {
+      createResult = await searchAfterAndBulkCreateSuppressedAlerts({
+        ...searchAfterBulkCreateParams,
+        wrapSuppressedHits,
+        alertTimestampOverride: runOpts.alertTimestampOverride,
+        alertWithSuppression: runOpts.alertWithSuppression,
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+      });
+    } else {
+      createResult = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
+    }
     ruleExecutionLogger.debug(
       `${
         threatFiltersFromEvents.query?.bool.should.length
       } items have completed match checks and the total times to search were ${
-        result.searchAfterTimes.length !== 0 ? result.searchAfterTimes : '(unknown) '
+        createResult.searchAfterTimes.length !== 0 ? createResult.searchAfterTimes : '(unknown) '
       }ms`
     );
-    return result;
+    return createResult;
   }
 };
