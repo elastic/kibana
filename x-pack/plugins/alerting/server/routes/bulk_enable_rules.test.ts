@@ -13,7 +13,8 @@ import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleTypeDisabledError } from '../lib/errors/rule_type_disabled';
 import { verifyApiAccess } from '../lib/license_api_access';
-import { RuleActionTypes, RuleDefaultAction, RuleSystemAction, SanitizedRule } from '../types';
+import { RuleActionTypes, RuleDefaultAction, RuleSystemAction } from '../types';
+import { Rule } from '../application/rule/types';
 
 const rulesClient = rulesClientMock.create();
 
@@ -126,7 +127,7 @@ describe('bulkEnableRulesRoute', () => {
   });
 
   describe('actions', () => {
-    const mockedRule: SanitizedRule<{}> = {
+    const mockedRule: Rule<{}> = {
       id: '1',
       alertTypeId: '1',
       schedule: { interval: '10s' },
@@ -185,9 +186,12 @@ describe('bulkEnableRulesRoute', () => {
       uuid: '123-456',
       type: RuleActionTypes.SYSTEM,
     };
-
-    const mockedRules: Array<SanitizedRule<{}>> = [
-      { ...mockedRule, actions: [action, systemAction] },
+    const actions = [action, systemAction];
+    const mockedRules: Array<Rule<{}>> = [
+      {
+        ...mockedRule,
+        actions,
+      },
     ];
 
     const bulkEnableActionsResult = {

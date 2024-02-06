@@ -12,7 +12,7 @@ import { licenseStateMock } from '../lib/license_state.mock';
 import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
-import { SanitizedDefaultRuleAction, SanitizedRule } from '../types';
+import { RuleActionTypes, SanitizedDefaultRuleAction, SanitizedRule } from '../types';
 import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
@@ -57,6 +57,7 @@ describe('getRuleRoute', () => {
             timezone: 'UTC',
           },
         },
+        type: RuleActionTypes.DEFAULT,
       },
     ],
     consumer: 'bar',

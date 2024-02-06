@@ -219,7 +219,7 @@ export type SanitizedDefaultRuleAction = Omit<RuleDefaultAction, 'alertsFilter'>
   alertsFilter?: SanitizedAlertsFilter;
 };
 
-export type SanitizedRuleAction = SanitizedDefaultRuleAction | RuleSystemAction;
+export type SanitizedRuleAction = RuleDefaultAction | RuleSystemAction;
 
 export type SanitizedRule<Params extends RuleTypeParams = never> = Omit<
   Rule<Params>,

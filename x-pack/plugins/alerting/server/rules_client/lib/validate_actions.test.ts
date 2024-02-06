@@ -38,6 +38,8 @@ describe('validateActions', () => {
       context: 'context',
       mappings: { fieldMap: { field: { type: 'fieldType', required: false } } },
     },
+    category: 'test',
+    validLegacyConsumers: [],
   };
 
   const defaultAction: NormalizedAlertAction = {
