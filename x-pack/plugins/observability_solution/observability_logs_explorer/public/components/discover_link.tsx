@@ -10,7 +10,7 @@ import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { hydrateDatasetSelection } from '@kbn/logs-explorer-plugin/common';
 import {
-  getDiscoverColumnsFromDisplayOptions,
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
   getDiscoverFiltersFromState,
 } from '@kbn/logs-explorer-plugin/public';
 import { getRouterLinkProps } from '@kbn/router-utils';
@@ -56,7 +56,7 @@ export const DiscoverLinkForValidState = React.memo(
     const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(
       () => ({
         breakdownField: logsExplorerState.chart.breakdownField ?? undefined,
-        columns: getDiscoverColumnsFromDisplayOptions(logsExplorerState),
+        columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(logsExplorerState),
         filters: getDiscoverFiltersFromState(logsExplorerState.filters, logsExplorerState.controls),
         query: logsExplorerState.query,
         refreshInterval: logsExplorerState.refreshInterval,

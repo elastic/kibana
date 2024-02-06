@@ -11,6 +11,11 @@ import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
 import {
+  CONTENT_FIELD_CONFIGURATION,
+  RESOURCE_FIELD_CONFIGURATION,
+  SMART_FALLBACK_FIELDS,
+} from '../../common/constants';
+import {
   ChartDisplayOptions,
   DisplayOptions,
   GridColumnDisplayOptions,
@@ -21,10 +26,20 @@ import { ControlOptions, OptionsListControlOption } from '../controller';
 export const getGridColumnDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
 ): GridColumnDisplayOptions[] | undefined =>
-  discoverAppState.columns?.map((field) => ({
-    field,
-    width: discoverAppState.grid?.columns?.[field]?.width,
-  }));
+  discoverAppState.columns?.map((field) => {
+    switch (field) {
+      case 'resource':
+        return RESOURCE_FIELD_CONFIGURATION;
+      case 'content':
+        return CONTENT_FIELD_CONFIGURATION;
+      default:
+        return {
+          type: 'document-field',
+          field,
+          width: discoverAppState.grid?.columns?.[field]?.width,
+        };
+    }
+  });
 
 export const getGridRowsDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
@@ -58,18 +73,39 @@ export const getDiscoverAppStateFromContext = (
   filters: cloneDeep(displayOptions.filters),
 });
 
+export const getDiscoverColumnsWithFallbackFieldsFromDisplayOptions = (
+  displayOptions: DisplayOptions
+): DiscoverAppState['columns'] =>
+  displayOptions.grid.columns.flatMap((column) => {
+    if (column.type === 'document-field') {
+      return column.field;
+    } else {
+      return SMART_FALLBACK_FIELDS[column.name];
+    }
+  });
+
 export const getDiscoverColumnsFromDisplayOptions = (
   displayOptions: DisplayOptions
-): DiscoverAppState['columns'] => displayOptions.grid.columns.map(({ field }) => field);
+): DiscoverAppState['columns'] =>
+  displayOptions.grid.columns.flatMap((column) => {
+    return column.field;
+    // if (column.type === 'document-field') {
+    //   return column.field;
+    // } else {
+    //   return column.name;
+    // }
+  });
 
 export const getDiscoverGridFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): DiscoverAppState['grid'] => ({
   columns: displayOptions.grid.columns.reduce<
     NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
-  >((gridColumns, { field, width }) => {
-    if (width != null) {
-      gridColumns[field] = { width };
+  >((gridColumns, column) => {
+    const key = column.type === 'document-field' ? column.field : column.name;
+
+    if (column.width != null) {
+      gridColumns[key] = { width: column.width };
     }
     return gridColumns;
   }, {}),

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { SmartFieldGridColumnOptions } from '@kbn/logs-explorer-plugin/common/display_options';
+
 export const LOGS_EXPLORER_PROFILE_ID = 'logs-explorer';
 
 // Fields constants
@@ -42,14 +44,26 @@ export const RESOURCE_FIELD = 'resource';
 export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
 export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
 
+export const RESOURCE_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
+  type: 'smart-field',
+  field: RESOURCE_FIELD,
+  name: RESOURCE_FIELD,
+  fallbackFields: ['host.name', 'service.name'],
+  width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
+};
+
+export const CONTENT_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
+  type: 'smart-field',
+  field: CONTENT_FIELD,
+  name: CONTENT_FIELD,
+  fallbackFields: ['message'],
+};
+
+export const SMART_FALLBACK_FIELDS = {
+  [CONTENT_FIELD]: CONTENT_FIELD_CONFIGURATION.fallbackFields,
+  [RESOURCE_FIELD]: RESOURCE_FIELD_CONFIGURATION.fallbackFields,
+};
+
 // UI preferences
-export const DEFAULT_COLUMNS = [
-  {
-    field: RESOURCE_FIELD,
-    width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
-  },
-  {
-    field: CONTENT_FIELD,
-  },
-];
+export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
 export const DEFAULT_ROWS_PER_PAGE = 100;
