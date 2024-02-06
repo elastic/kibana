@@ -94,10 +94,24 @@ export const BELOW_TEXT = i18n.translate(
   }
 );
 
+export const BELOW_OR_EQ_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.belowOrEqual',
+  {
+    defaultMessage: 'below or equal',
+  }
+);
+
 export const ABOVE_TEXT = i18n.translate(
   'xpack.observability.customThreshold.rule.threshold.above',
   {
     defaultMessage: 'above',
+  }
+);
+
+export const ABOVE_OR_EQ_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.aboveOrEqual',
+  {
+    defaultMessage: 'above or equal',
   }
 );
 

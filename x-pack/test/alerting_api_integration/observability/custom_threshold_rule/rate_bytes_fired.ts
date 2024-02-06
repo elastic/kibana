@@ -253,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Rate of system.network.in.bytes is 0.2 B/s, above the threshold of 0.2 B/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
+          `Rate of system.network.in.bytes is 0.2 B/s, above or equal the threshold of 0.2 B/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
         );
         expect(resp.hits.hits[0]._source?.value).eql('0.2 B/s');
         expect(resp.hits.hits[0]._source?.host).eql(
