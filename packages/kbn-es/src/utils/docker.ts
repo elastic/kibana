@@ -679,6 +679,27 @@ export async function runServerlessEsNode(
     image
   );
 
+  process.stdout.write('--- Running elasticsearch\n');
+  process.stdout.write(
+    JSON.stringify(
+      {
+        whoami: process.env.USER,
+        pwd: process.env.PWD,
+        argv: process.argv,
+        gid: process.getgid?.(),
+        uid: process.getuid?.(),
+        groups: process.getgroups?.(),
+        pid: process.pid,
+        ppid: process.ppid,
+      },
+      null,
+      2
+    )
+  );
+  await execa('id', [], {
+    stdio: ['inherit', 'inherit', 'inherit'],
+  });
+
   log.info(chalk.bold(`Running serverless ES node: ${name}`));
   log.indent(4, () => log.info(chalk.dim(`docker ${dockerCmd.join(' ')}`)));
 
