@@ -430,6 +430,21 @@ export class LensPlugin {
       () => startServices().plugins.data.nowProvider.get()
     );
 
+    registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        const panel = {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+
+        return panel;
+      }
+    );
+
     const getPresentationUtilContext = () =>
       startServices().plugins.presentationUtil.ContextProvider;
 
@@ -723,18 +738,3 @@ export class LensPlugin {
 
   stop() {}
 }
-
-registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
-  CONTENT_ID,
-  (savedObject) => {
-    if (!savedObject.managed) {
-      return { savedObjectId: savedObject.id };
-    }
-
-    const panel = {
-      attributes: savedObjectToEmbeddableAttributes(savedObject),
-    };
-
-    return panel;
-  }
-);

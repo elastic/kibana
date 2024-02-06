@@ -220,6 +220,16 @@ export class MapsPlugin
       name: APP_NAME,
     });
 
+    registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
+      if (!savedObject.managed) {
+        return { savedObjectId: savedObject.id };
+      }
+
+      return {
+        attributes: savedObjectToEmbeddableAttributes(savedObject),
+      };
+    });
+
     setupLensChoroplethChart(core, plugins.expressions, plugins.lens);
 
     // register wrapper around legacy tile_map and region_map visualizations
@@ -259,13 +269,3 @@ export class MapsPlugin
     };
   }
 }
-
-registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
-  if (!savedObject.managed) {
-    return { savedObjectId: savedObject.id };
-  }
-
-  return {
-    attributes: savedObjectToEmbeddableAttributes(savedObject),
-  };
-});

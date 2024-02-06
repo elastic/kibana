@@ -407,6 +407,37 @@ export class VisualizationsPlugin
       name: 'Visualize Library',
     });
 
+    registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        const visState = savedObject.attributes.visState;
+
+        // not sure if visState actually is ever undefined, but following the type
+        if (!savedObject.managed || !visState) {
+          return {
+            savedObjectId: savedObject.id,
+          };
+        }
+
+        // data is not always defined, so I added a default value since the extract
+        // routine in the embeddable factory expects it to be there
+        const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+          data?: SerializedVisData;
+        };
+
+        if (!savedVis.data) {
+          savedVis.data = {
+            searchSource: {},
+            aggs: [],
+          };
+        }
+
+        return {
+          savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+        };
+      }
+    );
+
     return {
       ...this.types.setup(),
       visEditorsRegistry,
@@ -474,34 +505,3 @@ export class VisualizationsPlugin
     }
   }
 }
-
-registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
-  CONTENT_ID,
-  (savedObject) => {
-    const visState = savedObject.attributes.visState;
-
-    // not sure if visState actually is ever undefined, but following the type
-    if (!savedObject.managed || !visState) {
-      return {
-        savedObjectId: savedObject.id,
-      };
-    }
-
-    // data is not always defined, so I added a default value since the extract
-    // routine in the embeddable factory expects it to be there
-    const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-      data?: SerializedVisData;
-    };
-
-    if (!savedVis.data) {
-      savedVis.data = {
-        searchSource: {},
-        aggs: [],
-      };
-    }
-
-    return {
-      savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
-    };
-  }
-);

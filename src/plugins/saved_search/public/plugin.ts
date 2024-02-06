@@ -117,6 +117,19 @@ export class SavedSearchPublicPlugin
 
     expressions.registerType(kibanaContext);
 
+    registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
+      SavedSearchType,
+      (savedObject) => {
+        if (!savedObject.managed) {
+          return { savedObjectId: savedObject.id };
+        }
+
+        return {
+          attributes: savedObjectToEmbeddableAttributes(savedObject),
+        };
+      }
+    );
+
     return {};
   }
 
@@ -149,16 +162,3 @@ export class SavedSearchPublicPlugin
     };
   }
 }
-
-registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
-  SavedSearchType,
-  (savedObject) => {
-    if (!savedObject.managed) {
-      return { savedObjectId: savedObject.id };
-    }
-
-    return {
-      attributes: savedObjectToEmbeddableAttributes(savedObject),
-    };
-  }
-);
