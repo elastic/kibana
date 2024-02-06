@@ -309,9 +309,9 @@ describe('bulk action hooks', () => {
       }));
       const { result } = renderHook(
         () =>
-          useBulkUntrackActions({ 
-            setIsBulkActionsLoading, 
-            refresh, 
+          useBulkUntrackActions({
+            setIsBulkActionsLoading,
+            refresh,
             clearSelection,
             isAllSelected: true,
             query: {
@@ -319,10 +319,10 @@ describe('bulk action hooks', () => {
                 must: {
                   term: {
                     test: 'test',
-                  }
-                }
-              }
-            } 
+                  },
+                },
+              },
+            },
           }),
         {
           wrapper: appMockRender.AppWrapper,
