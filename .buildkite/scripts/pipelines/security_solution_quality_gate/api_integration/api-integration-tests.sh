@@ -15,15 +15,33 @@ cd x-pack/test/security_solution_api_integration
 set +e
 
 QA_API_KEY=$(vault_get security-solution-quality-gate qa_api_key)
+QA_CONSOLE_URL=$(vault_get security-solution-quality-gate qa_console_url)
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
-ENVIRONMENT_DETAILS=$(curl --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
+if [ -z "${KIBANA_MKI_USE_LATEST_COMMIT+x}" ] || [ "$KIBANA_MKI_USE_LATEST_COMMIT" = "0" ]; then
+  ENVIRONMENT_DETAILS=$(curl --location "$QA_CONSOLE_URL/api/v1/serverless/projects/security" \
     --header "Authorization: ApiKey $QA_API_KEY" \
     --header 'Content-Type: application/json' \
     --data '{
-        "name": "ftr-integration-tests-'$random_number'",
-        "region_id": "aws-eu-west-1"}' | jq '.')
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1"}' | jq '.')
+else
+  KBN_COMMIT_HASH=${BUILDKITE_COMMIT:0:12}
+  ENVIRONMENT_DETAILS=$(curl --location "$QA_CONSOLE_URL/api/v1/serverless/projects/security" \
+    --header "Authorization: ApiKey $QA_API_KEY" \
+    --header 'Content-Type: application/json' \
+    --data '{
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1",
+          "overrides": {
+            "kibana": {
+              "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-'$KBN_COMMIT_HASH'"
+              }
+            }
+          }' | jq '.')
+fi
+
 NAME=$(echo $ENVIRONMENT_DETAILS | jq -r '.name')
 ID=$(echo $ENVIRONMENT_DETAILS | jq -r '.id')
 ES_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.elasticsearch')
@@ -33,7 +51,7 @@ KB_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.kibana')
 sleep 5
 
 # Resetting the credentials of the elastic user in the project
-CREDS_BODY=$(curl -s --location --request POST "https://global.qa.cld.elstc.co/api/v1/serverless/projects/security/$ID/_reset-credentials" \
+CREDS_BODY=$(curl -s --location --request POST "$QA_CONSOLE_URL/api/v1/serverless/projects/security/$ID/_reset-credentials" \
   --header "Authorization: ApiKey $QA_API_KEY" \
   --header 'Content-Type: application/json' | jq '.')
 USERNAME=$(echo $CREDS_BODY | jq -r '.username')
@@ -76,7 +94,7 @@ TEST_CLOUD=1 TEST_ES_URL="https://elastic:$PASSWORD@$FORMATTED_ES_URL:443" TEST_
 cmd_status=$?
 echo "Exit code with status: $cmd_status"
 
-curl --location --request DELETE "https://global.qa.cld.elstc.co/api/v1/serverless/projects/security/$ID" \
+curl --location --request DELETE "$QA_CONSOLE_URL/api/v1/serverless/projects/security/$ID" \
   --header "Authorization: ApiKey $QA_API_KEY"
 
 exit $cmd_status
