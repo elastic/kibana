@@ -4101,10 +4101,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "id": "def-common.LOGS_EXPLORER_FEEDBACK_LINK",
         "type": "string",
         "tags": [],
-        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "label": "LOGS_EXPLORER_FEEDBACK_LINK",
         "description": [],
         "signature": [
           "\"https://ela.st/explorer-feedback\""
