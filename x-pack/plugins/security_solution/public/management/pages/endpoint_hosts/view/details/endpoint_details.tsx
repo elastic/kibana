@@ -82,7 +82,7 @@ export const EndpointDetails = memo(() => {
             name: 'endpointActivityLog',
             selected_endpoint: id,
           }),
-          content: <ResponseActionsLog agentIds={id} agentType={'endpoint'} />,
+          content: <ResponseActionsLog agentIds={id} />,
         });
       }
       return tabs;

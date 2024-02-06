@@ -10,7 +10,6 @@ import type {
   DurationRange,
   OnRefreshChangeProps,
 } from '@elastic/eui/src/components/date_picker/types';
-import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import type { useGetEndpointActionList } from '../../../hooks';
 import {
@@ -23,7 +22,6 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilters = memo(
   ({
-    agentType,
     dateRangePickerState,
     isDataLoading,
     isFlyout,
@@ -40,7 +38,6 @@ export const ActionsLogFilters = memo(
     showHostsFilter,
     'data-test-subj': dataTestSubj,
   }: {
-    agentType: ResponseActionAgentType | undefined;
     dateRangePickerState: DateRangePickerValues;
     isDataLoading: boolean;
     isFlyout: boolean;
@@ -92,7 +89,6 @@ export const ActionsLogFilters = memo(
           {isSentinelOneV1Enabled
             ? responseActionsEnabled && (
                 <ActionsLogFilter
-                  agentType={agentType}
                   filterName={'types'}
                   typesFilters={{
                     agentTypes: { onChangeFilterOptions: onChangeAgentTypesFilter },
@@ -113,7 +109,6 @@ export const ActionsLogFilters = memo(
         </>
       );
     }, [
-      agentType,
       showHostsFilter,
       isFlyout,
       isSentinelOneV1Enabled,

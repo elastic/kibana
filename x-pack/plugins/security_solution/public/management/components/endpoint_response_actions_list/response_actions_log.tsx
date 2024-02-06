@@ -34,7 +34,6 @@ import { ActionsLogTable } from './components/actions_log_table';
 
 export const ResponseActionsLog = memo<
   Pick<EndpointActionListRequestQuery, 'agentIds'> & {
-    agentType?: ResponseActionAgentType;
     showHostNames?: boolean;
     isFlyout?: boolean;
     setIsDataInResponse?: (isData: boolean) => void;
@@ -42,7 +41,6 @@ export const ResponseActionsLog = memo<
   }
 >(
   ({
-    agentType,
     agentIds,
     showHostNames = false,
     isFlyout = true,
@@ -75,7 +73,7 @@ export const ResponseActionsLog = memo<
       page: isFlyout ? 1 : paginationFromUrlParams.page,
       pageSize: isFlyout ? 10 : paginationFromUrlParams.pageSize,
       agentIds: isFlyout ? agentIds : agentIdsFromUrl?.length ? agentIdsFromUrl : agentIds,
-      agentTypes: isFlyout && agentType ? [agentType] : [],
+      agentTypes: [],
       commands: [],
       statuses: [],
       userIds: [],
@@ -277,7 +275,6 @@ export const ResponseActionsLog = memo<
     return (
       <>
         <ActionsLogFilters
-          agentType={agentType}
           isFlyout={isFlyout}
           dateRangePickerState={dateRangePickerState}
           isDataLoading={isFetching}
