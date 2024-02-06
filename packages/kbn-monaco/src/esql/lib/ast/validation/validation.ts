@@ -240,7 +240,7 @@ function extractCompatibleSignaturesForFunction(
     if (astFunction.args.length === def.params.length) {
       return true;
     }
-    return astFunction.args.length >= def.params.filter(({ optional }) => !optional).length;
+    return astFunction.args.length === def.params.filter(({ optional }) => !optional).length;
   });
 }
 

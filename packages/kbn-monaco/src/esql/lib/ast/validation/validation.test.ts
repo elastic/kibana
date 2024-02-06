@@ -21,7 +21,7 @@ import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { EditorError } from '../../../../types';
-import { camelCase } from 'lodash';
+import { camelCase, min } from 'lodash';
 
 const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
 
@@ -1046,7 +1046,7 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, returnType } of signatures) {
+      for (const { params, returnType, infiniteParams, minParams } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a | eval var = ${
@@ -1127,6 +1127,37 @@ describe('validation logic', () => {
             }`,
             expectedErrors
           );
+
+          if (!infiniteParams && !minParams) {
+            // test that additional args are spotted
+            const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
+              name: 'extraArg',
+              type: 'number',
+            });
+            // get the expected args from the first signature in case of errors
+            const expectedArgs = signatures[0].params.filter(({ optional }) => !optional);
+            testErrorsAndWarnings(
+              `from a | eval ${
+                getFunctionSignatures(
+                  {
+                    name,
+                    ...defRest,
+                    signatures: [{ params: fieldMappingWithOneExtraArg, returnType }],
+                  },
+                  { withTypes: false }
+                )[0].declaration
+              }`,
+              [
+                `Error building [${name}]: expects exactly ${
+                  expectedArgs.length === 1
+                    ? 'one argument'
+                    : expectedArgs.length === 0
+                    ? '0 arguments'
+                    : `${expectedArgs.length} arguments`
+                }, passed ${fieldMappingWithOneExtraArg.length} instead.`,
+              ]
+            );
+          }
         }
 
         // test that wildcard won't work as arg
