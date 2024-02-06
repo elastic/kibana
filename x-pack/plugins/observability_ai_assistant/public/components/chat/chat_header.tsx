@@ -6,6 +6,7 @@
  */
 import React, { useEffect, useState } from 'react';
 import {
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
@@ -18,6 +19,8 @@ import { css } from '@emotion/css';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatActionsMenu } from './chat_actions_menu';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { FlyoutWidthMode } from './chat_flyout';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
 
 // needed to prevent InlineTextEdit component from expanding container
 const minWidthClassName = css`
@@ -30,25 +33,31 @@ const chatHeaderClassName = css`
 `;
 
 export function ChatHeader({
-  title,
-  loading,
-  licenseInvalid,
   connectors,
   conversationId,
+  flyoutWidthMode,
+  licenseInvalid,
+  loading,
   showLinkToConversationsApp,
+  title,
   onCopyConversation,
   onSaveTitle,
+  onToggleFlyoutWidthMode,
 }: {
-  title: string;
-  loading: boolean;
-  licenseInvalid: boolean;
   connectors: UseGenAIConnectorsResult;
   conversationId?: string;
+  flyoutWidthMode?: FlyoutWidthMode;
+  licenseInvalid: boolean;
+  loading: boolean;
   showLinkToConversationsApp: boolean;
+  title: string;
   onCopyConversation: () => void;
   onSaveTitle: (title: string) => void;
+  onToggleFlyoutWidthMode?: (newFlyoutWidthMode: FlyoutWidthMode) => void;
 }) {
   const theme = useEuiTheme();
+
+  const router = useObservabilityAIAssistantRouter();
 
   const [newTitle, setNewTitle] = useState(title);
 
@@ -56,10 +65,22 @@ export function ChatHeader({
     setNewTitle(title);
   }, [title]);
 
-  const chatActionsMenuWrapper = css`
-    position: absolute;
-    right: 46px;
-  `;
+  const handleToggleFlyoutWidthMode = () => {
+    onToggleFlyoutWidthMode?.(flyoutWidthMode === 'side' ? 'full' : 'side');
+  };
+
+  const handleNavigateToConversations = () => {
+    if (conversationId) {
+      router.navigateToConversationsApp('/conversations/{conversationId}', {
+        path: {
+          conversationId,
+        },
+        query: {},
+      });
+    } else {
+      router.navigateToConversationsApp('/conversations/new', { path: {}, query: {} });
+    }
+  };
 
   return (
     <EuiPanel
@@ -105,17 +126,47 @@ export function ChatHeader({
             }}
           />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow={false}
-          className={showLinkToConversationsApp ? chatActionsMenuWrapper : ''}
-        >
-          <ChatActionsMenu
-            connectors={connectors}
-            conversationId={conversationId}
-            disabled={licenseInvalid}
-            showLinkToConversationsApp={showLinkToConversationsApp}
-            onCopyConversationClick={onCopyConversation}
-          />
+
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s">
+            {flyoutWidthMode && onToggleFlyoutWidthMode ? (
+              <>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
+                      { defaultMessage: 'Navigate to conversations' }
+                    )}
+                    data-test-subj="observabilityAiAssistantChatHeaderButton"
+                    iconType="discuss"
+                    onClick={handleNavigateToConversations}
+                  />
+                </EuiFlexItem>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.toggleFlyoutWidthModeLabel',
+                      { defaultMessage: 'Toggle flyout width mode' }
+                    )}
+                    data-test-subj="observabilityAiAssistantChatHeaderButton"
+                    iconType={flyoutWidthMode === 'side' ? 'expand' : 'minimize'}
+                    onClick={handleToggleFlyoutWidthMode}
+                  />
+                </EuiFlexItem>
+              </>
+            ) : null}
+
+            <EuiFlexItem grow={false}>
+              <ChatActionsMenu
+                connectors={connectors}
+                conversationId={conversationId}
+                disabled={licenseInvalid}
+                showLinkToConversationsApp={showLinkToConversationsApp}
+                onCopyConversationClick={onCopyConversation}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiPanel>
