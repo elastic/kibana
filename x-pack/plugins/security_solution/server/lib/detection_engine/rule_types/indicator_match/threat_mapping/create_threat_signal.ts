@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
+
 import { buildThreatMappingFilter } from './build_threat_mapping_filter';
 import { getFilter } from '../../utils/get_filter';
 import { searchAfterAndBulkCreate } from '../../utils/search_after_bulk_create';
 import { buildReasonMessageForThreatMatchAlert } from '../../utils/reason_formatters';
 import type { CreateThreatSignalOptions } from './types';
 import type { SearchAfterAndBulkCreateReturnType } from '../../types';
+import { searchAfterAndBulkCreateSuppressedAlerts } from '../../utils/search_after_bulk_create_suppressed_alerts';
 
 import { buildThreatEnrichment } from './build_threat_enrichment';
 export const createThreatSignal = async ({
@@ -34,7 +37,9 @@ export const createThreatSignal = async ({
   tuple,
   type,
   wrapHits,
+  wrapSuppressedHits,
   runtimeMappings,
+  runOpts,
   primaryTimestamp,
   secondaryTimestamp,
   exceptionFilter,
@@ -49,6 +54,7 @@ export const createThreatSignal = async ({
   allowedFieldsForTermsQuery,
   inputIndexFields,
   threatIndexFields,
+  licensing,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -56,6 +62,9 @@ export const createThreatSignal = async ({
     entryKey: 'value',
     allowedFieldsForTermsQuery,
   });
+
+  const license = await firstValueFrom(licensing.license$);
+  const hasPlatinumLicense = license.hasAtLeast('platinum');
 
   if (!threatFilter.query || threatFilter.query?.bool.should.length === 0) {
     // empty threat list and we do not want to return everything as being
@@ -98,7 +107,12 @@ export const createThreatSignal = async ({
       threatIndexFields,
     });
 
-    const result = await searchAfterAndBulkCreate({
+    const isAlertSuppressionEnabled = Boolean(
+      completeRule.ruleParams.alertSuppression?.groupBy?.length
+    );
+
+    let result: SearchAfterAndBulkCreateReturnType;
+    const searchAfterBulkCreateParams = {
       buildReasonMessage: buildReasonMessageForThreatMatchAlert,
       bulkCreate,
       enrichment: threatEnrichment,
@@ -110,14 +124,30 @@ export const createThreatSignal = async ({
       pageSize: searchAfterSize,
       ruleExecutionLogger,
       services,
-      sortOrder: 'desc',
+      sortOrder: 'desc' as const,
       trackTotalHits: false,
       tuple,
       wrapHits,
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-    });
+    };
+
+    if (
+      isAlertSuppressionEnabled &&
+      runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled &&
+      hasPlatinumLicense
+    ) {
+      result = await searchAfterAndBulkCreateSuppressedAlerts({
+        ...searchAfterBulkCreateParams,
+        wrapSuppressedHits,
+        alertTimestampOverride: runOpts.alertTimestampOverride,
+        alertWithSuppression: runOpts.alertWithSuppression,
+        alertSuppression: completeRule.ruleParams.alertSuppression,
+      });
+    } else {
+      result = await searchAfterAndBulkCreate(searchAfterBulkCreateParams);
+    }
 
     ruleExecutionLogger.debug(
       `${
