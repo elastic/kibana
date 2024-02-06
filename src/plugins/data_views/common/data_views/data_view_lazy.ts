@@ -12,7 +12,7 @@ import type {
   // SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import { each, cloneDeep } from 'lodash';
+import { each, cloneDeep, pickBy, mapValues, omit } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
 import { AbstractDataView } from './abstract_data_views';
 // import type { TimeBasedDataView } from './data_view';
@@ -97,7 +97,10 @@ export class DataViewLazy extends AbstractDataView {
         // todo this set/get thing could be neater. Also happens for mapped. check scripted
         (field) =>
           this.fieldCache.get(field.name) ||
-          this.fieldCache.set(field.name, new DataViewField(field))
+          this.fieldCache.set(
+            field.name,
+            new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
+          )
       );
 
       dataViewFields.push(...runtimeFields);
@@ -155,11 +158,13 @@ export class DataViewLazy extends AbstractDataView {
     }
 
     // Make sure no field with the same name already exist
-    if (this.getFieldByName(name) !== undefined) {
+    /* todo verify that I want to get rid of this
+    if (async this.getFieldByName(name) !== undefined) {
       throw new Error(
         `Can't create composite runtime field ["${name}"] as there is already a field with this name`
       );
     }
+    */
 
     // We first remove the runtime composite field with the same name which will remove all of its subFields.
     // This guarantees that we don't leave behind orphan data view fields
@@ -260,7 +265,9 @@ export class DataViewLazy extends AbstractDataView {
     let createdField: DataViewField | undefined;
     const existingField = await this.getFieldByName(fieldName);
 
-    if (existingField && !existingField.isMapped) {
+    // if (existingField && !existingField.isMapped) {
+    // todo
+    if (existingField) {
       existingField.runtimeField = runtimeFieldSpec;
     } else {
       createdField = this.fieldCache.set(
@@ -274,6 +281,7 @@ export class DataViewLazy extends AbstractDataView {
           searchable: true,
           count: config.popularity ?? 0,
           readFromDocValues: false,
+          shortDotsEnable: this.shortDotsEnable,
         })
       );
     }
@@ -386,13 +394,19 @@ export class DataViewLazy extends AbstractDataView {
         fld.spec.isMapped = true;
         // fld.spec.runtimeField = undefined;
       }
-      dataViewFields.push(fld || this.fieldCache.set(field.name, new DataViewField(field)));
+      dataViewFields.push(
+        fld ||
+          this.fieldCache.set(
+            field.name,
+            new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
+          )
+      );
     });
 
     return dataViewFields;
   }
 
-  // I'm not sure if htis is useful but I like that it uses the cache
+  // I'm not sure if this is useful but I like that it uses the cache
   getFieldInstance = async (fieldName: string): Promise<DataViewField> => {
     // todo review
     const fld = this.fieldCache.get(fieldName);
@@ -400,7 +414,10 @@ export class DataViewLazy extends AbstractDataView {
     const fields = await this.getFields({ fieldName: [fieldName] });
     // todo more specific error OR maybe returning undefined is ok
     if (!fields.length) throw new Error(`Field ${fieldName} not found`);
-    return this.fieldCache.set(fieldName, new DataViewField(fields[0]));
+    return this.fieldCache.set(
+      fieldName,
+      new DataViewField({ ...fields[0].spec, shortDotsEnable: this.shortDotsEnable })
+    );
   };
 
   getScriptedFieldsForQuery() {
@@ -498,7 +515,7 @@ export class DataViewLazy extends AbstractDataView {
       return fields;
     };
 
-    const fields = includeFields ? await getFieldsAsMap() : {};
+    const fields = includeFields ? await getFieldsAsMap() : undefined;
 
     const spec: DataViewSpec = {
       id: this.id,
@@ -522,7 +539,28 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   // should specify which fields are needed
-  toMinimalSpec() {}
+  /**
+   * Creates a minimal static representation of the data view. Fields and popularity scores will be omitted.
+   */
+  // TODO make synchronous
+  public async toMinimalSpec(): Promise<Omit<DataViewSpec, 'fields'>> {
+    // removes `fields`
+    const dataViewSpec = await this.toSpec(false);
+
+    if (dataViewSpec.fieldAttrs) {
+      // removes `count` props (popularity scores) from `fieldAttrs`
+      dataViewSpec.fieldAttrs = pickBy(
+        mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
+        (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
+      );
+
+      if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
+        dataViewSpec.fieldAttrs = undefined;
+      }
+    }
+
+    return dataViewSpec;
+  }
 
   /**
    * returns true if dataview contains TSDB fields

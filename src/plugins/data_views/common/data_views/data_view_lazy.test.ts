@@ -18,8 +18,6 @@ import { DataViewField } from '../fields';
 import { DataViewLazy } from './data_view_lazy';
 import { stubLogstashFieldSpecMap } from '../field.stub';
 
-class MockFieldFormatter {}
-
 let fieldCapsResponse: FieldSpec[];
 
 const runtimeFieldScript = {
@@ -409,13 +407,13 @@ describe('DataViewLazy', () => {
       expect((await dataViewLazy.getFieldByName(newField))?.customLabel).toBeUndefined();
       dataViewLazy.removeRuntimeField(newField);
     });
-    /*
+
     test('add and remove composite runtime field as new fields', async () => {
       const fieldCount = (await dataViewLazy.getFields({})).length;
-      dataViewLazy.addRuntimeField('new_field', runtimeCompositeWithAttrs);
+      await dataViewLazy.addRuntimeField('new_field', runtimeCompositeWithAttrs);
       expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
-        runtime_field: runtimeField.runtimeField,
         new_field: runtimeComposite,
+        runtime_field: runtimeField.runtimeField,
       });
       expect((await dataViewLazy.getFields({})).length - fieldCount).toEqual(2);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
@@ -436,8 +434,6 @@ describe('DataViewLazy', () => {
       });
       expect((await dataViewLazy.toSpec())!.fields!.new_field).toBeUndefined();
     });
-
-    */
 
     test('should not allow runtime field with * in name', async () => {
       try {
@@ -481,36 +477,40 @@ describe('DataViewLazy', () => {
     });
   });
 
-  /*
   describe('toSpec', () => {
-    test('should match snapshot', () => {
+    test('should match snapshot', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as unknown as FieldFormat;
-      indexPattern.getFormatterForField = () => formatter;
-      expect(indexPattern.toSpec()).toMatchSnapshot();
+      dataViewLazy.getFormatterForField = () => formatter;
+      expect(await dataViewLazy.toSpec()).toMatchSnapshot();
     });
 
-    test('can optionally exclude fields', () => {
-      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    test('can optionally exclude fields', async () => {
+      expect(await dataViewLazy.toSpec(false)).toMatchSnapshot();
     });
 
     test('can restore from spec', async () => {
       const formatter = {
         toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
       } as unknown as FieldFormat;
-      indexPattern.getFormatterForField = () => formatter;
-      const spec = indexPattern.toSpec();
-      const restoredPattern = new DataView({
+      dataViewLazy.getFormatterForField = () => formatter;
+      const spec = await dataViewLazy.toSpec();
+      const restoredPattern = new DataViewLazy({
         spec,
         fieldFormats: fieldFormatsMock,
         shortDotsEnable: false,
         metaFields: [],
+        apiClient: {
+          getFieldsForWildcard: jest
+            .fn()
+            .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
+        } as any,
       });
-      expect(restoredPattern.id).toEqual(indexPattern.id);
-      expect(restoredPattern.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
-      expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
-      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+      expect(restoredPattern.id).toEqual(dataViewLazy.id);
+      expect(restoredPattern.getIndexPattern()).toEqual(dataViewLazy.getIndexPattern());
+      expect(restoredPattern.timeFieldName).toEqual(dataViewLazy.timeFieldName);
+      // expect(restoredPattern.fields.length).toEqual(dataViewLazy.fields.length);
     });
 
     test('creating from spec does not contain references to spec', () => {
@@ -523,11 +523,11 @@ describe('DataViewLazy', () => {
   });
 
   describe('toMinimalSpec', () => {
-    test('can exclude fields', () => {
-      expect(dataViewLazy.toMinimalSpec()).toMatchSnapshot();
+    test('can exclude fields', async () => {
+      expect(await dataViewLazy.toMinimalSpec()).toMatchSnapshot();
     });
 
-    test('can omit counts', () => {
+    test('can omit counts', async () => {
       const fieldsMap = {
         test1: {
           name: 'test1',
@@ -552,44 +552,50 @@ describe('DataViewLazy', () => {
         },
       };
       expect(
-        create('test', {
-          id: 'test',
-          title: 'test*',
-          fields: fieldsMap,
-          fieldAttrs: undefined,
-        }).toMinimalSpec().fieldAttrs
+        (
+          await create('test', {
+            id: 'test',
+            title: 'test*',
+            fields: fieldsMap,
+            fieldAttrs: undefined,
+          }).toMinimalSpec()
+        ).fieldAttrs
       ).toBeUndefined();
       expect(
-        create('test', {
-          id: 'test',
-          title: 'test*',
-          fields: fieldsMap,
-          fieldAttrs: {
-            test1: {
-              count: 11,
+        (
+          await create('test', {
+            id: 'test',
+            title: 'test*',
+            fields: fieldsMap,
+            fieldAttrs: {
+              test1: {
+                count: 11,
+              },
+              test2: {
+                count: 12,
+              },
             },
-            test2: {
-              count: 12,
-            },
-          },
-        }).toMinimalSpec().fieldAttrs
+          }).toMinimalSpec()
+        ).fieldAttrs
       ).toBeUndefined();
 
       expect(
-        create('test', {
-          id: 'test',
-          title: 'test*',
-          fields: fieldsMap,
-          fieldAttrs: {
-            test1: {
-              count: 11,
-              customLabel: 'test11',
+        (
+          await create('test', {
+            id: 'test',
+            title: 'test*',
+            fields: fieldsMap,
+            fieldAttrs: {
+              test1: {
+                count: 11,
+                customLabel: 'test11',
+              },
+              test2: {
+                count: 12,
+              },
             },
-            test2: {
-              count: 12,
-            },
-          },
-        }).toMinimalSpec().fieldAttrs
+          }).toMinimalSpec()
+        ).fieldAttrs
       ).toMatchInlineSnapshot(`
         Object {
           "test1": Object {
@@ -599,23 +605,25 @@ describe('DataViewLazy', () => {
       `);
 
       expect(
-        create('test', {
-          id: 'test',
-          title: 'test*',
-          fields: fieldsMap,
-          fieldAttrs: {
-            test1: {
-              count: 11,
-              customLabel: 'test11',
+        (
+          await create('test', {
+            id: 'test',
+            title: 'test*',
+            fields: fieldsMap,
+            fieldAttrs: {
+              test1: {
+                count: 11,
+                customLabel: 'test11',
+              },
+              test2: {
+                customLabel: 'test12',
+              },
+              test3: {
+                count: 30,
+              },
             },
-            test2: {
-              customLabel: 'test12',
-            },
-            test3: {
-              count: 30,
-            },
-          },
-        }).toMinimalSpec().fieldAttrs
+          }).toMinimalSpec()
+        ).fieldAttrs
       ).toMatchInlineSnapshot(`
         Object {
           "test1": Object {
@@ -628,5 +636,4 @@ describe('DataViewLazy', () => {
       `);
     });
   });
-  */
 });
