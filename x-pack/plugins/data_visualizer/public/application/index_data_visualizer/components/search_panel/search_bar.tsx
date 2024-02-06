@@ -61,14 +61,8 @@ export const SearchPanelContent = ({
   }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
   const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
-    // @TODO: remove
-    console.log(`--@@query`, query); // @TODO: remove
-    console.log(`--@@filters`, filters);
-
     const mergedQuery = isDefined(query) ? query : searchInput;
     const mergedFilters = isDefined(filters) ? filters : queryManager.filterManager.getFilters();
-    console.log(`--@@mergedQuery`, mergedQuery);
-    console.log(`--@@mergedFilters`, mergedFilters);
 
     try {
       if (mergedFilters) {
@@ -81,9 +75,6 @@ export const SearchPanelContent = ({
         queryManager.filterManager.getFilters() ?? [],
         uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
-
-      // @TODO: remove
-      console.log(`--@@combinedQuery`, combinedQuery);
 
       setSearchParams({
         searchQuery: combinedQuery,

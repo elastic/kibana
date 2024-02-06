@@ -79,10 +79,7 @@ export function getEsQueryFromSavedSearch({
   filters?: Filter[];
   filterManager?: FilterManager;
 }) {
-  // @TODO: remove
-  console.log(`--@@getEsQueryFromSavedSearch`, dataView, savedSearch);
   if (!dataView && !savedSearch) return;
-  console.log(`--@@userQuery`, query);
 
   const userQuery = query;
   const userFilters = filters;
@@ -110,8 +107,6 @@ export function getEsQueryFromSavedSearch({
           !(c.hasOwnProperty('range') && c.range?.hasOwnProperty(timeField))
       );
     }
-
-    console.log(`--@@savedSearchSource.getParent()`, savedSearchSource.getParent());
 
     return {
       searchQuery: savedQuery,
