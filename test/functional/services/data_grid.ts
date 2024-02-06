@@ -277,6 +277,19 @@ export class DataGridService extends FtrService {
     return Promise.resolve(textArr);
   }
 
+  public async getControlColumnHeaderFields(): Promise<string[]> {
+    const result = await this.find.allByCssSelector(
+      '.euiDataGridHeaderCell--controlColumn > .euiDataGridHeaderCell__content'
+    );
+
+    const textArr = [];
+    for (const cell of result) {
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
+    }
+    return Promise.resolve(textArr);
+  }
+
   public async getRowActions(
     options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
   ): Promise<WebElementWrapper[]> {
