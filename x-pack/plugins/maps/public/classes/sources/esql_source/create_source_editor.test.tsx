@@ -13,44 +13,57 @@ import { CreateSourceEditor } from './create_source_editor';
 jest.mock('../../../kibana_services', () => ({}));
 
 describe('CreateSourceEditor', () => {
-  let dataView = {};
+  const DEFAULT_DATA_VIEW_INDEX_PATTERN = 'logs';
+  const defaultDataView =  {
+    fields: [
+      {
+        name: 'location',
+        type: 'geo_point',
+      },
+      {
+        name: '@timestamp',
+        type: 'date',
+      },
+    ],
+    timeFieldName: '@timestamp',
+    getIndexPattern: () => {
+      return DEFAULT_DATA_VIEW_INDEX_PATTERN;
+    },
+  };
+
+  const otherDataView = {
+    fields: [
+      {
+        name: 'geometry',
+        type: 'geo_shape',
+      },
+    ],
+    getIndexPattern: () => {
+      return 'world_countries';
+    },
+  };
+
   beforeAll(() => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     require('../../../kibana_services').getIndexPatternService = () => {
       return {
         create: async (spec: DataViewSpec) => {
           return {
-            ...dataView,
+            ...spec.title === DEFAULT_DATA_VIEW_INDEX_PATTERN ? defaultDataView : otherDataView,
             id: spec.id,
           };
         },
         get: async () => {
-          return dataView;
+          return otherDataView;
         },
         getDefaultDataView: async () => {
-          return dataView;
+          return defaultDataView;
         },
       };
     };
   });
 
   test('should preview default data view on load', async () => {
-    dataView =  {
-      fields: [
-        {
-          name: 'location',
-          type: 'geo_point',
-        },
-        {
-          name: '@timestamp',
-          type: 'date',
-        },
-      ],
-      timeFieldName: '@timestamp',
-      getIndexPattern: () => {
-        return 'logs';
-      },
-    }
     const onSourceConfigChange = jest.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
     await waitFor(() =>
@@ -73,17 +86,6 @@ describe('CreateSourceEditor', () => {
   });
 
   test('should preview requested data view on load when mostCommonDataViewId prop provided', async () => {
-    dataView = {
-      fields: [
-        {
-          name: 'geometry',
-          type: 'geo_shape',
-        },
-      ],
-      getIndexPattern: () => {
-        return 'world_countries';
-      },
-    };
     const onSourceConfigChange = jest.fn();
     render(
       <CreateSourceEditor
