@@ -34,10 +34,9 @@ describe(
     },
   },
   () => {
-    // FLAKY: https://github.com/elastic/kibana/issues/169334
-    describe.skip('User with no access can not create an endpoint response action', () => {
+    describe('User with no access can not create an endpoint response action', () => {
       beforeEach(() => {
-        login(ROLE.endpoint_response_actions_no_access);
+        login(ROLE.rule_author);
       });
 
       it('no endpoint response action option during rule creation', () => {
@@ -198,74 +197,57 @@ describe(
       });
     });
 
-    describe(
-      'User should not see endpoint action when no rbac',
-      {
-        tags: [
-          // Not supported in serverless! Test suite uses custom roles
-          '@brokenInServerless',
-        ],
-      },
-      () => {
-        const [ruleName, ruleDescription] = generateRandomStringName(2);
+    describe('User should not see endpoint action when no rbac', () => {
+      const [ruleName, ruleDescription] = generateRandomStringName(2);
 
-        beforeEach(() => {
-          login(ROLE.endpoint_response_actions_no_access);
+      beforeEach(() => {
+        login(ROLE.rule_author);
+      });
+
+      // let currentUrl 
+      it('response actions are disabled', () => {
+        fillUpNewRule(ruleName, ruleDescription);
+        cy.getByTestSubj('response-actions-wrapper').within(() => {
+          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+            'be.disabled'
+          );
         });
+      });
+    });
 
-        it('response actions are disabled', () => {
-          fillUpNewRule(ruleName, ruleDescription);
-          cy.getByTestSubj('response-actions-wrapper').within(() => {
-            cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
-              'be.disabled'
-            );
-          });
+    describe('User without access can not edit, add nor delete an endpoint response action', () => {
+      let ruleId: string;
+
+      beforeEach(() => {
+        login(ROLE.rule_author);
+        loadRule().then((res) => {
+          ruleId = res.id;
         });
-      }
-    );
+      });
 
-    describe(
-      'User without access can not edit, add nor delete an endpoint response action',
-      {
-        tags: [
-          // Not supported in serverless! Test suite uses custom roles
-          '@brokenInServerless',
-        ],
-      },
-      () => {
-        let ruleId: string;
+      afterEach(() => {
+        cleanupRule(ruleId);
+      });
 
-        beforeEach(() => {
-          login(ROLE.endpoint_response_actions_no_access);
-          loadRule().then((res) => {
-            ruleId = res.id;
-          });
+      it('All response action controls are disabled', () => {
+        visitRuleActions(ruleId);
+        cy.getByTestSubj('edit-rule-actions-tab').click();
+
+        cy.getByTestSubj('response-actions-wrapper').within(() => {
+          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+            'be.disabled'
+          );
         });
-
-        afterEach(() => {
-          cleanupRule(ruleId);
+        cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
+          cy.getByTestSubj('commandTypeField').should('have.text', 'isolate').and('be.disabled');
+          cy.getByTestSubj('input').should('have.value', 'Isolate host').and('be.disabled');
+          cy.getByTestSubj('remove-response-action').should('be.disabled');
+          // Try removing action
+          cy.getByTestSubj('remove-response-action').click({ force: true });
         });
-
-        it('All response action controls are disabled', () => {
-          visitRuleActions(ruleId);
-          cy.getByTestSubj('edit-rule-actions-tab').click();
-
-          cy.getByTestSubj('response-actions-wrapper').within(() => {
-            cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
-              'be.disabled'
-            );
-          });
-          cy.getByTestSubj(`response-actions-list-item-0`).within(() => {
-            cy.getByTestSubj('commandTypeField').should('have.text', 'isolate').and('be.disabled');
-            cy.getByTestSubj('input').should('have.value', 'Isolate host').and('be.disabled');
-            cy.getByTestSubj('remove-response-action').should('be.disabled');
-            // Try removing action
-            cy.getByTestSubj('remove-response-action').click({ force: true });
-          });
-          cy.getByTestSubj(`response-actions-list-item-2`).should('exist');
-          tryAddingDisabledResponseAction(3);
-        });
-      }
-    );
+        cy.getByTestSubj(`response-actions-list-item-2`).should('exist');
+        tryAddingDisabledResponseAction(3);
+      });
+    });
   }
 );
