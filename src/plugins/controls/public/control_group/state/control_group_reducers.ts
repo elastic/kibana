@@ -43,13 +43,6 @@ export const controlGroupReducers = {
   ) => {
     state.componentState.unpublishedFilters = action.payload;
   },
-  setPublishedPanelState: (
-    state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupComponentState['publishedPanelState']>
-  ) => {
-    console.log('setLastAppliedState', action.payload);
-    state.componentState.publishedPanelState = action.payload;
-  },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupInput['defaultControlWidth']>

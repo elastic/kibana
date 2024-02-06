@@ -11,7 +11,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, filter, first, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, skip } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -218,20 +218,20 @@ export class ControlGroupContainer extends Container<
     /**
      * recalculate filters when `showApplySelections` value changes to keep state clean
      */
-    // this.subscriptions.add(
-    //   this.getInput$()
-    //     .pipe(
-    //       skip(1),
-    //       distinctUntilChanged(
-    //         (a: ControlGroupInput, b: ControlGroupInput) =>
-    //           Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
-    //       )
-    //     )
-    //     .subscribe(() => {
-    //       const { filters, timeslice } = this.recalculateFilters();
-    //       this.publishFilters({ filters, timeslice });
-    //     })
-    // );
+    this.subscriptions.add(
+      this.getInput$()
+        .pipe(
+          skip(1),
+          distinctUntilChanged(
+            (a: ControlGroupInput, b: ControlGroupInput) =>
+              Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
+          )
+        )
+        .subscribe(() => {
+          const { filters, timeslice } = this.recalculateFilters();
+          this.publishFilters({ filters, timeslice });
+        })
+    );
 
     /**
      * run OnChildOutputChanged when any child's output has changed
@@ -354,21 +354,6 @@ export class ControlGroupContainer extends Container<
     this.updateInput({ filters });
   };
 
-  public resetSelections = () => {
-    const {
-      explicitInput: { showApplySelections },
-      componentState: { publishedPanelState: lastAppliedState, lastSavedInput },
-    } = this.getState();
-
-    const panels = (showApplySelections ? lastAppliedState : lastSavedInput.panels) ?? {};
-    for (const childId of this.getChildIds()) {
-      const child = this.getChild(childId);
-      if (isClearableControl(child)) {
-        child.resetSelections(panels[childId].explicitInput);
-      }
-    }
-  };
-
   private recalculateFilters = (): { filters: Filter[]; timeslice?: [number, number] } => {
     const allFilters: Filter[] = [];
     let timeslice;
@@ -389,9 +374,6 @@ export class ControlGroupContainer extends Container<
     filters: Filter[];
     timeslice?: [number, number];
   }) => {
-    // if apply button is not available, just publish right away
-    // otherwise, set some component state `unpublishedFilters`
-
     if (
       !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
       !isEqual(this.output.timeslice, timeslice)
@@ -422,11 +404,8 @@ export class ControlGroupContainer extends Container<
       filters: outputFilters,
       timeslice,
     });
+    this.dispatch.setUnpublishedFilters(undefined);
     this.onFiltersPublished$.next(outputFilters);
-    batch(() => {
-      this.dispatch.setUnpublishedFilters(undefined);
-      this.dispatch.setPublishedPanelState(this.getState().explicitInput.panels);
-    });
   };
 
   private recalculateDataViews = () => {

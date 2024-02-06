@@ -202,64 +202,8 @@ export const ControlGroupEditor = ({
                   })
                 }
               />
-              <EuiSpacer size="s" />
-              <EuiSwitch
-                compressed
-                data-test-subj="control-group-allow-selection-reset"
-                label={
-                  <ControlSettingTooltipLabel
-                    label={'Show "Reset selections" button'}
-                    tooltip={
-                      'Allows all control selections to be reset to the last saved state with a single click.'
-                    }
-                  />
-                }
-                checked={Boolean(controlGroupEditorState.showSelectionReset)}
-                onChange={(e) =>
-                  updateControlGroupEditorSetting({
-                    showSelectionReset: e.target.checked,
-                  })
-                }
-              />
             </div>
           </EuiFormRow>
-
-          {/* <EuiSpacer size="m" />
-          <EuiCheckboxGroup
-            className="test"
-            compressed
-            options={[
-              {
-                id: 'test1',
-                label: (
-                  <ControlSettingTooltipLabel
-                    label={'Show "Apply" button'}
-                    tooltip={'Selections will not be applied until the "Apply" button is clicked.'}
-                  />
-                ),
-              },
-              {
-                id: 'test2',
-                label: (
-                  <ControlSettingTooltipLabel
-                    label={'Show "Reset selections" button'}
-                    tooltip={
-                      'Allows all control selections to be reset to the last saved state with a single click.'
-                    }
-                  />
-                ),
-              },
-            ]}
-            idToSelectedMap={{
-              test1: true,
-            }}
-            onChange={(optionId) => {
-              console.log('here', optionId);
-            }}
-            legend={{
-              children: 'Selection controls',
-            }}
-          /> */}
 
           {controlCount > 0 && (
             <>

@@ -22,7 +22,6 @@ type ControlGroupAttributesV2 = Pick<
   | 'controlStyle'
   | 'ignoreParentSettingsJSON'
   | 'showApplySelections'
-  | 'showSelectionReset'
 >;
 
 export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {

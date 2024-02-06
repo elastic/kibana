@@ -44,7 +44,6 @@ export type ControlGroupComponentState = ControlGroupSettings & {
   lastSavedInput: PersistableControlGroupInput;
   lastSavedOutput?: Pick<ControlGroupOutput, 'filters'>;
   unpublishedFilters?: ControlGroupOutput['filters'];
-  publishedPanelState?: PersistableControlGroupInput['panels'];
 };
 
 export {

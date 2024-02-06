@@ -23,7 +23,6 @@ export const dashboardAttributesSchema = dashboardAttributesSchemaV1.extends(
     controlGroupInput: schema.maybe(
       controlGroupInputSchemaV1.extends(
         {
-          showSelectionReset: schema.maybe(schema.boolean()),
           showApplySelections: schema.maybe(schema.boolean()),
         },
         { unknowns: 'ignore' }

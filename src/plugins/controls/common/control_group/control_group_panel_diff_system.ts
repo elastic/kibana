@@ -42,7 +42,7 @@ export const ControlPanelDiffSystems: {
         initialInput.explicitInput;
       const { value: valueB = ['', ''], ...inputB }: Partial<RangeSliderEmbeddableInput> =
         newInput.explicitInput;
-      return isEqual(valueA, valueB) && deepEqual(inputA, inputB);
+      return (compareSelections ? isEqual(valueA, valueB) : true) && deepEqual(inputA, inputB);
     },
   },
   [OPTIONS_LIST_CONTROL]: {

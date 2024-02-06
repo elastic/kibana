@@ -47,7 +47,6 @@ export const ControlGroup = () => {
   const panels = contextSelect((state) => state.explicitInput.panels);
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
-  const showSelectionReset = contextSelect((state) => state.explicitInput.showSelectionReset);
   const showApplySelections = contextSelect((state) => state.explicitInput.showApplySelections);
 
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
@@ -166,7 +165,7 @@ export const ControlGroup = () => {
                 </DragOverlay>
               </DndContext>
             </EuiFlexItem>
-            {(showAddButton || showSelectionReset || showApplySelections) && (
+            {(showAddButton || showApplySelections) && (
               <EuiFlexItem className="controlGroup--endButtonGroup" grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
                   {showAddButton && (
@@ -178,20 +177,6 @@ export const ControlGroup = () => {
                         iconType={'plusInCircle'}
                         aria-label={ControlGroupStrings.management.getAddControlTitle()}
                         onClick={() => controlGroup.openAddDataControlFlyout()}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  {showSelectionReset && (
-                    <EuiFlexItem>
-                      <EuiButtonIcon
-                        size="m"
-                        disabled={!applyResetButtonsEnabled}
-                        iconSize="m"
-                        display="base"
-                        color={'danger'}
-                        iconType={'refresh'}
-                        aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.resetSelections()}
                       />
                     </EuiFlexItem>
                   )}

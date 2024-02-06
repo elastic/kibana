@@ -56,7 +56,6 @@ export const createDashboardSavedObjectType = ({
           addedMappings: {
             controlGroupInput: {
               properties: {
-                showSelectionReset: { type: 'boolean', index: false },
                 showApplySelections: { type: 'boolean', index: false },
               },
             },
@@ -91,7 +90,6 @@ export const createDashboardSavedObjectType = ({
           controlStyle: { type: 'keyword', index: false, doc_values: false },
           chainingSystem: { type: 'keyword', index: false, doc_values: false },
           panelsJSON: { type: 'text', index: false },
-          showSelectionReset: { type: 'boolean', index: false },
           showApplySelections: { type: 'boolean', index: false },
           ignoreParentSettingsJSON: { type: 'text', index: false },
         },
