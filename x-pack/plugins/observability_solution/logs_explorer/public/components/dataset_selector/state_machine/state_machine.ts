@@ -138,7 +138,7 @@ export const createPureDatasetsSelectorStateMachine = (
                     },
                     SELECT_DATA_VIEW: {
                       target: '#closed',
-                      actions: ['storeDataViewSelection', 'notifySelectionChanged'],
+                      actions: ['storeDataViewSelection'],
                     },
                   },
                 },
