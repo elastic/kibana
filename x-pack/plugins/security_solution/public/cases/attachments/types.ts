@@ -9,12 +9,16 @@ import type { ResponseActionAgentType } from '../../../common/endpoint/service/r
 
 export interface IExternalReferenceMetaDataProps {
   externalReferenceMetadata: {
-    comment: string;
-    command: string;
-    targets: Array<{
-      endpointId: string;
-      hostname: string;
-      agentType: ResponseActionAgentType;
-    }>;
+    comment: ExternalReferenceCommentType;
+    command: ExternalReferenceCommandType;
+    targets: ExternalReferenceTargetsType;
   };
 }
+
+export type ExternalReferenceTargetsType = Array<{
+  endpointId: string;
+  hostname: string;
+  agentType: ResponseActionAgentType;
+}>;
+export type ExternalReferenceCommentType = string;
+export type ExternalReferenceCommandType = string;

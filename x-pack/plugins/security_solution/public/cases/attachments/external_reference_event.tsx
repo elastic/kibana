@@ -10,13 +10,13 @@ import { useNavigation } from '@kbn/security-solution-navigation/src/navigation'
 import React, { useCallback, useMemo } from 'react';
 
 import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../pages/translations';
-import type { IExternalReferenceMetaDataProps } from './types';
+import type { ExternalReferenceCommandType, ExternalReferenceTargetsType } from './types';
 import { getEndpointDetailsPath } from '../../management/common/routing';
 
 const AttachmentContentEvent = (props: {
   externalReferenceMetadata: {
-    command: IExternalReferenceMetaDataProps['externalReferenceMetadata']['command'];
-    targets: IExternalReferenceMetaDataProps['externalReferenceMetadata']['targets'];
+    command: ExternalReferenceCommandType;
+    targets: ExternalReferenceTargetsType;
   };
 }) => {
   const {

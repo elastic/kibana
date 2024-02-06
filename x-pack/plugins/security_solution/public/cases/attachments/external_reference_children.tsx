@@ -9,7 +9,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { EuiMarkdownFormat } from '@elastic/eui';
-import type { IExternalReferenceMetaDataProps } from './types';
+import type { ExternalReferenceCommentType } from './types';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui?.euiSizeM} ${theme.eui?.euiSizeL}`};
@@ -21,7 +21,7 @@ export const ContentWrapper = styled.div`
 
 const AttachmentContentChildren = (props: {
   externalReferenceMetadata: {
-    comment: IExternalReferenceMetaDataProps['externalReferenceMetadata']['comment'];
+    comment: ExternalReferenceCommentType;
   };
 }) => {
   const {

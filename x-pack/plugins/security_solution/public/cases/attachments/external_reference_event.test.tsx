@@ -82,7 +82,6 @@ describe('AttachmentContentEvent', () => {
     });
     expect(mockGetAppUrl).toHaveBeenNthCalledWith(2, {
       path: '/hosts/name/host-1',
-      appId: 'security',
     });
   });
 });
