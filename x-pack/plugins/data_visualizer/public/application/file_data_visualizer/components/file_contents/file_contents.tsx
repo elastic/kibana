@@ -113,7 +113,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
           >
             <FormattedMessage
               id="xpack.dataVisualizer.file.fileContents.tab.parsedTitle"
-              defaultMessage="Highlighted text"
+              defaultMessage="Pattern highlight"
             />
           </EuiTab>
           <EuiTab
