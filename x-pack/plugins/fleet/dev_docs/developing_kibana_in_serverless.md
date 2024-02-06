@@ -23,9 +23,11 @@ yarn es serverless --projectType=security --kill
 yarn serverless-security
 ```
 
-Once running, you can login with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
+Once running, you can login at `http://localhost:5601` with the username `elastic_serverless` or `system_indices_superuser` and the password `changeme`.
 
-Note: to reset Elasticsearch data, delete the following folder:
+Note: it is not possible to use a base path in serverless mode. In case of issue, make sure the `server.basePath` property is not set in the config.
+
+Tip: to reset Elasticsearch data, delete the following folder:
 
 ```bash
 # Run this from the kibana folder:
@@ -71,7 +73,29 @@ xpack.fleet.outputs:
 
 In serverless mode, Fleet Server runs in standalone mode. Unless you are [simultaneously developing Kibana and Fleet Server](./developing_kibana_and_fleet_server.mddeveloping_), it is easier to run Fleet Server as a Docker container.
 
-TBC
+The Kibana's dev utils package defines a hard-coded [Fleet Server service token](ttps://github.com/elastic/kibana/blob/92b6fd64cd58fd62f69898c222e86409d5f15b60/packages/kbn-dev-utils/src/dev_service_account.ts#L21-L25) and fingerprint of the ca.crt certificate.
+
+Running a standalone Fleet Server:
+
+```bash
+docker run -it --rm \
+  -e ELASTICSEARCH_HOSTS="http://host.docker.internal:9200" \
+  -e ELASTICSEARCH_SERVICE_TOKEN="AAEAAWVsYXN0aWMvZmxlZXQtc2VydmVyL2ZsZWV0LXNlcnZlci1kZXY6VVo1TWd6MnFTX3FVTWliWGNXNzlwQQ" \
+  -e ELASTICSEARCH_CA_TRUSTED_FINGERPRINT="F71F73085975FD977339A1909EBFE2DF40DB255E0D5BB56FC37246BF383FFC84" \
+  -p 8220:8220 \
+  docker.elastic.co/observability-ci/fleet-server:latest
+```
+
+Containerized elastic agents can then be enrolled using:
+
+```bash
+docker run \
+    -e FLEET_URL=http://host.docker.internal:8220 \
+    -e FLEET_ENROLL=1 \
+    -e FLEET_ENROLLMENT_TOKEN=<enrollment_token>== \
+    -e FLEET_INSECURE=1 \
+    --rm docker.elastic.co/beats/elastic-agent:<version>
+```
 
 ## Troubleshooting
 
