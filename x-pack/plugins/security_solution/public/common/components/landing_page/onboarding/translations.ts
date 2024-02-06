@@ -34,6 +34,13 @@ export const CURRENT_PLAN_LABEL = i18n.translate(
   }
 );
 
+export const CURRENT_TIER_LABEL = i18n.translate(
+  'xpack.securitySolution.onboarding.currentTier.label',
+  {
+    defaultMessage: 'Current tier:',
+  }
+);
+
 export const PROGRESS_TRACKER_LABEL = i18n.translate(
   'xpack.securitySolution.onboarding.progressTracker.progressBar.label',
   { defaultMessage: 'PROGRESS' }

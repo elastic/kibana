@@ -9,9 +9,9 @@
 import { ControlGroupInput } from '@kbn/controls-plugin/common';
 import {
   EmbeddableFactoryNotFoundError,
+  reactEmbeddableRegistryHasKey,
   runEmbeddableFactoryMigrations,
 } from '@kbn/embeddable-plugin/public';
-
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import { type DashboardEmbeddableService } from '../../embeddable/types';
 import { SavedDashboardInput } from '../types';
@@ -51,7 +51,13 @@ export const migrateDashboardInput = (
     });
   }
   const migratedPanels: DashboardContainerInput['panels'] = {};
-  Object.entries(dashboardInput.panels).forEach(([id, panel]) => {
+  for (const [id, panel] of Object.entries(dashboardInput.panels)) {
+    // if the panel type is registered in the new embeddable system, we do not need to run migrations for it.
+    if (reactEmbeddableRegistryHasKey(panel.type)) {
+      migratedPanels[id] = panel;
+      continue;
+    }
+
     const factory = embeddable.getEmbeddableFactory(panel.type);
     if (!factory) throw new EmbeddableFactoryNotFoundError(panel.type);
     // run last saved migrations for by value panels only.
@@ -67,7 +73,7 @@ export const migrateDashboardInput = (
       panel.explicitInput.version = factory.latestVersion;
     }
     migratedPanels[id] = panel;
-  });
+  }
   dashboardInput.panels = migratedPanels;
   return { dashboardInput, anyMigrationRun };
 };
