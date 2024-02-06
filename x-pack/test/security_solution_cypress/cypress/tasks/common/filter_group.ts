@@ -16,7 +16,6 @@ import {
   FILTER_GROUP_SAVE_CHANGES,
   CONTROL_FRAME_TITLE,
   FILTER_GROUP_CONTROL_ACTION_DELETE,
-  FILTER_GROUP_CONTROL_CONFIRM_DIALOG,
   FILTER_GROUP_CONTROL_CONFIRM_BTN,
   DETECTION_PAGE_FILTER_GROUP_WRAPPER,
   DETECTION_PAGE_FILTER_GROUP_LOADING,
@@ -56,6 +55,11 @@ export const resetFilterGroup = () => {
 export const editFilterGroupControls = () => {
   openFilterGroupContextMenu();
   cy.get(FILTER_GROUP_CONTEXT_EDIT_CONTROLS).click();
+};
+
+export const editSingleFilterControl = (idx: number) => {
+  cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
+  cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click();
 };
 
 export const cancelFieldEditing = () => {
@@ -106,7 +110,6 @@ export const addNewFilterGroupControlValues = ({
 export const deleteFilterGroupControl = (idx: number) => {
   cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
   cy.get(FILTER_GROUP_CONTROL_ACTION_DELETE(idx)).click();
-  cy.get(FILTER_GROUP_CONTROL_CONFIRM_DIALOG).should('be.visible');
   cy.get(FILTER_GROUP_CONTROL_CONFIRM_BTN).click();
 };
 

@@ -19,7 +19,6 @@ import {
   OPTION_LIST_VALUES,
   OPTION_SELECTABLE,
   OPTION_SELECTABLE_COUNT,
-  FILTER_GROUP_CONTROL_ACTION_EDIT,
   FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS,
 } from '../../../screens/common/filter_group';
 import { createRule } from '../../../tasks/api_calls/rules';
@@ -37,14 +36,15 @@ import {
   waitForAlerts,
   waitForPageFilters,
 } from '../../../tasks/alerts';
-import { ALERTS_COUNT, ALERTS_REFRESH_BTN, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
-import { kqlSearch } from '../../../tasks/security_header';
+import { ALERTS_COUNT, EMPTY_ALERT_TABLE } from '../../../screens/alerts';
+import { kqlSearch, refreshPage } from '../../../tasks/security_header';
 import {
   addNewFilterGroupControlValues,
   deleteFilterGroupControl,
   discardFilterGroupControls,
   editFilterGroupControl,
   editFilterGroupControls,
+  editSingleFilterControl,
   saveFilterGroupControls,
 } from '../../../tasks/common/filter_group';
 import { TOASTER } from '../../../screens/alerts_detection_rules';
@@ -106,7 +106,6 @@ const assertFilterControlsWithFilterObject = (
   });
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171890
 describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     deleteAlertsAndRules();
@@ -122,13 +121,11 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
 
   context('Alert Page Filters Customization ', () => {
     it('should be able to delete Controls', () => {
-      waitForPageFilters();
       editFilterGroupControls();
       deleteFilterGroupControl(3);
       cy.get(CONTROL_FRAMES).should((sub) => {
         expect(sub.length).lt(4);
       });
-      discardFilterGroupControls();
     });
 
     it('should be able to add new Controls', () => {
@@ -220,7 +217,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     cy.get(FILTER_GROUP_CHANGED_BANNER).should('be.visible');
   });
 
-  context('with data modificiation', () => {
+  context('with data modification', () => {
     it(`should update alert status list when the alerts are updated`, () => {
       // mark status of one alert to be acknowledged
       selectCountTable();
@@ -309,7 +306,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     it('should recover from invalid kql Query result', () => {
       // do an invalid search
       kqlSearch('\\');
-      cy.get(ALERTS_REFRESH_BTN).click();
+      refreshPage();
       waitForPageFilters();
       cy.get(TOASTER).should('contain.text', 'KQLSyntaxError');
       togglePageFilterPopover(0);
@@ -320,7 +317,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
 
     it('should take kqlQuery into account', () => {
       kqlSearch('kibana.alert.workflow_status: "nothing"');
-      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      refreshPage();
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
@@ -345,7 +342,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       setStartDate(startDateWithZeroAlerts);
       setEndDate(endDateWithZeroAlerts);
 
-      cy.get(ALERTS_REFRESH_BTN).trigger('click');
+      refreshPage();
       waitForPageFilters();
       togglePageFilterPopover(0);
       cy.get(CONTROL_POPOVER(0)).should('contain.text', 'No options found');
@@ -356,8 +353,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
     const idx = 3;
     const { FILTER_FIELD_TYPE, FIELD_TYPES } = FILTER_GROUP_EDIT_CONTROL_PANEL_ITEMS;
     editFilterGroupControls();
-    cy.get(CONTROL_FRAME_TITLE).eq(idx).realHover();
-    cy.get(FILTER_GROUP_CONTROL_ACTION_EDIT(idx)).click();
+    editSingleFilterControl(idx);
     cy.get(FILTER_FIELD_TYPE).click();
     cy.get(FIELD_TYPES.STRING).should('be.visible');
     cy.get(FIELD_TYPES.BOOLEAN).should('be.visible');
