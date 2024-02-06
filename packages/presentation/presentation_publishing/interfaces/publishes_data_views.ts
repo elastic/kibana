@@ -23,6 +23,4 @@ export const apiPublishesDataViews = (
  * Gets this API's data views as a reactive variable which will cause re-renders on change.
  */
 export const useDataViews = (api: Partial<PublishesDataViews> | undefined) =>
-  useStateFromPublishingSubject<DataView[] | undefined, PublishesDataViews['dataViews']>(
-    apiPublishesDataViews(api) ? api.dataViews : undefined
-  );
+  useStateFromPublishingSubject(apiPublishesDataViews(api) ? api.dataViews : undefined);

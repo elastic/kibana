@@ -62,9 +62,9 @@ export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onSta
             grow: true,
             title: STATUS_LABEL,
             controlId: 'slo-status-filter',
-            exclude: statusFilter?.meta.negate,
+            exclude: statusFilter?.meta?.negate,
             selectedOptions: getSelectedOptions(statusFilter),
-            existsSelected: Boolean(statusFilter?.query?.exists.field === 'status'),
+            existsSelected: Boolean(statusFilter?.query?.exists?.field === 'status'),
             placeholder: ALL_LABEL,
           });
           await builder.addOptionsListControl(initialInput, {
@@ -75,8 +75,8 @@ export function QuickFilters({ initialState: { tagsFilter, statusFilter }, onSta
             grow: false,
             controlId: 'slo-tags-filter',
             selectedOptions: getSelectedOptions(tagsFilter),
-            exclude: statusFilter?.meta.negate,
-            existsSelected: Boolean(tagsFilter?.query?.exists.field === 'slo.tags'),
+            exclude: statusFilter?.meta?.negate,
+            existsSelected: Boolean(tagsFilter?.query?.exists?.field === 'slo.tags'),
             placeholder: ALL_LABEL,
           });
           return {

@@ -35,6 +35,8 @@ import type {
   AlertSuppressionMissingFieldsStrategy,
   InvestigationFields,
   RuleAction,
+  AlertSuppression,
+  ThresholdAlertSuppression,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -219,6 +221,7 @@ export interface DefineStepRuleJson {
   timestamp_field?: string;
   event_category_override?: string;
   tiebreaker_field?: string;
+  alert_suppression?: AlertSuppression | ThresholdAlertSuppression;
 }
 
 export interface AboutStepRuleJson {

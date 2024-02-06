@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import React from 'react';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
-export const ObservabilityLogExplorerPageTemplate = ({
+export const ObservabilityLogsExplorerPageTemplate = ({
   children,
   pageProps,
 }: React.PropsWithChildren<{
