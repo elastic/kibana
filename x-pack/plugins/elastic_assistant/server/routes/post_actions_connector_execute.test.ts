@@ -19,6 +19,7 @@ import {
   INVOKE_ASSISTANT_ERROR_EVENT,
   INVOKE_ASSISTANT_SUCCESS_EVENT,
 } from '../lib/telemetry/event_based_telemetry';
+import { PassThrough } from 'stream';
 
 jest.mock('../lib/build_response', () => ({
   buildResponse: jest.fn().mockImplementation((x) => x),
@@ -36,26 +37,40 @@ jest.mock('../lib/executor', () => ({
     }
   }),
 }));
-
+const mockStream = jest.fn().mockImplementation(() => new PassThrough());
 jest.mock('../lib/langchain/execute_custom_llm_chain', () => ({
   callAgentExecutor: jest.fn().mockImplementation(
     async ({
       connectorId,
+      isStream,
     }: {
       actions: ActionsPluginStart;
       connectorId: string;
       esClient: ElasticsearchClient;
       langChainMessages: BaseMessage[];
       logger: Logger;
+      isStream: boolean;
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       request: KibanaRequest<unknown, unknown, any, any>;
     }) => {
-      if (connectorId === 'mock-connector-id') {
+      if (!isStream && connectorId === 'mock-connector-id') {
         return {
           body: {
             connector_id: 'mock-connector-id',
             data: mockActionResponse,
             status: 'ok',
+          },
+          headers: { 'content-type': 'application/json' },
+        };
+      } else if (isStream && connectorId === 'mock-connector-id') {
+        return {
+          body: mockStream,
+          headers: {
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            'X-Accel-Buffering': 'no',
+            'X-Content-Type-Options': 'nosniff',
           },
         };
       } else {
@@ -164,6 +179,7 @@ describe('postActionsConnectorExecuteRoute', () => {
             replacements: {},
             status: 'ok',
           },
+          headers: { 'content-type': 'application/json' },
         });
       }),
     };
@@ -402,6 +418,83 @@ describe('postActionsConnectorExecuteRoute', () => {
           errorMessage: 'simulated error',
           isEnabledKnowledgeBase: false,
           isEnabledRAGAlerts: false,
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeStream and llmType=openai', async () => {
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        const result = await handler(
+          mockContext,
+          {
+            ...mockRequest,
+            body: {
+              ...mockRequest.body,
+              params: {
+                ...mockRequest.body.params,
+                subAction: 'invokeStream',
+              },
+              llmType: 'openai',
+            },
+          },
+          mockResponse
+        );
+
+        expect(result).toEqual({
+          body: mockStream,
+          headers: {
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'Transfer-Encoding': 'chunked',
+            'X-Accel-Buffering': 'no',
+            'X-Content-Type-Options': 'nosniff',
+          },
+        });
+      }),
+    };
+
+    await postActionsConnectorExecuteRoute(
+      mockRouter as unknown as IRouter<ElasticAssistantRequestHandlerContext>,
+      mockGetElser
+    );
+  });
+
+  it('returns the expected response when subAction=invokeStream and llmType=bedrock', async () => {
+    const mockRouter = {
+      post: jest.fn().mockImplementation(async (_, handler) => {
+        const result = await handler(
+          mockContext,
+          {
+            ...mockRequest,
+            body: {
+              ...mockRequest.body,
+              params: {
+                ...mockRequest.body.params,
+                subAction: 'invokeStream',
+              },
+              llmType: 'bedrock',
+            },
+          },
+          mockResponse
+        );
+
+        expect(result).toEqual({
+          body: {
+            connector_id: 'mock-connector-id',
+            data: mockActionResponse,
+            replacements: {},
+            status: 'ok',
+          },
+          headers: {
+            'content-type': 'application/json',
+          },
         });
       }),
     };
