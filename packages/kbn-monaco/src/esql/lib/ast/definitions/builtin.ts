@@ -334,6 +334,31 @@ export const builtinFunctions: FunctionDefinition[] = [
       },
     ],
   },
+  ...[
+    {
+      name: 'is null',
+      description: i18n.translate('monaco.esql.definition.isNullDoc', {
+        defaultMessage: 'Predicate for NULL comparison: returns true if the value is NULL',
+      }),
+    },
+    {
+      name: 'is not null',
+      description: i18n.translate('monaco.esql.definition.isNotNullDoc', {
+        defaultMessage: 'Predicate for NULL comparison: returns true if the value is not NULL',
+      }),
+    },
+  ].map<FunctionDefinition>(({ name, description }) => ({
+    type: 'builtin',
+    name,
+    description,
+    supportedCommands: ['eval', 'where', 'row'],
+    signatures: [
+      {
+        params: [{ name: 'left', type: 'any' }],
+        returnType: 'boolean',
+      },
+    ],
+  })),
   {
     type: 'builtin' as const,
     name: '=',

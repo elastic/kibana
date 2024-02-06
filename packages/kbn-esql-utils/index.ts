@@ -12,4 +12,5 @@ export {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
   removeDropCommandsFromESQLQuery,
+  getIndexForESQLQuery,
 } from './src';

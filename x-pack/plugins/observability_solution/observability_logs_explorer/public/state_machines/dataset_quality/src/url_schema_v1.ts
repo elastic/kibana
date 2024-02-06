@@ -15,6 +15,7 @@ export const getStateFromUrlValue = (
   deepCompactObject<DatasetQualityPublicStateUpdate>({
     table: urlValue.table,
     flyout: urlValue.flyout,
+    filters: urlValue.filters,
   });
 
 export const getUrlValueFromState = (
@@ -23,6 +24,7 @@ export const getUrlValueFromState = (
   deepCompactObject<datasetQualityUrlSchemaV1.UrlSchema>({
     table: state.table,
     flyout: state.flyout,
+    filters: state.filters,
     v: 1,
   });
 
