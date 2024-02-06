@@ -7,7 +7,7 @@
 
 import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { ObservabilityLogExplorerConfig } from '../common/plugin_config';
+import { ObservabilityLogsExplorerConfig } from '../common/plugin_config';
 
 export const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
@@ -23,7 +23,7 @@ export const configSchema = schema.object({
   }),
 });
 
-export const config: PluginConfigDescriptor<ObservabilityLogExplorerConfig> = {
+export const config: PluginConfigDescriptor<ObservabilityLogsExplorerConfig> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot(

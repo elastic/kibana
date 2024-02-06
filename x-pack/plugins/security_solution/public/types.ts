@@ -193,10 +193,6 @@ export interface PluginStart {
   setOnboardingPageSettings: OnboardingPageService;
 }
 
-export interface AppObservableLibs {
-  kibana: CoreStart;
-}
-
 export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';

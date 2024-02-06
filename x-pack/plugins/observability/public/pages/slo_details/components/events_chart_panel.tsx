@@ -33,9 +33,9 @@ import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { cloneDeep, max, min } from 'lodash';
 import moment from 'moment';
 import React, { useRef } from 'react';
-import { max, min } from 'lodash';
 import { useGetPreviewData } from '../../../hooks/slo/use_get_preview_data';
 import { useKibana } from '../../../utils/kibana_react';
 import { COMPARATOR_MAPPING } from '../../slo_edit/constants';
@@ -51,13 +51,22 @@ export interface Props {
 export function EventsChartPanel({ slo, range }: Props) {
   const { charts, uiSettings } = useKibana().services;
   const { euiTheme } = useEuiTheme();
-  const filter = slo.instanceId !== ALL_VALUE ? `${slo.groupBy}: "${slo.instanceId}"` : '';
-  const { isLoading, data } = useGetPreviewData(true, slo.indicator, range, slo.objective, filter);
   const baseTheme = charts.theme.useChartsBaseTheme();
   const chartRef = useRef(null);
   const handleCursorUpdate = useActiveCursor(charts.activeCursor, chartRef, {
     isDateHistogram: true,
   });
+
+  const instanceIdFilter =
+    slo.instanceId !== ALL_VALUE ? `${slo.groupBy}: "${slo.instanceId}"` : null;
+  const sloIndicator = cloneDeep(slo.indicator);
+  if (instanceIdFilter) {
+    sloIndicator.params.filter =
+      !!sloIndicator.params.filter && sloIndicator.params.filter.length > 0
+        ? `${sloIndicator.params.filter} and ${instanceIdFilter}`
+        : instanceIdFilter;
+  }
+  const { isLoading, data } = useGetPreviewData(true, sloIndicator, range, slo.objective);
 
   const dateFormat = uiSettings.get('dateFormat');
 

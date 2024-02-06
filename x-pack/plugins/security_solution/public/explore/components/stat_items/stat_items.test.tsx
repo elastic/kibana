@@ -16,14 +16,7 @@ import { BarChart } from '../../../common/components/charts/barchart';
 import { AreaChart } from '../../../common/components/charts/areachart';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { mockUpdateDateRange } from '../../network/components/kpi_network/mock';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-} from '../../../common/mock';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
+import { createMockStore } from '../../../common/mock';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
 import * as module from '../../../common/containers/query_toggle';
@@ -57,9 +50,7 @@ jest
 const mockSetQuerySkip = jest.fn();
 describe('Stat Items Component', () => {
   const mockTheme = getMockTheme({ eui: { euiColorMediumShade: '#ece' } });
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-  const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore();
   const testProps = {
     description: 'HOSTS',
     fields: [{ key: 'hosts', value: null, color: '#6092C0', icon: 'cross' }],
