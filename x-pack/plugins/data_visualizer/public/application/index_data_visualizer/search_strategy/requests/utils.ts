@@ -27,17 +27,6 @@ export const processTopValues = (aggResult: object, sampledCount?: number) => {
   // We could use `aggregations.sample.sample_count.value` instead, but it does not always give a correct sum
   // See Github issue #144625
   const realNumberOfDocuments = valuesInTopBuckets + sumOtherDocCount;
-
-  // @TODO: remove
-  console.log(
-    `--@@sampledCount`,
-    sampledCount,
-    'realNumberOfDocuments',
-    realNumberOfDocuments,
-    'aggResult',
-    aggResult // 'num',
-    // bucket.doc_count * (sampledCount / realNumberOfDocuments)
-  );
   const topValues = topValuesBuckets.map((bucket) => ({
     ...bucket,
     doc_count: sampledCount
