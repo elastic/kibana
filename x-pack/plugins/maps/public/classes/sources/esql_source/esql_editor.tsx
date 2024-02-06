@@ -17,11 +17,13 @@ import { getESQLMeta, verifyGeometryColumn } from './esql_utils';
 interface Props {
   esql: string;
   onESQLChange: ({
+    adhocDataViewId,
     columns,
     dateFields,
     geoFields,
     esql,
   }: {
+    adhocDataViewId: string;
     columns: ESQLColumn[];
     dateFields: string[];
     geoFields: string[];
@@ -80,13 +82,6 @@ export function ESQLEditor(props: Props) {
             if (!isMounted()) {
               return;
             }
-            setError(err);
-            props.onESQLChange({
-              columns: [],
-              dateFields: [],
-              geoFields: [],
-              esql: '',
-            });
           }
 
           setIsLoading(false);

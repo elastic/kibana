@@ -57,12 +57,17 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }
 
+    if (!isValidStringConfig(descriptor.dataViewId)) {
+      throw new Error('Cannot create ESQLSourceDescriptor when adhocDataViewId is not provided');
+    }
+
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
       type: SOURCE_TYPES.ESQL,
       esql: descriptor.esql!,
       columns: descriptor.columns ? descriptor.columns : [],
+      dataViewId: descriptor.dataViewId!,
       narrowByGlobalSearch:
         typeof descriptor.narrowByGlobalSearch !== 'undefined'
           ? descriptor.narrowByGlobalSearch
@@ -327,5 +332,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       narrowByMapBounds: this._descriptor.narrowByMapBounds,
       narrowByGlobalTime: this._descriptor.narrowByGlobalTime,
     };
+  }
+
+  getIndexPatternId() {
+    return this._descriptor.dataViewId;
   }
 }
