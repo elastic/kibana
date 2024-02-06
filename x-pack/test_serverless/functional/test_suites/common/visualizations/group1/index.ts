@@ -59,7 +59,6 @@ export default ({ getService, loadTestFile, getPageObjects }: FtrProviderContext
       });
       await kibanaServer.importExport.load(fixtureDirs.lensBasic);
       await kibanaServer.importExport.load(fixtureDirs.lensDefault);
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
