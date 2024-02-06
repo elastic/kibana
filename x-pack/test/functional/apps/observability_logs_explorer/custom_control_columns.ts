@@ -145,7 +145,7 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
         .fill(0)
         .map(() => {
           return log.create().logLevel('info').timestamp(timestamp).defaults({
-            'error.message': 'message in error object',
+            'error.stack_trace': 'Error message in error.stack_trace',
             'service.name': 'node-service',
           });
         })
@@ -169,8 +169,8 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
     );
 
   const logsWithErrorInLog = timerange(
-    moment(to).subtract(4, 'second'),
-    moment(to).subtract(3, 'second')
+    moment(to).subtract(5, 'second'),
+    moment(to).subtract(4, 'second')
   )
     .interval('1m')
     .rate(1)
