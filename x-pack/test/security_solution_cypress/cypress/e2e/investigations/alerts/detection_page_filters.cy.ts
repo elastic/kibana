@@ -228,7 +228,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
           markAcknowledgedFirstAlert();
           waitForAlerts();
           cy.get(OPTION_LIST_VALUES(0)).click();
-          cy.get(OPTION_SELECTABLE(0, 'acknowledged')).should('be.visible').trigger('click');
+          cy.get(OPTION_SELECTABLE(0, 'acknowledged')).click();
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .should((newAlertCount) => {
