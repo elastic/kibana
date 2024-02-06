@@ -16,7 +16,6 @@ export class BedrockSimulator extends Simulator {
 
   constructor({ returnError = false, proxy }: { returnError?: boolean; proxy?: ProxyArgs }) {
     super(proxy);
-
     this.returnError = returnError;
   }
 

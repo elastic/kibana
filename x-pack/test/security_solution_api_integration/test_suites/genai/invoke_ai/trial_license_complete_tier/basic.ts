@@ -7,8 +7,11 @@
 
 import expect from '@kbn/expect';
 
+import { BedrockSimulator } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
+import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { postActionsClientExecute } from '../utils/post_actions_client_execute';
+import { getUrlPrefix, ObjectRemover } from '../../../../../alerting_api_integration/common/lib';
 
 const mockRequest = {
   params: {
@@ -32,26 +35,128 @@ const mockRequest = {
   },
   isEnabledKnowledgeBase: false,
   isEnabledRAGAlerts: false,
-  llmType: 'openai',
+  llmType: 'bedrock',
+};
+
+const connectorSetup = {
+  bedrock: {
+    connectorTypeId: '.bedrock',
+    name: 'A bedrock action',
+    secrets: {
+      accessKey: 'bedrockAccessKey',
+      secret: 'bedrockSecret',
+    },
+    config: {
+      defaultModel: 'anthropic.claude-v2',
+    },
+  },
+  openai: {
+    connectorTypeId: '.gen-ai',
+    name: 'An openai action',
+    secrets: {
+      apiKey: 'genAiApiKey',
+    },
+    config: {
+      apiProvider: 'OpenAI',
+    },
+  },
 };
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
-  const esArchiver = getService('esArchiver');
-  const log = getService('log');
-  const retry = getService('retry');
-  const es = getService('es');
+  const objectRemover = new ObjectRemover(supertest);
+  const configService = getService('config');
+  const createConnector = async (
+    apiUrl: string,
+    connectorType: 'bedrock' | 'openai',
+    spaceId?: string
+  ) => {
+    const { connectorTypeId, config, name, secrets } = connectorSetup[connectorType];
+    const result = await supertest
+      .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
+      .set('kbn-xsrf', 'foo')
+      .send({
+        name,
+        connector_type_id: connectorTypeId,
+        config: { ...config, apiUrl },
+        secrets,
+      })
+      .expect(200);
+
+    const { body } = result;
+
+    objectRemover.add(spaceId ?? 'default', body.id, 'connector', 'actions');
+
+    return body.id;
+  };
 
   describe('@ess @serverless Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
-    const kibanaServer = getService('kibanaServer');
+    after(() => {
+      objectRemover.removeAll();
+    });
 
-    beforeEach(async () => {});
+    describe('With Bedrock connector', () => {
+      const simulator = new BedrockSimulator({
+        proxy: {
+          config: configService.get('kbnTestServer.serverArgs'),
+        },
+      });
+      let apiUrl: string;
+      let bedrockActionId: string;
+
+      before(async () => {
+        apiUrl = await simulator.start();
+        bedrockActionId = await createConnector(apiUrl, 'bedrock');
+      });
+
+      after(() => {
+        simulator.close();
+      });
+      it('should execute a chat completion', async () => {
+        const response = await postActionsClientExecute(bedrockActionId, mockRequest, supertest);
+
+        const expected = {
+          connector_id: bedrockActionId,
+          data: 'Hello there! How may I assist you today?',
+          status: 'ok',
+        };
+
+        expect(response.body).to.eql(expected);
+      });
+    });
 
     describe('With OpenAI connector', () => {
+      const simulator = new OpenAISimulator({
+        returnError: false,
+        proxy: {
+          config: configService.get('kbnTestServer.serverArgs'),
+        },
+      });
+      let apiUrl: string;
+      let openaiActionId: string;
+
+      before(async () => {
+        apiUrl = await simulator.start();
+        openaiActionId = await createConnector(apiUrl, 'openai');
+      });
+
+      after(() => {
+        simulator.close();
+      });
       it('should execute a chat completion', async () => {
-        const response = await postActionsClientExecute('connectorId', mockRequest, supertest);
-        const expected = {};
-        expect(response).to.eql(expected);
+        const response = await postActionsClientExecute(
+          openaiActionId,
+          { ...mockRequest, llmType: 'openai' },
+          supertest
+        );
+
+        const expected = {
+          connector_id: openaiActionId,
+          data: 'Hello there! How may I assist you today?',
+          status: 'ok',
+        };
+
+        expect(response.body).to.eql(expected);
       });
     });
   });
