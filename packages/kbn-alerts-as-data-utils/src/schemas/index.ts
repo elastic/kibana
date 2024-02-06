@@ -15,6 +15,7 @@ import type { ObservabilityUptimeAlert } from './generated/observability_uptime_
 import type { SecurityAlert } from './generated/security_schema';
 import type { MlAnomalyDetectionAlert } from './generated/ml_anomaly_detection_schema';
 import type { DefaultAlert } from './generated/default_schema';
+import type { MlAnomalyDetectionHealthAlert } from './generated/ml_anomaly_detection_health_schema';
 
 export * from './create_schema_from_field_map';
 
@@ -38,4 +39,5 @@ export type AADAlert =
   | ObservabilityUptimeAlert
   | SecurityAlert
   | MlAnomalyDetectionAlert
+  | MlAnomalyDetectionHealthAlert
   | DefaultAlert;

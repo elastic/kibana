@@ -21,7 +21,7 @@ import type {
 } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
 import { AlertsClientError, IRuleTypeAlerts } from '@kbn/alerting-plugin/server';
-import { DefaultAlert, MlAnomalyDetectionAlert } from '@kbn/alerts-as-data-utils';
+import { MlAnomalyDetectionHealthAlert } from '@kbn/alerts-as-data-utils';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import {
@@ -111,12 +111,12 @@ export type JobsHealthExecutorOptions = RuleExecutorOptions<
   Record<string, unknown>,
   AnomalyDetectionJobsHealthAlertContext,
   AnomalyDetectionJobRealtimeIssue,
-  DefaultAlert
+  MlAnomalyDetectionHealthAlert
 >;
 
 export const ANOMALY_DETECTION_HEALTH_AAD_INDEX_NAME = 'ml.anomaly-detection-health';
 
-export const ANOMALY_DETECTION_HEALTH_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionAlert> = {
+export const ANOMALY_DETECTION_HEALTH_AAD_CONFIG: IRuleTypeAlerts<MlAnomalyDetectionHealthAlert> = {
   context: ANOMALY_DETECTION_HEALTH_AAD_INDEX_NAME,
   mappings: {
     fieldMap: {
@@ -187,7 +187,7 @@ export function registerJobsMonitoringRuleType({
     AnomalyDetectionJobsHealthAlertContext,
     AnomalyDetectionJobRealtimeIssue,
     RecoveredActionGroupId,
-    DefaultAlert
+    MlAnomalyDetectionHealthAlert
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     name: i18n.translate('xpack.ml.jobsHealthAlertingRule.name', {
