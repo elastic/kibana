@@ -585,9 +585,12 @@ FROM employees
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
 
+**Examples**:
+
 \`\`\`
 FROM employees
-| STATS count = COUNT(languages) BY languages
+| STATS count = COUNT(emp_no) BY languages
+| SORT languages
 \`\`\`
 
 If \`BY\` is omitted, the output table contains exactly one row with the aggregations applied over the entire dataset:
@@ -615,6 +618,40 @@ FROM employees
 \`\`\`
 
 Refer to **Aggregation functions** for a list of functions that can be used with \`STATS ... BY\`.
+
+Both the aggregating functions and the grouping expressions accept other functions. This is useful for using \`STATS...BY\` on multivalue columns. For example, to calculate the average salary change, you can use \`MV_AVG\` to first average the multiple values per employee, and use the result with the \`AVG\` function:
+
+\`\`\`
+FROM employees
+| STATS avg_salary_change = AVG(MV_AVG(salary_change))
+\`\`\`
+
+An example of grouping by an expression is grouping employees on the first letter of their last name:
+
+\`\`\`
+FROM employees
+| STATS my_count = COUNT() BY LEFT(last_name, 1)
+| SORT \`LEFT(last_name, 1)\`
+\`\`\`
+
+Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query returns a column named \`AVG(salary)\`:
+
+\`\`\`
+FROM employees
+| STATS AVG(salary)
+\`\`\`
+
+Because this name contains special characters, it needs to be quoted with backticks (\`) when using it in subsequent commands:
+
+\`\`\`
+FROM employees
+| STATS AVG(salary)
+| EVAL avg_salary_rounded = ROUND(\`AVG(salary)\`)
+\`\`\`
+
+**Note**: \`STATS\` without any groups is much faster than adding a group.
+
+**Note**: Grouping on a single expression is currently much more optimized than grouping on many expressions.
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
