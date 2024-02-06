@@ -107,11 +107,11 @@ const useAllCasesUrlState = (): [
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {
       const updatedQuery = allCasesUrlStateSerializer(updated);
-      const allCasesStateSearch = stringifyUrlParams(updatedQuery);
+      const search = stringifyUrlParams(location.search, updatedQuery);
 
       history[mode]({
         ...location,
-        search: getSearch(location.search, allCasesStateSearch),
+        search,
       });
     },
     [history, location]
@@ -180,15 +180,4 @@ const useAllCasesLocalStorage = (): [
 const getAllCasesTableStateLocalStorageKey = (appId: string) => {
   const key = LOCAL_STORAGE_KEYS.casesTableState;
   return `${appId}.${key}`;
-};
-
-const getSearch = (currentSearch: string, allCasesStateSearch: string): string => {
-  const searchUrlParams = new URLSearchParams(decodeURIComponent(currentSearch));
-  searchUrlParams.delete('cases');
-
-  const casesQueryParam = `cases=${allCasesStateSearch}`;
-
-  return searchUrlParams.size > 0
-    ? `${casesQueryParam}&${searchUrlParams.toString()}`
-    : casesQueryParam;
 };

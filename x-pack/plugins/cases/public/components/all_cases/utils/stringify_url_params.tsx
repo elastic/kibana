@@ -6,30 +6,30 @@
  */
 
 import { encode } from '@kbn/rison';
+import { ALL_CASES_STATE_URL_KEY, LEGACY_SUPPORTED_STATE_KEYS } from '../constants';
 import type { AllCasesURLQueryParams } from '../types';
 
-// export function stringifyUrlParams(urlParams: AllCasesURLQueryParams): string {
-//   const urlSearchParams = new URLSearchParams();
+export function stringifyUrlParams(
+  currentSearch: string,
+  allCasesUrlParams: AllCasesURLQueryParams
+): string {
+  const encodedUrlParams = encode({ ...allCasesUrlParams });
 
-//   for (const [key, value] of Object.entries(urlParams)) {
-//     if (value) {
-//       if (Array.isArray(value)) {
-//         if (value.length === 0) {
-//           urlSearchParams.append(key, '');
-//         } else {
-//           value.forEach((v) => urlSearchParams.append(key, v));
-//         }
-//       } else {
-//         urlSearchParams.append(key, value);
-//       }
-//     }
-//   }
+  const searchUrlParams = removeLegacyStateFromUrl(
+    new URLSearchParams(decodeURIComponent(currentSearch))
+  );
 
-//   return urlSearchParams.toString();
-// }
+  searchUrlParams.delete(ALL_CASES_STATE_URL_KEY);
+  const casesQueryParam = `${ALL_CASES_STATE_URL_KEY}=${encodedUrlParams}`;
 
-export function stringifyUrlParams(urlParams: AllCasesURLQueryParams): string {
-  const encodedUrlParams = encode({ ...urlParams });
-
-  return encodedUrlParams;
+  return searchUrlParams.size > 0
+    ? `${casesQueryParam}&${searchUrlParams.toString()}`
+    : casesQueryParam;
 }
+
+const removeLegacyStateFromUrl = (urlParams: URLSearchParams): URLSearchParams => {
+  const newUrlParams = new URLSearchParams(urlParams);
+  LEGACY_SUPPORTED_STATE_KEYS.forEach((key) => newUrlParams.delete(key));
+
+  return newUrlParams;
+};

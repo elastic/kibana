@@ -6,3 +6,13 @@
  */
 
 export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
+export const ALL_CASES_STATE_URL_KEY = 'cases';
+
+export const LEGACY_SUPPORTED_STATE_KEYS = [
+  'status',
+  'severity',
+  'page',
+  'perPage',
+  'sortField',
+  'sortOrder',
+] as const;

@@ -6,10 +6,22 @@
  */
 
 import { safeDecode } from '@kbn/rison';
+import { SortFieldCase } from '../../../../common/ui';
+import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constants';
 import type { AllCasesURLQueryParams } from '../types';
 
+type LegacySupportedKeys = typeof LEGACY_SUPPORTED_STATE_KEYS[number];
+
+const legacyDefaultState: Record<LegacySupportedKeys, string | number | string[]> = {
+  page: 1,
+  perPage: 10,
+  sortField: SortFieldCase.createdAt,
+  sortOrder: 'desc',
+  status: [],
+  severity: [],
+};
 /**
- * Parses filter options from a URL query string.
+ * Parses legacy state in URL.
  *
  * - Parameters in the query string can have multiple formats:
  *   1. Comma-separated values (e.g., "status=foo,bar")
@@ -17,31 +29,42 @@ import type { AllCasesURLQueryParams } from '../types';
  *   3. Repeated keys (e.g., "status=foo&status=bar")
  *
  */
-// export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryParams {
-//   const urlParamsMap = new Map<string, Set<string>>();
+const parseLegacyUrl = (urlParams: URLSearchParams): AllCasesURLQueryParams => {
+  const urlParamsMap = new Map<string, Set<string>>();
 
-//   for (const [key, urlParamValue] of urlParams.entries()) {
-//     const values = urlParamsMap.get(key) ?? new Set();
+  urlParams.forEach((value, key) => {
+    if (LEGACY_SUPPORTED_STATE_KEYS.includes(key as LegacySupportedKeys)) {
+      const values = urlParamsMap.get(key) ?? new Set();
 
-//     urlParamValue
-//       .split(',')
-//       .filter(Boolean)
-//       .forEach((urlValue) => values.add(urlValue));
+      value
+        .split(',')
+        .filter(Boolean)
+        .forEach((urlValue) => values.add(urlValue));
 
-//     urlParamsMap.set(key, values);
-//   }
+      urlParamsMap.set(key, values);
+    }
+  });
 
-//   const entries = new Map([...urlParamsMap].map(([key, value]) => [key, Array.from(value)]));
+  const entries = new Map(
+    [...urlParamsMap].map(([key, value]) => [
+      key,
+      parseValue(value, legacyDefaultState[key as LegacySupportedKeys]),
+    ])
+  );
 
-//   return Object.fromEntries(entries.entries()) as AllCasesURLQueryParams;
-// }
+  return Object.fromEntries(entries.entries()) as AllCasesURLQueryParams;
+};
+
+const parseValue = (values: Set<string>, defaultValue: unknown): string | string[] => {
+  const valuesAsArray = Array.from(values.values());
+  return Array.isArray(defaultValue) ? valuesAsArray : valuesAsArray[0] ?? '';
+};
 
 export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryParams {
-  // TODO: Support old URL formats
-  const allCasesParams = urlParams.get('cases');
+  const allCasesParams = urlParams.get(ALL_CASES_STATE_URL_KEY);
 
   if (!allCasesParams) {
-    return {};
+    return parseLegacyUrl(urlParams);
   }
 
   const parsedAllCasesParams = safeDecode(allCasesParams);
