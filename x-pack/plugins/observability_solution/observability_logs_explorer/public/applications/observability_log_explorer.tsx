@@ -6,6 +6,7 @@
  */
 
 import { CoreStart } from '@kbn/core/public';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
@@ -57,6 +58,7 @@ export const ObservabilityLogExplorerApp = ({
   plugins,
   pluginStart,
 }: ObservabilityLogExplorerAppProps) => {
+  const isDarkMode = core.theme.getTheme().darkMode;
   const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(
     core,
     plugins,
@@ -69,14 +71,16 @@ export const ObservabilityLogExplorerApp = ({
       <KibanaContextProviderForPlugin>
         <KbnUrlStateStorageFromRouterProvider>
           <Router history={appParams.history}>
-            <Routes>
-              <Route path="/" exact={true} render={() => <ObservabilityLogExplorerMainRoute />} />
-              <Route
-                path="/dataset-quality"
-                exact={true}
-                render={() => <DatasetQualityRoute core={core} />}
-              />
-            </Routes>
+            <EuiThemeProvider darkMode={isDarkMode}>
+              <Routes>
+                <Route path="/" exact={true} render={() => <ObservabilityLogExplorerMainRoute />} />
+                <Route
+                  path="/dataset-quality"
+                  exact={true}
+                  render={() => <DatasetQualityRoute core={core} />}
+                />
+              </Routes>
+            </EuiThemeProvider>
           </Router>
         </KbnUrlStateStorageFromRouterProvider>
       </KibanaContextProviderForPlugin>
