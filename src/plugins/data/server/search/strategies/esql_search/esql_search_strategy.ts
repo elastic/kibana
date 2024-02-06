@@ -35,7 +35,7 @@ export const esqlSearchStrategyProvider = (
         // drop_null_columns is going to change the response
         // now we get all_columns and columns
         // columns contain only columns with data
-        // al_columns contain everyhing
+        // al_columns contain everything
         const { terminateAfter, dropNullColumns, ...requestParams } = request.params ?? {};
         const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
           {
