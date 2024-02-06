@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { mitigationParamsRT } from '../data_stream_quality_checks';
+import { mitigationExecutionRT, mitigationParamsRT } from '../data_stream_quality_checks';
 import { DATASET_QUALITY_URL_PREFIX } from './shared';
 
 export const getDataStreamMitigationPath = <DataStream extends string>(dataStream: DataStream) =>
@@ -21,7 +21,9 @@ export const postDatastreamMitigationRequestPayloadRT = rt.strict({
   mitigation: mitigationParamsRT,
 });
 
-export const postDatastreamMitigationResponsePayloadRT = rt.strict({});
+export const postDatastreamMitigationResponsePayloadRT = rt.strict({
+  result: mitigationExecutionRT,
+});
 
 export type PostDatastreamMitigationResponsePayload = rt.TypeOf<
   typeof postDatastreamMitigationResponsePayloadRT

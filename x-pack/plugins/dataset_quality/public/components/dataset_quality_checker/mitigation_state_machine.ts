@@ -174,6 +174,9 @@ export const createDataStreamQualityMitigationStateMachine = ({
         context,
         event
       ): Promise<DataStreamQualityMitigationServices['getMitigations']['data']> => {
+        const {
+          parameters: { dataStream },
+        } = context;
         return [
           {
             cause: {
@@ -185,19 +188,19 @@ export const createDataStreamQualityMitigationStateMachine = ({
             mitigations: [
               {
                 type: 'mapping-increase-ignore-above',
-                data_stream: 'logs-custom_2-default',
+                data_stream: dataStream,
                 field: 'message',
                 limit: 2048,
               },
               {
                 type: 'pipeline-truncate-value',
-                data_stream: 'logs-custom_2-default',
+                data_stream: dataStream,
                 field: 'message',
                 limit: 2048,
               },
               {
                 type: 'pipeline-remove-field',
-                data_stream: 'logs-custom_2-default',
+                data_stream: dataStream,
                 field: 'message',
               },
             ],

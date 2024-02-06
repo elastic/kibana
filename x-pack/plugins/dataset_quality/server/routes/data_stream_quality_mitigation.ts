@@ -8,7 +8,7 @@
 import { IRouter } from '@kbn/core-http-server';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import {
-  DATA_STREAM_CHECK_PATH,
+  DATA_STREAM_MITIGATION_PATH,
   postDatastreamMitigationRequestParamsRT,
   postDatastreamMitigationRequestPayloadRT,
   PostDatastreamMitigationResponsePayload,
@@ -24,7 +24,7 @@ export const registerDataStreamQualityMitigationRoute = ({
   router.versioned
     .post({
       access: 'internal',
-      path: DATA_STREAM_CHECK_PATH,
+      path: DATA_STREAM_MITIGATION_PATH,
     })
     .addVersion(
       {
@@ -45,7 +45,7 @@ export const registerDataStreamQualityMitigationRoute = ({
         const { dataStream } = req.params;
         const { type: mitigationId, ...mitigationArgs } = req.body.mitigation;
 
-        const mitigationResult = await (
+        const result = await (
           await ctx.datasetQuality
         ).dataStreamQualityService.applyMitigation(mitigationId, {
           data_stream: dataStream,
@@ -53,7 +53,9 @@ export const registerDataStreamQualityMitigationRoute = ({
         });
 
         return res.ok<PostDatastreamMitigationResponsePayload>({
-          body: postDatastreamMitigationResponsePayloadRT.encode({}),
+          body: postDatastreamMitigationResponsePayloadRT.encode({
+            result,
+          }),
         });
       }
     );

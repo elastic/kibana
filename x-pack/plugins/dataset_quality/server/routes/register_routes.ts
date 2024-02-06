@@ -17,6 +17,7 @@ import * as t from 'io-ts';
 import { DatasetQualityRequestHandlerContext } from '../types';
 import { registerDataStreamQualityCheckRoute } from './data_stream_quality_check';
 import { registerDataStreamQualityChecksRoute } from './data_stream_quality_checks';
+import { registerDataStreamQualityMitigationRoute } from './data_stream_quality_mitigation';
 import { DatasetQualityRouteHandlerResources } from './types';
 
 interface RegisterRoutes {
@@ -95,4 +96,5 @@ export function registerRoutes({ repository, core, logger, plugins }: RegisterRo
 
   registerDataStreamQualityChecksRoute({ router });
   registerDataStreamQualityCheckRoute({ router });
+  registerDataStreamQualityMitigationRoute({ router });
 }

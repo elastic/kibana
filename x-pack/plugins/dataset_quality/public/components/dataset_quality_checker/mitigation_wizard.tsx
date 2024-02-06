@@ -8,16 +8,20 @@
 import {
   EuiButton,
   EuiButtonIcon,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
+  EuiFormRow,
   EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
 import { useActor } from '@xstate/react';
-import React, { useCallback, useState } from 'react';
-import { Mitigation, QualityProblemCause } from '../../../common';
+import React, { useCallback } from 'react';
+import { Controller, useForm } from 'react-hook-form';
+import { IncreaseIgnoreAboveMitigation, Mitigation, QualityProblemCause } from '../../../common';
 import { DetailsPreJson, PreJson } from './json_details';
 import {
   DataStreamQualityMitigationStateProvider,
@@ -146,7 +150,7 @@ const ConnectedConfiguringMitigationPanel = React.memo(() => {
   }
 
   return (
-    <ConfigurationMitigationPanel
+    <ConfiguringMitigationPanel
       cause={currentMitigation.cause}
       mitigation={currentMitigation.mitigation}
       onGotoPrevious={gotoPrevious}
@@ -155,7 +159,7 @@ const ConnectedConfiguringMitigationPanel = React.memo(() => {
   );
 });
 
-const ConfigurationMitigationPanel = React.memo(
+const ConfiguringMitigationPanel = React.memo(
   ({
     cause,
     mitigation,
@@ -167,8 +171,6 @@ const ConfigurationMitigationPanel = React.memo(
     onGotoPrevious: () => void;
     onApplyMitigation: (cause: QualityProblemCause, mitigation: Mitigation) => void;
   }) => {
-    const [configuredMitigation, setConfiguredMitigation] = useState(mitigation);
-
     return (
       <EuiPanel hasShadow={false}>
         <EuiTitle size="s">
@@ -185,10 +187,60 @@ const ConfigurationMitigationPanel = React.memo(
         <EuiSpacer />
         <DetailsPreJson title={`Cause: ${cause.type}`} value={cause} />
         <EuiSpacer />
-        TODO: add form here
-        <EuiSpacer />
-        <EuiButton onClick={() => onApplyMitigation(cause, configuredMitigation)}>Apply</EuiButton>
+        {mitigation.type === 'mapping-increase-ignore-above' ? (
+          <ConfiguringIncreaseIgnoreAboveMitigationForm
+            cause={cause}
+            mitigation={mitigation}
+            onApplyMitigation={onApplyMitigation}
+          />
+        ) : null}
       </EuiPanel>
+    );
+  }
+);
+
+const ConfiguringIncreaseIgnoreAboveMitigationForm = React.memo(
+  ({
+    cause,
+    mitigation,
+    onApplyMitigation,
+  }: {
+    cause: QualityProblemCause;
+    mitigation: IncreaseIgnoreAboveMitigation;
+    onApplyMitigation: (cause: QualityProblemCause, mitigation: Mitigation) => void;
+  }) => {
+    const { control, formState, handleSubmit } = useForm({
+      defaultValues: {
+        limit: `${mitigation.limit}`,
+      },
+    });
+
+    return (
+      <EuiForm
+        onSubmit={handleSubmit(({ limit }) => {
+          onApplyMitigation(cause, {
+            ...mitigation,
+            limit: parseInt(limit, 10),
+          });
+        })}
+        component="form"
+        isInvalid={!formState.isValid}
+      >
+        <Controller
+          name="limit"
+          control={control}
+          render={({ field: { ref, ...field }, fieldState }) => (
+            <EuiFormRow
+              label="New ignore_above limit"
+              isInvalid={fieldState.invalid}
+              error={fieldState.error}
+            >
+              <EuiFieldNumber inputRef={ref} isInvalid={fieldState.invalid} {...field} />
+            </EuiFormRow>
+          )}
+        />
+        <EuiButton type="submit">Apply</EuiButton>
+      </EuiForm>
     );
   }
 );

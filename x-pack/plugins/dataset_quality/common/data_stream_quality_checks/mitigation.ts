@@ -80,3 +80,26 @@ export const mitigationForCauseRT = rt.strict({
 });
 
 export type MitigationForCause = rt.TypeOf<typeof mitigationForCauseRT>;
+
+export const mitigationAppliedResultRT = rt.strict({
+  type: rt.literal('applied'),
+});
+
+export const mitigationErrorResultRT = rt.strict({
+  type: rt.literal('error'),
+  name: rt.string,
+  description: rt.string,
+});
+
+export const mitigationResultRT = rt.union([mitigationAppliedResultRT, mitigationErrorResultRT]);
+
+export type MitigationResult = rt.TypeOf<typeof mitigationResultRT>;
+
+export const mitigationExecutionRT = rt.strict({
+  id: rt.string,
+  started: rt.string,
+  finished: rt.string,
+  result: mitigationResultRT,
+});
+
+export type MitigationExecution = rt.TypeOf<typeof mitigationExecutionRT>;

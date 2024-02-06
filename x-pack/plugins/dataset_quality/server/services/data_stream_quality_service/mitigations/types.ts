@@ -7,11 +7,13 @@
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import type { ISearchGeneric } from '@kbn/data-plugin/common';
-import { MitigationType } from '../../../../common';
+import { MitigationResult, MitigationType } from '../../../../common';
 
 export interface GenericMitigationImplementation<Args extends object> {
   id: MitigationType;
-  apply: (dependencies: DataStreamQualityMitigationDependencies) => (args: Args) => Promise<void>;
+  apply: (
+    dependencies: DataStreamQualityMitigationDependencies
+  ) => (args: Args) => Promise<MitigationResult>;
 }
 
 export interface DataStreamQualityMitigationDependencies {

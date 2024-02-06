@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ClusterComponentTemplate, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import {
+  ClusterComponentTemplateNode,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import { merge } from 'lodash';
 import { IncreaseIgnoreAboveMitigation } from '../../../../common';
 import { GenericMitigationImplementation } from './types';
@@ -37,20 +40,26 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
           },
         };
 
+        // TODO: get mapping for field from data stream
+
         // update mapping in component template
         const {
-          component_templates: [previousComponentTemplate],
+          component_templates: [{ component_template: previousComponentTemplate }],
         } = await elasticsearchClient.asCurrentUser.cluster.getComponentTemplate({
           name: componentTemplateName,
         });
-        const nextComponentTemplate: ClusterComponentTemplate = merge(previousComponentTemplate, {
-          component_template: {
+        const nextComponentTemplate: ClusterComponentTemplateNode = merge(
+          previousComponentTemplate,
+          {
             template: {
               mappings: updatedFieldMapping,
             },
-          },
+          }
+        );
+        await elasticsearchClient.asCurrentUser.cluster.putComponentTemplate({
+          name: componentTemplateName,
+          ...nextComponentTemplate,
         });
-        await elasticsearchClient.asCurrentUser.cluster.putComponentTemplate(nextComponentTemplate);
 
         // update mapping in write index
         await elasticsearchClient.asCurrentUser.indices.putMapping({
@@ -58,6 +67,8 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
           ...updatedFieldMapping,
         });
 
-        return;
+        return {
+          type: 'applied',
+        };
       },
   };

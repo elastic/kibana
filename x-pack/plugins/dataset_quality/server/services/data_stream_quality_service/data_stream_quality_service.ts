@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStreamQualityCheckExecution, Mitigation } from '../../../common';
+import { DataStreamQualityCheckExecution, Mitigation, MitigationExecution } from '../../../common';
 import {
   checkForIgnoredFields,
   DataStreamQualityCheck,
@@ -72,9 +72,10 @@ export class DataStreamQualityService {
   public async applyMitigation(
     mitigationId: string,
     mitigationArgs: Omit<Mitigation, 'type'>
-  ): Promise<void> {
+  ): Promise<MitigationExecution> {
     const [mitigation] = this.mitigations.filter((_mitigation) => _mitigation.id === mitigationId);
 
+    const started = new Date().toISOString();
     const result = await mitigation
       .apply(this.dependencies)(mitigationArgs)
       .catch((err) => ({
@@ -82,7 +83,13 @@ export class DataStreamQualityService {
         name: err.name,
         description: err.message,
       }));
+    const finished = new Date().toISOString();
 
-    return;
+    return {
+      id: mitigationId,
+      started,
+      finished,
+      result,
+    };
   }
 }
