@@ -5,57 +5,32 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
-import { deflattenCustomFieldKey, isFlattenCustomField } from '.';
-import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
+import { isEmpty, isNumber } from 'lodash';
 import { CustomFieldTypes } from '../../../../common/types/domain';
+import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
 
-type UrlQueryParams = Omit<QueryParams, 'page' | 'perPage'> & {
-  page: string;
-  perPage: string;
-};
-
 export const allCasesUrlStateDeserializer = (
   urlParamsMap: AllCasesURLQueryParams
 ): AllCasesURLState => {
-  const { customFields, ...filterOptionsWithoutCustomFields } =
-    DEFAULT_CASES_TABLE_STATE.filterOptions;
+  const queryParams: Partial<QueryParams> & Record<string, unknown> = {};
+  const filterOptions: Partial<FilterOptions> & Record<string, unknown> = {};
 
-  const queryParams: Partial<UrlQueryParams> & Record<string, string | string[]> = {};
-  const filterOptions: Partial<FilterOptions> & Record<string, string | string[]> = {};
-  const customFieldsParams: FilterOptions['customFields'] = {};
-
-  for (const [key, values] of Object.entries(urlParamsMap)) {
+  for (const [key, value] of Object.entries(urlParamsMap)) {
     if (Object.hasOwn(DEFAULT_CASES_TABLE_STATE.queryParams, key)) {
-      queryParams[key] = parseValue(
-        values,
-        DEFAULT_CASES_TABLE_STATE.queryParams[key as keyof QueryParams]
-      );
+      queryParams[key] = value;
     }
 
-    if (Object.hasOwn(filterOptionsWithoutCustomFields, key)) {
-      filterOptions[key] = parseValue(
-        values,
-        filterOptionsWithoutCustomFields[key as keyof Omit<FilterOptions, 'customFields'>]
-      );
-    }
-
-    if (isFlattenCustomField(key)) {
-      const keyWithoutPrefix = deflattenCustomFieldKey(key);
-      customFieldsParams[keyWithoutPrefix] = {
-        // TOOD: Add the correct type or remove the need for type
-        type: CustomFieldTypes.TOGGLE,
-        options: values,
-      };
+    if (Object.hasOwn(DEFAULT_CASES_TABLE_STATE.filterOptions, key)) {
+      filterOptions[key] = value;
     }
   }
 
   const { page, perPage, ...restQueryParams } = queryParams;
-  const { assignees, ...restFilterOptions } = filterOptions;
+  const { assignees, customFields, ...restFilterOptions } = filterOptions;
 
   const queryParamsParsed: Partial<QueryParams> = {
     ...restQueryParams,
@@ -66,12 +41,13 @@ export const allCasesUrlStateDeserializer = (
   };
 
   if (page) {
-    queryParamsParsed.page = stringToInteger(page) ?? DEFAULT_CASES_TABLE_STATE.queryParams.page;
+    queryParamsParsed.page =
+      isNumber(page) && page > 0 ? page : DEFAULT_CASES_TABLE_STATE.queryParams.page;
   }
 
   if (perPage) {
     queryParamsParsed.perPage =
-      stringToInteger(perPage) ?? DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
+      isNumber(page) && page > 0 ? perPage : DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
   }
 
   if (assignees) {
@@ -80,7 +56,13 @@ export const allCasesUrlStateDeserializer = (
     );
   }
 
-  const state = {
+  const customFieldsParams = Object.entries(customFields ?? {}).reduce(
+    // TODO: Remove type
+    (acc, [key, value]) => ({ ...acc, [key]: { type: CustomFieldTypes.TOGGLE, options: value } }),
+    {}
+  );
+
+  const state: AllCasesURLState = {
     queryParams: queryParamsParsed,
     filterOptions: {
       ...filterOptionsParsed,
@@ -91,19 +73,4 @@ export const allCasesUrlStateDeserializer = (
   };
 
   return sanitizeState(state);
-};
-
-const stringToInteger = (value: string): number | undefined => {
-  const num = Number(value);
-
-  if (isNaN(num)) {
-    return;
-  }
-
-  return num;
-};
-
-const parseValue = (values: string[], defaultValue: unknown): string | string[] => {
-  const valuesAsArray = Array.from(values.values());
-  return Array.isArray(defaultValue) ? valuesAsArray : valuesAsArray[0] ?? '';
 };

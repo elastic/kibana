@@ -12,7 +12,6 @@ import deepEqual from 'react-fast-compare';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { isEmpty } from 'lodash';
 
-import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
 import type { FilterOptions, QueryParams } from '../../../common/ui/types';
 import {
   DEFAULT_CASES_TABLE_STATE,
@@ -27,7 +26,6 @@ import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializ
 import { parseUrlParams } from './utils/parse_url_params';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
-import { isFlattenCustomField } from './utils';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -105,26 +103,18 @@ const useAllCasesUrlState = (): [
 
   const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(location.search)));
   const parsedUrlParams = allCasesUrlStateDeserializer(urlParams);
-  const nonAllCasesStateUrlParams = parseNonCasesStateUrlParams(
-    decodeURIComponent(location.search)
-  );
 
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {
       const updatedQuery = allCasesUrlStateSerializer(updated);
-      const allCasesStateSearch = urlUtils.encodeUriQuery(stringifyUrlParams(updatedQuery));
-      // is assumed that url from other solution are already encoded
-      const nonAllCasesStateSearch = nonAllCasesStateUrlParams.toString();
-      const search = isEmpty(nonAllCasesStateSearch)
-        ? allCasesStateSearch
-        : `${allCasesStateSearch}${urlUtils.encodeUriQuery('&')}${nonAllCasesStateSearch}`;
+      const allCasesStateSearch = stringifyUrlParams(updatedQuery);
 
       history[mode]({
         ...location,
-        search,
+        search: getSearch(location.search, allCasesStateSearch),
       });
     },
-    [history, location, nonAllCasesStateUrlParams]
+    [history, location]
   );
 
   return [parsedUrlParams, updateQueryParams];
@@ -192,22 +182,13 @@ const getAllCasesTableStateLocalStorageKey = (appId: string) => {
   return `${appId}.${key}`;
 };
 
-const parseNonCasesStateUrlParams = (url: string): URLSearchParams => {
-  const urlParamsWithoutAllCasesState = new URLSearchParams(url);
+const getSearch = (currentSearch: string, allCasesStateSearch: string): string => {
+  const searchUrlParams = new URLSearchParams(decodeURIComponent(currentSearch));
+  searchUrlParams.delete('cases');
 
-  const allCasesValidStateKeys = Object.keys({
-    ...DEFAULT_CASES_TABLE_STATE.filterOptions,
-    ...DEFAULT_CASES_TABLE_STATE.queryParams,
-  });
+  const casesQueryParam = `cases=${allCasesStateSearch}`;
 
-  // delete will remove all occurrences of the key
-  allCasesValidStateKeys.forEach((key) => urlParamsWithoutAllCasesState.delete(key));
-
-  urlParamsWithoutAllCasesState.forEach((_, key) => {
-    if (isFlattenCustomField(key)) {
-      urlParamsWithoutAllCasesState.delete(key);
-    }
-  });
-
-  return urlParamsWithoutAllCasesState;
+  return searchUrlParams.size > 0
+    ? `${casesQueryParam}&${searchUrlParams.toString()}`
+    : casesQueryParam;
 };

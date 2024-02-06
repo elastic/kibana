@@ -5,24 +5,31 @@
  * 2.0.
  */
 
-export function stringifyUrlParams(urlParams: {
-  [key in string]: string[] | string | undefined;
-}): string {
-  const urlSearchParams = new URLSearchParams();
+import { encode } from '@kbn/rison';
+import type { AllCasesURLQueryParams } from '../types';
 
-  for (const [key, value] of Object.entries(urlParams)) {
-    if (value) {
-      if (Array.isArray(value)) {
-        if (value.length === 0) {
-          urlSearchParams.append(key, '');
-        } else {
-          value.forEach((v) => urlSearchParams.append(key, v));
-        }
-      } else {
-        urlSearchParams.append(key, value);
-      }
-    }
-  }
+// export function stringifyUrlParams(urlParams: AllCasesURLQueryParams): string {
+//   const urlSearchParams = new URLSearchParams();
 
-  return urlSearchParams.toString();
+//   for (const [key, value] of Object.entries(urlParams)) {
+//     if (value) {
+//       if (Array.isArray(value)) {
+//         if (value.length === 0) {
+//           urlSearchParams.append(key, '');
+//         } else {
+//           value.forEach((v) => urlSearchParams.append(key, v));
+//         }
+//       } else {
+//         urlSearchParams.append(key, value);
+//       }
+//     }
+//   }
+
+//   return urlSearchParams.toString();
+// }
+
+export function stringifyUrlParams(urlParams: AllCasesURLQueryParams): string {
+  const encodedUrlParams = encode({ ...urlParams });
+
+  return encodedUrlParams;
 }

@@ -44,11 +44,10 @@ export interface AllCasesTableState {
 }
 
 export interface AllCasesURLState {
-  filterOptions: Partial<SupportedFilterOptionsInURL>;
+  filterOptions: Partial<SupportedFilterOptionsInURL> &
+    Partial<Pick<FilterOptions, 'customFields'>>;
   queryParams: Partial<QueryParams>;
 }
 
-type ValuesAsArrayOfStrings<T> = { [key in keyof T]: string[] };
-
-export type AllCasesURLQueryParams = Partial<ValuesAsArrayOfStrings<QueryParams>> &
-  Partial<ValuesAsArrayOfStrings<SupportedFilterOptionsInURL>> & { [key: string]: string[] };
+export type AllCasesURLQueryParams = Partial<QueryParams> &
+  Partial<SupportedFilterOptionsInURL> & { customFields?: Record<string, string[]> };

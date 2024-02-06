@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, pick } from 'lodash';
-import { flattenCustomFieldKey } from '.';
+import { isEmpty, pick, isNumber } from 'lodash';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
 import type { AllCasesURLQueryParams, AllCasesTableState } from '../types';
 
@@ -21,30 +20,34 @@ export const allCasesUrlStateSerializer = (state: AllCasesTableState): AllCasesU
   ]);
 
   const customFieldsAsQueryParams = Object.entries(state.filterOptions.customFields).reduce(
-    (acc, [key, value]) => ({ ...acc, [flattenCustomFieldKey(key)]: value.options }),
+    (acc, [key, value]) => {
+      if (isEmpty(value.options)) {
+        return acc;
+      }
+
+      return { ...acc, [key]: value.options };
+    },
     {}
   );
 
   const combinedState = {
     ...state.queryParams,
-    page: state.queryParams.page.toString(),
-    perPage: state.queryParams.perPage.toString(),
+    page: state.queryParams.page,
+    perPage: state.queryParams.perPage,
     ...supportedFilterOptions,
     assignees: supportedFilterOptions.assignees.map((assignee) =>
       assignee === null ? NO_ASSIGNEES_FILTERING_KEYWORD : assignee
     ),
-    ...customFieldsAsQueryParams,
+    customFields: customFieldsAsQueryParams,
   };
 
-  const stateAsQueryParams = Object.entries(combinedState).reduce((acc, [key, value]) => {
-    if (isEmpty(value)) {
+  // filters empty values
+  return Object.entries(combinedState).reduce((acc, [key, value]) => {
+    // isEmpty returns true for numbers
+    if (isEmpty(value) && !isNumber(value)) {
       return acc;
     }
 
-    return Object.assign(acc, { [key]: parseValue(value) });
+    return Object.assign(acc, { [key]: value });
   }, {});
-
-  return stateAsQueryParams;
 };
-
-const parseValue = <T>(value: T) => (Array.isArray(value) ? value : [value]);

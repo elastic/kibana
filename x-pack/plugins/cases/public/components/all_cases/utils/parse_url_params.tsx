@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { safeDecode } from '@kbn/rison';
 import type { AllCasesURLQueryParams } from '../types';
 
 /**
@@ -16,21 +17,38 @@ import type { AllCasesURLQueryParams } from '../types';
  *   3. Repeated keys (e.g., "status=foo&status=bar")
  *
  */
+// export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryParams {
+//   const urlParamsMap = new Map<string, Set<string>>();
+
+//   for (const [key, urlParamValue] of urlParams.entries()) {
+//     const values = urlParamsMap.get(key) ?? new Set();
+
+//     urlParamValue
+//       .split(',')
+//       .filter(Boolean)
+//       .forEach((urlValue) => values.add(urlValue));
+
+//     urlParamsMap.set(key, values);
+//   }
+
+//   const entries = new Map([...urlParamsMap].map(([key, value]) => [key, Array.from(value)]));
+
+//   return Object.fromEntries(entries.entries()) as AllCasesURLQueryParams;
+// }
+
 export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryParams {
-  const urlParamsMap = new Map<string, Set<string>>();
+  // TODO: Support old URL formats
+  const allCasesParams = urlParams.get('cases');
 
-  for (const [key, urlParamValue] of urlParams.entries()) {
-    const values = urlParamsMap.get(key) ?? new Set();
-
-    urlParamValue
-      .split(',')
-      .filter(Boolean)
-      .forEach((urlValue) => values.add(urlValue));
-
-    urlParamsMap.set(key, values);
+  if (!allCasesParams) {
+    return {};
   }
 
-  const entries = new Map([...urlParamsMap].map(([key, value]) => [key, Array.from(value)]));
+  const parsedAllCasesParams = safeDecode(allCasesParams);
 
-  return Object.fromEntries(entries.entries()) as AllCasesURLQueryParams;
+  if (!parsedAllCasesParams) {
+    return {};
+  }
+
+  return parsedAllCasesParams as AllCasesURLQueryParams;
 }
