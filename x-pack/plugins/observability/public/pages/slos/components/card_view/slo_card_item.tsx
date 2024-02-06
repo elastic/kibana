@@ -57,7 +57,7 @@ export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['stat
   return { cardColor: colors[status ?? 'NO_DATA'], colors };
 };
 
-const getSubTitle = (slo: SLOWithSummaryResponse) => {
+export const getSubTitle = (slo: SLOWithSummaryResponse) => {
   return getGroupings(slo);
 };
 
