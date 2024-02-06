@@ -125,7 +125,7 @@ export const reportingScreenshotShareProvider = ({
       objectType,
       sharingData,
     };
-
+    // eslint-disable-next-line @typescript-eslint/no-shadow
     const isJobV2Params = ({ sharingData }: { sharingData: Record<string, unknown> }): boolean =>
       sharingData.locatorParams != null;
 
