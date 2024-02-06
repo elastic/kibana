@@ -73,7 +73,7 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = 'https://console.qa.cld.elstc.co';
+const BASE_ENV_URL = process.env.QA_CONSOLE_URL;
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
