@@ -22,15 +22,11 @@ START_INDEX=${3:-1}
 
 # Not command line args
 ELASTICSEARCH_URL="elastic:changeme@localhost:9200"
-KIBANA_URL="elastic:changeme@localhost:5601/mark"
 INDEX="logs-testdata-default"
 SUCCESSFUL_DOC_COUNT=0
 SLEEP=1
 
 echo "Using Elasticsearch URL: $ELASTICSEARCH_URL"
-echo "Using Kibana URL: $KIBANA_URL"
-
-echo "REMEMBER TO EDIT KIBANA_URL BEFORE RUNNING FOR THE FIRST TIME :)"
 
 for ((i=START_INDEX; i<=DOC_COUNT + START_INDEX - 1; i++)); do
     TIMESTAMP=$(date -u +"%Y-%m-%dT%H:%M:%SZ")
@@ -143,25 +139,5 @@ EOF
     SUCCESSFUL_DOC_COUNT=$((SUCCESSFUL_DOC_COUNT + 1))
     sleep $SLEEP
 done
-
-# echo "Creating criticality record"
-
-# criticality_data=$(cat <<EOF
-# {
-#     "id_field": "host.name",
-#     "id_value": "$HOSTNAME",
-#     "criticality_level": "very_important"
-# }
-# EOF
-# ) 
-
-# curl -s -X POST \
-#   -H "Content-Type: application/json" \
-#   -H "kbn-xsrf: hello" \
-#   -H "elastic-api-version: 1" \
-#   -d "$criticality_data" \
-#   "$KIBANA_URL/internal/asset_criticality"
-
-# echo ""
 
 echo "Successfully created $SUCCESSFUL_DOC_COUNT documents for host $HOSTNAME"
