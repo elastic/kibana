@@ -25,6 +25,9 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
     .post({
       path: '/internal/data_visualizer/test_grok_pattern',
       access: 'internal',
+      options: {
+        tags: ['access:fileUpload:analyzeFile'],
+      },
     })
     .addVersion(
       {
@@ -42,7 +45,7 @@ export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger)
       async (context, request, response) => {
         try {
           const esClient = (await context.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.transport.request<TestGrokPatternResponse>({
+          const body = await esClient.asInternalUser.transport.request<TestGrokPatternResponse>({
             method: 'GET',
             path: `/_text_structure/test_grok_pattern`,
             body: {
