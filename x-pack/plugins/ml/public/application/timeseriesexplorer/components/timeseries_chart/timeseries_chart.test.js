@@ -34,6 +34,8 @@ function getTimeseriesChartPropsMock() {
     showModelBounds: true,
     svgWidth: 1600,
     timefilter: {},
+    tooltipService: {},
+    sourceIndicesWithGeoFields: {},
   };
 }
 
