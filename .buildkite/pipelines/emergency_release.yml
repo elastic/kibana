@@ -10,7 +10,7 @@ steps:
     if: build.branch =~ /^deploy-fix@.*\$/
 
   - label: ':argo: Emergency Release'
-    if: build.tag =~ /^deploy-fix@-.*\$/ && build.branch =~ /^deploy-fix@.*\$/
+    if: build.tag =~ /^deploy-fix@.*\$/ && build.branch =~ /^deploy-fix@.*\$/
     trigger: gpctl-promote
     build:
       env:
