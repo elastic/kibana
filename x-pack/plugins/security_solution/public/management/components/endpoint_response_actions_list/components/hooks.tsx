@@ -346,7 +346,10 @@ export const useActionsLogFilter = ({
     () => items.filter((item) => item.checked === 'on').length,
     [items]
   );
-  const numFilters = useMemo(() => items.filter((item) => item.checked !== 'on').length, [items]);
+  const numFilters = useMemo(
+    () => items.filter((item) => item.key && item.checked !== 'on').length,
+    [items]
+  );
 
   return {
     areHostsSelectedOnMount,
