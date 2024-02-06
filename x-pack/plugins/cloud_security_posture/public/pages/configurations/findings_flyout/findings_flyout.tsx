@@ -117,9 +117,9 @@ const FindingsTab = ({ tab, findings }: { findings: CspFinding; tab: FindingsTab
 
   const ruleFlyoutLink = application.getUrlForApp('security', {
     path: generatePath(benchmarksNavigation.rules.path, {
-      benchmarkVersion: data.rule.benchmark.version.split('v')[1], // removing the v from the version
-      benchmarkId: data.rule.benchmark.id,
-      ruleId: data.rule.id,
+      benchmarkVersion: findings.rule.benchmark.version.split('v')[1], // removing the v from the version
+      benchmarkId: findings.rule.benchmark.id,
+      ruleId: findings.rule.id,
     }),
   });
 

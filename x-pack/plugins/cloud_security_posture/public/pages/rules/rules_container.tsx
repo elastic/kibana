@@ -219,7 +219,7 @@ export const RulesContainer = () => {
           : 'unmuted',
     },
     ...{
-      metadata: allRules.data?.items.find((rule) => rule.metadata.id === params.ruleId)?.metadata,
+      metadata: allRules.data?.items.find((rule) => rule.metadata.id === params.ruleId)?.metadata!,
     },
   };
 
