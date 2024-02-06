@@ -13,6 +13,7 @@ import {
   HOST_NAME,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import {
   mergeKueries,
@@ -27,6 +28,7 @@ import {
   serviceTransactionDataSourceRt,
 } from '../default_api_types';
 import { getServiceHostNames } from './get_service_host_names';
+import { environmentQuery } from '../../../common/utils/environment_query';
 
 const profilingFlamegraphRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/flamegraph',
@@ -109,63 +111,6 @@ const profilingFlamegraphRoute = createApmServerRoute({
   },
 });
 
-const transactionsFlamegraphRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/flamegraph',
-  params: t.type({
-    path: t.type({ serviceName: t.string }),
-    query: t.intersection([
-      kueryRt,
-      t.type({
-        transactionName: t.string,
-        start: isoToEpochSecsRt,
-        end: isoToEpochSecsRt,
-      }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (resources): Promise<BaseFlameGraph | undefined> => {
-    const { context, plugins, params } = resources;
-    const core = await context.core;
-    const [esClient, profilingDataAccessStart] = await Promise.all([
-      core.elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
-    ]);
-    if (profilingDataAccessStart) {
-      const { serviceName } = params.path;
-      const { start, end, kuery, transactionName } = params.query;
-
-      return await profilingDataAccessStart?.services.fetchFlamechartData({
-        core,
-        esClient: esClient.asCurrentUser,
-        // TODO: caue fix this
-        indices: '.ds-traces-apm-default-2024.02.02-000001',
-        stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
-        totalSeconds: end - start,
-        query: {
-          bool: {
-            filter: [
-              ...kqlQuery(kuery),
-              ...termQuery(SERVICE_NAME, serviceName),
-              ...termQuery(TRANSACTION_NAME, transactionName),
-              {
-                range: {
-                  ['@timestamp']: {
-                    gte: String(start),
-                    lt: String(end),
-                    format: 'epoch_second',
-                  },
-                },
-              },
-            ],
-          },
-        },
-      });
-    }
-
-    return undefined;
-  },
-});
-
 const profilingFunctionsRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/services/{serviceName}/profiling/functions',
   params: t.type({
@@ -217,19 +162,106 @@ const profilingFunctionsRoute = createApmServerRoute({
         return undefined;
       }
 
+      const startSecs = start / 1000;
+      const endSecs = end / 1000;
+
       const functions = await profilingDataAccessStart?.services.fetchFunction({
         core,
         esClient: esClient.asCurrentUser,
-        rangeFromMs: start,
-        rangeToMs: end,
-        kuery: mergeKueries([
-          `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
-          kuery,
-        ]),
         startIndex,
         endIndex,
+        totalSeconds: endSecs - startSecs,
+        query: {
+          bool: {
+            filter: [
+              ...kqlQuery(
+                mergeKueries([
+                  `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+                  kuery,
+                ])
+              ),
+              {
+                range: {
+                  ['@timestamp']: {
+                    gte: String(startSecs),
+                    lt: String(endSecs),
+                    format: 'epoch_second',
+                  },
+                },
+              },
+            ],
+          },
+        },
       });
       return { functions, hostNames: serviceHostNames };
+    }
+
+    return undefined;
+  },
+});
+
+const transactionsFlamegraphRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/flamegraph',
+  params: t.type({
+    path: t.type({ serviceName: t.string }),
+    query: t.intersection([
+      kueryRt,
+      environmentRt,
+      t.type({
+        transactionName: t.string,
+        start: isoToEpochSecsRt,
+        end: isoToEpochSecsRt,
+        transactionType: t.string,
+      }),
+    ]),
+  }),
+  options: { tags: ['access:apm'] },
+  handler: async (resources): Promise<BaseFlameGraph | undefined> => {
+    const { context, plugins, params } = resources;
+    const core = await context.core;
+    const [esClient, profilingDataAccessStart] = await Promise.all([
+      core.elasticsearch.client,
+      await plugins.profilingDataAccess?.start(),
+    ]);
+    if (profilingDataAccessStart) {
+      const { serviceName } = params.path;
+      const {
+        start,
+        end,
+        kuery,
+        transactionName,
+        transactionType,
+        environment,
+      } = params.query;
+
+      return await profilingDataAccessStart?.services.fetchFlamechartData({
+        core,
+        esClient: esClient.asCurrentUser,
+        // TODO: caue fix this
+        indices: '.ds-traces-apm-default-2024.02.02-000001',
+        stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+        totalSeconds: end - start,
+        query: {
+          bool: {
+            filter: [
+              ...kqlQuery(kuery),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              ...environmentQuery(environment),
+              ...termQuery(TRANSACTION_TYPE, transactionType),
+              {
+                range: {
+                  ['@timestamp']: {
+                    gte: String(start),
+                    lt: String(end),
+                    format: 'epoch_second',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      });
     }
 
     return undefined;
@@ -241,11 +273,14 @@ const transactionsFunctionsRoute = createApmServerRoute({
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
-      rangeRt,
+      environmentRt,
       t.type({
+        start: isoToEpochSecsRt,
+        end: isoToEpochSecsRt,
         startIndex: toNumberRt,
         endIndex: toNumberRt,
         transactionName: t.string,
+        transactionType: t.string,
       }),
       kueryRt,
     ]),
@@ -259,20 +294,47 @@ const transactionsFunctionsRoute = createApmServerRoute({
       await plugins.profilingDataAccess?.start(),
     ]);
     if (profilingDataAccessStart) {
-      const { start, end, startIndex, endIndex, kuery } = params.query;
+      const {
+        start,
+        end,
+        startIndex,
+        endIndex,
+        kuery,
+        transactionName,
+        transactionType,
+        environment,
+      } = params.query;
       const { serviceName } = params.path;
 
       return profilingDataAccessStart?.services.fetchFunction({
         core,
         esClient: esClient.asCurrentUser,
-        rangeFromMs: start,
-        rangeToMs: end,
-        kuery,
         startIndex,
         endIndex,
         // TODO: caue fix this
         indices: '.ds-traces-apm-default-2024.02.02-000001',
         stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+        totalSeconds: end - start,
+        query: {
+          bool: {
+            filter: [
+              ...kqlQuery(kuery),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              ...environmentQuery(environment),
+              ...termQuery(TRANSACTION_TYPE, transactionType),
+              {
+                range: {
+                  ['@timestamp']: {
+                    gte: String(start),
+                    lt: String(end),
+                    format: 'epoch_second',
+                  },
+                },
+              },
+            ],
+          },
+        },
       });
     }
 

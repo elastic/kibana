@@ -17,6 +17,8 @@ interface Props {
   rangeTo: string;
   kuery: string;
   transactionName: string;
+  transactionType?: string;
+  environment: string;
 }
 
 export function ProfilingTopNFunctions({
@@ -25,11 +27,16 @@ export function ProfilingTopNFunctions({
   rangeTo,
   kuery,
   transactionName,
+  transactionType,
+  environment,
 }: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   const { data, status } = useFetcher(
     (callApmApi) => {
+      if (!transactionType) {
+        return;
+      }
       return callApmApi(
         'GET /internal/apm/services/{serviceName}/transactions/functions',
         {
@@ -42,12 +49,22 @@ export function ProfilingTopNFunctions({
               transactionName,
               startIndex: 0,
               endIndex: 10,
+              transactionType,
+              environment,
             },
           },
         }
       );
     },
-    [serviceName, start, end, kuery, transactionName]
+    [
+      serviceName,
+      start,
+      end,
+      kuery,
+      transactionName,
+      transactionType,
+      environment,
+    ]
   );
 
   return (

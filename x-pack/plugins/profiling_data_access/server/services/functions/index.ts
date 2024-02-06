@@ -14,6 +14,7 @@ import {
 } from '@kbn/observability-plugin/common';
 import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import { createTopNFunctions } from '@kbn/profiling-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { percentToFactor } from '../../utils/percent_to_factor';
 import { withProfilingSpan } from '../../utils/with_profiling_span';
 import { RegisterServicesParams } from '../register_services';
@@ -22,13 +23,12 @@ import { searchStackTraces } from '../search_stack_traces';
 export interface FetchFunctionsParams {
   core: CoreRequestHandlerContext;
   esClient: ElasticsearchClient;
-  rangeFromMs: number;
-  rangeToMs: number;
-  kuery: string;
   startIndex: number;
   endIndex: number;
   indices?: string;
   stacktraceIdsField?: string;
+  query: QueryDslQueryContainer;
+  totalSeconds: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -37,18 +37,13 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
   return async ({
     core,
     esClient,
-    rangeFromMs,
-    rangeToMs,
-    kuery,
     startIndex,
     endIndex,
     indices,
     stacktraceIdsField,
+    query,
+    totalSeconds,
   }: FetchFunctionsParams) => {
-    const rangeFromSecs = rangeFromMs / 1000;
-    const rangeToSecs = rangeToMs / 1000;
-    const totalSeconds = rangeToSecs - rangeFromSecs;
-
     const [
       co2PerKWH,
       datacenterPUE,
@@ -70,9 +65,6 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
     const { events, stackTraces, executables, stackFrames, samplingRate } = await searchStackTraces(
       {
         client: profilingEsClient,
-        rangeFrom: rangeFromSecs,
-        rangeTo: rangeToSecs,
-        kuery,
         sampleSize: targetSampleSize,
         durationSeconds: totalSeconds,
         co2PerKWH,
@@ -83,6 +75,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         costPervCPUPerHour,
         indices,
         stacktraceIdsField,
+        query,
       }
     );
 

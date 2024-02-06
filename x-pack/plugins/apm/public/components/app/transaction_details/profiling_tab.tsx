@@ -17,7 +17,14 @@ import { ProfilingTopNFunctions } from './profiling_top_functions';
 
 function ProfilingTab() {
   const {
-    query: { rangeFrom, rangeTo, environment, kuery, transactionName },
+    query: {
+      rangeFrom,
+      rangeTo,
+      environment,
+      kuery,
+      transactionName,
+      transactionType,
+    },
     path: { serviceName },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
@@ -38,6 +45,8 @@ function ProfilingTab() {
               rangeTo={rangeTo}
               kuery={kuery}
               transactionName={transactionName}
+              transactionType={transactionType}
+              environment={environment}
             />
           </>
         ),
@@ -57,12 +66,22 @@ function ProfilingTab() {
               rangeTo={rangeTo}
               kuery={kuery}
               transactionName={transactionName}
+              transactionType={transactionType}
+              environment={environment}
             />
           </>
         ),
       },
     ];
-  }, [kuery, rangeFrom, rangeTo, serviceName, transactionName]);
+  }, [
+    environment,
+    kuery,
+    rangeFrom,
+    rangeTo,
+    serviceName,
+    transactionName,
+    transactionType,
+  ]);
 
   return (
     <EuiTabbedContent
