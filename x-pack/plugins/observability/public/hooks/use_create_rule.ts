@@ -24,7 +24,7 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
       try {
         const ruleId = v4();
         const body = JSON.stringify(rule);
-        return http.post(`${http.basePath.prepend(BASE_ALERTING_API_PATH)}/rule/${ruleId}`, {
+        return http.post(`${BASE_ALERTING_API_PATH}/rule/${ruleId}`, {
           body,
         });
       } catch (e) {
