@@ -214,22 +214,6 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
     },
-    validate: (command: ESQLCommand) => {
-      // the command name is automatically converted into KEEP by the ast_walker
-      // so validate the actual text
-      const messages: ESQLMessage[] = [];
-      if (/^project/.test(command.text.toLowerCase())) {
-        messages.push({
-          location: command.location,
-          text: i18n.translate('monaco.esql.validation.projectCommandDeprecated', {
-            defaultMessage: 'PROJECT command is no longer supported, please use KEEP instead',
-          }),
-          type: 'warning',
-          code: 'projectCommandDeprecated',
-        });
-      }
-      return messages;
-    },
   },
   {
     name: 'drop',

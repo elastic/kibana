@@ -585,26 +585,18 @@ describe('validation logic', () => {
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
-    testErrorsAndWarnings(
-      'from index | project ',
-      [`SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
-    testErrorsAndWarnings(
-      'from index | project stringField, numberField, dateField',
-      [],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
-    testErrorsAndWarnings(
-      'from index | PROJECT stringField, numberField, dateField',
-      [],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
-    testErrorsAndWarnings(
-      'from index | project missingField, numberField, dateField',
-      ['Unknown column [missingField]'],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
+    testErrorsAndWarnings('from index | project ', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"project\"`,
+    ]);
+    testErrorsAndWarnings('from index | project stringField, numberField, dateField', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"project\"`,
+    ]);
+    testErrorsAndWarnings('from index | PROJECT stringField, numberField, dateField', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"PROJECT\"`,
+    ]);
+    testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"project\"`,
+    ]);
     testErrorsAndWarnings('from index | keep s*', []);
     testErrorsAndWarnings('from index | keep *Field', []);
     testErrorsAndWarnings('from index | keep s*Field', []);
