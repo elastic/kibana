@@ -68,7 +68,6 @@ function create(id: string, spec?: DataViewSpec) {
       getFieldsForWildcard: jest
         .fn()
         .mockImplementation(() => Promise.resolve({ fields: fieldCapsResponse })),
-      // jest.fn().mockResolvedValue({ fields: fieldCapsResponse }),
     } as any,
   });
 }
@@ -91,7 +90,7 @@ describe('DataViewLazy', () => {
   describe('api', () => {
     test('should have expected properties', () => {
       expect(dataViewLazy).toHaveProperty('getScriptedFields');
-      /*
+      /* todo
       expect(indexPattern).toHaveProperty('getNonScriptedFields');
       expect(indexPattern).toHaveProperty('removeScriptedField');
       expect(indexPattern).toHaveProperty('addRuntimeField');
@@ -111,7 +110,6 @@ describe('DataViewLazy', () => {
     });
   });
 
-  /* isTSDBMode - not yet implemented, needs to get all number fields
   describe('isTSDBMode', () => {
     const tsdbField: FieldSpec = {
       name: 'tsdb-metric-field',
@@ -121,20 +119,15 @@ describe('DataViewLazy', () => {
       timeSeriesMetric: 'gauge',
     };
 
-    test('should return false if no fields are tsdb fields', () => {
-      expect(indexPattern.isTSDBMode()).toBe(false);
+    test('should return false if no fields are tsdb fields', async () => {
+      expect(await dataViewLazy.isTSDBMode()).toBe(false);
     });
 
-    test('should return true if some fields are tsdb fields', () => {
-      indexPattern.fields.add(tsdbField);
-      expect(indexPattern.isTSDBMode()).toBe(true);
-    });
-
-    afterAll(() => {
-      indexPattern.fields.remove(tsdbField);
+    test('should return true if some fields are tsdb fields', async () => {
+      fieldCapsResponse.push(tsdbField);
+      expect(await dataViewLazy.isTSDBMode()).toBe(true);
     });
   });
-  */
 
   describe('getScriptedFields', () => {
     test('should return all scripted fields', () => {
@@ -216,20 +209,6 @@ describe('DataViewLazy', () => {
         type: 'boolean',
       };
 
-      /* add scripted field
-      dataViewLazy.fields.add({
-        name: scriptedField.name,
-        script: scriptedField.script,
-        type: scriptedField.type,
-        scripted: true,
-        lang: 'painless',
-        aggregatable: true,
-        searchable: true,
-        count: 0,
-        readFromDocValues: false,
-      });
-      */
-
       dataViewLazy.upsertScriptedField({
         name: scriptedField.name,
         script: scriptedField.script,
@@ -238,8 +217,6 @@ describe('DataViewLazy', () => {
         lang: 'painless',
         aggregatable: true,
         searchable: true,
-        // count: 0,
-        // readFromDocValues: false,
       });
 
       const scriptedFields = dataViewLazy.getScriptedFields();
@@ -346,14 +323,11 @@ describe('DataViewLazy', () => {
         runtime_field: runtimeField.runtimeField,
       });
       const field = (await dataViewLazy.toSpec())!.fields!['@tags'];
-      console.log('****', (await dataViewLazy.toSpec())!.fields);
       expect(field.runtimeField).toEqual(runtime);
       expect(field.count).toEqual(5);
-      /* todo add formatters
       expect(field.format).toEqual({
         id: 'bytes',
       });
-      */
       expect(field.customLabel).toEqual('custom name');
       expect((await dataViewLazy.toSpec()).fieldAttrs!['@tags']).toEqual({
         customLabel: 'custom name',
@@ -367,15 +341,28 @@ describe('DataViewLazy', () => {
       expect((await dataViewLazy.toSpec())!.fields!['@tags'].runtimeField).toBeUndefined();
     });
 
-    /*
-    todo - mapped fields need to override runtime fields
-    test('ignore runtime field mapping if a mapped field exists with the same name', () => {
+    // todo - mapped fields need to override runtime fields
+    /* I think I'd prefer to skip this as its not where we want to be long term.
+    Might be less work to make it work now
+    test('ignore runtime field mapping if a mapped field exists with the same name', async () => {
       expect(dataViewLazy.getRuntimeMappings()).toEqual({
         runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
       });
 
       // add a runtime field called "theme"
       dataViewLazy.addRuntimeField('theme', runtimeWithAttrs);
+
+      // its added to runtimeFieldMappings
+      expect(dataViewLazy.getRuntimeMappings()).toEqual({
+        runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
+        theme: { script: { source: "emit('hello world');" }, type: 'keyword' },
+      });
+
+      // we can get the field
+      expect((await dataViewLazy.getFieldByName('theme'))?.runtimeField).toEqual({
+        script: { source: "emit('hello world');" },
+        type: 'keyword',
+      });
 
       // add a new mapped field also called "theme"
       const themeFieldSpec = {
@@ -387,13 +374,11 @@ describe('DataViewLazy', () => {
         isMapped: true,
       };
 
-      fieldCapsResponse = [...fieldCapsResponse, themeFieldSpec];
+      fieldCapsResponse = [themeFieldSpec];
 
-      expect(dataViewLazy.getRuntimeMappings()).toEqual({
-        runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
-      });
+      expect((await dataViewLazy.getFieldByName('theme'))?.runtimeField).toEqual(undefined);
     });
-    */
+    // */
 
     test('add and remove runtime field as new field', async () => {
       dataViewLazy.addRuntimeField('new_field', runtimeWithAttrs);
@@ -453,6 +438,7 @@ describe('DataViewLazy', () => {
     });
 
     */
+
     test('should not allow runtime field with * in name', async () => {
       try {
         await dataViewLazy.addRuntimeField('test*123', runtime);
@@ -461,4 +447,186 @@ describe('DataViewLazy', () => {
       }
     });
   });
+
+  describe('getIndexPattern', () => {
+    test('should return the index pattern, labeled title on the data view spec', () => {
+      expect(dataViewLazy.getIndexPattern()).toBe(
+        stubbedSavedObjectIndexPattern().attributes.title
+      );
+    });
+
+    test('setIndexPattern', () => {
+      dataViewLazy.setIndexPattern('test');
+      expect(dataViewLazy.getIndexPattern()).toBe('test');
+    });
+  });
+
+  describe('getFormatterForField', () => {
+    test('should return the default one for empty objects', () => {
+      dataViewLazy.setFieldFormat('scriptedFieldWithEmptyFormatter', {});
+      expect(
+        dataViewLazy.getFormatterForField({
+          name: 'scriptedFieldWithEmptyFormatter',
+          type: 'number',
+          esTypes: ['long'],
+          searchable: true,
+          aggregatable: true,
+        })
+      ).toEqual(
+        expect.objectContaining({
+          convert: expect.any(Function),
+          getConverterFor: expect.any(Function),
+        })
+      );
+    });
+  });
+
+  /*
+  describe('toSpec', () => {
+    test('should match snapshot', () => {
+      const formatter = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      } as unknown as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      expect(indexPattern.toSpec()).toMatchSnapshot();
+    });
+
+    test('can optionally exclude fields', () => {
+      expect(indexPattern.toSpec(false)).toMatchSnapshot();
+    });
+
+    test('can restore from spec', async () => {
+      const formatter = {
+        toJSON: () => ({ id: 'number', params: { pattern: '$0,0.[00]' } }),
+      } as unknown as FieldFormat;
+      indexPattern.getFormatterForField = () => formatter;
+      const spec = indexPattern.toSpec();
+      const restoredPattern = new DataView({
+        spec,
+        fieldFormats: fieldFormatsMock,
+        shortDotsEnable: false,
+        metaFields: [],
+      });
+      expect(restoredPattern.id).toEqual(indexPattern.id);
+      expect(restoredPattern.getIndexPattern()).toEqual(indexPattern.getIndexPattern());
+      expect(restoredPattern.timeFieldName).toEqual(indexPattern.timeFieldName);
+      expect(restoredPattern.fields.length).toEqual(indexPattern.fields.length);
+    });
+
+    test('creating from spec does not contain references to spec', () => {
+      const sourceFilters = [{ value: 'test' }];
+      const spec = { sourceFilters };
+      const dataView1 = create('test1', spec);
+      const dataView2 = create('test2', spec);
+      expect(dataView1.sourceFilters).not.toBe(dataView2.sourceFilters);
+    });
+  });
+
+  describe('toMinimalSpec', () => {
+    test('can exclude fields', () => {
+      expect(dataViewLazy.toMinimalSpec()).toMatchSnapshot();
+    });
+
+    test('can omit counts', () => {
+      const fieldsMap = {
+        test1: {
+          name: 'test1',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test2: {
+          name: 'test2',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+        test3: {
+          name: 'test3',
+          type: 'keyword',
+          aggregatable: true,
+          searchable: true,
+          readFromDocValues: false,
+        },
+      };
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: undefined,
+        }).toMinimalSpec().fieldAttrs
+      ).toBeUndefined();
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+            },
+            test2: {
+              count: 12,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toBeUndefined();
+
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+              customLabel: 'test11',
+            },
+            test2: {
+              count: 12,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+        }
+      `);
+
+      expect(
+        create('test', {
+          id: 'test',
+          title: 'test*',
+          fields: fieldsMap,
+          fieldAttrs: {
+            test1: {
+              count: 11,
+              customLabel: 'test11',
+            },
+            test2: {
+              customLabel: 'test12',
+            },
+            test3: {
+              count: 30,
+            },
+          },
+        }).toMinimalSpec().fieldAttrs
+      ).toMatchInlineSnapshot(`
+        Object {
+          "test1": Object {
+            "customLabel": "test11",
+          },
+          "test2": Object {
+            "customLabel": "test12",
+          },
+        }
+      `);
+    });
+  });
+  */
 });

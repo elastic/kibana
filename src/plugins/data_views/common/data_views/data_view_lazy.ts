@@ -7,7 +7,10 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type {
+  FieldFormatsStartCommon,
+  // SerializedFieldFormat,
+} from '@kbn/field-formats-plugin/common';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 import { each, cloneDeep } from 'lodash';
 import { CharacterNotAllowedInField } from '@kbn/kibana-utils-plugin/common';
@@ -25,7 +28,7 @@ import type {
   RuntimeType,
   FieldSpec,
   IDataViewsApiClient,
-  FieldAttrs,
+  // FieldAttrs,
 } from '../types';
 import { removeFieldAttrs } from './utils';
 
@@ -72,13 +75,10 @@ export class DataViewLazy extends AbstractDataView {
   includeUnmapped?: boolean;
   fields?: string[];
   */
-  async getFields({
-    mapped = true,
-    scripted = true,
-    runtime = true,
-    type,
-    fieldName = ['*'],
-  }: GetFieldsParams) {
+  async getFields(
+    { mapped = true, scripted = true, runtime = true, type, fieldName = ['*'] }: GetFieldsParams,
+    forceRefresh = false
+  ) {
     const dataViewFields: DataViewField[] = [];
     if (mapped !== false) {
       const mappedFields = await this.getMappedFields({ type, fieldName });
@@ -260,36 +260,24 @@ export class DataViewLazy extends AbstractDataView {
     let createdField: DataViewField | undefined;
     const existingField = await this.getFieldByName(fieldName);
 
-    if (existingField) {
+    if (existingField && !existingField.isMapped) {
       existingField.runtimeField = runtimeFieldSpec;
     } else {
-      createdField = new DataViewField({
-        name: fieldName,
-        runtimeField: runtimeFieldSpec,
-        type: castEsToKbnFieldTypeName(fieldType),
-        esTypes: [fieldType],
-        aggregatable: true,
-        searchable: true,
-        count: config.popularity ?? 0,
-        readFromDocValues: false,
-      });
-      this.fieldCache.set(fieldName, createdField);
-      /*
-      createdField = this.fields.add({
-        name: fieldName,
-        runtimeField: runtimeFieldSpec,
-        type: castEsToKbnFieldTypeName(fieldType),
-        esTypes: [fieldType],
-        aggregatable: true,
-        searchable: true,
-        count: config.popularity ?? 0,
-        readFromDocValues: false,
-      });
-      */
+      createdField = this.fieldCache.set(
+        fieldName,
+        new DataViewField({
+          name: fieldName,
+          runtimeField: runtimeFieldSpec,
+          type: castEsToKbnFieldTypeName(fieldType),
+          esTypes: [fieldType],
+          aggregatable: true,
+          searchable: true,
+          count: config.popularity ?? 0,
+          readFromDocValues: false,
+        })
+      );
     }
 
-    // debugger;
-    // Apply configuration to the field
     this.setFieldCustomLabel(fieldName, config.customLabel);
 
     if (config.popularity || config.popularity === null) {
@@ -379,10 +367,26 @@ export class DataViewLazy extends AbstractDataView {
 
     const dataViewFields: DataViewField[] = [];
     response.fields.forEach((field) => {
-      // how to handle updated field info. This will always keep existing field info
-      dataViewFields.push(
-        this.fieldCache.get(field.name) || this.fieldCache.set(field.name, new DataViewField(field))
-      );
+      // keep existing field object, make sure content is fresh
+      const fld = this.fieldCache.get(field.name);
+      if (fld) {
+        // update a bunch of things
+        // I wonder if there's a more clever way to do this
+        fld.spec.aggregatable = field.aggregatable;
+        fld.spec.conflictDescriptions = field.conflictDescriptions;
+        fld.spec.esTypes = field.esTypes;
+        fld.spec.readFromDocValues = field.readFromDocValues;
+        fld.spec.searchable = field.searchable;
+        fld.spec.aggregatable = field.aggregatable;
+        fld.spec.shortDotsEnable = field.shortDotsEnable;
+        fld.spec.subType = field.subType;
+        fld.spec.timeSeriesDimension = field.timeSeriesDimension;
+        fld.spec.timeSeriesMetric = field.timeSeriesMetric;
+        fld.spec.type = field.type;
+        fld.spec.isMapped = true;
+        // fld.spec.runtimeField = undefined;
+      }
+      dataViewFields.push(fld || this.fieldCache.set(field.name, new DataViewField(field)));
     });
 
     return dataViewFields;
@@ -489,12 +493,11 @@ export class DataViewLazy extends AbstractDataView {
     const getFieldsAsMap = async () => {
       const fields: DataViewFieldMap = {};
       (await this.getFields({ fieldName: ['*'] })).forEach((field) => {
-        fields[field.name] = field.toSpec();
+        fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
       });
       return fields;
     };
 
-    // todo add formatters
     const fields = includeFields ? await getFieldsAsMap() : {};
 
     const spec: DataViewSpec = {
@@ -520,6 +523,16 @@ export class DataViewLazy extends AbstractDataView {
 
   // should specify which fields are needed
   toMinimalSpec() {}
+
+  /**
+   * returns true if dataview contains TSDB fields
+   */
+  async isTSDBMode() {
+    // todo this could be more efficient
+    return await this.getFields({ fieldName: ['*'] }).then((fields) =>
+      fields.some((field) => field.timeSeriesDimension || field.timeSeriesMetric)
+    );
+  }
 
   removeScriptedField(fieldName: string) {
     this.deleteScriptedFieldInternal(fieldName);
@@ -557,8 +570,8 @@ export class DataViewLazy extends AbstractDataView {
     return fldArray.length ? fldArray[0] : undefined;
   }
 
-  async getFieldByName(name: string) {
-    const fieldArray = await this.getFields({ fieldName: [name] });
+  async getFieldByName(name: string, forceRefresh = false) {
+    const fieldArray = await this.getFields({ fieldName: [name] }, forceRefresh);
     return fieldArray.length ? fieldArray[0] : undefined;
   }
 
