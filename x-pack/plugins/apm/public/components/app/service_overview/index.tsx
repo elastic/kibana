@@ -135,7 +135,6 @@ export function ServiceOverview() {
                     kuery={kuery}
                     environment={environment}
                     fixedHeight={true}
-                    isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
                     showPerPageOptions={false}

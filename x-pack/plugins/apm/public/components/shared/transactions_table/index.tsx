@@ -48,7 +48,6 @@ const INITIAL_STATE: ApiResponse & { requestId: string } = {
 interface Props {
   hideTitle?: boolean;
   hideViewTransactionsLink?: boolean;
-  isSingleColumn?: boolean;
   numberOfTransactionsPerPage?: number;
   showPerPageOptions?: boolean;
   showMaxTransactionGroupsExceededWarning?: boolean;
@@ -64,7 +63,6 @@ export function TransactionsTable({
   fixedHeight = false,
   hideViewTransactionsLink = false,
   hideTitle = false,
-  isSingleColumn = true,
   numberOfTransactionsPerPage = 10,
   showPerPageOptions = true,
   showMaxTransactionGroupsExceededWarning = false,
@@ -95,8 +93,8 @@ export function TransactionsTable({
   );
 
   // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
-  const { isXl } = useBreakpoints();
-  const shouldShowSparkPlots = isSingleColumn || !isXl;
+  const { isXl, isLarge } = useBreakpoints();
+  const shouldShowSparkPlots = !isLarge || !isXl;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
