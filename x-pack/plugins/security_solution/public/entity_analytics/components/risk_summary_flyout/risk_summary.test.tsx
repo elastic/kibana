@@ -44,17 +44,36 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
+
+    // Alerts
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
       `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
     );
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
       `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
     );
+
+    // Context
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
       `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
     );
     expect(getByTestId('risk-summary-table')).toHaveTextContent(
       `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+    );
+
+    // Result
+    expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
+      `${
+        (mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0) +
+        (mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0)
+      }`
+    );
+
+    expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
+      `${
+        (mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0) +
+        (mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0)
+      }`
     );
   });
 

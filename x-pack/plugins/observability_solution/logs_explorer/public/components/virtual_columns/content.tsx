@@ -31,9 +31,9 @@ const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   return (
     <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
       {renderFieldPrefix && (
-        <strong data-test-subj="logExplorerDataTableMessageKey">{field}</strong>
+        <strong data-test-subj="logsExplorerDataTableMessageKey">{field}</strong>
       )}
-      <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
+      <span data-test-subj="logsExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
         {value}
       </span>
     </EuiText>
@@ -108,7 +108,7 @@ export const Content = ({
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
-          dataTestSubj="logExplorerCellDescriptionList"
+          dataTestSubj="logsExplorerCellDescriptionList"
           className="logsExplorerVirtualColumn__sourceDocument"
         />
       )}

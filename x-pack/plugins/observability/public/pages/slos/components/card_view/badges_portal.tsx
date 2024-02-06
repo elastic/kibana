@@ -11,24 +11,24 @@ import ReactDOM from 'react-dom';
 export interface Props {
   children: ReactNode;
   containerRef: React.RefObject<HTMLDivElement>;
+  index?: number;
 }
 
-export function SloCardBadgesPortal({ children, containerRef }: Props) {
+export function SloCardBadgesPortal({ children, containerRef, index }: Props) {
   const portalNode = useMemo(() => createHtmlPortalNode(), []);
-
   useEffect(() => {
     if (containerRef?.current) {
       setTimeout(() => {
-        const gapDiv = containerRef?.current?.querySelector('.echMetricText__gap');
-        if (!gapDiv) return;
-        ReactDOM.render(<OutPortal node={portalNode} />, gapDiv);
+        const gapDivs = containerRef?.current?.querySelectorAll('.echMetricText__gap');
+        if (!gapDivs?.[index ?? 0]) return;
+        ReactDOM.render(<OutPortal node={portalNode} />, gapDivs[index ?? 0]);
       }, 100);
     }
 
     return () => {
       portalNode.unmount();
     };
-  }, [portalNode, containerRef]);
+  }, [portalNode, containerRef, index]);
 
   return <InPortal node={portalNode}>{children}</InPortal>;
 }

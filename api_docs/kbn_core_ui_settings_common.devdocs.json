@@ -358,10 +358,6 @@
                 "path": "packages/kbn-management/settings/field_definition/get_definition.ts"
               },
               {
-                "plugin": "advancedSettings",
-                "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-              },
-              {
                 "plugin": "discover",
                 "path": "src/plugins/discover/server/ui_settings.ts"
               },
@@ -517,7 +513,7 @@
           "\nUI element type to represent the settings."
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"select\" | \"image\" | \"color\" | \"json\" | \"array\" | \"markdown\""
+          "\"string\" | \"number\" | \"boolean\" | \"undefined\" | \"color\" | \"image\" | \"select\" | \"json\" | \"array\" | \"markdown\""
         ],
         "path": "packages/core/ui-settings/core-ui-settings-common/src/ui_settings.ts",
         "deprecated": false,

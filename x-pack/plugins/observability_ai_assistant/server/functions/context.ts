@@ -12,7 +12,7 @@ import * as t from 'io-ts';
 import { last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
-import { MessageRole, type Message } from '../../common/types';
+import { FunctionVisibility, MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
 
@@ -25,21 +25,8 @@ export function registerContextFunction({
     {
       name: 'context',
       contexts: ['core'],
-      description:
-        dedent(`Use this function to recall earlier learnings and get the context in which the user is currently using Kibana.
-
-        Anything this is summarized can be retrieved again later via this function. The learnings are sorted by score, descending.
-
-      Make sure the query covers ONLY the following aspects:
-      - Anything you've inferred from the user's request but is not mentioned in the user's request
-      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query. DO NOT include the user's request. It will be added internally.
-
-      Use this function to get the context of the application that the user is currently using. Examples of context are: 
-      - the URL the user is at;
-      - the time range the user is looking at;
-      - the service the user is looking at.
-
-      This context can change every time the user adds a prompt, so you should call this function every time you need the context.`),
+      description: '',
+      visibility: FunctionVisibility.Internal,
       descriptionForUser:
         'This function allows the assistant to recall previous learnings from the Knowledge base and gather context of how you are using the application.',
       parameters: {
@@ -55,22 +42,22 @@ export function registerContextFunction({
               type: 'string',
             },
           },
-          contexts: {
+          categories: {
             type: 'array',
             additionalItems: false,
             additionalProperties: false,
             description:
-              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
+              'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
               type: 'string',
               enum: ['apm', 'lens'],
             },
           },
         },
-        required: ['queries', 'contexts'],
+        required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: { queries, contexts }, messages, connectorId }, signal) => {
+    async ({ arguments: { queries, categories }, messages, connectorId }, signal) => {
       const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
 
       if (!systemMessage) {
@@ -87,7 +74,7 @@ export function registerContextFunction({
         userMessage,
         client,
         signal,
-        contexts,
+        categories,
         queries,
       });
 
@@ -125,12 +112,13 @@ async function retrieveSuggestions({
   userMessage,
   queries,
   client,
-  contexts,
+  categories,
+  signal,
 }: {
   userMessage?: Message;
   queries: string[];
   client: ObservabilityAIAssistantClient;
-  contexts: Array<'apm' | 'lens'>;
+  categories: Array<'apm' | 'lens'>;
   signal: AbortSignal;
 }) {
   const queriesWithUserPrompt =
@@ -140,7 +128,7 @@ async function retrieveSuggestions({
 
   const recallResponse = await client.recall({
     queries: queriesWithUserPrompt,
-    contexts,
+    categories,
   });
 
   return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
@@ -243,7 +231,7 @@ async function scoreSuggestions({
 
   const response = await lastValueFrom(
     (
-      await client.chat({
+      await client.chat('score_suggestions', {
         connectorId,
         messages: [extendedSystemMessage, newUserMessage],
         functions: [scoreFunction],

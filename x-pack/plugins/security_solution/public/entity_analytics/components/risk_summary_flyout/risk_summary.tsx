@@ -42,6 +42,8 @@ import {
   isUserRiskData,
   LAST_30_DAYS,
   LENS_VISUALIZATION_HEIGHT,
+  LENS_VISUALIZATION_MIN_WIDTH,
+  SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
@@ -184,12 +186,14 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
           expandable: false,
         }}
       >
-        <EuiFlexGroup gutterSize="m" direction="column">
-          <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="m" direction="row" wrap>
+          <EuiFlexItem grow={1}>
             <div
               // Improve Visualization loading state by predefining the size
+              // Set min-width for a fluid layout
               css={css`
                 height: ${LENS_VISUALIZATION_HEIGHT}px;
+                min-width: ${LENS_VISUALIZATION_MIN_WIDTH}px;
               `}
             >
               {riskData && (
@@ -212,7 +216,12 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
               )}
             </div>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem
+            grow={3}
+            css={css`
+              min-width: ${SUMMARY_TABLE_MIN_WIDTH}px;
+            `}
+          >
             <InspectButtonContainer>
               <div
                 // Anchors the position absolute inspect button (nearest positioned ancestor)

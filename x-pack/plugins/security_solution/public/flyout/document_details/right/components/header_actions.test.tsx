@@ -17,7 +17,6 @@ import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_f
 import { TestProvidersComponent } from '../../../../common/mock';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
-import { ExpandableFlyoutProvider } from '@kbn/expandable-flyout';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../hooks/use_assistant');
@@ -40,11 +39,9 @@ const mockContextValue = {
 const renderHeaderActions = (contextValue: RightPanelContext) =>
   render(
     <TestProvidersComponent>
-      <ExpandableFlyoutProvider>
-        <RightPanelContext.Provider value={contextValue}>
-          <HeaderActions />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutProvider>
+      <RightPanelContext.Provider value={contextValue}>
+        <HeaderActions />
+      </RightPanelContext.Provider>
     </TestProvidersComponent>
   );
 

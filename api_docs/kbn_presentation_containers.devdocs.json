@@ -141,6 +141,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.apiPublishesLastSavedState",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesLastSavedState",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
+          }
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.apiPublishesLastSavedState.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
         "id": "def-common.getContainerParentFromAPI",
         "type": "Function",
         "tags": [],
@@ -175,6 +215,93 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.getLastSavedStateSubjectForChild",
+        "type": "Function",
+        "tags": [],
+        "label": "getLastSavedStateSubjectForChild",
+        "description": [],
+        "signature": [
+          "<StateType extends unknown = unknown>(parentApi: unknown, childId: string, deserializer?: ((state: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<object>) => StateType) | undefined) => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<StateType | undefined> | undefined"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.getLastSavedStateSubjectForChild.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "parentApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.getLastSavedStateSubjectForChild.$2",
+            "type": "string",
+            "tags": [],
+            "label": "childId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.getLastSavedStateSubjectForChild.$3",
+            "type": "Function",
+            "tags": [],
+            "label": "deserializer",
+            "description": [],
+            "signature": [
+              "((state: ",
+              {
+                "pluginId": "@kbn/presentation-containers",
+                "scope": "common",
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.SerializedPanelState",
+                "text": "SerializedPanelState"
+              },
+              "<object>) => StateType) | undefined"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -570,141 +697,144 @@
       },
       {
         "parentPluginId": "@kbn/presentation-containers",
-        "id": "def-common.PresentationContainer",
+        "id": "def-common.PublishesLastSavedState",
         "type": "Interface",
         "tags": [],
-        "label": "PresentationContainer",
+        "label": "PublishesLastSavedState",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/presentation-containers",
-            "scope": "common",
-            "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
-          },
-          " extends Partial<",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "common",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-common.PublishesViewMode",
-            "text": "PublishesViewMode"
-          },
-          ">"
-        ],
-        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.removePanel",
-            "type": "Function",
+            "id": "def-common.PublishesLastSavedState.lastSavedState",
+            "type": "Object",
             "tags": [],
-            "label": "removePanel",
+            "label": "lastSavedState",
             "description": [],
             "signature": [
-              "(panelId: string) => void"
+              "Subject",
+              "<void>"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.removePanel.$1",
-                "type": "string",
-                "tags": [],
-                "label": "panelId",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
+            "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.canRemovePanels",
+            "id": "def-common.PublishesLastSavedState.getLastSavedStateForChild",
             "type": "Function",
             "tags": [],
-            "label": "canRemovePanels",
+            "label": "getLastSavedStateForChild",
             "description": [],
             "signature": [
-              "(() => boolean) | undefined"
-            ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/presentation-containers",
-            "id": "def-common.PresentationContainer.replacePanel",
-            "type": "Function",
-            "tags": [],
-            "label": "replacePanel",
-            "description": [],
-            "signature": [
-              "(idToRemove: string, newPanel: ",
+              "(childId: string) => ",
               {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PanelPackage",
-                "text": "PanelPackage"
+                "section": "def-common.SerializedPanelState",
+                "text": "SerializedPanelState"
               },
-              ") => Promise<string>"
+              "<object> | undefined"
             ],
-            "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+            "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.replacePanel.$1",
+                "id": "def-common.PublishesLastSavedState.getLastSavedStateForChild.$1",
                 "type": "string",
                 "tags": [],
-                "label": "idToRemove",
+                "label": "childId",
                 "description": [],
                 "signature": [
                   "string"
                 ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/presentation-containers",
-                "id": "def-common.PresentationContainer.replacePanel.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "newPanel",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/presentation-containers",
-                    "scope": "common",
-                    "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PanelPackage",
-                    "text": "PanelPackage"
-                  }
-                ],
-                "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+                "path": "packages/presentation/presentation_containers/interfaces/last_saved_state.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.SerializedPanelState",
+        "type": "Interface",
+        "tags": [],
+        "label": "SerializedPanelState",
+        "description": [
+          "\nA package containing the serialized Embeddable state, with references extracted. When saving Embeddables using any\nstrategy, this is the format that should be used."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<RawStateType>"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.SerializedPanelState.references",
+            "type": "Array",
+            "tags": [],
+            "label": "references",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-saved-objects-common",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+                "section": "def-common.SavedObjectReference",
+                "text": "SavedObjectReference"
+              },
+              "[] | undefined"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.SerializedPanelState.rawState",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              "RawStateType"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-containers",
+            "id": "def-common.SerializedPanelState.version",
+            "type": "string",
+            "tags": [],
+            "label": "version",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/presentation/presentation_containers/interfaces/serialized_state.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -802,7 +932,47 @@
       }
     ],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/presentation-containers",
+        "id": "def-common.PresentationContainer",
+        "type": "Type",
+        "tags": [],
+        "label": "PresentationContainer",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
+          },
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; }"
+        ],
+        "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

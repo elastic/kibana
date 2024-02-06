@@ -22,7 +22,7 @@
         "label": "APMDataAccessConfig",
         "description": [],
         "signature": [
-          "{ readonly indices: Readonly<{} & { error: string; span: string; metric: string; transaction: string; onboarding: string; sourcemap: string; }>; }"
+          "{ readonly indices: Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>; }"
         ],
         "path": "x-pack/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
@@ -37,7 +37,7 @@
         "label": "APMIndices",
         "description": [],
         "signature": [
-          "{ readonly error: string; readonly span: string; readonly metric: string; readonly transaction: string; readonly onboarding: string; readonly sourcemap: string; }"
+          "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
         ],
         "path": "x-pack/plugins/apm_data_access/server/index.ts",
         "deprecated": false,
@@ -65,7 +65,7 @@
           "label": "apmIndicesFromConfigFile",
           "description": [],
           "signature": [
-            "{ readonly error: string; readonly span: string; readonly metric: string; readonly transaction: string; readonly onboarding: string; readonly sourcemap: string; }"
+            "{ readonly error: string; readonly transaction: string; readonly span: string; readonly metric: string; readonly onboarding: string; readonly sourcemap: string; }"
           ],
           "path": "x-pack/plugins/apm_data_access/server/types.ts",
           "deprecated": false,
@@ -87,7 +87,7 @@
               "section": "def-common.SavedObjectsClientContract",
               "text": "SavedObjectsClientContract"
             },
-            ") => Promise<Readonly<{} & { error: string; span: string; metric: string; transaction: string; onboarding: string; sourcemap: string; }>>"
+            ") => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>"
           ],
           "path": "x-pack/plugins/apm_data_access/server/types.ts",
           "deprecated": false,

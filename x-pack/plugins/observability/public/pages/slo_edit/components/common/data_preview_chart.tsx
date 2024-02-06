@@ -48,6 +48,7 @@ interface DataPreviewChartProps {
   thresholdDirection?: 'above' | 'below';
   thresholdColor?: string;
   thresholdMessage?: string;
+  ignoreMoreThan100?: boolean;
 }
 
 const ONE_HOUR_IN_MILLISECONDS = 1 * 60 * 60 * 1000;
@@ -58,6 +59,7 @@ export function DataPreviewChart({
   thresholdDirection,
   thresholdColor,
   thresholdMessage,
+  ignoreMoreThan100,
 }: DataPreviewChartProps) {
   const { watch, getFieldState, formState, getValues } = useFormContext<CreateSLOForm>();
   const { charts, uiSettings } = useKibana().services;
@@ -80,7 +82,7 @@ export function DataPreviewChart({
     isError,
   } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'), range);
 
-  const isMoreThan100 = previewData?.find((row) => row.sliValue > 1) != null;
+  const isMoreThan100 = !ignoreMoreThan100 && previewData?.find((row) => row.sliValue > 1) != null;
 
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
