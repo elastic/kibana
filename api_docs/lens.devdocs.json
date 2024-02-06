@@ -636,7 +636,7 @@
               "\n"
             ],
             "signature": [
-              "(domNode: Element | HTMLElement) => void"
+              "(domNode: HTMLElement | Element) => void"
             ],
             "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -650,7 +650,7 @@
                 "label": "domNode",
                 "description": [],
                 "signature": [
-                  "Element | HTMLElement"
+                  "HTMLElement | Element"
                 ],
                 "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
                 "deprecated": false,
@@ -989,7 +989,48 @@
         "initialIsOpen": false
       }
     ],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.apiHasLensConfig",
+        "type": "Function",
+        "tags": [],
+        "label": "apiHasLensConfig",
+        "description": [],
+        "signature": [
+          "(api: unknown) => api is ",
+          {
+            "pluginId": "lens",
+            "scope": "public",
+            "docId": "kibLensPluginApi",
+            "section": "def-public.HasLensConfig",
+            "text": "HasLensConfig"
+          }
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "lens",
+            "id": "def-public.apiHasLensConfig.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "api",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "lens",
@@ -3102,12 +3143,128 @@
             "label": "onApply",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "((newAttributes: LensAttributes<\"lnsXY\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.XYState",
+                "text": "XYState"
+              },
+              "> | LensAttributes<\"lnsPie\", ",
+              "PieVisualizationState",
+              "> | LensAttributes<\"lnsHeatmap\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.HeatmapVisualizationState",
+                "text": "HeatmapVisualizationState"
+              },
+              "> | LensAttributes<\"lnsGauge\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.GaugeVisualizationState",
+                "text": "GaugeVisualizationState"
+              },
+              "> | LensAttributes<\"lnsDatatable\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.DatatableVisualizationState",
+                "text": "DatatableVisualizationState"
+              },
+              "> | LensAttributes<\"lnsLegacyMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "common",
+                "docId": "kibLensPluginApi",
+                "section": "def-common.LegacyMetricState",
+                "text": "LegacyMetricState"
+              },
+              "> | LensAttributes<\"lnsMetric\", ",
+              {
+                "pluginId": "lens",
+                "scope": "public",
+                "docId": "kibLensPluginApi",
+                "section": "def-public.MetricVisualizationState",
+                "text": "MetricVisualizationState"
+              },
+              "> | LensAttributes<string, unknown>) => void) | undefined"
             ],
             "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "lens",
+                "id": "def-public.InlineEditLensEmbeddableContext.onApply.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "newAttributes",
+                "description": [],
+                "signature": [
+                  "LensAttributes<\"lnsXY\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.XYState",
+                    "text": "XYState"
+                  },
+                  "> | LensAttributes<\"lnsPie\", ",
+                  "PieVisualizationState",
+                  "> | LensAttributes<\"lnsHeatmap\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.HeatmapVisualizationState",
+                    "text": "HeatmapVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsGauge\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.GaugeVisualizationState",
+                    "text": "GaugeVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsDatatable\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.DatatableVisualizationState",
+                    "text": "DatatableVisualizationState"
+                  },
+                  "> | LensAttributes<\"lnsLegacyMetric\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "common",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-common.LegacyMetricState",
+                    "text": "LegacyMetricState"
+                  },
+                  "> | LensAttributes<\"lnsMetric\", ",
+                  {
+                    "pluginId": "lens",
+                    "scope": "public",
+                    "docId": "kibLensPluginApi",
+                    "section": "def-public.MetricVisualizationState",
+                    "text": "MetricVisualizationState"
+                  },
+                  "> | LensAttributes<string, unknown>"
+                ],
+                "path": "x-pack/plugins/lens/public/trigger_actions/open_lens_config/in_app_embeddable_edit/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           },
           {
@@ -9226,7 +9383,7 @@
             "label": "overrides",
             "description": [],
             "signature": [
-              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
+              "(Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -9238,7 +9395,7 @@
               "RecursivePartial",
               "<Omit<",
               "AxisStyle",
-              ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+              ", \"gridLine\">> | undefined>; title?: string | undefined; children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; gridLine?: ",
               {
                 "pluginId": "@kbn/chart-expressions-common",
                 "scope": "common",
@@ -10538,7 +10695,7 @@
             "section": "def-public.Action",
             "text": "Action"
           },
-          "<object>[] | undefined; showInspector?: boolean | undefined; }"
+          "<object>[] | undefined; showInspector?: boolean | undefined; abortController?: AbortController | undefined; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable_component.tsx",
         "deprecated": false,
@@ -10621,6 +10778,30 @@
           "ReferenceBasedIndexPatternColumn"
         ],
         "path": "x-pack/plugins/lens/public/datasources/form_based/operations/definitions/column_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "lens",
+        "id": "def-public.HasLensConfig",
+        "type": "Type",
+        "tags": [],
+        "label": "HasLensConfig",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasType",
+            "text": "HasType"
+          },
+          "<\"lens\"> & { getSavedVis: () => Readonly<",
+          "Document",
+          " | undefined>; }"
+        ],
+        "path": "x-pack/plugins/lens/public/embeddable/interfaces/has_lens_config.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -10744,7 +10925,7 @@
         "label": "LensSavedObjectAttributes",
         "description": [],
         "signature": [
-          "{ title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "{ title: string; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -10784,7 +10965,7 @@
             "section": "def-common.SavedObjectReference",
             "text": "SavedObjectReference"
           },
-          "[]; visualizationType: string | null; }"
+          "[]; description?: string | undefined; visualizationType: string | null; }"
         ],
         "path": "x-pack/plugins/lens/public/embeddable/embeddable.tsx",
         "deprecated": false,
@@ -11317,7 +11498,7 @@
           },
           "<",
           "GoalDomainRange",
-          ">; base?: number | undefined; actual?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
+          ">; actual?: number | undefined; base?: number | undefined; bandFillColor?: \"ignore\" | undefined; tickValueFormatter?: \"ignore\" | undefined; labelMajor?: string | ",
           "GoalLabelAccessor",
           " | undefined; labelMinor?: string | ",
           "GoalLabelAccessor",
@@ -11343,7 +11524,7 @@
           },
           "<{ duration: number; } | undefined>; valueGetter?: ",
           "ValueGetter",
-          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; style?: ",
+          " | undefined; fillOutside?: boolean | undefined; radiusOutside?: number | undefined; fillRectangleWidth?: number | undefined; fillRectangleHeight?: number | undefined; topGroove?: number | undefined; percentFormatter?: \"ignore\" | undefined; clockwiseSectors?: boolean | undefined; maxRowCount?: number | undefined; specialFirstInnermostSector?: boolean | undefined; smallMultiples?: string | undefined; drilldown?: boolean | undefined; }>> | Partial<Record<\"axisX\" | \"axisLeft\" | \"axisRight\", { style?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
@@ -11355,7 +11536,7 @@
           "RecursivePartial",
           "<Omit<",
           "AxisStyle",
-          ", \"gridLine\">> | undefined>; title?: string | undefined; gridLine?: ",
+          ", \"gridLine\">> | undefined>; title?: string | undefined; children?: boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | undefined; gridLine?: ",
           {
             "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",

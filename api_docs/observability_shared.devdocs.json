@@ -549,6 +549,76 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSelection",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSelectionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSelection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSelectionProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSuggestions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSuggestionsProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSuggestions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSuggestionsProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.getContextMenuItemsFromActions",
         "type": "Function",
         "tags": [],
@@ -2036,6 +2106,43 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useValuesList",
+        "type": "Function",
+        "tags": [],
+        "label": "useValuesList",
+        "description": [],
+        "signature": [
+          "({ sourceField, dataViewTitle, query, filters, time, label, keepHistory, cardinalityField, }: ",
+          "Props",
+          ") => { values: ",
+          "ListItem",
+          "[]; loading?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useValuesList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sourceField,\n  dataViewTitle,\n  query = '',\n  filters,\n  time,\n  label,\n  keepHistory,\n  cardinalityField,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -3016,7 +3123,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; }"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3085,7 +3192,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; }"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3994,10 +4101,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "id": "def-common.LOGS_EXPLORER_FEEDBACK_LINK",
         "type": "string",
         "tags": [],
-        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "label": "LOGS_EXPLORER_FEEDBACK_LINK",
         "description": [],
         "signature": [
           "\"https://ela.st/explorer-feedback\""

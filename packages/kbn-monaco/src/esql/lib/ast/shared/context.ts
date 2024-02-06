@@ -132,14 +132,14 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 function isBuiltinFunction(node: ESQLFunction) {
-  return Boolean(getFunctionDefinition(node.name)?.builtin);
+  return getFunctionDefinition(node.name)?.type === 'builtin';
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name)) {
+      if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }
@@ -156,6 +156,23 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
       // command [<here>
       return { type: 'setting' as const, command, node, option, setting };
     }
+  }
+  if (!command && innerText.trim().toLowerCase() === 'show') {
+    return {
+      type: 'expression' as const,
+      // The ES grammar makes the "SHOW" command an invalid type at grammar level
+      // so we need to create a fake command to make it work the AST in this case
+      command: {
+        type: 'command',
+        name: 'show',
+        text: innerText.trim(),
+        location: { min: 0, max: innerText.length },
+        incomplete: true,
+        args: [],
+      } as ESQLCommand,
+      node,
+      option,
+    };
   }
 
   if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {

@@ -11,7 +11,8 @@ import { lastValueFrom } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { v4 as uuidv4 } from 'uuid';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
-import { buildEsQuery, getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromESQLQuery, getLimitFromESQLQuery } from '@kbn/esql-utils';
+import { buildEsQuery } from '@kbn/es-query';
 import type { BoolQuery, Filter, Query } from '@kbn/es-query';
 import type { ESQLSearchReponse } from '@kbn/es-types';
 import { getEsQueryConfig } from '@kbn/data-service/src/es_query';
@@ -41,7 +42,7 @@ import { UpdateSourceEditor } from './update_source_editor';
 
 type ESQLSourceSyncMeta = Pick<
   ESQLSourceDescriptor,
-  'columns' | 'dateField' | 'esql' | 'narrowByMapBounds'
+  'columns' | 'dateField' | 'esql' | 'geoField' | 'narrowByMapBounds' | 'narrowByGlobalTime'
 >;
 
 export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
@@ -55,6 +56,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     if (!isValidStringConfig(descriptor.esql)) {
       throw new Error('Cannot create ESQLSourceDescriptor when esql is not provided');
     }
+
     return {
       ...descriptor,
       id: isValidStringConfig(descriptor.id) ? descriptor.id! : uuidv4(),
@@ -65,15 +67,22 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
         typeof descriptor.narrowByGlobalSearch !== 'undefined'
           ? descriptor.narrowByGlobalSearch
           : true,
+      narrowByGlobalTime:
+        typeof descriptor.narrowByGlobalTime !== 'undefined'
+          ? descriptor.narrowByGlobalTime
+          : descriptor.dateField !== 'undefined',
       narrowByMapBounds:
-        typeof descriptor.narrowByMapBounds !== 'undefined' ? descriptor.narrowByMapBounds : true,
+        typeof descriptor.narrowByMapBounds !== 'undefined'
+          ? descriptor.narrowByMapBounds
+          : descriptor.geoField !== 'undefined',
       applyForceRefresh:
         typeof descriptor.applyForceRefresh !== 'undefined' ? descriptor.applyForceRefresh : true,
     };
   }
 
-  constructor(descriptor: ESQLSourceDescriptor) {
-    super(ESQLSource.createDescriptor(descriptor));
+  constructor(partialDescriptor: Partial<ESQLSourceDescriptor>) {
+    const descriptor = ESQLSource.createDescriptor(partialDescriptor);
+    super(descriptor);
     this._descriptor = descriptor;
   }
 
@@ -103,11 +112,11 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
   }
 
   async isTimeAware() {
-    return !!this._descriptor.dateField;
+    return this._descriptor.narrowByGlobalTime;
   }
 
   getApplyGlobalTime() {
-    return !!this._descriptor.dateField;
+    return this._descriptor.narrowByGlobalTime;
   }
 
   getApplyForceRefresh() {
@@ -165,15 +174,27 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     }
 
     if (this._descriptor.narrowByMapBounds && requestMeta.buffer) {
-      const geoField =
-        this._descriptor.columns[getGeometryColumnIndex(this._descriptor.columns)]?.name;
-      if (geoField) {
-        const extentFilter = createExtentFilter(requestMeta.buffer, [geoField]);
-        filters.push(extentFilter);
+      if (!this._descriptor.geoField) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esql.noGeoFieldError', {
+            defaultMessage:
+              'Unable to narrow ES|QL statement by visible map area, geospatial field is not provided',
+          })
+        );
       }
+      const extentFilter = createExtentFilter(requestMeta.buffer, [this._descriptor.geoField]);
+      filters.push(extentFilter);
     }
 
     if (requestMeta.applyGlobalTime) {
+      if (!this._descriptor.dateField) {
+        throw new Error(
+          i18n.translate('xpack.maps.source.esql.noDateFieldError', {
+            defaultMessage:
+              'Unable to narrow ES|QL statement by global time, date field is not provided',
+          })
+        );
+      }
       const timeRange = requestMeta.timeslice
         ? {
             from: new Date(requestMeta.timeslice.from).toISOString(),
@@ -302,7 +323,9 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
       columns: this._descriptor.columns,
       dateField: this._descriptor.dateField,
       esql: this._descriptor.esql,
+      geoField: this._descriptor.geoField,
       narrowByMapBounds: this._descriptor.narrowByMapBounds,
+      narrowByGlobalTime: this._descriptor.narrowByGlobalTime,
     };
   }
 }

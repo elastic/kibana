@@ -117,6 +117,7 @@ export abstract class Embeddable<
     this.destroyAPI = destroyAPI;
     ({
       uuid: this.uuid,
+      disableTriggers: this.disableTriggers,
       onEdit: this.onEdit,
       viewMode: this.viewMode,
       dataViews: this.dataViews,
@@ -144,6 +145,7 @@ export abstract class Embeddable<
       getFallbackTimeRange: this.getFallbackTimeRange,
       canUnlinkFromLibrary: this.canUnlinkFromLibrary,
       isCompatibleWithLocalUnifiedSearch: this.isCompatibleWithLocalUnifiedSearch,
+      savedObjectId: this.savedObjectId,
     } = api);
 
     setTimeout(() => {
@@ -157,6 +159,7 @@ export abstract class Embeddable<
    */
   private destroyAPI;
   public uuid: LegacyEmbeddableAPI['uuid'];
+  public disableTriggers: LegacyEmbeddableAPI['disableTriggers'];
   public onEdit: LegacyEmbeddableAPI['onEdit'];
   public viewMode: LegacyEmbeddableAPI['viewMode'];
   public parentApi: LegacyEmbeddableAPI['parentApi'];
@@ -184,6 +187,7 @@ export abstract class Embeddable<
   public canUnlinkFromLibrary: LegacyEmbeddableAPI['canUnlinkFromLibrary'];
   public getFallbackTimeRange: LegacyEmbeddableAPI['getFallbackTimeRange'];
   public isCompatibleWithLocalUnifiedSearch: LegacyEmbeddableAPI['isCompatibleWithLocalUnifiedSearch'];
+  public savedObjectId: LegacyEmbeddableAPI['savedObjectId'];
 
   public getEditHref(): string | undefined {
     return this.getOutput().editUrl ?? undefined;

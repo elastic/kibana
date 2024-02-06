@@ -67,11 +67,18 @@ class DataStreamService {
     esClient: ElasticsearchClient,
     dataStream: string
   ): Promise<Awaited<ReturnType<ElasticsearchClient['indices']['getSettings']>>> {
-    const settings = await esClient.indices.getSettings({
-      index: dataStream,
-    });
+    try {
+      const settings = await esClient.indices.getSettings({
+        index: dataStream,
+      });
 
-    return settings;
+      return settings;
+    } catch (e) {
+      if (e.statusCode === 404) {
+        return {};
+      }
+      throw e;
+    }
   }
 }
 

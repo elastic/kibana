@@ -190,18 +190,37 @@ export const getBenchmarkCisName = (benchmarkId: BenchmarksCisId) => {
   }
 };
 
+const CLOUD_PROVIDER_NAMES = {
+  AWS: 'Amazon Web Services',
+  AZURE: 'Microsoft Azure',
+  GCP: 'Google Cloud Platform',
+};
+
 export const getBenchmarkApplicableTo = (benchmarkId: BenchmarksCisId) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return 'Kubernetes';
     case 'cis_azure':
-      return 'Microsoft Azure';
+      return CLOUD_PROVIDER_NAMES.AZURE;
     case 'cis_aws':
-      return 'Amazon Web Services';
+      return CLOUD_PROVIDER_NAMES.AWS;
     case 'cis_eks':
       return 'Amazon Elastic Kubernetes Service';
     case 'cis_gcp':
-      return 'Google Cloud Provider';
+      return CLOUD_PROVIDER_NAMES.GCP;
+  }
+};
+
+export const getCloudProviderNameFromAbbreviation = (cloudProvider: string) => {
+  switch (cloudProvider) {
+    case 'azure':
+      return CLOUD_PROVIDER_NAMES.AZURE;
+    case 'aws':
+      return CLOUD_PROVIDER_NAMES.AWS;
+    case 'gcp':
+      return CLOUD_PROVIDER_NAMES.GCP;
+    default:
+      return cloudProvider;
   }
 };
 

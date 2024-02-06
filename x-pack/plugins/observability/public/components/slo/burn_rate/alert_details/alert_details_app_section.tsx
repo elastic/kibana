@@ -43,6 +43,7 @@ export default function AlertDetailsAppSection({
   const sloId = alert.fields['kibana.alert.rule.parameters']!.sloId as string;
   const instanceId = alert.fields['kibana.alert.instance.id']!;
   const { isLoading, data: slo } = useFetchSloDetails({ sloId, instanceId });
+  const alertLink = alert.link;
 
   useEffect(() => {
     setAlertSummaryFields([
@@ -54,7 +55,7 @@ export default function AlertDetailsAppSection({
           }
         ),
         value: (
-          <EuiLink data-test-subj="sloLink" href={basePath.prepend(alert.link!)}>
+          <EuiLink data-test-subj="sloLink" href={basePath.prepend(alertLink!)}>
             {slo?.name ?? '-'}
           </EuiLink>
         ),
@@ -73,7 +74,7 @@ export default function AlertDetailsAppSection({
         ),
       },
     ]);
-  }, [alert, rule, ruleLink, setAlertSummaryFields, basePath, slo]);
+  }, [alertLink, rule, ruleLink, setAlertSummaryFields, basePath, slo]);
 
   return (
     <EuiFlexGroup direction="column" data-test-subj="overviewSection">

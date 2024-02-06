@@ -12,7 +12,7 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { sortBy, uniqBy } from 'lodash';
 
 import type { SecondaryAuthorizationHeader } from '../../../../../common/types/models/transform_api_key';
-import { updateEsAssetReferences } from '../../packages/install';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import type { Installation } from '../../../../../common';
 import { ElasticsearchAssetType, PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 

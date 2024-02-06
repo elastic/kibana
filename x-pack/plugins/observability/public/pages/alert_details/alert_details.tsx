@@ -161,9 +161,9 @@ export function AlertDetails() {
       <HeaderMenu />
       <AlertSummary alertSummaryFields={summaryFields} />
       <EuiSpacer size="l" />
-      {AlertDetailsAppSection && rule && (
+      {AlertDetailsAppSection && rule && alertDetail?.formatted && (
         <AlertDetailsAppSection
-          alert={alertDetail}
+          alert={alertDetail.formatted}
           rule={rule}
           timeZone={timeZone}
           setAlertSummaryFields={setSummaryFields}
