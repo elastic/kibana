@@ -124,7 +124,7 @@ export const createThreatSignal = async ({
       pageSize: searchAfterSize,
       ruleExecutionLogger,
       services,
-      sortOrder: 'desc' as const,
+      sortOrder: 'asc' as const,
       trackTotalHits: false,
       tuple,
       wrapHits,

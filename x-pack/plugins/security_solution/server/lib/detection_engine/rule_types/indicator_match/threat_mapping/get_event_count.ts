@@ -59,7 +59,7 @@ export const getEventList = async ({
     filter: queryFilter,
     primaryTimestamp,
     secondaryTimestamp,
-    sortOrder: 'desc',
+    sortOrder: 'asc',
     trackTotalHits: false,
     runtimeMappings,
     overrideBody: eventListConfig,

@@ -2064,6 +2064,7 @@ export default ({ getService }: FtrProviderContext) => {
                 },
               ],
               [ALERT_SUPPRESSION_DOCS_COUNT]: 499,
+              [ALERT_SUPPRESSION_START]: '2020-10-28T06:50:00.000Z',
             });
           });
 

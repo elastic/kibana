@@ -952,7 +952,7 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[0].enrichments, [
+        assertContains(threats[1].enrichments, [
           {
             feed: {},
             indicator: {
@@ -1012,7 +1012,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ]);
 
-        assertContains(threats[1].enrichments, [
+        assertContains(threats[0].enrichments, [
           {
             feed: {},
             indicator: {
@@ -1454,7 +1454,7 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[0].enrichments, [
+        assertContains(threats[1].enrichments, [
           {
             feed: {},
             indicator: {
@@ -1514,7 +1514,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ]);
 
-        assertContains(threats[1].enrichments, [
+        assertContains(threats[0].enrichments, [
           {
             feed: {},
             indicator: {
