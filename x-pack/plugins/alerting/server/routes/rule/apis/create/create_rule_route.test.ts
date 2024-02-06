@@ -216,7 +216,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -333,7 +332,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -451,7 +449,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -569,7 +566,6 @@ describe('createRuleRoute', () => {
                 "params": Object {
                   "foo": true,
                 },
-                "type": "default",
               },
             ],
             "alertTypeId": "1",
@@ -712,7 +708,6 @@ describe('createRuleRoute', () => {
                   "params": Object {
                     "foo": true,
                   },
-                  "type": "default",
                   "uuid": "123-456",
                 },
                 Object {
@@ -721,7 +716,6 @@ describe('createRuleRoute', () => {
                   "params": Object {
                     "foo": true,
                   },
-                  "type": "system",
                   "uuid": "123-456",
                 },
               ],

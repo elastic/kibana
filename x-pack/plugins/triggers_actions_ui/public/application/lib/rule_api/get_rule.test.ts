@@ -88,6 +88,7 @@ describe('loadRule', () => {
       executionStatus: { status: 'ok', lastExecutionDate: '2021-04-01T21:16:46.709Z' },
       actions: [
         {
+          type: 'default',
           group: 'threshold met',
           id: '1',
           params: { documents: [{ dsfsdf: 1212 }] },

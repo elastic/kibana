@@ -106,6 +106,7 @@ describe('createRule', () => {
       actions: [
         {
           actionTypeId: '.server-log',
+          type: 'default',
           group: 'threshold met',
           id: '1',
           params: {

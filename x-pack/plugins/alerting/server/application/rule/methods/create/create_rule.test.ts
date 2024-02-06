@@ -1240,11 +1240,12 @@ describe('create()', () => {
           params: {
             foo: true,
           },
+          type: RuleActionTypes.DEFAULT,
         },
         {
-          group: 'default',
           id: 'system_action-id',
           params: {},
+          type: RuleActionTypes.SYSTEM,
         },
         {
           group: 'default',
@@ -1252,6 +1253,7 @@ describe('create()', () => {
           params: {
             foo: true,
           },
+          type: RuleActionTypes.DEFAULT,
         },
       ],
     });
@@ -1304,11 +1306,6 @@ describe('create()', () => {
       },
     ]);
 
-    actionsClient.isSystemAction.mockReset();
-    actionsClient.isSystemAction.mockReturnValueOnce(false);
-    actionsClient.isSystemAction.mockReturnValueOnce(true);
-    actionsClient.isSystemAction.mockReturnValueOnce(false);
-
     unsecuredSavedObjectsClient.create.mockResolvedValueOnce({
       id: '1',
       type: RULE_SAVED_OBJECT_TYPE,
@@ -1332,7 +1329,6 @@ describe('create()', () => {
             },
           },
           {
-            group: 'default',
             actionRef: 'system_action:system_action-id',
             actionTypeId: 'test',
             params: {},
@@ -1384,12 +1380,15 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test",
-            "group": "default",
             "id": "system_action-id",
             "params": Object {},
+            "type": "system",
+            "uuid": undefined,
           },
           Object {
             "actionTypeId": "test2",
@@ -1398,6 +1397,8 @@ describe('create()', () => {
             "params": Object {
               "foo": true,
             },
+            "type": "default",
+            "uuid": undefined,
           },
         ],
         "alertTypeId": "123",
@@ -1434,7 +1435,6 @@ describe('create()', () => {
             uuid: '111',
           },
           {
-            group: 'default',
             actionRef: 'system_action:system_action-id',
             actionTypeId: 'test',
             params: {},
@@ -1487,7 +1487,6 @@ describe('create()', () => {
         ],
       }
     );
-    expect(actionsClient.isSystemAction).toHaveBeenCalledTimes(3);
   });
 
   test('creates a disabled alert', async () => {
@@ -1673,7 +1672,7 @@ describe('create()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '112',
+            uuid: '115',
           },
         ],
         alertTypeId: '123',
@@ -1865,7 +1864,7 @@ describe('create()', () => {
             actionTypeId: 'test',
             group: 'default',
             params: { foo: true },
-            uuid: '113',
+            uuid: '116',
           },
         ],
         alertTypeId: '123',
@@ -2044,7 +2043,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '115',
+            uuid: '118',
           },
         ],
         alertTypeId: '123',
@@ -2188,7 +2187,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '116',
+            uuid: '119',
           },
         ],
         legacyId: null,
@@ -2332,7 +2331,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '117',
+            uuid: '120',
           },
         ],
         legacyId: null,
@@ -2503,7 +2502,7 @@ describe('create()', () => {
             },
             actionRef: 'action_0',
             actionTypeId: 'test',
-            uuid: '118',
+            uuid: '121',
           },
         ],
         apiKeyOwner: null,
@@ -2892,7 +2891,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '126',
+            uuid: '129',
           },
         ],
         alertTypeId: '123',
@@ -2998,7 +2997,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '127',
+            uuid: '130',
           },
         ],
         legacyId: null,
@@ -3772,7 +3771,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 149"`
+      `"Failed to validate actions due to the following error: Action's alertsFilter  must have either \\"query\\" or \\"timeframe\\" : 152"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3829,7 +3828,7 @@ describe('create()', () => {
       ],
     });
     await expect(rulesClient.create({ data })).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [150]"`
+      `"Failed to validate actions due to the following error: This ruleType (Test) can't have an action with Alerts Filter. Actions: [153]"`
     );
     expect(unsecuredSavedObjectsClient.create).not.toHaveBeenCalled();
     expect(taskManager.schedule).not.toHaveBeenCalled();
@@ -3901,7 +3900,7 @@ describe('create()', () => {
             group: 'default',
             actionTypeId: 'test',
             params: { foo: true },
-            uuid: '151',
+            uuid: '154',
           },
         ],
         alertTypeId: '123',
@@ -4130,13 +4129,13 @@ describe('create()', () => {
               params: {
                 foo: true,
               },
-              uuid: '153',
+              uuid: '156',
             },
             {
               actionRef: 'system_action:system_action-id',
               actionTypeId: '.test',
               params: { foo: 'test' },
-              uuid: '154',
+              uuid: '157',
             },
           ],
           alertTypeId: '123',
@@ -4208,13 +4207,13 @@ describe('create()', () => {
           params: {
             foo: true,
           },
-          uuid: '155',
+          uuid: '158',
         },
         {
           actionRef: 'system_action:system_action-id',
           actionTypeId: '.test',
           params: { foo: 'test' },
-          uuid: '156',
+          uuid: '159',
         },
       ]);
     });
