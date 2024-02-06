@@ -63,7 +63,8 @@
     "@kbn/securitysolution-grouping",
     "@kbn/alerting-plugin",
     "@kbn/code-editor",
-    "@kbn/code-editor-mock"
+    "@kbn/code-editor-mock",
+    "@kbn/logging"
   ],
   "exclude": ["target/**/*"]
 }
