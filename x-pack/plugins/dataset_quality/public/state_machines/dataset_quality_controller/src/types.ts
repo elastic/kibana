@@ -15,18 +15,10 @@ import {
 } from '../../../../common/data_streams_stats';
 import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 
-export interface FlyoutDataset {
-  rawName: string;
-  type: string;
-  name: string;
-  namespace: string;
-  title: string;
-  integration?: {
-    name: string;
-    title: string;
-    version: string;
-  };
-}
+export type FlyoutDataset = Omit<
+  DataStreamStat,
+  'type' | 'size' | 'sizeBytes' | 'lastActivity' | 'degradedDocs'
+> & { type: string };
 
 interface TableCriteria {
   page: number;
@@ -34,6 +26,15 @@ interface TableCriteria {
   sort: {
     field: SortField;
     direction: Direction;
+  };
+}
+
+interface FiltersCriteria {
+  inactive: boolean;
+  fullNames: boolean;
+  timeRange: {
+    from: string;
+    to: string;
   };
 }
 
@@ -46,6 +47,10 @@ export interface WithFlyoutOptions {
     dataset?: FlyoutDataset;
     datasetDetails?: DataStreamDetails;
   };
+}
+
+export interface WithFilters {
+  filters: FiltersCriteria;
 }
 
 export interface WithDataStreamStats {
@@ -64,7 +69,8 @@ export type DefaultDatasetQualityControllerState = WithTableOptions &
   Partial<WithDataStreamStats> &
   Partial<WithDegradedDocs> &
   WithFlyoutOptions &
-  WithDatasets;
+  WithDatasets &
+  WithFilters;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -116,6 +122,12 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'CLOSE_FLYOUT';
+    }
+  | {
+      type: 'TOGGLE_INACTIVE_DATASETS';
+    }
+  | {
+      type: 'TOGGLE_FULL_DATASET_NAMES';
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

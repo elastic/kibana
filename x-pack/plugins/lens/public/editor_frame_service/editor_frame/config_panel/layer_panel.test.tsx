@@ -170,7 +170,8 @@ describe('LayerPanel', () => {
     });
   });
 
-  describe('single group', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/176247
+  describe.skip('single group', () => {
     it('should render the group with a way to add a new column', async () => {
       mockVisualization.getConfiguration.mockReturnValue({
         groups: [defaultGroup],

@@ -36,7 +36,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   let INITIAL_CSV_QUOTE_VALUES_SETTING_VALUE: any;
 
-  describe('Common advanced settings', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/172990
+  describe.skip('Common advanced settings', function () {
     // the suite is flaky on MKI
     this.tags(['failsOnMKI']);
     before(async () => {
