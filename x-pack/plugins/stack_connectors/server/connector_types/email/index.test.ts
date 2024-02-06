@@ -845,7 +845,11 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
 
     expect(renderedParams.message).toBe('\\*bold\\*');
     expect(renderedParams).toMatchInlineSnapshot(`
@@ -887,7 +891,11 @@ describe('execute()', () => {
     const variables = {
       rogue: '*bold*',
     };
-    const renderedParams = connectorType.renderParameterTemplates!(paramsWithTemplates, variables);
+    const renderedParams = connectorType.renderParameterTemplates!(
+      mockedLogger,
+      paramsWithTemplates,
+      variables
+    );
     // Yes, this is tested in the snapshot below, but it's double-escaped there,
     // so easier to see here that the escaping is correct.
     expect(renderedParams.message).toBe('\\*bold\\*');
