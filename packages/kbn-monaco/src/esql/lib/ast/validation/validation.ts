@@ -10,6 +10,7 @@ import uniqBy from 'lodash/uniqBy';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
+  FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
 import {
@@ -171,56 +172,76 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isColumnItem(actualArg) && actualArg.name) {
-    const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
-    if (!columnCheck) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownColumn',
-          values: {
-            name: actualArg.name,
-          },
-          locations: actualArg.location,
-        })
-      );
-    } else {
-      if (actualArg.name === '*') {
-        // if function does not support wildcards return a specific error
-        if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'noWildcardSupportAsArg',
-              values: {
-                name: astFunction.name,
-              },
-              locations: actualArg.location,
-            })
-          );
-        }
-        // do not validate any further for now, only count() accepts wildcard as args...
+  if (isColumnItem(actualArg)) {
+    if (actualArg.name) {
+      const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
+      if (!columnCheck) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownColumn',
+            values: {
+              name: actualArg.name,
+            },
+            locations: actualArg.location,
+          })
+        );
       } else {
-        // guaranteed by the check above
-        const columnHit = getColumnHit(nameHit!, references);
-        // check the type of the column hit
-        const typeHit = columnHit!.type;
-        if (!isEqualType(actualArg, argDef, references, parentCommand)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'wrongArgumentType',
-              values: {
-                name: astFunction.name,
-                argType: argDef.type,
-                value: actualArg.name,
-                givenType: typeHit,
-              },
-              locations: actualArg.location,
-            })
-          );
+        if (actualArg.name === '*') {
+          // if function does not support wildcards return a specific error
+          if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'noWildcardSupportAsArg',
+                values: {
+                  name: astFunction.name,
+                },
+                locations: actualArg.location,
+              })
+            );
+          }
+          // do not validate any further for now, only count() accepts wildcard as args...
+        } else {
+          // guaranteed by the check above
+          const columnHit = getColumnHit(nameHit!, references);
+          // check the type of the column hit
+          const typeHit = columnHit!.type;
+          if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'wrongArgumentType',
+                values: {
+                  name: astFunction.name,
+                  argType: argDef.type,
+                  value: actualArg.name,
+                  givenType: typeHit,
+                },
+                locations: actualArg.location,
+              })
+            );
+          }
         }
       }
     }
   }
   return messages;
+}
+
+function extractCompatibleSignaturesForFunction(
+  fnDef: FunctionDefinition,
+  astFunction: ESQLFunction
+) {
+  return fnDef.signatures.filter((def) => {
+    if (def.infiniteParams && astFunction.args.length > 0) {
+      return true;
+    }
+    if (def.minParams && astFunction.args.length >= def.minParams) {
+      return true;
+    }
+    if (astFunction.args.length === def.params.length) {
+      return true;
+    }
+    return astFunction.args.length >= def.params.filter(({ optional }) => !optional).length;
+  });
 }
 
 function validateFunction(
@@ -283,18 +304,7 @@ function validateFunction(
       return messages;
     }
   }
-  const matchingSignatures = fnDefinition.signatures.filter((def) => {
-    if (def.infiniteParams && astFunction.args.length > 0) {
-      return true;
-    }
-    if (def.minParams && astFunction.args.length >= def.minParams) {
-      return true;
-    }
-    if (astFunction.args.length === def.params.length) {
-      return true;
-    }
-    return astFunction.args.length >= def.params.filter(({ optional }) => !optional).length;
-  });
+  const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
     const numArgs = fnDefinition.signatures[0].params.filter(({ optional }) => !optional).length;
     messages.push(
@@ -326,9 +336,9 @@ function validateFunction(
       }
     }
   }
-  // check if the definition has some warning to show:
-  if (fnDefinition.warning) {
-    const payloads = fnDefinition.warning(astFunction);
+  // check if the definition has some specific validation to apply:
+  if (fnDefinition.validate) {
+    const payloads = fnDefinition.validate(astFunction);
     if (payloads.length) {
       messages.push(...payloads);
     }
@@ -400,6 +410,7 @@ function validateFunction(
       failingSignatures.push(failingSignature);
     }
   }
+
   if (failingSignatures.length && failingSignatures.length === matchingSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
       .map((arr, index) => ({ index, count: arr.length }))

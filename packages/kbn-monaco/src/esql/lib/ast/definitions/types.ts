@@ -29,7 +29,7 @@ export interface FunctionDefinition {
     returnType: string;
     examples?: string[];
   }>;
-  warning?: (fnDef: ESQLFunction) => ESQLMessage[];
+  validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
 export interface CommandBaseDefinition {

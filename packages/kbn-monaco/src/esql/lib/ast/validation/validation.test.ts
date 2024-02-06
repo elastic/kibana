@@ -27,21 +27,26 @@ const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_poin
 
 function getCallbackMocks() {
   return {
-    getFieldsFor: jest.fn(async ({ query }) =>
-      /enrich/.test(query)
-        ? [
-            { name: 'otherField', type: 'string' },
-            { name: 'yetAnotherField', type: 'number' },
-          ]
-        : /unsupported_index/.test(query)
-        ? [{ name: 'unsupported_field', type: 'unsupported' }]
-        : [
-            ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-            { name: 'any#Char$Field', type: 'number' },
-            { name: 'kubernetes.something.something', type: 'number' },
-            { name: '@timestamp', type: 'date' },
-          ]
-    ),
+    getFieldsFor: jest.fn(async ({ query }) => {
+      if (/enrich/.test(query)) {
+        return [
+          { name: 'otherField', type: 'string' },
+          { name: 'yetAnotherField', type: 'number' },
+        ];
+      }
+      if (/unsupported_index/.test(query)) {
+        return [{ name: 'unsupported_field', type: 'unsupported' }];
+      }
+      if (/dissect|grok/.test(query)) {
+        return [{ name: 'firstWord', type: 'string' }];
+      }
+      return [
+        ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+        { name: 'any#Char$Field', type: 'number' },
+        { name: 'kubernetes.something.something', type: 'number' },
+        { name: '@timestamp', type: 'date' },
+      ];
+    }),
     getSources: jest.fn(async () =>
       ['a', 'index', 'otherIndex', '.secretIndex', 'my-index', 'unsupported_index'].map((name) => ({
         name,
@@ -374,7 +379,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(`row var = ${signatureStringCorrect}`, []);
-        testErrorsAndWarnings(`row ${signatureStringCorrect}`);
+        testErrorsAndWarnings(`row ${signatureStringCorrect}`, []);
 
         if (alias) {
           for (const otherName of alias) {
@@ -412,7 +417,7 @@ describe('validation logic', () => {
             )[0].declaration
           );
 
-          testErrorsAndWarnings(`row var = ${signatureString}`);
+          testErrorsAndWarnings(`row var = ${signatureString}`, []);
 
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
@@ -736,27 +741,28 @@ describe('validation logic', () => {
       "SyntaxError: missing STRING at '%'",
     ]);
     // Do not try to validate the dissect pattern string
-    testErrorsAndWarnings('from a | dissect stringField "%{a}"', []);
-    testErrorsAndWarnings('from a | dissect numberField "%{a}"', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}"', []);
+    testErrorsAndWarnings('from a | dissect numberField "%{firstWord}"', [
       'DISSECT only supports string type values, found [numberField] of type number',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" option ', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" option = ', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option = ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET} but found "<EOF>"',
       'Invalid option for DISSECT: [option]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" option = 1', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option = 1', [
       'Invalid option for DISSECT: [option]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = "-"', []);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" ignore_missing = true', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" append_separator = "-"', []);
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" ignore_missing = true', [
       'Invalid option for DISSECT: [ignore_missing]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = true', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" append_separator = true', [
       'Invalid value for DISSECT append_separator: expected a string, but was [true]',
     ]);
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" | keep firstWord', []);
     // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
     //   'Using wildcards (*) in dissect is not allowed [s*]',
     // ]);
@@ -776,10 +782,11 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a | grok stringField %a', ["SyntaxError: missing STRING at '%'"]);
     // Do not try to validate the grok pattern string
-    testErrorsAndWarnings('from a | grok stringField "%{a}"', []);
-    testErrorsAndWarnings('from a | grok numberField "%{a}"', [
+    testErrorsAndWarnings('from a | grok stringField "%{firstWord}"', []);
+    testErrorsAndWarnings('from a | grok numberField "%{firstWord}"', [
       'GROK only supports string type values, found [numberField] of type number',
     ]);
+    testErrorsAndWarnings('from a | grok stringField "%{firstWord}" | keep firstWord', []);
     // testErrorsAndWarnings('from a | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
     // ]);
@@ -1151,6 +1158,37 @@ describe('validation logic', () => {
         }
       }
     }
+    testErrorsAndWarnings(
+      'from a | eval log10(-1)',
+      [],
+      ['Log of a negative number results in null: -1']
+    );
+    testErrorsAndWarnings(
+      'from a | eval log(-1)',
+      [],
+      ['Log of a negative number results in null: -1']
+    );
+    testErrorsAndWarnings(
+      'from a | eval log(-1, 20)',
+      [],
+      ['Log of a negative number results in null: -1']
+    );
+    testErrorsAndWarnings(
+      'from a | eval log(-1, -20)',
+      [],
+      [
+        'Log of a negative number results in null: -1',
+        'Log of a negative number results in null: -20',
+      ]
+    );
+    testErrorsAndWarnings(
+      'from a | eval var0 = log(-1, -20)',
+      [],
+      [
+        'Log of a negative number results in null: -1',
+        'Log of a negative number results in null: -20',
+      ]
+    );
     for (const op of ['>', '>=', '<', '<=', '==']) {
       testErrorsAndWarnings(`from a | eval numberField ${op} 0`, []);
       testErrorsAndWarnings(`from a | eval NOT numberField ${op} 0`, []);

@@ -11,6 +11,28 @@ import { isLiteralItem } from '../shared/helpers';
 import { ESQLFunction } from '../types';
 import { FunctionDefinition } from './types';
 
+const validateLogFunctions = (fnDef: ESQLFunction) => {
+  const messages = [];
+  // do not really care here about the base and field
+  // just need to check both values are not negative
+  for (const arg of fnDef.args) {
+    if (isLiteralItem(arg) && arg.value < 0) {
+      messages.push({
+        type: 'warning' as const,
+        code: 'logOfNegativeValue',
+        text: i18n.translate('monaco.esql.divide.warning.logOfNegativeValue', {
+          defaultMessage: 'Log of a negative number results in null: {value}',
+          values: {
+            value: arg.value,
+          },
+        }),
+        location: arg.location,
+      });
+    }
+  }
+  return messages;
+};
+
 export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
     name: 'round',
@@ -70,6 +92,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         examples: [`from index | eval log10_value = log10(field)`],
       },
     ],
+    validate: validateLogFunctions,
   },
 
   {
@@ -81,39 +104,17 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'base', type: 'number' },
-          { name: 'field', type: 'number' },
+          { name: 'baseOrField', type: 'number' },
+          { name: 'field', type: 'number', optional: true },
         ],
         returnType: 'number',
-        examples: [`from index | eval log2_value = log(2, field)`],
-      },
-      {
-        params: [{ name: 'field', type: 'number' }],
-        returnType: 'number',
-        examples: [`from index | eval loge_value = log(field)`],
+        examples: [
+          `from index | eval log2_value = log(2, field)`,
+          `from index | eval loge_value = log(field)`,
+        ],
       },
     ],
-    warning: (fnDef: ESQLFunction) => {
-      const messages = [];
-      // do not really care here about the base and field
-      // just need to check both values are not negative
-      for (const arg of fnDef.args) {
-        if (isLiteralItem(arg) && arg.value < 0) {
-          messages.push({
-            type: 'warning' as const,
-            code: 'logOfNegativeValue',
-            text: i18n.translate('monaco.esql.divide.warning.logOfNegativeValue', {
-              defaultMessage: 'Log of a negative number results in null: {value}',
-              values: {
-                value: arg.value,
-              },
-            }),
-            location: fnDef.location,
-          });
-        }
-      }
-      return messages;
-    },
+    validate: validateLogFunctions,
   },
   {
     name: 'pow',

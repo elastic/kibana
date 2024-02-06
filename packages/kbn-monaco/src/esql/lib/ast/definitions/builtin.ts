@@ -13,7 +13,7 @@ function createMathDefinition(
   name: string,
   types: Array<string | string[]>,
   description: string,
-  warning?: FunctionDefinition['warning']
+  validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
   return {
     type: 'builtin',
@@ -39,7 +39,7 @@ function createMathDefinition(
         returnType: type,
       };
     }),
-    warning,
+    validate,
   };
 }
 
@@ -51,7 +51,7 @@ function createComparisonDefinition(
     name: string;
     description: string;
   },
-  warning?: FunctionDefinition['warning']
+  validate?: FunctionDefinition['validate']
 ): FunctionDefinition {
   return {
     type: 'builtin' as const,
@@ -59,6 +59,7 @@ function createComparisonDefinition(
     description,
     supportedCommands: ['eval', 'where', 'row'],
     supportedOptions: ['by'],
+    validate,
     signatures: [
       {
         params: [
