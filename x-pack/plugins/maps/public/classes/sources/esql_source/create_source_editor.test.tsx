@@ -10,9 +10,7 @@ import { render, waitFor } from '@testing-library/react';
 import type { DataViewSpec } from '@kbn/data-plugin/common';
 import { CreateSourceEditor } from './create_source_editor';
 
-jest.mock('../../../kibana_services', () => ({}));
-
-describe('CreateSourceEditor', () => {
+jest.mock('../../../kibana_services', () => {
   const DEFAULT_DATA_VIEW_INDEX_PATTERN = 'logs';
   const defaultDataView = {
     fields: [
@@ -43,9 +41,8 @@ describe('CreateSourceEditor', () => {
     },
   };
 
-  beforeAll(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../../kibana_services').getIndexPatternService = () => {
+  return {
+    getIndexPatternService() {
       return {
         create: async (spec: DataViewSpec) => {
           return {
@@ -60,9 +57,11 @@ describe('CreateSourceEditor', () => {
           return defaultDataView;
         },
       };
-    };
-  });
+    },
+  };
+});
 
+describe('CreateSourceEditor', () => {
   test('should preview default data view on load', async () => {
     const onSourceConfigChange = jest.fn();
     render(<CreateSourceEditor onSourceConfigChange={onSourceConfigChange} />);
