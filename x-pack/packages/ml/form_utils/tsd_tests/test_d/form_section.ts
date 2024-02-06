@@ -7,7 +7,7 @@
 
 import { expectType } from 'tsd';
 
-import { createFormSection, createFormSectionsMap, type FormSection } from '../../form_section';
+import { createFormSection, createFormSectionsMap, type FormSection } from '../../src/form_section';
 
 const test1Section = createFormSection('test1');
 expectType<FormSection<'test1'>>(test1Section);

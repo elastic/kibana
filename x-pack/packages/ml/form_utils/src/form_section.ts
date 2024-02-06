@@ -26,7 +26,7 @@ export function createFormSectionsMap<FS extends string>(formSections: Array<For
   }, {} as Record<FS, FormSection<FS>>);
 }
 
-export const createFormSection = <FS extends string, C>(
+export const createFormSection = <FS extends string, C extends object>(
   formSectionName: FS,
   configFieldName?: Path<C>,
   config?: C,

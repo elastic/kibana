@@ -7,7 +7,7 @@
 
 import { expectType } from 'tsd';
 
-import { createFormField, createFormFieldsMap, type FormField } from '../../form_field';
+import { createFormField, createFormFieldsMap, type FormField } from '../../src/form_field';
 
 const firstName = createFormField('firstName');
 expectType<FormField<'firstName', string, string>>(firstName);

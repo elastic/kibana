@@ -6,7 +6,7 @@
  */
 
 import { getNestedProperty } from '@kbn/ml-nested-property';
-import type { DotObject } from '@kbn/utility-types';
+import type { Path } from 'react-hook-form';
 
 import type { ValueParserName } from './value_parsers';
 
@@ -35,9 +35,14 @@ export function createFormFieldsMap<FF extends string, FS extends string, VN ext
   }, {} as Record<FF, FormField<FF, FS, VN>>);
 }
 
-export const createFormField = <FF extends string, FS extends string, VN extends string, C>(
+export const createFormField = <
+  FF extends string,
+  FS extends string,
+  VN extends string,
+  C extends object
+>(
   formFieldName: FF,
-  configFieldName?: keyof DotObject<C>,
+  configFieldName?: Path<C>,
   config?: C,
   overloads?: Partial<FormField<FF, FS, VN>>
 ): FormField<FF, FS, VN> => {

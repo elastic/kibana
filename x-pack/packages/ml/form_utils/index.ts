@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { capitalizeFirstLetter } from './utils/capitalize_first_letter';
-export type { Validator } from './validator';
-export { stringValidator } from './validators/string_validator';
-export { valueParsers, type ValueParserName } from './value_parsers';
+export { capitalizeFirstLetter } from './src/utils/capitalize_first_letter';
+export type { Validator } from './src/validator';
+export { stringValidator } from './src/validators/string_validator';
+export { valueParsers, type ValueParserName } from './src/value_parsers';

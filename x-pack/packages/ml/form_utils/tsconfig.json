@@ -19,5 +19,6 @@
     "@kbn/i18n",
     "@kbn/ml-is-defined",
     "@kbn/ml-nested-property",
+    "@kbn/utility-types",
   ]
 }

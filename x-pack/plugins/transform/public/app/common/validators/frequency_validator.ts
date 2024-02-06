@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Validator } from '@kbn/ml-form-utils/validator';
+import type { Validator } from '@kbn/ml-form-utils';
 
 import { frequencyNotValidErrorMessage } from './messages';
 import { parseDurationAboveZero } from './parse_duration_above_zero';
