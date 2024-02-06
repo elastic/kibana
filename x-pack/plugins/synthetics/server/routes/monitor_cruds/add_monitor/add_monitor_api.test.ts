@@ -68,7 +68,7 @@ describe('AddNewMonitorsPublicAPI', () => {
             type: 'tcp',
           } as any,
           {} as any,
-          {} as any
+          []
         )
       ).toEqual({
         __ui: { is_tls_enabled: false },
@@ -116,7 +116,7 @@ describe('AddNewMonitorsPublicAPI', () => {
             type: 'icmp',
           } as any,
           {} as any,
-          {} as any
+          []
         )
       ).toEqual({
         alert: { status: { enabled: true }, tls: { enabled: true } },
