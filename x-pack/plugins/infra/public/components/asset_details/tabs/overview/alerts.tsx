@@ -53,6 +53,14 @@ export const AlertsSummaryContent = ({
     [assetName, dateRange]
   );
 
+  const onLoaded = (alertsCount?: AlertsCount) => {
+    const hasActiveAlerts =
+      typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount > 0;
+
+    setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
+    setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
+  };
+
   return (
     <>
       <CollapsibleSection
@@ -80,8 +88,7 @@ export const AlertsSummaryContent = ({
         }
       >
         <MemoAlertSummaryWidget
-          setIsAlertSectionOpen={setIsAlertSectionOpen}
-          setActiveAlertsCount={setActiveAlertsCount}
+          onLoaded={onLoaded}
           alertsQuery={alertsEsQueryByStatus}
           dateRange={dateRange}
         />
@@ -102,17 +109,11 @@ export const AlertsSummaryContent = ({
 interface MemoAlertSummaryWidgetProps {
   alertsQuery: AlertsEsQuery;
   dateRange: TimeRange;
-  setIsAlertSectionOpen: (value: EuiAccordionProps['forceState']) => void;
-  setActiveAlertsCount: (value: number) => void;
+  onLoaded: (alertsCount?: AlertsCount) => void;
 }
 
 const MemoAlertSummaryWidget = React.memo(
-  ({
-    alertsQuery,
-    dateRange,
-    setIsAlertSectionOpen,
-    setActiveAlertsCount,
-  }: MemoAlertSummaryWidgetProps) => {
+  ({ alertsQuery, dateRange, onLoaded }: MemoAlertSummaryWidgetProps) => {
     const { services } = useKibanaContextForPlugin();
 
     const summaryTimeRange = useSummaryTimeRange(dateRange);
@@ -124,21 +125,13 @@ const MemoAlertSummaryWidget = React.memo(
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
 
-    const getAlertsCount = (alertsCount: AlertsCount) => {
-      const hasActiveAlerts =
-        typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount > 0;
-
-      setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
-      setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
-    };
-
     return (
       <AlertSummaryWidget
         chartProps={chartProps}
         featureIds={infraAlertFeatureIds}
         filter={alertsQuery}
         timeRange={summaryTimeRange}
-        getAlertsCount={(alertsCount) => getAlertsCount(alertsCount)}
+        onLoaded={onLoaded}
         fullSize
         hideChart
       />

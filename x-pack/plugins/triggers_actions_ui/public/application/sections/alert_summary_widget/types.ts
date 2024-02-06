@@ -43,6 +43,5 @@ export interface AlertSummaryWidgetProps {
   timeRange: AlertSummaryTimeRange;
   chartProps: ChartProps;
   hideChart?: boolean;
-  onLoaded?: () => void;
-  getAlertsCount?: (alertsCount: AlertsCount) => void;
+  onLoaded?: (alertsCount?: AlertsCount) => void;
 }

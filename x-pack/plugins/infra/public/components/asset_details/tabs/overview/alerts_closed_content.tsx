@@ -10,8 +10,12 @@ import { i18n } from '@kbn/i18n';
 export const AlertsClosedContent = ({ activeAlertCount }: { activeAlertCount?: number }) => {
   const shouldRenderAlertsClosedContent = typeof activeAlertCount === 'number';
 
-  return shouldRenderAlertsClosedContent ? (
-    activeAlertCount > 0 ? (
+  if (!shouldRenderAlertsClosedContent) {
+    return null;
+  }
+
+  if (activeAlertCount > 0) {
+    return (
       <span data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts">
         {i18n.translate('xpack.infra.assetDetails.activeAlertsContentClosedSection', {
           defaultMessage:
@@ -19,12 +23,14 @@ export const AlertsClosedContent = ({ activeAlertCount }: { activeAlertCount?: n
           values: { activeAlertCount },
         })}
       </span>
-    ) : (
-      <span data-test-subj="infraAssetDetailsAlertsClosedContentNoAlerts">
-        {i18n.translate('xpack.infra.assetDetails.noActiveAlertsContentClosedSection', {
-          defaultMessage: 'No active alerts',
-        })}
-      </span>
-    )
-  ) : null;
+    );
+  }
+
+  return (
+    <span data-test-subj="infraAssetDetailsAlertsClosedContentNoAlerts">
+      {i18n.translate('xpack.infra.assetDetails.noActiveAlertsContentClosedSection', {
+        defaultMessage: 'No active alerts',
+      })}
+    </span>
+  );
 };

@@ -24,7 +24,6 @@ export const AlertSummaryWidget = ({
   timeRange,
   hideChart,
   onLoaded,
-  getAlertsCount,
 }: AlertSummaryWidgetProps) => {
   const {
     alertSummary: { activeAlertCount, activeAlerts, recoveredAlertCount },
@@ -38,12 +37,9 @@ export const AlertSummaryWidget = ({
 
   useEffect(() => {
     if (!isLoading && onLoaded) {
-      onLoaded();
+      onLoaded({ activeAlertCount, recoveredAlertCount });
     }
-    if (!isLoading && getAlertsCount) {
-      getAlertsCount({ activeAlertCount, recoveredAlertCount });
-    }
-  }, [activeAlertCount, getAlertsCount, isLoading, onLoaded, recoveredAlertCount]);
+  }, [activeAlertCount, isLoading, onLoaded, recoveredAlertCount]);
 
   if (isLoading)
     return <AlertSummaryWidgetLoader fullSize={fullSize} isLoadingWithoutChart={hideChart} />;
