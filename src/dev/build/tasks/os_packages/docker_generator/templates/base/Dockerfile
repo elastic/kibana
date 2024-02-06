@@ -73,7 +73,7 @@ RUN for iter in {1..10}; do \
       {{packageManager}} update  && \
       {{packageManager}} upgrade -y  && \
       {{packageManager}} install -y --no-install-recommends \
-       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl {{#fips}}perl build-essential {{/fips}}&& \
+       fontconfig fonts-liberation libnss3 libfontconfig1 ca-certificates curl && \
       {{packageManager}} clean && \
       rm -rf /var/lib/apt/lists/* && exit_code=0 && break || exit_code=$? && echo "{{packageManager}} error: retry $iter in 10s" && \
       sleep 10; \
