@@ -9,7 +9,10 @@ import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { BASE_ALERTING_API_PATH, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { v4 } from 'uuid';
-import { CreateRuleRequestBody } from '@kbn/alerting-plugin/common/routes/rule/apis/create';
+import {
+  CreateRuleRequestBody,
+  CreateRuleResponse,
+} from '@kbn/alerting-plugin/common/routes/rule/apis/create';
 import { useKibana } from '../utils/kibana_react';
 
 export function useCreateRule<Params extends RuleTypeParams = never>() {
@@ -18,7 +21,11 @@ export function useCreateRule<Params extends RuleTypeParams = never>() {
     notifications: { toasts },
   } = useKibana().services;
 
-  const createRule = useMutation<string, string, { rule: CreateRuleRequestBody<Params> }>(
+  const createRule = useMutation<
+    CreateRuleResponse<Params>,
+    Error,
+    { rule: CreateRuleRequestBody<Params> }
+  >(
     ['createRule'],
     ({ rule }) => {
       try {
