@@ -20,5 +20,9 @@ node scripts/build \
 # --skip-platform-folders \
 # --skip-cdn-assets \
 
-docker load <"target/kibana-ubi-fips-${BASE_VERSION}-SNAPSHOT-docker-image.tar.gz"
+# Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
+cd "$KIBANA_DIR/target"
+buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+
+docker load <"kibana-ubi-fips-${BASE_VERSION}-SNAPSHOT-docker-image.tar.gz"
 docker run --rm -it -p 5601:5601/tcp "docker.elastic.co/kibana/kibana-ubi-fips:${BASE_VERSION}-SNAPSHOT-${BUILDKITE_COMMIT}"
