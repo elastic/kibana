@@ -49,6 +49,8 @@ export function createProfilingEsClient({
       costPervCPUPerHour,
       pervCPUWattArm64,
       pervCPUWattX86,
+      indices,
+      stacktraceIdsField,
     }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
@@ -66,6 +68,8 @@ export function createProfilingEsClient({
               datacenter_pue: datacenterPUE,
               aws_cost_factor: awsCostDiscountRate,
               cost_per_core_hour: costPervCPUPerHour,
+              indices,
+              stacktrace_ids_field: stacktraceIdsField,
             },
           },
           {
@@ -114,30 +118,6 @@ export function createProfilingEsClient({
       stacktraceIdsField,
     }) {
       const controller = new AbortController();
-      console.log(
-        '#####',
-        JSON.stringify(
-          {
-            method: 'POST',
-            path: encodeURI('/_profiling/flamegraph'),
-            body: {
-              query,
-              sample_size: sampleSize,
-              requested_duration: durationSeconds,
-              co2_per_kwh: co2PerKWH,
-              per_core_watt_x86: pervCPUWattX86,
-              per_core_watt_arm64: pervCPUWattArm64,
-              datacenter_pue: datacenterPUE,
-              aws_cost_factor: awsCostDiscountRate,
-              cost_per_core_hour: costPervCPUPerHour,
-              indices,
-              stacktrace_ids_field: stacktraceIdsField,
-            },
-          },
-          null,
-          2
-        )
-      );
 
       const promise = withProfilingSpan('_profiling/flamegraph', () => {
         return esClient.transport.request(

@@ -27,6 +27,8 @@ export interface FetchFunctionsParams {
   kuery: string;
   startIndex: number;
   endIndex: number;
+  indices?: string;
+  stacktraceIdsField?: string;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -40,6 +42,8 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
     kuery,
     startIndex,
     endIndex,
+    indices,
+    stacktraceIdsField,
   }: FetchFunctionsParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
@@ -77,6 +81,8 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         pervCPUWattArm64,
         awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
         costPervCPUPerHour,
+        indices,
+        stacktraceIdsField,
       }
     );
 
