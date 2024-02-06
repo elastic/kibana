@@ -1,6 +1,6 @@
 # @kbn/security-hardening
 
-A pacakage counterpart of `src/setup_node_env/harden` - containing overrides, utilities, and tools to reduce potential vulnerability.
+A package counterpart of `src/setup_node_env/harden` - containing overrides, utilities, and tools to reduce potential vulnerability.
 
 ## console
 
