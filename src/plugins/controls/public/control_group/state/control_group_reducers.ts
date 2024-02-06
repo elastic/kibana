@@ -31,11 +31,11 @@ export const controlGroupReducers = {
   ) => {
     state.componentState.lastSavedInput = action.payload;
   },
-  setLastSavedOutput: (
+  setLastSavedFilters: (
     state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupComponentState['lastSavedOutput']>
+    action: PayloadAction<ControlGroupComponentState['lastSavedFilters']>
   ) => {
-    state.componentState.lastSavedOutput = action.payload;
+    state.componentState.lastSavedFilters = action.payload;
   },
   setUnpublishedFilters: (
     state: WritableDraft<ControlGroupReduxState>,

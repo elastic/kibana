@@ -11,7 +11,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, first, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, first, skip, filter } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -24,7 +24,7 @@ import {
   persistableControlGroupInputKeys,
 } from '../../../common';
 import { pluginServices } from '../../services';
-import { ControlEmbeddable, ControlInput, ControlOutput, isClearableControl } from '../../types';
+import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
 import { openAddDataControlFlyout } from '../editor/open_add_data_control_flyout';
 import { openEditControlGroupFlyout } from '../editor/open_edit_control_group_flyout';
@@ -105,14 +105,11 @@ export class ControlGroupContainer extends Container<
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
-  public lastSavedFilters$: Subject<PersistableControlGroupInput>;
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
   public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
 
   public fieldFilterPredicate: FieldFilterPredicate | undefined;
-
-  // public unappliedState$ = BehaviorSubject<
 
   constructor(
     reduxToolsPackage: ReduxToolsPackage,
@@ -134,7 +131,6 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // start diffing control group state
-    this.lastSavedFilters$ = new Subject();
     this.unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
     const diffingMiddleware = startDiffingControlGroupState.bind(this)();
 
@@ -157,43 +153,35 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
-    // when all children are ready setup subscriptions
+    // when all children are ready setup subscriptions + publish current filters
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
       this.setupSubscriptions();
       const { filters, timeslice } = this.recalculateFilters();
       this.publishFilters({ filters, timeslice });
       this.initialized$.next(true);
-      this.lastSavedFilters$.next(initialComponentState?.lastSavedInput);
     });
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
 
   private setupSubscriptions = () => {
+    /**
+     * on initialization, in order for comparison to be performed, calculate the last saved filters based on the
+     * selections from the last saved input and save them to component state. This is done as a subscription so that
+     * it can be done async without actually slowing down the loading of the controls.
+     */
     this.subscriptions.add(
-      this.lastSavedFilters$.subscribe(async () => {
-        const {
-          componentState: { lastSavedInput },
-        } = this.getState();
-
-        const panels = lastSavedInput.panels;
-        let filtersArray: Filter[] = [];
-        await Promise.all(
-          Object.values(this.children).map(async (child) => {
-            if (panels[child.id]) {
-              const filters2 =
-                (await (child as ControlEmbeddable).selectionsToFilters?.(
-                  panels[child.id].explicitInput
-                )) ?? [];
-              if (filters2) {
-                filtersArray = [...filtersArray, ...filters2];
-              }
-            }
-          })
-        );
-        this.dispatch.setLastSavedOutput({ filters: filtersArray });
-      })
+      this.initialized$
+        .pipe(
+          filter((isInitialized) => isInitialized),
+          first()
+        )
+        .subscribe(async () => {
+          const { lastSavedInput } = this.getState().componentState;
+          const filtersArray = await this.calculateFiltersFromSelections(lastSavedInput.panels);
+          this.dispatch.setLastSavedFilters(filtersArray);
+        })
     );
 
     /**
@@ -203,11 +191,9 @@ export class ControlGroupContainer extends Container<
       this.getInput$()
         .pipe(
           skip(1),
-          distinctUntilChanged((a: ControlGroupInput, b: ControlGroupInput) =>
-            controlOrdersAreEqual(a.panels, b.panels)
-          )
+          distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
         )
-        .subscribe((input: ControlGroupInput) => {
+        .subscribe((input) => {
           this.recalculateDataViews();
           this.recalculateFilters$.next(null);
           const childOrderCache = cachedChildEmbeddableOrder(input.panels);
@@ -223,8 +209,7 @@ export class ControlGroupContainer extends Container<
         .pipe(
           skip(1),
           distinctUntilChanged(
-            (a: ControlGroupInput, b: ControlGroupInput) =>
-              Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
+            (a, b) => Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
           )
         )
         .subscribe(() => {
@@ -262,7 +247,7 @@ export class ControlGroupContainer extends Container<
   public setSavedState(lastSavedInput: PersistableControlGroupInput): void {
     batch(() => {
       this.dispatch.setLastSavedInput(lastSavedInput);
-      this.dispatch.setLastSavedOutput({ filters: this.getOutput().filters });
+      this.dispatch.setLastSavedFilters(this.getOutput().filters);
     });
   }
 
@@ -272,16 +257,16 @@ export class ControlGroupContainer extends Container<
       componentState: { lastSavedInput },
     } = this.getState();
 
-    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput, true)) {
+    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
       this.updateInput(lastSavedInput);
       if (showApplySelections) {
         /** Calling reset should force the changes to be published */
         this.recalculateFilters$.pipe(first()).subscribe(() => {
           const { filters, timeslice } = this.recalculateFilters();
           this.publishFilters({ filters, timeslice });
+          this.dispatch.setLastSavedFilters(filters);
         });
       }
-      this.lastSavedFilters$.next(lastSavedInput);
     }
   }
 
@@ -366,6 +351,26 @@ export class ControlGroupContainer extends Container<
     });
     return { filters: allFilters, timeslice };
   };
+
+  private async calculateFiltersFromSelections(
+    panels: PersistableControlGroupInput['panels']
+  ): Promise<Filter[]> {
+    let filtersArray: Filter[] = [];
+    await Promise.all(
+      Object.values(this.children).map(async (child) => {
+        if (panels[child.id]) {
+          const filters2 =
+            (await (child as ControlEmbeddable).selectionsToFilters?.(
+              panels[child.id].explicitInput
+            )) ?? [];
+          if (filters2) {
+            filtersArray = [...filtersArray, ...filters2];
+          }
+        }
+      })
+    );
+    return filtersArray;
+  }
 
   public tryPublishFilters = ({
     filters,

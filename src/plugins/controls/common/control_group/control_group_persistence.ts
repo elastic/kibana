@@ -59,7 +59,7 @@ export const getDefaultControlGroupPersistableInput = (): PersistableControlGrou
 export const persistableControlGroupInputIsEqual = (
   a: PersistableControlGroupInput | undefined,
   b: PersistableControlGroupInput | undefined,
-  compareSelections?: boolean
+  compareSelections: boolean = true
 ) => {
   const defaultInput = getDefaultControlGroupPersistableInput();
   const inputA = {
@@ -81,10 +81,10 @@ export const persistableControlGroupInputIsEqual = (
   );
 };
 
-export const getPanelsAreEqual = (
+const getPanelsAreEqual = (
   originalPanels: PersistableControlGroupInput['panels'],
   newPanels: PersistableControlGroupInput['panels'],
-  compareSelections?: boolean
+  compareSelections: boolean
 ) => {
   const originalPanelIds = Object.keys(originalPanels);
   const newPanelIds = Object.keys(newPanels);

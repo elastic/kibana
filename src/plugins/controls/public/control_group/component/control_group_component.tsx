@@ -188,9 +188,11 @@ export const ControlGroup = () => {
                         iconSize="m"
                         display="fill"
                         color={'success'}
-                        iconType={'check'}
+                        iconType={'kqlFunction'}
                         aria-label={ControlGroupStrings.management.getAddControlTitle()}
-                        onClick={() => controlGroup.publishFilters({ filters: unpublishedFilters })}
+                        onClick={() =>
+                          controlGroup.publishFilters({ filters: unpublishedFilters ?? [] })
+                        }
                       />
                     </EuiFlexItem>
                   )}

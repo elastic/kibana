@@ -42,7 +42,7 @@ export interface ControlGroupSettings {
 
 export type ControlGroupComponentState = ControlGroupSettings & {
   lastSavedInput: PersistableControlGroupInput;
-  lastSavedOutput?: Pick<ControlGroupOutput, 'filters'>;
+  lastSavedFilters?: ControlGroupOutput['filters'];
   unpublishedFilters?: ControlGroupOutput['filters'];
 };
 

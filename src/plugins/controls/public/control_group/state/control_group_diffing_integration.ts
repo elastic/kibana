@@ -42,7 +42,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
 
             const {
               explicitInput: currentInput,
-              componentState: { lastSavedInput, lastSavedOutput },
+              componentState: { lastSavedInput, lastSavedFilters },
               output: { filters },
             } = this.getState();
 
@@ -51,8 +51,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
                 currentInput,
                 lastSavedInput,
                 false // never diff selections for unsaved changes - compare the output filters instead
-              ) &&
-              compareFilters(filters ?? [], lastSavedOutput?.filters ?? [], COMPARE_ALL_OPTIONS)
+              ) && compareFilters(filters ?? [], lastSavedFilters ?? [], COMPARE_ALL_OPTIONS)
             );
 
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);
