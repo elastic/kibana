@@ -334,7 +334,6 @@ export const EditorFooter = memo(function EditorFooter({
                   fill
                   onClick={runQuery}
                   isLoading={isLoading}
-                  isDisabled={Boolean(disableSubmitAction)}
                   data-test-subj="TextBasedLangEditor-run-query-button"
                   minWidth={isSpaceReduced ? false : undefined}
                 >
@@ -345,7 +344,11 @@ export const EditorFooter = memo(function EditorFooter({
                     justifyContent="spaceBetween"
                   >
                     <EuiFlexItem grow={false}>
-                      {isSpaceReduced
+                      {disableSubmitAction
+                        ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.cancel', {
+                            defaultMessage: 'Cancel',
+                          })
+                        : isSpaceReduced
                         ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
                             defaultMessage: 'Run',
                           })
