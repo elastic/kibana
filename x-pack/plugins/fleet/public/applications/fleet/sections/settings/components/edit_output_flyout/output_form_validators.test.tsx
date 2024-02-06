@@ -34,6 +34,12 @@ describe('Output form validation', () => {
       expect(res).toBeUndefined();
     });
 
+    it('should work with hostnames using uppercase letters', () => {
+      const res = validateKafkaHosts(['tEsT.fr:9200', 'TEST2.fr:9200', 'teSt.fR:9999']);
+
+      expect(res).toBeUndefined();
+    });
+
     it('should return an error with invalid url', () => {
       const res = validateKafkaHosts(['toto']);
 
