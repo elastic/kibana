@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
 import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
@@ -43,7 +44,7 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
             const {
               explicitInput: currentInput,
               componentState: { lastSavedInput, lastSavedFilters },
-              output: { filters },
+              output: { filters, timeslice },
             } = this.getState();
 
             const hasUnsavedChanges = !(
@@ -51,7 +52,9 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
                 currentInput,
                 lastSavedInput,
                 false // never diff selections for unsaved changes - compare the output filters instead
-              ) && compareFilters(filters ?? [], lastSavedFilters ?? [], COMPARE_ALL_OPTIONS)
+              ) &&
+              compareFilters(filters ?? [], lastSavedFilters?.filters ?? [], COMPARE_ALL_OPTIONS) &&
+              isEqual(timeslice, lastSavedFilters?.timeslice)
             );
 
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);

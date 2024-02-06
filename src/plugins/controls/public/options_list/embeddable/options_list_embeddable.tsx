@@ -34,6 +34,7 @@ import {
   OptionsListEmbeddableInput,
   OPTIONS_LIST_CONTROL,
 } from '../..';
+import { ControlFilterOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
@@ -229,7 +230,7 @@ export class OptionsListEmbeddable
             }
           }),
           switchMap(async () => {
-            const newFilters = await this.buildFilter();
+            const { filters: newFilters } = await this.buildFilter();
             this.dispatch.publishFilters(newFilters);
           })
         )
@@ -363,7 +364,7 @@ export class OptionsListEmbeddable
       }
 
       // publish filter
-      const newFilters = await this.buildFilter();
+      const { filters: newFilters } = await this.buildFilter();
       batch(() => {
         this.dispatch.setErrorMessage(undefined);
         this.dispatch.setLoading(false);
@@ -382,15 +383,15 @@ export class OptionsListEmbeddable
 
   public selectionsToFilters = async (
     input: Partial<OptionsListEmbeddableInput>
-  ): Promise<Filter[]> => {
+  ): Promise<ControlFilterOutput> => {
     const { existsSelected, exclude, selectedOptions } = input;
 
     if ((!selectedOptions || isEmpty(selectedOptions)) && !existsSelected) {
-      return [];
+      return { filters: [] };
     }
 
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return [];
+    if (!dataView || !field) return { filters: [] };
 
     let newFilter: Filter | undefined;
     if (existsSelected) {
@@ -403,28 +404,19 @@ export class OptionsListEmbeddable
       }
     }
 
-    if (!newFilter) return [];
+    if (!newFilter) return { filters: [] };
 
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
-    return [newFilter];
+    return { filters: [newFilter] };
   };
 
-  private buildFilter = async () => {
+  private buildFilter = async (
+    input?: Partial<OptionsListEmbeddableInput>
+  ): Promise<ControlFilterOutput> => {
     const { validSelections } = this.getState().componentState ?? {};
     return await this.selectionsToFilters({ selectedOptions: validSelections });
   };
-
-  public resetSelections(lastSavedInput: OptionsListEmbeddableInput) {
-    batch(() => {
-      if (lastSavedInput.existsSelected) {
-        this.dispatch.selectExists(Boolean(lastSavedInput.existsSelected));
-      } else {
-        this.dispatch.setSelections(lastSavedInput.selectedOptions);
-      }
-      this.dispatch.setExclude(Boolean(lastSavedInput.exclude));
-    });
-  }
 
   public clearSelections() {
     this.dispatch.clearSelections({});

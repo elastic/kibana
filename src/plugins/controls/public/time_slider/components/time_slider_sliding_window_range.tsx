@@ -8,10 +8,11 @@
 
 import React from 'react';
 import { EuiDualRange, EuiRangeTick } from '@elastic/eui';
+import { TimeSlice } from '../../../common/types';
 
 interface Props {
-  value: [number, number];
-  onChange: (value?: [number, number]) => void;
+  value: TimeSlice;
+  onChange: (value?: TimeSlice) => void;
   stepSize: number;
   ticks: EuiRangeTick[];
   timeRangeMin: number;
@@ -20,7 +21,7 @@ interface Props {
 
 export function TimeSliderSlidingWindowRange(props: Props) {
   function onChange(value?: [number | string, number | string]) {
-    props.onChange(value as [number, number]);
+    props.onChange(value as TimeSlice);
   }
 
   return (

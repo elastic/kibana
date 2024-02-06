@@ -8,7 +8,8 @@
 
 import { ReactNode } from 'react';
 
-import { Filter } from '@kbn/es-query';
+import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -17,18 +18,15 @@ import {
   IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewField, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 import { ControlInput, ControlWidth, DataControlInput } from '../common/types';
+import { ControlGroupFilterOutput } from './control_group/types';
 import { ControlsServiceType } from './services/controls/types';
 
-export interface CommonControlOutput {
-  filters?: Filter[];
+export type CommonControlOutput = ControlGroupFilterOutput & {
   dataViewId?: string;
-  timeslice?: [number, number];
-}
+};
 
 export type ControlOutput = EmbeddableOutput & CommonControlOutput;
 
@@ -44,21 +42,19 @@ export type ControlEmbeddable<
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
-  selectionsToFilters?: (input: Partial<TControlEmbeddableInput>) => Promise<Filter[]>;
+  selectionsToFilters?: (
+    input: Partial<TControlEmbeddableInput>
+  ) => Promise<ControlGroupFilterOutput>;
 };
 
 export interface IClearableControl<
   TClearableControlEmbeddableInput extends ControlInput = ControlInput
 > extends ControlEmbeddable {
   clearSelections: () => void;
-  resetSelections: (lastSavedInput: TClearableControlEmbeddableInput) => void;
 }
 
 export const isClearableControl = (control: ControlEmbeddable): control is IClearableControl => {
-  return (
-    Boolean((control as IClearableControl).clearSelections) &&
-    Boolean((control as IClearableControl).resetSelections)
-  );
+  return Boolean((control as IClearableControl).clearSelections);
 };
 
 /**
@@ -120,4 +116,4 @@ export interface ControlsPluginStartDeps {
 }
 
 // re-export from common
-export type { ControlWidth, ControlInput, DataControlInput, ControlStyle } from '../common/types';
+export type { ControlInput, ControlStyle, ControlWidth, DataControlInput } from '../common/types';

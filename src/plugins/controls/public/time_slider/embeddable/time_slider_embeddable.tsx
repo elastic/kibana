@@ -20,7 +20,9 @@ import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import { TIME_SLIDER_CONTROL } from '../..';
 import { TimeSliderControlEmbeddableInput } from '../../../common/time_slider/types';
+import { TimeSlice } from '../../../common/types';
 import { ControlGroupContainer } from '../../control_group/embeddable/control_group_container';
+import { ControlTimesliceOutput } from '../../control_group/types';
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsSettingsService } from '../../services/settings/types';
@@ -156,6 +158,14 @@ export class TimeSliderControlEmbeddable
     }
   };
 
+  public selectionsToFilters = async (
+    input: Partial<TimeSliderControlEmbeddableInput>
+  ): Promise<ControlTimesliceOutput> => {
+    console.log('INPUT', input);
+    const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } = input;
+    return { timeslice: undefined };
+  };
+
   private onInputChange() {
     const input = this.getInput();
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
@@ -208,7 +218,7 @@ export class TimeSliderControlEmbeddable
       const value = [
         roundDownToNextStepSizeFactor(from, stepSize),
         roundUpToNextStepSizeFactor(to, stepSize),
-      ] as [number, number];
+      ] as TimeSlice;
       this.dispatch.publishValue({ value });
       this.dispatch.setValue({ value });
       this.onRangeChange(value[TO_INDEX] - value[FROM_INDEX]);
@@ -226,11 +236,11 @@ export class TimeSliderControlEmbeddable
     return;
   }
 
-  private debouncedPublishChange = _.debounce((value?: [number, number]) => {
+  private debouncedPublishChange = _.debounce((value?: TimeSlice) => {
     this.dispatch.publishValue({ value });
   }, 500);
 
-  private getTimeSliceAsPercentageOfTimeRange(value?: [number, number]) {
+  private getTimeSliceAsPercentageOfTimeRange(value?: TimeSlice) {
     let timesliceStartAsPercentageOfTimeRange: number | undefined;
     let timesliceEndAsPercentageOfTimeRange: number | undefined;
     if (value) {
@@ -248,7 +258,7 @@ export class TimeSliderControlEmbeddable
     return { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange };
   }
 
-  private onTimesliceChange = (value?: [number, number]) => {
+  private onTimesliceChange = (value?: TimeSlice) => {
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
       this.getTimeSliceAsPercentageOfTimeRange(value);
 
@@ -361,10 +371,6 @@ export class TimeSliderControlEmbeddable
     this.onTimesliceChange();
   }
 
-  public resetSelections(lastSavedInput: TimeSliderControlEmbeddableInput) {
-    console.log('hereee');
-  }
-
   public render = (node: HTMLElement) => {
     if (this.node) {
       ReactDOM.unmountComponentAtNode(this.node);
@@ -375,7 +381,7 @@ export class TimeSliderControlEmbeddable
         <TimeSliderControlContext.Provider value={this}>
           <TimeSlider
             formatDate={this.formatDate}
-            onChange={(value?: [number, number]) => {
+            onChange={(value?: TimeSlice) => {
               this.onTimesliceChange(value);
               const range = value ? value[TO_INDEX] - value[FROM_INDEX] : undefined;
               this.onRangeChange(range);

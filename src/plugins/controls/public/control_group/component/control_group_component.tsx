@@ -199,9 +199,9 @@ export const ControlGroup = () => {
                           aria-label={ControlGroupStrings.management.getApplyButtonTitle(
                             applyResetButtonsEnabled
                           )}
-                          onClick={() =>
-                            controlGroup.publishFilters({ filters: unpublishedFilters ?? [] })
-                          }
+                          onClick={() => {
+                            if (unpublishedFilters) controlGroup.publishFilters(unpublishedFilters);
+                          }}
                         />
                       </EuiToolTip>
                     </EuiFlexItem>

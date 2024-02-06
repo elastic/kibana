@@ -11,7 +11,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, first, skip, filter } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first, skip } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -23,6 +23,7 @@ import {
   persistableControlGroupInputIsEqual,
   persistableControlGroupInputKeys,
 } from '../../../common';
+import { TimeSlice } from '../../../common/types';
 import { pluginServices } from '../../services';
 import { ControlEmbeddable, ControlInput, ControlOutput } from '../../types';
 import { ControlGroup } from '../component/control_group_component';
@@ -41,6 +42,7 @@ import { startDiffingControlGroupState } from '../state/control_group_diffing_in
 import { controlGroupReducers } from '../state/control_group_reducers';
 import {
   ControlGroupComponentState,
+  ControlGroupFilterOutput,
   ControlGroupInput,
   ControlGroupOutput,
   ControlGroupReduxState,
@@ -179,8 +181,8 @@ export class ControlGroupContainer extends Container<
         )
         .subscribe(async () => {
           const { lastSavedInput } = this.getState().componentState;
-          const filtersArray = await this.calculateFiltersFromSelections(lastSavedInput.panels);
-          this.dispatch.setLastSavedFilters(filtersArray);
+          const filterOutput = await this.calculateFiltersFromSelections(lastSavedInput.panels);
+          this.dispatch.setLastSavedFilters(filterOutput);
         })
     );
 
@@ -247,7 +249,8 @@ export class ControlGroupContainer extends Container<
   public setSavedState(lastSavedInput: PersistableControlGroupInput): void {
     batch(() => {
       this.dispatch.setLastSavedInput(lastSavedInput);
-      this.dispatch.setLastSavedFilters(this.getOutput().filters);
+      const { filters, timeslice } = this.getState().output;
+      this.dispatch.setLastSavedFilters({ filters, timeslice });
     });
   }
 
@@ -264,7 +267,7 @@ export class ControlGroupContainer extends Container<
         this.recalculateFilters$.pipe(first()).subscribe(() => {
           const { filters, timeslice } = this.recalculateFilters();
           this.publishFilters({ filters, timeslice });
-          this.dispatch.setLastSavedFilters(filters);
+          this.dispatch.setLastSavedFilters({ filters });
         });
       }
     }
@@ -339,7 +342,7 @@ export class ControlGroupContainer extends Container<
     this.updateInput({ filters });
   };
 
-  private recalculateFilters = (): { filters: Filter[]; timeslice?: [number, number] } => {
+  private recalculateFilters = (): ControlGroupFilterOutput => {
     const allFilters: Filter[] = [];
     let timeslice;
     Object.values(this.children).map((child) => {
@@ -349,27 +352,31 @@ export class ControlGroupContainer extends Container<
         timeslice = childOutput.timeslice;
       }
     });
-    return { filters: allFilters, timeslice };
+    return { filters: uniqFilters(allFilters), timeslice };
   };
 
   private async calculateFiltersFromSelections(
     panels: PersistableControlGroupInput['panels']
-  ): Promise<Filter[]> {
+  ): Promise<ControlGroupFilterOutput> {
     let filtersArray: Filter[] = [];
+    let timeslice;
     await Promise.all(
       Object.values(this.children).map(async (child) => {
         if (panels[child.id]) {
-          const filters2 =
+          const controlOutput =
             (await (child as ControlEmbeddable).selectionsToFilters?.(
               panels[child.id].explicitInput
-            )) ?? [];
-          if (filters2) {
-            filtersArray = [...filtersArray, ...filters2];
+            )) ?? ({} as ControlGroupFilterOutput);
+          if (controlOutput.filters) {
+            filtersArray = [...filtersArray, ...controlOutput.filters];
+          } else if (controlOutput.timeslice) {
+            timeslice = controlOutput.timeslice;
           }
         }
       })
     );
-    return filtersArray;
+    // console.log('FILTERS', { filters: filtersArray, timeslice });
+    return { filters: filtersArray, timeslice };
   }
 
   /**
@@ -380,8 +387,8 @@ export class ControlGroupContainer extends Container<
     filters,
     timeslice,
   }: {
-    filters: Filter[];
-    timeslice?: [number, number];
+    filters?: Filter[];
+    timeslice?: TimeSlice;
   }) => {
     if (
       !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
@@ -394,27 +401,21 @@ export class ControlGroupContainer extends Container<
       if (!showApplySelections) {
         this.publishFilters({ filters, timeslice });
       } else {
-        this.dispatch.setUnpublishedFilters(filters);
+        this.dispatch.setUnpublishedFilters({ filters, timeslice });
       }
     } else {
       this.dispatch.setUnpublishedFilters(undefined);
     }
   };
 
-  public publishFilters = ({
-    filters,
-    timeslice,
-  }: {
-    filters: Filter[];
-    timeslice?: [number, number];
-  }) => {
-    const outputFilters = uniqFilters(filters);
+  public publishFilters = ({ filters, timeslice }: ControlGroupFilterOutput) => {
+    // console.log('publishfilters', { filters, timeslice });
     this.updateOutput({
-      filters: outputFilters,
+      filters,
       timeslice,
     });
     this.dispatch.setUnpublishedFilters(undefined);
-    this.onFiltersPublished$.next(outputFilters);
+    this.onFiltersPublished$.next(filters ?? []);
   };
 
   private recalculateDataViews = () => {

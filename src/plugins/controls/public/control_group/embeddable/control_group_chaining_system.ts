@@ -18,6 +18,7 @@ import {
   ControlGroupInput,
   ControlsPanels,
 } from '../../../common/control_group/types';
+import { TimeSlice } from '../../../common/types';
 
 interface GetPrecedingFiltersProps {
   id: string;
@@ -38,7 +39,7 @@ interface ChainingSystem {
   ) => EmbeddableContainerSettings | undefined;
   getPrecedingFilters: (
     props: GetPrecedingFiltersProps
-  ) => { filters: Filter[]; timeslice?: [number, number] } | undefined;
+  ) => { filters: Filter[]; timeslice?: TimeSlice } | undefined;
   onChildChange: (props: OnChildChangedProps) => void;
 }
 
