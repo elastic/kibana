@@ -27,9 +27,7 @@ export type PresentationContainer = Partial<PublishesViewMode> &
     getChild: (childId: string) => unknown;
   };
 
-export const apiIsPresentationContainer = (
-  api: unknown | null
-): api is PresentationContainer => {
+export const apiIsPresentationContainer = (api: unknown | null): api is PresentationContainer => {
   return Boolean(
     typeof (api as PresentationContainer)?.removePanel === 'function' &&
       typeof (api as PresentationContainer)?.registerPanelApi === 'function' &&

@@ -7,10 +7,9 @@
  */
 
 export interface HasSupportedTriggers {
-    supportedTriggers: () => string[];
-  }
-  
-  export const apiHasSupportedTriggers = (api: unknown | null): api is HasSupportedTriggers => {
-    return Boolean(api && typeof (api as HasSupportedTriggers).supportedTriggers === 'function');
-  };
-  
+  supportedTriggers: () => string[];
+}
+
+export const apiHasSupportedTriggers = (api: unknown | null): api is HasSupportedTriggers => {
+  return Boolean(api && typeof (api as HasSupportedTriggers).supportedTriggers === 'function');
+};
