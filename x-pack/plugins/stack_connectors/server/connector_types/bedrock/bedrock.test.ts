@@ -73,7 +73,7 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-v2/invoke',
+            path: '/model/anthropic.claude-v2:1/invoke',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -137,7 +137,7 @@ describe('BedrockConnector', () => {
               'x-amzn-bedrock-accept': '*/*',
             },
             host: 'bedrock-runtime.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-v2/invoke-with-response-stream',
+            path: '/model/anthropic.claude-v2:1/invoke-with-response-stream',
             service: 'bedrock',
           },
           { accessKeyId: '123', secretAccessKey: 'secret' }
@@ -166,12 +166,12 @@ describe('BedrockConnector', () => {
         await connector.invokeStream({
           messages: [
             {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
               role: 'system',
               content: 'Be a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'Hello world',
             },
             {
               role: 'assistant',
@@ -191,7 +191,7 @@ describe('BedrockConnector', () => {
           responseSchema: StreamingResponseSchema,
           data: JSON.stringify({
             prompt:
-              '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+              'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
             max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
             temperature: 0.5,
             stop_sequences: ['\n\nHuman:'],
@@ -245,12 +245,12 @@ describe('BedrockConnector', () => {
         const response = await connector.invokeAI({
           messages: [
             {
-              role: 'user',
-              content: 'Hello world',
-            },
-            {
               role: 'system',
               content: 'Be a good chatbot',
+            },
+            {
+              role: 'user',
+              content: 'Hello world',
             },
             {
               role: 'assistant',
@@ -271,7 +271,7 @@ describe('BedrockConnector', () => {
           responseSchema: RunActionResponseSchema,
           data: JSON.stringify({
             prompt:
-              '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+              'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
             max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
             temperature: 0.5,
             stop_sequences: ['\n\nHuman:'],

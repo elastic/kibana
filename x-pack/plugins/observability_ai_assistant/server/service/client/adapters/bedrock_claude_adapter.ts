@@ -53,8 +53,12 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
       You can call multiple tools in successive messages. This means you can chain function calls. If any tool was used in a previous
       message, consider whether it still makes sense to follow it up with another function call.
 
-      The "recall" function is ALWAYS used after a user question. Even if it was used before, your job is to answer the last user question,
-      even if the "recall" function was executed after that. Consider the tools you need to answer the user's question.
+      ${
+        functions?.find((fn) => fn.name === 'recall')
+          ? `The "recall" function is ALWAYS used after a user question. Even if it was used before, your job is to answer the last user question,
+      even if the "recall" function was executed after that. Consider the tools you need to answer the user's question.`
+          : ''
+      }
       
       Rather than explaining how you would call a function, just generate the XML to call the function. It will automatically be
       executed and returned to you.
@@ -176,12 +180,12 @@ export const createBedrockClaudeAdapter: LlmApiAdapterFactory = ({
 
         let content = replaceFunctionsWithTools(message.message.content || '');
 
-        if (message.message.function_call) {
+        if (message.message.function_call?.name) {
           content += builder.buildObject({
             function_calls: {
               invoke: {
                 tool_name: message.message.function_call.name,
-                parameters: JSON.parse(message.message.function_call.arguments ?? '{}'),
+                parameters: JSON.parse(message.message.function_call.arguments || '{}'),
               },
             },
           });
