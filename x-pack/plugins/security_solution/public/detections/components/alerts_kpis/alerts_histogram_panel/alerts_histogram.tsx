@@ -79,11 +79,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 onBrushEnd={updateDateRange}
                 // showLegend controls the default legend coming from Elastic chart, we show them when our customised legend items doesn't exist (but we still want to show legend).
                 showLegend={showLegend && legendItems.length === 0}
-                // Please double check if the data passed to the chart contains all the buckets, even the empty ones.
-                // the showLegendExtra will display the last element of the data array as the default legend value
-                // and if empty buckets are filtered out you can probably see a value that doesn't correspond
-                // to the value in the last time bucket visualized.
-                // showLegendExtra
+                showLegendExtra={showLegend}
                 theme={theme}
                 baseTheme={baseTheme}
                 locale={i18n.getLocale()}
