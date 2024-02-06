@@ -17,7 +17,7 @@ node scripts/build \
     --skip-platform-folders \
     --skip-cdn-assets \
     --docker-images \
-    --docker-tag-qualifier="$GIT_COMMIT" \
+    --docker-tag-qualifier="$BUILDKITE_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
     --skip-docker-ubuntu \
