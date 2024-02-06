@@ -10,6 +10,7 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { fetchFieldsFromESQL } from '@kbn/text-based-editor';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
 import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
@@ -75,7 +76,7 @@ export const getSuggestions = async (
       query,
       suggestion: firstSuggestion,
       dataView,
-    });
+    }) as TypedLensByValueInput['attributes'];
     return attrs;
   } catch (e) {
     setErrors([e]);
