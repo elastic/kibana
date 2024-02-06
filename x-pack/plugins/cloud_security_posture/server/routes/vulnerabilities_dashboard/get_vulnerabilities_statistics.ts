@@ -9,6 +9,7 @@ import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
   VULNERABILITIES_SEVERITY,
 } from '../../../common/constants';
 
@@ -33,7 +34,18 @@ export interface VulnerabilitiesStatisticsQueryResult {
 export const getVulnerabilitiesStatisticsQuery = (): SearchRequest => ({
   size: 0,
   query: {
-    match_all: {},
+    bool: {
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
   },
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   aggs: {

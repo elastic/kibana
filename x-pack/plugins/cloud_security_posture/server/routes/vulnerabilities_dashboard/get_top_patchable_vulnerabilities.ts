@@ -8,7 +8,10 @@
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { AggFieldBucket, PatchableVulnerabilityStat } from '../../../common/types_old';
-import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
+import {
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+} from '../../../common/constants';
 
 interface VulnerabilityBucket {
   key: string | undefined;
@@ -31,6 +34,14 @@ const getPatchableVulnerabilitiesQuery = (): SearchRequest => ({
   query: {
     bool: {
       filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
         {
           exists: {
             field: 'package.fixed_version',

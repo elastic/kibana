@@ -8,7 +8,10 @@
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { VulnerabilityStat } from '../../../common/types_old';
-import { LATEST_VULNERABILITIES_INDEX_DEFAULT_NS } from '../../../common/constants';
+import {
+  LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+} from '../../../common/constants';
 
 interface VulnerabilityBucket {
   key: string | undefined;
@@ -75,7 +78,18 @@ export interface VulnerabilitiesQueryResult {
 const getVulnerabilitiesQuery = (): SearchRequest => ({
   size: 0,
   query: {
-    match_all: {},
+    bool: {
+      filter: [
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${LATEST_VULNERABILITIES_RETENTION_POLICY}`,
+              lte: 'now',
+            },
+          },
+        },
+      ],
+    },
   },
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   aggs: {

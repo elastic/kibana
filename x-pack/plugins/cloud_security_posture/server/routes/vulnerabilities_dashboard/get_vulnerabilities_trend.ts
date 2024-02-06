@@ -86,9 +86,17 @@ export const getVulnerabilitiesTrends = async (
     throw new Error('Missing trend results from score index');
   }
 
-  const vulnStatsTrendDocs = vulnTrendsQueryResult.aggregations?.vuln_severity_per_day.buckets?.map(
-    (bucket) => bucket.last_doc.hits.hits[0]._source
-  );
+  const vulnStatsTrendDocs =
+    vulnTrendsQueryResult.aggregations?.vuln_severity_per_day.buckets?.reduce(
+      (vulnStatsTrend: VulnStatsTrend[], bucket: LastDocBucket) => {
+        const lastDoc = bucket.last_doc.hits.hits[0]?._source;
+        if (lastDoc) {
+          vulnStatsTrend.push(lastDoc);
+        }
+        return vulnStatsTrend;
+      },
+      [] as VulnStatsTrend[]
+    );
 
   return vulnStatsTrendDocs || [];
 };
