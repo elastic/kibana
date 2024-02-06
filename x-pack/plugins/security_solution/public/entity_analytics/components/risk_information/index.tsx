@@ -163,8 +163,8 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreLevelText"
-              defaultMessage="The {riskLevelField} field represents one of the six risk level of
-              the Entity based on a predefined risk metrics."
+              defaultMessage="The {riskLevelField} field represents the risk level of
+              the Entity based on set of predefined risk metrics."
               values={{
                 riskLevelField: (
                   <b>
@@ -188,8 +188,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.howOftenText"
-              defaultMessage="The risk engine runs hourly and aggregates alerts with an “open” status from the last 30
-              days."
+              defaultMessage="Once enabled, the risk engine runs hourly."
             />
           </p>
           <EuiTitle size="s">
