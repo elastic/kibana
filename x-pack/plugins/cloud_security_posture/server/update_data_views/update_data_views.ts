@@ -6,7 +6,7 @@
  */
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/core/server';
 import {
   LATEST_FINDINGS_INDEX_PATTERN_ID,
   LATEST_VULNERABILITIES_INDEX_PATTERN_ID,
