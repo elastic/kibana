@@ -315,7 +315,7 @@ export interface GetFieldsOptions {
   fields?: string[];
   allowHidden?: boolean;
   forceRefresh?: boolean;
-  includeFieldsWithNoValue?: boolean;
+  includeEmptyFields?: boolean;
 }
 
 /**
