@@ -13,7 +13,12 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
   describe('User Profile Page', async () => {
     before(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('viewer');
+      // TODO: migrate to SAML role when profile page displays the data
+      await pageObjects.svlCommonPage.login();
+    });
+
+    after(async () => {
+      await pageObjects.svlCommonPage.forceLogout();
     });
 
     describe('Theme', async () => {
