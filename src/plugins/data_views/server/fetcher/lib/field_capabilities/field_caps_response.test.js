@@ -169,7 +169,7 @@ describe('index_patterns/field_capabilities/field_caps_response', () => {
     it('sets default field formatter', () => {
       const fields = readFieldCapsResponse({
         fields: {
-          percent: {
+          seconds: {
             long: {
               searchable: true,
               aggregatable: true,
