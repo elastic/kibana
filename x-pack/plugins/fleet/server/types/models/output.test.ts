@@ -16,7 +16,7 @@ describe('Output model', () => {
     it('should support valid host with uppercase letters', () => {
       expect(validateLogstashHost('tEsT.fr:5044')).toBeUndefined();
     });
-    
+
     it('should return an error for an invalid host', () => {
       expect(validateLogstashHost('!@#%&!#!@')).toMatchInlineSnapshot(`"Invalid Logstash host"`);
     });
