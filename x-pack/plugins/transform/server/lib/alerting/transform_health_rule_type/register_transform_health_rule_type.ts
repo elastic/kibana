@@ -88,6 +88,12 @@ export function getTransformHealthRuleType(
     actionGroups: [TRANSFORM_ISSUE_DETECTED],
     defaultActionGroupId: TRANSFORM_ISSUE,
     validate: { params: transformHealthRuleParams },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: transformHealthRuleParams,
+      },
+    },
     actionVariables: {
       context: [
         {
