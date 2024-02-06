@@ -5685,7 +5685,7 @@
                 "section": "def-common.SOWithMetadata",
                 "text": "SOWithMetadata"
               },
-              "<Attr>; }>"
+              "<Attr>; meta?: undefined; }>"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -5757,7 +5757,7 @@
                 "section": "def-common.SOWithMetadataPartial",
                 "text": "SOWithMetadataPartial"
               },
-              "<Attr>; }>"
+              "<Attr>; meta?: undefined; }>"
             ],
             "path": "src/plugins/visualizations/public/vis_types/vis_type_alias_registry.ts",
             "deprecated": false,
@@ -6936,7 +6936,15 @@
             "section": "def-common.ViewMode",
             "text": "ViewMode"
           },
-          ">; disableTriggers: boolean; getExplicitInput: () => ",
+          ">; disableTriggers: boolean; savedObjectId: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishingSubject",
+            "text": "PublishingSubject"
+          },
+          "<string | undefined>; getExplicitInput: () => ",
           {
             "pluginId": "visualizations",
             "scope": "public",
