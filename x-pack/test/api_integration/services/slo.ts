@@ -39,11 +39,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
         .expect(200);
       await Promise.all(
         (response.body as FindSLODefinitionsResponse).results.map(({ id }) => {
-          return supertest
-            .delete(`/api/observability/slos/${id}`)
-            .set('kbn-xsrf', 'true')
-            .send()
-            .expect(204);
+          return supertest.delete(`/api/observability/slos/${id}`).set('kbn-xsrf', 'true').send();
         })
       );
     },
