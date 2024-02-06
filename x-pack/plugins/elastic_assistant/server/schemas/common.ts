@@ -14,6 +14,8 @@ import type {
   RouteValidationResultFactory,
   RouteValidationError,
 } from '@kbn/core/server';
+import type { TypeOf, ZodType } from 'zod';
+import { stringifyZodError } from '@kbn/zod-helpers';
 
 type RequestValidationResult<T> =
   | {
@@ -36,3 +38,14 @@ export const buildRouteValidation =
         (validatedInput: A) => validationResult.ok(validatedInput)
       )
     );
+
+export const buildRouteValidationWithZod =
+  <T extends ZodType, A = TypeOf<T>>(schema: T): RouteValidationFunction<A> =>
+  (inputValue: unknown, validationResult: RouteValidationResultFactory) => {
+    const decoded = schema.safeParse(inputValue);
+    if (decoded.success) {
+      return validationResult.ok(decoded.data);
+    } else {
+      return validationResult.badRequest(stringifyZodError(decoded.error));
+    }
+  };
