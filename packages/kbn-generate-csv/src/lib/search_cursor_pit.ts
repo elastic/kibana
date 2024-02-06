@@ -24,9 +24,10 @@ export class SearchCursorPit extends SearchCursor {
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
+    abortController: AbortController,
     logger: Logger
   ) {
-    super(indexPatternTitle, settings, clients, logger);
+    super(indexPatternTitle, settings, clients, abortController, logger);
   }
 
   /**
@@ -53,6 +54,7 @@ export class SearchCursorPit extends SearchCursor {
           ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
         {
+          signal: this.abortController.signal,
           requestTimeout: scroll.duration(taskInstanceFields),
           maxRetries: 0,
           maxConcurrentShardRequests,
@@ -85,6 +87,7 @@ export class SearchCursorPit extends SearchCursor {
     return await lastValueFrom(
       this.clients.data.search(searchParamsPit, {
         strategy: ES_SEARCH_STRATEGY,
+        abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
           requestTimeout: scroll.duration(taskInstanceFields),

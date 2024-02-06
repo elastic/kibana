@@ -98,13 +98,13 @@ export const getExportSettings = async (
         const now = new Date(Date.now()).getTime();
         const timeTillRetry = new Date(retryAt).getTime();
 
-        if (now > timeTillRetry) {
+        if (now >= timeTillRetry) {
           return `0${format}`;
         }
 
         const _duration = timeTillRetry - now;
         const result = format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
-        logger.debug(`using timeout duration of ${result}`);
+        logger.debug(`using timeout duration of ${result} for csv scroll`);
         return result;
       },
     },

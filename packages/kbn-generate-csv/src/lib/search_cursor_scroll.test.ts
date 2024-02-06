@@ -38,7 +38,14 @@ describe('CSV Export Search Cursor', () => {
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursorScroll('test-index-pattern-string', settings, { data, es }, logger);
+    cursor = new SearchCursorScroll(
+      'test-index-pattern-string',
+      settings,
+      { data, es },
+      new AbortController(),
+      logger
+    );
+
     await cursor.initialize();
   });
 

@@ -33,6 +33,7 @@ export abstract class SearchCursor {
     protected indexPatternTitle: string,
     protected settings: SearchCursorSettings,
     protected clients: SearchCursorClients,
+    protected abortController: AbortController,
     protected logger: Logger
   ) {}
 

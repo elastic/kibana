@@ -179,9 +179,9 @@ export class CsvGenerator {
 
       /*
        * Intrinsically, generating the rows is a synchronous process. Awaiting
-       * on a setImmediate call here partititions what could be a very long and
-       * CPU-intenstive synchronous process into asychronous processes. This
-       * give NodeJS to process other asychronous events that wait on the Event
+       * on a setImmediate call here partitions what could be a very long and
+       * CPU-intensive synchronous process into asynchronous processes. This
+       * give NodeJS to process other asynchronous events that wait on the Event
        * Loop.
        *
        * See: https://nodejs.org/en/docs/guides/dont-block-the-event-loop/
@@ -257,15 +257,30 @@ export class CsvGenerator {
     let totalRecords: number | undefined;
     let reportingError: undefined | ReportingError;
 
+    const abortController = new AbortController();
+    this.cancellationToken.on(() => abortController.abort());
+
     // use a class to internalize the paging strategy
     let cursor: SearchCursor;
     if (this.job.pagingStrategy === 'scroll') {
       // Optional strategy: scan-and-scroll
-      cursor = new SearchCursorScroll(indexPatternTitle, settings, this.clients, this.logger);
+      cursor = new SearchCursorScroll(
+        indexPatternTitle,
+        settings,
+        this.clients,
+        abortController,
+        this.logger
+      );
       logger.debug('Using search strategy: scroll');
     } else {
       // Default strategy: point-in-time
-      cursor = new SearchCursorPit(indexPatternTitle, settings, this.clients, this.logger);
+      cursor = new SearchCursorPit(
+        indexPatternTitle,
+        settings,
+        this.clients,
+        abortController,
+        this.logger
+      );
       logger.debug('Using search strategy: pit');
     }
     await cursor.initialize();
@@ -412,7 +427,7 @@ export class CsvGenerator {
         /*
          * Add the errors into the CSV content. This makes error messages more
          * discoverable. When the export was automated or triggered by an API
-         * call or is automated, the user doesn't necesssarily go through the
+         * call or is automated, the user doesn't necessarily go through the
          * Kibana UI to download the export and might not otherwise see the
          * error message.
          */

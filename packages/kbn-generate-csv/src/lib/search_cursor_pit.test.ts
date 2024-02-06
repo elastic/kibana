@@ -38,7 +38,13 @@ describe('CSV Export Search Cursor', () => {
 
     logger = loggingSystemMock.createLogger();
 
-    cursor = new SearchCursorPit('test-index-pattern-string', settings, { data, es }, logger);
+    cursor = new SearchCursorPit(
+      'test-index-pattern-string',
+      settings,
+      { data, es },
+      new AbortController(),
+      logger
+    );
 
     const openPointInTimeSpy = jest
       // @ts-expect-error create spy on private method

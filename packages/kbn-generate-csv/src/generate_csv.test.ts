@@ -363,7 +363,11 @@ describe('CsvGenerator', () => {
       expect(mockDataClient.search).toHaveBeenCalledTimes(10);
       expect(mockDataClient.search).toBeCalledWith(
         { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
-        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: '30s' },
+        }
       );
 
       expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledTimes(1);
@@ -373,7 +377,12 @@ describe('CsvGenerator', () => {
           index: 'logstash-*',
           keep_alive: '30s',
         },
-        { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
+        {
+          maxConcurrentShardRequests: 5,
+          maxRetries: 0,
+          requestTimeout: '30s',
+          signal: expect.any(AbortSignal),
+        }
       );
 
       expect(mockEsClient.asCurrentUser.closePointInTime).toHaveBeenCalledTimes(1);
@@ -653,7 +662,11 @@ describe('CsvGenerator', () => {
 
       expect(mockDataClientSearchFn).toBeCalledWith(
         { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
-        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` } }
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` },
+        }
       );
 
       expect(content).toMatchSnapshot();
@@ -735,7 +748,11 @@ describe('CsvGenerator', () => {
 
       expect(mockDataClientSearchFn).toBeCalledWith(
         { params: { body: {}, ignore_throttled: undefined, max_concurrent_shard_requests: 5 } },
-        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` } }
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: `${timeFromNowInMs}ms` },
+        }
       );
     });
   });
@@ -846,7 +863,11 @@ describe('CsvGenerator', () => {
             max_concurrent_shard_requests: 5,
           }),
         },
-        { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+        {
+          abortSignal: expect.any(AbortSignal),
+          strategy: 'es',
+          transport: { maxRetries: 0, requestTimeout: '30s' },
+        }
       );
 
       expect(mockEsClient.asCurrentUser.openPointInTime).not.toHaveBeenCalled();
@@ -1392,17 +1413,12 @@ describe('CsvGenerator', () => {
         index: 'logstash-*',
         keep_alive: '30s',
       },
-      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
-    );
-
-    expect(mockEsClient.asCurrentUser.openPointInTime).toHaveBeenCalledWith(
       {
-        ignore_unavailable: true,
-        ignore_throttled: false,
-        index: 'logstash-*',
-        keep_alive: '30s',
-      },
-      { maxConcurrentShardRequests: 5, maxRetries: 0, requestTimeout: '30s' }
+        maxConcurrentShardRequests: 5,
+        maxRetries: 0,
+        requestTimeout: '30s',
+        signal: expect.any(AbortSignal),
+      }
     );
 
     expect(mockDataClient.search).toBeCalledWith(
@@ -1412,7 +1428,11 @@ describe('CsvGenerator', () => {
           max_concurrent_shard_requests: 5,
         },
       },
-      { strategy: 'es', transport: { maxRetries: 0, requestTimeout: '30s' } }
+      {
+        abortSignal: expect.any(AbortSignal),
+        strategy: 'es',
+        transport: { maxRetries: 0, requestTimeout: '30s' },
+      }
     );
   });
 

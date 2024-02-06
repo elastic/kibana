@@ -23,9 +23,10 @@ export class SearchCursorScroll extends SearchCursor {
     indexPatternTitle: string,
     settings: SearchCursorSettings,
     clients: SearchCursorClients,
+    abortController: AbortController,
     logger: Logger
   ) {
-    super(indexPatternTitle, settings, clients, logger);
+    super(indexPatternTitle, settings, clients, abortController, logger);
   }
 
   // The first search query begins the scroll context in ES
@@ -48,6 +49,7 @@ export class SearchCursorScroll extends SearchCursor {
     return await lastValueFrom(
       this.clients.data.search(searchParamsScan, {
         strategy: ES_SEARCH_STRATEGY,
+        abortSignal: this.abortController.signal,
         transport: {
           maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
           requestTimeout: scroll.duration(taskInstanceFields),
@@ -61,6 +63,7 @@ export class SearchCursorScroll extends SearchCursor {
     return await this.clients.es.asCurrentUser.scroll(
       { scroll: scroll.duration(taskInstanceFields), scroll_id: this.cursorId },
       {
+        signal: this.abortController.signal,
         maxRetries: 0, // retrying reporting jobs is handled in the task manager scheduling logic
         requestTimeout: scroll.duration(taskInstanceFields),
       }
