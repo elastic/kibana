@@ -1,23 +1,25 @@
 /*
- *
- *  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- *  * or more contributor license agreements. Licensed under the Elastic License
- *  * 2.0; you may not use this file except in compliance with the Elastic License
- *  * 2.0.
- *
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React, { useEffect, useState } from 'react';
-import moment from 'moment';
+
 import { useValues } from 'kea';
+import moment from 'moment';
+
 import { EuiComment, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAvatar, UserProfileWithAvatar } from '@kbn/user-profile-components';
-import { CopyActionButton } from './copy_action_button';
-import type { Message as MessageType } from '../../types';
-import { KibanaLogic } from '../../../../../shared/kibana';
 
-interface UserMessageProps extends Pick<MessageType, 'content' | 'createdAt'> {}
+import { KibanaLogic } from '../../../../../shared/kibana';
+import type { Message as MessageType } from '../../types';
+
+import { CopyActionButton } from './copy_action_button';
+
+type UserMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
 
 export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
   const { security } = useValues(KibanaLogic);

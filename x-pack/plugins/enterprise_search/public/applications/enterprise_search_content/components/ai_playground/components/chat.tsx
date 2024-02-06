@@ -1,11 +1,11 @@
 /*
- *
- *  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- *  * or more contributor license agreements. Licensed under the Elastic License
- *  * 2.0; you may not use this file except in compliance with the Elastic License
- *  * 2.0.
- *
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
+
+import React from 'react';
 
 import {
   EuiButtonIcon,
@@ -15,13 +15,16 @@ import {
   EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
-import { QuestionInput } from './question_input';
+
 import { i18n } from '@kbn/i18n';
-import { ChatSidebar } from './chat_sidebar';
-import { TelegramIcon } from './telegram_icon';
-import { MessageList } from './message_list/message_list';
+
 import { MessageRole } from '../types';
+
+import { ChatSidebar } from './chat_sidebar';
+import { MessageList } from './message_list/message_list';
+import { QuestionInput } from './question_input';
+
+import { TelegramIcon } from './telegram_icon';
 
 export const Chat = () => {
   const { euiTheme } = useEuiTheme();

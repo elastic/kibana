@@ -12,7 +12,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { AIPlayground } from './ai_playground';
-import { AIPlaygroundSidebar } from './components/ai_playground_sidebar';
+import { Chat } from './components/chat';
 import { EmptyIndex } from './components/empty_index';
 
 describe('AI Playground', () => {
@@ -36,6 +36,6 @@ describe('AI Playground', () => {
     const wrapper = shallow(<AIPlayground />);
 
     expect(wrapper.find(EmptyIndex)).toHaveLength(0);
-    expect(wrapper.find(AIPlaygroundSidebar)).toHaveLength(1);
+    expect(wrapper.find(Chat)).toHaveLength(1);
   });
 });
