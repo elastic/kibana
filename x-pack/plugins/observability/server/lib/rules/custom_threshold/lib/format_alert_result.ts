@@ -67,8 +67,7 @@ export const formatAlertResult = (evaluationResult: Evaluation): FormattedEvalua
   const eventsAsUnit =
     metrics[0].aggType === Aggregators.RATE &&
     !metrics[0].field?.endsWith('.pct') &&
-    !metrics[0].field?.endsWith('.bytes') &&
-    !metrics[0].field?.endsWith('.bits')
+    !metrics[0].field?.endsWith('.bytes')
       ? ` ${EventsAsUnit}`
       : '';
   const rateUnitPerSec = eventsAsUnit + perSecIfRate;
