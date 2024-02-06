@@ -152,9 +152,8 @@ export function LogRateAnalysisPageProvider({ getService, getPageObject }: FtrPr
     },
 
     async clickLogRateAnalysisResultsGroupSwitchOn() {
-      await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
-
       await retry.tryForTime(30 * 1000, async () => {
+        await testSubjects.clickWhenNotDisabledWithoutRetry('aiopsLogRateAnalysisGroupSwitchOn');
         await testSubjects.existOrFail('aiopsLogRateAnalysisGroupSwitch checked');
       });
     },

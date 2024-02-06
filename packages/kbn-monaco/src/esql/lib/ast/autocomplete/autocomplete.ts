@@ -21,11 +21,14 @@ import {
   isAssignment,
   isAssignmentComplete,
   isColumnItem,
+  isComma,
   isFunctionItem,
   isIncompleteItem,
   isLiteralItem,
+  isMathFunction,
   isOptionItem,
   isRestartingExpression,
+  isSourceCommand,
   isSettingItem,
   isSourceItem,
   isTimeIntervalItem,
@@ -34,7 +37,6 @@ import {
 import { collectVariables, excludeVariablesFromCurrentCommand } from '../shared/variables';
 import type {
   AstProviderFn,
-  ESQLAst,
   ESQLAstItem,
   ESQLCommand,
   ESQLCommandMode,
@@ -48,7 +50,6 @@ import {
   commandAutocompleteDefinitions,
   getAssignmentDefinitionCompletitionItem,
   getBuiltinCompatibleFunctionDefinition,
-  mathCommandDefinition,
   pipeCompleteItem,
 } from './complete_items';
 import {
@@ -70,6 +71,7 @@ import {
 import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
 import {
+  buildQueryUntilPreviousCommand,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
@@ -117,17 +119,6 @@ function getFinalSuggestions({ comma }: { comma?: boolean } = { comma: true }) {
   return finalSuggestions;
 }
 
-function isMathFunction(char: string) {
-  return ['+', '-', '*', '/', '%', '='].some((op) => char === op);
-}
-
-function isComma(char: string) {
-  return char === ',';
-}
-
-function isSourceCommand({ label }: AutocompleteCommandDefinition) {
-  return ['from', 'row', 'show'].includes(String(label));
-}
 /**
  * This function count the number of unclosed brackets in order to
  * locally fix the queryString to generate a valid AST
@@ -196,7 +187,7 @@ export async function suggest(
 
   const astContext = getAstContext(innerText, ast, offset);
   // build the correct query to fetch the list of fields
-  const queryForFields = buildQueryForFields(ast, finalText);
+  const queryForFields = buildQueryUntilPreviousCommand(ast, finalText);
   const { getFieldsByType, getFieldsMap } = getFieldsByTypeRetriever(
     queryForFields,
     resourceRetriever
@@ -267,11 +258,6 @@ export async function suggest(
     );
   }
   return [];
-}
-
-export function buildQueryForFields(ast: ESQLAst, queryString: string) {
-  const prevCommand = ast[Math.max(ast.length - 2, 0)];
-  return prevCommand ? queryString.substring(0, prevCommand.location.max + 1) : queryString;
 }
 
 function getFieldsByTypeRetriever(queryString: string, resourceRetriever?: ESQLCallbacks) {
@@ -402,7 +388,10 @@ function isFunctionArgComplete(
   arg: ESQLFunction,
   references: Pick<ReferenceMaps, 'fields' | 'variables'>
 ) {
-  const fnDefinition = getFunctionDefinition(arg.name)!;
+  const fnDefinition = getFunctionDefinition(arg.name);
+  if (!fnDefinition) {
+    return { complete: false };
+  }
   const cleanedArgs = removeMarkerArgFromArgsList(arg)!.args;
   const argLengthCheck = fnDefinition.signatures.some((def) => {
     if (def.infiniteParams && cleanedArgs.length > 0) {
@@ -477,6 +466,11 @@ async function getExpressionSuggestionsByType(
   // * just after a command name => i.e. ... | STATS <here>
   // * or after a comma => i.e. STATS fieldA, <here>
   const isNewExpression = isRestartingExpression(innerText) || argIndex === 0;
+
+  // early exit in case of a missing function
+  if (isFunctionItem(lastArg) && !getFunctionDefinition(lastArg.name)) {
+    return [];
+  }
 
   // Are options already declared? This is useful to suggest only new ones
   const optionsAlreadyDeclared = (
@@ -813,7 +807,7 @@ async function getBuiltinFunctionNextArgument(
           // technically another boolean value should be suggested, but it is a better experience
           // to actually suggest a wider set of fields/functions
           [
-            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.builtin
+            finalType === 'boolean' && getFunctionDefinition(nodeArg.name)?.type === 'builtin'
               ? 'any'
               : finalType,
           ],
@@ -925,108 +919,108 @@ async function getFunctionArgsSuggestions(
   getPolicyMetadata: GetPolicyMetadataFn
 ): Promise<AutocompleteCommandDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
-  if (fnDefinition) {
-    const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
-    const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
-      commands,
-      command,
-      fieldsMap
-    );
-    // pick the type of the next arg
-    const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
-    let argIndex = Math.max(node.args.length, 0);
-    if (!shouldGetNextArgument && argIndex) {
-      argIndex -= 1;
-    }
-    const types = fnDefinition.signatures.flatMap((signature) => {
-      if (signature.params.length > argIndex) {
-        return signature.params[argIndex].type;
-      }
-      if (signature.infiniteParams) {
-        return signature.params[0].type;
-      }
-      return [];
-    });
-
-    const arg = node.args[argIndex];
-
-    const hasMoreMandatoryArgs =
-      fnDefinition.signatures[0].params.filter(
-        ({ optional }, index) => !optional && index > argIndex
-      ).length > argIndex;
-
-    const suggestions = [];
-    const noArgDefined = !arg;
-    const isUnknownColumn =
-      arg &&
-      isColumnItem(arg) &&
-      !columnExists(arg, { fields: fieldsMap, variables: variablesExcludingCurrentCommandOnes })
-        .hit;
-    if (noArgDefined || isUnknownColumn) {
-      // ... | EVAL fn( <suggest>)
-      // ... | EVAL fn( field, <suggest>)
-      suggestions.push(
-        ...(await getFieldsOrFunctionsSuggestions(
-          types,
-          command.name,
-          option?.name,
-          getFieldsByType,
-          {
-            functions: command.name !== 'stats',
-            fields: true,
-            variables: variablesExcludingCurrentCommandOnes,
-          },
-          // do not repropose the same function as arg
-          // i.e. avoid cases like abs(abs(abs(...))) with suggestions
-          { ignoreFn: [node.name] }
-        ))
-      );
-    }
-
-    // for eval and row commands try also to complete numeric literals with time intervals where possible
-    if (arg) {
-      if (command.name !== 'stats') {
-        if (isLiteralItem(arg) && arg.literalType === 'number') {
-          // ... | EVAL fn(2 <suggest>)
-          suggestions.push(
-            ...(await getFieldsOrFunctionsSuggestions(
-              ['time_literal_unit'],
-              command.name,
-              option?.name,
-              getFieldsByType,
-              {
-                functions: false,
-                fields: false,
-                variables: variablesExcludingCurrentCommandOnes,
-              }
-            ))
-          );
-        }
-      }
-      if (hasMoreMandatoryArgs) {
-        // suggest a comma if there's another argument for the function
-        suggestions.push(commaCompleteItem);
-      }
-      // if there are other arguments in the function, inject automatically a comma after each suggestion
-      return suggestions.map((suggestion) =>
-        suggestion !== commaCompleteItem
-          ? {
-              ...suggestion,
-              insertText:
-                hasMoreMandatoryArgs && !fnDefinition.builtin
-                  ? `${suggestion.insertText},`
-                  : suggestion.insertText,
-            }
-          : suggestion
-      );
-    }
-
-    return suggestions.map(({ insertText, ...rest }) => ({
-      ...rest,
-      insertText: hasMoreMandatoryArgs && !fnDefinition.builtin ? `${insertText},` : insertText,
-    }));
+  // early exit on no hit
+  if (!fnDefinition) {
+    return [];
   }
-  return mathCommandDefinition;
+  const fieldsMap: Map<string, ESQLRealField> = await getFieldsMap();
+  const variablesExcludingCurrentCommandOnes = excludeVariablesFromCurrentCommand(
+    commands,
+    command,
+    fieldsMap
+  );
+  // pick the type of the next arg
+  const shouldGetNextArgument = node.text.includes(EDITOR_MARKER);
+  let argIndex = Math.max(node.args.length, 0);
+  if (!shouldGetNextArgument && argIndex) {
+    argIndex -= 1;
+  }
+  const types = fnDefinition.signatures.flatMap((signature) => {
+    if (signature.params.length > argIndex) {
+      return signature.params[argIndex].type;
+    }
+    if (signature.infiniteParams) {
+      return signature.params[0].type;
+    }
+    return [];
+  });
+
+  const arg = node.args[argIndex];
+
+  const hasMoreMandatoryArgs =
+    fnDefinition.signatures[0].params.filter(({ optional }, index) => !optional && index > argIndex)
+      .length > argIndex;
+
+  const suggestions = [];
+  const noArgDefined = !arg;
+  const isUnknownColumn =
+    arg &&
+    isColumnItem(arg) &&
+    !columnExists(arg, { fields: fieldsMap, variables: variablesExcludingCurrentCommandOnes }).hit;
+  if (noArgDefined || isUnknownColumn) {
+    // ... | EVAL fn( <suggest>)
+    // ... | EVAL fn( field, <suggest>)
+    suggestions.push(
+      ...(await getFieldsOrFunctionsSuggestions(
+        types,
+        command.name,
+        option?.name,
+        getFieldsByType,
+        {
+          functions: command.name !== 'stats',
+          fields: true,
+          variables: variablesExcludingCurrentCommandOnes,
+        },
+        // do not repropose the same function as arg
+        // i.e. avoid cases like abs(abs(abs(...))) with suggestions
+        { ignoreFn: [node.name] }
+      ))
+    );
+  }
+
+  // for eval and row commands try also to complete numeric literals with time intervals where possible
+  if (arg) {
+    if (command.name !== 'stats') {
+      if (isLiteralItem(arg) && arg.literalType === 'number') {
+        // ... | EVAL fn(2 <suggest>)
+        suggestions.push(
+          ...(await getFieldsOrFunctionsSuggestions(
+            ['time_literal_unit'],
+            command.name,
+            option?.name,
+            getFieldsByType,
+            {
+              functions: false,
+              fields: false,
+              variables: variablesExcludingCurrentCommandOnes,
+            }
+          ))
+        );
+      }
+    }
+    if (hasMoreMandatoryArgs) {
+      // suggest a comma if there's another argument for the function
+      suggestions.push(commaCompleteItem);
+    }
+    // if there are other arguments in the function, inject automatically a comma after each suggestion
+    return suggestions.map((suggestion) =>
+      suggestion !== commaCompleteItem
+        ? {
+            ...suggestion,
+            insertText:
+              hasMoreMandatoryArgs && fnDefinition.type !== 'builtin'
+                ? `${suggestion.insertText},`
+                : suggestion.insertText,
+          }
+        : suggestion
+    );
+  }
+
+  return suggestions.map(({ insertText, ...rest }) => ({
+    ...rest,
+    insertText:
+      hasMoreMandatoryArgs && fnDefinition.type !== 'builtin' ? `${insertText},` : insertText,
+  }));
 }
 
 async function getSettingArgsSuggestions(

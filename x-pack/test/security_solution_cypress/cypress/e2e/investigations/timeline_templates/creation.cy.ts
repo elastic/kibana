@@ -46,7 +46,8 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 
 import { TIMELINES_URL } from '../../../urls/navigation';
 
-describe('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175955
+describe.skip('Timeline Templates', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteTimelines();

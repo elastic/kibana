@@ -8,9 +8,11 @@
 import React from 'react';
 import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { loadingDatasetsText, noDatasetsTitle } from '../../../common/translations';
 import { useDatasetQualityTable } from '../../hooks';
-import { Flyout } from '../flyout';
+
+const Flyout = dynamic(() => import('../flyout/flyout'));
 
 export const Table = () => {
   const {
@@ -69,3 +71,7 @@ export const Table = () => {
     </>
   );
 };
+
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default Table;

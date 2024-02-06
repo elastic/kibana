@@ -21,6 +21,9 @@ import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { EditorError } from '../../../../types';
+import { camelCase } from 'lodash';
+
+const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
 
 function getCallbackMocks() {
   return {
@@ -33,11 +36,7 @@ function getCallbackMocks() {
         : /unsupported_index/.test(query)
         ? [{ name: 'unsupported_field', type: 'unsupported' }]
         : [
-            ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
-              name: `${type}Field`,
-              type,
-            })),
-            { name: 'geoPointField', type: 'geo_point' },
+            ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
             { name: 'any#Char$ field', type: 'number' },
             { name: 'kubernetes.something.something', type: 'number' },
             {
@@ -75,6 +74,10 @@ const toStringSignature = evalFunctionsDefinitions.find(({ name }) => name === '
 const toDateSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_datetime')!;
 const toBooleanSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_boolean')!;
 const toIpSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_ip')!;
+const toGeoPointSignature = evalFunctionsDefinitions.find(({ name }) => name === 'to_geopoint')!;
+const toCartesianPointSignature = evalFunctionsDefinitions.find(
+  ({ name }) => name === 'to_cartesianpoint'
+)!;
 
 const toAvgSignature = statsAggregationFunctionDefinitions.find(({ name }) => name === 'avg')!;
 
@@ -84,6 +87,8 @@ const nestedFunctions = {
   date: prepareNestedFunction(toDateSignature),
   boolean: prepareNestedFunction(toBooleanSignature),
   ip: prepareNestedFunction(toIpSignature),
+  geo_point: prepareNestedFunction(toGeoPointSignature),
+  cartesian_point: prepareNestedFunction(toCartesianPointSignature),
 };
 
 const literals = {
@@ -97,13 +102,15 @@ function getLiteralType(typeString: 'chrono_literal' | 'time_literal') {
   return `1 ${literals[typeString]}`;
 }
 function getFieldName(
-  typeString: 'string' | 'number' | 'date' | 'boolean' | 'ip',
+  typeString: string,
   { useNestedFunction, isStats }: { useNestedFunction: boolean; isStats: boolean }
 ) {
   if (useNestedFunction && isStats) {
     return prepareNestedFunction(toAvgSignature);
   }
-  return useNestedFunction ? nestedFunctions[typeString] : `${typeString}Field`;
+  return useNestedFunction && typeString in nestedFunctions
+    ? nestedFunctions[typeString as keyof typeof nestedFunctions]
+    : `${camelCase(typeString)}Field`;
 }
 
 function getMultiValue(type: 'string[]' | 'number[]' | 'boolean[]' | 'any[]') {
@@ -139,9 +146,9 @@ function getFieldMapping(
 ) {
   return params.map(({ name: _name, type, ...rest }) => {
     const typeString: string = type;
-    if (['string', 'number', 'date', 'boolean', 'ip'].includes(typeString)) {
+    if (fieldTypes.includes(typeString)) {
       return {
-        name: getFieldName(typeString as 'string' | 'number' | 'date' | 'boolean' | 'ip', {
+        name: getFieldName(typeString, {
           useNestedFunction,
           isStats: !useLiterals,
         }),
@@ -394,7 +401,14 @@ describe('validation logic', () => {
 
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
-            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const canBeFieldButNotString = [
+              'number',
+              'date',
+              'boolean',
+              'ip',
+              'cartesian_point',
+              'geo_point',
+            ].includes(typeString);
             const isLiteralType = /literal$/.test(typeString);
             // pick a field name purposely wrong
             const nameValue = canBeFieldButNotString || isLiteralType ? '"a"' : '5';
@@ -765,6 +779,30 @@ describe('validation logic', () => {
         `Argument of [${op}] must be [number], found value [stringField] type [string]`,
       ]);
     }
+    testErrorsAndWarnings(`from a | where numberField =~ 0`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where NOT numberField =~ 0`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where (numberField =~ 0)`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where (NOT (numberField =~ 0))`, [
+      'Argument of [=~] must be [string], found value [numberField] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | where 1 =~ 0`, [
+      'Argument of [=~] must be [string], found value [1] type [number]',
+      'Argument of [=~] must be [string], found value [0] type [number]',
+    ]);
+    testErrorsAndWarnings(`from a | eval stringField =~ 0`, [
+      `Argument of [=~] must be [string], found value [0] type [number]`,
+    ]);
+
     for (const op of ['like', 'rlike']) {
       testErrorsAndWarnings(`from a | where stringField ${op} "?a"`, []);
       testErrorsAndWarnings(`from a | where stringField NOT ${op} "?a"`, []);
@@ -956,7 +994,9 @@ describe('validation logic', () => {
 
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
-            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const canBeFieldButNotString = fieldTypes
+              .filter((t) => t !== 'string')
+              .includes(typeString);
             const isLiteralType = /literal$/.test(typeString);
             // pick a field name purposely wrong
             const nameValue =
@@ -1170,30 +1210,18 @@ describe('validation logic', () => {
       'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
       []
     );
-    testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) BY numberField % 2',
-      []
-    );
-    testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2',
-      []
-    );
-    testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) BY numberField % 2, numberField + 1',
-      []
-    );
-    testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2, var1 = numberField + 1',
-      []
-    );
-    testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2, numberField + 1',
-      []
-    );
-    testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) BY var0 = numberField % 2, ipField',
-      []
-    );
+    testErrorsAndWarnings('from a | stats count(* + 1) BY ipField', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
+    ]);
+    testErrorsAndWarnings('from a | stats count(* + round(numberField)) BY ipField', [
+      'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
+    ]);
+    testErrorsAndWarnings('from a | stats count(round(*)) BY ipField', [
+      'Using wildcards (*) in round is not allowed',
+    ]);
+    testErrorsAndWarnings('from a | stats count(count(*)) BY ipField', [
+      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
+    ]);
     testErrorsAndWarnings('from a | stats numberField + 1', ['STATS does not support function +']);
 
     testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
@@ -1210,9 +1238,12 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | stats var0 = count(*)', []);
     testErrorsAndWarnings('from a | stats var0 = count()', []);
     testErrorsAndWarnings('from a | stats var0 = avg(numberField), count(*)', []);
+    testErrorsAndWarnings('from a | stats var0 = avg(fn(number)), count(*)', [
+      'Unknown function [fn]',
+    ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const { params, returnType } of signatures) {
+      for (const [signatureIndex, { params, returnType }] of Object.entries(signatures)) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a | stats var = ${
@@ -1220,7 +1251,8 @@ describe('validation logic', () => {
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
-          }`
+          }`,
+          []
         );
         testErrorsAndWarnings(
           `from a | stats ${
@@ -1228,7 +1260,8 @@ describe('validation logic', () => {
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
-          }`
+          }`,
+          []
         );
 
         if (alias) {
@@ -1242,6 +1275,82 @@ describe('validation logic', () => {
           }
         }
 
+        // test only numeric functions for now
+        if (params[0].type === 'number') {
+          const nestedBuiltin = 'numberField / 2';
+          const fieldMappingWithNestedBuiltinFunctions = getFieldMapping(params);
+          fieldMappingWithNestedBuiltinFunctions[0].name = nestedBuiltin;
+
+          const fnSignatureWithBuiltinString = getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithNestedBuiltinFunctions, returnType }],
+            },
+            { withTypes: false }
+          )[0].declaration;
+          // FROM a | STATS aggFn( numberField / 2 )
+          testErrorsAndWarnings(`from a | stats ${fnSignatureWithBuiltinString}`, []);
+          testErrorsAndWarnings(`from a | stats var0 = ${fnSignatureWithBuiltinString}`, []);
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithBuiltinString}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithBuiltinString}`,
+            []
+          );
+
+          const nestedEvalAndBuiltin = 'round(numberField / 2)';
+          const fieldMappingWithNestedEvalAndBuiltinFunctions = getFieldMapping(params);
+          fieldMappingWithNestedBuiltinFunctions[0].name = nestedEvalAndBuiltin;
+
+          const fnSignatureWithEvalAndBuiltinString = getFunctionSignatures(
+            {
+              name,
+              ...defRest,
+              signatures: [{ params: fieldMappingWithNestedEvalAndBuiltinFunctions, returnType }],
+            },
+            { withTypes: false }
+          )[0].declaration;
+          // FROM a | STATS aggFn( round(numberField / 2) )
+          testErrorsAndWarnings(`from a | stats ${fnSignatureWithEvalAndBuiltinString}`, []);
+          testErrorsAndWarnings(`from a | stats var0 = ${fnSignatureWithEvalAndBuiltinString}`, []);
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString}`,
+            []
+          );
+          // FROM a | STATS aggFn(round(numberField / 2) ) BY round(numberField / 2)
+          testErrorsAndWarnings(
+            `from a | stats ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ipField`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ipField`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), ${fnSignatureWithEvalAndBuiltinString} by ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats avg(numberField), var0 = ${fnSignatureWithEvalAndBuiltinString} by var1 = ${nestedEvalAndBuiltin}, ${nestedBuiltin}`,
+            []
+          );
+        }
+
         // Skip functions that have only arguments of type "any", as it is not possible to pass "the wrong type".
         // auto_bucket and to_version functions are a bit harder to test exactly a combination of argument and predict the
         // the right error message
@@ -1250,7 +1359,7 @@ describe('validation logic', () => {
           !['auto_bucket', 'to_version'].includes(name)
         ) {
           // now test nested functions
-          const fieldMappingWithNestedFunctions = getFieldMapping(params, {
+          const fieldMappingWithNestedAggsFunctions = getFieldMapping(params, {
             useNestedFunction: true,
             useLiterals: false,
           });
@@ -1260,20 +1369,38 @@ describe('validation logic', () => {
                 {
                   name,
                   ...defRest,
-                  signatures: [{ params: fieldMappingWithNestedFunctions, returnType }],
+                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, returnType }],
                 },
                 { withTypes: false }
               )[0].declaration
             }`,
             params.map(
               (_) =>
-                `Aggregate function's parameters must be an attribute or literal; found [avg(numberField)] of type [number]`
+                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
+            )
+          );
+          testErrorsAndWarnings(
+            `from a | stats ${
+              getFunctionSignatures(
+                {
+                  name,
+                  ...defRest,
+                  signatures: [{ params: fieldMappingWithNestedAggsFunctions, returnType }],
+                },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            params.map(
+              (_) =>
+                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
             )
           );
           // and the message is case of wrong argument type is passed
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
-            const canBeFieldButNotString = ['number', 'date', 'boolean', 'ip'].includes(typeString);
+            const canBeFieldButNotString = fieldTypes
+              .filter((t) => t !== 'string')
+              .includes(typeString);
             const isLiteralType = /literal$/.test(typeString);
             // pick a field name purposely wrong
             const nameValue =
@@ -1283,9 +1410,13 @@ describe('validation logic', () => {
 
           const expectedErrors = params.map(
             ({ type }, i) =>
-              `Argument of [${name}] must be [${type}], found value [${
-                wrongFieldMapping[i].name
-              }] type [${wrongFieldMapping[i].name.replace('Field', '')}]`
+              `Argument of [${name}] must be [${
+                // If the function has multiple signatures and all fail, then only
+                // one error will be reported for the first signature type
+                +signatureIndex > 0 ? signatures[0].params[i].type : type
+              }], found value [${wrongFieldMapping[i].name}] type [${wrongFieldMapping[
+                i
+              ].name.replace('Field', '')}]`
           );
           testErrorsAndWarnings(
             `from a | stats ${

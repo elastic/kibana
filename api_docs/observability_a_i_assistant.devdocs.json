@@ -858,7 +858,7 @@
               "Readable",
               ">; } & ",
               "ObservabilityAIAssistantRouteCreateOptions",
-              "; }, TEndpoint> & Omit<FetchOptions, \"body\" | \"query\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; }>) => Promise<",
+              "; }, TEndpoint> & Omit<FetchOptions, \"query\" | \"body\" | \"signal\" | \"pathname\"> & { signal: AbortSignal | null; }>) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository",
                 "scope": "common",

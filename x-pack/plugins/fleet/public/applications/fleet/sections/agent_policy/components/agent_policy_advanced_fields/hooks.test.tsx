@@ -120,6 +120,39 @@ const mockApiCallsWithRemoteESOutputs = (http: MockedFleetStartServices['http'])
   });
 };
 
+const mockApiCallsWithInternalOutputs = (http: MockedFleetStartServices['http']) => {
+  http.get.mockImplementation(async (path) => {
+    if (typeof path !== 'string') {
+      throw new Error('Invalid request');
+    }
+    if (path === '/api/fleet/outputs') {
+      return {
+        data: {
+          items: [
+            {
+              id: 'default-output',
+              name: 'Default',
+              type: 'elasticsearch',
+              is_default: true,
+              is_default_monitoring: true,
+            },
+            {
+              id: 'internal-output',
+              name: 'Internal',
+              type: 'elasticsearch',
+              is_default: false,
+              is_default_monitoring: false,
+              is_internal: true,
+            },
+          ],
+        },
+      };
+    }
+
+    return defaultHttpClientGetImplementation(path);
+  });
+};
+
 describe('useOutputOptions', () => {
   it('should generate enabled options if the licence is platinium', async () => {
     const testRenderer = createFleetTestRendererMock();
@@ -549,5 +582,57 @@ describe('useOutputOptions', () => {
     expect(result.current.dataOutputOptions[1].value).toEqual('remote1');
     expect(result.current.monitoringOutputOptions.length).toEqual(2);
     expect(result.current.monitoringOutputOptions[1].value).toEqual('remote1');
+  });
+
+  it('should not enable internal outputs', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    mockedUseLicence.mockReturnValue({
+      hasAtLeast: () => true,
+    } as unknown as LicenseService);
+    mockApiCallsWithInternalOutputs(testRenderer.startServices.http);
+    const { result, waitForNextUpdate } = testRenderer.renderHook(() =>
+      useOutputOptions({} as AgentPolicy)
+    );
+    expect(result.current.isLoading).toBeTruthy();
+
+    await waitForNextUpdate();
+    expect(result.current.dataOutputOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default",
+          "value": "default-output",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
+        },
+      ]
+    `);
+    expect(result.current.monitoringOutputOptions).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "disabled": undefined,
+          "inputDisplay": "Default (currently Default)",
+          "value": "@@##DEFAULT_SELECT##@@",
+        },
+        Object {
+          "disabled": false,
+          "inputDisplay": "Default",
+          "value": "default-output",
+        },
+        Object {
+          "disabled": true,
+          "inputDisplay": "Internal",
+          "value": "internal-output",
+        },
+      ]
+    `);
   });
 });

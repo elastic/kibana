@@ -10,14 +10,14 @@ import {
   APM_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,
-  OBSERVABILITY_LOG_EXPLORER_APP_ID,
+  OBSERVABILITY_LOGS_EXPLORER_APP_ID,
   OBSERVABILITY_ONBOARDING_APP_ID,
   OBSERVABILITY_OVERVIEW_APP_ID,
   SYNTHETICS_APP_ID,
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
-type ObservabilityLogExplorerApp = typeof OBSERVABILITY_LOG_EXPLORER_APP_ID;
+type ObservabilityLogExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
 type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;

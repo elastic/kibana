@@ -8,7 +8,6 @@
 import React from 'react';
 import { fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { mockGlobals } from '../../utils/testing';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorEditPage } from './monitor_edit_page';
 import { useMonitorName } from '../../hooks/use_monitor_name';
@@ -19,8 +18,6 @@ import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
 } from '../../../../../common/constants/monitor_defaults';
-
-mockGlobals();
 
 jest.mock('@kbn/observability-shared-plugin/public');
 

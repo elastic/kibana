@@ -20,15 +20,15 @@ import {
 import { IKibanaSearchResponse } from '@kbn/data-plugin/common';
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import type { ESQLSearchReponse } from '@kbn/es-types';
 import { CancellationToken } from '@kbn/reporting-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
-} from './constants';
+} from '../constants';
 import { CsvESQLGenerator, JobParamsCsvESQL } from './generate_csv_esql';
-import type { ESQLSearchReponse } from '@kbn/es-types';
 
 const createMockJob = (
   params: Partial<JobParamsCsvESQL> = { query: { esql: '' } }
@@ -93,7 +93,7 @@ describe('CsvESQLGenerator', () => {
       escapeFormulaValues: true,
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
-      scroll: { size: 500, duration: '30s' },
+      scroll: { size: 500, duration: '30s', strategy: 'pit' },
       enablePanelActionDownload: true,
       maxConcurrentShardRequests: 5,
     };
@@ -373,7 +373,7 @@ describe('CsvESQLGenerator', () => {
         escapeFormulaValues: false,
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
-        scroll: { size: 500, duration: '30s' },
+        scroll: { size: 500, duration: '30s', strategy: 'pit' },
         enablePanelActionDownload: true,
         maxConcurrentShardRequests: 5,
       };

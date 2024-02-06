@@ -102,6 +102,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
         'console.ui.enabled (boolean)',
+        'console.ui.embeddedEnabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
         'unifiedSearch.autocomplete.valueSuggestions.enabled (boolean)',
@@ -330,7 +331,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
-        'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
+        'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

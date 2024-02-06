@@ -41,7 +41,7 @@ export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps)
   });
 
   return (
-    <EuiTabs bottomBorder={false} data-test-subj="logExplorerTabs">
+    <EuiTabs bottomBorder={false} data-test-subj="logsExplorerTabs">
       <EuiTab
         isSelected={selectedTab === 'discover'}
         href={discoverUrl}
@@ -49,7 +49,7 @@ export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps)
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
         data-test-subj="discoverTab"
       >
-        {i18n.translate('discover.logExplorerTabs.discover', {
+        {i18n.translate('discover.logsExplorerTabs.discover', {
           defaultMessage: 'Discover',
         })}
       </EuiTab>
@@ -58,9 +58,9 @@ export const LogExplorerTabs = ({ services, selectedTab }: LogExplorerTabsProps)
         href={logExplorerUrl}
         onClick={navigateToLogExplorer}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
-        data-test-subj="logExplorerTab"
+        data-test-subj="logsExplorerTab"
       >
-        {i18n.translate('discover.logExplorerTabs.logExplorer', {
+        {i18n.translate('discover.logsExplorerTabs.logsExplorer', {
           defaultMessage: 'Logs Explorer',
         })}
       </EuiTab>

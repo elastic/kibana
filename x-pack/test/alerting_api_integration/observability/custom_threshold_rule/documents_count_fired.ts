@@ -37,9 +37,9 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom  Threshold rule - DOCUMENTS_COUNT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATE_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
-    const DATE_VIEW_NAME = 'data-view-name';
+    const DATA_VIEW_NAME = 'data-view-name';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
@@ -61,7 +61,12 @@ export default function ({ getService }: FtrProviderContext) {
             ],
           },
         ],
-        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 60000 },
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 60000,
+          alignEventsToInterval: true,
+        },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await waitForDocumentInIndex({
@@ -71,9 +76,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await createDataView({
         supertest,
-        name: DATE_VIEW_NAME,
+        name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: DATA_VIEW,
       });
     });
 
@@ -96,8 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/175407
-    describe.skip('Rule creation', () => {
+    describe('Rule creation', () => {
       it('creates rule successfully', async () => {
         actionId = await createIndexConnector({
           supertest,
@@ -237,8 +241,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
+
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATE_VIEW_NAME})`
+          `Document count is 3, not between the threshold of 1 and 2. (duration: 1 min, data view: ${DATA_VIEW_NAME})`
         );
         expect(resp.hits.hits[0]._source?.value).eql('3');
 

@@ -5121,6 +5121,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5188,6 +5190,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5337,6 +5341,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5407,6 +5413,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5449,6 +5457,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5519,6 +5529,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5653,6 +5665,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string

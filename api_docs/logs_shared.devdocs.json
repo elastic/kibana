@@ -270,7 +270,7 @@
         "label": "LogAIAssistant",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<",
           {
             "pluginId": "logsShared",
             "scope": "public",
@@ -278,7 +278,7 @@
             "section": "def-public.LogAIAssistantProps",
             "text": "LogAIAssistantProps"
           },
-          ") => JSX.Element"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -293,9 +293,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -310,9 +310,9 @@
         "label": "LogColumnHeader",
         "description": [],
         "signature": [
-          "(props: { columnWidth: ",
+          "React.ForwardRefExoticComponent<{ columnWidth: ",
           "LogEntryColumnWidth",
-          "; 'data-test-subj'?: string | undefined; } & { children?: React.ReactNode; }) => JSX.Element"
+          "; 'data-test-subj'?: string | undefined; } & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -327,9 +327,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -344,7 +344,7 @@
         "label": "LogColumnHeadersWrapper",
         "description": [],
         "signature": [
-          "(props: StyledComponentPropsWithAs<React.ComponentType<any> | keyof JSX.IntrinsicElements, ",
+          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -352,7 +352,15 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ", { role: React.AriaRole; }, \"role\">) => JSX.Element"
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -367,9 +375,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -384,7 +392,7 @@
         "label": "LogEntryColumn",
         "description": [],
         "signature": [
-          "(props: StyledComponentPropsWithAs<React.ComponentType<any> | keyof JSX.IntrinsicElements, ",
+          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -392,7 +400,15 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ", { role: \"cell\"; } & LogEntryColumnProps, \"role\">) => JSX.Element"
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -407,9 +423,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -424,9 +440,9 @@
         "label": "LogEntryContextMenu",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<",
           "LogEntryContextMenuProps",
-          " & { children?: React.ReactNode; }) => JSX.Element"
+          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -441,9 +457,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -458,9 +474,9 @@
         "label": "LogEntryFieldColumn",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<",
           "LogEntryFieldColumnProps",
-          " & { children?: React.ReactNode; }) => JSX.Element"
+          " & { children?: React.ReactNode; } & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -475,9 +491,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -527,9 +543,9 @@
         "label": "LogEntryMessageColumn",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<",
           "LogEntryMessageColumnProps",
-          ") => JSX.Element"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -544,9 +560,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -561,7 +577,7 @@
         "label": "LogEntryRowWrapper",
         "description": [],
         "signature": [
-          "(props: StyledComponentPropsWithAs<React.ComponentType<any> | keyof JSX.IntrinsicElements, ",
+          "React.ForwardRefExoticComponent<(Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
           {
             "pluginId": "@kbn/react-kibana-context-styled",
             "scope": "common",
@@ -569,7 +585,15 @@
             "section": "def-common.EuiTheme",
             "text": "EuiTheme"
           },
-          ", { role: \"row\"; } & LogEntryRowWrapperProps, \"role\">) => JSX.Element"
+          " | undefined; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol> | Pick<Omit<Omit<any, \"role\"> & Partial<Pick<any, \"role\">>, \"theme\"> & { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } & { children?: React.ReactNode; } & { as?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; forwardedAs?: React.ComponentType<any> | keyof JSX.IntrinsicElements | undefined; }, string | number | symbol>) & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -584,9 +608,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -601,9 +625,9 @@
         "label": "LogEntryTimestampColumn",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<",
           "LogEntryTimestampColumnProps",
-          ") => JSX.Element"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -618,9 +642,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -731,7 +755,7 @@
         "label": "LogStream",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<",
           {
             "pluginId": "logsShared",
             "scope": "public",
@@ -739,7 +763,7 @@
             "section": "def-public.LogStreamProps",
             "text": "LogStreamProps"
           },
-          ") => JSX.Element"
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -754,9 +778,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1041,9 +1065,19 @@
         "label": "ScrollableLogTextStreamView",
         "description": [],
         "signature": [
-          "(props: ",
+          "React.ForwardRefExoticComponent<Pick<",
           "ScrollableLogTextStreamViewProps",
-          ") => JSX.Element"
+          " & React.RefAttributes<",
+          {
+            "pluginId": "logsShared",
+            "scope": "public",
+            "docId": "kibLogsSharedPluginApi",
+            "section": "def-public.ScrollableLogTextStreamView",
+            "text": "ScrollableLogTextStreamView"
+          },
+          ">, \"key\" | \"css\" | keyof ",
+          "ScrollableLogTextStreamViewProps",
+          "> & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/logs_shared/public/index.ts",
         "deprecated": false,
@@ -1058,9 +1092,9 @@
             "label": "props",
             "description": [],
             "signature": [
-              "TComponent extends React.JSXElementConstructor<infer P> ? P : TComponent extends keyof JSX.IntrinsicElements ? JSX.IntrinsicElements[TComponent] : {}"
+              "P"
             ],
-            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "path": "node_modules/@types/react/index.d.ts",
             "deprecated": false,
             "trackAdoption": false
           }

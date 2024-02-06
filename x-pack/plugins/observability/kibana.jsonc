@@ -39,7 +39,7 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logExplorer",
+      "logsExplorer",
       "licensing"
     ],
     "optionalPlugins": [

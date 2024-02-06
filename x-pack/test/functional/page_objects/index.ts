@@ -33,7 +33,7 @@ import { LogstashPageObject } from './logstash_page';
 import { MaintenanceWindowsPageProvider } from './maintenance_windows_page';
 import { MonitoringPageObject } from './monitoring_page';
 import { NavigationalSearchPageObject } from './navigational_search';
-import { ObservabilityLogExplorerPageObject } from './observability_log_explorer';
+import { ObservabilityLogsExplorerPageObject } from './observability_log_explorer';
 import { ObservabilityPageProvider } from './observability_page';
 import { RemoteClustersPageProvider } from './remote_clusters_page';
 import { ReportingPageObject } from './reporting_page';
@@ -82,7 +82,7 @@ export const pageObjects = {
   maps: GisPageObject,
   monitoring: MonitoringPageObject,
   navigationalSearch: NavigationalSearchPageObject,
-  observabilityLogExplorer: ObservabilityLogExplorerPageObject,
+  observabilityLogsExplorer: ObservabilityLogsExplorerPageObject,
   observability: ObservabilityPageProvider,
   remoteClusters: RemoteClustersPageProvider,
   reporting: ReportingPageObject,

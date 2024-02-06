@@ -7,7 +7,7 @@
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
-
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import {
   type AggregateQuery,
   getIndexPatternFromSQLQuery,
@@ -16,7 +16,6 @@ import {
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import { generateId } from '../../id_generator';
 import { fetchDataFromAggregateQuery } from './fetch_data_from_aggregate_query';
-
 import type { IndexPatternRef, TextBasedPrivateState, TextBasedLayerColumn } from './types';
 import type { DataViewsState } from '../../state_management';
 import { addColumnsToCache } from './fieldlist_cache';
@@ -89,9 +88,8 @@ export async function getStateFromAggregateQuery(
   let columnsFromQuery: DatatableColumn[] = [];
   let timeFieldName;
   try {
-    const dataView = await dataViews.create({
-      title: indexPattern,
-    });
+    const dataView = await getESQLAdHocDataview(indexPattern, dataViews);
+
     if (dataView && dataView.id) {
       if (dataView?.fields?.getByName('@timestamp')?.type === 'date') {
         dataView.timeFieldName = '@timestamp';

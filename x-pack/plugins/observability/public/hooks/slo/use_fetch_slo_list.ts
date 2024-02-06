@@ -19,6 +19,7 @@ import {
 
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { mixKqlWithTags } from './mix_kql_with_tags';
 
 interface SLOListParams {
   kqlQuery?: string;
@@ -130,28 +131,3 @@ export function useFetchSloList({
     isError,
   };
 }
-
-const mixKqlWithTags = (kqlQuery: string, tags: SearchState['tags']) => {
-  if (!tags) {
-    return kqlQuery;
-  }
-  const tagsKqlIncluded = tags.included?.join(' or ') || '';
-  const excludedTagsKql = tags.excluded?.join(' or ') || '';
-
-  let tagsQuery = '';
-  if (tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `slo.tags: (${excludedTagsKql}) and not slo.tags: (${tagsKqlIncluded})`;
-  }
-  if (!excludedTagsKql && tagsKqlIncluded) {
-    tagsQuery = `slo.tags: (${tagsKqlIncluded})`;
-  }
-  if (!tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `not slo.tags: (${excludedTagsKql})`;
-  }
-
-  if (!kqlQuery) {
-    return tagsQuery;
-  }
-
-  return `${kqlQuery} and ${tagsQuery}`;
-};

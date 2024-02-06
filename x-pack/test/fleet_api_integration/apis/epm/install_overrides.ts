@@ -60,6 +60,7 @@ export default function (providerContext: FtrProviderContext) {
         `logs@settings`,
         `${templateName}@package`,
         `${templateName}@custom`,
+        `ecs@mappings`,
         '.fleet_globals-1',
         '.fleet_agent_id_verification-1',
       ]);

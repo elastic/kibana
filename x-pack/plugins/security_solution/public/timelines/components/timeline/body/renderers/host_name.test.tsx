@@ -12,7 +12,6 @@ import { HostName } from './host_name';
 import { TestProviders } from '../../../../../common/mock';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import { timelineActions } from '../../../../store';
-import { activeTimeline } from '../../../../containers/active_timeline_context';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import { createTelemetryServiceMock } from '../../../../../common/lib/telemetry/telemetry_service.mock';
 
@@ -83,15 +82,6 @@ describe('HostName', () => {
     value: 'Mock Host',
   };
 
-  let toggleExpandedDetail: jest.SpyInstance;
-
-  beforeAll(() => {
-    toggleExpandedDetail = jest.spyOn(activeTimeline, 'toggleExpandedDetail');
-  });
-
-  afterEach(() => {
-    toggleExpandedDetail.mockClear();
-  });
   test('should render host name', () => {
     const wrapper = mount(
       <TestProviders>
@@ -128,7 +118,6 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(timelineActions.toggleDetailPanel).not.toHaveBeenCalled();
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
 
@@ -160,61 +149,6 @@ describe('HostName', () => {
     });
   });
 
-  test('if enableHostDetailsFlyout and timelineId equals to `timeline-1`, should call toggleExpandedDetail', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TimelineId.active,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <HostName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
-    await waitFor(() => {
-      expect(toggleExpandedDetail).toHaveBeenCalledWith({
-        panelView: 'hostDetail',
-        params: {
-          hostName: props.value,
-        },
-      });
-    });
-  });
-
-  test('if enableHostDetailsFlyout but timelineId not equals to `TimelineId.active`, should not call toggleExpandedDetail', async () => {
-    const context = {
-      enableHostDetailsFlyout: true,
-      enableIpDetailsFlyout: true,
-      timelineID: TimelineId.test,
-      tabType: TimelineTabs.query,
-    };
-    const wrapper = mount(
-      <TestProviders>
-        <StatefulEventContext.Provider value={context}>
-          <HostName {...props} />
-        </StatefulEventContext.Provider>
-      </TestProviders>
-    );
-
-    wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
-    await waitFor(() => {
-      expect(timelineActions.toggleDetailPanel).toHaveBeenCalledWith({
-        id: context.timelineID,
-        panelView: 'hostDetail',
-        params: {
-          hostName: props.value,
-        },
-        tabType: context.tabType,
-      });
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
-    });
-  });
-
   test('it should open expandable flyout if timeline is not in context and experimental flag is enabled', async () => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(true);
     const context = {
@@ -234,7 +168,6 @@ describe('HostName', () => {
     wrapper.find('[data-test-subj="host-details-button"]').last().simulate('click');
     await waitFor(() => {
       expect(mockOpenRightPanel).toHaveBeenCalled();
-      expect(toggleExpandedDetail).not.toHaveBeenCalled();
     });
   });
 });

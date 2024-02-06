@@ -1052,4 +1052,5 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ...def,
     supportedCommands: ['eval', 'where', 'row'],
     supportedOptions: ['by'],
+    type: 'eval',
   }));

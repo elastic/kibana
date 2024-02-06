@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import React from 'react';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { encode } from '@kbn/rison';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
@@ -23,7 +24,6 @@ import { useLicense } from '../../hooks/use_license';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
-import { encode } from '@kbn/rison';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -127,6 +127,9 @@ describe('SLOs Page', () => {
     jest.clearAllMocks();
     mockKibana();
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    jest
+      .spyOn(Router, 'useLocation')
+      .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
   });
 
   describe('when the incorrect license is found', () => {

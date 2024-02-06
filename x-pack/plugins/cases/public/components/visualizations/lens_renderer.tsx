@@ -9,6 +9,7 @@ import React from 'react';
 import styled from 'styled-components';
 
 import { createGlobalStyle } from '@kbn/kibana-react-plugin/common';
+import { EuiSpacer } from '@elastic/eui';
 import { useKibana } from '../../common/lib/kibana';
 import type { LensProps } from './types';
 
@@ -25,7 +26,7 @@ const LensChartTooltipFix = createGlobalStyle`
   }
 `;
 
-const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange }) => {
+const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange, metadata }) => {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
@@ -35,22 +36,30 @@ const LensRendererComponent: React.FC<LensProps> = ({ attributes, timeRange }) =
   }
 
   return (
-    <Container>
-      <EmbeddableComponent
-        id=""
-        style={{ height: LENS_VISUALIZATION_HEIGHT }}
-        timeRange={timeRange}
-        attributes={attributes}
-        renderMode="view"
-        disableTriggers
-        executionContext={{
-          type: 'cases',
-        }}
-        syncTooltips={false}
-        syncCursor={false}
-      />
-      <LensChartTooltipFix />
-    </Container>
+    <>
+      {metadata && metadata.description && (
+        <>
+          {metadata.description}
+          <EuiSpacer size="s" />
+        </>
+      )}
+      <Container>
+        <EmbeddableComponent
+          id=""
+          style={{ height: LENS_VISUALIZATION_HEIGHT }}
+          timeRange={timeRange}
+          attributes={attributes}
+          renderMode="view"
+          disableTriggers
+          executionContext={{
+            type: 'cases',
+          }}
+          syncTooltips={false}
+          syncCursor={false}
+        />
+        <LensChartTooltipFix />
+      </Container>
+    </>
   );
 };
 

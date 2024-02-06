@@ -23,7 +23,12 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { ESQLSearchReponse, ESQLSearchParams } from '@kbn/es-types';
 import { getEsQueryConfig } from '../../es_query';
 import { getTime } from '../../query';
-import { ESQL_SEARCH_STRATEGY, IKibanaSearchRequest, ISearchGeneric, KibanaContext } from '..';
+import {
+  ESQL_ASYNC_SEARCH_STRATEGY,
+  IKibanaSearchRequest,
+  ISearchGeneric,
+  KibanaContext,
+} from '..';
 import { IKibanaSearchResponse } from '../types';
 import { UiSettingsCommon } from '../..';
 
@@ -189,7 +194,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           return search<
             IKibanaSearchRequest<ESQLSearchParams>,
             IKibanaSearchResponse<ESQLSearchReponse>
-          >({ params }, { abortSignal, strategy: ESQL_SEARCH_STRATEGY }).pipe(
+          >({ params }, { abortSignal, strategy: ESQL_ASYNC_SEARCH_STRATEGY }).pipe(
             catchError((error) => {
               if (!error.attributes) {
                 error.message = `Unexpected error from Elasticsearch: ${error.message}`;

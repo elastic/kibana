@@ -7,6 +7,7 @@
  */
 
 import type { monaco } from '../../../../monaco_imports';
+import { AutocompleteCommandDefinition } from '../autocomplete/types';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { builtinFunctions } from '../definitions/builtin';
 import { commandDefinitions } from '../definitions/commands';
@@ -91,6 +92,23 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
+export function isMathFunction(char: string) {
+  // compare last char for all math functions
+  // limit only to 2 chars operators
+  return builtinFunctions
+    .filter(({ name }) => name.length < 3)
+    .map(({ name }) => name[name.length - 1])
+    .some((op) => char === op);
+}
+
+export function isComma(char: string) {
+  return char === ',';
+}
+
+export function isSourceCommand({ label }: AutocompleteCommandDefinition) {
+  return ['from', 'row', 'show'].includes(String(label));
+}
+
 // From Monaco position to linear offset
 export function monacoPositionToOffset(expression: string, position: monaco.Position): number {
   const lines = expression.split(/\n/);
@@ -146,6 +164,17 @@ export function isSupportedFunction(
     supported: isSupported,
     reason: isSupported ? undefined : fn ? 'unsupportedFunction' : 'unknownFunction',
   };
+}
+
+export function getAllFunctions(options?: {
+  type: Array<FunctionDefinition['type']> | FunctionDefinition['type'];
+}) {
+  const fns = buildFunctionLookup();
+  if (!options?.type) {
+    return Array.from(fns.values());
+  }
+  const types = new Set(Array.isArray(options.type) ? options.type : [options.type]);
+  return Array.from(fns.values()).filter((fn) => types.has(fn.type));
 }
 
 export function getFunctionDefinition(name: string) {
@@ -463,4 +492,11 @@ export function getLastCharFromTrimmed(text: string) {
 
 export function isRestartingExpression(text: string) {
   return getLastCharFromTrimmed(text) === ',';
+}
+
+export function shouldBeQuotedText(
+  text: string,
+  { dashSupported }: { dashSupported?: boolean } = {}
+) {
+  return dashSupported ? /[^a-zA-Z\d_\.@-]/.test(text) : /[^a-zA-Z\d_\.@]/.test(text);
 }

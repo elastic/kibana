@@ -544,5 +544,6 @@ export interface HasDataService {
 
 export interface ClientConfigType {
   scriptedFieldsEnabled?: boolean;
+  dataTiersExcludedForFields?: string;
   fieldListCachingEnabled?: boolean;
 }

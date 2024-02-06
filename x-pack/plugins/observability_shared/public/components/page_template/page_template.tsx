@@ -24,6 +24,7 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
@@ -37,6 +38,7 @@ export type WrappedPageTemplateProps = Pick<
   pageSectionProps?: EuiPageSectionProps;
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
+  topSearchBar?: React.ReactNode;
 };
 
 export interface NavigationEntry {
@@ -102,11 +104,13 @@ export function ObservabilityPageTemplate({
   bottomBarProps,
   pageSectionProps,
   guidedOnboardingApi,
+  topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
   const currentAppId = useObservable(currentAppId$, undefined);
   const { pathname: currentPath } = useLocation();
+  const containerRef = React.useRef<HTMLDivElement>(null);
 
   const { services } = useKibana();
 
@@ -194,38 +198,45 @@ export function ObservabilityPageTemplate({
       >
         {({ isTourVisible }) => {
           return (
-            <KibanaPageTemplate
-              restrictWidth={false}
-              {...pageTemplateProps}
-              solutionNav={
-                showSolutionNav
-                  ? {
-                      icon: 'logoObservability',
-                      items: sideNavItems,
-                      name: sideNavTitle,
-                      // Only false if tour is active
-                      canBeCollapsed: isTourVisible === false,
-                    }
-                  : undefined
-              }
-            >
-              <KibanaErrorBoundaryProvider analytics={services.analytics}>
-                <KibanaErrorBoundary>
-                  <KibanaPageTemplate.Section
-                    component="div"
-                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                    {...pageSectionProps}
-                  >
-                    {children}
-                  </KibanaPageTemplate.Section>
-                </KibanaErrorBoundary>
-              </KibanaErrorBoundaryProvider>
-              {bottomBar && (
-                <KibanaPageTemplate.BottomBar {...bottomBarProps}>
-                  {bottomBar}
-                </KibanaPageTemplate.BottomBar>
-              )}
-            </KibanaPageTemplate>
+            <div ref={containerRef}>
+              <KibanaPageTemplate
+                restrictWidth={false}
+                {...pageTemplateProps}
+                solutionNav={
+                  showSolutionNav
+                    ? {
+                        icon: 'logoObservability',
+                        items: sideNavItems,
+                        name: sideNavTitle,
+                        // Only false if tour is active
+                        canBeCollapsed: isTourVisible === false,
+                      }
+                    : undefined
+                }
+              >
+                <KibanaErrorBoundaryProvider analytics={services.analytics}>
+                  <KibanaErrorBoundary>
+                    <KibanaPageTemplate.Section
+                      component="div"
+                      alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                      {...pageSectionProps}
+                    >
+                      {topSearchBar && (
+                        <SearchBarPortal containerRef={containerRef}>
+                          {topSearchBar}
+                        </SearchBarPortal>
+                      )}
+                      {children}
+                    </KibanaPageTemplate.Section>
+                  </KibanaErrorBoundary>
+                </KibanaErrorBoundaryProvider>
+                {bottomBar && (
+                  <KibanaPageTemplate.BottomBar {...bottomBarProps}>
+                    {bottomBar}
+                  </KibanaPageTemplate.BottomBar>
+                )}
+              </KibanaPageTemplate>
+            </div>
           );
         }}
       </ObservabilityTour>

@@ -233,7 +233,7 @@
         "label": "apiIsOfType",
         "description": [],
         "signature": [
-          "<T extends string = string>(api: unknown, typeToCheck: string) => api is ",
+          "<T extends string = string>(api: unknown, typeToCheck: T) => api is ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -265,12 +265,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-common.apiIsOfType.$2",
-            "type": "string",
+            "type": "Uncategorized",
             "tags": [],
             "label": "typeToCheck",
             "description": [],
             "signature": [
-              "string"
+              "T"
             ],
             "path": "packages/presentation/presentation_publishing/interfaces/has_type.ts",
             "deprecated": false,
@@ -6483,7 +6483,7 @@
         "label": "ViewMode",
         "description": [],
         "signature": [
-          "\"view\" | \"edit\" | \"print\" | \"preview\""
+          "\"edit\" | \"view\" | \"print\" | \"preview\""
         ],
         "path": "packages/presentation/presentation_publishing/interfaces/publishes_view_mode.ts",
         "deprecated": false,

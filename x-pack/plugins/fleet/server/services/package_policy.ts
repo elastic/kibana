@@ -46,8 +46,6 @@ import {
 } from '../../common/services';
 import {
   SO_SEARCH_LIMIT,
-  FLEET_APM_PACKAGE,
-  outputType,
   PACKAGES_SAVED_OBJECT_TYPE,
   DATASET_VAR_NAME,
 } from '../../common/constants';
@@ -103,7 +101,6 @@ import { getAuthzFromRequest, doesNotHaveRequiredFleetAuthz } from './security';
 
 import { storedPackagePolicyToAgentInputs } from './agent_policies';
 import { agentPolicyService } from './agent_policy';
-import { getDataOutputForAgentPolicy } from './agent_policies';
 import { getPackageInfo, getInstallation, ensureInstalledPackage } from './epm/packages';
 import { getAssetsDataFromAssetsMap } from './epm/packages/assets';
 import { compileTemplate } from './epm/agent/agent';
@@ -124,6 +121,7 @@ import {
   isSecretStorageEnabled,
 } from './secrets';
 import { getPackageAssetsMap } from './epm/packages/get';
+import { validateOutputForNewPackagePolicy } from './agent_policies/outputs_helpers';
 
 export type InputsOverride = Partial<NewPackagePolicyInput> & {
   vars?: Array<NewPackagePolicyInput['vars'] & { name: string }>;
@@ -225,11 +223,12 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
       true
     );
 
-    if (agentPolicy && enrichedPackagePolicy.package?.name === FLEET_APM_PACKAGE) {
-      const dataOutput = await getDataOutputForAgentPolicy(soClient, agentPolicy);
-      if (dataOutput.type === outputType.Logstash) {
-        throw new FleetError('You cannot add APM to a policy using a logstash output');
-      }
+    if (agentPolicy && enrichedPackagePolicy.package?.name) {
+      await validateOutputForNewPackagePolicy(
+        soClient,
+        agentPolicy,
+        enrichedPackagePolicy.package?.name
+      );
     }
     await validateIsNotHostedPolicy(soClient, enrichedPackagePolicy.policy_id, options?.force);
 

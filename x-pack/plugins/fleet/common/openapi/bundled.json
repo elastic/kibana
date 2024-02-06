@@ -7936,6 +7936,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8035,6 +8038,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8260,6 +8266,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8366,6 +8375,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8434,6 +8446,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8537,6 +8552,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8740,6 +8758,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {

@@ -130,8 +130,8 @@ describe('DiscoverTopNavServerless', () => {
     });
   });
 
-  describe('LogExplorerTabs', () => {
-    it('should render when showLogExplorerTabs is true', async () => {
+  describe('LogsExplorerTabs', () => {
+    it('should render when showLogsExplorerTabs is true', async () => {
       mockUseKibana.mockReturnValue({
         services: {
           ...mockDiscoverService,
@@ -148,12 +148,12 @@ describe('DiscoverTopNavServerless', () => {
       const topNav = screen.queryByTestId('discoverTopNavServerless');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
-        const logExplorerTabs = screen.queryByTestId('logExplorerTabs');
+        const logExplorerTabs = screen.queryByTestId('logsExplorerTabs');
         expect(logExplorerTabs).not.toBeNull();
       });
     });
 
-    it('should not render when showLogExplorerTabs is false', async () => {
+    it('should not render when showLogsExplorerTabs is false', async () => {
       mockUseKibana.mockReturnValue({
         services: {
           ...mockDiscoverService,
@@ -169,7 +169,7 @@ describe('DiscoverTopNavServerless', () => {
       const topNav = screen.queryByTestId('discoverTopNavServerless');
       expect(topNav).not.toBeNull();
       await waitFor(() => {
-        const logExplorerTabs = screen.queryByTestId('logExplorerTabs');
+        const logExplorerTabs = screen.queryByTestId('logsExplorerTabs');
         expect(logExplorerTabs).toBeNull();
       });
     });

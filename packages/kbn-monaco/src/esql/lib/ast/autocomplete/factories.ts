@@ -18,7 +18,7 @@ import {
   CommandOptionsDefinition,
   CommandModeDefinition,
 } from '../definitions/types';
-import { getCommandDefinition } from '../shared/helpers';
+import { getCommandDefinition, shouldBeQuotedText } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
@@ -28,11 +28,8 @@ export const TRIGGER_SUGGESTION_COMMAND = {
   id: 'editor.action.triggerSuggest',
 };
 
-function getSafeInsertText(text: string, { dashSupported }: { dashSupported?: boolean } = {}) {
-  if (dashSupported) {
-    return /[^a-zA-Z\d_\.@-]/.test(text) ? `\`${text}\`` : text;
-  }
-  return /[^a-zA-Z\d_\.@]/.test(text) ? `\`${text}\`` : text;
+function getSafeInsertText(text: string, options: { dashSupported?: boolean } = {}) {
+  return shouldBeQuotedText(text, options) ? `\`${text}\`` : text;
 }
 
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {

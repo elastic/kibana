@@ -306,7 +306,7 @@ enabled:
   - x-pack/test/functional/apps/ml/short_tests/config.ts
   - x-pack/test/functional/apps/ml/stack_management_jobs/config.ts
   - x-pack/test/functional/apps/monitoring/config.ts
-  - x-pack/test/functional/apps/observability_log_explorer/config.ts
+  - x-pack/test/functional/apps/observability_logs_explorer/config.ts
   - x-pack/test/functional/apps/painless_lab/config.ts
   - x-pack/test/functional/apps/remote_clusters/config.ts
   - x-pack/test/functional/apps/reporting_management/config.ts
