@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     beforeEach(async () => {

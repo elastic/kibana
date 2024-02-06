@@ -56,7 +56,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       before(async () => {
         await esArchiver.emptyKibanaIndex();
         await reportingAPI.initEcommerce();
-        await PageObjects.svl.navigateToApp('discover');
         await PageObjects.common.navigateToApp('discover');
         await PageObjects.discover.selectIndexPattern('ecommerce');
       });
