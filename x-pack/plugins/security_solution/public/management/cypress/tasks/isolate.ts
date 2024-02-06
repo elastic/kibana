@@ -8,6 +8,7 @@
 /* eslint-disable cypress/no-unnecessary-waiting */
 
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { HIGHLIGHTED_FIELDS_CELL_TEST_ID } from '../../../flyout/document_details/right/components/test_ids';
 import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
@@ -56,13 +57,13 @@ export const openCaseAlertDetails = (alertId: string): void => {
 
 export const waitForReleaseOption = (alertId: string): void => {
   openCaseAlertDetails(alertId);
-  cy.getByTestSubj('event-field-agent.status').then(($status) => {
+  cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).then(($status) => {
     if ($status.find('[title="Isolated"]').length > 0) {
       cy.contains('Release host').click();
     } else {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       openCaseAlertDetails(alertId);
-      cy.getByTestSubj('event-field-agent.status').within(() => {
+      cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).within(() => {
         cy.contains('Isolated');
       });
       cy.contains('Release host').click();
@@ -76,14 +77,14 @@ export const visitRuleAlerts = (ruleName: string) => {
 };
 
 export const checkFlyoutEndpointIsolation = (): void => {
-  cy.getByTestSubj('event-field-agent.status').then(($status) => {
+  cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).then(($status) => {
     if ($status.find('[title="Isolated"]').length > 0) {
       cy.contains('Release host').click();
     } else {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.wait(5000);
       openAlertDetailsView();
-      cy.getByTestSubj('event-field-agent.status').within(() => {
+      cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).within(() => {
         cy.contains('Isolated');
       });
       cy.contains('Release host').click();

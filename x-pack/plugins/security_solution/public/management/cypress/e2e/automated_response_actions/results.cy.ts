@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { generateRandomStringName } from '../../tasks/utils';
-import { APP_ALERTS_PATH } from '../../../../../common/constants';
 import { closeAllToasts } from '../../tasks/toasts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../../types';
 import { indexEndpointRuleAlerts } from '../../tasks/index_endpoint_rule_alerts';
 
 import { login, ROLE } from '../../tasks/login';
+import { navigateToAlertsList } from '../../screens/alerts';
 
 describe('Results', { tags: ['@ess', '@serverless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -61,15 +60,17 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
     () => {
       before(() => {
         login(ROLE.endpoint_response_actions_access);
-        disableExpandableFlyoutAdvancedSettings();
       });
 
       it('see endpoint action', () => {
-        cy.visit(APP_ALERTS_PATH);
+        navigateToAlertsList(`query=(language:kuery,query:'_id: ${alertData?.alerts[0]._id}')`);
         closeAllToasts();
+
         cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-        cy.getByTestSubj('responseActionsViewTab').click();
+        cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+        // response-actions-notification doesn't exist in expandable flyout
+        // cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
         cy.getByTestSubj('endpoint-results-comment');
         cy.contains(/isolate is pending|isolate completed successfully/g);
       });
@@ -86,16 +87,17 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
     () => {
       before(() => {
         login(ROLE.endpoint_response_actions_no_access);
-        disableExpandableFlyoutAdvancedSettings();
       });
 
       it('show the permission denied callout', () => {
-        cy.visit(APP_ALERTS_PATH);
+        navigateToAlertsList(`query=(language:kuery,query:'_id: ${alertData?.alerts[0]._id}')`);
         closeAllToasts();
 
         cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
-        cy.getByTestSubj('responseActionsViewTab').click();
+        // response-actions-notification doesn't exist in expandable flyout
+        // cy.getByTestSubj('response-actions-notification').should('not.have.text', '0');
+        cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+        cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
         cy.contains('Permission denied');
         cy.contains(
           'To access these results, ask your administrator for Elastic Defend Kibana privileges.'

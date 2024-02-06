@@ -203,7 +203,7 @@ describe(
           'host.os.name'
         );
         const customHighlightedField =
-          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('Mac OS X');
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('host.os.name');
         cy.get(customHighlightedField).and('have.text', 'Mac OS X');
 
         cy.log('system defined highlighted fields');
@@ -213,7 +213,7 @@ describe(
           'host.name'
         );
         const hostNameCell =
-          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('siem-kibana');
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('host.name');
         cy.get(hostNameCell).and('have.text', 'siem-kibana');
 
         cy.get(hostNameCell).click();
@@ -226,7 +226,7 @@ describe(
           'user.name'
         );
         const userNameCell =
-          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('test');
+          DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_HIGHLIGHTED_FIELDS_TABLE_VALUE_CELL('user.name');
         cy.get(userNameCell).should('have.text', 'test');
 
         cy.get(userNameCell).click();

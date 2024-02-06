@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HIGHLIGHTED_FIELDS_CELL_TEST_ID } from '../../../../flyout/document_details/right/components/test_ids';
 import { openAlertDetailsView } from '../../screens/alerts';
 import type { PolicyData } from '../../../../../common/endpoint/types';
 import { APP_CASES_PATH, APP_ENDPOINTS_PATH } from '../../../../../common/constants';
@@ -23,7 +24,7 @@ import {
 } from '../../tasks/isolate';
 import { cleanupCase, cleanupRule, loadCase, loadRule } from '../../tasks/api_fixtures';
 import { login } from '../../tasks/login';
-import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/common';
+import { loadPage } from '../../tasks/common';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../tasks/fleet';
 import type { CreateAndEnrollEndpointHostResponse } from '../../../../../scripts/endpoint/common/endpoint_host_services';
@@ -34,15 +35,7 @@ import { enableAllPolicyProtections } from '../../tasks/endpoint_policy';
 describe.skip(
   'Isolate command',
   {
-    tags: [
-      '@ess',
-      '@serverless',
-
-      // Not supported in serverless!
-      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-      // `internal/kibana/settings` is not accessible in serverless
-      '@brokenInServerless',
-    ],
+    tags: ['@ess', '@serverless'],
   },
   () => {
     let isolateComment: string;
@@ -85,7 +78,6 @@ describe.skip(
 
     beforeEach(() => {
       login();
-      disableExpandableFlyoutAdvancedSettings();
     });
 
     describe('From manage', () => {
@@ -170,7 +162,7 @@ describe.skip(
         cy.contains(`Release on host ${createdHost.hostname} successfully submitted`);
         cy.getByTestSubj('euiFlyoutCloseButton').click();
         openAlertDetailsView();
-        cy.getByTestSubj('event-field-agent.status').within(() => {
+        cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).within(() => {
           cy.get('[title="Isolated"]').should('not.exist');
         });
       });
@@ -260,7 +252,7 @@ describe.skip(
 
           openCaseAlertDetails(caseAlertId);
 
-          cy.getByTestSubj('event-field-agent.status').then(($status) => {
+          cy.getByTestSubj(`agent.status-${HIGHLIGHTED_FIELDS_CELL_TEST_ID}`).then(($status) => {
             if ($status.find('[title="Isolated"]').length > 0) {
               cy.getByTestSubj('euiFlyoutCloseButton').click();
               cy.getByTestSubj(`comment-action-show-alert-${caseAlertId}`).click();
