@@ -34,7 +34,7 @@ steps:
     label: 'Build FIPS Image'
     agents:
       queue: n2-16-spot
-    timeout_in_minutes: 30
+    timeout_in_minutes: 60
     soft_fail: true
     retry:
       automatic:
