@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the stacktrace icon disabled in the last control column when stacktrace does not exists', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(2, 4);
+          const cellElement = await dataGrid.getCellElement(1, 4);
           const stacktraceButton = await cellElement.findByTestSubject(
             'docTableStacktraceDoesNotExist'
           );
