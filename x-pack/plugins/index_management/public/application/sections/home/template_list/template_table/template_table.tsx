@@ -18,7 +18,7 @@ import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_i
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';
 import { TemplateContentIndicator } from '../../../../components/shared';
-import { TemplateTypeIndicator } from '../components';
+import { TemplateTypeIndicator, TemplateDeprecatedBadge } from '../components';
 import { getTemplateDetailsLink } from '../../../../services/routing';
 
 interface Props {
@@ -61,6 +61,13 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
             >
               {name}
             </EuiLink>{' '}
+            {item.deprecated && (
+              <>
+                &nbsp;
+                <TemplateDeprecatedBadge />
+              </>
+            )}
+            &nbsp;
             <TemplateTypeIndicator templateType={item._kbnMeta.type} />
           </span>
         );
