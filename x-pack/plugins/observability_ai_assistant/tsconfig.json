@@ -61,7 +61,8 @@
     "@kbn/apm-synthtrace-client",
     "@kbn/apm-synthtrace",
     "@kbn/code-editor",
-    "@kbn/safer-lodash-set"
+    "@kbn/safer-lodash-set",
+    "@kbn/cloud-plugin"
   ],
   "exclude": ["target/**/*"]
 }
