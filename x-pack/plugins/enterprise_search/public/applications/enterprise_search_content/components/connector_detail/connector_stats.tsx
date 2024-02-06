@@ -147,61 +147,6 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ connector, index
           }
         />
       </EuiFlexItem>
-      {
-        // <EuiFlexItem>
-        //   <StatCard
-        //     title="Sync frequency"
-        //     content={'Recurring syncs every ** at **'}
-        //     footer={
-        //       <EuiFlexGroup>
-        //         <EuiFlexItem>
-        //           <EuiLinkTo>
-        //             <EuiText textAlign="right">
-        //               {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.schedulingLink', {
-        //                 defaultMessage: 'Scheduling',
-        //               })}
-        //             </EuiText>
-        //           </EuiLinkTo>
-        //         </EuiFlexItem>
-        //       </EuiFlexGroup>
-        //     }
-        //   />
-        // </EuiFlexItem>
-      }
-      {
-        // <EuiFlexItem>
-        //   <StatCard
-        //     title="Sync rules"
-        //     content={
-        //       <EuiFlexGroup gutterSize="s">
-        //         <EuiFlexItem grow={false}>
-        //           <EuiBadge color="success" iconType="plusInCircle">
-        //             2 include policies
-        //           </EuiBadge>
-        //         </EuiFlexItem>
-        //         <EuiFlexItem grow={false}>
-        //           <EuiBadge color="danger" iconType="minusInCircle">
-        //             2 include policies
-        //           </EuiBadge>
-        //         </EuiFlexItem>
-        //       </EuiFlexGroup>
-        //     }
-        //     footer={
-        //       <EuiFlexGroup>
-        //         <EuiFlexItem>
-        //           <EuiLinkTo>
-        //             <EuiText textAlign="right">
-        //               {i18n.translate('xpack.enterpriseSearch.connectors.connectorStats.syncRulesLink', {
-        //                 defaultMessage: 'Sync rules',
-        //               })}
-        //             </EuiText>
-        //           </EuiLinkTo>
-        //         </EuiFlexItem>
-        //       </EuiFlexGroup>
-        //     }
-        //   />
-        // </EuiFlexItem>
-      }
       <EuiFlexItem>
         <StatCard
           title="Index"

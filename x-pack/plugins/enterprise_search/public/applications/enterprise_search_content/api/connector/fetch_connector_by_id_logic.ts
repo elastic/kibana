@@ -22,7 +22,7 @@ export const fetchConnectorById = async ({
 }: FetchConnectorByIdApiLogicArgs): Promise<FetchConnectorByIdApiLogicResponse> => {
   const route = `/internal/enterprise_search/connectors/${connectorId}`;
   const response = await HttpLogic.values.http.get<FetchConnectorByIdApiLogicResponse>(route);
-  return { ...response };
+  return response;
 };
 
 export const FetchConnectorByIdApiLogic = createApiLogic(
