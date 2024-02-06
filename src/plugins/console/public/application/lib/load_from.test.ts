@@ -17,7 +17,7 @@ const baseMockWindow = () => {
     location: {
       host: 'my-kibana.elastic.co',
       pathname: '',
-      protocol: 'https',
+      protocol: 'https:',
       search: '',
       hash: '',
     },

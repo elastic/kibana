@@ -10,7 +10,7 @@ import qs from 'query-string';
 import { compressToEncodedURIComponent } from 'lz-string';
 
 function getBaseUrl() {
-  return `${window.location.protocol}://${window.location.host}${window.location.pathname}`;
+  return `${window.location.protocol}//${window.location.host}${window.location.pathname}`;
 }
 function parseQueryString() {
   const [hashRoute, queryString] = (window.location.hash || window.location.search || '').split(
