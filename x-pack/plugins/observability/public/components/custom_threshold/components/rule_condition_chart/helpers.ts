@@ -62,7 +62,7 @@ export const lensFieldFormatter = (
   const firstMetricField = metrics[0].field;
   if (firstMetricField.endsWith('.pct')) return LensFieldFormat.PERCENT;
   if (firstMetricField.endsWith('.bytes')) return LensFieldFormat.BITS;
-  return 'number';
+  return LensFieldFormat.NUMBER;
 };
 
 export const isRate = (metrics: CustomThresholdExpressionMetric[]): boolean =>
