@@ -15,7 +15,7 @@ const MORE_THAN_1024_CHARS =
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogsExplorer', 'svlCommonPage']);
   const synthtrace = getService('svlLogsSynthtraceClient');
   const dataGrid = getService('dataGrid');
   const from = '2024-02-06T10:24:14.035Z';
@@ -36,11 +36,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('When the logs explorer loads', () => {
     before(async () => {
       await synthtrace.index(generateLogsData({ to }));
+      await PageObjects.svlCommonPage.login();
       await navigateToLogsExplorer();
     });
 
     after(async () => {
       await synthtrace.clean();
+      await PageObjects.svlCommonPage.forceLogout();
     });
 
     describe('should render custom control columns properly', async () => {
