@@ -45,7 +45,6 @@ import {
   TIMELINE_TITLE_BY_ID,
   TIMESTAMP_TOGGLE_FIELD,
   TOGGLE_TIMELINE_EXPAND_EVENT,
-  CREATE_NEW_TIMELINE_TEMPLATE,
   TIMELINE_SAVE_MODAL,
   TIMELINE_SAVE_MODAL_SAVE_BUTTON,
   TIMELINE_SAVE_MODAL_SAVE_AS_NEW_SWITCH,
@@ -95,19 +94,6 @@ import { drag, drop, waitForTabToBeLoaded } from './common';
 import { closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
 
 const hostExistsQuery = 'host.name: *';
-
-export const addDescriptionToTimeline = (
-  description: string,
-  modalAlreadyOpen: boolean = false
-) => {
-  if (!modalAlreadyOpen) {
-    cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
-  }
-  cy.get(TIMELINE_DESCRIPTION_INPUT).should('not.be.disabled').type(description);
-  cy.get(TIMELINE_DESCRIPTION_INPUT).invoke('val').should('equal', description);
-  cy.get(TIMELINE_SAVE_MODAL_SAVE_BUTTON).click();
-  cy.get(TIMELINE_TITLE_INPUT).should('not.exist');
-};
 
 export const addNameToTimelineAndSave = (name: string) => {
   cy.get(SAVE_TIMELINE_ACTION_BTN).first().click();
@@ -346,11 +332,6 @@ export const createTimelineTemplateFromBottomBar = () => {
   );
 
   cy.get(BOTTOM_BAR_CREATE_NEW_TIMELINE_TEMPLATE).eq(0).click();
-};
-
-export const createNewTimelineTemplate = () => {
-  openCreateTimelineOptionsPopover();
-  cy.get(CREATE_NEW_TIMELINE_TEMPLATE).click();
 };
 
 export const executeTimelineKQL = (query: string) => {

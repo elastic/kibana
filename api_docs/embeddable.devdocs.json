@@ -434,6 +434,84 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Container.lastSavedState",
+            "type": "Object",
+            "tags": [],
+            "label": "lastSavedState",
+            "description": [],
+            "signature": [
+              "Subject",
+              "<void>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Container.getLastSavedStateForChild",
+            "type": "Function",
+            "tags": [],
+            "label": "getLastSavedStateForChild",
+            "description": [],
+            "signature": [
+              "() => undefined"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.Container.registerPanelApi",
+            "type": "Function",
+            "tags": [],
+            "label": "registerPanelApi",
+            "description": [],
+            "signature": [
+              "<ApiType extends unknown = unknown>(id: string, api: ApiType) => void"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.registerPanelApi.$1",
+                "type": "string",
+                "tags": [],
+                "label": "id",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.registerPanelApi.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "api",
+                "description": [],
+                "signature": [
+                  "ApiType"
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Container.Unnamed",
             "type": "Function",
             "tags": [],
@@ -2463,15 +2541,31 @@
             "label": "parentApi",
             "description": [],
             "signature": [
-              "(",
+              "(Partial<",
+              {
+                "pluginId": "@kbn/presentation-publishing",
+                "scope": "common",
+                "docId": "kibKbnPresentationPublishingPluginApi",
+                "section": "def-common.PublishesViewMode",
+                "text": "PublishesViewMode"
+              },
+              "> & ",
               {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
                 "docId": "kibKbnPresentationContainersPluginApi",
-                "section": "def-common.PresentationContainer",
-                "text": "PresentationContainer"
+                "section": "def-common.PublishesLastSavedState",
+                "text": "PublishesLastSavedState"
               },
-              " & Partial<Pick<",
+              " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+              {
+                "pluginId": "@kbn/presentation-containers",
+                "scope": "common",
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.PanelPackage",
+                "text": "PanelPackage"
+              },
+              ") => Promise<string>; } & Partial<Pick<",
               {
                 "pluginId": "@kbn/presentation-publishing",
                 "scope": "common",
@@ -5783,6 +5877,170 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Embeddable.savedObjectId",
+            "type": "Object",
+            "tags": [],
+            "label": "savedObjectId",
+            "description": [],
+            "signature": [
+              "{ readonly value: string | undefined; source: ",
+              "Observable",
+              "<any> | undefined; error: (err: any) => void; forEach: { (next: (value: string | undefined) => void): Promise<void>; (next: (value: string | undefined) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; getValue: () => string | undefined; pipe: { (): ",
+              "Observable",
+              "<string | undefined>; <A>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>): ",
+              "Observable",
+              "<A>; <A, B>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>): ",
+              "Observable",
+              "<B>; <A, B, C>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>): ",
+              "Observable",
+              "<C>; <A, B, C, D>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>): ",
+              "Observable",
+              "<D>; <A, B, C, D, E>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>): ",
+              "Observable",
+              "<E>; <A, B, C, D, E, F>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>): ",
+              "Observable",
+              "<F>; <A, B, C, D, E, F, G>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>): ",
+              "Observable",
+              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>): ",
+              "Observable",
+              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>): ",
+              "Observable",
+              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
+              "OperatorFunction",
+              "<string | undefined, A>, op2: ",
+              "OperatorFunction",
+              "<A, B>, op3: ",
+              "OperatorFunction",
+              "<B, C>, op4: ",
+              "OperatorFunction",
+              "<C, D>, op5: ",
+              "OperatorFunction",
+              "<D, E>, op6: ",
+              "OperatorFunction",
+              "<E, F>, op7: ",
+              "OperatorFunction",
+              "<F, G>, op8: ",
+              "OperatorFunction",
+              "<G, H>, op9: ",
+              "OperatorFunction",
+              "<H, I>, ...operations: ",
+              "OperatorFunction",
+              "<any, any>[]): ",
+              "Observable",
+              "<unknown>; }; complete: () => void; closed: boolean; observers: ",
+              "Observer",
+              "<string | undefined>[]; isStopped: boolean; hasError: boolean; thrownError: any; lift: <R>(operator: ",
+              "Operator",
+              "<string | undefined, R>) => ",
+              "Observable",
+              "<R>; unsubscribe: () => void; readonly observed: boolean; asObservable: () => ",
+              "Observable",
+              "<string | undefined>; operator: ",
+              "Operator",
+              "<any, string | undefined> | undefined; subscribe: { (observerOrNext?: Partial<",
+              "Observer",
+              "<string | undefined>> | ((value: string | undefined) => void) | undefined): ",
+              "Subscription",
+              "; (next?: ((value: string | undefined) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
+              "Subscription",
+              "; }; toPromise: { (): Promise<string | undefined>; (PromiseCtor: PromiseConstructor): Promise<string | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<string | undefined>; }; }"
+            ],
+            "path": "src/plugins/embeddable/public/lib/embeddables/embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Embeddable.getEditHref",
             "type": "Function",
             "tags": [],
@@ -7243,39 +7501,6 @@
     "functions": [
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.CreateEmbeddableComponent",
-        "type": "Function",
-        "tags": [],
-        "label": "CreateEmbeddableComponent",
-        "description": [],
-        "signature": [
-          "<ApiType extends unknown = unknown>(component: (ref: React.ForwardedRef<ApiType>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null) => React.ForwardRefExoticComponent<Pick<React.RefAttributes<ApiType>, \"key\" | \"css\"> & React.RefAttributes<ApiType>>"
-        ],
-        "path": "src/plugins/embeddable/public/registry/create_embeddable_component.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.CreateEmbeddableComponent.$1",
-            "type": "Function",
-            "tags": [],
-            "label": "component",
-            "description": [],
-            "signature": [
-              "(ref: React.ForwardedRef<ApiType>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
-            ],
-            "path": "src/plugins/embeddable/public/registry/create_embeddable_component.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.defaultEmbeddableFactoryProvider",
         "type": "Function",
         "tags": [],
@@ -7598,6 +7823,112 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.initializeReactEmbeddableTitles",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeReactEmbeddableTitles",
+        "description": [],
+        "signature": [
+          "(rawState: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.SerializedReactEmbeddableTitles",
+            "text": "SerializedReactEmbeddableTitles"
+          },
+          ") => { titlesApi: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReactEmbeddableTitlesApi",
+            "text": "ReactEmbeddableTitlesApi"
+          },
+          "; titleComparators: ",
+          "EmbeddableStateComparators",
+          "<",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.SerializedReactEmbeddableTitles",
+            "text": "SerializedReactEmbeddableTitles"
+          },
+          ">; serializeTitles: () => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.SerializedReactEmbeddableTitles",
+            "text": "SerializedReactEmbeddableTitles"
+          },
+          "; }"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.initializeReactEmbeddableTitles.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "rawState",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.SerializedReactEmbeddableTitles",
+                "text": "SerializedReactEmbeddableTitles"
+              }
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.initializeReactEmbeddableUuid",
+        "type": "Function",
+        "tags": [],
+        "label": "initializeReactEmbeddableUuid",
+        "description": [],
+        "signature": [
+          "(maybeId?: string | undefined) => string"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.initializeReactEmbeddableUuid.$1",
+            "type": "string",
+            "tags": [],
+            "label": "maybeId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.isContextMenuTriggerContext",
         "type": "Function",
         "tags": [],
@@ -7874,63 +8205,14 @@
             "section": "def-public.ChartActionContext",
             "text": "ChartActionContext"
           },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>) => context is ",
+          ") => context is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.MultiValueClickContext",
             "text": "MultiValueClickContext"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>"
+          }
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -7950,32 +8232,7 @@
                 "docId": "kibEmbeddablePluginApi",
                 "section": "def-public.ChartActionContext",
                 "text": "ChartActionContext"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              ", ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
-              },
-              ", any>>"
+              }
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -8002,63 +8259,14 @@
             "section": "def-public.ChartActionContext",
             "text": "ChartActionContext"
           },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>) => context is ",
+          ") => context is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.RangeSelectContext",
             "text": "RangeSelectContext"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>"
+          }
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -8078,32 +8286,7 @@
                 "docId": "kibEmbeddablePluginApi",
                 "section": "def-public.ChartActionContext",
                 "text": "ChartActionContext"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              ", ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
-              },
-              ", any>>"
+              }
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -8163,31 +8346,7 @@
             "section": "def-public.ChartActionContext",
             "text": "ChartActionContext"
           },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>) => context is ",
+          ") => context is ",
           {
             "pluginId": "@kbn/ui-actions-browser",
             "scope": "common",
@@ -8214,32 +8373,7 @@
                 "docId": "kibEmbeddablePluginApi",
                 "section": "def-public.ChartActionContext",
                 "text": "ChartActionContext"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              ", ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
-              },
-              ", any>>"
+              }
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -8329,63 +8463,14 @@
             "section": "def-public.ChartActionContext",
             "text": "ChartActionContext"
           },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>) => context is ",
+          ") => context is ",
           {
             "pluginId": "embeddable",
             "scope": "public",
             "docId": "kibEmbeddablePluginApi",
             "section": "def-public.ValueClickContext",
             "text": "ValueClickContext"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.IEmbeddable",
-            "text": "IEmbeddable"
-          },
-          "<",
-          {
-            "pluginId": "embeddable",
-            "scope": "common",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-common.EmbeddableInput",
-            "text": "EmbeddableInput"
-          },
-          ", ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableOutput",
-            "text": "EmbeddableOutput"
-          },
-          ", any>>"
+          }
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -8405,32 +8490,7 @@
                 "docId": "kibEmbeddablePluginApi",
                 "section": "def-public.ChartActionContext",
                 "text": "ChartActionContext"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.IEmbeddable",
-                "text": "IEmbeddable"
-              },
-              "<",
-              {
-                "pluginId": "embeddable",
-                "scope": "common",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-common.EmbeddableInput",
-                "text": "EmbeddableInput"
-              },
-              ", ",
-              {
-                "pluginId": "embeddable",
-                "scope": "public",
-                "docId": "kibEmbeddablePluginApi",
-                "section": "def-public.EmbeddableOutput",
-                "text": "EmbeddableOutput"
-              },
-              ", any>>"
+              }
             ],
             "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
@@ -8647,6 +8707,271 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.reactEmbeddableRegistryHasKey",
+        "type": "Function",
+        "tags": [],
+        "label": "reactEmbeddableRegistryHasKey",
+        "description": [],
+        "signature": [
+          "(key: string) => boolean"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.reactEmbeddableRegistryHasKey.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ReactEmbeddableRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "ReactEmbeddableRenderer",
+        "description": [
+          "\nRenders a component from the React Embeddable registry into a Presentation Panel.\n\nTODO: Rename this to simply `Embeddable` when the legacy Embeddable system is removed."
+        ],
+        "signature": [
+          "({ uuid, type, state, }: { uuid?: string | undefined; type: string; state: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<object>; }) => JSX.Element"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ReactEmbeddableRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  uuid,\n  type,\n  state,\n}",
+            "description": [],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.uuid",
+                "type": "string",
+                "tags": [],
+                "label": "uuid",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.type",
+                "type": "string",
+                "tags": [],
+                "label": "type",
+                "description": [],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableRenderer.$1.state",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.SerializedPanelState",
+                    "text": "SerializedPanelState"
+                  },
+                  "<object>"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.RegisterReactEmbeddable",
+        "type": "Function",
+        "tags": [],
+        "label": "RegisterReactEmbeddable",
+        "description": [
+          "\nA helper function which transforms a component into an Embeddable component by forwarding a ref which\nshould be used with `useEmbeddableApiHandle` to expose an API for your component."
+        ],
+        "signature": [
+          "<ApiType extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          " = ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          ">(component: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReactEmbeddableRegistration",
+            "text": "ReactEmbeddableRegistration"
+          },
+          "<ApiType>) => React.ForwardRefExoticComponent<Pick<React.RefAttributes<ApiType>, \"key\" | \"css\"> & React.RefAttributes<ApiType>>"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.RegisterReactEmbeddable.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ReactEmbeddableRegistration",
+                "text": "ReactEmbeddableRegistration"
+              },
+              "<ApiType>"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.registerReactEmbeddableFactory",
+        "type": "Function",
+        "tags": [],
+        "label": "registerReactEmbeddableFactory",
+        "description": [],
+        "signature": [
+          "<StateType extends unknown = unknown, APIType extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          " = ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          ">(key: string, factory: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReactEmbeddableFactory",
+            "text": "ReactEmbeddableFactory"
+          },
+          "<StateType, APIType>) => void"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.registerReactEmbeddableFactory.$1",
+            "type": "string",
+            "tags": [],
+            "label": "key",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.registerReactEmbeddableFactory.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ReactEmbeddableFactory",
+                "text": "ReactEmbeddableFactory"
+              },
+              "<StateType, APIType>"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.runEmbeddableFactoryMigrations",
         "type": "Function",
         "tags": [],
@@ -8774,6 +9099,60 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.serializeReactEmbeddableTitles",
+        "type": "Function",
+        "tags": [],
+        "label": "serializeReactEmbeddableTitles",
+        "description": [],
+        "signature": [
+          "(titlesApi: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReactEmbeddableTitlesApi",
+            "text": "ReactEmbeddableTitlesApi"
+          },
+          ") => ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.SerializedReactEmbeddableTitles",
+            "text": "SerializedReactEmbeddableTitles"
+          }
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.serializeReactEmbeddableTitles.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "titlesApi",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ReactEmbeddableTitlesApi",
+                "text": "ReactEmbeddableTitlesApi"
+              }
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.shouldFetch$",
         "type": "Function",
         "tags": [],
@@ -8874,6 +9253,203 @@
               "EmbeddableRendererWithFactory<I>"
             ],
             "path": "src/plugins/embeddable/public/lib/embeddables/embeddable_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useReactEmbeddableApiHandle",
+        "type": "Function",
+        "tags": [],
+        "label": "useReactEmbeddableApiHandle",
+        "description": [
+          "\nPushes any API to the passed in ref. Note that any API passed in will not be rebuilt on\nsubsequent renders, so it does not support reactive variables. Instead, pass in setter functions\nand publishing subjects to allow other components to listen to changes."
+        ],
+        "signature": [
+          "<ApiType extends ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          " = ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          ">(apiToRegister: Omit<ApiType, \"parent\">, ref: React.ForwardedRef<ApiType>, uuid: string) => ApiType"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useReactEmbeddableApiHandle.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "apiToRegister",
+            "description": [],
+            "signature": [
+              "Omit<ApiType, \"parent\">"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useReactEmbeddableApiHandle.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ref",
+            "description": [],
+            "signature": [
+              "React.ForwardedRef<ApiType>"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useReactEmbeddableApiHandle.$3",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useReactEmbeddableParentApi",
+        "type": "Function",
+        "tags": [],
+        "label": "useReactEmbeddableParentApi",
+        "description": [],
+        "signature": [
+          "() => unknown"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.useReactEmbeddableUnsavedChanges",
+        "type": "Function",
+        "tags": [],
+        "label": "useReactEmbeddableUnsavedChanges",
+        "description": [],
+        "signature": [
+          "<StateType extends object = object>(uuid: string, factory: ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.ReactEmbeddableFactory",
+            "text": "ReactEmbeddableFactory"
+          },
+          "<StateType, ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.DefaultEmbeddableApi",
+            "text": "DefaultEmbeddableApi"
+          },
+          ">, comparators: ",
+          "EmbeddableStateComparators",
+          "<StateType>) => { unsavedChanges: ",
+          "BehaviorSubject",
+          "<Partial<StateType> | undefined>; resetUnsavedChanges: () => void; }"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useReactEmbeddableUnsavedChanges.$1",
+            "type": "string",
+            "tags": [],
+            "label": "uuid",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useReactEmbeddableUnsavedChanges.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "factory",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ReactEmbeddableFactory",
+                "text": "ReactEmbeddableFactory"
+              },
+              "<StateType, ",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.DefaultEmbeddableApi",
+                "text": "DefaultEmbeddableApi"
+              },
+              ">"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.useReactEmbeddableUnsavedChanges.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "comparators",
+            "description": [],
+            "signature": [
+              "EmbeddableStateComparators",
+              "<StateType>"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_unsaved_changes.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -8994,66 +9570,6 @@
               "[key: string]:  any"
             ],
             "path": "src/plugins/inspector/common/adapters/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.CellValueContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "CellValueContext",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.CellValueContext",
-            "text": "CellValueContext"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.CellValueContext.embeddable",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.CellValueContext.data",
-            "type": "Array",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ value?: any; eventId?: string | undefined; columnMeta?: ",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.DatatableColumnMeta",
-                "text": "DatatableColumnMeta"
-              },
-              " | undefined; }[]"
-            ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -9222,96 +9738,6 @@
             "path": "src/plugins/embeddable/public/lib/embeddables/i_embeddable.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
-        "id": "def-public.EmbeddableComponentFactory",
-        "type": "Interface",
-        "tags": [],
-        "label": "EmbeddableComponentFactory",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.EmbeddableComponentFactory",
-            "text": "EmbeddableComponentFactory"
-          },
-          "<StateType, APIType>"
-        ],
-        "path": "src/plugins/embeddable/public/registry/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableComponentFactory.getComponent",
-            "type": "Function",
-            "tags": [],
-            "label": "getComponent",
-            "description": [],
-            "signature": [
-              "(initialState: StateType) => Promise<",
-              "EmbeddableComponent",
-              "<APIType>>"
-            ],
-            "path": "src/plugins/embeddable/public/registry/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableComponentFactory.getComponent.$1",
-                "type": "Uncategorized",
-                "tags": [],
-                "label": "initialState",
-                "description": [],
-                "signature": [
-                  "StateType"
-                ],
-                "path": "src/plugins/embeddable/public/registry/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.EmbeddableComponentFactory.deserializeState",
-            "type": "Function",
-            "tags": [],
-            "label": "deserializeState",
-            "description": [],
-            "signature": [
-              "(state: unknown) => StateType"
-            ],
-            "path": "src/plugins/embeddable/public/registry/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "embeddable",
-                "id": "def-public.EmbeddableComponentFactory.deserializeState.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "state",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/plugins/embeddable/public/registry/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -12234,74 +12660,6 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.MultiValueClickContext",
-        "type": "Interface",
-        "tags": [],
-        "label": "MultiValueClickContext",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.MultiValueClickContext",
-            "text": "MultiValueClickContext"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.MultiValueClickContext.embeddable",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "embeddable",
-            "description": [],
-            "signature": [
-              "T | undefined"
-            ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "embeddable",
-            "id": "def-public.MultiValueClickContext.data",
-            "type": "Object",
-            "tags": [],
-            "label": "data",
-            "description": [],
-            "signature": [
-              "{ data: { table: Pick<",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.BooleanRelation",
-                "text": "BooleanRelation"
-              },
-              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
-            ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "embeddable",
         "id": "def-public.OutputSpec",
         "type": "Interface",
         "tags": [],
@@ -12458,58 +12816,138 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.RangeSelectContext",
+        "id": "def-public.ReactEmbeddableFactory",
         "type": "Interface",
         "tags": [],
-        "label": "RangeSelectContext",
+        "label": "ReactEmbeddableFactory",
         "description": [],
         "signature": [
           {
             "pluginId": "embeddable",
             "scope": "public",
             "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.RangeSelectContext",
-            "text": "RangeSelectContext"
+            "section": "def-public.ReactEmbeddableFactory",
+            "text": "ReactEmbeddableFactory"
           },
-          "<T>"
+          "<StateType, APIType>"
         ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.RangeSelectContext.embeddable",
-            "type": "Uncategorized",
+            "id": "def-public.ReactEmbeddableFactory.getComponent",
+            "type": "Function",
             "tags": [],
-            "label": "embeddable",
+            "label": "getComponent",
             "description": [],
             "signature": [
-              "T | undefined"
+              "(initialState: StateType, maybeId?: string | undefined) => Promise<",
+              {
+                "pluginId": "embeddable",
+                "scope": "public",
+                "docId": "kibEmbeddablePluginApi",
+                "section": "def-public.ReactEmbeddable",
+                "text": "ReactEmbeddable"
+              },
+              "<APIType>>"
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.getComponent.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "initialState",
+                "description": [],
+                "signature": [
+                  "StateType"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.getComponent.$2",
+                "type": "string",
+                "tags": [],
+                "label": "maybeId",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.RangeSelectContext.data",
-            "type": "Object",
+            "id": "def-public.ReactEmbeddableFactory.deserializeState",
+            "type": "Function",
             "tags": [],
-            "label": "data",
+            "label": "deserializeState",
             "description": [],
             "signature": [
-              "{ table: ",
+              "(state: ",
               {
-                "pluginId": "expressions",
+                "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.SerializedPanelState",
+                "text": "SerializedPanelState"
               },
-              "; column: number; range: number[]; timeFieldName?: string | undefined; }"
+              "<object>) => StateType"
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.ReactEmbeddableFactory.deserializeState.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "state",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.SerializedPanelState",
+                    "text": "SerializedPanelState"
+                  },
+                  "<object>"
+                ],
+                "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ReactEmbeddableFactory.latestVersion",
+            "type": "string",
+            "tags": [],
+            "label": "latestVersion",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12691,58 +13129,54 @@
       },
       {
         "parentPluginId": "embeddable",
-        "id": "def-public.ValueClickContext",
+        "id": "def-public.SerializedReactEmbeddableTitles",
         "type": "Interface",
         "tags": [],
-        "label": "ValueClickContext",
+        "label": "SerializedReactEmbeddableTitles",
         "description": [],
-        "signature": [
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.ValueClickContext",
-            "text": "ValueClickContext"
-          },
-          "<T>"
-        ],
-        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.ValueClickContext.embeddable",
-            "type": "Uncategorized",
+            "id": "def-public.SerializedReactEmbeddableTitles.title",
+            "type": "string",
             "tags": [],
-            "label": "embeddable",
+            "label": "title",
             "description": [],
             "signature": [
-              "T | undefined"
+              "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "embeddable",
-            "id": "def-public.ValueClickContext.data",
-            "type": "Object",
+            "id": "def-public.SerializedReactEmbeddableTitles.description",
+            "type": "string",
             "tags": [],
-            "label": "data",
+            "label": "description",
             "description": [],
             "signature": [
-              "{ data: { table: Pick<",
-              {
-                "pluginId": "expressions",
-                "scope": "common",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-common.Datatable",
-                "text": "Datatable"
-              },
-              ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              "string | undefined"
             ],
-            "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.SerializedReactEmbeddableTitles.hidePanelTitles",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hidePanelTitles",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -12799,6 +13233,37 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.CellValueContext",
+        "type": "Type",
+        "tags": [],
+        "label": "CellValueContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { value?: any; eventId?: string | undefined; columnMeta?: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.DatatableColumnMeta",
+            "text": "DatatableColumnMeta"
+          },
+          " | undefined; }[]; }"
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.ChartActionContext",
         "type": "Type",
         "tags": [],
@@ -12812,15 +13277,7 @@
             "section": "def-public.ValueClickContext",
             "text": "ValueClickContext"
           },
-          "<T> | ",
-          {
-            "pluginId": "embeddable",
-            "scope": "public",
-            "docId": "kibEmbeddablePluginApi",
-            "section": "def-public.MultiValueClickContext",
-            "text": "MultiValueClickContext"
-          },
-          "<T> | ",
+          " | ",
           {
             "pluginId": "embeddable",
             "scope": "public",
@@ -12828,7 +13285,15 @@
             "section": "def-public.RangeSelectContext",
             "text": "RangeSelectContext"
           },
-          "<T> | ",
+          " | ",
+          {
+            "pluginId": "embeddable",
+            "scope": "public",
+            "docId": "kibEmbeddablePluginApi",
+            "section": "def-public.MultiValueClickContext",
+            "text": "MultiValueClickContext"
+          },
+          " | ",
           {
             "pluginId": "@kbn/ui-actions-browser",
             "scope": "common",
@@ -12853,6 +13318,135 @@
           "\"CONTEXT_MENU_TRIGGER\""
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.DefaultEmbeddableApi",
+        "type": "Type",
+        "tags": [],
+        "label": "DefaultEmbeddableApi",
+        "description": [
+          "\nThe default embeddable API that all Embeddables must implement.\n\nBefore adding anything to this interface, please be certain that it belongs in *every* embeddable."
+        ],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasUniqueId",
+            "text": "HasUniqueId"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesDataLoading",
+            "text": "PublishesDataLoading"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesBlockingError",
+            "text": "PublishesBlockingError"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelDescription",
+            "text": "PublishesPanelDescription"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesDisabledActionIds",
+            "text": "PublishesDisabledActionIds"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.HasParentApi",
+            "text": "HasParentApi"
+          },
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
+          },
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; } & Partial<Pick<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          ", \"hidePanelTitle\"> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          ">>> & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesUnsavedChanges",
+            "text": "PublishesUnsavedChanges"
+          },
+          " & { serializeState: () => Promise<",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<object>>; }"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12961,6 +13555,45 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.MultiValueClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "MultiValueClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { data: { table: Pick<",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.BooleanRelation",
+            "text": "BooleanRelation"
+          },
+          " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.PANEL_BADGE_TRIGGER",
         "type": "string",
         "tags": [],
@@ -13006,6 +13639,131 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.RangeSelectContext",
+        "type": "Type",
+        "tags": [],
+        "label": "RangeSelectContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { table: ",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          "; column: number; range: number[]; timeFieldName?: string | undefined; }; }"
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ReactEmbeddable",
+        "type": "Type",
+        "tags": [],
+        "label": "ReactEmbeddable",
+        "description": [],
+        "signature": [
+          "React.ForwardRefExoticComponent<React.RefAttributes<ApiType>>"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ReactEmbeddable.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ReactEmbeddableRegistration",
+        "type": "Type",
+        "tags": [],
+        "label": "ReactEmbeddableRegistration",
+        "description": [],
+        "signature": [
+          "(ref: React.ForwardedRef<ApiType>) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.ReactEmbeddableRegistration.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ref",
+            "description": [],
+            "signature": [
+              "((instance: ApiType | null) => void) | React.MutableRefObject<ApiType | null> | null"
+            ],
+            "path": "src/plugins/embeddable/public/react_embeddable_system/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ReactEmbeddableTitlesApi",
+        "type": "Type",
+        "tags": [],
+        "label": "ReactEmbeddableTitlesApi",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelTitle",
+            "text": "PublishesPanelTitle"
+          },
+          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; } & ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesPanelDescription",
+            "text": "PublishesPanelDescription"
+          },
+          " & { setPanelDescription: (newTitle: string | undefined) => void; }"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_titles.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.SELECT_RANGE_TRIGGER",
         "type": "string",
         "tags": [],
@@ -13028,6 +13786,37 @@
         "description": [],
         "signature": [
           "\"VALUE_CLICK_TRIGGER\""
+        ],
+        "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ValueClickContext",
+        "type": "Type",
+        "tags": [],
+        "label": "ValueClickContext",
+        "description": [],
+        "signature": [
+          "Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.EmbeddableApiContext",
+            "text": "EmbeddableApiContext"
+          },
+          "> & { data: { data: { table: Pick<",
+          {
+            "pluginId": "expressions",
+            "scope": "common",
+            "docId": "kibExpressionsPluginApi",
+            "section": "def-common.Datatable",
+            "text": "Datatable"
+          },
+          ", \"rows\" | \"columns\">; column: number; row: number; value: any; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }; }"
         ],
         "path": "src/plugins/embeddable/public/lib/triggers/triggers.ts",
         "deprecated": false,
@@ -13269,6 +14058,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
+        "id": "def-public.ReactEmbeddableParentContext",
+        "type": "Object",
+        "tags": [],
+        "label": "ReactEmbeddableParentContext",
+        "description": [],
+        "signature": [
+          "React.Context<ReactEmbeddableParentContext | null>"
+        ],
+        "path": "src/plugins/embeddable/public/react_embeddable_system/react_embeddable_api.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

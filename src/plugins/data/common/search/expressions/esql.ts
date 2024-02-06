@@ -237,13 +237,28 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           );
         }),
         map(({ rawResponse: body, warning }) => {
-          const columns =
-            body.columns?.map(({ name, type }) => ({
+          // all_columns in the response means that there is a separation between
+          // columns with data and empty columns
+          // columns contain only columns with data while all_columns everything
+          const hasEmptyColumns =
+            body.all_columns && body.all_columns?.length > body.columns.length;
+          const lookup = new Set(
+            hasEmptyColumns ? body.columns?.map(({ name }) => name) || [] : []
+          );
+          const allColumns =
+            (body.all_columns ?? body.columns)?.map(({ name, type }) => ({
               id: name,
               name,
               meta: { type: normalizeType(type) },
+              isNull: hasEmptyColumns ? !lookup.has(name) : false,
             })) ?? [];
-          const columnNames = columns.map(({ name }) => name);
+
+          // sort only in case of empty columns to correctly align columns to items in values array
+          if (hasEmptyColumns) {
+            allColumns.sort((a, b) => Number(a.isNull) - Number(b.isNull));
+          }
+          const columnNames = allColumns?.map(({ name }) => name);
+
           const rows = body.values.map((row) => zipObject(columnNames, row));
 
           return {
@@ -251,7 +266,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
             meta: {
               type: 'es_ql',
             },
-            columns,
+            columns: allColumns,
             rows,
             warning,
           } as Datatable;

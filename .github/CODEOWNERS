@@ -844,7 +844,6 @@ x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
 src/plugins/url_forwarding @elastic/kibana-visualizations
-packages/kbn-url-state @elastic/security-threat-hunting-investigations
 src/plugins/usage_collection @elastic/kibana-core
 test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 packages/kbn-use-tracked-promise @elastic/obs-ux-logs-team
