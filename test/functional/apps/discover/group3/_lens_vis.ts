@@ -14,9 +14,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const monacoEditor = getService('monacoEditor');
+  const retry = getService('retry');
   const browser = getService('browser');
   const PageObjects = getPageObjects([
-    'lens',
     'settings',
     'common',
     'discover',
@@ -68,6 +68,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await testSubjects.missingOrFail('unifiedHistogramTimeIntervalSelectorButton');
     expect(await PageObjects.discover.getChartTimespan()).to.be(timespan);
     expect(await PageObjects.discover.getHitCount()).to.be(totalCount);
+  }
+
+  async function changeVisSeriesType(seriesType: string) {
+    await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    await retry.try(async () => {
+      await testSubjects.click('lns_layer_settings');
+      await testSubjects.exists(`lnsXY_seriesType-${seriesType}`);
+    });
+
+    await testSubjects.click(`lnsXY_seriesType-${seriesType}`);
+    await testSubjects.click('applyFlyoutButton');
+  }
+
+  async function getCurrentVisSeriesTypeLabel() {
+    await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+    const seriesType = await testSubjects.getVisibleText('lns_layer_settings');
+    await testSubjects.click('cancelFlyoutButton');
+    return seriesType;
   }
 
   describe('discover lens vis', function describeIndexTests() {
@@ -170,9 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      await PageObjects.lens.switchLayerSeriesType('line');
-      await testSubjects.click('applyFlyoutButton');
+      await changeVisSeriesType('line');
 
       await PageObjects.discover.saveSearch('testCustomESQLHistogram');
 
@@ -182,7 +198,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
 
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
     });
 
     it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
@@ -191,9 +207,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
-      await testSubjects.click('cancelFlyoutButton');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
       await checkESQLHistogramVis(
@@ -201,13 +215,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         '10'
       );
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      await PageObjects.lens.switchLayerSeriesType('area');
-      await testSubjects.click('applyFlyoutButton');
-
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Area');
-      await testSubjects.click('cancelFlyoutButton');
+      await changeVisSeriesType('area');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Area');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
 
@@ -216,8 +225,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
 
       await checkESQLHistogramVis(
         'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
@@ -231,9 +239,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
-      await testSubjects.click('cancelFlyoutButton');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
 
       await testSubjects.missingOrFail('unsavedChangesBadge');
       await checkESQLHistogramVis(
@@ -249,9 +255,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Bar vertical stacked');
-      await testSubjects.click('cancelFlyoutButton');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Bar vertical stacked');
 
       await checkESQLHistogramVis(
         'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
@@ -266,8 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
-      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
-      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
 
       await checkESQLHistogramVis(
         'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',

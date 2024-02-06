@@ -36,7 +36,6 @@ import { UnifiedSearchPageObject } from './unified_search_page';
 import { UnifiedFieldListPageObject } from './unified_field_list';
 import { FilesManagementPageObject } from './files_management';
 import { AnnotationEditorPageObject } from './annotation_library_editor_page';
-import { LensPageProvider } from '../../../x-pack/test/functional/page_objects/lens_page';
 
 export const pageObjects = {
   annotationEditor: AnnotationEditorPageObject,
@@ -69,5 +68,4 @@ export const pageObjects = {
   unifiedSearch: UnifiedSearchPageObject,
   unifiedFieldList: UnifiedFieldListPageObject,
   filesManagement: FilesManagementPageObject,
-  lens: LensPageProvider,
 };
