@@ -105,6 +105,17 @@ export function thresholdRuleType(
     label: schema.maybe(schema.string()),
   });
 
+  const paramsSchema = schema.object(
+    {
+      criteria: schema.arrayOf(customCriterion),
+      groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      alertOnNoData: schema.maybe(schema.boolean()),
+      alertOnGroupDisappear: schema.maybe(schema.boolean()),
+      searchConfiguration: searchConfigurationSchema,
+    },
+    { unknowns: 'allow' }
+  );
+
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
@@ -112,16 +123,13 @@ export function thresholdRuleType(
     }),
     fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(customCriterion),
-          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          alertOnNoData: schema.maybe(schema.boolean()),
-          alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          searchConfiguration: searchConfigurationSchema,
-        },
-        { unknowns: 'allow' }
-      ),
+      params: paramsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema' as const,
+        schema: paramsSchema,
+      },
     },
     defaultActionGroupId: FIRED_ACTION.id,
     actionGroups: [FIRED_ACTION, NO_DATA_ACTION],

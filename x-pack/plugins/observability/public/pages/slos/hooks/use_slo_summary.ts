@@ -59,3 +59,13 @@ export const getSloFormattedSummary = (
     errorBudgetRemaining: errorBudgetRemainingTitle,
   };
 };
+
+export const useSloFormattedSLIValue = (sliValue?: number): string | null => {
+  const { uiSettings } = useKibana().services;
+  const percentFormat = uiSettings.get('format:percent:defaultPattern');
+
+  const formattedSLIValue =
+    sliValue !== undefined && sliValue !== null ? numeral(sliValue).format(percentFormat) : null;
+
+  return formattedSLIValue;
+};
