@@ -47,7 +47,7 @@ export function SloBadges({
           <SloIndicatorTypeBadge slo={slo} />
           <SloTimeWindowBadge slo={slo} />
           <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
-          <TagsList tags={slo.tags} noOfTagsToDisplay={1} color="default" />
+          <TagsList tags={slo.tags} noOfTagsToDisplay={1} color="default" ignoreEmpty={true} />
         </>
       )}
     </EuiFlexGroup>
