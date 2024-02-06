@@ -145,7 +145,7 @@ export interface CodeEditorProps {
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
-  onChange,
+  onChange: _onChange,
   width,
   height,
   options,
@@ -207,6 +207,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     onResize: _updateDimensions,
     refreshMode: 'debounce',
   });
+
+  const onChange = useBug175684OnChange(_onChange);
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
@@ -639,4 +641,21 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
   };
 
   return { showCopyButton, CopyButton };
+};
+
+// https://github.com/elastic/kibana/issues/175684
+// 'react-monaco-editor' has a bug that it always calls the initial onChange callback, so the closure might become stale
+// we work this around by calling the latest onChange from props
+const useBug175684OnChange = (onChange: CodeEditorProps['onChange']) => {
+  const onChangePropRef = useRef<CodeEditorProps['onChange']>(onChange);
+  useEffect(() => {
+    onChangePropRef.current = onChange;
+  }, [onChange]);
+  const onChangeWrapper = useCallback<NonNullable<CodeEditorProps['onChange']>>((_value, event) => {
+    if (onChangePropRef.current) {
+      onChangePropRef.current(_value, event);
+    }
+  }, []);
+
+  return onChangeWrapper;
 };
