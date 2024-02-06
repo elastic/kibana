@@ -7,21 +7,29 @@
  *
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import moment from 'moment';
-import { EuiAvatar, EuiComment, EuiText } from '@elastic/eui';
+import { useValues } from 'kea';
+import { EuiComment, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { UserAvatar, UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { CopyActionButton } from './copy_action_button';
 import type { Message as MessageType } from '../../types';
+import { KibanaLogic } from '../../../../../shared/kibana';
 
 interface UserMessageProps extends Pick<MessageType, 'content' | 'createdAt'> {}
 
 export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) => {
-  const username = 'User';
+  const { security } = useValues(KibanaLogic);
+  const [currentUserProfile, setCurrentUserProfile] = useState<UserProfileWithAvatar>();
+
+  useEffect(() => {
+    security.userProfiles.getCurrent({ dataPath: 'avatar' }).then(setCurrentUserProfile);
+  }, [security]);
 
   return (
     <EuiComment
-      username={username}
+      username={currentUserProfile?.user.username}
       event={i18n.translate('xpack.enterpriseSearch.content.aiPlayground.message.user.event', {
         defaultMessage: 'asked',
       })}
@@ -34,8 +42,10 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
           },
         })
       }
-      timelineAvatar={<EuiAvatar name={username} initialsLength={2} />}
-      timelineAvatarAriaLabel={username}
+      timelineAvatar={
+        <UserAvatar user={currentUserProfile?.user} avatar={currentUserProfile?.data.avatar} />
+      }
+      timelineAvatarAriaLabel={currentUserProfile?.user.username}
       actions={
         <CopyActionButton
           copyText={String(content)}
