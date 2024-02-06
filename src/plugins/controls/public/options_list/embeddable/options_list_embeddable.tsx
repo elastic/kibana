@@ -6,41 +6,41 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
-import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 
-import {
-  Filter,
-  compareFilters,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  COMPARE_ALL_OPTIONS,
-  buildExistsFilter,
-} from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import {
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+} from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
   ControlInput,
   ControlOutput,
-  OPTIONS_LIST_CONTROL,
   OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
 } from '../..';
 import { pluginServices } from '../../services';
-import { IClearableControl } from '../../types';
-import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { IClearableControl } from '../../types';
+import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -380,25 +380,26 @@ export class OptionsListEmbeddable
     }
   };
 
-  private buildFilter = async () => {
-    const { validSelections } = this.getState().componentState ?? {};
-    const { existsSelected } = this.getState().explicitInput ?? {};
-    const { exclude } = this.getInput();
+  public selectionsToFilters = async (
+    input: Partial<OptionsListEmbeddableInput>
+  ): Promise<Filter[]> => {
+    const { existsSelected, exclude, selectedOptions } = input;
 
-    if ((!validSelections || isEmpty(validSelections)) && !existsSelected) {
+    if ((!selectedOptions || isEmpty(selectedOptions)) && !existsSelected) {
       return [];
     }
+
     const { dataView, field } = await this.getCurrentDataViewAndField();
-    if (!dataView || !field) return;
+    if (!dataView || !field) return [];
 
     let newFilter: Filter | undefined;
     if (existsSelected) {
       newFilter = buildExistsFilter(field, dataView);
-    } else if (validSelections) {
-      if (validSelections.length === 1) {
-        newFilter = buildPhraseFilter(field, validSelections[0], dataView);
+    } else if (selectedOptions) {
+      if (selectedOptions.length === 1) {
+        newFilter = buildPhraseFilter(field, selectedOptions[0], dataView);
       } else {
-        newFilter = buildPhrasesFilter(field, validSelections, dataView);
+        newFilter = buildPhrasesFilter(field, selectedOptions, dataView);
       }
     }
 
@@ -409,8 +410,20 @@ export class OptionsListEmbeddable
     return [newFilter];
   };
 
+  private buildFilter = async () => {
+    const { validSelections } = this.getState().componentState ?? {};
+    return await this.selectionsToFilters({ selectedOptions: validSelections });
+  };
+
   public resetSelections(lastSavedInput: OptionsListEmbeddableInput) {
-    this.dispatch.setSelections(lastSavedInput.selectedOptions);
+    batch(() => {
+      if (lastSavedInput.existsSelected) {
+        this.dispatch.selectExists(Boolean(lastSavedInput.existsSelected));
+      } else {
+        this.dispatch.setSelections(lastSavedInput.selectedOptions);
+      }
+      this.dispatch.setExclude(Boolean(lastSavedInput.exclude));
+    });
   }
 
   public clearSelections() {

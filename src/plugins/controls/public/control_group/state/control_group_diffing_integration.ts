@@ -9,6 +9,7 @@
 import { AnyAction, Middleware } from 'redux';
 import { debounceTime, Observable, startWith, Subject, switchMap } from 'rxjs';
 
+import { compareFilters, COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import { ControlGroupContainer } from '..';
 import { persistableControlGroupInputIsEqual } from '../../../common';
 import { CHANGE_CHECK_DEBOUNCE } from '../../constants';
@@ -41,17 +42,17 @@ export function startDiffingControlGroupState(this: ControlGroupContainer) {
 
             const {
               explicitInput: currentInput,
-              componentState: { lastSavedInput },
-              // output: { filters },
+              componentState: { lastSavedInput, lastSavedOutput },
+              output: { filters },
             } = this.getState();
-            // console.log(
-            //   'fastIsEqual(filters ?? [], lastOutputFilters ?? [])',
-            //   fastIsEqual(filters ?? [], lastOutputFilters ?? [])
-            // );
-            const hasUnsavedChanges = !persistableControlGroupInputIsEqual(
-              currentInput,
-              lastSavedInput,
-              false // never diff selections for unsaved changes - this will be done differently
+
+            const hasUnsavedChanges = !(
+              persistableControlGroupInputIsEqual(
+                currentInput,
+                lastSavedInput,
+                false // never diff selections for unsaved changes - compare the output filters instead
+              ) &&
+              compareFilters(filters ?? [], lastSavedOutput?.filters ?? [], COMPARE_ALL_OPTIONS)
             );
 
             this.unsavedChanges.next(hasUnsavedChanges ? this.getPersistableInput() : undefined);

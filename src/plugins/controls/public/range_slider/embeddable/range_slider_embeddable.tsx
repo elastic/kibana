@@ -315,6 +315,12 @@ export class RangeSliderEmbeddable
     return { min, max };
   };
 
+  public selectionsToFilters = async (
+    input: Partial<RangeSliderEmbeddableInput>
+  ): Promise<Filter[]> => {
+    return [];
+  };
+
   private buildFilter = async () => {
     const {
       componentState: { min: availableMin, max: availableMax },

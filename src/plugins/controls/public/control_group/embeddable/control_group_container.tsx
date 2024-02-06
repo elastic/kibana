@@ -11,7 +11,7 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch, Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
-import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
+import { debounceTime, distinctUntilChanged, filter, first, skip } from 'rxjs/operators';
 
 import { OverlayRef } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
@@ -93,9 +93,6 @@ export class ControlGroupContainer extends Container<
   private lastUsedDataViewId?: string;
   public diffingSubscription: Subscription = new Subscription();
 
-  private currentFilters: Filter[] = [];
-  private currentTimeslice: [number, number] | undefined;
-
   // state management
   public select: ControlGroupReduxEmbeddableTools['select'];
   public getState: ControlGroupReduxEmbeddableTools['getState'];
@@ -108,6 +105,7 @@ export class ControlGroupContainer extends Container<
 
   public onFiltersPublished$: Subject<Filter[]>;
   public onControlRemoved$: Subject<string>;
+  public lastSavedFilters$: Subject<PersistableControlGroupInput>;
 
   /** This currently reports the **entire** persistable control group input on unsaved changes */
   public unsavedChanges: BehaviorSubject<PersistableControlGroupInput | undefined>;
@@ -136,6 +134,7 @@ export class ControlGroupContainer extends Container<
     this.onControlRemoved$ = new Subject<string>();
 
     // start diffing control group state
+    this.lastSavedFilters$ = new Subject();
     this.unsavedChanges = new BehaviorSubject<PersistableControlGroupInput | undefined>(undefined);
     const diffingMiddleware = startDiffingControlGroupState.bind(this)();
 
@@ -161,16 +160,42 @@ export class ControlGroupContainer extends Container<
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
-      const { filters, timeslice } = this.recalculateFilters();
-      this.tryPublishFilters({ filters, timeslice });
       this.setupSubscriptions();
+      const { filters, timeslice } = this.recalculateFilters();
+      this.publishFilters({ filters, timeslice });
       this.initialized$.next(true);
+      this.lastSavedFilters$.next(initialComponentState?.lastSavedInput);
     });
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
 
   private setupSubscriptions = () => {
+    this.subscriptions.add(
+      this.lastSavedFilters$.subscribe(async () => {
+        const {
+          componentState: { lastSavedInput },
+        } = this.getState();
+
+        const panels = lastSavedInput.panels;
+        let filtersArray: Filter[] = [];
+        await Promise.all(
+          Object.values(this.children).map(async (child) => {
+            if (panels[child.id]) {
+              const filters2 =
+                (await (child as ControlEmbeddable).selectionsToFilters?.(
+                  panels[child.id].explicitInput
+                )) ?? [];
+              if (filters2) {
+                filtersArray = [...filtersArray, ...filters2];
+              }
+            }
+          })
+        );
+        this.dispatch.setLastSavedOutput({ filters: filtersArray });
+      })
+    );
+
     /**
      * refresh control order cache and make all panels refreshInputFromParent whenever panel orders change
      */
@@ -178,14 +203,13 @@ export class ControlGroupContainer extends Container<
       this.getInput$()
         .pipe(
           skip(1),
-          distinctUntilChanged((a, b) => controlOrdersAreEqual(a.panels, b.panels))
+          distinctUntilChanged((a: ControlGroupInput, b: ControlGroupInput) =>
+            controlOrdersAreEqual(a.panels, b.panels)
+          )
         )
-        .subscribe((input) => {
-          // console.log(' this.getInput$()');
+        .subscribe((input: ControlGroupInput) => {
           this.recalculateDataViews();
           this.recalculateFilters$.next(null);
-          // const [ filters, timeslice ] = this.recalculateFilters();
-          // this.tryPublishFilters({ filters, timeslice })
           const childOrderCache = cachedChildEmbeddableOrder(input.panels);
           childOrderCache.idsInOrder.forEach((id) => this.getChild(id)?.refreshInputFromParent());
         })
@@ -194,18 +218,20 @@ export class ControlGroupContainer extends Container<
     /**
      * recalculate filters when `showApplySelections` value changes to keep state clean
      */
-    this.subscriptions.add(
-      this.getInput$()
-        .pipe(
-          skip(1),
-          distinctUntilChanged(
-            (a, b) => Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
-          )
-        )
-        .subscribe(() => {
-          this.recalculateFilters$.next(null);
-        })
-    );
+    // this.subscriptions.add(
+    //   this.getInput$()
+    //     .pipe(
+    //       skip(1),
+    //       distinctUntilChanged(
+    //         (a: ControlGroupInput, b: ControlGroupInput) =>
+    //           Boolean(a.showApplySelections) === Boolean(b.showApplySelections)
+    //       )
+    //     )
+    //     .subscribe(() => {
+    //       const { filters, timeslice } = this.recalculateFilters();
+    //       this.publishFilters({ filters, timeslice });
+    //     })
+    // );
 
     /**
      * run OnChildOutputChanged when any child's output has changed
@@ -233,20 +259,29 @@ export class ControlGroupContainer extends Container<
     );
   };
 
+  public setSavedState(lastSavedInput: PersistableControlGroupInput): void {
+    batch(() => {
+      this.dispatch.setLastSavedInput(lastSavedInput);
+      this.dispatch.setLastSavedOutput({ filters: this.getOutput().filters });
+    });
+  }
+
   public resetToLastSavedState() {
     const {
-      componentState: { lastSavedInput },
       explicitInput: { showApplySelections },
+      componentState: { lastSavedInput },
     } = this.getState();
-    if (
-      !persistableControlGroupInputIsEqual(
-        this.getPersistableInput(),
-        lastSavedInput,
-        Boolean(showApplySelections)
-      )
-    ) {
+
+    if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput, true)) {
       this.updateInput(lastSavedInput);
-      this.recalculateFilters$.next(null);
+      if (showApplySelections) {
+        /** Calling reset should force the changes to be published */
+        this.recalculateFilters$.pipe(first()).subscribe(() => {
+          const { filters, timeslice } = this.recalculateFilters();
+          this.publishFilters({ filters, timeslice });
+        });
+      }
+      this.lastSavedFilters$.next(lastSavedInput);
     }
   }
 
@@ -264,7 +299,7 @@ export class ControlGroupContainer extends Container<
       this.recalculateDataViews();
       const { filters, timeslice } = this.recalculateFilters();
       // this.publishFilters({ filters, timeslice });
-      this.tryPublishFilters({ filters, timeslice });
+      this.publishFilters({ filters, timeslice });
       this.setupSubscriptions();
       this.initialized$.next(true);
     });
@@ -320,8 +355,12 @@ export class ControlGroupContainer extends Container<
   };
 
   public resetSelections = () => {
-    // const panels = this.getState().componentState.lastAppliedState ?? {};
-    const panels = this.getState().componentState.lastSavedInput.panels ?? {}; // TODO: MAKE THIS NOT LAST SAVED INPUT
+    const {
+      explicitInput: { showApplySelections },
+      componentState: { publishedPanelState: lastAppliedState, lastSavedInput },
+    } = this.getState();
+
+    const panels = (showApplySelections ? lastAppliedState : lastSavedInput.panels) ?? {};
     for (const childId of this.getChildIds()) {
       const child = this.getChild(childId);
       if (isClearableControl(child)) {
@@ -352,13 +391,22 @@ export class ControlGroupContainer extends Container<
   }) => {
     // if apply button is not available, just publish right away
     // otherwise, set some component state `unpublishedFilters`
-    const {
-      explicitInput: { showApplySelections },
-    } = this.getState();
 
-    this.dispatch.setUnpublishedFilters(filters);
-    if (!showApplySelections) {
-      this.publishFilters({ filters, timeslice });
+    if (
+      !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
+      !isEqual(this.output.timeslice, timeslice)
+    ) {
+      const {
+        explicitInput: { showApplySelections },
+      } = this.getState();
+
+      if (!showApplySelections) {
+        this.publishFilters({ filters, timeslice });
+      } else {
+        this.dispatch.setUnpublishedFilters(filters);
+      }
+    } else {
+      this.dispatch.setUnpublishedFilters(undefined);
     }
   };
 
@@ -369,17 +417,16 @@ export class ControlGroupContainer extends Container<
     filters: Filter[];
     timeslice?: [number, number];
   }) => {
-    if (
-      !compareFilters(this.output.filters ?? [], filters ?? [], COMPARE_ALL_OPTIONS) ||
-      !isEqual(this.output.timeslice, timeslice)
-    ) {
-      this.updateOutput({
-        filters: uniqFilters(filters),
-        timeslice,
-      });
-      this.onFiltersPublished$.next(filters);
-      this.dispatch.setUnpublishedFilters([]);
-    }
+    const outputFilters = uniqFilters(filters);
+    this.updateOutput({
+      filters: outputFilters,
+      timeslice,
+    });
+    this.onFiltersPublished$.next(outputFilters);
+    batch(() => {
+      this.dispatch.setUnpublishedFilters(undefined);
+      this.dispatch.setPublishedPanelState(this.getState().explicitInput.panels);
+    });
   };
 
   private recalculateDataViews = () => {

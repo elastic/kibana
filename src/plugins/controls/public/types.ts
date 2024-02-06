@@ -44,6 +44,7 @@ export type ControlEmbeddable<
 > = IEmbeddable<TControlEmbeddableInput, TControlEmbeddableOutput> & {
   isChained?: () => boolean;
   renderPrepend?: () => ReactNode | undefined;
+  selectionsToFilters?: (input: Partial<TControlEmbeddableInput>) => Promise<Filter[]>;
 };
 
 export interface IClearableControl<

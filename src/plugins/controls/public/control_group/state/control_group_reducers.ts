@@ -31,30 +31,24 @@ export const controlGroupReducers = {
   ) => {
     state.componentState.lastSavedInput = action.payload;
   },
+  setLastSavedOutput: (
+    state: WritableDraft<ControlGroupReduxState>,
+    action: PayloadAction<ControlGroupComponentState['lastSavedOutput']>
+  ) => {
+    state.componentState.lastSavedOutput = action.payload;
+  },
   setUnpublishedFilters: (
     state: WritableDraft<ControlGroupReduxState>,
     action: PayloadAction<ControlGroupComponentState['unpublishedFilters']>
   ) => {
     state.componentState.unpublishedFilters = action.payload;
   },
-  // setApplyButtonEnabled: (
-  //   state: WritableDraft<ControlGroupReduxState>,
-  //   action: PayloadAction<ControlGroupComponentState['applyButtonEnabled']>
-  // ) => {
-  //   state.componentState.applyButtonEnabled = action.payload;
-  // },
-  // setLastAppliedState: (
-  //   state: WritableDraft<ControlGroupReduxState>,
-  //   action: PayloadAction<ControlGroupComponentState['lastAppliedState']>
-  // ) => {
-  //   console.log('setLastAppliedState', action.payload);
-  //   state.componentState.lastAppliedState = action.payload;
-  // },
-  setResetButtonEnabled: (
+  setPublishedPanelState: (
     state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupComponentState['resetButtonEnabled']>
+    action: PayloadAction<ControlGroupComponentState['publishedPanelState']>
   ) => {
-    state.componentState.resetButtonEnabled = action.payload;
+    console.log('setLastAppliedState', action.payload);
+    state.componentState.publishedPanelState = action.payload;
   },
   setDefaultControlWidth: (
     state: WritableDraft<ControlGroupReduxState>,

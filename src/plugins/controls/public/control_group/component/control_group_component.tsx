@@ -27,7 +27,6 @@ import {
 } from '@dnd-kit/sortable';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
-import deepEqual from 'fast-deep-equal';
 import React, { useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
@@ -44,7 +43,6 @@ export const ControlGroup = () => {
   const controlGroup = useControlGroupContainer();
 
   // current state
-  const filters = contextSelect((state) => state.output.filters);
 
   const panels = contextSelect((state) => state.explicitInput.panels);
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
@@ -55,21 +53,9 @@ export const ControlGroup = () => {
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
   const unpublishedFilters = contextSelect((state) => state.componentState.unpublishedFilters);
 
-  const applyButtonEnabled = useMemo(() => {
-    console.log(filters, unpublishedFilters);
-    return (unpublishedFilters ?? []).length > 0 && !deepEqual(filters, unpublishedFilters);
-  }, [filters, unpublishedFilters]);
-
-  // useEffect(() => {
-  //   console.log('unpublishedFilters', unpublishedFilters);
-  // }, [unpublishedFilters]);
-  // const applyButtonEnabled = contextSelect((state) => state.componentState.applyButtonEnabled); // TODO: REMOVE THIS
-  // const resetButtonEnabled = contextSelect((state) => state.componentState.resetButtonEnabled);
-  // const lastAppliedState = contextSelect((state) => state.componentState.lastAppliedState);
-
-  // const resetButtonEnabled = useMemo(() => {
-  //   return !isEqual(panels, lastAppliedState);
-  // }, [lastAppliedState, panels]);
+  const applyResetButtonsEnabled = useMemo(() => {
+    return Boolean(unpublishedFilters); // if undefined, no unpublished filters; otherwise, there exists unpublished filters
+  }, [unpublishedFilters]);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -199,7 +185,7 @@ export const ControlGroup = () => {
                     <EuiFlexItem>
                       <EuiButtonIcon
                         size="m"
-                        disabled={false}
+                        disabled={!applyResetButtonsEnabled}
                         iconSize="m"
                         display="base"
                         color={'danger'}
@@ -213,7 +199,7 @@ export const ControlGroup = () => {
                     <EuiFlexItem>
                       <EuiButtonIcon
                         size="m"
-                        disabled={!applyButtonEnabled}
+                        disabled={!applyResetButtonsEnabled}
                         iconSize="m"
                         display="fill"
                         color={'success'}

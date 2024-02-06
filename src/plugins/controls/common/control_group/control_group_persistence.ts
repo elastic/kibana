@@ -72,8 +72,6 @@ export const persistableControlGroupInputIsEqual = (
     ...pick(b, persistableControlGroupInputKeys),
   };
 
-  // console.log(inputB);
-
   return (
     getPanelsAreEqual(inputA.panels, inputB.panels, compareSelections) &&
     deepEqual(
@@ -85,7 +83,7 @@ export const persistableControlGroupInputIsEqual = (
   );
 };
 
-const getPanelsAreEqual = (
+export const getPanelsAreEqual = (
   originalPanels: PersistableControlGroupInput['panels'],
   newPanels: PersistableControlGroupInput['panels'],
   compareSelections?: boolean
@@ -96,8 +94,6 @@ const getPanelsAreEqual = (
   if (panelIdDiff.length > 0) {
     return false;
   }
-
-  // console.log('compareSelections', compareSelections);
 
   for (const panelId of newPanelIds) {
     const newPanelType = newPanels[panelId].type;
