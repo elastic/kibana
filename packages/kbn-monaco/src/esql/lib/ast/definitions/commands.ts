@@ -7,8 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isColumnItem, isSettingItem } from '../shared/helpers';
-import { ESQLColumn, ESQLCommand, ESQLCommandMode, ESQLMessage } from '../types';
+import {
+  getFunctionDefinition,
+  isAssignment,
+  isAssignmentComplete,
+  isColumnItem,
+  isFunctionItem,
+  isSettingItem,
+} from '../shared/helpers';
+import type { ESQLColumn, ESQLCommand, ESQLCommandMode, ESQLAstItem, ESQLMessage } from '../types';
 import { ccqMode } from './settings';
 import {
   appendSeparatorOption,
@@ -87,6 +94,64 @@ export const commandDefinitions: CommandDefinition[] = [
           type: 'error',
           code: 'statsNoArguments',
         });
+      }
+
+      // now that all functions are supported, there's a specific check to perform
+      // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
+      // until an agg function is detected
+      // in the long run this might be integrated into the validation function
+      const fnArg = command.args.filter(isFunctionItem);
+      if (fnArg.length) {
+        function isAggFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+        }
+        function isBuiltinFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'builtin';
+        }
+        function isBuiltinFunctionWithAggInside(arg: ESQLAstItem) {
+          return (
+            isFunctionItem(arg) &&
+            isBuiltinFunction(arg) &&
+            arg.args.filter(isFunctionItem).some(
+              // this is recursive as builtin fns can be wrapped one withins another
+              (subArg): boolean =>
+                isAggFunction(subArg) ||
+                (isBuiltinFunction(subArg) ? isBuiltinFunctionWithAggInside(subArg) : false)
+            )
+          );
+        }
+        // which is the presence of at least one agg type function at root level
+        const hasAggFunction = fnArg.some(isAggFunction);
+        // or as builtin function arg with an agg function as sub arg
+        const hasAggFunctionWithinBuiltin = fnArg
+          .filter((arg) => !isAssignment(arg))
+          .some(isBuiltinFunctionWithAggInside);
+
+        // assignment requires a special handling
+        const hasAggFunctionWithinAssignment = fnArg
+          .filter((arg) => isAssignment(arg) && isAssignmentComplete(arg))
+          // extract the right hand side of the assignments
+          .flatMap((arg) => arg.args[1])
+          .filter(isFunctionItem)
+          // now check that they are either agg functions
+          // or builtin functions with an agg function as sub arg
+          .some((arg) => isAggFunction(arg) || isBuiltinFunctionWithAggInside(arg));
+
+        if (!hasAggFunction && !hasAggFunctionWithinBuiltin && !hasAggFunctionWithinAssignment) {
+          messages.push({
+            location: command.location,
+            text: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
+              defaultMessage:
+                "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
+              values: {
+                name: fnArg[0].name,
+                argType: getFunctionDefinition(fnArg[0].name)?.signatures[0].returnType,
+              },
+            }),
+            type: 'error',
+            code: 'noNestedArgumentSupport',
+          });
+        }
       }
       return messages;
     },

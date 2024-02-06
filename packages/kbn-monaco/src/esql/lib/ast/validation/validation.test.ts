@@ -1304,9 +1304,11 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [=] of type [void]",
     ]);
     testErrorsAndWarnings('from a | stats numberField=5 by ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [=] of type [void]",
     ]);
     testErrorsAndWarnings('from a | stats avg(numberField) by wrongField', [
       'Unknown column [wrongField]',
@@ -1365,9 +1367,29 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | stats count(count(*)) BY ipField', [
       `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
     ]);
-    testErrorsAndWarnings('from a | stats numberField + 1', ['STATS does not support function +']);
+    testErrorsAndWarnings('from a | stats numberField + 1', [
+      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
+    ]);
 
-    testErrorsAndWarnings('from a | stats numberField + 1 by ipField', []);
+    for (const nesting of [1, 2, 3, 4]) {
+      const moreBuiltinWrapping = Array(nesting).fill('+ 1').join('');
+      testErrorsAndWarnings(`from a | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
+      testErrorsAndWarnings(`from a | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
+      testErrorsAndWarnings(`from a | stats 5 ${moreBuiltinWrapping} + numberField`, [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+      ]);
+      testErrorsAndWarnings(`from a | stats 5 + numberField ${moreBuiltinWrapping}`, [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+      ]);
+    }
+
+    testErrorsAndWarnings('from a | stats 5 + numberField + 1', [
+      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+    ]);
+
+    testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
+      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
+    ]);
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
