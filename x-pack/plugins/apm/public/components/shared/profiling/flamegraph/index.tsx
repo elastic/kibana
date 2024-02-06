@@ -20,7 +20,8 @@ interface Props {
 export function ProfilingFlamegraphChart({ data, status }: Props) {
   return (
     <>
-      {status === FETCH_STATUS.SUCCESS && isEmpty(data) ? (
+      {status === FETCH_STATUS.SUCCESS &&
+      (isEmpty(data) || data?.TotalSamples === 0) ? (
         <EuiEmptyPrompt
           titleSize="s"
           title={

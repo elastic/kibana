@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { CoreRequestHandlerContext, ElasticsearchClient } from '@kbn/core/server';
 import {
   profilingAWSCostDiscountRate,
@@ -15,19 +15,15 @@ import {
   profilingPervCPUWattX86,
 } from '@kbn/observability-plugin/common';
 import { percentToFactor } from '../../utils/percent_to_factor';
-import { kqlQuery } from '../../utils/query';
 import { RegisterServicesParams } from '../register_services';
 
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
   core: CoreRequestHandlerContext;
-  rangeFromMs: number;
-  rangeToMs: number;
-  kuery: string;
   indices?: string;
   stacktraceIdsField?: string;
-  serviceName?: string;
-  transactionName?: string;
+  query: QueryDslQueryContainer;
+  totalSeconds: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -36,17 +32,11 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
   return async ({
     core,
     esClient,
-    rangeFromMs,
-    rangeToMs,
-    kuery,
     indices,
     stacktraceIdsField,
-    serviceName,
-    transactionName,
+    query,
+    totalSeconds,
   }: FetchFlamechartParams) => {
-    const rangeFromSecs = rangeFromMs / 1000;
-    const rangeToSecs = rangeToMs / 1000;
-
     const [
       co2PerKWH,
       datacenterPUE,
@@ -64,27 +54,9 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
     ]);
 
     const profilingEsClient = createProfilingEsClient({ esClient });
-    const totalSeconds = rangeToSecs - rangeFromSecs;
+
     const flamegraph = await profilingEsClient.profilingFlamegraph({
-      // TODO: caue maybe receive the query as a new argument?!
-      query: {
-        bool: {
-          filter: [
-            ...kqlQuery(kuery),
-            ...(serviceName ? [{ term: { 'service.name': serviceName } }] : []),
-            ...(transactionName ? [{ term: { 'transaction.name': transactionName } }] : []),
-            {
-              range: {
-                ['@timestamp']: {
-                  gte: String(rangeFromSecs),
-                  lt: String(rangeToSecs),
-                  format: 'epoch_second',
-                },
-              },
-            },
-          ],
-        },
-      },
+      query,
       sampleSize: targetSampleSize,
       durationSeconds: totalSeconds,
       co2PerKWH,

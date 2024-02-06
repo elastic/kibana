@@ -5,10 +5,15 @@
  * 2.0.
  */
 
-import { toNumberRt } from '@kbn/io-ts-utils';
+import { isoToEpochSecsRt, toNumberRt } from '@kbn/io-ts-utils';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
-import { HOST_NAME } from '../../../common/es_fields/apm';
+import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import {
+  HOST_NAME,
+  SERVICE_NAME,
+  TRANSACTION_NAME,
+} from '../../../common/es_fields/apm';
 import {
   mergeKueries,
   toKueryFilterFormat,
@@ -66,17 +71,35 @@ const profilingFlamegraphRoute = createApmServerRoute({
       if (!serviceHostNames.length) {
         return undefined;
       }
+      const startSecs = start / 1000;
+      const endSecs = end / 1000;
 
       const flamegraph =
         await profilingDataAccessStart?.services.fetchFlamechartData({
           core,
           esClient: esClient.asCurrentUser,
-          rangeFromMs: start,
-          rangeToMs: end,
-          kuery: mergeKueries([
-            `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
-            kuery,
-          ]),
+          totalSeconds: endSecs - startSecs,
+          query: {
+            bool: {
+              filter: [
+                ...kqlQuery(
+                  mergeKueries([
+                    `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+                    kuery,
+                  ])
+                ),
+                {
+                  range: {
+                    ['@timestamp']: {
+                      gte: String(startSecs),
+                      lt: String(endSecs),
+                      format: 'epoch_second',
+                    },
+                  },
+                },
+              ],
+            },
+          },
         });
 
       return { flamegraph, hostNames: serviceHostNames };
@@ -91,9 +114,12 @@ const transactionsFlamegraphRoute = createApmServerRoute({
   params: t.type({
     path: t.type({ serviceName: t.string }),
     query: t.intersection([
-      rangeRt,
       kueryRt,
-      t.type({ transactionName: t.string }),
+      t.type({
+        transactionName: t.string,
+        start: isoToEpochSecsRt,
+        end: isoToEpochSecsRt,
+      }),
     ]),
   }),
   options: { tags: ['access:apm'] },
@@ -111,14 +137,28 @@ const transactionsFlamegraphRoute = createApmServerRoute({
       return await profilingDataAccessStart?.services.fetchFlamechartData({
         core,
         esClient: esClient.asCurrentUser,
-        rangeFromMs: start,
-        rangeToMs: end,
-        kuery,
         // TODO: caue fix this
         indices: '.ds-traces-apm-default-2024.02.02-000001',
         stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
-        serviceName,
-        transactionName,
+        totalSeconds: end - start,
+        query: {
+          bool: {
+            filter: [
+              ...kqlQuery(kuery),
+              ...termQuery(SERVICE_NAME, serviceName),
+              ...termQuery(TRANSACTION_NAME, transactionName),
+              {
+                range: {
+                  ['@timestamp']: {
+                    gte: String(start),
+                    lt: String(end),
+                    format: 'epoch_second',
+                  },
+                },
+              },
+            ],
+          },
+        },
       });
     }
 
