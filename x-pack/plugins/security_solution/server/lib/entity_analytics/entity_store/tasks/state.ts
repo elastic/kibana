@@ -27,8 +27,14 @@ export const stateSchemaByVersion = {
       timestamps: schema.maybe(
         schema.object({
           lastExecution: schema.maybe(schema.string()),
-          lastEntityQuery: schema.maybe(schema.string()),
-          lastCriticalityQuery: schema.maybe(schema.string()),
+          lastProcessedCompositeTimestamp: schema.maybe(schema.string()),
+          lastProcessedCriticalityTimestamp: schema.maybe(schema.string()),
+        })
+      ),
+      ids: schema.maybe(
+        schema.object({
+          lastProcessedCompositeId: schema.maybe(schema.string()),
+          lastProcessedCriticalityId: schema.maybe(schema.string()),
         })
       ),
       namespace: schema.string(),

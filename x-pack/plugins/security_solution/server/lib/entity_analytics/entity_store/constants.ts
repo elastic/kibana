@@ -7,6 +7,7 @@
 
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 
+export const FIELD_HISTORY_MAX_SIZE = 10;
 export const entityStoreFieldMap: FieldMap = {
   '@timestamp': {
     type: 'date',
@@ -16,6 +17,16 @@ export const entityStoreFieldMap: FieldMap = {
   // user or host
   entity_type: {
     type: 'keyword',
+    array: false,
+    required: true,
+  },
+  first_seen: {
+    type: 'date',
+    array: false,
+    required: true,
+  },
+  last_seen: {
+    type: 'date',
     array: false,
     required: true,
   },
@@ -31,6 +42,16 @@ export const entityStoreFieldMap: FieldMap = {
     array: true,
   },
   'host.ip': {
+    type: 'ip',
+    required: false,
+    array: true,
+  },
+  'host.ip_history.timestamp': {
+    type: 'date',
+    required: false,
+    array: true,
+  },
+  'host.ip_history.value': {
     type: 'ip',
     required: false,
     array: true,

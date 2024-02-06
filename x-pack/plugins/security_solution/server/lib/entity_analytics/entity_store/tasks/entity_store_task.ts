@@ -212,15 +212,17 @@ export const runTask = async ({
     return { state: updatedState };
   }
 
-  const { entitiesUpdated, entitiesCreated, errors, timestamps } =
+  const { entitiesUpdated, entitiesCreated, errors, timestamps, ids } =
     await entityStoreService.updateEntityStore({
       timestamps: state.timestamps,
+      ids: state.ids,
     });
 
   log(`errors: ${errors}`);
   log(`entitiesUpdated: ${entitiesUpdated}`);
   log(`entitiesCreated: ${entitiesCreated}`);
   updatedState.timestamps = timestamps;
+  updatedState.ids = ids;
 
   const taskCompletionTime = moment().utc().toISOString();
   const taskDurationInSeconds = moment(taskCompletionTime).diff(moment(taskStartTime), 'seconds');
