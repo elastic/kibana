@@ -7,6 +7,9 @@
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
+  useEuiFontSize,
+  EuiButtonIcon,
+  useGeneratedHtmlId,
   EuiAccordion,
   EuiButton,
   EuiButtonEmpty,
@@ -19,32 +22,123 @@ import {
   EuiModalHeader,
   EuiModalHeaderTitle,
   EuiSuperSelect,
-  EuiText,
   EuiTitle,
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+import { css } from '@emotion/css';
+import { i18n } from '@kbn/i18n';
 import { PICK_ASSET_CRITICALITY } from './translations';
 import {
   AssetCriticalityBadge,
   AssetCriticalityBadgeAllowMissing,
 } from './asset_criticality_badge';
-import type { Entity, ModalState, State } from './use_asset_criticality';
-import { useAssetCriticalityData, useCriticalityModal } from './use_asset_criticality';
+import type { Entity, State } from './use_asset_criticality';
+import {
+  useAssetCriticalityData,
+  useCriticalityModal,
+  useAssetCriticalityPrivileges,
+} from './use_asset_criticality';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
 interface Props {
   entity: Entity;
 }
-const AssetCriticalityComponent: React.FC<Props> = ({ entity }) => {
+const AssetCriticalitySelectorComponent: React.FC<{
+  criticality: State;
+  entity: Entity;
+  compressed?: boolean;
+}> = ({ criticality, entity, compressed = false }) => {
   const modal = useCriticalityModal();
-  const criticality = useAssetCriticalityData(entity, modal);
-  const { euiTheme } = useEuiTheme();
+  const openModal = useMemo(() => () => modal.toggle(true), [modal]);
+  const closeModal = useMemo(() => () => modal.toggle(false), [modal]);
+  const sFontSize = useEuiFontSize('s').fontSize;
 
-  if (criticality.privileges.isLoading || !criticality.privileges.data?.has_read_permissions) {
+  return (
+    <>
+      {criticality.query.isLoading || criticality.mutation.isLoading ? (
+        <EuiLoadingSpinner size="s" />
+      ) : (
+        <EuiFlexGroup
+          direction="row"
+          alignItems="center"
+          justifyContent="spaceBetween"
+          wrap={false}
+          gutterSize={'xs'}
+          responsive={false}
+        >
+          <EuiFlexItem grow={false}>
+            <AssetCriticalityBadgeAllowMissing
+              criticalityLevel={criticality.query.data?.criticality_level}
+              dataTestSubj="asset-criticality-level"
+              className={css`
+                font-size: ${sFontSize};
+              `}
+            />
+          </EuiFlexItem>
+          {compressed && criticality.privileges.data?.has_write_permissions && (
+            <EuiFlexItem>
+              <EuiButtonIcon
+                data-test-subj="asset-criticality-change-btn"
+                iconSize="s"
+                iconType={'pencil'}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.entityAnalytics.assetCriticality.compressedButtonArialLabel',
+                  {
+                    defaultMessage: 'Change asset criticality',
+                  }
+                )}
+                onClick={openModal}
+              />
+            </EuiFlexItem>
+          )}
+
+          {!compressed && criticality.privileges.data?.has_write_permissions && (
+            <EuiFlexItem css={{ flexGrow: 'unset' }}>
+              <EuiButtonEmpty
+                data-test-subj="asset-criticality-change-btn"
+                iconType="arrowStart"
+                iconSide="left"
+                flush="right"
+                onClick={openModal}
+              >
+                {criticality.status === 'update' ? (
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.assetCriticality.changeButton"
+                    defaultMessage="Change"
+                  />
+                ) : (
+                  <FormattedMessage
+                    id="xpack.securitySolution.entityAnalytics.assetCriticality.createButton"
+                    defaultMessage="Create"
+                  />
+                )}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          )}
+        </EuiFlexGroup>
+      )}
+      {modal.visible ? (
+        <AssetCriticalityModal entity={entity} criticality={criticality} onClose={closeModal} />
+      ) : null}
+    </>
+  );
+};
+
+export const AssetCriticalitySelector = React.memo(AssetCriticalitySelectorComponent);
+AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';
+
+const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
+  const { euiTheme } = useEuiTheme();
+  const privileges = useAssetCriticalityPrivileges(entity.name);
+  const criticality = useAssetCriticalityData({
+    entity,
+    enabled: !!privileges.data?.has_read_permissions,
+  });
+
+  if (privileges.isLoading || !privileges.data?.has_read_permissions) {
     return null;
   }
 
@@ -70,69 +164,27 @@ const AssetCriticalityComponent: React.FC<Props> = ({ entity }) => {
         }}
         data-test-subj="asset-criticality-selector"
       >
-        {criticality.query.isLoading || criticality.mutation.isLoading ? (
-          <EuiLoadingSpinner size="s" />
-        ) : (
-          <EuiFlexGroup
-            direction="row"
-            alignItems="center"
-            justifyContent="spaceBetween"
-            wrap={false}
-          >
-            <EuiFlexItem>
-              <EuiText size="s">
-                <AssetCriticalityBadgeAllowMissing
-                  criticalityLevel={criticality.query.data?.criticality_level}
-                  dataTestSubj="asset-criticality-level"
-                />
-              </EuiText>
-            </EuiFlexItem>
-            {criticality.privileges.data?.has_write_permissions && (
-              <EuiFlexItem css={{ flexGrow: 'unset' }}>
-                <EuiButtonEmpty
-                  data-test-subj="asset-criticality-change-btn"
-                  iconType="arrowStart"
-                  iconSide="left"
-                  flush="right"
-                  onClick={() => modal.toggle(true)}
-                >
-                  {criticality.status === 'update' ? (
-                    <FormattedMessage
-                      id="xpack.securitySolution.entityAnalytics.assetCriticality.changeButton"
-                      defaultMessage="Change"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.securitySolution.entityAnalytics.assetCriticality.createButton"
-                      defaultMessage="Create"
-                    />
-                  )}
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            )}
-          </EuiFlexGroup>
-        )}
+        <AssetCriticalitySelector criticality={criticality} entity={entity} />
       </EuiAccordion>
       <EuiHorizontalRule />
-      {modal.visible ? (
-        <AssetCriticalityModal entity={entity} criticality={criticality} modal={modal} />
-      ) : null}
     </>
   );
 };
 
 interface ModalProps {
   criticality: State;
-  modal: ModalState;
+  onClose: () => void;
   entity: Entity;
 }
-const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entity }) => {
+
+const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, onClose }) => {
+  const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
   const [value, setNewValue] = useState<CriticalityLevel>(
     criticality.query.data?.criticality_level ?? 'normal'
   );
 
   return (
-    <EuiModal onClose={() => modal.toggle(false)}>
+    <EuiModal onClose={onClose}>
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="asset-criticality-modal-title">
           {PICK_ASSET_CRITICALITY}
@@ -140,7 +192,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
       </EuiModalHeader>
       <EuiModalBody>
         <EuiSuperSelect
-          id={modal.basicSelectId}
+          id={basicSelectId}
           options={options}
           valueOfSelected={value}
           onChange={setNewValue}
@@ -149,7 +201,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={() => modal.toggle(false)}>
+        <EuiButtonEmpty onClick={onClose}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.assetCriticality.cancelButton"
             defaultMessage="Cancel"
@@ -157,13 +209,14 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, modal, entit
         </EuiButtonEmpty>
 
         <EuiButton
-          onClick={() =>
+          onClick={() => {
             criticality.mutation.mutate({
               criticalityLevel: value,
               idField: `${entity.type}.name`,
               idValue: entity.name,
-            })
-          }
+            });
+            onClose();
+          }}
           fill
           data-test-subj="asset-criticality-modal-save-btn"
         >
@@ -198,5 +251,5 @@ const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
   option('very_important'),
 ];
 
-export const AssetCriticalitySelector = React.memo(AssetCriticalityComponent);
-AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';
+export const AssetCriticalityAccordion = React.memo(AssetCriticalityAccordionComponent);
+AssetCriticalityAccordion.displayName = 'AssetCriticalityAccordion';
