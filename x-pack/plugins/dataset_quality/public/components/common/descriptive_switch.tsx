@@ -22,9 +22,9 @@ export const DescriptiveSwitch = ({
   onToggle,
 }: DescriptiveSwitchProps) => {
   return (
-    <EuiFlexGroup gutterSize="xs" css={{ flexGrow: 'unset' }}>
+    <EuiFlexGroup gutterSize="xs" css={{ flexGrow: 'unset' }} alignItems="center">
       <EuiSwitch compressed label={label} checked={checked} onChange={onToggle} showLabel={false} />
-      <EuiFlexGroup gutterSize="xs">
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiText size="xs">{label}</EuiText>
         <EuiToolTip position="bottom" content={tooltipText}>
           <EuiIcon tabIndex={0} type="questionInCircle" size="s" />

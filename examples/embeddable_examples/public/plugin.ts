@@ -31,6 +31,7 @@ import {
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
 } from './filter_debugger';
+import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown_react_embeddable';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -52,6 +53,8 @@ export interface EmbeddableExamplesStart {
   createSampleData: () => Promise<void>;
   factories: ExampleEmbeddableFactories;
 }
+
+registerMarkdownEditorEmbeddable();
 
 export class EmbeddableExamplesPlugin
   implements

@@ -14,7 +14,8 @@ import { tableSummaryAllText, tableSummaryOfText } from '../../common/translatio
 import { getDatasetQualityTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { FlyoutDataset } from '../state_machines/dataset_quality_controller';
-import { filterInactiveDatasets, isActiveDataset, useKibanaContextForPlugin } from '../utils';
+import { useKibanaContextForPlugin } from '../utils';
+import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
 
 export type Direction = 'asc' | 'desc';
 export type SortField = keyof DataStreamStat;
@@ -114,10 +115,15 @@ export const useDatasetQualityTable = () => {
     ]
   );
 
+  const filteredItems = useMemo(
+    () => (showInactiveDatasets ? datasets : filterInactiveDatasets({ datasets, timeRange })),
+    [showInactiveDatasets, datasets, timeRange]
+  );
+
   const pagination = {
     pageIndex: page,
     pageSize: rowsPerPage,
-    totalItemCount: datasets.length,
+    totalItemCount: filteredItems.length,
     hidePerPageOptions: true,
   };
 
@@ -149,7 +155,7 @@ export const useDatasetQualityTable = () => {
     const sortedItems = orderBy(filteredItems, overridenSortingField, sort.direction);
 
     return sortedItems.slice(page * rowsPerPage, (page + 1) * rowsPerPage);
-  }, [showInactiveDatasets, datasets, timeRange, sort.field, sort.direction, page, rowsPerPage]);
+  }, [sort.field, sort.direction, filteredItems, page, rowsPerPage]);
 
   const resultsCount = useMemo(() => {
     const startNumberItemsOnPage = rowsPerPage * page + 1;

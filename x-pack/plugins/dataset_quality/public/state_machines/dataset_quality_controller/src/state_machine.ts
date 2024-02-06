@@ -67,7 +67,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
                 TOGGLE_INACTIVE_DATASETS: {
                   target: 'loaded',
-                  actions: ['storeInactiveDatasetsVisibility'],
+                  actions: ['storeInactiveDatasetsVisibility', 'resetPage'],
                 },
                 TOGGLE_FULL_DATASET_NAMES: {
                   target: 'loaded',
@@ -169,6 +169,12 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        resetPage: assign((context, _event) => ({
+          table: {
+            ...context.table,
+            page: 0,
+          },
+        })),
         storeInactiveDatasetsVisibility: assign((context, _event) => {
           return {
             filters: {

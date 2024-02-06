@@ -15,15 +15,15 @@ import { DataViewsProvider, useDataViewsContext } from '../hooks/use_data_views'
 import { useEsql } from '../hooks/use_esql';
 import { IntegrationsProvider, useIntegrationsContext } from '../hooks/use_integrations';
 import { IDatasetsClient } from '../services/datasets';
-import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
+import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 
 interface CustomDatasetSelectorProps {
-  logExplorerControllerStateService: LogExplorerControllerStateService;
+  logsExplorerControllerStateService: LogsExplorerControllerStateService;
 }
 
-export const CustomDatasetSelector = withProviders(({ logExplorerControllerStateService }) => {
+export const CustomDatasetSelector = withProviders(({ logsExplorerControllerStateService }) => {
   const { datasetSelection, handleDatasetSelectionChange } = useDatasetSelection(
-    logExplorerControllerStateService
+    logsExplorerControllerStateService
   );
 
   const {
@@ -111,13 +111,13 @@ function withProviders(Component: React.FunctionComponent<CustomDatasetSelectorP
     datasetsClient,
     dataViews,
     discover,
-    logExplorerControllerStateService,
+    logsExplorerControllerStateService,
   }: CustomDatasetSelectorBuilderProps) {
     return (
       <IntegrationsProvider datasetsClient={datasetsClient}>
         <DatasetsProvider datasetsClient={datasetsClient}>
           <DataViewsProvider dataViewsService={dataViews} discoverService={discover}>
-            <Component logExplorerControllerStateService={logExplorerControllerStateService} />
+            <Component logsExplorerControllerStateService={logsExplorerControllerStateService} />
           </DataViewsProvider>
         </DatasetsProvider>
       </IntegrationsProvider>
