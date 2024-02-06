@@ -111,6 +111,7 @@ export interface SuggestionPanelProps {
   wrapSuggestions?: boolean;
   isAccordionOpen?: boolean;
   toggleAccordionCb?: (flag: boolean) => void;
+  abortController?: AbortController;
 }
 
 const PreviewRenderer = ({
@@ -119,12 +120,14 @@ const PreviewRenderer = ({
   expression,
   hasError,
   onRender,
+  abortController,
 }: {
   withLabel: boolean;
   expression: string | null | undefined;
   ExpressionRendererComponent: ReactExpressionRendererType;
   hasError: boolean;
   onRender: () => void;
+  abortController?: AbortController;
 }) => {
   const onErrorMessage = (
     <div className="lnsSuggestionPanel__suggestionIcon">
@@ -156,6 +159,7 @@ const PreviewRenderer = ({
           renderMode="preview"
           expression={expression}
           onRender$={onRender}
+          abortController={abortController}
           debounce={2000}
           renderError={() => {
             return onErrorMessage;
@@ -174,6 +178,7 @@ const SuggestionPreview = ({
   showTitleAsLabel,
   onRender,
   wrapSuggestions,
+  abortController,
 }: {
   onSelect: () => void;
   preview: {
@@ -187,6 +192,7 @@ const SuggestionPreview = ({
   showTitleAsLabel?: boolean;
   onRender: () => void;
   wrapSuggestions?: boolean;
+  abortController?: AbortController;
 }) => {
   return (
     <EuiToolTip
@@ -226,6 +232,7 @@ const SuggestionPreview = ({
               withLabel={Boolean(showTitleAsLabel)}
               hasError={Boolean(preview.error)}
               onRender={onRender}
+              abortController={abortController}
             />
           ) : (
             <span className="lnsSuggestionPanel__suggestionIcon">
@@ -258,6 +265,7 @@ export function SuggestionPanel({
   wrapSuggestions,
   toggleAccordionCb,
   isAccordionOpen,
+  abortController,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -487,6 +495,7 @@ export function SuggestionPanel({
             showTitleAsLabel
             onRender={() => onSuggestionRender(0)}
             wrapSuggestions={wrapSuggestions}
+            abortController={abortController}
           />
         )}
         {!hideSuggestions &&
@@ -512,6 +521,7 @@ export function SuggestionPanel({
                 onRender={() => onSuggestionRender(index + 1)}
                 showTitleAsLabel={showOnlyIcons}
                 wrapSuggestions={wrapSuggestions}
+                abortController={abortController}
               />
             );
           })}

@@ -547,6 +547,18 @@ export function App({
     visualizationState: visualization,
   });
 
+  // todo: isLoading is always false
+
+  // create new abort controller as soon as we are done loading, it will be used for next query
+  const abortController: AbortController | undefined = useMemo(() => {
+    if (!isLoading) return new AbortController();
+    return abortController;
+  }, [isLoading]);
+
+  const onCancel = () => {
+    abortController?.abort();
+  };
+
   return (
     <>
       <div className="lnsApp" data-test-subj="lnsApp" role="main">
@@ -584,6 +596,8 @@ export function App({
           onTextBasedSavedAndExit={onTextBasedSavedAndExit}
           getUserMessages={getUserMessages}
           shortUrlService={shortUrlService}
+          onCancel={onCancel}
+          isLoading={isLoading}
         />
         {getLegacyUrlConflictCallout()}
         {(!isLoading || persistedDoc) && (
@@ -666,6 +680,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   addUserMessages,
   lensInspector,
   indexPatternService,
+  abortController,
 }: {
   editorFrame: EditorFrameInstance;
   lensInspector: LensInspector;
@@ -673,6 +688,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
   indexPatternService: IndexPatternServiceAPI;
+  abortController?: AbortController;
 }) {
   const { EditorFrameContainer } = editorFrame;
   return (
@@ -682,6 +698,7 @@ const MemoizedEditorFrameWrapper = React.memo(function EditorFrameWrapper({
       addUserMessages={addUserMessages}
       lensInspector={lensInspector}
       indexPatternService={indexPatternService}
+      abortController={abortController}
     />
   );
 });
