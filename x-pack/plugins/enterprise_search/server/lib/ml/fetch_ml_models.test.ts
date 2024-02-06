@@ -230,7 +230,7 @@ describe('fetchMlModels', () => {
           },
           input: {
             fields: ['text_field'],
-          },          
+          },
         },
         {
           model_id: E5_LINUX_OPTIMIZED_MODEL_ID,
@@ -239,7 +239,7 @@ describe('fetchMlModels', () => {
           },
           input: {
             fields: ['text_field'],
-          },          
+          },
         },
         {
           model_id: ELSER_MODEL_ID,
@@ -248,7 +248,7 @@ describe('fetchMlModels', () => {
           },
           input: {
             fields: ['text_field'],
-          },          
+          },
         },
         {
           model_id: ELSER_LINUX_OPTIMIZED_MODEL_ID,
@@ -257,7 +257,7 @@ describe('fetchMlModels', () => {
           },
           input: {
             fields: ['text_field'],
-          },          
+          },
         },
       ],
     };

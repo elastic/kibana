@@ -335,11 +335,6 @@ export const MLInferenceLogic = kea<
         targetField: '',
       });
     },
-    setIndexName: ({ indexName }) => {
-      actions.makeMlInferencePipelinesRequest(undefined);
-      actions.startPollingModels();
-      actions.makeMappingRequest({ indexName });
-    },
     mlInferencePipelinesSuccess: (data) => {
       if (
         (data?.length ?? 0) === 0 &&
