@@ -17,9 +17,12 @@ import {
   EuiFlexGroup,
   EuiSwitch,
   EuiFlyoutFooter,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
@@ -73,6 +76,7 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       await refetchRulesStates();
     }
   };
+
   return (
     <EuiFlyout
       ownFocus={false}
@@ -136,7 +140,7 @@ const RuleOverviewTab = ({
   <EuiFlexGroup direction="column">
     <EuiFlexItem>
       <EuiDescriptionList
-        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule)]}
+        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule, ruleData.state)]}
       />
     </EuiFlexItem>
   </EuiFlexGroup>
@@ -144,9 +148,32 @@ const RuleOverviewTab = ({
 
 const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => [
   {
-    title: i18n.translate('xpack.csp.rules.rulesFlyout.ruleState', {
-      defaultMessage: 'Enabled',
-    }),
+    title: (
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle"
+            defaultMessage="Enabled"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            '.euiToolTipAnchor': {
+              display: 'flex', // needed to align the icon with the title
+            },
+          }}
+        >
+          <EuiToolTip
+            content={i18n.translate('xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip', {
+              defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
+            })}
+          >
+            <EuiIcon size="m" color="subdued" type="iInCircle" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     description: (
       <>
         <EuiSwitch
