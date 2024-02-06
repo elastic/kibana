@@ -31,7 +31,6 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
-import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
@@ -554,14 +553,7 @@ export const EndpointList = () => {
   const mutableListData = useMemo(() => [...listData], [listData]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (loading) {
-      return (
-        <ManagementPageLoader
-          data-test-subj={'endpointListLoadingSpinner'}
-          classname={'essentialAnimation'}
-        />
-      );
-    } else if (listError) {
+    if (listError) {
       return (
         <ManagementEmptyStateWrapper>
           <EuiCallOut color="danger" title={listError.error}>
@@ -569,7 +561,7 @@ export const EndpointList = () => {
           </EuiCallOut>
         </ManagementEmptyStateWrapper>
       );
-    } else if (endpointsExist) {
+    } else if (endpointsExist && !loading) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
