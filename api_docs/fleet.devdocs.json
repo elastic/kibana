@@ -7071,98 +7071,6 @@
       },
       {
         "parentPluginId": "fleet",
-        "id": "def-server.ESIndexPatternService",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESIndexPatternService",
-        "description": [
-          "\nService to return the index pattern of EPM packages"
-        ],
-        "path": "x-pack/plugins/fleet/server/services/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fleet",
-            "id": "def-server.ESIndexPatternService.getESIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "getESIndexPattern",
-            "description": [],
-            "signature": [
-              "(savedObjectsClient: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
-              },
-              ", pkgName: string, datasetPath: string) => Promise<string | undefined>"
-            ],
-            "path": "x-pack/plugins/fleet/server/services/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.ESIndexPatternService.getESIndexPattern.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "savedObjectsClient",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
-                ],
-                "path": "x-pack/plugins/fleet/server/services/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.ESIndexPatternService.getESIndexPattern.$2",
-                "type": "string",
-                "tags": [],
-                "label": "pkgName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/fleet/server/services/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.ESIndexPatternService.getESIndexPattern.$3",
-                "type": "string",
-                "tags": [],
-                "label": "datasetPath",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/fleet/server/services/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
         "id": "def-server.FleetFile",
         "type": "Interface",
         "tags": [],
@@ -18493,26 +18401,6 @@
               "text": "FleetAuthz"
             },
             ">; }"
-          ],
-          "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "fleet",
-          "id": "def-server.FleetStartContract.esIndexPatternService",
-          "type": "Object",
-          "tags": [],
-          "label": "esIndexPatternService",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "fleet",
-              "scope": "server",
-              "docId": "kibFleetPluginApi",
-              "section": "def-server.ESIndexPatternService",
-              "text": "ESIndexPatternService"
-            }
           ],
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,

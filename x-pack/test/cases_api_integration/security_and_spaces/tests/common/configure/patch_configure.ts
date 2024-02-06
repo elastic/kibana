@@ -7,6 +7,7 @@
 
 import expect from '@kbn/expect';
 import { ConnectorTypes, CustomFieldTypes } from '@kbn/cases-plugin/common/types/domain';
+import { ConfigurationPatchRequest } from '@kbn/cases-plugin/common/types/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 
@@ -57,10 +58,10 @@ export default ({ getService }: FtrProviderContext): void => {
     it('should patch a configuration with customFields', async () => {
       const customFields = [
         {
-          key: 'text_field',
+          key: 'text_field_1',
           label: '#1',
           type: CustomFieldTypes.TEXT,
-          required: false,
+          required: true,
         },
         {
           key: 'toggle_field',
@@ -68,7 +69,14 @@ export default ({ getService }: FtrProviderContext): void => {
           type: CustomFieldTypes.TOGGLE,
           required: false,
         },
-      ];
+        {
+          key: 'text_field_2',
+          label: '#3',
+          type: CustomFieldTypes.TEXT,
+          required: true,
+          defaultValue: 'foobar',
+        },
+      ] as ConfigurationPatchRequest['customFields'];
       const configuration = await createConfiguration(supertest);
       const newConfiguration = await updateConfiguration(supertest, configuration.id, {
         version: configuration.version,
