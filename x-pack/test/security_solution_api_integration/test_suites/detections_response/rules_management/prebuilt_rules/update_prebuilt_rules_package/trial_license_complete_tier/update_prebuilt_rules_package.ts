@@ -161,7 +161,8 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest,
         currentVersion,
-        retry
+        retry,
+        log
       );
       expect(installLatestPackageResponse.items.length).toBeGreaterThanOrEqual(0);
 

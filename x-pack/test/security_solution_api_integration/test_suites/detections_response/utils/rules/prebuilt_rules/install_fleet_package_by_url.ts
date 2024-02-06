@@ -29,7 +29,8 @@ const ATTEMPT_TIMEOUT = 120000;
 export const installPrebuiltRulesPackageViaFleetAPI = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  retryService: RetryService
+  retryService: RetryService,
+  log: ToolingLog
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await retry<InstallPackageResponse>({
     test: async () => {
@@ -45,9 +46,11 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
 
       return testResponse.body;
     },
+    utilityName: installPrebuiltRulesPackageViaFleetAPI.name,
     retryService,
     retries: MAX_RETRIES,
     timeout: ATTEMPT_TIMEOUT,
+    log,
   });
 
   await refreshSavedObjectIndices(es);
@@ -73,23 +76,19 @@ export const installPrebuiltRulesPackageByVersion = async (
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await retry<InstallPackageResponse>({
     test: async () => {
-      try {
-        const testResponse = await supertest
-          .post(epmRouteService.getInstallPath('security_detection_engine', version))
-          .set('kbn-xsrf', 'xxxx')
-          .set('elastic-api-version', '2023-10-31')
-          .type('application/json')
-          .send({ force: true })
-          .expect(500);
-        expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
-        expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
+      const testResponse = await supertest
+        .post(epmRouteService.getInstallPath('security_detection_engine', version))
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '2023-10-31')
+        .type('application/json')
+        .send({ force: true })
+        .expect(500);
+      expect((testResponse.body as InstallPackageResponse).items).toBeDefined();
+      expect((testResponse.body as InstallPackageResponse).items.length).toBeGreaterThan(0);
 
-        return testResponse.body;
-      } catch (error) {
-        log.error(`Retrying installPrebuiltRulesPackageByVersion: ${error}`);
-        throw error;
-      }
+      return testResponse.body;
     },
+    utilityName: installPrebuiltRulesPackageByVersion.name,
     retryService,
     retries: MAX_RETRIES,
     timeout: ATTEMPT_TIMEOUT,

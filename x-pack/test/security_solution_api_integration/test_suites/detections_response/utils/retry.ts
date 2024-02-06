@@ -44,17 +44,19 @@ import type { ToolingLog } from '@kbn/tooling-log';
 export const retry = async <T>({
   test,
   retryService,
+  utilityName,
   retries = 2,
   timeout = 30000,
   retryDelay = 200,
   log,
 }: {
   test: () => Promise<T>;
+  utilityName: string;
   retryService: RetryService;
   retries?: number;
   timeout?: number;
   retryDelay?: number;
-  log?: ToolingLog;
+  log: ToolingLog;
 }): Promise<T> => {
   let retryAttempt = 0;
   const response = await retryService.tryForTime(
@@ -67,12 +69,19 @@ export const retry = async <T>({
           retryAttempt - 1
         }/${retries}`;
         log?.error(errorMessage);
-        return new Error(JSON.stringify({ retries: errorMessage }));
+        return new Error(JSON.stringify(errorMessage));
       }
 
       retryAttempt = retryAttempt + 1;
 
-      return test();
+      // Catch the error thrown by the test and log it, then throw it again
+      // to cause `tryForTime` to retry.
+      try {
+        return await test();
+      } catch (error) {
+        log.error(`Retrying ${utilityName}: ${error}`);
+        throw error;
+      }
     },
     undefined,
     retryDelay
