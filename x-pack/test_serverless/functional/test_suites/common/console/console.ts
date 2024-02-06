@@ -26,7 +26,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage', 'common', 'console', 'header']);
 
   describe('console app', function describeIndexTests() {
-    this.tags('includeFirefox');
     before(async () => {
       await PageObjects.svlCommonPage.loginWithRole('viewer');
       log.debug('navigateTo console');

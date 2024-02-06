@@ -7,14 +7,7 @@
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
-  const svlCommonPage = getPageObject('svlCommonPage');
-
   describe('Discover alerting', function () {
-    before(async function () {
-      // TODO: Update with valid SAML role
-      await svlCommonPage.loginAsAdmin();
-    });
-
     loadTestFile(require.resolve('./search_source_alert'));
   });
 };

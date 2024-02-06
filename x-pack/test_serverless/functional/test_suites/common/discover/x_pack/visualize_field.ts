@@ -18,13 +18,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
-    'error',
+    'svlCommonPage',
     'discover',
     'timePicker',
-    'unifiedSearch',
     'lens',
-    'security',
-    'spaceSelector',
     'header',
     'unifiedFieldList',
   ]);
@@ -36,6 +33,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   }
 
   describe('discover field visualize button', () => {
+    before(async () => {
+      // TODO: Serverless tests require login first
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+    });
+
     beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(

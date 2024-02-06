@@ -7,15 +7,13 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile, getPageObject }: FtrProviderContext) {
+export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
-  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('discover/group1', function () {
     before(async function () {
       await browser.setWindowSize(1300, 800);
-      await svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async function unloadMakelogs() {
