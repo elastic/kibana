@@ -13,6 +13,8 @@ import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import { CloudProvider } from '@kbn/custom-icons';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { EuiToolTip } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -44,6 +46,7 @@ interface HostMetadata {
 export type HostNodeRow = HostMetadata &
   HostMetrics & {
     name: string;
+    alertsCount?: number;
   };
 
 /**
@@ -54,7 +57,7 @@ const formatMetric = (type: InfraAssetMetricType, value: number | undefined | nu
 };
 
 const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
-  return nodes.map(({ metrics, metadata, name }) => {
+  return nodes.map(({ metrics, metadata, name, alertsCount }) => {
     const metadataKeyValue = metadata.reduce(
       (acc, curr) => ({
         ...acc,
@@ -79,6 +82,8 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
         }),
         {} as HostMetrics
       ),
+
+      alertsCount,
     };
   });
 };
@@ -123,6 +128,8 @@ export const useHostsTable = () => {
   const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
+
+  const displayAlerts = hostNodes.some((item) => 'alertsCount' in item);
 
   const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
 
@@ -221,6 +228,28 @@ export const useHostsTable = () => {
           },
         ],
       },
+      ...(displayAlerts
+        ? [
+            {
+              name: TABLE_COLUMN_LABEL.alertsCount,
+              field: 'alertsCount',
+              sortable: true,
+              'data-test-subj': 'hostsView-tableRow-title',
+              render: (alertsCount: HostNodeRow['alertsCount']) => {
+                if (!alertsCount) {
+                  return null;
+                }
+                return (
+                  <EuiToolTip position="bottom" content={TABLE_COLUMN_LABEL.alertsCount}>
+                    <EuiBadge iconType="warning" color="danger">
+                      {alertsCount}
+                    </EuiBadge>
+                  </EuiToolTip>
+                );
+              },
+            },
+          ]
+        : []),
       {
         name: TABLE_COLUMN_LABEL.title,
         field: 'title',
@@ -344,6 +373,7 @@ export const useHostsTable = () => {
       formulas?.tx.value,
       reportHostEntryClick,
       setProperties,
+      displayAlerts,
     ]
   );
 
