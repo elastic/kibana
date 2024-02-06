@@ -6829,7 +6829,7 @@
         "label": "useExpressionRenderer",
         "description": [],
         "signature": [
-          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }: ",
+          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }: ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -6863,7 +6863,7 @@
             "id": "def-public.useExpressionRenderer.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }",
+            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }",
             "description": [],
             "signature": [
               {
@@ -9593,6 +9593,20 @@
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10979,6 +10993,20 @@
                 "text": "KibanaExecutionContext"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false,
