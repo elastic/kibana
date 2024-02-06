@@ -25,7 +25,7 @@ export function flushBuffer<T extends StreamingChatResponseEventWithoutError>(
           const intervalId = setInterval(function flushBufferIfNeeded() {
             if (currentBufferSize && currentBufferSize <= cloudProxyBufferSize) {
               subscriber.next({
-                data: repeat('0', cloudProxyBufferSize - currentBufferSize),
+                data: repeat('0', cloudProxyBufferSize * 2),
                 type: StreamingChatResponseEventType.BufferFlush,
               });
               currentBufferSize = 0;
