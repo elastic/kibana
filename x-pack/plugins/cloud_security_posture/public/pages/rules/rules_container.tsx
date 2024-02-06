@@ -67,9 +67,8 @@ const MAX_ITEMS_PER_PAGE = 10000;
 export const RulesContainer = () => {
   const params = useParams<PageUrlParams>();
   const [selectedRuleId, setSelectedRuleId] = useState<string | null>(null);
-  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
-
   const [enabledDisabledItemsFilter, setEnabledDisabledItemsFilter] = useState('no-filter');
+  const { pageSize, setPageSize } = usePageSize(LOCAL_STORAGE_PAGE_SIZE_RULES_KEY);
 
   const [rulesQuery, setRulesQuery] = useState<RulesQuery>({
     section: undefined,
@@ -89,7 +88,7 @@ export const RulesContainer = () => {
       page: 1,
       perPage: MAX_ITEMS_PER_PAGE,
       sortField: 'metadata.benchmark.rule_number',
-      sortOrder: 'asc',
+      sortOrder: rulesQuery.sortOrder,
     },
     params.benchmarkId,
     params.benchmarkVersion
@@ -109,6 +108,7 @@ export const RulesContainer = () => {
 
   const rulesStates = useCspGetRulesStates();
   const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
+
   const filteredRulesStates: RuleStateAttributes[] = arrayRulesStates.filter(
     (ruleState: RuleStateAttributes) =>
       ruleState.benchmark_id === params.benchmarkId &&
@@ -135,6 +135,8 @@ export const RulesContainer = () => {
       });
   }, [data, rulesStates?.data]);
 
+  const mutedRulesCount = rulesWithStates.filter((rule) => rule.state === 'muted').length;
+
   const filteredRulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (enabledDisabledItemsFilter === 'disabled')
       return rulesWithStates?.filter((rule) => rule?.state === 'muted');
@@ -147,13 +149,16 @@ export const RulesContainer = () => {
     () => allRules.data?.items.map((rule) => rule.metadata.section),
     [allRules.data]
   );
+
   const ruleNumberList = useMemo(
     () => allRules.data?.items.map((rule) => rule.metadata.benchmark.rule_number || ''),
     [allRules.data]
   );
+
   const cleanedSectionList = [...new Set(sectionList)].sort((a, b) => {
     return a.localeCompare(b, 'en', { sensitivity: 'base' });
   });
+
   const cleanedRuleNumberList = [...new Set(ruleNumberList)].sort(compareVersions);
 
   const rulesPageData = useMemo(
@@ -181,7 +186,10 @@ export const RulesContainer = () => {
 
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
-      <RulesCounters />
+      <RulesCounters
+        mutedRulesCount={mutedRulesCount}
+        setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
+      />
       <EuiSpacer />
       <RulesTableHeader
         onSectionChange={(value) =>
@@ -200,12 +208,15 @@ export const RulesContainer = () => {
         selectedRules={selectedRules}
         refetchRulesStates={rulesStates.refetch}
         setEnabledDisabledItemsFilter={setEnabledDisabledItemsFilter}
-        currentEnabledDisabledItemsFilterState={enabledDisabledItemsFilter}
+        enabledDisabledItemsFilterState={enabledDisabledItemsFilter}
         setSelectAllRules={setSelectAllRules}
         setSelectedRules={setSelectedRules}
       />
       <EuiSpacer />
       <RulesTable
+        onSortChange={(value) =>
+          setRulesQuery((currentQuery) => ({ ...currentQuery, sortOrder: value }))
+        }
         rules_page={rulesPageData.rules_page}
         total={rulesPageData.total}
         error={rulesPageData.error}

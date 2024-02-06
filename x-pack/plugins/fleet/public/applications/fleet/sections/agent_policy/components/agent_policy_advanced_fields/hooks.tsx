@@ -101,6 +101,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
       getDefaultOutput(defaultOutputName, defaultOutputDisabled, defaultOutputDisabledMessage),
       ...outputsRequest.data.items.map((item) => {
         const isOutputTypeUnsupported = !allowedOutputTypes.includes(item.type);
+        const isInternalOutput = !!item.is_internal;
 
         return {
           value: item.id,
@@ -116,7 +117,7 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
               />
             ) : undefined
           ),
-          disabled: !isPolicyPerOutputAllowed || isOutputTypeUnsupported,
+          disabled: !isPolicyPerOutputAllowed || isOutputTypeUnsupported || isInternalOutput,
         };
       }),
     ];
@@ -133,10 +134,12 @@ export function useOutputOptions(agentPolicy: Partial<NewAgentPolicy | AgentPoli
     return [
       getDefaultOutput(defaultOutputName),
       ...outputsRequest.data.items.map((item) => {
+        const isInternalOutput = !!item.is_internal;
+
         return {
           value: item.id,
           inputDisplay: item.name,
-          disabled: !isPolicyPerOutputAllowed,
+          disabled: !isPolicyPerOutputAllowed || isInternalOutput,
         };
       }),
     ];
@@ -221,9 +224,12 @@ export function useFleetServerHostsOptions(agentPolicy: Partial<NewAgentPolicy |
       ...fleetServerHostsRequest.data.items
         .filter((item) => !item.is_default)
         .map((item) => {
+          const isInternalFleetServerHost = !!item.is_internal;
+
           return {
             value: item.id,
             inputDisplay: item.name,
+            disabled: isInternalFleetServerHost,
           };
         }),
     ];

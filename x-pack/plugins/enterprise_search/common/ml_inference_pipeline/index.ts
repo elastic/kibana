@@ -17,6 +17,7 @@ import {
   TRAINED_MODEL_TYPE,
   BUILT_IN_MODEL_TAG,
 } from '@kbn/ml-trained-models-utils';
+
 import { MlModel } from '../types/ml';
 
 import {
