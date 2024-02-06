@@ -13,6 +13,7 @@ import {
   isAgentType,
 } from '../../../../../common/endpoint/service/response_actions/type_guards';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import type { ResponseActionAgentType } from '../../../../../common/endpoint/service/response_actions/constants';
 import {
   RESPONSE_ACTION_API_COMMAND_TO_CONSOLE_COMMAND_MAP,
   type ResponseActionsApiCommandNames,
@@ -30,12 +31,14 @@ import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
 
 export const ActionsLogFilter = memo(
   ({
+    agentType,
     filterName,
     typesFilters,
     isFlyout,
     onChangeFilterOptions,
     'data-test-subj': dataTestSubj,
   }: {
+    agentType?: ResponseActionAgentType;
     filterName: ActionsLogPopupFilters;
     typesFilters?: TypesFilters;
     isFlyout: boolean;
@@ -74,6 +77,7 @@ export const ActionsLogFilter = memo(
       setUrlTypesFilters,
       setUrlTypeFilters,
     } = useActionsLogFilter({
+      agentType,
       filterName,
       isFlyout,
       searchString,
@@ -211,7 +215,10 @@ export const ActionsLogFilter = memo(
       // update filter UI options state
       setItems(
         items.map((option) => {
-          option.checked = undefined;
+          // for flyout filter don't unchecked selected agent type
+          if (agentType && agentType !== option.key) {
+            option.checked = undefined;
+          }
           return option;
         })
       );
@@ -231,7 +238,7 @@ export const ActionsLogFilter = memo(
 
       // update query state for flyout filters
       if (typesFilters && typeof onChangeFilterOptions === 'undefined') {
-        typesFilters.agentTypes.onChangeFilterOptions([]);
+        typesFilters.agentTypes.onChangeFilterOptions(agentType ? [agentType] : []);
         typesFilters.actionTypes.onChangeFilterOptions([]);
       } else {
         if (typeof onChangeFilterOptions !== 'undefined') {
@@ -239,6 +246,7 @@ export const ActionsLogFilter = memo(
         }
       }
     }, [
+      agentType,
       setItems,
       items,
       isFlyout,

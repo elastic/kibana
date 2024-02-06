@@ -32,6 +32,7 @@ type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 export interface BasicConsoleProps {
   agentId: string;
   hostName: string;
+  agentType: ResponseActionAgentType;
 }
 
 type ResponderInfoProps =
@@ -124,6 +125,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             meta: {
               agentId,
               hostName,
+              agentType,
             },
             consoleProps,
             PageTitleComponent: () => <>{RESPONDER_PAGE_TITLE}</>,
