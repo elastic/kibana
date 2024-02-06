@@ -29,7 +29,15 @@ export class FindSLO {
       toPagination(params)
     );
 
-    const sloList = await this.repository.findAllByIds(sloSummaryList.results.map((slo) => slo.id));
+    const sloList = await this.repository.findAllByIds(
+      sloSummaryList.results.filter((slo) => !slo.unsafeIsRemote).map((slo) => slo.id)
+    );
+
+    console.dir(
+      sloSummaryList.results.filter((sloSummary) => sloSummary.unsafeIsRemote),
+      { depth: 10 }
+    );
+
     const sloListWithSummary = mergeSloWithSummary(sloList, sloSummaryList.results);
 
     return findSLOResponseSchema.encode({
@@ -42,13 +50,22 @@ export class FindSLO {
 }
 
 function mergeSloWithSummary(sloList: SLO[], sloSummaryList: SLOSummary[]): SLOWithSummary[] {
-  return sloSummaryList
-    .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
-    .map((sloSummary) => ({
-      ...sloList.find((s) => s.id === sloSummary.id)!,
-      instanceId: sloSummary.instanceId,
-      summary: sloSummary.summary,
-    }));
+  return [
+    ...sloSummaryList
+      .filter((sloSummary) => sloList.some((s) => s.id === sloSummary.id))
+      .map((sloSummary) => ({
+        ...sloList.find((s) => s.id === sloSummary.id)!,
+        instanceId: sloSummary.instanceId,
+        summary: sloSummary.summary,
+      })),
+    ...sloSummaryList
+      .filter((sloSummary) => sloSummary.unsafeIsRemote)
+      .map((remoteSloSummary) => ({
+        ...remoteSloSummary.unsafeSlo!,
+        instanceId: remoteSloSummary.instanceId,
+        summary: remoteSloSummary.summary,
+      })),
+  ];
 }
 
 function toPagination(params: FindSLOParams): Pagination {
