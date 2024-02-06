@@ -58,7 +58,7 @@ describe('getCasesDeepLinks', () => {
           searchable: false,
         },
         cases_create: {
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleInSideNavigation: false,
         },
         cases_configure: {
           order: 8002,
@@ -76,7 +76,7 @@ describe('getCasesDeepLinks', () => {
           id: 'cases_create',
           path: '/cases/create',
           title: 'Create',
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleInSideNavigation: false,
         },
         {
           id: 'cases_configure',

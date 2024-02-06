@@ -15,8 +15,7 @@ import type { MlCapabilities } from '../../shared';
 export function registerSearchLinks(
   appUpdater: BehaviorSubject<AppUpdater>,
   isFullLicense: boolean,
-  mlCapabilities: MlCapabilities,
-  showMLNavMenu: boolean
+  mlCapabilities: MlCapabilities
 ) {
   appUpdater.next(() => ({
     keywords: [
@@ -24,6 +23,6 @@ export function registerSearchLinks(
         defaultMessage: 'ML',
       }),
     ],
-    deepLinks: getDeepLinks(isFullLicense, mlCapabilities, showMLNavMenu),
+    deepLinks: getDeepLinks(isFullLicense, mlCapabilities),
   }));
 }

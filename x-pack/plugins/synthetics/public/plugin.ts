@@ -11,7 +11,6 @@ import {
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -154,7 +153,7 @@ export class UptimePlugin
             defaultMessage: 'Overview',
           }),
           path: '/',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleInSideNavigation: true,
         },
         {
           id: 'management',
@@ -162,7 +161,7 @@ export class UptimePlugin
             defaultMessage: 'Management',
           }),
           path: '/monitors',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleInSideNavigation: true,
         },
       ],
       mount: async (params: AppMountParameters) => {

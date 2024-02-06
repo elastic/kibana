@@ -10,7 +10,6 @@ import {
   type AppUpdater,
   type CoreStart,
   type AppDeepLink,
-  AppNavLinkStatus,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
 } from '@kbn/core/public';
@@ -249,10 +248,6 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
-      const serverlessNavLinkStatus = this.isServerlessEnv
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden;
-
       return [
         {
           id: 'inventory',
@@ -260,7 +255,6 @@ export class Plugin implements InfraClientPluginClass {
             defaultMessage: 'Inventory',
           }),
           path: '/inventory',
-          navLinkStatus: serverlessNavLinkStatus,
         },
         ...(hostsEnabled
           ? [
@@ -270,7 +264,6 @@ export class Plugin implements InfraClientPluginClass {
                   defaultMessage: 'Hosts',
                 }),
                 path: '/hosts',
-                navLinkStatus: serverlessNavLinkStatus,
               },
             ]
           : []),
@@ -330,7 +323,6 @@ export class Plugin implements InfraClientPluginClass {
       id: 'infra',
       appRoute: '/app/infra',
       title: 'infra',
-      navLinkStatus: 3,
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./apps/legacy_app');
 

@@ -14,7 +14,6 @@ import {
   App,
   AppDeepLink,
   AppMountParameters,
-  AppNavLinkStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
@@ -196,7 +195,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleInSideNavigation: false,
       deepLinks: [
         {
           id: 'rules',
@@ -204,7 +203,7 @@ export class Plugin
             defaultMessage: 'Rules',
           }),
           path: RULES_PATH,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleInSideNavigation: false,
         },
       ],
     },
@@ -213,7 +212,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.slosLinkTitle', {
         defaultMessage: 'SLOs',
       }),
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleInSideNavigation: false,
       order: 8002,
       path: SLOS_PATH,
     },
@@ -222,14 +221,14 @@ export class Plugin
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleInSideNavigation: false,
         },
         [CasesDeepLinkId.casesCreate]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleInSideNavigation: false,
           searchable: false,
         },
         [CasesDeepLinkId.casesConfigure]: {
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleInSideNavigation: false,
           searchable: false,
         },
       },
@@ -416,7 +415,7 @@ export class Plugin
           //
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
-            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+            .filter((link) => link.visibleInSideNavigation === true)
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,
