@@ -7,9 +7,9 @@
 
 import {
   ClusterComponentTemplateNode,
+  MappingPropertyBase,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { merge } from 'lodash';
 import { IncreaseIgnoreAboveMitigation } from '../../../../common';
 import { GenericMitigationImplementation } from './types';
 
@@ -23,24 +23,38 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
       async (args) => {
         // get index template
         const {
-          data_streams: [dataStreamInfo],
+          data_streams: [{ template: indexTemplateName }],
         } = await elasticsearchClient.asCurrentUser.indices.getDataStream({
           name: args.data_stream,
           expand_wildcards: 'none',
         });
-        const indexTemplateName = dataStreamInfo.template;
 
         // derive @custom mapping component template
         const componentTemplateName = `${indexTemplateName}@custom`;
-        const updatedFieldMapping: MappingTypeMapping = {
+        const updateFieldMapping = (previousProperty: MappingPropertyBase) => ({
+          ...previousProperty,
+          ignore_above: args.limit,
+        });
+        const updateMappingProperties = (
+          previousMapping: MappingTypeMapping
+        ): MappingTypeMapping => ({
+          ...previousMapping,
           properties: {
-            [args.field]: {
-              ignore_above: args.limit,
-            },
+            ...previousMapping.properties,
+            [args.field]: updateFieldMapping(previousMapping.properties?.[args.field] ?? {}),
           },
-        };
+        });
+        // TODO: make it work with dotted fields (see functions at the end of this file)
 
         // TODO: get mapping for field from data stream
+        const fieldMappings = await elasticsearchClient.asCurrentUser.indices.getFieldMapping({
+          fields: args.field,
+        });
+        const latestFieldMapping = Object.entries(fieldMappings)
+          .sort(([firstIndexName, firstFieldMapping], [secondIndexName, secondFieldMapping]) =>
+            firstIndexName < secondIndexName ? -1 : firstIndexName > secondIndexName ? 1 : 0
+          )
+          .at(-1)?.[1]?.mappings?.[args.field]?.mapping?.[args.field];
 
         // update mapping in component template
         const {
@@ -48,27 +62,61 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
         } = await elasticsearchClient.asCurrentUser.cluster.getComponentTemplate({
           name: componentTemplateName,
         });
-        const nextComponentTemplate: ClusterComponentTemplateNode = merge(
-          previousComponentTemplate,
-          {
-            template: {
-              mappings: updatedFieldMapping,
-            },
-          }
-        );
+        const nextComponentTemplate: ClusterComponentTemplateNode = {
+          ...previousComponentTemplate,
+          template: {
+            ...previousComponentTemplate.template,
+            mappings: updateMappingProperties(previousComponentTemplate.template.mappings ?? {}),
+          },
+        };
         await elasticsearchClient.asCurrentUser.cluster.putComponentTemplate({
           name: componentTemplateName,
           ...nextComponentTemplate,
         });
 
-        // update mapping in write index
-        await elasticsearchClient.asCurrentUser.indices.putMapping({
-          index: args.data_stream,
-          ...updatedFieldMapping,
+        // roll over data stream
+        await elasticsearchClient.asCurrentUser.indices.rollover({
+          alias: args.data_stream,
         });
 
         return {
           type: 'applied',
         };
       },
+  };
+
+const getMappingAt =
+  ([head, ...tail]: string[]) =>
+  (mappingProperty: MappingPropertyBase): MappingPropertyBase | undefined => {
+    if (head == null) {
+      return mappingProperty;
+    } else {
+      const childMappingProperty = mappingProperty.properties?.[head];
+      if (childMappingProperty != null) {
+        return getMappingAt(tail)(childMappingProperty);
+      } else {
+        return undefined;
+      }
+    }
+  };
+
+const updateMappingAt =
+  (
+    [head, ...tail]: string[],
+    updater: (mappingProperty: MappingPropertyBase) => MappingPropertyBase
+  ) =>
+  (mappingProperty: MappingPropertyBase): MappingPropertyBase => {
+    if (head == null) {
+      return updater(mappingProperty);
+    } else {
+      const childMappingProperty = mappingProperty.properties?.[head] ?? {};
+
+      return {
+        ...mappingProperty,
+        properties: {
+          ...mappingProperty.properties,
+          [head]: updateMappingAt(tail, updater)(childMappingProperty),
+        },
+      };
+    }
   };
