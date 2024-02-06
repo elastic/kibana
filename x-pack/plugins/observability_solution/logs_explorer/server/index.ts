@@ -6,6 +6,6 @@
  */
 
 export const plugin = async () => {
-  const { LogExplorerServerPlugin } = await import('./plugin');
-  return new LogExplorerServerPlugin();
+  const { LogsExplorerServerPlugin } = await import('./plugin');
+  return new LogsExplorerServerPlugin();
 };

@@ -505,7 +505,7 @@ export default function ({ getService }: FtrProviderContext) {
           .set('Cookie', sessionCookie.cookieString())
           .expect(302);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(2);
@@ -528,7 +528,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('should log authentication failure correctly', async () => {
         await supertest.get('/security/account').ca(CA_CERT).pfx(UNTRUSTED_CLIENT_CERT).expect(401);
 
-        await retry.waitFor('audit events in dest file', () => logFile.isNotEmpty());
+        await logFile.isWritten();
         const auditEvents = await logFile.readJSON();
 
         expect(auditEvents).to.have.length(1);

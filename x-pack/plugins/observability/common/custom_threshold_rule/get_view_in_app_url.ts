@@ -16,7 +16,7 @@ export interface GetViewInAppUrlArgs {
   endedAt?: string;
   startedAt?: string;
   filter?: string;
-  logExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>;
+  logsExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>;
   metrics?: CustomThresholdExpressionMetric[];
 }
 
@@ -25,10 +25,10 @@ export const getViewInAppUrl = ({
   endedAt,
   startedAt = new Date().toISOString(),
   filter,
-  logExplorerLocator,
+  logsExplorerLocator,
   metrics = [],
 }: GetViewInAppUrlArgs) => {
-  if (!logExplorerLocator) return '';
+  if (!logsExplorerLocator) return '';
 
   const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
   timeRange.to = endedAt ? timeRange.to : 'now';
@@ -47,7 +47,7 @@ export const getViewInAppUrl = ({
     query.query = filter;
   }
 
-  return logExplorerLocator?.getRedirectUrl({
+  return logsExplorerLocator?.getRedirectUrl({
     dataset: dataViewId,
     timeRange,
     query,

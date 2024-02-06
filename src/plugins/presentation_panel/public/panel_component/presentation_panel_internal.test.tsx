@@ -8,6 +8,7 @@
 
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { getMockPresentationContainer } from '@kbn/presentation-containers/mocks';
 import { PublishesDataViews, PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
@@ -221,9 +222,8 @@ describe('Presentation panel', () => {
         panelTitle: new BehaviorSubject<string | undefined>('SUPER TITLE'),
         viewMode: new BehaviorSubject<ViewMode>('view'),
         parentApi: {
-          removePanel: jest.fn(),
-          replacePanel: jest.fn(),
           viewMode: new BehaviorSubject<ViewMode>('view'),
+          ...getMockPresentationContainer(),
         },
       };
       await renderPresentationPanel({ api });
