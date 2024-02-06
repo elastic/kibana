@@ -8,6 +8,7 @@
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
 import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
+import { MlModel, MlModelDeploymentState } from '../types/ml';
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
 import {
@@ -18,7 +19,6 @@ import {
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '.';
-import { MlModel, MlModelDeploymentState } from '../types/ml';
 
 const mockTrainedModel: MlTrainedModelConfig = {
   inference_config: {
