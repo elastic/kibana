@@ -8,7 +8,7 @@
 
 import { schema } from '@kbn/config-schema';
 import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
-import { kibanaConsole } from '@kbn/security-hardening';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { Layouts } from '../../layouts/layouts';
 
 const { literal, object } = schema;
@@ -35,7 +35,7 @@ export class ConsoleAppender implements DisposableAppender {
    * @param record `LogRecord` instance to be logged.
    */
   public append(record: LogRecord) {
-    kibanaConsole.log(this.layout.format(record));
+    unsafeConsole.log(this.layout.format(record));
   }
 
   /**

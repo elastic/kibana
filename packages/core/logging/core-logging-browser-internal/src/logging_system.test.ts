@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { kibanaConsole } from '@kbn/security-hardening';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { BrowserLoggingSystem } from './logging_system';
 
 describe('', () => {
@@ -16,7 +16,7 @@ describe('', () => {
   let loggingSystem: BrowserLoggingSystem;
 
   beforeEach(() => {
-    mockConsoleLog = jest.spyOn(kibanaConsole, 'log').mockReturnValue(undefined);
+    mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
     jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
     loggingSystem = new BrowserLoggingSystem({ logLevel: 'warn' });
   });

@@ -12,7 +12,7 @@
 // but explicitly allowing the range \u0008-\u000F (line breaks, tabs, etc.)
 const CONTROL_CHAR_REGEXP = new RegExp('[\\u0000-\\u0007\\u0010-\\u001F]', 'g');
 
-export const kibanaConsole = {
+export const unsafeConsole = {
   debug: console.debug.bind(console),
   error: console.error.bind(console),
   info: console.info.bind(console),
@@ -31,27 +31,27 @@ function callWithSanitizedArgs(func: Function, ...args: any[]) {
 
 if (process.env.NODE_ENV === 'production') {
   console.debug = function (...args) {
-    callWithSanitizedArgs(kibanaConsole.debug, ...args);
+    callWithSanitizedArgs(unsafeConsole.debug, ...args);
   };
 
   console.error = function (...args) {
-    callWithSanitizedArgs(kibanaConsole.error, ...args);
+    callWithSanitizedArgs(unsafeConsole.error, ...args);
   };
 
   console.info = function (...args) {
-    callWithSanitizedArgs(kibanaConsole.info, ...args);
+    callWithSanitizedArgs(unsafeConsole.info, ...args);
   };
 
   console.log = function (...args) {
-    callWithSanitizedArgs(kibanaConsole.log, ...args);
+    callWithSanitizedArgs(unsafeConsole.log, ...args);
   };
 
   console.trace = function (...args) {
-    callWithSanitizedArgs(kibanaConsole.trace, ...args);
+    callWithSanitizedArgs(unsafeConsole.trace, ...args);
   };
 
   console.warn = function (...args) {
-    callWithSanitizedArgs(kibanaConsole.warn, ...args);
+    callWithSanitizedArgs(unsafeConsole.warn, ...args);
   };
 }
 

@@ -11,7 +11,7 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { kibanaConsole } from '@kbn/security-hardening';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 describe('Error logging', () => {
   describe('ES client errors', () => {
@@ -20,7 +20,7 @@ describe('Error logging', () => {
     let kibanaServer: TestKibanaUtils;
 
     beforeAll(async () => {
-      mockConsoleLog = jest.spyOn(kibanaConsole, 'log');
+      mockConsoleLog = jest.spyOn(unsafeConsole, 'log');
 
       const { startES, startKibana } = createTestServers({
         adjustTimeout: jest.setTimeout,

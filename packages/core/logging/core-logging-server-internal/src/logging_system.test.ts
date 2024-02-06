@@ -18,11 +18,11 @@ const mockCreateWriteStream = createWriteStream as unknown as jest.Mock<typeof c
 
 import { LoggingSystem, config } from '..';
 import { EcsVersion } from '@kbn/ecs';
-import { kibanaConsole } from '@kbn/security-hardening';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 let system: LoggingSystem;
 beforeEach(() => {
-  mockConsoleLog = jest.spyOn(kibanaConsole, 'log').mockReturnValue(undefined);
+  mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
   jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
   jest.spyOn(process, 'uptime').mockReturnValue(10);
   system = new LoggingSystem();

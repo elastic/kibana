@@ -7,11 +7,11 @@
  */
 
 import { LogRecord, LogLevel } from '@kbn/logging';
-import { kibanaConsole } from '@kbn/security-hardening';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { ConsoleAppender } from './console_appender';
 
 test('`append()` correctly formats records and pushes them to console.', () => {
-  jest.spyOn(kibanaConsole, 'log').mockImplementation(() => {
+  jest.spyOn(unsafeConsole, 'log').mockImplementation(() => {
     // noop
   });
 
@@ -48,7 +48,7 @@ test('`append()` correctly formats records and pushes them to console.', () => {
 
   for (const record of records) {
     appender.append(record);
-    expect(kibanaConsole.log).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}`);
+    expect(unsafeConsole.log).toHaveBeenCalledWith(`mock-${JSON.stringify(record)}`);
   }
-  expect(kibanaConsole.log).toHaveBeenCalledTimes(records.length);
+  expect(unsafeConsole.log).toHaveBeenCalledTimes(records.length);
 });
