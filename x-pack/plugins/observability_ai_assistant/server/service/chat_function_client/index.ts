@@ -15,7 +15,7 @@ import type {
   Message,
 } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
-import { FunctionHandler, FunctionHandlerRegistry } from '../types';
+import type { FunctionHandler, FunctionHandlerRegistry } from '../types';
 
 export class FunctionArgsValidationError extends Error {
   constructor(public readonly errors: ErrorObject[]) {
@@ -45,7 +45,10 @@ export class ChatFunctionClient {
   getFunctions({
     contexts,
     filter,
-  }: { contexts?: string[]; filter?: string } = {}): FunctionHandler[] {
+  }: {
+    contexts?: string[];
+    filter?: string;
+  } = {}): FunctionHandler[] {
     const allFunctions = Array.from(this.functionRegistry.values());
 
     const functionsByName = keyBy(allFunctions, (definition) => definition.definition.name);
