@@ -90,6 +90,10 @@ interface DatePickerWrapperProps {
    * Boolean flag to set use of flex group wrapper
    */
   flexGroup?: boolean;
+  /**
+   * Boolean flag to disable the date picker
+   */
+  isDisabled?: boolean;
 }
 
 /**
@@ -100,7 +104,14 @@ interface DatePickerWrapperProps {
  * @returns {React.ReactElement} The DatePickerWrapper component.
  */
 export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
-  const { isAutoRefreshOnly, isLoading = false, showRefresh, width, flexGroup = true } = props;
+  const {
+    isAutoRefreshOnly,
+    isLoading = false,
+    showRefresh,
+    width,
+    flexGroup = true,
+    isDisabled = false,
+  } = props;
   const {
     data,
     notifications: { toasts },
@@ -292,6 +303,7 @@ export const DatePickerWrapper: FC<DatePickerWrapperProps> = (props) => {
           commonlyUsedRanges={commonlyUsedRanges}
           updateButtonProps={{ iconOnly: isWithinLBreakpoint, fill: false }}
           width={width}
+          isDisabled={isDisabled}
         />
       </EuiFlexItem>
       {showRefresh === true || !isTimeRangeSelectorEnabled ? (

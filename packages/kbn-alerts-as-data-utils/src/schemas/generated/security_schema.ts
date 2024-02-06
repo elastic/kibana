@@ -122,6 +122,7 @@ const SecurityAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'event.action': schemaString,
   'event.kind': schemaString,
+  'host.asset.criticality': schemaString,
   'kibana.alert.action_group': schemaString,
   'kibana.alert.ancestors.rule': schemaString,
   'kibana.alert.building_block_type': schemaString,
@@ -204,6 +205,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
   tags: schemaStringArray,
+  'user.asset.criticality': schemaString,
 });
 
 // prettier-ignore

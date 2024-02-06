@@ -208,7 +208,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Query', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176105
+    describe.skip('Query', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);
@@ -547,7 +548,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Saved Query', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176117
+    describe.skip('Saved Query', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);
@@ -590,7 +592,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('EQL', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176270
+    describe.skip('EQL', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);

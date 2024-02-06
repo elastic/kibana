@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import moment from 'moment';
-import { DataViewBase, Query } from '@kbn/es-query';
+import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -18,10 +17,8 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
-  useEuiTheme,
 } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { AlertAnnotation, AlertActiveTimeRangeAnnotation } from '@kbn/observability-alert-details';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
   ALERT_END,
@@ -31,7 +28,14 @@ import {
   TAGS,
 } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { MetricsExplorerChartType } from '../../../../../common/custom_threshold_rule/types';
+import chroma from 'chroma-js';
+import type {
+  EventAnnotationConfig,
+  PointInTimeEventAnnotationConfig,
+  RangeEventAnnotationConfig,
+} from '@kbn/event-annotation-common';
+import moment from 'moment';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
@@ -41,20 +45,17 @@ import {
   CustomThresholdAlertFields,
   CustomThresholdRuleTypeParams,
 } from '../../types';
-import { ExpressionChart } from '../expression_chart';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
+import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
+import { getFilterQuery } from './helpers/get_filter_query';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
 export type CustomThresholdAlert = TopAlert<CustomThresholdAlertFields>;
-
-const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
-const ALERT_START_ANNOTATION_ID = 'alert_start_annotation';
-const ALERT_TIME_RANGE_ANNOTATION_ID = 'alert_time_range_annotation';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -71,37 +72,49 @@ export default function AlertDetailsAppSection({
   setAlertSummaryFields,
 }: AppSectionProps) {
   const services = useKibana().services;
-  const { uiSettings, charts, data } = services;
-  const { euiTheme } = useEuiTheme();
+  const { charts, data } = services;
   const { hasAtLeast } = useLicense();
+  const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
+  const [filterQuery, setFilterQuery] = useState<string>('');
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
-  const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
-  const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const alertStart = alert.fields[ALERT_START];
+  const alertEnd = alert.fields[ALERT_END];
+  const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
 
-  const annotations = [
-    <AlertAnnotation
-      alertStart={alert.start}
-      color={euiTheme.colors.danger}
-      dateFormat={uiSettings.get('dateFormat') || DEFAULT_DATE_FORMAT}
-      id={ALERT_START_ANNOTATION_ID}
-      key={ALERT_START_ANNOTATION_ID}
-    />,
-    <AlertActiveTimeRangeAnnotation
-      alertStart={alert.start}
-      alertEnd={alertEnd}
-      color={euiTheme.colors.danger}
-      id={ALERT_TIME_RANGE_ANNOTATION_ID}
-      key={ALERT_TIME_RANGE_ANNOTATION_ID}
-    />,
-  ];
+  const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
+    label: 'Alert',
+    type: 'manual',
+    key: {
+      type: 'point_in_time',
+      timestamp: alertStart!,
+    },
+    color: euiTheme.colors.danger,
+    icon: 'alert',
+    id: 'custom_threshold_alert_start_annotation',
+  };
+
+  const alertRangeAnnotation: RangeEventAnnotationConfig = {
+    label: `${alertEnd ? 'Alert duration' : 'Active alert'}`,
+    type: 'manual',
+    key: {
+      type: 'range',
+      timestamp: alertStart!,
+      endTimestamp: alertEnd ?? moment().toISOString(),
+    },
+    color: chroma(transparentize('#F04E981A', 0.2)).hex().toUpperCase(),
+    id: `custom_threshold_${alertEnd ? 'recovered' : 'active'}_alert_range_annotation`,
+  };
+
+  const annotations: EventAnnotationConfig[] = [];
+  annotations.push(alertStartAnnotation, alertRangeAnnotation);
 
   useEffect(() => {
     const alertSummaryFields = [];
@@ -144,13 +157,10 @@ export default function AlertDetailsAppSection({
     setAlertSummaryFields(alertSummaryFields);
   }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
-  const derivedIndexPattern = useMemo<DataViewBase>(
-    () => ({
-      fields: dataView?.fields || [],
-      title: dataView?.getIndexPattern() || 'unknown-index',
-    }),
-    [dataView]
-  );
+  useEffect(() => {
+    const query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
+    setFilterQuery(getFilterQuery(query, groups));
+  }, [groups, ruleParams.searchConfiguration]);
 
   useEffect(() => {
     const initDataView = async () => {
@@ -209,15 +219,15 @@ export default function AlertDetailsAppSection({
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={5}>
-                <ExpressionChart
-                  annotations={annotations}
-                  chartType={MetricsExplorerChartType.line}
-                  derivedIndexPattern={derivedIndexPattern}
-                  expression={criterion}
-                  filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
+                <RuleConditionChart
+                  metricExpression={criterion}
+                  dataView={dataView}
+                  filterQuery={filterQuery}
                   groupBy={ruleParams.groupBy}
-                  hideTitle
+                  annotations={annotations}
                   timeRange={timeRange}
+                  // For alert details page, the series type needs to be changed to 'bar_stacked' due to https://github.com/elastic/elastic-charts/issues/2323
+                  seriesType={'bar_stacked'}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

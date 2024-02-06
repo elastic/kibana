@@ -18,7 +18,6 @@ import { css } from '@emotion/react';
 import { isEqual, round } from 'lodash';
 import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
-import useLatest from 'react-use/lib/useLatest';
 import { ResizableLayoutDirection } from '../types';
 import { getContainerSize, percentToPixels, pixelsToPercent } from './utils';
 
@@ -70,7 +69,7 @@ export const PanelsResizable = ({
     euiTheme.border.width.thin,
     (x) => x / 2
   )};
-  `;
+    `;
   const defaultButtonCss = css`
     z-index: 3;
   `;
@@ -158,31 +157,27 @@ export const PanelsResizable = ({
     if (trigger !== 'pointer') {
       return;
     }
+
     setIsResizing(true);
   }, []);
 
-  // EUI will call an outdated version of this callback when the resize ends,
-  // so we need to make sure on our end that the latest version is called.
-  const onResizeEndStable = useLatest(() => {
-    setIsResizing((_isResizing) => {
-      // We don't want the resize button to retain focus after the resize is complete,
-      // but EuiResizableContainer will force focus it onClick. To work around this we
-      // use setTimeout to wait until after onClick has been called before blurring.
-      if (_isResizing) {
-        if (document.activeElement instanceof HTMLElement) {
-          const button = document.activeElement;
-          setTimeout(() => {
-            button.blur();
-          });
-        }
-      }
-      return false;
-    });
-  });
-
   const onResizeEnd = useCallback(() => {
-    onResizeEndStable.current();
-  }, [onResizeEndStable]);
+    if (!isResizing) {
+      return;
+    }
+
+    // We don't want the resize button to retain focus after the resize is complete,
+    // but EuiResizableContainer will force focus it onClick. To work around this we
+    // use setTimeout to wait until after onClick has been called before blurring.
+    if (document.activeElement instanceof HTMLElement) {
+      const button = document.activeElement;
+      setTimeout(() => {
+        button.blur();
+      });
+    }
+
+    setIsResizing(false);
+  }, [isResizing]);
 
   // Don't render EuiResizableContainer until we have have valid
   // panel sizes or it can cause the resize functionality to break.

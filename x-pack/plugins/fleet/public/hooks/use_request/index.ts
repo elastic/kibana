@@ -16,7 +16,7 @@ export * from './outputs';
 export * from './settings';
 export * from './setup';
 export * from './app';
-export * from './ingest_pipelines';
+export * from './index_management';
 export * from './download_source';
 export * from './fleet_server_hosts';
 export * from './fleet_proxies';
