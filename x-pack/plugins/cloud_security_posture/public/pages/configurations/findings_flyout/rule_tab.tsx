@@ -8,9 +8,6 @@
 import { EuiBadge, EuiDescriptionList, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { generatePath } from 'react-router-dom';
-import { useKibana } from '../../../common/hooks/use_kibana';
-import { benchmarksNavigation } from '../../../common/navigation/constants';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
 
@@ -94,16 +91,6 @@ export const getRuleList = (rule: CspFinding['rule'], ruleFlyoutLink?: string) =
     : []),
 ];
 
-export const RuleTab = ({ data }: { data: CspFinding }) => {
-  const { application } = useKibana().services;
-
-  const ruleFlyoutLink = application?.getUrlForApp('security', {
-    path: generatePath(benchmarksNavigation.rules.path, {
-      benchmarkVersion: data.rule.benchmark.version.split('v')[1], // removing the v from the version
-      benchmarkId: data.rule.benchmark.id,
-      ruleId: data.rule.id,
-    }),
-  });
-
+export const RuleTab = ({ data, ruleFlyoutLink }: { data: CspFinding; ruleFlyoutLink: string }) => {
   return <EuiDescriptionList listItems={getRuleList(data.rule, ruleFlyoutLink)} />;
 };

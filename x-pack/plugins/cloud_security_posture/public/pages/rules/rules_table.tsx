@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
+import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
@@ -272,9 +273,16 @@ const getColumns = ({
   },
   {
     field: 'metadata.name',
-    name: i18n.translate('xpack.csp.rules.rulesTable.mutedColumnLabel', {
-      defaultMessage: 'Enabled',
-    }),
+    name: (
+      <ColumnNameWithTooltip
+        columnName={i18n.translate('xpack.csp.rules.rulesTable.enabledColumnLabel', {
+          defaultMessage: 'Enabled',
+        })}
+        tooltipContent={i18n.translate('xpack.csp.rules.rulesTable.enabledColumnTooltip', {
+          defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
+        })}
+      />
+    ),
     align: 'right',
     width: '100px',
     truncateText: true,

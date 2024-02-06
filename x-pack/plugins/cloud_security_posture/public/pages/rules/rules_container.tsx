@@ -112,6 +112,7 @@ export const RulesContainer = () => {
     sortOrder: 'asc',
   });
 
+  // This useEffect is in charge of auto paginating to the correct page of a rule from the url params
   useEffect(() => {
     const getPageByRuleId = () => {
       if (params.ruleId && allRules.data?.items) {
@@ -151,12 +152,6 @@ export const RulesContainer = () => {
 
   const rulesStates = useCspGetRulesStates();
   const arrayRulesStates: RuleStateAttributes[] = Object.values(rulesStates.data || {});
-
-  const filteredRulesStates: RuleStateAttributes[] = arrayRulesStates.filter(
-    (ruleState: RuleStateAttributes) =>
-      ruleState.benchmark_id === params.benchmarkId &&
-      ruleState.benchmark_version === 'v' + params.benchmarkVersion
-  );
 
   const rulesWithStates: CspBenchmarkRulesWithStates[] = useMemo(() => {
     if (!data) return [];
@@ -218,12 +213,14 @@ export const RulesContainer = () => {
   const rulesFlyoutData: CspBenchmarkRulesWithStates = {
     ...{
       state:
-        filteredRulesStates.find((filteredRuleState) => filteredRuleState.rule_id === params.ruleId)
+        arrayRulesStates.find((filteredRuleState) => filteredRuleState.rule_id === params.ruleId)
           ?.muted === true
           ? 'muted'
           : 'unmuted',
     },
-    ...{ metadata: rulesPageData.rules_map.get(params.ruleId!)?.metadata! },
+    ...{
+      metadata: allRules.data?.items.find((rule) => rule.metadata.id === params.ruleId)?.metadata,
+    },
   };
 
   return (
