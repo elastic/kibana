@@ -52,9 +52,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       validate: {
         body: schema.object({
           delete_existing_connector: schema.maybe(schema.boolean()),
-          index_name: schema.string(),
+          index_name: schema.maybe(schema.string()),
           is_native: schema.boolean(),
           language: schema.nullable(schema.string()),
+          name: schema.maybe(schema.string()),
           service_type: schema.maybe(schema.string()),
         }),
       },
@@ -64,9 +65,10 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       try {
         const body = await addConnector(client, {
           deleteExistingConnector: request.body.delete_existing_connector,
-          indexName: request.body.index_name,
+          indexName: request.body.index_name ?? null,
           isNative: request.body.is_native,
           language: request.body.language,
+          name: request.body.name ?? null,
           serviceType: request.body.service_type,
         });
         return response.ok({ body });

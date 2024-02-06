@@ -117,7 +117,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
     ],
   },
   selectors: ({ selectors }) => ({
-    fullIndexName: [() => [selectors.rawName], (name: string) => `search-${name}`],
+    fullIndexName: [() => [selectors.rawName], (name: string) => name],
     fullIndexNameExists: [
       () => [selectors.data, selectors.fullIndexName],
       (data: IndexExistsApiResponse | undefined, fullIndexName: string) =>
