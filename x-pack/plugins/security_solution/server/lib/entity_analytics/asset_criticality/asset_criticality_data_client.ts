@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ESFilter } from '@kbn/es-types';
-import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchResponse, SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics';
@@ -68,14 +68,17 @@ export class AssetCriticalityDataClient {
   public async search({
     query,
     size,
+    sort,
   }: {
     query: ESFilter;
     size?: number;
+    sort?: SearchRequest['sort'];
   }): Promise<SearchResponse<AssetCriticalityRecord>> {
     const response = await this.options.esClient.search<AssetCriticalityRecord>({
       index: this.getIndex(),
       ignore_unavailable: true,
       body: { query },
+      sort,
       size: Math.min(size ?? DEFAULT_CRITICALITY_RESPONSE_SIZE, MAX_CRITICALITY_RESPONSE_SIZE),
     });
     return response;

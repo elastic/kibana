@@ -15,7 +15,12 @@ import { AssetCriticalityDataClient } from '../asset_criticality';
 import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import type { EntityStoreDataClient } from './entity_store_data_client';
-import { FIELD_HISTORY_MAX_SIZE } from './constants';
+import {
+  FIELD_HISTORY_MAX_SIZE,
+  COMPOSITES_INDEX_PATTERN,
+  MAX_COMPOSITE_SIZE,
+  MAX_CRITICALITY_SIZE,
+} from './constants';
 import type { LatestTaskStateSchema } from './tasks/state';
 
 export interface UpdateEntityStoreParams {
@@ -34,6 +39,37 @@ export interface UpdateEntityStoreResponse {
   ids: {
     lastProcessedCompositeId?: string;
     lastProcessedCriticalityId?: string;
+  };
+}
+
+interface CompositeDocument {
+  id: string;
+  '@timestamp': string;
+  type: 'host';
+  host: {
+    name: string;
+  };
+  ip_history: Array<{
+    ip: string;
+    timestamp: string;
+  }>;
+  first_doc_timestamp: string;
+  last_doc_timestamp: string;
+}
+
+interface CompositeHit {
+  '@timestamp': string;
+  host: {
+    name: string;
+  };
+  entity: {
+    type: 'host';
+    ip_history: Array<{
+      ip: string;
+      timestamp: string;
+    }>;
+    first_doc_timestamp: string;
+    last_doc_timestamp: string;
   };
 }
 
@@ -154,40 +190,6 @@ export const updateEntityStore = async ({
   };
 };
 
-const COMPOSITES_INDEX_PATTERN = '.entities.entity-composites.*';
-const MAX_COMPOSITE_COUNT = 500;
-
-interface CompositeDocument {
-  id: string;
-  '@timestamp': string;
-  type: 'host';
-  host: {
-    name: string;
-  };
-  ip_history: Array<{
-    ip: string;
-    timestamp: string;
-  }>;
-  first_doc_timestamp: string;
-  last_doc_timestamp: string;
-}
-
-interface CompositeHit {
-  '@timestamp': string;
-  host: {
-    name: string;
-  };
-  entity: {
-    type: 'host';
-    ip_history: Array<{
-      ip: string;
-      timestamp: string;
-    }>;
-    first_doc_timestamp: string;
-    last_doc_timestamp: string;
-  };
-}
-
 function createLastProcessedInfo(opts: {
   composites: CompositeDocument[];
   assetCriticalities: AssetCriticalityRecord[];
@@ -238,7 +240,7 @@ async function getNextEntityComposites({
 }): Promise<CompositeDocument[]> {
   const result = await esClient.search<CompositeHit>({
     index: COMPOSITES_INDEX_PATTERN,
-    size: MAX_COMPOSITE_COUNT,
+    size: MAX_COMPOSITE_SIZE,
     body: {
       query: {
         bool: {
@@ -303,15 +305,21 @@ async function getNextAssetCriticalities({
   if (!fromTimestamp) {
     return [];
   }
-  const criticalities = await assetCriticalityService.getCriticalitiesFromTimestamp(fromTimestamp);
+  const criticalities = await assetCriticalityService.getCriticalitiesFromTimestamp(
+    fromTimestamp,
+    MAX_CRITICALITY_SIZE
+  );
 
   if (!lastProcessedId || !criticalities.length) {
     return criticalities;
   }
 
-  const lastProcessedIndex = criticalities.findIndex(
-    (criticality) => AssetCriticalityDataClient.createIdFromRecord(criticality) === lastProcessedId
-  );
+  const lastProcessedIndex = criticalities.findIndex((criticality) => {
+    return (
+      AssetCriticalityDataClient.createIdFromRecord(criticality) === lastProcessedId &&
+      criticality['@timestamp'] === fromTimestamp
+    );
+  });
 
   if (lastProcessedIndex === -1) {
     return criticalities;
