@@ -18,7 +18,7 @@ export type PresentationContainer = Partial<PublishesViewMode> &
   PublishesLastSavedState & {
     addNewPanel: <ApiType extends unknown = unknown>(
       panel: PanelPackage,
-      silent?: boolean
+      displaySuccessMessage?: boolean
     ) => Promise<ApiType | undefined>;
     registerPanelApi: <ApiType extends unknown = unknown>(
       panelId: string,

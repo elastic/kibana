@@ -105,16 +105,13 @@ export async function executeCreateAction({
   if (!factory) {
     return undefined;
   }
-  const embeddable = await api.addNewPanel<Embeddable>(
-    {
-      panelType: 'lens',
-      initialState: {
-        attributes: attrs,
-        id: generateId(),
-      },
+  const embeddable = await api.addNewPanel<Embeddable>({
+    panelType: 'lens',
+    initialState: {
+      attributes: attrs,
+      id: generateId(),
     },
-    true
-  );
+  });
   // open the flyout if embeddable has been created successfully
   if (embeddable) {
     const deletePanel = () => {

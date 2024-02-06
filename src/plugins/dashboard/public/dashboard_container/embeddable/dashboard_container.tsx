@@ -418,8 +418,26 @@ export class DashboardContainer
 
   public async addNewPanel<ApiType extends unknown = unknown>(
     panelPackage: PanelPackage,
-    silent?: boolean
+    displaySuccessMessage?: boolean
   ) {
+    const {
+      notifications: { toasts },
+      embeddable: { getEmbeddableFactory },
+    } = pluginServices.getServices();
+
+    const onSuccess = (id?: string, title?: string) => {
+      if (!displaySuccessMessage) return;
+      toasts.addSuccess({
+        title: dashboardReplacePanelActionStrings.getSuccessMessage(title),
+        'data-test-subj': 'addEmbeddableToDashboardSuccess',
+      });
+      this.setScrollToPanelId(id);
+      this.setHighlightPanelId(id);
+    };
+
+    if (this.trackPanelAddMetric) {
+      this.trackPanelAddMetric(METRIC_TYPE.CLICK, panelPackage.panelType);
+    }
     if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
       const newId = v4();
       const { newPanelPlacement, otherPanels } = panelPlacementStrategies.findTopLeftMostOpenSpace({
@@ -439,20 +457,13 @@ export class DashboardContainer
         },
       };
       this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
+      onSuccess(newId, newPanel.explicitInput.title);
       return;
     }
 
-    const {
-      notifications: { toasts },
-      embeddable: { getEmbeddableFactory },
-    } = pluginServices.getServices();
     const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
     if (!embeddableFactory) {
       throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
-    }
-
-    if (this.trackPanelAddMetric) {
-      this.trackPanelAddMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
     }
     const initialInput = panelPackage.initialState as Partial<EmbeddableInput>;
 
@@ -482,15 +493,7 @@ export class DashboardContainer
     );
 
     if (newEmbeddable) {
-      this.setScrollToPanelId(newEmbeddable.id);
-      this.setHighlightPanelId(newEmbeddable.id);
-
-      if (!silent) {
-        toasts.addSuccess({
-          title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
-          'data-test-subj': 'addEmbeddableToDashboardSuccess',
-        });
-      }
+      onSuccess(newEmbeddable.id, newEmbeddable.getTitle());
     }
     return newEmbeddable as ApiType;
   }
