@@ -32,23 +32,25 @@ export function BurnRateRuleEditor(props: Props) {
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
+  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
 
   useEffect(() => {
     setSelectedSlo(initialSlo);
+    setWindowDefs((previous) => {
+      if (previous.length > 0) {
+        return previous;
+      }
+      return createDefaultWindows(initialSlo);
+    });
   }, [initialSlo]);
 
   const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
     setWindowDefs(() => {
-      const burnRateDefaults = slo
-        ? BURN_RATE_DEFAULTS[slo.timeWindow.duration]
-        : BURN_RATE_DEFAULTS['30d'];
-      return burnRateDefaults.map((partialWindow) => createNewWindow(slo, partialWindow));
+      return createDefaultWindows(slo);
     });
     setRuleParams('sloId', slo?.id);
   };
-
-  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
 
   useEffect(() => {
     setRuleParams('windows', windowDefs);
@@ -93,4 +95,9 @@ export function BurnRateRuleEditor(props: Props) {
       )}
     </>
   );
+}
+
+function createDefaultWindows(slo: SLOResponse | undefined) {
+  const burnRateDefaults = slo ? BURN_RATE_DEFAULTS[slo.timeWindow.duration] : [];
+  return burnRateDefaults.map((partialWindow) => createNewWindow(slo, partialWindow));
 }
