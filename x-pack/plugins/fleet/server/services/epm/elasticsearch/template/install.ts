@@ -55,6 +55,7 @@ import {
   getTemplatePriority,
 } from './template';
 import { buildDefaultSettings } from './default_settings';
+import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
@@ -287,12 +288,6 @@ function putComponentTemplate(
   };
 }
 
-type TemplateBaseName = string;
-type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPLATE_SUFFIX}`;
-
-const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
-  name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
-
 export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
   templateName: string;
@@ -419,26 +414,13 @@ async function installDataStreamComponentTemplates({
 }) {
   await Promise.all(
     Object.entries(componentTemplates).map(async ([name, body]) => {
+      // @custom component template should be lazily created by user
       if (isUserSettingsTemplate(name)) {
-        try {
-          // Attempt to create custom component templates, ignore if they already exist
-          const { clusterPromise } = putComponentTemplate(esClient, logger, {
-            body,
-            name,
-            create: true,
-          });
-          return await clusterPromise;
-        } catch (e) {
-          if (e?.statusCode === 400 && e.body?.error?.reason.includes('already exists')) {
-            // ignore
-          } else {
-            throw e;
-          }
-        }
-      } else {
-        const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
-        return clusterPromise;
+        return;
       }
+
+      const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
+      return clusterPromise;
     })
   );
 }
@@ -624,6 +606,7 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
       }));
+
     return indexTemplates.concat(componentTemplates);
   });
 }
