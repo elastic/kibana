@@ -749,7 +749,7 @@ describe('ConfigureCases', () => {
               key: customFieldsConfigurationMock[0].key,
               type: customFieldsConfigurationMock[0].type,
               label: `${customFieldsConfigurationMock[0].label}!!`,
-              required: !customFieldsConfigurationMock[0].required, // now optional
+              required: !customFieldsConfigurationMock[0].required,
               defaultValue: customFieldsConfigurationMock[0].defaultValue,
             },
             { ...customFieldsConfigurationMock[1] },
