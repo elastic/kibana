@@ -16,7 +16,7 @@ import { EuiCallOut } from '@elastic/eui';
 interface WildCardWithWrongOperatorWarningProps {
   index?: string;
 }
-export const WildCardWithWrongOperatorWarning: FC<WildCardWithWrongOperatorWarningProps> = ({
+export const WildCardWithWrongOperatorCallout: FC<WildCardWithWrongOperatorWarningProps> = ({
   index,
 }) => {
   return (

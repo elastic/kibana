@@ -9,6 +9,7 @@ import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DocLinks } from '@kbn/doc-links';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import type { EuiModal } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -171,6 +172,7 @@ export interface ArtifactFlyoutProps {
   labels?: Partial<typeof ARTIFACT_FLYOUT_LABELS>;
   'data-test-subj'?: string;
   size?: EuiFlyoutSize;
+  confirmModal?: EuiModal;
 }
 
 /**
@@ -189,6 +191,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
     size = 'm',
+    confirmModal,
   }) => {
     const {
       docLinks: {
@@ -270,11 +273,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
-      ({ item: updatedItem, isValid }) => {
+      ({ item: updatedItem, isValid, extraWarning }) => {
         if (isMounted()) {
           setFormState({
             item: updatedItem,
             isValid,
+            extraWarning,
           });
         }
       },
@@ -316,10 +320,21 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               setExternalIsSubmittingData(false);
             }
           });
+      } else if (confirmModal) {
+        // show confirm Modal
+        submitData(formState.item).then(handleSuccess);
       } else {
         submitData(formState.item).then(handleSuccess);
       }
-    }, [formMode, formState.item, handleSuccess, isMounted, submitData, submitHandler]);
+    }, [
+      formMode,
+      formState.item,
+      handleSuccess,
+      isMounted,
+      submitData,
+      submitHandler,
+      confirmModal,
+    ]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now

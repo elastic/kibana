@@ -28,7 +28,7 @@ import {
   OperatingSystem,
 } from '@kbn/securitysolution-utils';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-import { WildCardWithWrongOperatorWarning } from '@kbn/securitysolution-exception-list-components';
+import { WildCardWithWrongOperatorCallout } from '@kbn/securitysolution-exception-list-components';
 import type {
   TrustedAppConditionEntry,
   NewTrustedApp,
@@ -88,6 +88,9 @@ interface ValidationResult {
   result: Partial<{
     [key in keyof NewTrustedApp]: FieldValidationState;
   }>;
+
+  /**  Additional Warning callout after submit */
+  extraWarning: boolean;
 }
 
 const addResultToValidation = (
@@ -123,7 +126,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     isValid,
     result: {},
   };
-  let showInvalidOperatorWildcardCallout = false;
+  let extraWarning: ValidationResult['extraWarning'];
 
   // Name field
   if (!values.name.trim()) {
@@ -167,7 +170,7 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
           value: (entry as TrustedAppConditionEntry).value,
         })
       ) {
-        showInvalidOperatorWildcardCallout = true;
+        extraWarning = true;
         addResultToValidation(
           validation,
           'entries',
@@ -205,14 +208,15 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
     });
   }
 
-  if (showInvalidOperatorWildcardCallout) {
+  if (extraWarning) {
     addResultToValidation(
       validation,
       'entries',
       'warnings',
-      <WildCardWithWrongOperatorWarning />,
+      <WildCardWithWrongOperatorCallout />,
       true
     );
+    validation.extraWarning = extraWarning;
   }
   validation.isValid = isValid;
   return validation;
@@ -278,6 +282,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         onChange({
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
+          additionalSubmitWarning: updatedValidationResult.extraWarning,
         });
       },
       [onChange]
