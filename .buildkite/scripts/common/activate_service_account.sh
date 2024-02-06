@@ -5,18 +5,23 @@ set -euo pipefail
 source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
 
 BUCKET_OR_EMAIL="${1:-}"
+GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
+GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
 if [[ -z "$BUCKET_OR_EMAIL" ]]; then
   echo "Usage: $0 <bucket_name|email>"
   exit 1
-elif [[ "$BUCKET_OR_EMAIL" == "-" ]]; then
+elif [[ "$BUCKET_OR_EMAIL" == "--unset-impersonation" ]]; then
   echo "Unsetting impersonation"
   gcloud config unset auth/impersonate_service_account
   exit 0
+elif [[ "$BUCKET_OR_EMAIL" == "--logout-gcloud" ]]; then
+  echo "Logging out of gcloud"
+  if [[ -x "$(command -v gcloud)" ]] && [[ "$(gcloud auth list 2>/dev/null | grep $GCLOUD_SA_PROXY_EMAIL)" != "" ]]; then
+    gcloud auth revoke $GCLOUD_SA_PROXY_EMAIL --no-user-output-enabled
+  fi
+  exit 0
 fi
-
-GCLOUD_EMAIL_POSTFIX="elastic-kibana-ci.iam.gserviceaccount.com"
-GCLOUD_SA_PROXY_EMAIL="kibana-ci-sa-proxy@$GCLOUD_EMAIL_POSTFIX"
 
 CURRENT_GCLOUD_USER=$(gcloud auth list --filter="status=ACTIVE" --format="value(account)")
 
