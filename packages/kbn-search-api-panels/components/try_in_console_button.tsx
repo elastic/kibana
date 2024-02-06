@@ -31,20 +31,6 @@ export const TryInConsoleButton = ({
   const { url } = sharePlugin;
   const canShowDevtools = !!application?.capabilities?.dev_tools?.show;
   if (!canShowDevtools || !url) return null;
-  if (consolePlugin && consolePlugin?.isEmbeddedConsoleAvailable?.()) {
-    return (
-      <EuiButtonEmpty
-        iconType="popout"
-        size="s"
-        onClick={() => consolePlugin?.openEmbeddedConsole?.(request)}
-      >
-        <FormattedMessage
-          id="searchApiPanels.welcomeBanner.tryInConsoleButton"
-          defaultMessage="Try in Console"
-        />
-      </EuiButtonEmpty>
-    );
-  }
 
   const devToolsDataUri = compressToEncodedURIComponent(request);
   const consolePreviewLink = url.locators.get('CONSOLE_APP_LOCATOR')?.useUrl(
@@ -56,8 +42,20 @@ export const TryInConsoleButton = ({
   );
   if (!consolePreviewLink) return null;
 
+  const onClick = () => {
+    const embeddedConsoleAvailable =
+      (consolePlugin?.openEmbeddedConsole !== undefined &&
+        consolePlugin?.isEmbeddedConsoleAvailable?.()) ??
+      false;
+    if (embeddedConsoleAvailable) {
+      consolePlugin!.openEmbeddedConsole!(request);
+    } else {
+      window.open(consolePreviewLink, '_blank', 'noreferrer');
+    }
+  };
+
   return (
-    <EuiButtonEmpty href={consolePreviewLink} iconType="popout" target="_blank" size="s">
+    <EuiButtonEmpty onClick={onClick} iconType="popout" size="s">
       <FormattedMessage
         id="searchApiPanels.welcomeBanner.tryInConsoleButton"
         defaultMessage="Try in Console"
