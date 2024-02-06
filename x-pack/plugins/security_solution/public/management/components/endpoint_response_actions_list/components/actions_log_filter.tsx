@@ -215,10 +215,13 @@ export const ActionsLogFilter = memo(
       // update filter UI options state
       setItems(
         items.map((option) => {
-          // for flyout filter don't unchecked selected agent type
-          if (agentType && agentType !== option.key) {
+          // for flyout filter don't uncheck selected agent type
+          if (agentType && agentType === option.key) {
+            option.checked = 'on';
+          } else {
             option.checked = undefined;
           }
+
           return option;
         })
       );
