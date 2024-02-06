@@ -6,6 +6,7 @@
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { PresentationContainer } from '@kbn/presentation-containers';
 import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
@@ -13,7 +14,6 @@ import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
 import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_data_from_aggregate_query';
 import { suggestionsApi } from '../../lens_suggestions_api';
-import { getLensAttributes } from '../../app_plugin/shared/edit_on_the_fly/helpers';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
 import { Embeddable } from '../../embeddable';
@@ -94,17 +94,13 @@ export async function executeCreateAction({
   // Lens might not return suggestions for some cases, i.e. in case of errors
   if (!allSuggestions.length) return undefined;
   const [firstSuggestion] = allSuggestions;
-  const attrs = getLensAttributes({
+  const attrs = getLensAttributesFromSuggestion({
     filters: [],
     query: defaultEsqlQuery,
     suggestion: firstSuggestion,
     dataView,
   });
-  const embeddableStart = deps.embeddable;
-  const factory = embeddableStart.getEmbeddableFactory('lens');
-  if (!factory) {
-    return undefined;
-  }
+
   const embeddable = await api.addNewPanel<Embeddable>({
     panelType: 'lens',
     initialState: {

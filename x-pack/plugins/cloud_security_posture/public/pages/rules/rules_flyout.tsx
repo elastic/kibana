@@ -17,9 +17,12 @@ import {
   EuiFlexGroup,
   EuiSwitch,
   EuiFlyoutFooter,
+  EuiIcon,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
@@ -73,6 +76,7 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       await refetchRulesStates();
     }
   };
+
   return (
     <EuiFlyout
       ownFocus={false}
@@ -124,29 +128,37 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
   );
 };
 
-const RuleOverviewTab = ({
-  rule,
-  ruleData,
-  switchRuleStates,
-}: {
-  rule: CspBenchmarkRuleMetadata;
-  ruleData: CspBenchmarkRulesWithStates;
-  switchRuleStates: () => Promise<void>;
-}) => (
-  <EuiFlexGroup direction="column">
-    <EuiFlexItem>
-      <EuiDescriptionList
-        listItems={[...ruleState(ruleData, switchRuleStates), ...getRuleList(rule)]}
-      />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Promise<void>) => [
+const getRuleStateSwitch = (
+  rule: CspBenchmarkRulesWithStates,
+  switchRuleStates: () => Promise<void>
+) => [
   {
-    title: i18n.translate('xpack.csp.rules.rulesFlyout.ruleState', {
-      defaultMessage: 'Enabled',
-    }),
+    title: (
+      <EuiFlexGroup gutterSize="xs" alignItems="center">
+        <EuiFlexItem grow={false}>
+          <FormattedMessage
+            id="xpack.csp.rules.rulesFlyout.ruleStateSwitchTitle"
+            defaultMessage="Enabled"
+          />
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+          css={{
+            '.euiToolTipAnchor': {
+              display: 'flex', // needed to align the icon with the title
+            },
+          }}
+        >
+          <EuiToolTip
+            content={i18n.translate('xpack.csp.rules.rulesFlyout.ruleStateSwitchTooltip', {
+              defaultMessage: `Disabling a rule will also disable its associated detection rules and alerts. Enabling it again does not automatically re-enable them`,
+            })}
+          >
+            <EuiIcon size="m" color="subdued" type="iInCircle" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ),
     description: (
       <>
         <EuiSwitch
@@ -160,3 +172,21 @@ const ruleState = (rule: CspBenchmarkRulesWithStates, switchRuleStates: () => Pr
     ),
   },
 ];
+
+const RuleOverviewTab = ({
+  rule,
+  ruleData,
+  switchRuleStates,
+}: {
+  rule: CspBenchmarkRuleMetadata;
+  ruleData: CspBenchmarkRulesWithStates;
+  switchRuleStates: () => Promise<void>;
+}) => (
+  <EuiFlexGroup direction="column">
+    <EuiFlexItem>
+      <EuiDescriptionList
+        listItems={[...getRuleStateSwitch(ruleData, switchRuleStates), ...getRuleList(rule)]}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+);

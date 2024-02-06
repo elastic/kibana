@@ -428,7 +428,6 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].result.requestParams).to.eql({
               method: 'POST',
               path: '/_query',
-              querystring: 'drop_null_columns',
             });
           });
 
@@ -457,7 +456,6 @@ export default function ({ getService }: FtrProviderContext) {
             expect(jsonBody[0].error.attributes.requestParams).to.eql({
               method: 'POST',
               path: '/_query',
-              querystring: 'drop_null_columns',
             });
           });
         });
