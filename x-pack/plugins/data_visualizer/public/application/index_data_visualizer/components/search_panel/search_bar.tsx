@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { isDefined } from '@kbn/ml-is-defined';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
-import { createMergedEsQuery } from '../../utils/saved_search_utils';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 
 export const SearchPanelContent = ({
@@ -61,19 +61,29 @@ export const SearchPanelContent = ({
   }, [searchQueryLanguage, searchString, queryManager.filterManager]);
 
   const searchHandler = ({ query, filters }: { query?: Query; filters?: Filter[] }) => {
+    // @TODO: remove
+    console.log(`--@@query`, query); // @TODO: remove
+    console.log(`--@@filters`, filters);
+
     const mergedQuery = isDefined(query) ? query : searchInput;
     const mergedFilters = isDefined(filters) ? filters : queryManager.filterManager.getFilters();
+    console.log(`--@@mergedQuery`, mergedQuery);
+    console.log(`--@@mergedFilters`, mergedFilters);
+
     try {
       if (mergedFilters) {
         queryManager.filterManager.setFilters(mergedFilters);
       }
 
-      const combinedQuery = createMergedEsQuery(
-        mergedQuery,
-        queryManager.filterManager.getFilters() ?? [],
+      const combinedQuery = buildEsQuery(
         dataView,
-        uiSettings
+        mergedQuery ? [mergedQuery] : [],
+        queryManager.filterManager.getFilters() ?? [],
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
+
+      // @TODO: remove
+      console.log(`--@@combinedQuery`, combinedQuery);
 
       setSearchParams({
         searchQuery: combinedQuery,

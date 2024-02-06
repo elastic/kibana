@@ -137,10 +137,11 @@ export const useDataVisualizerGridData = (
     });
 
     if (searchData === undefined || dataVisualizerListState.searchString !== '') {
-      if (dataVisualizerListState.filters) {
+      if (filterManager) {
         const globalFilters = filterManager?.getGlobalFilters();
 
-        if (filterManager) filterManager.setFilters(dataVisualizerListState.filters);
+        if (dataVisualizerListState.filters)
+          filterManager.setFilters(dataVisualizerListState.filters);
         if (globalFilters) filterManager?.addFilters(globalFilters);
       }
       return {
@@ -169,6 +170,7 @@ export const useDataVisualizerGridData = (
       currentFilters,
     }),
     lastRefresh,
+    data.query.filterManager,
   ]);
 
   const _timeBuckets = useTimeBuckets();
@@ -532,10 +534,10 @@ export const useDataVisualizerGridData = (
           const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
-                ...c,
-                loading: false,
-                stats: { ...c.stats, ...loadedFullStats },
-              }
+              ...c,
+              loading: false,
+              stats: { ...c.stats, ...loadedFullStats },
+            }
             : c;
         });
       }
