@@ -9,7 +9,7 @@ import React, { ComponentClass } from 'react';
 import {
   OPEN_DETAILS,
   SELECT_ROW,
-  ControlColumnsProps,
+  type ControlColumnsProps,
   DataTableRowControl,
 } from '@kbn/unified-data-table';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
