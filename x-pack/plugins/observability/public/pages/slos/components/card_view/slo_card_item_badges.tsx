@@ -10,6 +10,7 @@ import React from 'react';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import styled from 'styled-components';
 import { EuiFlexGroup } from '@elastic/eui';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { LoadingBadges } from '../badges/slo_badges';
 import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
 import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
@@ -42,6 +43,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
             <SloIndicatorTypeBadge slo={slo} color="default" />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />
+            <TagsList tags={slo.tags} noOfTagsToDisplay={1} color="default" />
           </>
         )}
       </EuiFlexGroup>

@@ -6,6 +6,7 @@
  */
 
 import React, { lazy, Suspense } from 'react';
+import type { TagsListProps } from './tags_list/tags_list';
 import type {
   FieldValueSuggestionsProps,
   FieldValueSelectionProps,
@@ -29,6 +30,16 @@ export function FieldValueSuggestions(props: FieldValueSuggestionsProps) {
   return (
     <Suspense fallback={null}>
       <FieldValueSuggestionsLazy {...props} />
+    </Suspense>
+  );
+}
+
+const TagsListLazy = lazy(() => import('./tags_list/tags_list'));
+
+export function TagsList(props: TagsListProps) {
+  return (
+    <Suspense fallback={null}>
+      <TagsListLazy {...props} />
     </Suspense>
   );
 }
