@@ -51,7 +51,9 @@ export function ChatFlyout({
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
   const [flyoutWidthMode, setFlyoutWidthMode] = useState<FlyoutWidthMode>('side');
+
   const [conversationsExpanded, setConversationsExpanded] = useState(false);
+
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
   const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
 
@@ -73,6 +75,7 @@ export function ChatFlyout({
       : 5}px;
     padding: ${euiTheme.size.s};
     z-index: 1;
+    color: ${euiTheme.colors.primary};
   `;
 
   const containerClassName = css`
