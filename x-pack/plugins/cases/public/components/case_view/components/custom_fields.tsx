@@ -97,11 +97,25 @@ const createMissingAndRemoveExtraCustomFields = (
       (customField) => customField.key === confCustomField.key
     );
 
+    const shouldUseDefaultValue = Boolean(
+      confCustomField.required && confCustomField?.defaultValue
+    );
+
     if (foundCustomField) {
-      return foundCustomField;
+      return {
+        ...foundCustomField,
+        value:
+          foundCustomField.value == null && shouldUseDefaultValue
+            ? confCustomField.defaultValue
+            : foundCustomField.value,
+      } as CaseUICustomField;
     }
 
-    return { key: confCustomField.key, type: confCustomField.type, value: null };
+    return {
+      key: confCustomField.key,
+      type: confCustomField.type,
+      value: shouldUseDefaultValue ? confCustomField.defaultValue : null,
+    } as CaseUICustomField;
   });
 
   return createdCustomFields;
