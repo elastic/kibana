@@ -55,6 +55,7 @@ import {
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
 
 import { LinksMenuUI } from '../../../components/anomalies_table/links_menu';
+import { RuleEditorFlyout } from '../../../components/rule_editor';
 
 const focusZoomPanelHeight = 25;
 const focusChartHeight = 310;
@@ -137,7 +138,7 @@ class TimeseriesChartIntl extends Component {
 
   constructor(props) {
     super(props);
-    this.state = { popoverData: null, popoverCoords: [0, 0] };
+    this.state = { popoverData: null, popoverCoords: [0, 0], showRuleEditorFlyout: () => {} };
   }
 
   componentWillUnmount() {
@@ -1923,9 +1924,25 @@ class TimeseriesChartIntl extends Component {
     this.setState({ popoverData: null, popoverCoords: [0, 0] });
   }
 
+  setShowRuleEditorFlyoutFunction = (func) => {
+    this.setState({
+      showRuleEditorFlyout: func,
+    });
+  };
+
+  unsetShowRuleEditorFlyoutFunction = () => {
+    this.setState({
+      showRuleEditorFlyout: () => {},
+    });
+  };
+
   render() {
     return (
       <>
+        <RuleEditorFlyout
+          setShowFunction={this.setShowRuleEditorFlyoutFunction}
+          unsetShowFunction={this.unsetShowRuleEditorFlyoutFunction}
+        />
         {this.state.popoverData !== null && (
           <div
             style={{
@@ -1947,6 +1964,7 @@ class TimeseriesChartIntl extends Component {
                 showViewSeriesLink={false}
                 isAggregatedData={this.props.tableData.interval !== 'second'}
                 interval={this.props.tableData.interval}
+                showRuleEditorFlyout={this.state.showRuleEditorFlyout}
                 onItemClick={() => this.closePopover()}
                 sourceIndicesWithGeoFields={this.props.sourceIndicesWithGeoFields}
               />
