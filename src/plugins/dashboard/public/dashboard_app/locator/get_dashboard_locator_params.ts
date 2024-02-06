@@ -17,7 +17,7 @@ export const getDashboardLocatorParamsFromEmbeddable = (
 ): Partial<DashboardLocatorParams> => {
   const params: DashboardLocatorParams = {};
 
-  const query = api.localQuery?.value ?? api.parentApi?.localQuery?.value;
+  const query = api.parentApi?.localQuery?.value;
   if (query && options.useCurrentFilters) {
     params.query = query as Query;
   }
@@ -32,7 +32,7 @@ export const getDashboardLocatorParamsFromEmbeddable = (
 
   // if useCurrentDashboardFilters enabled, then preserve all the filters (pinned, unpinned, and from controls)
   // otherwise preserve only pinned
-  const filters = api.localFilters?.value ?? api.parentApi?.localFilters?.value ?? [];
+  const filters = api.parentApi?.localFilters?.value ?? [];
   params.filters = options.useCurrentFilters ? filters : filters?.filter((f) => isFilterPinned(f));
 
   return params;
