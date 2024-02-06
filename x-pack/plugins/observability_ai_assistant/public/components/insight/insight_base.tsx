@@ -75,9 +75,10 @@ export function InsightBase({
                 </EuiText>
 
                 <EuiIconTip
-                  content={
-                    'Every contextual insight can be changed with a custom prompt defined by the user. You can always reset it to the default.'
-                  }
+                  content={i18n.translate('xpack.observabilityAiAssistant.insight.iconTooltip', {
+                    defaultMessage:
+                      'Every contextual insight can be changed with a custom prompt defined by the user. You can always reset it to the default.',
+                  })}
                   position="right"
                 />
               </EuiFlexGroup>

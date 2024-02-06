@@ -200,6 +200,24 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     [service]
   );
 
+  const handleSend = (newPrompt) => {
+    const clonedMessages = cloneDeep(messages);
+    const message = last(clonedMessages.filter((msg) => msg.message.role === MessageRole.User));
+    if (!message) return false;
+
+    message.message.content = newPrompt;
+    setUpdatedPrompt(newPrompt);
+    setInitialMessages(clonedMessages);
+    setEditingPrompt(false);
+    return true;
+  };
+
+  const handleCancel = () => {
+    setEditingPrompt(false);
+    setInsightOpen(false);
+    setHasOpened(false);
+  };
+
   const {
     services: { http },
   } = useKibana();
@@ -256,24 +274,8 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
           last(messages.filter((msg) => msg.message.role === MessageRole.User))?.message.content ||
           ''
         }
-        onSend={(newPrompt) => {
-          const clonedMessages = cloneDeep(messages);
-          const message = last(
-            clonedMessages.filter((msg) => msg.message.role === MessageRole.User)
-          );
-          if (!message) return false;
-
-          message.message.content = newPrompt;
-          setUpdatedPrompt(newPrompt);
-          setInitialMessages(clonedMessages);
-          setEditingPrompt(false);
-          return true;
-        }}
-        onCancel={() => {
-          setEditingPrompt(false);
-          setInsightOpen(false);
-          setHasOpened(false);
-        }}
+        onSend={handleSend}
+        onCancel={handleCancel}
       />
     );
   } else if (!connectors.loading && !connectors.connectors?.length) {
