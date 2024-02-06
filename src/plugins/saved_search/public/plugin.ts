@@ -17,18 +17,14 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { SOWithMetadata } from '@kbn/content-management-utils';
-import {
-  EmbeddableStart,
-  registerSavedObjectToPanelMethod,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
+import { EmbeddableStart, registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
 import {
   getSavedSearch,
   saveSavedSearch,
   SaveSavedSearchOptions,
   getNewSavedSearch,
   SavedSearchUnwrapResult,
+  SearchByValueInput,
 } from './services/saved_searches';
 import { SavedSearch, SavedSearchAttributes } from '../common/types';
 import { SavedSearchType, LATEST_VERSION } from '../common';
@@ -154,14 +150,15 @@ export class SavedSearchPublicPlugin
   }
 }
 
-registerSavedObjectToPanelMethod(SavedSearchType, (savedObject) => {
-  if (!savedObject.managed) {
-    return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
-  }
+registerSavedObjectToPanelMethod<SavedSearchAttributes, SearchByValueInput>(
+  SavedSearchType,
+  (savedObject) => {
+    if (!savedObject.managed) {
+      return { savedObjectId: savedObject.id };
+    }
 
-  return {
-    attributes: savedObjectToEmbeddableAttributes(
-      savedObject as SavedObjectCommon<SavedSearchAttributes>
-    ),
-  };
-});
+    return {
+      attributes: savedObjectToEmbeddableAttributes(savedObject),
+    };
+  }
+);

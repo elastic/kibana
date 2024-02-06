@@ -8,13 +8,15 @@
 
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
-type SavedObjectToPanelMethod = (savedObject: SavedObjectCommon) => any;
+type SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueInput> = (
+  savedObject: SavedObjectCommon<TSavedObjectAttributes>
+) => { savedObjectId: string } | Partial<TByValueInput>;
 
-export const savedObjectToPanel: Record<string, SavedObjectToPanelMethod> = {};
+export const savedObjectToPanel: Record<string, SavedObjectToPanelMethod<any, any>> = {};
 
-export const registerSavedObjectToPanelMethod = (
+export const registerSavedObjectToPanelMethod = <TSavedObjectAttributes, TByValueAttributes>(
   savedObjectType: string,
-  method: SavedObjectToPanelMethod
+  method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>
 ) => {
   savedObjectToPanel[savedObjectType] = method;
 };

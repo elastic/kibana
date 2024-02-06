@@ -51,7 +51,6 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   registerSavedObjectToPanelMethod,
-  SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
@@ -70,7 +69,6 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { TypesSetup, TypesStart } from './vis_types';
 import type { VisualizeServices } from './visualize_app/types';
 import {
@@ -89,7 +87,6 @@ import {
   createVisEmbeddableFromObject,
   VISUALIZE_EMBEDDABLE_TYPE,
   VisualizeEmbeddableFactory,
-  VisualizeInput,
 } from './embeddable';
 import {
   setUISettings,
@@ -126,6 +123,7 @@ import {
   VisualizationSavedObjectAttributes,
 } from '../common/content_management';
 import { SerializedVisData } from '../common';
+import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -477,33 +475,33 @@ export class VisualizationsPlugin
   }
 }
 
-registerSavedObjectToPanelMethod(CONTENT_ID, (_savedObject) => {
-  const savedObject = _savedObject as SavedObjectCommon<VisualizationSavedObjectAttributes>;
+registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
+  CONTENT_ID,
+  (savedObject) => {
+    const visState = savedObject.attributes.visState;
 
-  const visState = savedObject.attributes.visState;
+    // not sure if visState actually is ever undefined, but following the type
+    if (!savedObject.managed || !visState) {
+      return {
+        savedObjectId: savedObject.id,
+      };
+    }
 
-  // not sure if visState actually is ever undefined, but following the type
-  if (!savedObject.managed || !visState) {
-    const input: Pick<SavedObjectEmbeddableInput, 'savedObjectId'> = {
-      savedObjectId: savedObject.id,
+    // data is not always defined, so I added a default value since the extract
+    // routine in the embeddable factory expects it to be there
+    const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+      data?: SerializedVisData;
     };
-    return input;
-  }
 
-  // data is not always defined, so I added a default value since the extract
-  // routine in the embeddable factory expects it to be there
-  const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
-    data?: SerializedVisData;
-  };
+    if (!savedVis.data) {
+      savedVis.data = {
+        searchSource: {},
+        aggs: [],
+      };
+    }
 
-  if (!savedVis.data) {
-    savedVis.data = {
-      searchSource: {},
-      aggs: [],
+    return {
+      savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
     };
   }
-
-  return {
-    savedVis,
-  } as Partial<VisualizeInput>;
-});
+);

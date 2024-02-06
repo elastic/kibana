@@ -29,7 +29,6 @@ import {
   EmbeddableSetup,
   EmbeddableStart,
   registerSavedObjectToPanelMethod,
-  SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -52,7 +51,6 @@ import type {
 } from '@kbn/content-management-plugin/public';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import {
   createRegionMapFn,
   GEOHASH_GRID,
@@ -90,6 +88,7 @@ import { VectorTileInspectorView } from './inspector/vector_tile_adapter/vector_
 import { setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION, MapAttributes } from '../common/content_management';
 import { savedObjectToEmbeddableAttributes } from './map_attribute_service';
+import { MapByValueInput } from './embeddable';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -261,12 +260,12 @@ export class MapsPlugin
   }
 }
 
-registerSavedObjectToPanelMethod(CONTENT_ID, (savedObject) => {
+registerSavedObjectToPanelMethod<MapAttributes, MapByValueInput>(CONTENT_ID, (savedObject) => {
   if (!savedObject.managed) {
-    return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
+    return { savedObjectId: savedObject.id };
   }
 
   return {
-    attributes: savedObjectToEmbeddableAttributes(savedObject as SavedObjectCommon<MapAttributes>),
+    attributes: savedObjectToEmbeddableAttributes(savedObject),
   };
 });

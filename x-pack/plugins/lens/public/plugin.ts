@@ -14,11 +14,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  EmbeddableSetup,
-  EmbeddableStart,
-  SavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -69,7 +65,6 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { registerSavedObjectToPanelMethod } from '@kbn/embeddable-plugin/public';
-import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -729,16 +724,17 @@ export class LensPlugin {
   stop() {}
 }
 
-registerSavedObjectToPanelMethod(CONTENT_ID, (savedObject) => {
-  if (!savedObject.managed) {
-    return { savedObjectId: savedObject.id } as SavedObjectEmbeddableInput;
+registerSavedObjectToPanelMethod<LensSavedObjectAttributes, LensByValueInput>(
+  CONTENT_ID,
+  (savedObject) => {
+    if (!savedObject.managed) {
+      return { savedObjectId: savedObject.id };
+    }
+
+    const panel = {
+      attributes: savedObjectToEmbeddableAttributes(savedObject),
+    };
+
+    return panel;
   }
-
-  const panel: Partial<LensByValueInput> = {
-    attributes: savedObjectToEmbeddableAttributes(
-      savedObject as SavedObjectCommon<LensSavedObjectAttributes>
-    ),
-  };
-
-  return panel;
-});
+);
