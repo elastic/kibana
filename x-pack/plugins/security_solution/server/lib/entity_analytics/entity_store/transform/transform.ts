@@ -8,6 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   ENTITY_COMPOSITES_TRANSFORM_ID,
+  DESTINATION_INDEX_MAPPING,
   SOURCE_INDEX_PATTERN,
   getEntityStoreTransform,
 } from './constants';
@@ -38,9 +39,18 @@ const doesEntityTransformExist = ({ client }: { client: ElasticsearchClient }) =
     .catch(() => false);
 };
 
+const createDestinationIndexMapping = async (client: ElasticsearchClient, index: string) => {
+  return client.indices.create({
+    index,
+    mappings: DESTINATION_INDEX_MAPPING,
+  });
+};
+
 const createEntityStoreTransform = async (client: ElasticsearchClient) => {
   try {
     const destinationIndex = getTransformDestinationIndex('hosts');
+
+    await createDestinationIndexMapping(client, destinationIndex);
 
     const entityStoreTransform = getEntityStoreTransform({
       destinationIndex,
