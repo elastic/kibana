@@ -21,6 +21,7 @@ import { getEntityStoreIndex } from '../../../../common/entity_analytics/entity_
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { entityStoreFieldMap, FIELD_HISTORY_MAX_SIZE } from './constants';
 import { startEntityStoreTask } from './tasks';
+import { maybeCreateAndStartEntityTransform } from './transform';
 
 interface EntityStoreClientOpts {
   logger: Logger;
@@ -48,6 +49,8 @@ export class EntityStoreDataClient {
       namespace: this.options.namespace,
       taskManager,
     });
+
+    await maybeCreateAndStartEntityTransform({ client: this.options.esClient });
   }
 
   public async bulkUpsertEntities({ entities }: { entities: NewEntityStoreEntity[] }) {
