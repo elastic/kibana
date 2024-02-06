@@ -23,7 +23,6 @@ import {
   useGeneratedHtmlId,
   EuiBetaBadge,
   useEuiTheme,
-  EuiLink,
 } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -200,29 +199,38 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             </h3>
           </EuiTitle>
           <p>
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.howCalculatedText"
-              defaultMessage="The Entity Risk engine runs hourly to aggregate “Open” and “Acknowledged” alerts from the last 30 days and assigns risk score to the host or user. It then aggregates the individual
-              risk scores and normalizes to the 0-100 range using the {riemannZetaLink}."
-              values={{
-                riemannZetaLink: (
-                  <EuiLink
-                    target="_blank"
-                    rel="noopener nofollow noreferrer"
-                    href="https://en.wikipedia.org/wiki/Riemann_zeta_function"
-                  >
-                    {'Riemann Zeta function'}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </p>
-          <p>
-            <FormattedMessage
-              id="xpack.securitySolution.riskInformation.intro"
-              defaultMessage="Finally, the engine assigns a risk level by mapping the normalized risk score to the
-            below 5 risk levels."
-            />
+            <ol>
+              <li>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskInformation.riskCalculationStep1"
+                  defaultMessage="Only scores entities (users and hosts) associated with a detection alert, based on any alerts that have not been closed."
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskInformation.riskCalculationStep2"
+                  defaultMessage="Generates an 'Alert' category score by aggregating alerts by entity idenfifier such that alerts with higher risk contribute more than alerts with lower risk scores."
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskInformation.riskCalculationStep3"
+                  defaultMessage="Verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Context' category."
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskInformation.riskCalculationStep4"
+                  defaultMessage="Produces a single normalized numeric value as the entity risk score"
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.securitySolution.riskInformation.riskCalculationStep5"
+                  defaultMessage="Maps the entity risk label based on the normalized risk score"
+                />
+              </li>
+            </ol>
           </p>
         </EuiText>
         <EuiSpacer />
