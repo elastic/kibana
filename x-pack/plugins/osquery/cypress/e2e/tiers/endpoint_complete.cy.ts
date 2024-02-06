@@ -7,7 +7,8 @@
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170469
+describe.skip(
   'App Features for Enpoint Complete PLI',
   {
     tags: ['@serverless'],

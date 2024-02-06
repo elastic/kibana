@@ -23,18 +23,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
 import { DimensionButton, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { LayerActions } from './layer_actions';
-import { IndexPatternServiceAPI } from '../../../data_views_service/service';
-import {
-  StateSetter,
-  Visualization,
-  isOperation,
-  LayerAction,
-  VisualizationDimensionGroupConfig,
-  UserMessagesGetter,
-  AddLayerFunction,
-  RegisterLibraryAnnotationGroupFunction,
-  DragDropOperation,
-} from '../../../types';
+import { isOperation, LayerAction } from '../../../types';
 import { LayerSettings } from './layer_settings';
 import { LayerPanelProps, ActiveDimensionState } from './types';
 import { DimensionContainer } from './dimension_container';
@@ -54,50 +43,7 @@ const initialActiveDimensionState = {
   isNew: false,
 };
 
-export function LayerPanel(
-  props: Exclude<LayerPanelProps, 'state' | 'setState'> & {
-    activeVisualization: Visualization;
-    dimensionGroups: VisualizationDimensionGroupConfig[];
-    layerId: string;
-    layerIndex: number;
-    isOnlyLayer: boolean;
-    addLayer: AddLayerFunction;
-    registerLibraryAnnotationGroup: RegisterLibraryAnnotationGroupFunction;
-    updateVisualization: StateSetter<unknown>;
-    onDropToDimension: (payload: {
-      source: DragDropIdentifier;
-      target: DragDropOperation;
-      dropType: DropType;
-    }) => void;
-    updateDatasource: (
-      datasourceId: string | undefined,
-      newState: unknown,
-      dontSyncLinkedDimensions?: boolean
-    ) => void;
-    updateDatasourceAsync: (datasourceId: string | undefined, newState: unknown) => void;
-    updateAll: (
-      datasourceId: string | undefined,
-      newDatasourcestate: unknown,
-      newVisualizationState: unknown
-    ) => void;
-    onRemoveLayer: (layerId: string) => void;
-    onCloneLayer: () => void;
-    onRemoveDimension: (props: { columnId: string; layerId: string }) => void;
-    registerNewLayerRef: (layerId: string, instance: HTMLDivElement | null) => void;
-    toggleFullscreen: () => void;
-    onEmptyDimensionAdd: (columnId: string, group: { groupId: string }) => void;
-    onChangeIndexPattern: (args: {
-      indexPatternId: string;
-      layerId: string;
-      datasourceId?: string;
-      visualizationId?: string;
-    }) => void;
-    indexPatternService?: IndexPatternServiceAPI;
-    getUserMessages?: UserMessagesGetter;
-    displayLayerSettings: boolean;
-    setIsInlineFlyoutVisible?: (status: boolean) => void;
-  }
-) {
+export function LayerPanel(props: LayerPanelProps) {
   const [activeDimension, setActiveDimension] = useState<ActiveDimensionState>(
     initialActiveDimensionState
   );
@@ -623,7 +569,7 @@ export function LayerPanel(
                         <DimensionTrigger
                           label={group.fakeFinalAccessor.label}
                           id="lns-fakeDimension"
-                          data-test-subj="lns-fakeDimension"
+                          dataTestSubj="lns-fakeDimension"
                         />
                       </div>
                     )}

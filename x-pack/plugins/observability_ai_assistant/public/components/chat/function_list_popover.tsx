@@ -158,7 +158,11 @@ function mapFunctions({
   selectedFunctionName: string | undefined;
 }) {
   return functions
-    .filter((func) => func.visibility !== FunctionVisibility.System)
+    .filter(
+      (func) =>
+        func.visibility !== FunctionVisibility.AssistantOnly &&
+        func.visibility !== FunctionVisibility.Internal
+    )
     .map((func) => ({
       label: func.name,
       searchableLabel: func.descriptionForUser || func.description,

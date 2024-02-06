@@ -15,7 +15,7 @@ export type RenderContentCustomization<Props> = (
   renderPreviousContent: RenderPreviousContent<Props>
 ) => (props: Props) => React.ReactNode;
 
-export interface LogExplorerFlyoutContentProps {
+export interface LogsExplorerFlyoutContentProps {
   actions: {
     addFilter: DocViewRenderProps['filter'];
     addColumn: DocViewRenderProps['onAddColumn'];
@@ -25,8 +25,8 @@ export interface LogExplorerFlyoutContentProps {
   doc: LogDocument;
 }
 
-export interface LogExplorerCustomizations {
+export interface LogsExplorerCustomizations {
   flyout?: {
-    renderContent?: RenderContentCustomization<LogExplorerFlyoutContentProps>;
+    renderContent?: RenderContentCustomization<LogsExplorerFlyoutContentProps>;
   };
 }
