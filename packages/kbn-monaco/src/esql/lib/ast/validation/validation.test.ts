@@ -21,7 +21,7 @@ import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { EditorError } from '../../../../types';
-import { camelCase, min } from 'lodash';
+import { camelCase } from 'lodash';
 
 const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
 
@@ -1135,7 +1135,8 @@ describe('validation logic', () => {
               type: 'number',
             });
             // get the expected args from the first signature in case of errors
-            const expectedArgs = signatures[0].params.filter(({ optional }) => !optional);
+            const expectedArgs = signatures[0].params.filter(({ optional }) => !optional).length;
+            const shouldBeExactly = signatures[0].params.length;
             testErrorsAndWarnings(
               `from a | eval ${
                 getFunctionSignatures(
@@ -1148,12 +1149,14 @@ describe('validation logic', () => {
                 )[0].declaration
               }`,
               [
-                `Error building [${name}]: expects exactly ${
-                  expectedArgs.length === 1
+                `Error building [${name}]: expects ${
+                  shouldBeExactly - expectedArgs === 0 ? 'exactly ' : ''
+                }${
+                  expectedArgs === 1
                     ? 'one argument'
-                    : expectedArgs.length === 0
+                    : expectedArgs === 0
                     ? '0 arguments'
-                    : `${expectedArgs.length} arguments`
+                    : `${expectedArgs} arguments`
                 }, passed ${fieldMappingWithOneExtraArg.length} instead.`,
               ]
             );

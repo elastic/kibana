@@ -314,6 +314,7 @@ function validateFunction(
           fn: astFunction.name,
           numArgs,
           passedArgs: astFunction.args.length,
+          exactly: fnDefinition.signatures[0].params.length - numArgs,
         },
         locations: astFunction.location,
       })
