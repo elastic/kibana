@@ -2057,6 +2057,10 @@
       "is_default": {
         "type": "boolean"
       },
+      "is_internal": {
+        "type": "boolean",
+        "index": false
+      },
       "host_urls": {
         "type": "keyword",
         "index": false

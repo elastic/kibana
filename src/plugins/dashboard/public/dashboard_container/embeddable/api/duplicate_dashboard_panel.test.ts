@@ -143,15 +143,13 @@ test('Duplicates a non RefOrVal embeddable by value', async () => {
 });
 
 test('Gets a unique title from the dashboard', async () => {
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, '')).toEqual('');
+  expect(await incrementPanelTitle(container, '')).toEqual('');
 
   container.getPanelTitles = jest.fn().mockImplementation(() => {
     return ['testDuplicateTitle', 'testDuplicateTitle (copy)', 'testUniqueTitle'];
   });
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, 'testUniqueTitle')).toEqual(
-    'testUniqueTitle (copy)'
-  );
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, 'testDuplicateTitle')).toEqual(
+  expect(await incrementPanelTitle(container, 'testUniqueTitle')).toEqual('testUniqueTitle (copy)');
+  expect(await incrementPanelTitle(container, 'testDuplicateTitle')).toEqual(
     'testDuplicateTitle (copy 1)'
   );
 
@@ -160,20 +158,20 @@ test('Gets a unique title from the dashboard', async () => {
       Array.from([...Array(39)], (_, index) => `testDuplicateTitle (copy ${index + 1})`)
     );
   });
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, 'testDuplicateTitle')).toEqual(
+  expect(await incrementPanelTitle(container, 'testDuplicateTitle')).toEqual(
     'testDuplicateTitle (copy 40)'
   );
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, 'testDuplicateTitle (copy 100)')).toEqual(
+  expect(await incrementPanelTitle(container, 'testDuplicateTitle (copy 100)')).toEqual(
     'testDuplicateTitle (copy 40)'
   );
 
   container.getPanelTitles = jest.fn().mockImplementation(() => {
     return ['testDuplicateTitle (copy 100)'];
   });
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, 'testDuplicateTitle')).toEqual(
+  expect(await incrementPanelTitle(container, 'testDuplicateTitle')).toEqual(
     'testDuplicateTitle (copy 101)'
   );
-  expect(await incrementPanelTitle(byRefOrValEmbeddable, 'testDuplicateTitle (copy 100)')).toEqual(
+  expect(await incrementPanelTitle(container, 'testDuplicateTitle (copy 100)')).toEqual(
     'testDuplicateTitle (copy 101)'
   );
 });

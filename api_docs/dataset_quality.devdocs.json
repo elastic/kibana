@@ -53,11 +53,52 @@
           "label": "DatasetQuality",
           "description": [],
           "signature": [
-            "React.ComponentClass<{}, any> | React.FunctionComponent<{}>"
+            "React.ComponentClass<",
+            "DatasetQualityProps",
+            ", any> | React.FunctionComponent<",
+            "DatasetQualityProps",
+            ">"
           ],
           "path": "x-pack/plugins/dataset_quality/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "datasetQuality",
+          "id": "def-public.DatasetQualityPluginStart.createDatasetQualityController",
+          "type": "Function",
+          "tags": [],
+          "label": "createDatasetQualityController",
+          "description": [],
+          "signature": [
+            "({ initialState, }: { initialState?: Partial<",
+            "DatasetQualityPublicState",
+            "> | undefined; }) => Promise<",
+            "DatasetQualityController",
+            ">"
+          ],
+          "path": "x-pack/plugins/dataset_quality/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "datasetQuality",
+              "id": "def-public.DatasetQualityPluginStart.createDatasetQualityController.$1",
+              "type": "Object",
+              "tags": [],
+              "label": "__0",
+              "description": [],
+              "signature": [
+                "{ initialState?: Partial<",
+                "DatasetQualityPublicState",
+                "> | undefined; }"
+              ],
+              "path": "x-pack/plugins/dataset_quality/public/controller/create_controller.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
         }
       ],
       "lifecycle": "start",
@@ -108,7 +149,7 @@
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn: number; }>; } & ",
+          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | undefined; lastActivity?: number | undefined; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/degraded_docs\": { endpoint: \"GET /internal/dataset_quality/data_streams/degraded_docs\"; params?: ",
           "TypeC",
@@ -189,7 +230,7 @@
           "StringC",
           "; }>; }> | undefined; handler: ({}: ",
           "DatasetQualityRouteHandlerResources",
-          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn: number; }>; } & ",
+          " & { params: { path: { dataStream: string; }; }; }) => Promise<{ createdOn?: number | undefined; lastActivity?: number | undefined; }>; } & ",
           "DatasetQualityRouteCreateOptions",
           "; \"GET /internal/dataset_quality/data_streams/degraded_docs\": { endpoint: \"GET /internal/dataset_quality/data_streams/degraded_docs\"; params?: ",
           "TypeC",
