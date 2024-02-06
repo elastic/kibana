@@ -1064,7 +1064,6 @@
     "react-popper-tooltip": "^3.1.1",
     "react-redux": "^7.2.8",
     "react-resizable": "^3.0.4",
-    "react-resize-detector": "^7.1.1",
     "react-reverse-portal": "^2.1.0",
     "react-router": "^5.3.4",
     "react-router-config": "^5.1.1",
@@ -1683,7 +1682,8 @@
     "xml-crypto": "^5.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
-    "yarn-deduplicate": "^6.0.2"
+    "yarn-deduplicate": "^6.0.2",
+    "zod-to-json-schema": "^3.22.3"
   },
   "packageManager": "yarn@1.22.21"
 }

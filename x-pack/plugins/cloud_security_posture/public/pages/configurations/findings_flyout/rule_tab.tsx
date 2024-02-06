@@ -5,18 +5,29 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDescriptionList } from '@elastic/eui';
+import { EuiBadge, EuiDescriptionList, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
 
-export const getRuleList = (rule: CspFinding['rule']) => [
+export const getRuleList = (rule: CspFinding['rule'], ruleFlyoutLink?: string) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTitle', {
       defaultMessage: 'Name',
     }),
-    description: rule.name,
+    description: ruleFlyoutLink ? (
+      <EuiToolTip
+        position="top"
+        content={i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTooltip', {
+          defaultMessage: 'Manage Rule',
+        })}
+      >
+        <EuiLink href={ruleFlyoutLink}>{rule.name}</EuiLink>
+      </EuiToolTip>
+    ) : (
+      rule.name
+    ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.descriptionTitle', {
@@ -80,6 +91,6 @@ export const getRuleList = (rule: CspFinding['rule']) => [
     : []),
 ];
 
-export const RuleTab = ({ data }: { data: CspFinding }) => (
-  <EuiDescriptionList listItems={getRuleList(data.rule)} />
-);
+export const RuleTab = ({ data, ruleFlyoutLink }: { data: CspFinding; ruleFlyoutLink: string }) => {
+  return <EuiDescriptionList listItems={getRuleList(data.rule, ruleFlyoutLink)} />;
+};

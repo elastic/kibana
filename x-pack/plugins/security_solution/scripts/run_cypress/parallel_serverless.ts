@@ -33,10 +33,22 @@ interface ProductType {
   product_tier: string;
 }
 
+interface OverrideEntry {
+  docker_image: string;
+}
+
+interface ProductOverrides {
+  kibana?: OverrideEntry;
+  elasticsearch?: OverrideEntry;
+  fleet?: OverrideEntry;
+  cluster?: OverrideEntry;
+}
+
 interface CreateProjectRequestBody {
   name: string;
   region_id: string;
   product_types?: ProductType[];
+  overrides?: ProductOverrides;
 }
 
 interface Project {
@@ -61,7 +73,7 @@ const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
-const BASE_ENV_URL = 'https://console.qa.cld.elstc.co';
+const BASE_ENV_URL = `${process.env.QA_CONSOLE_URL}`;
 let log: ToolingLog;
 const API_HEADERS = Object.freeze({
   'kbn-xsrf': 'cypress-creds',
@@ -95,6 +107,22 @@ async function createSecurityProject(
     region_id: DEFAULT_REGION,
     product_types: productTypes,
   };
+
+  log.info(`Kibana override flag equals to ${process.env.KIBANA_MKI_USE_LATEST_COMMIT}!`);
+  if (
+    process.env.KIBANA_MKI_USE_LATEST_COMMIT &&
+    process.env.KIBANA_MKI_USE_LATEST_COMMIT === '1'
+  ) {
+    const kibanaOverrideImage = `${process.env.BUILDKITE_COMMIT?.substring(0, 12)}`;
+    log.info(
+      `Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`
+    );
+    body.overrides = {
+      kibana: {
+        docker_image: `docker.elastic.co/kibana-ci/kibana-serverless:sec-sol-qg-${kibanaOverrideImage}`,
+      },
+    };
+  }
 
   try {
     const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
@@ -570,8 +598,11 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               KIBANA_USERNAME: credentials.username,
               KIBANA_PASSWORD: credentials.password,
 
+              // Both CLOUD_SERVERLESS and IS_SERVERLESS are used by the cypress tests.
               CLOUD_SERVERLESS: true,
               IS_SERVERLESS: true,
+              // TEST_CLOUD is used by SvlUserManagerProvider to define if testing against cloud.
+              TEST_CLOUD: 1,
             };
 
             if (process.env.DEBUG && !process.env.CI) {
