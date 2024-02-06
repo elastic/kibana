@@ -5,6 +5,9 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
+    "initialize-server:genai": "node ./scripts/index.js server genai trial_license_complete_tier",
+    "run-tests:genai": "node ./scripts/index.js runner genai trial_license_complete_tier",
+
     "initialize-server:ea": "node ./scripts/index.js server entity_analytics trial_license_complete_tier",
     "run-tests:ea": "node ./scripts/index.js runner entity_analytics trial_license_complete_tier",
 
