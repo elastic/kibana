@@ -12,7 +12,7 @@ import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@el
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { DataTableRowControl } from '@kbn/unified-data-table';
 import { useActor } from '@xstate/react';
-import { LogExplorerControllerStateService } from '../state_machines/log_explorer_controller';
+import { LogsExplorerControllerStateService } from '../state_machines/logs_explorer_controller';
 import {
   malformedDocButtonLabelWhenNotPresent,
   malformedDocButtonLabelWhenPresent,
@@ -29,7 +29,7 @@ const ConnectedMalformedDocs = ({
   service,
 }: {
   rowIndex: number;
-  service: LogExplorerControllerStateService;
+  service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
 
@@ -46,7 +46,7 @@ const ConnectedStacktraceDocs = ({
   service,
 }: {
   rowIndex: number;
-  service: LogExplorerControllerStateService;
+  service: LogsExplorerControllerStateService;
 }) => {
   const [state] = useActor(service);
 
@@ -120,7 +120,7 @@ const Stacktrace = ({ row, rowIndex }: { row: DataTableRecord; rowIndex: number 
 };
 
 export const createCustomControlColumnsConfiguration =
-  (service: LogExplorerControllerStateService) =>
+  (service: LogsExplorerControllerStateService) =>
   ({ controlColumns }: ControlColumnsProps) => {
     const checkBoxColumn = controlColumns[SELECT_ROW];
     const openDetails = controlColumns[OPEN_DETAILS];

@@ -84,8 +84,8 @@ export const updateContextFromDiscoverAppState = actions.assign<
 });
 
 export const updateContextFromDiscoverDataState = actions.assign<
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent
+  LogsExplorerControllerContext,
+  LogsExplorerControllerEvent
 >((context, event) => {
   if ('dataState' in event && event.type === 'RECEIVE_DISCOVER_DATA_STATE') {
     return {
