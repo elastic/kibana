@@ -115,6 +115,8 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
+      // TODO remove ts-expect-error when linksEmbeddable is converted to api
+      // @ts-expect-error
       ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable, linkOptions),
     };
 
