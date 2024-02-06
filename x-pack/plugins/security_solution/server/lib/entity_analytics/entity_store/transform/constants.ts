@@ -5,11 +5,67 @@
  * 2.0.
  */
 
-import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingTypeMapping,
+  TransformPutTransformRequest,
+} from '@elastic/elasticsearch/lib/api/types';
 
 export const ENTITY_COMPOSITES_TRANSFORM_ID = 'entity-composites-host-transform';
 
 export const SOURCE_INDEX_PATTERN = 'logs-*';
+
+export const DESTINATION_INDEX_MAPPING: MappingTypeMapping = {
+  _meta: {
+    created_by: 'security-entity-analytics',
+  },
+  properties: {
+    '@timestamp': {
+      type: 'date',
+    },
+    entity: {
+      properties: {
+        first_doc_timestamp: {
+          type: 'date',
+        },
+        ip_history: {
+          properties: {
+            ip: {
+              type: 'text',
+              fields: {
+                keyword: {
+                  type: 'keyword',
+                  ignore_above: 256,
+                },
+              },
+            },
+            timestamp: {
+              type: 'date',
+            },
+          },
+        },
+        last_doc_timestamp: {
+          type: 'date',
+        },
+        type: {
+          type: 'text',
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
+          },
+        },
+      },
+    },
+    host: {
+      properties: {
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+  },
+};
 
 export const getEntityStoreTransform = (opts: {
   sourceIndex: string;
