@@ -91,7 +91,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
             return res;
           }, {}),
         });
-        if (bulkResult.success) {
+        if (bulkResult && bulkResult.success) {
           storage.remove(`securitySolution.${LOCAL_STORAGE_KEY}`);
         }
       }

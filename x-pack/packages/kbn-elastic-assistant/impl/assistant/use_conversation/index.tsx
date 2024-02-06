@@ -219,6 +219,7 @@ export const useConversation = (): UseConversation => {
                 defaultSystemPromptId,
               },
               id: conversationId,
+              title: conversationId,
               messages: messages != null ? messages : [],
             };
       return newConversation;

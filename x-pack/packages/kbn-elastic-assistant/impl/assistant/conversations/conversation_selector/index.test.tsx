@@ -26,14 +26,14 @@ const mockConversation = {
 };
 
 const mockConversations = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
 };
 
 const mockConversationsWithCustom = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
-  [customConvo.id]: customConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
+  [customConvo.title]: customConvo,
 };
 
 jest.mock('../../use_conversation', () => ({
@@ -45,7 +45,7 @@ const onConversationDeleted = jest.fn();
 const defaultProps = {
   isDisabled: false,
   onConversationSelected,
-  selectedConversationId: 'Welcome',
+  selectedConversationTitle: 'Welcome',
   defaultConnectorId: '123',
   defaultProvider: OpenAiProviderType.OpenAi,
   conversations: mockConversations,
@@ -146,7 +146,7 @@ describe('Conversation selector', () => {
     jest.runAllTimers();
     expect(onConversationSelected).not.toHaveBeenCalled();
 
-    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.id);
+    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.title);
   });
 
   it('Previous conversation is set to active when selected conversation is deleted', () => {
@@ -154,7 +154,7 @@ describe('Conversation selector', () => {
       <TestProviders>
         <ConversationSelector
           {...{ ...defaultProps, conversations: mockConversationsWithCustom }}
-          selectedConversationId={customConvo.id}
+          selectedConversationTitle={customConvo.title}
         />
       </TestProviders>
     );
@@ -231,7 +231,7 @@ describe('Conversation selector', () => {
         <ConversationSelector
           {...defaultProps}
           conversations={{
-            [welcomeConvo.id]: welcomeConvo,
+            [welcomeConvo.title]: welcomeConvo,
           }}
         />
       </TestProviders>

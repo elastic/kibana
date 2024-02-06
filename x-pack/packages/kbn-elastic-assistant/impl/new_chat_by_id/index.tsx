@@ -15,7 +15,7 @@ import * as i18n from './translations';
 export interface Props {
   children?: React.ReactNode;
   /** Optionally automatically add this context to a conversation when the assistant is shown */
-  conversationId?: string;
+  conversationTitle?: string;
   /** Defaults to `discuss`. If null, the button will not have an icon */
   iconType?: string | null;
   /** Optionally specify a well known ID, or default to a UUID */
@@ -24,9 +24,9 @@ export interface Props {
   iconOnly?: boolean;
 }
 
-const NewChatByIdComponent: React.FC<Props> = ({
+const NewChatByTitleComponent: React.FC<Props> = ({
   children = i18n.NEW_CHAT,
-  conversationId,
+  conversationTitle,
   iconType,
   promptContextId,
   iconOnly = false,
@@ -36,11 +36,11 @@ const NewChatByIdComponent: React.FC<Props> = ({
   // proxy show / hide calls to assistant context, using our internal prompt context id:
   const showOverlay = useCallback(() => {
     showAssistantOverlay({
-      conversationId,
+      conversationTitle,
       promptContextId,
       showOverlay: true,
     });
-  }, [conversationId, promptContextId, showAssistantOverlay]);
+  }, [conversationTitle, promptContextId, showAssistantOverlay]);
 
   const icon = useMemo(() => {
     if (iconType === null) {
@@ -55,7 +55,7 @@ const NewChatByIdComponent: React.FC<Props> = ({
       iconOnly ? (
         <EuiToolTip content={i18n.NEW_CHAT}>
           <EuiButtonIcon
-            data-test-subj="newChatById"
+            data-test-subj="newChatByTitle"
             iconType={icon ?? 'discuss'}
             onClick={showOverlay}
             color={'text'}
@@ -64,7 +64,7 @@ const NewChatByIdComponent: React.FC<Props> = ({
         </EuiToolTip>
       ) : (
         <EuiButtonEmpty
-          data-test-subj="newChatById"
+          data-test-subj="newChatByTitle"
           iconType={icon}
           onClick={showOverlay}
           aria-label={i18n.NEW_CHAT}
@@ -76,10 +76,10 @@ const NewChatByIdComponent: React.FC<Props> = ({
   );
 };
 
-NewChatByIdComponent.displayName = 'NewChatByIdComponent';
+NewChatByTitleComponent.displayName = 'NewChatByTitleComponent';
 
 /**
- * `NewChatByID` displays a _New chat_ icon button by providing only the `promptContextId`
+ * `NewChatByTitle` displays a _New chat_ icon button by providing only the `promptContextId`
  * of a context that was (already) registered by the `useAssistantOverlay` hook. You may
  * optionally style the button icon, or override the default _New chat_ text with custom
  * content, like {'🪄✨'}
@@ -90,4 +90,4 @@ NewChatByIdComponent.displayName = 'NewChatByIdComponent';
  * registered where the data is available, and then the _New chat_ button can be displayed
  * in another part of the tree.
  */
-export const NewChatById = React.memo(NewChatByIdComponent);
+export const NewChatByTitle = React.memo(NewChatByTitleComponent);

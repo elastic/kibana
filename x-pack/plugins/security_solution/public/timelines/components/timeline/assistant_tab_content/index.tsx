@@ -17,13 +17,13 @@ const AssistantTabContainer = styled.div`
 
 const AssistantTab: React.FC<{
   shouldRefocusPrompt: boolean;
-  setConversationId: Dispatch<SetStateAction<string>>;
-}> = memo(({ shouldRefocusPrompt, setConversationId }) => (
+  setConversationTitle: Dispatch<SetStateAction<string>>;
+}> = memo(({ shouldRefocusPrompt, setConversationTitle }) => (
   <AssistantTabContainer>
     <Assistant
-      conversationId={TIMELINE_CONVERSATION_TITLE}
+      conversationTitle={TIMELINE_CONVERSATION_TITLE}
       embeddedLayout
-      setConversationId={setConversationId}
+      setConversationTitle={setConversationTitle}
       shouldRefocusPrompt={shouldRefocusPrompt}
     />
   </AssistantTabContainer>

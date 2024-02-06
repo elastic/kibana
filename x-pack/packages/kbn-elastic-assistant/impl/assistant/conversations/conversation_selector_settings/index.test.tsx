@@ -13,13 +13,13 @@ import { alertConvo, customConvo, welcomeConvo } from '../../../mock/conversatio
 const onConversationSelectionChange = jest.fn();
 const onConversationDeleted = jest.fn();
 const mockConversations = {
-  [alertConvo.id]: alertConvo,
-  [welcomeConvo.id]: welcomeConvo,
-  [customConvo.id]: customConvo,
+  [alertConvo.title]: alertConvo,
+  [welcomeConvo.title]: welcomeConvo,
+  [customConvo.title]: customConvo,
 };
 const testProps = {
   conversations: mockConversations,
-  selectedConversationId: welcomeConvo.id,
+  selectedConversationTitle: welcomeConvo.id,
   onConversationDeleted,
   onConversationSelectionChange,
 };
@@ -40,7 +40,7 @@ describe('ConversationSelectorSettings', () => {
     fireEvent.click(getByTestId('comboBoxToggleListButton'));
     // there is only one delete conversation because there is only one custom convo
     fireEvent.click(getByTestId('delete-conversation'));
-    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.id);
+    expect(onConversationDeleted).toHaveBeenCalledWith(customConvo.title);
   });
   it('Selects existing conversation from the search  input', () => {
     const { getByTestId } = render(<ConversationSelectorSettings {...testProps} />);

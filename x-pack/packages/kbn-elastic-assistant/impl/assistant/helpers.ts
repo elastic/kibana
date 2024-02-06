@@ -41,22 +41,12 @@ export const mergeBaseWithPersistedConversations = (
 ): Record<string, Conversation> => {
   const userConversations = (conversationsData?.data ?? []).reduce<Record<string, Conversation>>(
     (transformed, conversation) => {
-      transformed[conversation.id] = conversation;
+      transformed[conversation.title] = conversation;
       return transformed;
     },
     {}
   );
-  return merge(
-    userConversations,
-    Object.keys(baseConversations)
-      .filter(
-        (baseId) => (conversationsData?.data ?? []).find((c) => c.title === baseId) === undefined
-      )
-      .reduce<Record<string, Conversation>>((transformed, conversation) => {
-        transformed[conversation] = baseConversations[conversation];
-        return transformed;
-      }, {})
-  );
+  return merge(baseConversations, userConversations);
 };
 
 export const getBlockBotConversation = (

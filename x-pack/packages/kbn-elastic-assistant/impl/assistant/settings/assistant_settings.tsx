@@ -65,7 +65,7 @@ interface Props {
   ) => void;
   onSave: () => Promise<void>;
   selectedConversation: Conversation;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   conversations: Record<string, Conversation>;
 }
 
@@ -108,7 +108,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     // Conversation Selection State
     const [selectedConversation, setSelectedConversation] = useState<Conversation | undefined>(
       () => {
-        return conversationSettings[defaultSelectedConversation.id];
+        return conversationSettings[defaultSelectedConversation.title];
       }
     );
     const onHandleSelectedConversationChange = useCallback((conversation?: Conversation) => {
@@ -116,7 +116,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     }, []);
     useEffect(() => {
       if (selectedConversation != null) {
-        setSelectedConversation(conversationSettings[selectedConversation.id]);
+        setSelectedConversation(conversationSettings[selectedConversation.title]);
       }
     }, [conversationSettings, selectedConversation]);
 
@@ -147,16 +147,20 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     const handleSave = useCallback(async () => {
       // If the selected conversation is deleted, we need to select a new conversation to prevent a crash creating a conversation that already exists
       const isSelectedConversationDeleted =
-        conversationSettings[defaultSelectedConversation.id] == null;
-      const newSelectedConversationId: string | undefined = Object.keys(conversationSettings)[0];
-      if (isSelectedConversationDeleted && newSelectedConversationId != null) {
-        onConversationSelected({ cId: newSelectedConversationId });
+        conversationSettings[defaultSelectedConversation.title] == null;
+      const newSelectedConversation: Conversation | undefined =
+        Object.values(conversationSettings)[0];
+      if (isSelectedConversationDeleted && newSelectedConversation != null) {
+        onConversationSelected({
+          cId: newSelectedConversation.id,
+          cTitle: newSelectedConversation.title,
+        });
       }
       await saveSettings();
       await onSave();
     }, [
       conversationSettings,
-      defaultSelectedConversation.id,
+      defaultSelectedConversation.title,
       onConversationSelected,
       onSave,
       saveSettings,

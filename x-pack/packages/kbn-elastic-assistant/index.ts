@@ -28,7 +28,7 @@ export { Assistant } from './impl/assistant';
 // Step 3: Wherever you want to bring context into the assistant, use the any combination of the following
 // components and hooks:
 // - `NewChat` component
-// - `NewChatById` component
+// - `NewChatByTitle` component
 // - `useAssistantOverlay` hook
 
 /**
@@ -42,7 +42,7 @@ export { Assistant } from './impl/assistant';
 export { NewChat } from './impl/new_chat';
 
 /**
- * `NewChatByID` displays a _New chat_ icon button by providing only the `promptContextId`
+ * `NewChatByTitle` displays a _New chat_ icon button by providing only the `promptContextId`
  * of a context that was (already) registered by the `useAssistantOverlay` hook. You may
  * optionally style the button icon, or override the default _New chat_ text with custom
  * content, like {'🪄✨'}
@@ -53,13 +53,13 @@ export { NewChat } from './impl/new_chat';
  * registered where the data is available, and then the _New chat_ button can be displayed
  * in another part of the tree.
  */
-export { NewChatById } from './impl/new_chat_by_id';
+export { NewChatByTitle } from './impl/new_chat_by_id';
 
 /**
  * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and
  * returns an optional `showAssistantOverlay` function to display the assistant overlay.
  * As an alterative to using the `showAssistantOverlay` returned from this hook, you may
- * use the `NewChatById` component and pass it the `promptContextId` returned by this hook.
+ * use the `NewChatByTitle` component and pass it the `promptContextId` returned by this hook.
  *
  * USE THIS WHEN: You want to register context in one part of the tree, and then show
  * a _New chat_ button in another part of the tree without passing around the data, or when

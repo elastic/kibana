@@ -92,7 +92,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         ) {
           setConversationSettings({
             ...conversationSettings,
-            [isNew ? c : newSelectedConversation.id]: newSelectedConversation,
+            [isNew ? c : newSelectedConversation.title]: newSelectedConversation,
           });
           setConversationsSettingsBulkActions({
             ...conversationsSettingsBulkActions,
@@ -105,7 +105,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           setConversationSettings((prev) => {
             return {
               ...prev,
-              [newSelectedConversation.id]: newSelectedConversation,
+              [newSelectedConversation.title]: newSelectedConversation,
             };
           });
         }
@@ -125,9 +125,10 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
     );
 
     const onConversationDeleted = useCallback(
-      (conversationId: string) => {
+      (conversationTitle: string) => {
+        const conversationId = conversationSettings[conversationTitle].id;
         const updatedConverationSettings = { ...conversationSettings };
-        delete updatedConverationSettings[conversationId];
+        delete updatedConverationSettings[conversationTitle];
         setConversationSettings(updatedConverationSettings);
 
         setConversationsSettingsBulkActions({
@@ -157,7 +158,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [updatedConversation.id]: updatedConversation,
+            [updatedConversation.title]: updatedConversation,
           });
           if (selectedConversation.id !== selectedConversation.title) {
             setConversationsSettingsBulkActions({
@@ -226,7 +227,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           };
           setConversationSettings({
             ...conversationSettings,
-            [selectedConversation.id]: updatedConversation,
+            [selectedConversation.title]: updatedConversation,
           });
           if (selectedConversation.id !== selectedConversation.title) {
             setConversationsSettingsBulkActions({
@@ -338,7 +339,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
         <EuiHorizontalRule margin={'s'} />
 
         <ConversationSelectorSettings
-          selectedConversationId={selectedConversation?.id}
+          selectedConversationTitle={selectedConversation?.title ?? ''}
           conversations={conversationSettings}
           onConversationDeleted={onConversationDeleted}
           onConversationSelectionChange={onConversationSelectionChange}

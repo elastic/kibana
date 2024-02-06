@@ -29,11 +29,11 @@ const StyledEuiModal = styled(EuiModal)`
  */
 export const AssistantOverlay = React.memo(() => {
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [conversationId, setConversationId] = useState<string | undefined>(
+  const [conversationTitle, setConversationTitle] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
   );
   const [promptContextId, setPromptContextId] = useState<string | undefined>();
-  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationId } =
+  const { assistantTelemetry, setShowAssistantOverlay, getLastConversationTitle } =
     useAssistantContext();
 
   // Bind `showAssistantOverlay` in SecurityAssistantContext to this modal instance
@@ -42,9 +42,9 @@ export const AssistantOverlay = React.memo(() => {
       ({
         showOverlay: so,
         promptContextId: pid,
-        conversationId: cid,
+        conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        const newConversationId = getLastConversationId(cid);
+        const newConversationId = getLastConversationTitle(cTitle);
         if (so)
           assistantTelemetry?.reportAssistantInvoked({
             conversationId: newConversationId,
@@ -53,9 +53,9 @@ export const AssistantOverlay = React.memo(() => {
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationId(newConversationId);
+        setConversationTitle(newConversationId);
       },
-    [assistantTelemetry, getLastConversationId]
+    [assistantTelemetry, getLastConversationTitle]
   );
   useEffect(() => {
     setShowAssistantOverlay(showOverlay);
@@ -65,15 +65,15 @@ export const AssistantOverlay = React.memo(() => {
   const handleShortcutPress = useCallback(() => {
     // Try to restore the last conversation on shortcut pressed
     if (!isModalVisible) {
-      setConversationId(getLastConversationId());
+      setConversationTitle(getLastConversationTitle());
       assistantTelemetry?.reportAssistantInvoked({
         invokedBy: 'shortcut',
-        conversationId: getLastConversationId(),
+        conversationId: getLastConversationTitle(),
       });
     }
 
     setIsModalVisible(!isModalVisible);
-  }, [isModalVisible, getLastConversationId, assistantTelemetry]);
+  }, [isModalVisible, getLastConversationTitle, assistantTelemetry]);
 
   // Register keyboard listener to show the modal when cmd + ; is pressed
   const onKeyDown = useCallback(
@@ -91,8 +91,8 @@ export const AssistantOverlay = React.memo(() => {
   const cleanupAndCloseModal = useCallback(() => {
     setIsModalVisible(false);
     setPromptContextId(undefined);
-    setConversationId(conversationId);
-  }, [conversationId]);
+    setConversationTitle(conversationTitle);
+  }, [conversationTitle]);
 
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();
@@ -102,7 +102,7 @@ export const AssistantOverlay = React.memo(() => {
     <>
       {isModalVisible && (
         <StyledEuiModal onClose={handleCloseModal} data-test-subj="ai-assistant-modal">
-          <Assistant conversationId={conversationId} promptContextId={promptContextId} />
+          <Assistant conversationTitle={conversationTitle} promptContextId={promptContextId} />
         </StyledEuiModal>
       )}
     </>

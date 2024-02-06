@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { NewChatById } from '@kbn/elastic-assistant';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { isEmpty } from 'lodash/fp';
 import {
@@ -154,8 +154,8 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
               <EuiFlexGroup alignItems="center" direction="row" gutterSize="none">
                 {hasAssistantPrivilege && promptContextId != null && (
                   <EuiFlexItem grow={false}>
-                    <NewChatById
-                      conversationId={
+                    <NewChatByTitle
+                      conversationTitle={
                         isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
                       }
                       promptContextId={promptContextId}

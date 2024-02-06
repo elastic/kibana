@@ -31,7 +31,7 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   DEFAULT_KNOWLEDGE_BASE_SETTINGS,
   KNOWLEDGE_BASE_LOCAL_STORAGE_KEY,
-  LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY,
+  LAST_CONVERSATION_TITLE_LOCAL_STORAGE_KEY,
   QUICK_PROMPT_LOCAL_STORAGE_KEY,
   SYSTEM_PROMPT_LOCAL_STORAGE_KEY,
 } from './constants';
@@ -43,13 +43,13 @@ import { WELCOME_CONVERSATION_TITLE } from '../assistant/use_conversation/transl
 export interface ShowAssistantOverlayProps {
   showOverlay: boolean;
   promptContextId?: string;
-  conversationId?: string;
+  conversationTitle?: string;
 }
 
 type ShowAssistantOverlay = ({
   showOverlay,
   promptContextId,
-  conversationId,
+  conversationTitle,
 }: ShowAssistantOverlayProps) => void;
 export interface AssistantProviderProps {
   actionTypeRegistry: ActionTypeRegistryContract;
@@ -134,7 +134,7 @@ export interface UseAssistantContext {
   }) => EuiCommentProps[];
   http: HttpSetup;
   knowledgeBase: KnowledgeBaseConfig;
-  getLastConversationId: (id?: string) => string;
+  getLastConversationTitle: (conversationTitle?: string) => string;
   promptContexts: Record<string, PromptContext>;
   modelEvaluatorEnabled: boolean;
   nameSpace: string;
@@ -145,7 +145,7 @@ export interface UseAssistantContext {
   setDefaultAllow: React.Dispatch<React.SetStateAction<string[]>>;
   setDefaultAllowReplacement: React.Dispatch<React.SetStateAction<string[]>>;
   setKnowledgeBase: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig | undefined>>;
-  setLastConversationId: React.Dispatch<React.SetStateAction<string | undefined>>;
+  setLastConversationTitle: React.Dispatch<React.SetStateAction<string | undefined>>;
   setSelectedSettingsTab: React.Dispatch<React.SetStateAction<SettingsTabs>>;
   setShowAssistantOverlay: (showAssistantOverlay: ShowAssistantOverlay) => void;
   showAssistantOverlay: ShowAssistantOverlay;
@@ -197,8 +197,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
     baseSystemPrompts
   );
 
-  const [localStorageLastConversationId, setLocalStorageLastConversationId] =
-    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_ID_LOCAL_STORAGE_KEY}`);
+  const [localStorageLastConversationTitle, setLocalStorageLastConversationTitle] =
+    useLocalStorage<string>(`${nameSpace}.${LAST_CONVERSATION_TITLE_LOCAL_STORAGE_KEY}`);
 
   /**
    * Local storage for knowledge base configuration, prefixed by assistant nameSpace
@@ -253,12 +253,13 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
    */
   const [selectedSettingsTab, setSelectedSettingsTab] = useState<SettingsTabs>(CONVERSATIONS_TAB);
 
-  const getLastConversationId = useCallback(
+  const getLastConversationTitle = useCallback(
     // if a conversationId has been provided, use that
     // if not, check local storage
     // last resort, go to welcome conversation
-    (id?: string) => id ?? localStorageLastConversationId ?? WELCOME_CONVERSATION_TITLE,
-    [localStorageLastConversationId]
+    (conversationTitle?: string) =>
+      conversationTitle ?? localStorageLastConversationTitle ?? WELCOME_CONVERSATION_TITLE,
+    [localStorageLastConversationTitle]
   );
 
   // Fetch assistant capabilities
@@ -304,8 +305,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       unRegisterPromptContext,
-      getLastConversationId,
-      setLastConversationId: setLocalStorageLastConversationId,
+      getLastConversationTitle,
+      setLastConversationTitle: setLocalStorageLastConversationTitle,
       baseConversations,
     }),
     [
@@ -343,8 +344,8 @@ export const AssistantProvider: React.FC<AssistantProviderProps> = ({
       title,
       toasts,
       unRegisterPromptContext,
-      getLastConversationId,
-      setLocalStorageLastConversationId,
+      getLastConversationTitle,
+      setLocalStorageLastConversationTitle,
       baseConversations,
     ]
   );

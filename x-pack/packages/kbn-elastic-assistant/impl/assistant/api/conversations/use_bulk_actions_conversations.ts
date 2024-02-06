@@ -6,7 +6,8 @@
  */
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { HttpSetup } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
+import { HttpSetup, IToasts } from '@kbn/core/public';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
@@ -44,7 +45,7 @@ export interface BulkActionResponse {
   success?: boolean;
   conversations_count?: number;
   message?: string;
-  status_code?: number;
+  statusCode?: number;
   attributes: BulkActionAttributes;
 }
 
@@ -97,9 +98,10 @@ const transformUpdateActions = (
     []
   );
 
-export const bulkChangeConversations = (
+export const bulkChangeConversations = async (
   http: HttpSetup,
-  conversationsActions: ConversationsBulkActions
+  conversationsActions: ConversationsBulkActions,
+  toasts?: IToasts
 ) => {
   // transform conversations disctionary to array of Conversations to create
   // filter marked as deleted
@@ -113,13 +115,37 @@ export const bulkChangeConversations = (
     ? transformUpdateActions(conversationsActions.update, conversationsActions.delete?.ids)
     : undefined;
 
-  return http.fetch<BulkActionResponse>(ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION, {
-    method: 'POST',
-    version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
-    body: JSON.stringify({
-      update: conversationsToUpdate,
-      create: conversationsToCreate,
-      delete: conversationsActions.delete,
-    }),
-  });
+  try {
+    const result = await http.fetch<BulkActionResponse>(
+      ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
+      {
+        method: 'POST',
+        version: ELASTIC_AI_ASSISTANT_API_CURRENT_VERSION,
+        body: JSON.stringify({
+          update: conversationsToUpdate,
+          create: conversationsToCreate,
+          delete: conversationsActions.delete,
+        }),
+      }
+    );
+    if (!result.success) {
+      const serverError = result.attributes.errors
+        ?.map(
+          (e) =>
+            `Error code: ${e.status_code}. Error message: ${
+              e.message
+            } for conversation ${e.conversations.map((c) => c.name).join(',')}`
+        )
+        .join(',\n');
+      throw new Error(serverError);
+    }
+    return result;
+  } catch (error) {
+    toasts?.addError(error.body && error.body.message ? new Error(error.body.message) : error, {
+      title: i18n.translate('xpack.elasticAssistant.conversations.getConversationError', {
+        defaultMessage: 'Error updating conversations {error}',
+        values: { error },
+      }),
+    });
+  }
 };

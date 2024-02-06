@@ -31,7 +31,7 @@ interface OwnProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   isDisabled: boolean;
   isSettingsModalVisible: boolean;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   onConversationDeleted: (conversationId: string) => void;
   onToggleShowAnonymizedValues: (e: EuiSwitchEvent) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
@@ -90,7 +90,10 @@ export const AssistantHeader: React.FC<Props> = ({
             selectedConversation={currentConversation}
             onChange={(updatedConversation) => {
               setCurrentConversation(updatedConversation);
-              onConversationSelected({ cId: updatedConversation.id });
+              onConversationSelected({
+                cId: updatedConversation.id,
+                cTitle: updatedConversation.title,
+              });
             }}
             title={title}
           />
@@ -105,7 +108,7 @@ export const AssistantHeader: React.FC<Props> = ({
           <ConversationSelector
             defaultConnectorId={defaultConnectorId}
             defaultProvider={defaultProvider}
-            selectedConversationId={currentConversation.id}
+            selectedConversationTitle={currentConversation.title}
             onConversationSelected={onConversationSelected}
             shouldDisableKeyboardShortcut={shouldDisableKeyboardShortcut}
             isDisabled={isDisabled}

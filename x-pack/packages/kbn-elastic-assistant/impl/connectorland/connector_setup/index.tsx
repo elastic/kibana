@@ -38,7 +38,7 @@ const SkipEuiText = styled(EuiText)`
 export interface ConnectorSetupProps {
   conversation?: Conversation;
   onSetupComplete?: () => void;
-  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle?: string }) => Promise<void>;
+  onConversationUpdate: ({ cId, cTitle }: { cId: string; cTitle: string }) => Promise<void>;
 }
 
 export const useConnectorSetup = ({

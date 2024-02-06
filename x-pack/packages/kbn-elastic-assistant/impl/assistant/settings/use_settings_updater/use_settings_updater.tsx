@@ -52,6 +52,7 @@ export const useSettingsUpdater = (
     setDefaultAllowReplacement,
     setKnowledgeBase,
     http,
+    toasts,
   } = useAssistantContext();
 
   /**
@@ -102,7 +103,7 @@ export const useSettingsUpdater = (
   const saveSettings = useCallback(async (): Promise<void> => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
-    await bulkChangeConversations(http, conversationsSettingsBulkActions);
+    await bulkChangeConversations(http, conversationsSettingsBulkActions, toasts);
 
     const didUpdateKnowledgeBase =
       knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
@@ -128,6 +129,7 @@ export const useSettingsUpdater = (
     updatedSystemPromptSettings,
     http,
     conversationsSettingsBulkActions,
+    toasts,
     knowledgeBase.isEnabledKnowledgeBase,
     knowledgeBase.isEnabledRAGAlerts,
     updatedKnowledgeBaseSettings,

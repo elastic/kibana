@@ -9,7 +9,7 @@ import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NewChatById } from '@kbn/elastic-assistant';
+import { NewChatByTitle } from '@kbn/elastic-assistant';
 import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
@@ -57,8 +57,10 @@ export const HeaderActions: VFC = memo(() => {
     >
       {showAssistant && (
         <EuiFlexItem grow={false}>
-          <NewChatById
-            conversationId={isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID}
+          <NewChatByTitle
+            conversationTitle={
+              isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID
+            }
             promptContextId={promptContextId}
             iconOnly
           />

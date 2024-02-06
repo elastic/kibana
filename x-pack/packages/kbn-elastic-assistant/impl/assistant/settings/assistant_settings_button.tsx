@@ -20,7 +20,7 @@ interface Props {
   isSettingsModalVisible: boolean;
   selectedConversation: Conversation;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
+  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle: string }) => void;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
   refetchConversationsState: () => Promise<void>;

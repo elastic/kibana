@@ -65,7 +65,7 @@ describe('Assistant', () => {
   });
 
   describe('when selected conversation changes and some connectors are loaded', () => {
-    it('should persist the conversation id to local storage', async () => {
+    it('should persist the conversation title to local storage', async () => {
       const connectors: unknown[] = [{}];
 
       jest.mocked(useLoadConnectors).mockReturnValue({
@@ -76,13 +76,13 @@ describe('Assistant', () => {
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: {
           Welcome: {
-            id: 'Welcome',
+            id: 'Welcome Id',
             title: 'Welcome',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
-            id: 'electric sheep',
+            id: 'electric sheep id',
             title: 'electric sheep',
             messages: [],
             apiConfig: {},
@@ -119,13 +119,13 @@ describe('Assistant', () => {
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: {
           Welcome: {
-            id: 'Welcome',
+            id: 'Welcome Id',
             title: 'Welcome',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
-            id: 'electric sheep',
+            id: 'electric sheep id',
             title: 'electric sheep',
             messages: [],
             apiConfig: {},
@@ -151,9 +151,9 @@ describe('Assistant', () => {
       });
       expect(persistToLocalStorage).toHaveBeenLastCalledWith(WELCOME_CONVERSATION_TITLE);
     });
-    it('should call the setConversationId callback if it is defined and the conversation id changes', async () => {
+    it('should call the setConversationTitle callback if it is defined and the conversation id changes', async () => {
       const connectors: unknown[] = [{}];
-      const setConversationId = jest.fn();
+      const setConversationTitle = jest.fn();
       jest.mocked(useLoadConnectors).mockReturnValue({
         isSuccess: true,
         data: connectors,
@@ -162,13 +162,13 @@ describe('Assistant', () => {
       jest.mocked(useFetchCurrentUserConversations).mockReturnValue({
         data: {
           Welcome: {
-            id: 'Welcome',
+            id: 'Welcome Id',
             title: 'Welcome',
             messages: [],
             apiConfig: {},
           },
           'electric sheep': {
-            id: 'electric sheep',
+            id: 'electric sheep id',
             title: 'electric sheep',
             messages: [],
             apiConfig: {},
@@ -178,13 +178,13 @@ describe('Assistant', () => {
         refetch: jest.fn(),
       } as unknown as UseQueryResult<Record<string, Conversation>, unknown>);
 
-      renderAssistant({ setConversationId });
+      renderAssistant({ setConversationTitle });
 
       await act(async () => {
         fireEvent.click(screen.getByLabelText('Previous conversation'));
       });
 
-      expect(setConversationId).toHaveBeenLastCalledWith('electric sheep');
+      expect(setConversationTitle).toHaveBeenLastCalledWith('electric sheep');
     });
   });
 

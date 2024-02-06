@@ -118,7 +118,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
         if (selectedSystemPrompt != null) {
           setConversationSettings((prev) =>
             keyBy(
-              'id',
+              'title',
               /*
                * updatedConversationWithPrompts calculates the present of prompt for
                * each conversation. Based on the values of selected conversation, it goes
@@ -160,7 +160,7 @@ export const SystemPromptSettings: React.FC<Props> = React.memo(
                 : {};
 
             const updateOperation =
-              convo.id === convo.title
+              convo.id !== convo.title
                 ? {
                     update: {
                       ...(updatedConversationsSettingsBulkActions.update ?? {}),

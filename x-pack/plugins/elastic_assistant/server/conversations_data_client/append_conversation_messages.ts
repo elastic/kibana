@@ -69,7 +69,7 @@ export const appendConversationMessages = async ({
       },
     });
     if (response.failures && response.failures.length > 0) {
-      logger.warn(
+      logger.error(
         `Error appending conversation messages: ${response.failures.map(
           (f) => f.id
         )} for conversation by ID: ${existingConversation.id}`
@@ -86,7 +86,7 @@ export const appendConversationMessages = async ({
     });
     return updatedConversation;
   } catch (err) {
-    logger.warn(
+    logger.error(
       `Error appending conversation messages: ${err} for conversation by ID: ${existingConversation.id}`
     );
     throw err;
