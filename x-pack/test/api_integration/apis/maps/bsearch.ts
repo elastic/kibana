@@ -49,13 +49,12 @@ export default function ({ getService }: FtrProviderContext) {
         const jsonBody = parseBfetchResponse(resp);
         expect(resp.status).to.be(200);
         expect(jsonBody[0].result.rawResponse).to.eql({
-          all_columns: [
+          columns: [
             {
               name: 'geo.coordinates',
               type: 'geo_point',
-            },
+            }
           ],
-          columns: [],
           values: [],
         });
       });
@@ -70,6 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 request: {
                   params: {
+                    dropNullColumns: true,
                     query:
                       'from logstash-* | keep geo.coordinates, @timestamp | sort @timestamp | limit 1',
                   },
