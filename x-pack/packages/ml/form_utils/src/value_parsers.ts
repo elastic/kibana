@@ -14,6 +14,6 @@
 export const valueParsers = {
   defaultParser: (v: string) => v,
   nullableNumberParser: (v: string) => (v === '' ? null : +v),
-  numberParser: (v: string) => +v,
+  numberParser: (v: string) => (v === '' ? NaN : +v),
 };
 export type ValueParserName = keyof typeof valueParsers;
