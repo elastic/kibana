@@ -352,7 +352,10 @@ export const nonRuleAlert = () => ({
   alertTypeId: 'something',
 });
 
-export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> => ({
+export const getRuleMock = <T extends RuleParams>(
+  params: T,
+  rewrites?: Partial<SanitizedRule<T>>
+): SanitizedRule<T> => ({
   id: '04128c15-0d1b-4716-a4c5-46997ac7f3bd',
   name: 'Detect Root/Admin Users',
   tags: [],
@@ -377,6 +380,7 @@ export const getRuleMock = <T extends RuleParams>(params: T): SanitizedRule<T> =
     lastExecutionDate: new Date('2020-08-20T19:23:38Z'),
   },
   revision: 0,
+  ...rewrites,
 });
 
 export const resolveRuleMock = <T extends RuleParams>(params: T): ResolvedSanitizedRule<T> => ({

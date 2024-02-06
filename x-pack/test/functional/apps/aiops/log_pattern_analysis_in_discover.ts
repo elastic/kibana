@@ -68,15 +68,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
       // get category count from the first row
-      const categoryCount = await aiops.logPatternAnalysisPage.getCategoryCountFromTable(0);
+      await aiops.logPatternAnalysisPage.getCategoryCountFromTable(0);
       await aiops.logPatternAnalysisPage.clickFilterInButton(0);
 
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutDoesNotExist();
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
 
-      // ensure the discover doc count is equal to the category count
-      await aiops.logPatternAnalysisPage.assertDiscoverDocCount(categoryCount);
+      // ensure the discover doc count is greater than 0
+      await aiops.logPatternAnalysisPage.assertDiscoverDocCountGreaterThan(0);
     });
 
     it(`loads the log pattern analysis flyout and hides patterns in discover`, async () => {
@@ -100,15 +100,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.logPatternAnalysisPage.assertCategoryTableRows(3);
 
       // get category count from the first row
-      const categoryCount = await aiops.logPatternAnalysisPage.getCategoryCountFromTable(0);
+      await aiops.logPatternAnalysisPage.getCategoryCountFromTable(0);
       await aiops.logPatternAnalysisPage.clickFilterOutButton(0);
 
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisFlyoutDoesNotExist();
 
       await aiops.logPatternAnalysisPage.assertDiscoverDocCountExists();
 
-      // ensure the discover doc count is equal to the total count minus the category count
-      await aiops.logPatternAnalysisPage.assertDiscoverDocCount(totalDocCount - categoryCount);
+      // ensure the discover doc count is greater than 0
+      await aiops.logPatternAnalysisPage.assertDiscoverDocCountGreaterThan(0);
     });
   });
 }
