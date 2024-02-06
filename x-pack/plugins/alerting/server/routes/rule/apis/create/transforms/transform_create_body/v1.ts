@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { RuleActionTypes } from '../../../../../../../common';
 import type {
   CreateRuleActionV1,
   CreateRuleRequestBodyV1,
@@ -33,7 +32,6 @@ const transformCreateBodyActions = (
           actionTypeId: action.actionTypeId,
           ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
           ...(action.uuid ? { uuid: action.uuid } : {}),
-          type: RuleActionTypes.SYSTEM,
         };
       }
 
@@ -54,7 +52,6 @@ const transformCreateBodyActions = (
             }
           : {}),
         ...(alertsFilter ? { alertsFilter } : {}),
-        type: RuleActionTypes.DEFAULT,
       };
     }
   ) as CreateRuleData['actions'];

@@ -31,7 +31,7 @@ describe('listTypesSystemRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types_with_system"`);
 
     const listTypes = [
       {
@@ -93,7 +93,7 @@ describe('listTypesSystemRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types_with_system"`);
 
     const listTypes = [
       {
@@ -144,6 +144,7 @@ describe('listTypesSystemRoute', () => {
       Array [
         Object {
           "featureId": "alerting",
+          "includeSystemActionTypes": true,
         },
       ]
     `);
@@ -172,7 +173,7 @@ describe('listTypesSystemRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types_with_system"`);
 
     const listTypes = [
       {
@@ -215,7 +216,7 @@ describe('listTypesSystemRoute', () => {
 
     const [config, handler] = router.get.mock.calls[0];
 
-    expect(config.path).toMatchInlineSnapshot(`"/api/actions/connector_types"`);
+    expect(config.path).toMatchInlineSnapshot(`"/internal/actions/connector_types_with_system"`);
 
     const listTypes = [
       {
