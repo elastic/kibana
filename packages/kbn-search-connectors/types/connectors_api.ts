@@ -30,3 +30,7 @@ export interface ConnectorsAPISyncJobResponse {
 export interface ConnectorSecretCreateResponse {
   id: string;
 }
+
+export interface ConnectorSecretUpdateResponse {
+  result: Result;
+}

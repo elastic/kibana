@@ -61,10 +61,12 @@ const ConfirmModal: React.FC<{
   </EuiConfirmModal>
 );
 
-export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> = ({
-  hasApiKey,
-  indexName,
-}) => {
+export const ApiKeyConfig: React.FC<{
+  hasApiKey: boolean;
+  indexName: string;
+  isNative: boolean;
+  secretId: string | null;
+}> = ({ hasApiKey, indexName, isNative, secretId }) => {
   const { makeRequest, apiReset } = useActions(GenerateConnectorApiKeyApiLogic);
   const { data, status } = useValues(GenerateConnectorApiKeyApiLogic);
   useEffect(() => {
@@ -76,7 +78,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
     if (hasApiKey || data) {
       setIsModalVisible(true);
     } else {
-      makeRequest({ indexName });
+      makeRequest({ indexName, isNative, secretId });
     }
   };
 
@@ -87,7 +89,7 @@ export const ApiKeyConfig: React.FC<{ hasApiKey: boolean; indexName: string }> =
   };
 
   const onConfirm = () => {
-    makeRequest({ indexName });
+    makeRequest({ indexName, isNative, secretId });
     setIsModalVisible(false);
   };
 
