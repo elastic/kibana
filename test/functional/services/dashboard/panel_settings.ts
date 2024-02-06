@@ -64,6 +64,10 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
           );
         }
       });
+
+      await retry.waitFor('superDatePickerToggleQuickMenuButton', async () => {
+        return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+      });
     }
 
     public async disableCustomTimeRange() {
