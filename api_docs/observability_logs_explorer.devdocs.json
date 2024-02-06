@@ -321,10 +321,10 @@
     "interfaces": [
       {
         "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.ObservabilityLogExplorerLocators",
+        "id": "def-common.ObservabilityLogsExplorerLocators",
         "type": "Interface",
         "tags": [],
-        "label": "ObservabilityLogExplorerLocators",
+        "label": "ObservabilityLogsExplorerLocators",
         "description": [],
         "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
         "deprecated": false,
@@ -332,7 +332,7 @@
         "children": [
           {
             "parentPluginId": "observabilityLogsExplorer",
-            "id": "def-common.ObservabilityLogExplorerLocators.allDatasetsLocator",
+            "id": "def-common.ObservabilityLogsExplorerLocators.allDatasetsLocator",
             "type": "Object",
             "tags": [],
             "label": "allDatasetsLocator",
@@ -361,7 +361,7 @@
           },
           {
             "parentPluginId": "observabilityLogsExplorer",
-            "id": "def-common.ObservabilityLogExplorerLocators.singleDatasetLocator",
+            "id": "def-common.ObservabilityLogsExplorerLocators.singleDatasetLocator",
             "type": "Object",
             "tags": [],
             "label": "singleDatasetLocator",
