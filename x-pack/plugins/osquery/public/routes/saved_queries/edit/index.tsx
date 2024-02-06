@@ -69,7 +69,7 @@ const EditSavedQueryPageComponent = () => {
           <EuiButtonEmpty iconType="arrowLeft" {...savedQueryListProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.editSavedQuery.viewSavedQueriesListTitle"
-              defaultMessage="View all saved queries"
+              defaultMessage="View all filter sets"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>

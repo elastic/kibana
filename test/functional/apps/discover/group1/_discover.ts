@@ -70,7 +70,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      it('renaming a saved query should modify name in breadcrumb', async function () {
+      it('renaming a filter set should modify name in breadcrumb', async function () {
         const queryName2 = 'Modified Query # 1';
         await PageObjects.discover.loadSavedSearch(queryName1);
         await PageObjects.discover.saveSearch(queryName2);

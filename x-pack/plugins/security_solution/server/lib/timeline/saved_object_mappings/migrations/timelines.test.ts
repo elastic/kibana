@@ -24,7 +24,7 @@ describe('timeline migrations', () => {
       ]);
     });
 
-    it('preserves additional fields when migrating saved query id', () => {
+    it('preserves additional fields when migrating filter set id', () => {
       const migratedDoc = migrateSavedQueryIdToReferences({
         id: '1',
         type: 'awesome',

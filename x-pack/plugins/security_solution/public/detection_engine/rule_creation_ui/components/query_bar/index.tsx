@@ -43,11 +43,11 @@ export interface QueryBarDefineRuleProps {
   onValidityChange?: (arg: boolean) => void;
   isDisabled?: boolean;
   /**
-   * if saved query selected, reset query and filters to saved query values
+   * if filter set selected, reset query and filters to filter set values
    */
   resetToSavedQuery?: boolean;
   /**
-   * called when fetching of saved query fails
+   * called when fetching of filter set fails
    */
   onSavedQueryError?: () => void;
   defaultSavedQuery?: SavedQuery | undefined;
@@ -180,7 +180,7 @@ export const QueryBarDefineRule = ({
     }
   }, [onSavedQueryError, isSavedQueryFailedToLoad]);
 
-  // if saved query fetched, reset values in queryBar input and filters to saved query's values
+  // if filter set fetched, reset values in queryBar input and filters to filter set's values
   useEffect(() => {
     if (resetToSavedQuery && savedQuery) {
       const newFiledValue = savedQueryToFieldValue(savedQuery);
@@ -202,7 +202,7 @@ export const QueryBarDefineRule = ({
     (newQuery: Query) => {
       const { query } = fieldValue;
       if (!deepEqual(query, newQuery)) {
-        // if saved query failed to load, delete saved_id, when user types custom query
+        // if filter set failed to load, delete saved_id, when user types custom query
         const savedId = isSavedQueryFailedToLoad ? null : fieldValue.saved_id;
 
         setFieldValue({ ...fieldValue, query: newQuery, saved_id: savedId });

@@ -258,7 +258,7 @@ const SavedQueriesPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.savedQueryList.pageTitle"
-                defaultMessage="Saved queries"
+                defaultMessage="Filter sets"
               />
             </h1>
           </EuiText>
@@ -278,7 +278,7 @@ const SavedQueriesPageComponent = () => {
       >
         <FormattedMessage
           id="xpack.osquery.savedQueryList.addSavedQueryButtonLabel"
-          defaultMessage="Add saved query"
+          defaultMessage="Add filter set"
         />
       </EuiButton>
     ),

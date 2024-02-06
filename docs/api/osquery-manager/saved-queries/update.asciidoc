@@ -1,12 +1,12 @@
 [[osquery-manager-saved-queries-api-update]]
-=== Update saved query API
+=== Update filter set API
 ++++
-<titleabbrev>Update saved query</titleabbrev>
+<titleabbrev>Update filter set</titleabbrev>
 ++++
 
-experimental[] Update saved queries.
+experimental[] Update filter sets.
 
-WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).
+WARNING: You are unable to update a prebuilt filter set (`prebuilt = true`).
 
 
 [[osquery-manager-saved-queries-api-update-request]]
@@ -24,15 +24,15 @@ WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).
   (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-  (Required, string) The ID of the saved query you want to update.
+  (Required, string) The ID of the filter set you want to update.
 
 
 [[osquery-manager-saved-queries-api-update-body-params]]
 ==== Request body
 
-`id`:: (Required, string) The saved query name.
+`id`:: (Required, string) The filter set name.
 
-`description`:: (Optional, string) The saved query description.
+`description`:: (Optional, string) The filter set description.
 
 `platform`:: (Optional, string) Restricts the query to a specified platform. The default is 'all' platforms. To specify multiple platforms, use commas. For example, 'linux,darwin'.
 
@@ -55,7 +55,7 @@ WARNING: You are unable to update a prebuilt saved query (`prebuilt = true`).
 [[osquery-manager-saved-queries-api-update-example]]
 ==== Examples
 
-Update a name of the <my_saved query> saved query:
+Update a name of the <my_saved query> filter set:
 
 [source,sh]
 --------------------------------------------------
@@ -68,7 +68,7 @@ $ curl -X PUT api/osquery/saved_queries/<id> \
 // KIBANA
 
 
-The API returns the saved query saved object:
+The API returns the filter set saved object:
 
 [source,sh]
 --------------------------------------------------

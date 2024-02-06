@@ -34,7 +34,7 @@ export const useGetSavedQuery = ({ savedQueryId, ruleType, onError }: UseGetSave
   const query = useQuery(
     ['detectionEngine', 'rule', 'savedQuery', savedQueryId],
     async () => {
-      // load saved query only if rule type === 'saved_query', as other rule types still can have saved_id property that is not used
+      // load filter set only if rule type === 'saved_query', as other rule types still can have saved_id property that is not used
       // Rule schema allows to save any rule with saved_id property, but it only used for saved_query rule type
       // In future we might look in possibility to restrict rule schema (breaking change!) and remove saved_id from the rest of rules through migration
       if (!savedQueryId || ruleType !== 'saved_query') {

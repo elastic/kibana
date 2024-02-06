@@ -76,9 +76,9 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
     payload: { dateRange: TimeRange; query?: QT | Query },
     isUpdate?: boolean
   ) => void;
-  // User has saved the current state as a saved query
+  // User has saved the current state as a filter set
   onSaved?: (savedQuery: SavedQuery) => void;
-  // User has modified the saved query, your app should persist the update
+  // User has modified the filter set, your app should persist the update
   onSavedQueryUpdated?: (savedQuery: SavedQuery) => void;
   // Execute whenever time range is updated.
   onTimeRangeChange?: (payload: { dateRange: TimeRange }) => void;
@@ -272,7 +272,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
   }
 
   /*
-   * This Function is here to show the toggle in saved query form
+   * This Function is here to show the toggle in filter set form
    * in case you the date range (from/to)
    */
   private shouldRenderTimeFilterInSavedQueryForm() {

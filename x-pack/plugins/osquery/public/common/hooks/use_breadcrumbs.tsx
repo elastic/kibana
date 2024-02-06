@@ -71,7 +71,7 @@ const breadcrumbGetters: {
     BASE_BREADCRUMB,
     {
       text: i18n.translate('xpack.osquery.breadcrumbs.savedQueriesPageTitle', {
-        defaultMessage: 'Saved queries',
+        defaultMessage: 'Filter sets',
       }),
     },
   ],
@@ -80,7 +80,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.saved_queries(),
       text: i18n.translate('xpack.osquery.breadcrumbs.savedQueriesPageTitle', {
-        defaultMessage: 'Saved queries',
+        defaultMessage: 'Filter sets',
       }),
     },
     {
@@ -94,7 +94,7 @@ const breadcrumbGetters: {
     {
       href: pagePathGetters.saved_queries(),
       text: i18n.translate('xpack.osquery.breadcrumbs.savedQueriesPageTitle', {
-        defaultMessage: 'Saved queries',
+        defaultMessage: 'Filter sets',
       }),
     },
     {

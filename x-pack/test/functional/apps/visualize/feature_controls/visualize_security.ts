@@ -138,7 +138,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows saving via the saved query management component popover with no saved query loaded', async () => {
+      it('allows saving via the filter set management component popover with no filter set loaded', async () => {
         await queryBar.setQuery('response:200');
         await queryBar.clickQuerySubmitButton();
         await testSubjects.click('showQueryBarMenu');
@@ -151,7 +151,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryMissingOrFail('foo');
       });
 
-      it('allow saving changes to a currently loaded query via the saved query management component', async () => {
+      it('allow saving changes to a currently loaded query via the filter set management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery(
@@ -280,27 +280,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
+      it('allows loading a filter set via the filter set management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:200');
       });
 
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+      it('does not allow saving via the filter set management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
+      it('does not allow saving changes to filter set from the filter set management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
       });
 
-      it('does not allow deleting a saved query from the saved query management component', async () => {
+      it('does not allow deleting a filter set from the filter set management component', async () => {
         await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
       });
 
-      it('allows clearing the currently loaded saved query', async () => {
+      it('allows clearing the currently loaded filter set', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
       });
@@ -388,27 +388,27 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.share.clickShareTopNavButton();
       });
 
-      it('allows loading a saved query via the saved query management component', async () => {
+      it('allows loading a filter set via the filter set management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         const queryString = await queryBar.getQueryString();
         expect(queryString).to.eql('response:200');
       });
 
-      it('does not allow saving via the saved query management component popover with no query loaded', async () => {
+      it('does not allow saving via the filter set management component popover with no query loaded', async () => {
         await savedQueryManagementComponent.saveNewQueryMissingOrFail();
       });
 
-      it('does not allow saving changes to saved query from the saved query management component', async () => {
+      it('does not allow saving changes to filter set from the filter set management component', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQueryMissingOrFail();
       });
 
-      it('does not allow deleting a saved query from the saved query management component', async () => {
+      it('does not allow deleting a filter set from the filter set management component', async () => {
         await savedQueryManagementComponent.deleteSavedQueryMissingOrFail('OKJpgs');
       });
 
-      it('allows clearing the currently loaded saved query', async () => {
+      it('allows clearing the currently loaded filter set', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OKJpgs');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
       });

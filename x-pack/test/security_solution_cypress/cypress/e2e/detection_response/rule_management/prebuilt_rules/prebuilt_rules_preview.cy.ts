@@ -338,7 +338,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
 
   const testSavedQuery = {
     query: 'agent.id: *',
-    name: 'My test saved query',
+    name: 'My test filter set',
     filterKey: 'agent.hostname',
   };
 

@@ -21,11 +21,11 @@ import {
 import { navigateTo } from './navigation';
 
 export const getSavedQueriesComplexTest = () =>
-  describe('Saved queries Complex Test', () => {
+  describe('Filter sets Complex Test', () => {
     const timeout = '601';
     const suffix = generateRandomStringName(1)[0];
     const savedQueryId = `Saved-Query-Id-${suffix}`;
-    const savedQueryDescription = `Test saved query description ${suffix}`;
+    const savedQueryDescription = `Test filter set description ${suffix}`;
 
     it(
       'should create a new query and verify: \n ' +
@@ -87,14 +87,14 @@ export const getSavedQueriesComplexTest = () =>
         // save new query
         cy.contains('Exit full screen').should('not.exist');
         cy.contains('Save for later').click();
-        cy.contains('Save query');
+        cy.contains('Save filter set');
         cy.get('input[name="id"]').type(`${savedQueryId}{downArrow}{enter}`);
         cy.get('input[name="description"]').type(`${savedQueryDescription}{downArrow}{enter}`);
         cy.getBySel('savedQueryFlyoutSaveButton').click();
         cy.contains('Successfully saved');
         closeToastIfVisible();
 
-        // play saved query
+        // play filter set
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryId);
         cy.get(`[aria-label="Run ${savedQueryId}"]`).click();
@@ -102,8 +102,8 @@ export const getSavedQueriesComplexTest = () =>
         verifyQueryTimeout(timeout);
         submitQuery();
 
-        // edit saved query
-        cy.contains('Saved queries').click();
+        // edit filter set
+        cy.contains('Filter sets').click();
         cy.contains(savedQueryId);
 
         cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
@@ -132,7 +132,7 @@ export const getSavedQueriesComplexTest = () =>
         cy.getBySel('update-query-button').click();
         cy.contains(`${savedQueryDescription} Edited`);
 
-        // delete saved query
+        // delete filter set
         cy.contains(savedQueryId);
         cy.get(`[aria-label="Edit ${savedQueryId}"]`).click();
 

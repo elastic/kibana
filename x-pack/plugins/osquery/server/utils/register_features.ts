@@ -87,7 +87,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
                 api: [`${PLUGIN_ID}-runSavedQueries`],
                 id: 'run_saved_queries',
                 name: i18n.translate('xpack.osquery.features.runSavedQueriesPrivilegeName', {
-                  defaultMessage: 'Run Saved queries',
+                  defaultMessage: 'Run Filter sets',
                 }),
                 includeIn: 'all',
                 savedObject: {
@@ -102,7 +102,7 @@ export const registerFeatures = (features: SetupPlugins['features']) => {
       },
       {
         name: i18n.translate('xpack.osquery.features.savedQueriesSubFeatureName', {
-          defaultMessage: 'Saved queries',
+          defaultMessage: 'Filter sets',
         }),
         privilegeGroups: [
           {

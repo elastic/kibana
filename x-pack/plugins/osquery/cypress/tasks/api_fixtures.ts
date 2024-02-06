@@ -22,7 +22,7 @@ import { ServerlessRoleName } from '../support/roles';
 
 export const savedQueryFixture = {
   id: generateRandomStringName(1)[0],
-  description: 'Test saved query description',
+  description: 'Test filter set description',
   ecs_mapping: { labels: { field: 'hours' } },
   interval: '3600',
   query: 'select * from uptime;',

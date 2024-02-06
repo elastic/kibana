@@ -66,7 +66,7 @@ export const createSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
           conflictingEntries.saved_objects.length &&
           some(conflictingEntries.saved_objects, ['attributes.id', id])
         ) {
-          return response.conflict({ body: `Saved query with id "${id}" already exists.` });
+          return response.conflict({ body: `Filter set with id "${id}" already exists.` });
         }
 
         const savedQuerySO = await savedObjectsClient.create(

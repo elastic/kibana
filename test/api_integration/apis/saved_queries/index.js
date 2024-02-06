@@ -7,7 +7,7 @@
  */
 
 export default function ({ loadTestFile }) {
-  describe('Saved queries', () => {
+  describe('Filter sets', () => {
     loadTestFile(require.resolve('./saved_queries'));
   });
 }

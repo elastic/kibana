@@ -104,7 +104,7 @@ To add existing panels from the *Visualize Library*:
 
 . Click the panel you want to add to the dashboard, then click *X*.
 +
-When a panel contains a saved query, both queries are applied.
+When a panel contains a filter set, both queries are applied.
 +
 When you add search results from *Discover* to dashboards, the results are not aggregated.
 

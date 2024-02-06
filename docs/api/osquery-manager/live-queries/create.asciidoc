@@ -35,7 +35,7 @@ experimental[] Create live queries.
 
 `query`:: (Optional, string) The SQL query you want to run.
 
-`saved_query_id`:: (Optional, string) The ID of a saved query.
+`saved_query_id`:: (Optional, string) The ID of a filter set.
 
 `ecs_mapping`:: (Optional, object) Map osquery results columns or static values to Elastic Common Schema (ECS) fields.
 

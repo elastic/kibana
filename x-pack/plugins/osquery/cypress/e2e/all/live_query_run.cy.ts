@@ -90,7 +90,7 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
       });
   });
 
-  it('should run customized saved query', () => {
+  it('should run customized filter set', () => {
     cy.contains('New live query').click();
     selectAllAgents();
     cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);

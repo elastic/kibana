@@ -73,7 +73,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
         );
 
         if (isPrebuilt) {
-          return response.conflict({ body: `Elastic prebuilt Saved query cannot be updated.` });
+          return response.conflict({ body: `Elastic prebuilt Filter set cannot be updated.` });
         }
 
         const conflictingEntries = await savedObjectsClient.find<{ id: string }>({
@@ -90,7 +90,7 @@ export const updateSavedQueryRoute = (router: IRouter, osqueryContext: OsqueryAp
             ['attributes.id', id]
           )
         ) {
-          return response.conflict({ body: `Saved query with id "${id}" already exists.` });
+          return response.conflict({ body: `Filter set with id "${id}" already exists.` });
         }
 
         const updatedSavedQuerySO = await savedObjectsClient.update(

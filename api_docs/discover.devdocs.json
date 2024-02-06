@@ -247,7 +247,7 @@
             "tags": [],
             "label": "savedQuery",
             "description": [
-              "\nid of the used saved query"
+              "\nid of the used filter set"
             ],
             "signature": [
               "string | undefined"
@@ -2896,7 +2896,7 @@
             "tags": [],
             "label": "savedQuery",
             "description": [
-              "\nid of the used saved query"
+              "\nid of the used filter set"
             ],
             "signature": [
               "string | undefined"

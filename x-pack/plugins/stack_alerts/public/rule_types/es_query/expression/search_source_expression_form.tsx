@@ -155,7 +155,7 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
     }
   };
 
-  // Saved query
+  // Filter set
   const onSavedQuery = useCallback((newSavedQuery: SavedQuery) => {
     setSavedQuery(newSavedQuery);
     const newFilters = newSavedQuery.attributes.filters;

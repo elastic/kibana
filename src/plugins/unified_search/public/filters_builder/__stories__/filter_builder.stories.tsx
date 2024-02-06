@@ -119,7 +119,7 @@ const services = {
               {
                 id: 'testwewe',
                 attributes: {
-                  title: 'Saved query 1',
+                  title: 'Filter set 1',
                   description: '',
                   query: {
                     query: 'category.keyword : "Men\'s Shoes" ',

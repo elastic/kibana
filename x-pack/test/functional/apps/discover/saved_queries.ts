@@ -45,9 +45,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await spaces.delete(destinationSpaceId);
     });
 
-    describe('Manage saved queries', () => {
-      it('delete saved query shared in multiple spaces', async () => {
-        // Navigate to Discover & create a saved query
+    describe('Manage filter sets', () => {
+      it('delete filter set shared in multiple spaces', async () => {
+        // Navigate to Discover & create a filter set
         await PageObjects.common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
         await queryBar.submitQuery();
@@ -55,7 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryExistOrFail(savedQueryName);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
-        // Navigate to settings & share the saved query between multiple spaces
+        // Navigate to settings & share the filter set between multiple spaces
         await PageObjects.common.navigateToApp('settings');
         await PageObjects.settings.clickKibanaSavedObjects();
         await PageObjects.shareSavedObjectsToSpace.openShareToSpaceFlyoutForObject(savedQueryName);
@@ -73,10 +73,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryMissingOrFail(savedQueryName);
       });
 
-      it('updates a saved query', async () => {
+      it('updates a filter set', async () => {
         const name = `${savedQueryName}-update`;
 
-        // Navigate to Discover & create a saved query
+        // Navigate to Discover & create a filter set
         await PageObjects.common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
         await queryBar.submitQuery();
@@ -84,7 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryExistOrFail(name);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
 
-        // Update the saved query
+        // Update the filter set
         await queryBar.setQuery('response:404');
         await queryBar.submitQuery();
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('', true, false);

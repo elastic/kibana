@@ -105,7 +105,7 @@ export const getFilter = async ({
         } else {
           // user did not give any additional fall back mechanism for generating a rule
           // rethrow error for activity monitoring
-          err.message = `Failed to fetch saved query. "${err.message}"`;
+          err.message = `Failed to fetch filter set. "${err.message}"`;
           throw err;
         }
       }

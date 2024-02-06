@@ -1,6 +1,6 @@
 {
   "name": "Saved Query with all possible fields filled out",
-  "description": "Kitchen Sink (everything) saved query that has all possible fields filled out",
+  "description": "Kitchen Sink (everything) filter set that has all possible fields filled out",
   "false_positives": [
     "https://www.example.com/some-article-about-a-false-positive",
     "some text string about why another condition could be a false positive"

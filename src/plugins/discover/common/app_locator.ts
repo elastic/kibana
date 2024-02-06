@@ -87,7 +87,7 @@ export interface DiscoverAppLocatorParams extends SerializableRecord {
   sort?: string[][];
 
   /**
-   * id of the used saved query
+   * id of the used filter set
    */
   savedQuery?: string;
   /**

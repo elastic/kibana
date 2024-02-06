@@ -1,12 +1,12 @@
 [[osquery-manager-saved-queries-api-delete]]
-=== Delete saved query API
+=== Delete filter set API
 ++++
-<titleabbrev>Delete saved query</titleabbrev>
+<titleabbrev>Delete filter set</titleabbrev>
 ++++
 
-experimental[] Delete saved queries.
+experimental[] Delete filter sets.
 
-WARNING: Once you delete a saved query, _it cannot be recovered_.
+WARNING: Once you delete a filter set, _it cannot be recovered_.
 
 
 [[osquery-manager-saved-queries-api-delete-request]]
@@ -24,19 +24,19 @@ WARNING: Once you delete a saved query, _it cannot be recovered_.
   (Optional, string) The space identifier. When `space_id` is not provided in the URL, the default space is used.
 
 `id`::
-  (Required, string) The ID of the saved query you want to delete.
+  (Required, string) The ID of the filter set you want to delete.
 
 
 [[osquery-manager-saved-queries-api-delete-response-codes]]
 ==== Response code
 
 `200`::
-  Indicates the saved query is deleted. Returns an empty response body. 
+  Indicates the filter set is deleted. Returns an empty response body. 
 
 [[osquery-manager-saved-queries-api-delete-example]]
 ==== Example
 
-Delete a saved query object with the `42ba9c50-0cc5-11ed-aa1d-2b27890bc90d` ID:
+Delete a filter set object with the `42ba9c50-0cc5-11ed-aa1d-2b27890bc90d` ID:
 
 [source,sh]
 --------------------------------------------------

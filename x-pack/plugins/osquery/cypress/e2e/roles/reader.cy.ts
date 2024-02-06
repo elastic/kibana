@@ -51,10 +51,10 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     cleanupPack(packId);
   });
 
-  it('should not be able to add nor run saved queries', () => {
+  it('should not be able to add nor run filter sets', () => {
     navigateTo('/app/osquery/saved_queries');
     cy.contains(savedQueryName);
-    cy.contains('Add saved query').should('be.disabled');
+    cy.contains('Add filter set').should('be.disabled');
     cy.get(customActionRunSavedQuerySelector(savedQueryName)).should('not.exist');
     cy.get(customActionEditSavedQuerySelector(savedQueryName)).click();
     cy.get(formFieldInputSelector('id')).should('be.disabled');
@@ -64,7 +64,7 @@ describe('Reader - only READ', { tags: ['@ess'] }, () => {
     cy.contains(`Delete query`).should('not.exist');
   });
 
-  it('should not be able to enter live queries with just read and no run saved queries', () => {
+  it('should not be able to enter live queries with just read and no run filter sets', () => {
     navigateTo('/app/osquery/live_queries/new');
     cy.contains('Permission denied');
   });

@@ -49,7 +49,7 @@ export const MainNavigation = () => {
             >
               <FormattedMessage
                 id="xpack.osquery.appNavigation.savedQueriesLinkText"
-                defaultMessage="Saved queries"
+                defaultMessage="Filter sets"
               />
             </EuiTab>
           </EuiTabs>

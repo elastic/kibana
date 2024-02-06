@@ -44,7 +44,7 @@ describe('ALL - Inventory', { tags: ['@ess'] }, () => {
       checkResults();
     });
 
-    it('should be able to run the previously saved query', () => {
+    it('should be able to run the previously filter set', () => {
       cy.getBySel('toggleNavButton').click();
       cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 

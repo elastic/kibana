@@ -26,7 +26,7 @@ export default function ({ getService }) {
   const supertest = getService('supertest');
   void SAVED_QUERY_BASE_URL;
 
-  describe('Saved queries API', function () {
+  describe('Filter sets API', function () {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
@@ -36,7 +36,7 @@ export default function ({ getService }) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
     });
 
-    it('should return 200 for create saved query', () =>
+    it('should return 200 for create filter set', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -48,14 +48,14 @@ export default function ({ getService }) {
           expect(body.attributes.description).to.be('my description');
         }));
 
-    it('should return 400 for create invalid saved query', () =>
+    it('should return 400 for create invalid filter set', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({ description: 'my description' })
         .expect(400));
 
-    it('should return 200 for update saved query', () =>
+    it('should return 200 for update filter set', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -76,14 +76,14 @@ export default function ({ getService }) {
             })
         ));
 
-    it('should return 404 for update non-existent saved query', () =>
+    it('should return 404 for update non-existent filter set', () =>
       supertest
         .put(`${SAVED_QUERY_BASE_URL}/invalid_id`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send(mockSavedQuery)
         .expect(404));
 
-    it('should return 200 for get saved query', () =>
+    it('should return 200 for get filter set', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -100,39 +100,39 @@ export default function ({ getService }) {
             })
         ));
 
-    it('should return 404 for get non-existent saved query', () =>
+    it('should return 404 for get non-existent filter set', () =>
       supertest
         .get(`${SAVED_QUERY_BASE_URL}/invalid_id`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(404));
 
-    it('should return 200 for saved query count', () =>
+    it('should return 200 for filter set count', () =>
       supertest
         .get(`${SAVED_QUERY_BASE_URL}/_count`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200));
 
-    it('should return 200 for find saved queries', () =>
+    it('should return 200 for find filter sets', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_find`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({})
         .expect(200));
 
-    it('should return 400 for bad find saved queries request', () =>
+    it('should return 400 for bad find filter sets request', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_find`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .send({ foo: 'bar' })
         .expect(400));
 
-    it('should return 200 for find all saved queries', () =>
+    it('should return 200 for find all filter sets', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_all`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
         .expect(200));
 
-    it('should return 200 for delete saved query', () =>
+    it('should return 200 for delete filter set', () =>
       supertest
         .post(`${SAVED_QUERY_BASE_URL}/_create`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -145,7 +145,7 @@ export default function ({ getService }) {
             .expect(200)
         ));
 
-    it('should return 404 for get non-existent saved query', () =>
+    it('should return 404 for get non-existent filter set', () =>
       supertest
         .delete(`${SAVED_QUERY_BASE_URL}/invalid_id`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')

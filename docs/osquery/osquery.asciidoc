@@ -42,7 +42,7 @@ then view the results.
 . Select one or more agents or groups to query. Start typing in the search field,
 and you'll get suggestions for agents by name, ID, platform, and policy.
 . Specify the query or pack to run:
-** *Query*: Select a saved query or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to set a timeout period for the query, and view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query (optional). 
+** *Query*: Select a filter set or enter a new one in the text box. After you enter the query, you can expand the **Advanced** section to set a timeout period for the query, and view or set <<osquery-map-fields,mapped ECS fields>> included in the results from the live query (optional). 
 +
 NOTE: Overwriting the query's default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `900`.
 ** *Pack*: Select from available query packs. After you select a pack, all of the queries in the pack are displayed.
@@ -50,7 +50,7 @@ NOTE: Overwriting the query's default timeout period allows you to support queri
 TIP: Refer to <<osquery-prebuilt-packs,prebuilt packs>> to learn about using and managing Elastic prebuilt packs.
 +
 [role="screenshot"]
-image::images/enter-query.png[Select saved query dropdown name showing query name and description]
+image::images/enter-query.png[Select filter set dropdown name showing query name and description]
 
 . Click **Submit**. 
 +
@@ -104,10 +104,10 @@ NOTE: When defining pack deployment details, you cannot configure the same polic
 
 . If you're creating a new pack, add queries to schedule:
 
- ** Click *Add query* and then add a saved query or enter a new query.
+ ** Click *Add query* and then add a filter set or enter a new query.
 Each query must include a unique query ID and the interval at which it should run.
 Optionally, set the minimum Osquery version and platform, specify a timeout period,
-or <<osquery-map-fields,map ECS fields>>. When you add a saved query to a pack, this adds a copy of the query. A connection is not maintained between saved queries and packs.
+or <<osquery-map-fields,map ECS fields>>. When you add a filter set to a pack, this adds a copy of the query. A connection is not maintained between filter sets and packs.
 +
 NOTE: Overwriting the query's default timeout period allows you to support queries that require more time to complete. The default and minimum supported value for the **Timeout** field is `60`. The maximum supported value is `900`.
 
@@ -138,11 +138,11 @@ image::images/scheduled-pack.png[Shows queries in the pack and details about eac
 You can save queries in two ways:
 
 * After running a live query, click the *Save for later* link.
-* From the *Saved queries* tab, click **Add saved query**.
+* From the *Filter sets* tab, click **Add filter set**.
 
-Once you save a query, you can only edit it from the *Saved queries* tab:
+Once you save a query, you can only edit it from the *Filter sets* tab:
 
-. Go to *Saved queries*, and then click **Add saved query** or the edit icon.
+. Go to *Filter sets*, and then click **Add filter set** or the edit icon.
 . Provide the following fields:
 
 * The unique identifier (required).
@@ -224,7 +224,7 @@ To modify queries in prebuilt packs, you must first make a copy of the pack.
 [float]
 [[osquery-prebuilt-queries]]
 === Prebuilt queries
-A set of saved queries are included with the integration and available to run as a live query.
+A set of filter sets are included with the integration and available to run as a live query.
 Note the following about the prebuilt queries:
 
 * The queries are not editable.
@@ -246,9 +246,9 @@ and any other areas that rely on ECS-compliant data.
 When the query is run, the results include the original `osquery.<fields>`
 and the mapped ECS fields. For example, if you update a query to map `osquery.name` to `user.name`, the query results include both fields.
 
-. Edit saved queries or queries in a pack to map fields:
+. Edit filter sets or queries in a pack to map fields:
 
-* For *Saved queries*: Open the *Saved queries* tab, and then click the edit icon for the query that you want to map.
+* For *Filter sets*: Open the *Filter sets* tab, and then click the edit icon for the query that you want to map.
 
 * For *packs*: Open the *Packs* tab, edit a pack, and then click the edit icon for the query that you want to map.
 

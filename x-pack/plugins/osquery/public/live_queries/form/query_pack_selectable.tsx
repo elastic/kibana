@@ -112,7 +112,7 @@ export const QueryPackSelectable = ({
               description={i18n.translate(
                 'xpack.osquery.liveQuery.queryForm.singleQueryTypeDescription',
                 {
-                  defaultMessage: 'Run a saved query or new one.',
+                  defaultMessage: 'Run a filter set or new one.',
                 }
               )}
               selectable={queryCardSelectable}

@@ -5,7 +5,7 @@ info:
 paths:
   /api/osquery/saved_queries:
     get:
-      summary: Find saved queries
+      summary: Find filter sets
       parameters:
           - $ref: './find_saved_query.schema.yaml#/components/parameters/FindSavedQueryRequestQueryParameter'
       responses:
@@ -16,7 +16,7 @@ paths:
               schema:
                 $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
     post:
-      summary: Create a saved query
+      summary: Create a filter set
       requestBody:
         required: true
         content:
@@ -32,7 +32,7 @@ paths:
                 $ref: './create_saved_query.schema.yaml#/components/schemas/SuccessResponse'
   /api/osquery/saved_queries/{id}:
     get:
-      summary: Get saved query details
+      summary: Get filter set details
       parameters:
         - $ref: './read_saved_query.schema.yaml#/components/parameters/ReadSavedQueryRequestQueryParameter'
       responses:
@@ -43,7 +43,7 @@ paths:
               schema:
                 $ref: './read_saved_query.schema.yaml#/components/schemas/SuccessResponse'
     delete:
-          summary: Delete saved query
+          summary: Delete filter set
           parameters:
             - $ref: './delete_saved_query.schema.yaml#/components/parameters/DeleteSavedQueryRequestQueryParameter'
           responses:
@@ -54,7 +54,7 @@ paths:
                   schema:
                     $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
     put:
-          summary: Update saved query
+          summary: Update filter set
           requestBody:
             required: true
             content:

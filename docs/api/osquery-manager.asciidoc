@@ -1,9 +1,9 @@
 [[osquery-manager-api]]
 == Osquery manager API
 
-experimental[] Run live queries, manage packs and saved queries
+experimental[] Run live queries, manage packs and filter sets
 
-WARNING: Use the osquery manager APIs for managing packs and saved queries instead of lower-level <<saved-objects-api, saved objects API>>.
+WARNING: Use the osquery manager APIs for managing packs and filter sets instead of lower-level <<saved-objects-api, saved objects API>>.
 
 The following osquery manager APIs are available: 
 
@@ -18,12 +18,12 @@ The following osquery manager APIs are available:
     ** <<osquery-manager-packs-api-create, Create pack API>> to create a pack
     ** <<osquery-manager-packs-api-update, Update pack API>> to partially update an existing pack
     ** <<osquery-manager-packs-api-delete, Delete pack API>> to delete a pack
-* Saved queries
-    ** <<osquery-manager-saved-queries-api-get-all, Get all saved queries API>> to retrieve a list of saved queries
-    ** <<osquery-manager-saved-queries-api-get, Get saved query API>> to retrieve a saved query
-    ** <<osquery-manager-saved-queries-api-create, Create saved query API>> to create a saved query
-    ** <<osquery-manager-saved-queries-api-update, Update saved query API>> to partially update an existing saved query
-    ** <<osquery-manager-saved-queries-api-delete, Delete saved query API>> to delete a saved query
+* Filter sets
+    ** <<osquery-manager-saved-queries-api-get-all, Get all filter sets API>> to retrieve a list of filter sets
+    ** <<osquery-manager-saved-queries-api-get, Get filter set API>> to retrieve a filter set
+    ** <<osquery-manager-saved-queries-api-create, Create filter set API>> to create a filter set
+    ** <<osquery-manager-saved-queries-api-update, Update filter set API>> to partially update an existing filter set
+    ** <<osquery-manager-saved-queries-api-delete, Delete filter set API>> to delete a filter set
 
 include::osquery-manager/live-queries/get.asciidoc[]
 include::osquery-manager/live-queries/get-all.asciidoc[]

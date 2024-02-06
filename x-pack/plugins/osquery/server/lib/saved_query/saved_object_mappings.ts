@@ -102,7 +102,7 @@ export const savedQueryType: SavedObjectsType = {
     onExport: (context, objects) =>
       produce(objects, (draft) => {
         draft.forEach((savedQuerySO) => {
-          // Only prebuilt saved queries should have a version
+          // Only prebuilt filter sets should have a version
           if (savedQuerySO.attributes.version) {
             savedQuerySO.attributes.id += '_copy';
             delete savedQuerySO.attributes.version;

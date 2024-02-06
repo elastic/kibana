@@ -1,5 +1,5 @@
-title: Create saved query rule request
-description: > 
+title: Create filter set rule request
+description: >
   A rule that searches the defined indices and creates an alert when a document matches the saved search.
 type: object
 required:
@@ -21,7 +21,7 @@ properties:
     $ref: 'notify_when.yaml'
   params:
     type: object
-    description: The parameters for a saved query rule.
+    description: The parameters for a filter set rule.
     # TO-DO: Add the parameter details for this rule.
     additionalProperties: true
   rule_type_id:
@@ -35,4 +35,3 @@ properties:
     $ref: 'tags.yaml'
   throttle:
     $ref: 'throttle.yaml'
- 

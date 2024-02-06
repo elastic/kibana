@@ -4208,7 +4208,7 @@
         }
       },
       "create_siem_saved_query_rule_request": {
-        "title": "Create saved query rule request",
+        "title": "Create filter set rule request",
         "description": "A rule that searches the defined indices and creates an alert when a document matches the saved search.\n",
         "type": "object",
         "required": [
@@ -4236,7 +4236,7 @@
           },
           "params": {
             "type": "object",
-            "description": "The parameters for a saved query rule.",
+            "description": "The parameters for a filter set rule.",
             "additionalProperties": true
           },
           "rule_type_id": {

@@ -1,6 +1,6 @@
 {
   "name": "Simplest Saved Query",
-  "description": "Simplest saved query with a fallback of a query",
+  "description": "Simplest filter set with a fallback of a query",
   "risk_score": 1,
   "severity": "high",
   "type": "saved_query",

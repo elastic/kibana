@@ -100,7 +100,7 @@ describe('rule_converters', () => {
       );
     });
 
-    test('should accept saved query params when existing rule type is saved query', () => {
+    test('should accept filter set params when existing rule type is filter set', () => {
       const patchParams = {
         index: ['new-test-index'],
         language: 'lucene',
@@ -115,7 +115,7 @@ describe('rule_converters', () => {
       );
     });
 
-    test('should reject invalid saved query params when existing rule type is saved query', () => {
+    test('should reject invalid filter set params when existing rule type is filter set', () => {
       const patchParams = {
         index: [1],
         language: 'non-language',

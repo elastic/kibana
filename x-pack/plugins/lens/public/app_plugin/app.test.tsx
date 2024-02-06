@@ -1208,7 +1208,7 @@ describe('Lens App', () => {
     });
   });
 
-  describe('saved query handling', () => {
+  describe('filter set handling', () => {
     it('does not allow saving when the user is missing the saveQuery permission', async () => {
       const services = makeDefaultServicesForApp();
       services.application = {
@@ -1225,7 +1225,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('persists the saved query ID when the query is saved', async () => {
+    it('persists the filter set ID when the query is saved', async () => {
       const { instance, services } = await mountWith({});
       expect(services.navigation.ui.AggregateQueryTopNavMenu).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -1264,7 +1264,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('changes the saved query ID when the query is updated', async () => {
+    it('changes the filter set ID when the query is updated', async () => {
       const { instance, services } = await mountWith({});
       act(() => {
         instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSaved')!({
@@ -1306,7 +1306,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('updates the query if saved query is selected', async () => {
+    it('updates the query if filter set is selected', async () => {
       const { instance, services } = await mountWith({});
       act(() => {
         instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onSavedQueryUpdated')!(
@@ -1329,7 +1329,7 @@ describe('Lens App', () => {
       );
     });
 
-    it('clears all existing unpinned filters when the active saved query is cleared', async () => {
+    it('clears all existing unpinned filters when the active filter set is cleared', async () => {
       const { instance, services, lensStore } = await mountWith({});
       act(() =>
         instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({
@@ -1392,7 +1392,7 @@ describe('Lens App', () => {
       });
     });
 
-    it('updates the searchSessionId when the active saved query is cleared', async () => {
+    it('updates the searchSessionId when the active filter set is cleared', async () => {
       const { instance, services, lensStore } = await mountWith({});
       act(() =>
         instance.find(services.navigation.ui.AggregateQueryTopNavMenu).prop('onQuerySubmit')!({

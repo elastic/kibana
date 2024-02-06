@@ -262,7 +262,7 @@ describe('HomePage', () => {
     );
   });
 
-  it('initializes saved query store', async () => {
+  it('initializes filter set store', async () => {
     const state = 'test-query-id';
     const savedQueryData: SavedQuery = {
       id: 'testSavedquery',

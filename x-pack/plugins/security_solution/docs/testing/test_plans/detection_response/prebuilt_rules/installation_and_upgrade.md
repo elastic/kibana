@@ -153,9 +153,9 @@ Examples:
 │ Custom Query      │ Data view index pattern           │ Overview            │ Definition          │
 │ Custom Query      │ Custom query                      │ Overview            │ Definition          │
 │ Custom Query      │ Filters                           │ Overview            │ Definition          │
-│ Custom Query      │ Saved query name                  │ Overview            │ Definition          │
-│ Custom Query      │ Saved query filters               │ Overview            │ Definition          │
-│ Custom Query      │ Saved query                       │ Overview            │ Definition          │
+│ Custom Query      │ Filter set name                  │ Overview            │ Definition          │
+│ Custom Query      │ Filter set filters               │ Overview            │ Definition          │
+│ Custom Query      │ Filter set                       │ Overview            │ Definition          │
 │ Custom Query      │ Suppress alerts by                │ Overview            │ Definition          │
 │ Custom Query      │ Suppress alerts for               │ Overview            │ Definition          │
 │ Custom Query      │ If a suppression field is missing │ Overview            │ Definition          │

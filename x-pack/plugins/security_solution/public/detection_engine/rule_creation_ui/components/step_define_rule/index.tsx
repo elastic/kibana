@@ -376,7 +376,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     }
   }, [isThresholdRule, form]);
 
-  // if saved query failed to load:
+  // if filter set failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
   const handleSavedQueryError = useCallback(() => {
     if (!isQueryBarValid) {

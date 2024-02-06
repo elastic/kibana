@@ -21,7 +21,7 @@ import {
   SavedQueryManagementList,
 } from './saved_query_management_list';
 
-describe('Saved query management list component', () => {
+describe('Filter set management list component', () => {
   const startMock = coreMock.createStart();
   const dataMock = dataPluginMock.createStartContract();
   const applicationMock = applicationServiceMock.createStartContract();
@@ -84,13 +84,13 @@ describe('Saved query management list component', () => {
       },
     };
   });
-  it('should render the list component if saved queries exist', async () => {
+  it('should render the list component if filter sets exist', async () => {
     const component = mount(wrapSavedQueriesListComponentInContext(props));
     await flushEffect(component);
     expect(component.find('[data-test-subj="saved-query-management-list"]').length).toBe(1);
   });
 
-  it('should not rendet the list component if not saved queries exist', async () => {
+  it('should not rendet the list component if not filter sets exist', async () => {
     const newProps = {
       ...props,
       savedQueryService: {
@@ -103,7 +103,7 @@ describe('Saved query management list component', () => {
     expect(component.find('[data-test-subj="saved-query-management-empty"]').length).toBeTruthy();
   });
 
-  it('should render the saved queries on the selectable component', async () => {
+  it('should render the filter sets on the selectable component', async () => {
     const component = mount(wrapSavedQueriesListComponentInContext(props));
     await flushEffect(component);
     expect(component.find(EuiSelectable).prop('options').length).toBe(1);
@@ -137,7 +137,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Load query');
+    ).toBe('Load filter set');
 
     const newProps = {
       ...props,
@@ -150,7 +150,7 @@ describe('Saved query management list component', () => {
         .find('[data-test-subj="saved-query-management-apply-changes-button"]')
         .first()
         .text()
-    ).toBe('Load query');
+    ).toBe('Load filter set');
   });
 
   it('should render the modal on delete', async () => {

@@ -35,7 +35,7 @@ const savedQueryAttributes: SavedQueryAttributes = {
   filters: [],
 };
 
-describe('saved query service', () => {
+describe('filter set service', () => {
   afterEach(() => {
     http.post.mockReset();
     http.get.mockReset();
@@ -65,7 +65,7 @@ describe('saved query service', () => {
   });
 
   describe('getAllSavedQueries', function () {
-    it('should post and extract the saved queries from the response', async () => {
+    it('should post and extract the filter sets from the response', async () => {
       http.post.mockResolvedValue({
         total: 0,
         savedQueries: [{ attributes: savedQueryAttributes }],
@@ -78,7 +78,7 @@ describe('saved query service', () => {
   });
 
   describe('findSavedQueries', function () {
-    it('should post and return the total & saved queries', async () => {
+    it('should post and return the total & filter sets', async () => {
       http.post.mockResolvedValue({
         total: 0,
         savedQueries: [{ attributes: savedQueryAttributes }],

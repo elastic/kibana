@@ -54,10 +54,10 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
         cleanupPack(packId);
       });
 
-      it('should be able to run saved queries but not add new ones', () => {
+      it('should be able to run filter sets but not add new ones', () => {
         navigateTo('/app/osquery/saved_queries');
         cy.contains(savedQueryName);
-        cy.contains('Add saved query').should('be.disabled');
+        cy.contains('Add filter set').should('be.disabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).should('not.be.disabled');
         cy.get(`[aria-label="Run ${savedQueryName}"]`).click();
 
@@ -86,7 +86,7 @@ describe(`T1 and T2 analysts`, { tags: ['@ess', '@serverless'] }, () => {
         checkResults();
       });
 
-      it('should be able to use saved query in a new query', () => {
+      it('should be able to use filter set in a new query', () => {
         navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').should('not.be.disabled').click();
         selectAllAgents();

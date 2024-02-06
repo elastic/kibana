@@ -4,7 +4,7 @@
 <titleabbrev>Get saved-queries</titleabbrev>
 ++++
 
-experimental[] Get saved queries.
+experimental[] Get filter sets.
 
 
 [[osquery-manager-saved-queries-api-get-all-request]]
@@ -53,7 +53,7 @@ Indicates a successful call.
 [[osquery-manager-saved-queries-api-get-all-example]]
 ==== Example
 
-Retrieve the first 10 saved queries:
+Retrieve the first 10 filter sets:
 
 [source,sh]
 --------------------------------------------------
@@ -61,7 +61,7 @@ $ curl -X GET api/osquery/saved-queries?page=1&perPage=10&sortField=updatedAt&so
 --------------------------------------------------
 // KIBANA
 
-The API returns a JSON object of the retrieved saved queries:
+The API returns a JSON object of the retrieved filter sets:
 
 [source,sh]
 --------------------------------------------------
@@ -76,7 +76,7 @@ The API returns a JSON object of the retrieved saved queries:
       "namespaces": ["default"],
       "attributes": {
         "id": "saved_query_id",
-        "description": "Saved query description",
+        "description": "Filter set description",
         "query": "select * from uptime;",
         "platform": "linux,darwin",
         "version": "2.8.0",

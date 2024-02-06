@@ -2,7 +2,7 @@
 === Save a query
 
 Have you ever built a query that you wanted to reuse?
-With saved queries, you can save your query text, filters, and time range for
+With filter sets, you can save your query text, filters, and time range for
 reuse anywhere a query bar is present.
 
 For example, suppose you're in *Discover*, and you've put time into building
@@ -11,7 +11,7 @@ Save this query, and you can embed the search results in dashboards,
 use them as a foundation for building a visualization,
 and share them in a link or CVS form.
 
-Saved queries are different than <<save-open-search,saved searches>>,
+Filter sets are different than <<save-open-search,saved searches>>,
 which include the *Discover* configuration&mdash;selected columns in the document table, sort order, and
 {data-source}&mdash;in addition to the query.
 Saved searches are primarily used for adding search results to a dashboard.
@@ -19,7 +19,7 @@ Saved searches are primarily used for adding search results to a dashboard.
 [role="xpack"]
 ==== Read-only access
 If you have insufficient privileges to save queries,
-the *Save* button isn't visible in the saved query management popover.
+the *Save* button isn't visible in the filter set management popover.
 For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
 ==== Save a query
@@ -30,8 +30,8 @@ For more information, see <<xpack-security-authorization, Granting access to Kib
 . Choose whether to include or exclude filters and a time range.
 By default, filters are automatically included, but the time filter is not.
 . Save the query.
-. To load a saved query, select it in the *Saved query* menu.
+. To load a filter set, select it in the *Filter set* menu.
 +
 The query text, filters, and time range are updated and your data refreshed.
-If you’re loading a saved query that did not include the filters or time range, those components remain as-is.
-. To add filters and clear saved queries, use the *Saved query* menu.
+If you’re loading a filter set that did not include the filters or time range, those components remain as-is.
+. To add filters and clear filter sets, use the *Filter set* menu.

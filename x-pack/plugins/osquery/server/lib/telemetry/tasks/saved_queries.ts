@@ -27,7 +27,7 @@ export function createTelemetrySavedQueriesTaskConfig() {
       const savedQueriesResponse = await receiver.fetchSavedQueries();
 
       if (!savedQueriesResponse?.total) {
-        logger.debug('no saved queries found');
+        logger.debug('no filter sets found');
 
         return;
       }

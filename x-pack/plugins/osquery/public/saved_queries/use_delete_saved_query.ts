@@ -45,7 +45,7 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
         navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
         toasts.addSuccess(
           i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-            defaultMessage: 'Successfully deleted saved query',
+            defaultMessage: 'Successfully deleted filter set',
           })
         );
       },

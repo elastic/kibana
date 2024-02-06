@@ -47,11 +47,11 @@ import { CREATE_RULE_URL } from '../../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 
-const savedQueryName = 'custom saved query';
+const savedQueryName = 'custom filter set';
 const savedQueryQuery = 'process.name: test';
 const savedQueryFilterKey = 'testAgent.value';
 
-describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
+describe('Filter set rules', { tags: ['@ess', '@serverless'] }, () => {
   describe('Custom saved_query detection rule creation', () => {
     beforeEach(() => {
       login();
@@ -59,19 +59,19 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
       deleteSavedQueries();
     });
 
-    it('Creates saved query rule', function () {
+    it('Creates filter set rule', function () {
       const rule = getSavedQueryRule();
       createSavedQuery(savedQueryName, savedQueryQuery, savedQueryFilterKey);
       visit(CREATE_RULE_URL);
 
       selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
 
-      // edit loaded saved query
+      // edit loaded filter set
       getCustomQueryInput()
         .type(' AND random query')
         .should('have.value', [savedQueryQuery, ' AND random query'].join(''));
 
-      // when clicking load query dynamically checkbox, saved query should be shown in query input and input should be disabled
+      // when clicking load query dynamically checkbox, filter set should be shown in query input and input should be disabled
       checkLoadQueryDynamically();
       getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
       cy.get(QUERY_BAR).should('contain', savedQueryFilterKey);
@@ -100,8 +100,8 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
       getDetails(SAVED_QUERY_FILTERS_DETAILS).should('contain', savedQueryFilterKey);
     });
 
-    context('Non existent saved query', () => {
-      const FAILED_TO_LOAD_ERROR = 'Failed to load the saved query';
+    context('Non existent filter set', () => {
+      const FAILED_TO_LOAD_ERROR = 'Failed to load the filter set';
 
       describe('on rule details page', () => {
         beforeEach(() => {
@@ -113,7 +113,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
           ).then((rule) => visitRuleDetailsPage(rule.body.id));
         });
 
-        it('Shows error toast on details page when saved query can not be loaded', function () {
+        it('Shows error toast on details page when filter set can not be loaded', function () {
           cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
         });
       });
@@ -128,7 +128,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
           ).then((rule) => visitEditRulePage(rule.body.id));
         });
 
-        it('Shows validation error on rule edit when saved query can not be loaded', function () {
+        it('Shows validation error on rule edit when filter set can not be loaded', function () {
           cy.get(TOASTER).should('contain', FAILED_TO_LOAD_ERROR);
         });
 
@@ -163,7 +163,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
         saveEditedRule();
 
         cy.wait('@editedRule').then(({ response }) => {
-          // updated rule should be saved as saved_query type once Load query dynamically checkbox was checked
+          // updated rule should be saved as saved_query type once Load filter set dynamically checkbox was checked
           cy.wrap(response?.body.type).should('equal', 'saved_query');
         });
 
@@ -182,7 +182,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
           );
         });
 
-        // query input should be disabled and has value of saved query
+        // query input should be disabled and has value of filter set
         getCustomQueryInput().should('have.value', savedQueryQuery).should('be.disabled');
 
         // after unchecking Load Query Dynamically checkbox, query input becomes enabled, type custom query
@@ -193,7 +193,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
         saveEditedRule();
 
         cy.wait('@editedRule').then(({ response }) => {
-          // updated rule should be saved as query type once Load query dynamically checkbox was unchecked
+          // updated rule should be saved as query type once Load filter set dynamically checkbox was unchecked
           cy.wrap(response?.body.type).should('equal', 'query');
         });
 
@@ -208,7 +208,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
 
         uncheckLoadQueryDynamically();
 
-        // type custom query, ensure Load dynamically checkbox is absent, as rule can't be saved win non valid saved query
+        // type custom query, ensure Load dynamically checkbox is absent, as rule can't be saved win non valid filter set
         getCustomQueryInput().type(expectedCustomTestQuery);
         cy.get(LOAD_QUERY_DYNAMICALLY_CHECKBOX).should('not.visible');
 
@@ -216,14 +216,14 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
         saveEditedRule();
 
         cy.wait('@editedRule').then(({ response }) => {
-          // updated rule should be saved as query type once Load query dynamically checkbox was unchecked
+          // updated rule should be saved as query type once Load filter set dynamically checkbox was unchecked
           cy.wrap(response?.body.type).should('equal', 'query');
         });
 
         getDetails(CUSTOM_QUERY_DETAILS).should('contain', expectedCustomTestQuery);
       });
 
-      it('Allows to update saved_query rule with non-existent query by selecting another saved query', () => {
+      it('Allows to update saved_query rule with non-existent query by selecting another filter set', () => {
         createSavedQuery(savedQueryName, savedQueryQuery);
         createRule(getSavedQueryRule({ saved_id: 'non-existent', query: undefined })).then((rule) =>
           visitEditRulePage(rule.body.id)
@@ -234,7 +234,7 @@ describe('Saved query rules', { tags: ['@ess', '@serverless'] }, () => {
         editFirstRule();
         uncheckLoadQueryDynamically();
 
-        // select another saved query, edit query input, which later should be dismissed once Load query dynamically checkbox checked
+        // select another filter set, edit query input, which later should be dismissed once Load filter set dynamically checkbox checked
         selectAndLoadSavedQuery(savedQueryName, savedQueryQuery);
         getCustomQueryInput().type('AND this part wil be dismissed');
 

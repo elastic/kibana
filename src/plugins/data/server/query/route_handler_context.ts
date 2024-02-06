@@ -72,7 +72,7 @@ function verifySavedQuery({ title, query, filters = [] }: SavedQueryAttributes) 
   }
 
   if (!title.trim().length) {
-    throw new Error('Cannot create saved query without a title');
+    throw new Error('Cannot create filter set without a title');
   }
 }
 
@@ -113,7 +113,7 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
       id
     );
     if (outcome === 'conflict') {
-      throw new Error(`Multiple saved queries found with ID: ${id} (legacy URL alias conflict)`);
+      throw new Error(`Multiple filter sets found with ID: ${id} (legacy URL alias conflict)`);
     } else if (savedObject.error) {
       throw new Error(savedObject.error.message);
     }

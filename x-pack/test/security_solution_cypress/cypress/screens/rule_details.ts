@@ -27,11 +27,11 @@ export const EQL_QUERY_DETAILS = 'EQL query';
 
 export const ESQL_QUERY_DETAILS = 'ES|QL query';
 
-export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
+export const SAVED_QUERY_NAME_DETAILS = 'Filter set name';
 
 export const SAVED_QUERY_DETAILS = /^Saved query$/;
 
-export const SAVED_QUERY_FILTERS_DETAILS = 'Saved query filters';
+export const SAVED_QUERY_FILTERS_DETAILS = 'Filter set filters';
 
 export const DATA_VIEW_DETAILS = 'Data view';
 

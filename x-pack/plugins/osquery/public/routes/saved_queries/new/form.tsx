@@ -78,7 +78,7 @@ const NewSavedQueryFormComponent: React.FC<NewSavedQueryFormProps> = ({
                 >
                   <FormattedMessage
                     id="xpack.osquery.addSavedQuery.form.saveQueryButtonLabel"
-                    defaultMessage="Save query"
+                    defaultMessage="Save filter set"
                   />
                 </EuiButton>
               </EuiFlexItem>

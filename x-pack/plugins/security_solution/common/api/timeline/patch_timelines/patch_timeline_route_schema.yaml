@@ -14,7 +14,7 @@ paths:
     patch:
       operationId: patchTimeline
       summary: Updates an existing timeline.
-      description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned saved queries of an existing timeline.
+      description: Updates an existing timeline. This API is used to update the title, description, date range, pinned events, pinned queries, and/or pinned filter sets of an existing timeline.
       tags:
         - access:securitySolution
       requestBody:

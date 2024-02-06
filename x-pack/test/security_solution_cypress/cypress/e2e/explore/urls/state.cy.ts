@@ -83,10 +83,10 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(1)).should('have.text', 'host.os.name: test-os');
   });
 
-  it('sets saved query from the url', () => {
+  it('sets filter set from the url', () => {
     visit(ABSOLUTE_DATE_RANGE.urlFiltersHostsHosts);
     saveQuery('test-query');
-    // refresh the page to force loading the saved query from the URL
+    // refresh the page to force loading the filter set from the URL
     cy.reload();
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM_AT(0)).should('have.text', 'host.name: test-host');

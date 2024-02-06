@@ -608,7 +608,7 @@ Management::
 Platform::
 * ES|QL, a new query language, is available under technical preview in Discover and Dashboards ({kibana-pull}146971[#146971]).
 Querying & Filtering::
-* Saved queries can now be shared between multiple spaces ({kibana-pull}163436[#163436]).
+* Filter sets can now be shared between multiple spaces ({kibana-pull}163436[#163436]).
 Uptime::
 * Adds a document viewer to the summary pings table ({kibana-pull}163926[#163926]).
 
@@ -2188,7 +2188,7 @@ Observability::
 
 Querying & Filtering::
 * Adds the ability to avoid duplicate host IP mapping {kibana-pull}155353[#155353]
-* Adds improvements to the saved query terminology {kibana-pull}154517[#154517]
+* Adds improvements to the filter set terminology {kibana-pull}154517[#154517]
 
 [float]
 [[fixes-v8.8.0]]
@@ -3166,7 +3166,7 @@ Kibana Home & Add Data::
 * Updates the examples {kibana-pull}141265[#141265]
 
 Lens & Visualizations::
-* All saved queries are now returned on the list instead of only the first 50 {kibana-pull}145554[#145554]
+* All filter sets are now returned on the list instead of only the first 50 {kibana-pull}145554[#145554]
 * The baseTheme is now always included with the charts theme {kibana-pull}145401[#145401]
 * Do not throw on undefined sorting column referenced in *Lens* {kibana-pull}144716[#144716]
 * Fixes suggestion bug in *Lens* {kibana-pull}144708[#144708]

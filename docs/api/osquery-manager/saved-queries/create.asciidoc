@@ -1,10 +1,10 @@
 [[osquery-manager-saved-queries-api-create]]
-=== Create saved query API
+=== Create filter set API
 ++++
-<titleabbrev>Create saved query</titleabbrev>
+<titleabbrev>Create filter set</titleabbrev>
 ++++
 
-experimental[] Create saved queries.
+experimental[] Create filter sets.
 
 
 [[osquery-manager-saved-queries-api-create-request]]
@@ -25,9 +25,9 @@ experimental[] Create saved queries.
 [[osquery-manager-saved-queries-api-create-body-params]]
 ==== Request body
 
-`id`:: (Required, string) The saved query name.
+`id`:: (Required, string) The filter set name.
 
-`description`:: (Optional, string) The saved query description.
+`description`:: (Optional, string) The filter set description.
 
 `platform`:: (Optional, string) Restricts the query to a specified platform. The default is 'all' platforms. To specify multiple platforms, use commas. For example, 'linux,darwin'.
 
@@ -52,14 +52,14 @@ experimental[] Create saved queries.
 [[osquery-manager-saved-queries-api-create-example]]
 ==== Examples
 
-Create a saved query:
+Create a filter set:
 
 [source,sh]
 --------------------------------------------------
 $ curl -X POST api/osquery/saved_queries \
 {
   "id": "saved_query_id",
-  "description": "Saved query description",
+  "description": "Filter set description",
   "query": "select * from uptime;",
   "interval": "60",
   "timeout": 120,
@@ -76,7 +76,7 @@ $ curl -X POST api/osquery/saved_queries \
 // KIBANA
 
 
-The API returns the saved query object:
+The API returns the filter set object:
 
 [source,sh]
 --------------------------------------------------

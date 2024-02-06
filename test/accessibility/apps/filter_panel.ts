@@ -34,8 +34,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await browser.pressKeys(browser.keys.ESCAPE);
     });
 
-    // the following tests are for the new saved query panel which also has filter panel options
-    it('a11y test on saved query panel- on more than one filters', async () => {
+    // the following tests are for the new filter set panel which also has filter panel options
+    it('a11y test on filter set panel- on more than one filters', async () => {
       await filterBar.addFilter({ field: 'DestCountry', operation: 'is', value: 'AU' });
       await testSubjects.click('queryBarMenuPopover');
       await a11y.testAppSnapshot();

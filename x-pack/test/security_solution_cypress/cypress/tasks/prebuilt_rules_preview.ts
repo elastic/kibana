@@ -267,13 +267,13 @@ export const assertDataViewPropertiesShown = (dataViewId: string, dataViewIndexP
 };
 
 export const assertSavedQueryPropertiesShown = (query: string, filterKey: string, name: string) => {
-  cy.get(SAVED_QUERY_CONTENT_TITLE).should('have.text', 'Saved query');
+  cy.get(SAVED_QUERY_CONTENT_TITLE).should('have.text', 'Filter set');
   cy.get(SAVED_QUERY_CONTENT_VALUE).should('have.text', query);
 
-  cy.get(SAVED_QUERY_FILTERS_TITLE).should('have.text', 'Saved query filters');
+  cy.get(SAVED_QUERY_FILTERS_TITLE).should('have.text', 'Filter set filters');
   cy.get(SAVED_QUERY_FILTERS_VALUE).should('contain', filterKey);
 
-  cy.get(SAVED_QUERY_NAME_TITLE).should('have.text', 'Saved query name');
+  cy.get(SAVED_QUERY_NAME_TITLE).should('have.text', 'Filter set name');
   cy.get(SAVED_QUERY_NAME_VALUE).should('have.text', name);
 };
 

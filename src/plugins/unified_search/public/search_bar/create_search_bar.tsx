@@ -113,7 +113,7 @@ const defaultOnQuerySubmit = <QT extends AggregateQuery | Query = Query>(
   };
 };
 
-// Respond to user clearing a saved query
+// Respond to user clearing a filter set
 const defaultOnClearSavedQuery = <QT extends AggregateQuery | Query = Query>(
   props: StatefulSearchBarProps<QT>,
   clearSavedQuery: Function
@@ -125,7 +125,7 @@ const defaultOnClearSavedQuery = <QT extends AggregateQuery | Query = Query>(
   };
 };
 
-// Respond to user saving or updating a saved query
+// Respond to user saving or updating a filter set
 const defaultOnSavedQueryUpdated = <QT extends AggregateQuery | Query = Query>(
   props: StatefulSearchBarProps<QT>,
   setSavedQuery: Function
@@ -179,7 +179,7 @@ export function createSearchBar({
       timefilter: data.query.timefilter.timefilter,
     });
 
-    // Fetch and update UI from saved query
+    // Fetch and update UI from filter set
     const { savedQuery, setSavedQuery, clearSavedQuery } = useSavedQuery({
       queryService: data.query,
       savedQueryId: props.savedQueryId,

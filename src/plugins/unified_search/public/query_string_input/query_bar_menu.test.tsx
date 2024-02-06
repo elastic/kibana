@@ -148,7 +148,7 @@ describe('Querybar Menu component', () => {
     expect(component.find('[data-test-subj="queryBarMenuPanel"]')).toBeTruthy();
   });
 
-  it('should render the saved saved queries panels if the showQueryInput prop is true but disabled', async () => {
+  it('should render the saved filter sets panels if the showQueryInput prop is true but disabled', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,
@@ -168,7 +168,7 @@ describe('Querybar Menu component', () => {
     expect(loadFilterSetButton.first().prop('disabled')).toBe(true);
   });
 
-  it('should render the saved queries panels if the showFilterBar is true but disabled', async () => {
+  it('should render the filter sets panels if the showFilterBar is true but disabled', async () => {
     const newProps = {
       ...props,
       openQueryBarMenu: true,

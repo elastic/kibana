@@ -74,7 +74,7 @@ const SavedQueryFlyoutComponent: React.FC<AddQueryFlyoutProps> = ({
             <h2 id="flyoutTitle">
               <FormattedMessage
                 id="xpack.osquery.savedQuery.saveQueryFlyoutForm.addFormTitle"
-                defaultMessage="Save query"
+                defaultMessage="Save filter set"
               />
             </h2>
           </EuiTitle>

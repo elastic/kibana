@@ -43,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
   const path = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('@ess @serverless Saved query type rules', () => {
+  describe('@ess @serverless Filter set type rules', () => {
     before(async () => {
       await esArchiver.load(path);
     });
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     // First test creates a real rule - remaining tests use preview API
-    it('should query and get back expected alert structure using a saved query rule', async () => {
+    it('should query and get back expected alert structure using a filter set rule', async () => {
       const rule: SavedQueryRuleCreateProps = {
         ...getRuleForAlertTesting(['auditbeat-*']),
         type: 'saved_query',

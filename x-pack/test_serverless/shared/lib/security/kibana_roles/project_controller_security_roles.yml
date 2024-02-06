@@ -1,7 +1,7 @@
 # -----
 # Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
 
-# modeled after the t1_analyst minus osquery run saved queries privilege
+# modeled after the t1_analyst minus osquery run filter sets privilege
 viewer:
   cluster: []
   indices:

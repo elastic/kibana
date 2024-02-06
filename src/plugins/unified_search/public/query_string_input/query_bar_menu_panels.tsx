@@ -67,19 +67,19 @@ export const strings = {
     }),
   getLoadOtherFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadOtherFilterSetLabel', {
-      defaultMessage: 'Load query',
+      defaultMessage: 'Load filter set',
     }),
   getLoadCurrentFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.loadCurrentFilterSetLabel', {
-      defaultMessage: 'Load query',
+      defaultMessage: 'Load filter set',
     }),
   getSaveAsNewFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveAsNewFilterSetLabel', {
-      defaultMessage: 'Save query',
+      defaultMessage: 'Save filter set',
     }),
   getSaveFilterSetLabel: () =>
     i18n.translate('unifiedSearch.filter.options.saveFilterSetLabel', {
-      defaultMessage: 'Save query',
+      defaultMessage: 'Save filter set',
     }),
   getClearllFiltersButtonLabel: () =>
     i18n.translate('unifiedSearch.filter.options.clearllFiltersButtonLabel', {
@@ -385,7 +385,7 @@ export function QueryBarMenuPanels({
       { isSeparator: true }
     );
   }
-  // saved queries actions are only shown when the showQueryInput and showFilterBar is true
+  // filter sets actions are only shown when the showQueryInput and showFilterBar is true
   if (showQueryInput && showFilterBar) {
     items.push(...queryAndFiltersRelatedPanels);
   }

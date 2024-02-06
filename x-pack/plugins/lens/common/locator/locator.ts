@@ -34,7 +34,7 @@ interface LensShareableState {
   resolvedDateRange?: DateRange & SerializableRecord;
 
   /**
-   * Optionally set the id of the used saved query
+   * Optionally set the id of the used filter set
    */
   savedQuery?: SavedQuery & SerializableRecord;
 
@@ -96,7 +96,7 @@ export interface LensAppLocatorParams extends SerializableRecord {
   resolvedDateRange?: DateRange & SerializableRecord;
 
   /**
-   * Optionally set the id of the used saved query
+   * Optionally set the id of the used filter set
    */
   savedQuery?: SavedQuery & SerializableRecord;
 

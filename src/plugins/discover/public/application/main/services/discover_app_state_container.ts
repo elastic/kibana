@@ -116,7 +116,7 @@ export interface DiscoverAppState {
    */
   sort?: string[][];
   /**
-   * id of the used saved query
+   * id of the used filter set
    */
   savedQuery?: string;
   /**

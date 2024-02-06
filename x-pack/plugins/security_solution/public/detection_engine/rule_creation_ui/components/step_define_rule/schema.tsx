@@ -150,7 +150,7 @@ export const schema: FormSchema<DefineStepRule> = {
           }
           if (savedId) {
             // Ignore field validation error in this case.
-            // Instead, we show the error toast when saved query object does not exist.
+            // Instead, we show the error toast when filter set object does not exist.
             // https://github.com/elastic/kibana/issues/159060
             return undefined;
           }

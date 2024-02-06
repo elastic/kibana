@@ -1,7 +1,7 @@
-These are example POST rules that have the ability to use saved query id's and optionally
-queries and filters. If you only use a saved query id, then detection engine relies on that
-saved query id existing or it will throw errors if the user deletes the saved query id. If you
-add a saved query id along side with a filter and/or query then it will try to use the saved query
+These are example POST rules that have the ability to use filter set id's and optionally
+queries and filters. If you only use a filter set id, then detection engine relies on that
+filter set id existing or it will throw errors if the user deletes the filter set id. If you
+add a filter set id along side with a filter and/or query then it will try to use the filter set
 id first and if that fails it will fall back on the provided filter and/or query.
 
 Every single json file should have the field:

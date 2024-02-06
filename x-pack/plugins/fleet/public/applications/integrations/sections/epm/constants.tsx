@@ -69,7 +69,7 @@ export const AssetTitleMap: Record<DisplayedAssetType, string> = {
     defaultMessage: 'Osquery packs',
   }),
   osquery_saved_query: i18n.translate('xpack.fleet.epm.assetTitles.osquerySavedQuery', {
-    defaultMessage: 'Osquery saved queries',
+    defaultMessage: 'Osquery filter sets',
   }),
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'ML modules',

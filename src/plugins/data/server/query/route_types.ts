@@ -9,7 +9,7 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 
 /*
- * These types are used to define the shape of the response from the saved query API
+ * These types are used to define the shape of the response from the filter set API
  * separate but similar to other types to draw attention to REST api return changes
  */
 

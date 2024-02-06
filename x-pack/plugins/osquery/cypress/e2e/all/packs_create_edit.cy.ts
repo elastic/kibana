@@ -251,7 +251,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cleanupPack(packId);
     });
 
-    it('should add a pack from a saved query', () => {
+    it('should add a pack from a filter set', () => {
       cy.contains('Packs').click();
 
       cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
@@ -334,7 +334,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe(
-    'should trigger validation when saved query is being chosen',
+    'should trigger validation when filter set is being chosen',
     { tags: ['@ess', '@serverless'] },
     () => {
       let packId: string;
@@ -641,7 +641,7 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   describe(
-    'enable changing saved queries and ecs_mappings',
+    'enable changing filter sets and ecs_mappings',
     { tags: ['@ess', '@serverless'] },
     () => {
       let packId: string;

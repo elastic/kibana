@@ -78,7 +78,7 @@ describe(
       checkResults();
       cy.contains('Add to timeline investigation');
       cy.contains('Save for later').click();
-      cy.contains('Save query');
+      cy.contains('Save filter set');
       cy.get('[data-test-subj="osquery-save-query-flyout"]').within(() => {
         cy.get('.euiButtonEmpty').contains('Cancel').click();
       });

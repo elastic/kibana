@@ -88,7 +88,7 @@ export default ({ getService }: FtrProviderContext) => {
           );
         });
 
-        it('creates a saved query rule', async () => {
+        it('creates a filter set rule', async () => {
           const savedQueryRuleParams = getSavedQueryRuleParams({
             data_view_id: 'my-data-view',
             type: 'saved_query',

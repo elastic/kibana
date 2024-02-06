@@ -64,8 +64,8 @@ image:concepts/images/top-bar.png["Time filter, semi-structured search, and filt
 
 If you frequently use any of the search options, click
 image:concepts/images/saved-query-icon.png["save icon", width=20px] next to the
-semi-structured search to save or load a previously saved query.
-The saved query always contains the semi-structured search query,
+semi-structured search to save or load a previously filter set.
+The filter set always contains the semi-structured search query,
 and optionally the time filter and extra filters.
 
 [float]

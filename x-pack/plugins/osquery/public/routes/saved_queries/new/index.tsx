@@ -28,7 +28,7 @@ const NewSavedQueryPageComponent = () => {
           <EuiButtonEmpty iconType="arrowLeft" {...savedQueryListProps} flush="left" size="xs">
             <FormattedMessage
               id="xpack.osquery.addSavedQuery.viewSavedQueriesListTitle"
-              defaultMessage="View all saved queries"
+              defaultMessage="View all filter sets"
             />
           </EuiButtonEmpty>
         </EuiFlexItem>
@@ -37,7 +37,7 @@ const NewSavedQueryPageComponent = () => {
             <h1>
               <FormattedMessage
                 id="xpack.osquery.addSavedQuery.pageTitle"
-                defaultMessage="Add saved query"
+                defaultMessage="Add filter set"
               />
             </h1>
           </EuiText>

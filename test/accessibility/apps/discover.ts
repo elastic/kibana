@@ -97,14 +97,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test on toggle include filters option on saved queries panel', async () => {
+    it('a11y test on toggle include filters option on filter sets panel', async () => {
       await PageObjects.discover.setSaveQueryFormTitle('test');
       await PageObjects.discover.toggleIncludeFilters();
       await a11y.testAppSnapshot();
       await PageObjects.discover.saveCurrentSavedQuery();
     });
 
-    it('a11y test on saved queries list panel', async () => {
+    it('a11y test on filter sets list panel', async () => {
       await savedQueryManagementComponent.loadSavedQuery('test');
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.click('saved-query-management-load-button');

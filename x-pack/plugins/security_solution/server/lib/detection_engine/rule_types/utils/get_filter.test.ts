@@ -117,7 +117,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('query, filters, and index parameter should be defined');
     });
 
-    test('returns a saved query if given a type of query', async () => {
+    test('returns a filter set if given a type of query', async () => {
       const esFilter = await getFilter({
         type: 'saved_query',
         filters: undefined,
@@ -186,7 +186,7 @@ describe('get_filter', () => {
       });
     });
 
-    test('throws on saved query if saved_id is undefined', async () => {
+    test('throws on filter set if saved_id is undefined', async () => {
       await expect(
         getFilter({
           type: 'saved_query',
@@ -201,7 +201,7 @@ describe('get_filter', () => {
       ).rejects.toThrow('savedId parameter should be defined');
     });
 
-    test('throws on saved query if index is undefined', async () => {
+    test('throws on filter set if index is undefined', async () => {
       await expect(
         getFilter({
           type: 'saved_query',

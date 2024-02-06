@@ -46,7 +46,7 @@ async function saveDataSource({
         if (id !== prevSavedSearchId) {
           services.locator.navigate({ savedSearchId: id });
         } else {
-          // Update defaults so that "reload saved query" functions correctly
+          // Update defaults so that "reload filter set" functions correctly
           state.actions.undoSavedSearchChanges();
         }
       }

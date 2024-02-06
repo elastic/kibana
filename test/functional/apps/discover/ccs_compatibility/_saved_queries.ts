@@ -74,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
   };
 
-  describe('saved queries saved objects', function describeIndexTests() {
+  describe('filter sets saved objects', function describeIndexTests() {
     before(async function () {
       log.debug('load kibana index with default index pattern');
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern', 'query'] });
@@ -99,10 +99,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.unsetTime();
     });
 
-    describe('saved query selection', () => {
+    describe('filter set selection', () => {
       before(async () => await setUpQueriesWithFilters());
 
-      it(`should unselect saved query when navigating to a 'new'`, async function () {
+      it(`should unselect filter set when navigating to a 'new'`, async function () {
         await savedQueryManagementComponent.saveNewQuery(
           'test-unselect-saved-query',
           'mock',
@@ -141,10 +141,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('saved query management component functionality', function () {
+    describe('filter set management component functionality', function () {
       before(async () => await setUpQueriesWithFilters());
 
-      it('should show the saved query management load button as disabled when there are no saved queries', async () => {
+      it('should show the filter set management load button as disabled when there are no filter sets', async () => {
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         const loadFilterSetBtn = await testSubjects.find('saved-query-management-load-button');
         const isDisabled = await loadFilterSetBtn.getAttribute('disabled');
@@ -163,7 +163,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryTextExist('response:200');
       });
 
-      it('reinstates filters and the time filter when a saved query has filters and a time filter included', async () => {
+      it('reinstates filters and the time filter when a filter set has filters and a time filter included', async () => {
         await PageObjects.timePicker.setDefaultAbsoluteRange();
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
@@ -187,7 +187,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await savedQueryManagementComponent.getCurrentlyLoadedQueryID()).to.be('OkResponse');
       });
 
-      it('allows saving changes to a currently loaded query via the saved query management component', async () => {
+      it('allows saving changes to a currently loaded query via the filter set management component', async () => {
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
         await queryBar.setQuery('response:404');
         await savedQueryManagementComponent.updateCurrentlyLoadedQuery('OkResponse', false, false);
@@ -215,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.savedQueryExistOrFail('OkResponseCopy');
       });
 
-      it('allows deleting the currently loaded saved query in the saved query management component and clears the query', async () => {
+      it('allows deleting the currently loaded filter set in the filter set management component and clears the query', async () => {
         await savedQueryManagementComponent.deleteSavedQuery('OkResponseCopy');
         await savedQueryManagementComponent.savedQueryMissingOrFail('OkResponseCopy');
         expect(await queryBar.getQueryString()).to.eql('');
@@ -237,14 +237,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await savedQueryManagementComponent.saveNewQueryWithNameError('OkResponse');
       });
 
-      it('resets any changes to a loaded query on reloading the same saved query', async () => {
+      it('resets any changes to a loaded query on reloading the same filter set', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await queryBar.setQuery('response:503');
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         expect(await queryBar.getQueryString()).to.eql('response:404');
       });
 
-      it('allows clearing the currently loaded saved query', async () => {
+      it('allows clearing the currently loaded filter set', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.clearCurrentlyLoadedQuery();
         expect(await queryBar.getQueryString()).to.eql('');
@@ -264,7 +264,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.expectQueryLanguageOrFail('lucene');
       });
 
-      it('changing language removes saved query', async () => {
+      it('changing language removes filter set', async () => {
         await savedQueryManagementComponent.loadSavedQuery('OkResponse');
         await savedQueryManagementComponent.openSavedQueryManagementComponent();
         await queryBar.switchQueryLanguage('lucene');

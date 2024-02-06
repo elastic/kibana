@@ -128,17 +128,17 @@ used for the saved search will also be automatically selected.
 
 [[save-load-delete-query]]
 === Save a query
-A saved query is a portable collection of query text and filters that you can reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
+A filter set is a portable collection of query text and filters that you can reuse in <<discover, Discover>> and <<dashboard, Dashboard>>. Save a query when you want to:
 
 * Retrieve results from the same query at a later time without having to reenter the query text, add the filters or set the time filter
 * View the results of the same query in multiple apps
 * Share your query
 
-Saved queries don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
+Filter sets don't include information specific to Discover, such as the currently selected columns in the document table, the sort order, and the index pattern. If you want to save your current view of Discover for later retrieval and reuse, create a <<save-open-search, saved search>> instead.
 
 [role="xpack"]
 ==== Read-only access
-If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the saved query management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
+If you have insufficient privileges to save queries, the *Save current query* button isn't visible in the filter set management popover. For more information, see <<xpack-security-authorization, Granting access to Kibana>>
 
 ==== Save a query
 To save the current query text, filters, and time filter:
@@ -147,16 +147,16 @@ To save the current query text, filters, and time filter:
 . Click *Save current query* in the popover.
 +
 [role="screenshot"]
-image::discover/images/saved-query-management-component-all-privileges.png["Example of the saved query management popover with a list of saved queries with write access",width="80%"]
+image::discover/images/saved-query-management-component-all-privileges.png["Example of the filter set management popover with a list of filter sets with write access",width="80%"]
 +
 . Enter a name, a description, and then select the filter options that you want to include. By default, filters are automatically included, but the time filter is not.
 +
 [role="screenshot"]
-image::discover/images/saved-query-save-form-default-filters.png["Example of the saved query management save form with the filters option included and the time filter option excluded",width="80%"]
+image::discover/images/saved-query-save-form-default-filters.png["Example of the filter set management save form with the filters option included and the time filter option excluded",width="80%"]
 . Click *Save*.
 
 ==== Load a query
-To load a saved query into Discover or Dashboard:
+To load a filter set into Discover or Dashboard:
 
 . Click *#* in the search bar, next to the query text input.
 . Select the query you want to load. You might need to scroll down to find the query you are looking for.
@@ -172,7 +172,7 @@ To save the changes as a new query:
 . Click *Save*.
 +
 [role="screenshot"]
-image::discover/images/saved-query-management-component-save-as-new-query.png["Example of the saved query management popover when a query is loaded and we have made changes to the query",width="80%"]
+image::discover/images/saved-query-management-component-save-as-new-query.png["Example of the filter set management popover when a query is loaded and we have made changes to the query",width="80%"]
 
 To save the changes to the current query:
 
@@ -195,8 +195,8 @@ To completely delete a query:
 . Click the trash can icon.
 +
 [role="screenshot"]
-image::discover/images/saved-query-management-component-delete-query-button.png["Example of the saved query management popover when a query is hovered over and we are about to delete a query",width="80%"]
+image::discover/images/saved-query-management-component-delete-query-button.png["Example of the filter set management popover when a query is hovered over and we are about to delete a query",width="80%"]
 
-You can import, export, and delete saved queries from <<managing-saved-objects, Saved Objects in Management>>.
+You can import, export, and delete filter sets from <<managing-saved-objects, Saved Objects in Management>>.
 
 include::search-sessions.asciidoc[]

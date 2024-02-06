@@ -109,7 +109,7 @@ const services = {
               {
                 id: 'testwewe',
                 attributes: {
-                  title: 'Saved query 1',
+                  title: 'Filter set 1',
                   description: '',
                   query: {
                     query: 'category.keyword : "Men\'s Shoes" ',
@@ -267,12 +267,12 @@ storiesOf('SearchBar', module)
       showDatePicker: false,
     })
   )
-  .add('with disabled "Save query" menu', () =>
+  .add('with disabled "Save filter set" menu', () =>
     wrapSearchBarInContext({
       showSaveQuery: false,
     })
   )
-  .add('with hidden "Manage saved objects" link in "Load saved query" menu', () =>
+  .add('with hidden "Manage saved objects" link in "Load filter set" menu', () =>
     wrapSearchBarInContext(
       {},
       {
@@ -387,7 +387,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with loaded saved query without changes', () =>
+  .add('with loaded filter set without changes', () =>
     wrapSearchBarInContext({
       savedQuery: {
         id: '0173d0d0-b19a-11ec-8323-837d6b231b82',
@@ -448,7 +448,7 @@ storiesOf('SearchBar', module)
       ],
     } as unknown as SearchBarProps)
   )
-  .add('with loaded saved query with changes', () =>
+  .add('with loaded filter set with changes', () =>
     wrapSearchBarInContext({
       savedQuery: {
         id: '0173d0d0-b19a-11ec-8323-837d6b231b82',

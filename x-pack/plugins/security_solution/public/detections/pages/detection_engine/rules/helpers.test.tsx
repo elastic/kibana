@@ -253,7 +253,7 @@ describe('rule helpers', () => {
 
     test('returns with saved_id of undefined if value does not exist on rule', () => {
       const mockedRule = mockRule('test-id');
-      // @ts-expect-error Saved query rule requires saved_id
+      // @ts-expect-error Filter set rule requires saved_id
       delete mockedRule.saved_id;
       const result: DefineStepRule = getDefineStepsData(mockedRule);
       const expected = expect.objectContaining({

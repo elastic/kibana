@@ -35,7 +35,7 @@ import {
 } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
+describe('ALL - Filter sets', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -55,21 +55,21 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
   getSavedQueriesComplexTest();
 
-  it.skip('checks that user cant add a saved query with an ID that already exists', () => {
-    cy.contains('Saved queries').click();
-    cy.contains('Add saved query').click();
+  it.skip('checks that user cant add a filter set with an ID that already exists', () => {
+    cy.contains('Filter sets').click();
+    cy.contains('Add filter set').click();
 
     cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
 
     cy.contains('ID must be unique').should('not.exist');
     inputQuery('test');
-    cy.contains('Save query').click();
+    cy.contains('Save filter set').click();
     cy.contains('ID must be unique').should('exist');
   });
 
-  it('checks default values on new saved query', () => {
-    cy.contains('Saved queries').click();
-    cy.contains('Add saved query').click();
+  it('checks default values on new filter set', () => {
+    cy.contains('Filter sets').click();
+    cy.contains('Add filter set').click();
     // ADD MORE FIELDS HERE
     cy.getBySel('resultsTypeField').within(() => {
       cy.contains('Snapshot');
@@ -111,14 +111,14 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cleanupSavedQuery(savedQueryId);
     });
 
-    it('checks result type on prebuilt saved query', () => {
+    it('checks result type on prebuilt filter set', () => {
       cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
       });
     });
 
-    it('user can run prebuilt saved query and add to case', () => {
+    it('user can run prebuilt filter set and add to case', () => {
       cy.get(customActionRunSavedQuerySelector('users_elastic')).click();
 
       selectAllAgents();
@@ -128,7 +128,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       viewRecentCaseAndCheckResults();
     });
 
-    it('user can not delete prebuilt saved query but can delete normal saved query', () => {
+    it('user can not delete prebuilt filter set but can delete normal filter set', () => {
       cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
@@ -136,7 +136,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       deleteAndConfirm('query');
     });
 
-    it('user can edit prebuilt saved query under pack', () => {
+    it('user can edit prebuilt filter set under pack', () => {
       preparePack(packName);
       cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);

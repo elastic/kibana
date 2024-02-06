@@ -42,8 +42,8 @@ export function SaveQueryForm({
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     Boolean(savedQuery?.attributes.filters ?? true)
   );
-  // Defaults to false because saved queries are meant to be as portable as possible and loading
-  // a saved query with a time filter will override whatever the current value of the global timepicker
+  // Defaults to false because filter sets are meant to be as portable as possible and loading
+  // a filter set with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
     Boolean(savedQuery?.attributes.timefilter ?? false)
@@ -203,7 +203,7 @@ export function SaveQueryForm({
           disabled={hasErrors}
         >
           {i18n.translate('unifiedSearch.search.searchBar.savedQueryFormSaveButtonText', {
-            defaultMessage: 'Save query',
+            defaultMessage: 'Save filter set',
           })}
         </EuiButton>
       </EuiFormRow>

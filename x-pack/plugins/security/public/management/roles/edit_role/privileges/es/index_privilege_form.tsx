@@ -516,7 +516,7 @@ export class IndexPrivilegeForm extends Component<Props, State> {
       });
     }
 
-    // If turning on, then restore the saved query if available
+    // If turning on, then restore the filter set if available
     if (willToggleOn && !this.props.indexPrivilege.query && this.state.documentQuery) {
       this.props.onChange({
         ...this.props.indexPrivilege,

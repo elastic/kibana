@@ -710,7 +710,7 @@ export const createSavedQueryService = (savedObjectsClient: SavedObjectsClientCo
         id: attributes.title as string,
       });
     } catch (err) {
-      throw new Error('Unable to create saved query, please try again.');
+      throw new Error('Unable to create filter set, please try again.');
     }
   };
 
@@ -726,7 +726,7 @@ import { createSavedQueryService, SavedQueryAttributes } from './saved_query_ser
 import { savedObjectsServiceMock } from '../../../../../core/public/mocks';
 import { SavedObjectsClientContract, SimpleSavedObject } from '../../../../../core/public';
 
-describe('saved query service', () => {
+describe('filter set service', () => {
   const savedQueryAttributes: SavedQueryAttributes = {
     title: 'foo',
     description: 'bar',
@@ -771,7 +771,7 @@ describe('saved query service', () => {
         await savedQueryService.saveQuery(savedQueryAttributes);
       } catch (err) {
         expect(err).toMatchInlineSnapshot(
-          `[Error: Unable to create saved query, please try again.]`
+          `[Error: Unable to create filter set, please try again.]`
         );
         done();
       }

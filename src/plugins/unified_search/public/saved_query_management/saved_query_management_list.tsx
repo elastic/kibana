@@ -188,13 +188,13 @@ export function SavedQueryManagementList({
   const savedQueryDescriptionText = i18n.translate(
     'unifiedSearch.search.searchBar.savedQueryDescriptionText',
     {
-      defaultMessage: 'Save query text and filters that you want to use again.',
+      defaultMessage: 'Save filter set text and filters that you want to use again.',
     }
   );
 
   const noSavedQueriesDescriptionText =
     i18n.translate('unifiedSearch.search.searchBar.savedQueryNoSavedQueriesText', {
-      defaultMessage: 'No saved queries.',
+      defaultMessage: 'No filter sets.',
     }) +
     ' ' +
     savedQueryDescriptionText;
@@ -202,7 +202,7 @@ export function SavedQueryManagementList({
   const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
     'unifiedSearch.search.searchBar.savedQueryMultipleNamespacesDeleteWarning',
     {
-      defaultMessage: `This saved query is shared in multiple spaces. When you delete it, you remove it from every space it is shared in. You can't undo this action.`,
+      defaultMessage: `This filter set is shared in multiple spaces. When you delete it, you remove it from every space it is shared in. You can't undo this action.`,
     }
   );
 
@@ -283,7 +283,7 @@ export function SavedQueryManagementList({
                 placeholder: i18n.translate(
                   'unifiedSearch.query.queryBar.indexPattern.findFilterSet',
                   {
-                    defaultMessage: 'Find a query',
+                    defaultMessage: 'Find a filter set',
                   }
                 ),
               }}
@@ -326,7 +326,7 @@ export function SavedQueryManagementList({
               aria-label={i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Load query',
+                  defaultMessage: 'Load filter set',
                 }
               )}
               data-test-subj="saved-query-management-apply-changes-button"
@@ -334,7 +334,7 @@ export function SavedQueryManagementList({
               {i18n.translate(
                 'unifiedSearch.search.searchBar.savedQueryPopoverApplyFilterSetLabel',
                 {
-                  defaultMessage: 'Load query',
+                  defaultMessage: 'Load filter set',
                 }
               )}
             </EuiButton>

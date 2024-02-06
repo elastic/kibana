@@ -2,7 +2,7 @@
   "attributes": {
     "created_at": "2021-12-21T08:54:07.802Z",
     "created_by": "elastic",
-    "description": "Test saved query description",
+    "description": "Test filter set description",
     "ecs_mapping": [
       {
         "key": "labels",

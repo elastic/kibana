@@ -72,7 +72,7 @@ const savedQueryReferences = [
   },
 ];
 
-describe('saved query route handler context', () => {
+describe('filter set route handler context', () => {
   let context: Awaited<ReturnType<typeof registerSavedQueryRouteHandlerContext>>;
 
   beforeEach(async () => {
@@ -166,10 +166,10 @@ describe('saved query route handler context', () => {
       expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });
 
-    it('should throw an error if the saved query does not have a title', async () => {
+    it('should throw an error if the filter set does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
       expect(response).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot create saved query without a title]`
+        `[Error: Cannot create filter set without a title]`
       );
     });
   });
@@ -213,16 +213,16 @@ describe('saved query route handler context', () => {
       expect(response).rejects.toMatchInlineSnapshot(`[Error: An Error]`);
     });
 
-    it('should throw an error if the saved query does not have a title', async () => {
+    it('should throw an error if the filter set does not have a title', async () => {
       const response = context.create({ ...savedQueryAttributes, title: '' });
       expect(response).rejects.toMatchInlineSnapshot(
-        `[Error: Cannot create saved query without a title]`
+        `[Error: Cannot create filter set without a title]`
       );
     });
   });
 
   describe('find', function () {
-    it('should find and return saved queries without search text or pagination parameters', async () => {
+    it('should find and return filter sets without search text or pagination parameters', async () => {
       const mockResponse: SavedObjectsFindResponse<SavedQueryAttributes> = {
         page: 0,
         per_page: 0,
@@ -260,7 +260,7 @@ describe('saved query route handler context', () => {
       expect(response.total).toEqual(5);
     });
 
-    it('should find and return saved queries with search text matching the title field', async () => {
+    it('should find and return filter sets with search text matching the title field', async () => {
       const mockResponse: SavedObjectsFindResponse<SavedQueryAttributes> = {
         page: 0,
         per_page: 0,
@@ -306,7 +306,7 @@ describe('saved query route handler context', () => {
       ]);
     });
 
-    it('should return an array of saved queries', async () => {
+    it('should return an array of filter sets', async () => {
       const mockResponse: SavedObjectsFindResponse<SavedQueryAttributes> = {
         page: 0,
         per_page: 0,
@@ -389,7 +389,7 @@ describe('saved query route handler context', () => {
   });
 
   describe('get', function () {
-    it('should retrieve a saved query by id', async () => {
+    it('should retrieve a filter set by id', async () => {
       mockSavedObjectsClient.resolve.mockResolvedValue({
         saved_object: {
           id: 'foo',
@@ -404,7 +404,7 @@ describe('saved query route handler context', () => {
       expect(response).toEqual({ id: 'foo', attributes: savedQueryAttributes });
     });
 
-    it('should only return saved queries', async () => {
+    it('should only return filter sets', async () => {
       mockSavedObjectsClient.resolve.mockResolvedValue({
         saved_object: {
           id: 'foo',
@@ -545,20 +545,20 @@ describe('saved query route handler context', () => {
 
       const result = context.get('food');
       expect(result).rejects.toMatchInlineSnapshot(
-        `[Error: Multiple saved queries found with ID: food (legacy URL alias conflict)]`
+        `[Error: Multiple filter sets found with ID: food (legacy URL alias conflict)]`
       );
     });
   });
 
   describe('delete', function () {
-    it('should delete the saved query for the given ID', async () => {
+    it('should delete the filter set for the given ID', async () => {
       await context.delete('foo');
       expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo', { force: true });
     });
   });
 
   describe('count', function () {
-    it('should return the total number of saved queries', async () => {
+    it('should return the total number of filter sets', async () => {
       mockSavedObjectsClient.find.mockResolvedValue({
         total: 1,
         page: 0,

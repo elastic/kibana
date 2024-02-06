@@ -28,22 +28,22 @@ interface UseSavedQueriesReturn {
 }
 
 export const useSavedQuery = (props: UseSavedQueriesProps): UseSavedQueriesReturn => {
-  // Handle saved queries
+  // Handle filter sets
   const [savedQuery, setSavedQuery] = useState<SavedQuery | undefined>();
 
-  // Effect is used to convert a saved query id into an object
+  // Effect is used to convert a filter set id into an object
   useEffect(() => {
     const fetchSavedQuery = async (savedQueryId: string) => {
       try {
-        // fetch saved query
+        // fetch filter set
         const newSavedQuery = await props.queryService.savedQueries.getSavedQuery(savedQueryId);
-        // Make sure we set the saved query to the most recent one
+        // Make sure we set the filter set to the most recent one
         if (newSavedQuery && newSavedQuery.id === savedQueryId) {
           setSavedQuery(newSavedQuery);
           populateStateFromSavedQuery(props.queryService, newSavedQuery);
         }
       } catch (error) {
-        // Clear saved query
+        // Clear filter set
         setSavedQuery(undefined);
         clearStateFromSavedQuery(props.queryService);
         // notify of saving error
