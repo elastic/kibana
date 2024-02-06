@@ -52,4 +52,4 @@ export const useViewMode = <
   ApiType extends Partial<PublishesViewMode> = Partial<PublishesViewMode>
 >(
   api: ApiType | undefined
-) => useStateFromPublishingSubject<ViewMode, ApiType['viewMode']>(api?.viewMode);
+) => useStateFromPublishingSubject(api?.viewMode);

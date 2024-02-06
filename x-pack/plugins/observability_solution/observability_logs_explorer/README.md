@@ -1,6 +1,6 @@
 # Observability Logs Explorer
 
-This plugin provides an app based on the `LogExplorer` component from the `logs_explorer` plugin, but adds observability-specific affordances.
+This plugin provides an app based on the `LogsExplorer` component from the `logs_explorer` plugin, but adds observability-specific affordances.
 
 ## Testing
 

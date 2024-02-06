@@ -269,6 +269,8 @@ List of {fleet-server} hosts that are configured when the {fleet} app starts.
 =====
   `is_default`:::
     Whether or not this host should be the default to use for {fleet-server}.
+  `is_internal`:::
+    If `true` the host will not appear in the UI, and can only be managed through `kibana.yml` or the {fleet} API.
   `proxy_id`::: 
     Unique ID of the proxy to access the {fleet-server} host.
 =====
