@@ -21,10 +21,10 @@ const HIGH_CARDINALITY_THRESHOLD = 1000;
 
 const buildInstanceId = (groupBy: string | string[]): string => {
   const groups = [groupBy].flat().filter((value) => !!value);
-  const groupings = groups
-    .map((group) => `'${group}:'+(doc['${group}'].size() == 0 ? '' : doc['${group}'].value)`)
-    .join(`+'|'+`);
-  return `emit(${groupings})`;
+  const groupings = groups.map((group) => `'${group}:'+doc['${group}'].value`).join(`+'|'+`);
+
+  const hasAllGroupings = groups.map((group) => `doc['${group}'].size() > 0`).join(' && ');
+  return `if (${hasAllGroupings}) { emit(${groupings}) }`;
 };
 
 export function useFetchGroupByCardinality(
