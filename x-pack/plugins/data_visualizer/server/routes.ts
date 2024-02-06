@@ -12,7 +12,11 @@ import { wrapError } from './utils/error_wrapper';
 import type { TestGrokPatternResponse } from '../common/types/test_grok_pattern';
 
 /**
- * Routes for data visualizer.
+ * @apiGroup DataVisualizer
+ *
+ * @api {post} /internal/data_visualizer/test_grok_pattern Tests a grok pattern against a sample of text
+ * @apiName testGrokPattern
+ * @apiDescription Tests a grok pattern against a sample of text and return the positions of the fields
  */
 export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
   const router = coreSetup.http.createRouter();
