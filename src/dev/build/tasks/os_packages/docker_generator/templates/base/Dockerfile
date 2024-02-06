@@ -215,9 +215,6 @@ RUN mkdir /licenses && \
     cp LICENSE.txt /licenses/LICENSE
 {{/ubi}}
 
-# TODO: remove, only for debug
-RUN sed -i '2i set -x' bin/kibana
-
 ENTRYPOINT ["/bin/tini", "--"]
 
 {{#cloud}}

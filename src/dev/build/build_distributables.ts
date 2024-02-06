@@ -165,7 +165,7 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   }
 
   if (options.createDockerFIPS) {
-    // control w/ --docker-fips-image
+    // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
     await run(Tasks.CreateDockerFIPS);
   }
 

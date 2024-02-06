@@ -139,9 +139,9 @@ const uploadPipeline = (pipelineContent: string | object) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_cloud.yml'));
     }
 
-    // if (GITHUB_PR_LABELS.includes('ci:build-fips-images')) {
-    //   pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
-    // }
+    if (GITHUB_PR_LABELS.includes('ci:build-docker-fips')) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/fips.yml'));
+    }
 
     if (
       GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||

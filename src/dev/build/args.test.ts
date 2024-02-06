@@ -73,7 +73,7 @@ it('builds packages if --all-platforms is passed', () => {
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
-        "createDockerFIPS": false,
+        "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": true,
         "createDockerUbuntu": true,
@@ -194,7 +194,7 @@ it('limits packages if --docker passed with --all-platforms', () => {
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
-        "createDockerFIPS": false,
+        "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": true,
         "createDockerUbuntu": true,
@@ -242,7 +242,7 @@ it('limits packages if --docker passed with --skip-docker-ubi and --all-platform
         "createDebPackage": false,
         "createDockerCloud": true,
         "createDockerContexts": true,
-        "createDockerFIPS": false,
+        "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": false,
         "createDockerUbuntu": true,
@@ -283,7 +283,7 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
         "createDebPackage": true,
         "createDockerCloud": true,
         "createDockerContexts": true,
-        "createDockerFIPS": false,
+        "createDockerFIPS": true,
         "createDockerServerless": true,
         "createDockerUBI": true,
         "createDockerUbuntu": false,
@@ -313,23 +313,24 @@ it('limits packages if --all-platforms passed with --skip-docker-ubuntu', () => 
   `);
 });
 
-it('builds docker fips images if --docker-fips-images is passed', () => {
-  expect(readCliArgs(['node', 'scripts/build', '--docker-fips-images'])).toMatchInlineSnapshot(`
+it('limits packages if --all-platforms passed with --skip-docker-fips', () => {
+  expect(readCliArgs(['node', 'scripts/build', '--all-platforms', '--skip-docker-fips']))
+    .toMatchInlineSnapshot(`
     Object {
       "buildOptions": Object {
         "buildCanvasShareableRuntime": true,
         "createArchives": true,
         "createCdnAssets": true,
-        "createDebPackage": false,
-        "createDockerCloud": false,
+        "createDebPackage": true,
+        "createDockerCloud": true,
         "createDockerContexts": true,
-        "createDockerFIPS": true,
-        "createDockerServerless": false,
-        "createDockerUBI": false,
-        "createDockerUbuntu": false,
+        "createDockerFIPS": false,
+        "createDockerServerless": true,
+        "createDockerUBI": true,
+        "createDockerUbuntu": true,
         "createGenericFolders": true,
         "createPlatformFolders": true,
-        "createRpmPackage": false,
+        "createRpmPackage": true,
         "dockerContextUseLocalArtifact": null,
         "dockerCrossCompile": false,
         "dockerNamespace": null,
@@ -341,7 +342,7 @@ it('builds docker fips images if --docker-fips-images is passed', () => {
         "eprRegistry": "snapshot",
         "initialize": true,
         "isRelease": false,
-        "targetAllPlatforms": false,
+        "targetAllPlatforms": true,
         "versionQualifier": "",
         "withExamplePlugins": false,
         "withTestPlugins": false,
