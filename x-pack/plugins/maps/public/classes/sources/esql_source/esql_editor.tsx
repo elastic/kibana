@@ -79,10 +79,10 @@ export function ESQLEditor(props: Props) {
               ...esqlMeta,
             });
           } catch (err) {
-            setError(err);
             if (!isMounted()) {
               return;
             }
+            setError(err);
           }
 
           setIsLoading(false);
