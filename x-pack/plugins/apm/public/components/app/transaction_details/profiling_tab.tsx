@@ -4,9 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiSpacer } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentProps,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { ProfilingFlamegraph } from './profiling_flamegraph';
 import { ProfilingTopNFunctions } from './profiling_top_functions';
@@ -17,24 +21,55 @@ function ProfilingTab() {
     path: { serviceName },
   } = useApmParams('/services/{serviceName}/transactions/view');
 
+  const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
+    return [
+      {
+        id: 'flamegraph',
+        name: i18n.translate(
+          'xpack.apm.transactions.profiling.tabs.flamegraph',
+          { defaultMessage: 'Flamegraph' }
+        ),
+        content: (
+          <>
+            <EuiSpacer />
+            <ProfilingFlamegraph
+              serviceName={serviceName}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              transactionName={transactionName}
+            />
+          </>
+        ),
+      },
+      {
+        id: 'topNFunctions',
+        name: i18n.translate(
+          'xpack.apm.transactions.profiling.tabs.topNFunctions',
+          { defaultMessage: 'Top 10 Functions' }
+        ),
+        content: (
+          <>
+            <EuiSpacer />
+            <ProfilingTopNFunctions
+              serviceName={serviceName}
+              rangeFrom={rangeFrom}
+              rangeTo={rangeTo}
+              kuery={kuery}
+              transactionName={transactionName}
+            />
+          </>
+        ),
+      },
+    ];
+  }, [kuery, rangeFrom, rangeTo, serviceName, transactionName]);
+
   return (
-    <>
-      <ProfilingFlamegraph
-        serviceName={serviceName}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        kuery={kuery}
-        transactionName={transactionName}
-      />
-      <EuiSpacer />
-      <ProfilingTopNFunctions
-        serviceName={serviceName}
-        rangeFrom={rangeFrom}
-        rangeTo={rangeTo}
-        kuery={kuery}
-        transactionName={transactionName}
-      />
-    </>
+    <EuiTabbedContent
+      tabs={tabs}
+      initialSelectedTab={tabs[0]}
+      autoFocus="selected"
+    />
   );
 }
 

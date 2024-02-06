@@ -7,36 +7,26 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 
+import { XYBrushEvent } from '@elastic/charts';
+import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { omit } from 'lodash';
 import { useHistory } from 'react-router-dom';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiTabs,
-  EuiTab,
-  EuiFlexItem,
-  EuiFlexGroup,
-} from '@elastic/eui';
-
-import { XYBrushEvent } from '@elastic/charts';
+import { maybe } from '../../../../common/utils/maybe';
 import { useLegacyUrlParams } from '../../../context/url_params_context/use_url_params';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
+import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
 import {
   TraceSamplesFetchResult,
   useTransactionTraceSamplesFetcher,
 } from '../../../hooks/use_transaction_trace_samples_fetcher';
-
-import { maybe } from '../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../shared/links/url_helpers';
-
+import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
 import { failedTransactionsCorrelationsTab } from './failed_transactions_correlations_tab';
 import { latencyCorrelationsTab } from './latency_correlations_tab';
-import { traceSamplesTab } from './trace_samples_tab';
-import { useSampleChartSelection } from '../../../hooks/use_sample_chart_selection';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
-import { useCriticalPathFeatureEnabledSetting } from '../../../hooks/use_critical_path_feature_enabled_setting';
-import { aggregatedCriticalPathTab } from './aggregated_critical_path_tab';
 import { profilingTab } from './profiling_tab';
+import { traceSamplesTab } from './trace_samples_tab';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -142,20 +132,16 @@ export function TransactionDetailsTabs() {
       </EuiTabs>
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <TabContent
-              {...{
-                clearChartSelection,
-                onFilter,
-                sampleRangeFrom,
-                sampleRangeTo,
-                selectSampleFromChartSelection,
-                traceSamplesFetchResult,
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <TabContent
+          {...{
+            clearChartSelection,
+            onFilter,
+            sampleRangeFrom,
+            sampleRangeTo,
+            selectSampleFromChartSelection,
+            traceSamplesFetchResult,
+          }}
+        />
       </EuiPanel>
     </>
   );
