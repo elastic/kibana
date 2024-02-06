@@ -71,6 +71,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 'e09e0380-0740-4105-becc-0a4ca12e3944': {

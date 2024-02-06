@@ -91,6 +91,7 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 '0a923af2-c880-4aa3-aa93-a0b9c2801f6d': {
