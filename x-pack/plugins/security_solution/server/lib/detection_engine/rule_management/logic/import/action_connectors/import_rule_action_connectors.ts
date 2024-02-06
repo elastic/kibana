@@ -8,6 +8,8 @@ import { Readable } from 'stream';
 
 import type { SavedObjectsImportResponse } from '@kbn/core-saved-objects-common';
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 import type { RuleToImport } from '../../../../../../../common/api/detection_engine/rule_management';
 import type { WarningSchema } from '../../../../../../../common/api/detection_engine';
@@ -22,6 +24,13 @@ import {
 } from './utils';
 import type { ImportRuleActionConnectorsParams, ImportRuleActionConnectorsResult } from './types';
 
+const NO_ACTION_RESULT = {
+  success: true,
+  errors: [],
+  successCount: 0,
+  warnings: [],
+};
+
 export const importRuleActionConnectors = async ({
   actionConnectors,
   actionsClient,
@@ -30,19 +39,20 @@ export const importRuleActionConnectors = async ({
   overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
   try {
+    const preconfiguredActionConnectors = await fetchPreconfiguredActionConnectors(actionsClient);
+    const preconfiguredActionConnectorIds = new Set(preconfiguredActionConnectors.map((c) => c.id));
     const actionConnectorRules = getActionConnectorRules(rules);
-    const actionsIds: string[] = Object.keys(actionConnectorRules);
+    const actionsIds: string[] = Object.keys(actionConnectorRules).filter(
+      (id) => !preconfiguredActionConnectorIds.has(id)
+    );
 
-    if (!actionsIds.length)
-      return {
-        success: true,
-        errors: [],
-        successCount: 0,
-        warnings: [],
-      };
+    if (!actionsIds.length) {
+      return NO_ACTION_RESULT;
+    }
 
-    if (overwrite && !actionConnectors.length)
+    if (overwrite && !actionConnectors.length) {
       return handleActionsHaveNoConnectors(actionsIds, actionConnectorRules);
+    }
 
     let actionConnectorsToImport: SavedObject[] = actionConnectors;
 
@@ -58,13 +68,9 @@ export const importRuleActionConnectors = async ({
       // filter out existing connectors
       actionConnectorsToImport = actionConnectors.filter(({ id }) => newIdsToAdd.includes(id));
     }
-    if (!actionConnectorsToImport.length)
-      return {
-        success: true,
-        errors: [],
-        successCount: 0,
-        warnings: [],
-      };
+    if (!actionConnectorsToImport.length) {
+      return NO_ACTION_RESULT;
+    }
 
     const readStream = Readable.from(actionConnectorsToImport);
     const { success, successCount, successResults, warnings, errors }: SavedObjectsImportResponse =
@@ -93,3 +99,11 @@ export const importRuleActionConnectors = async ({
     return returnErroredImportResult(error);
   }
 };
+
+async function fetchPreconfiguredActionConnectors(
+  actionsClient: ActionsClient
+): Promise<ConnectorWithExtraFindData[]> {
+  const knownConnectors = await actionsClient.getAll();
+
+  return knownConnectors.filter((c) => c.isPreconfigured);
+}
