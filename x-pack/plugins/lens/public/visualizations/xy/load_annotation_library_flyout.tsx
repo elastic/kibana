@@ -61,7 +61,7 @@ export function LoadAnnotationLibraryFlyout({
         </EuiFlyoutFooter>
       }
       isOpen={Boolean(isLoadLibraryVisible)}
-      groupLabel={i18n.translate('xpack.lens.editorFrame.loadFromLibrary', {
+      label={i18n.translate('xpack.lens.editorFrame.loadFromLibrary', {
         defaultMessage: 'Select annotations from library',
       })}
       handleClose={() => {

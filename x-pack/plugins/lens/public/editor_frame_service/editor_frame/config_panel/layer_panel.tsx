@@ -160,12 +160,12 @@ export function LayerPanel(props: LayerPanelProps) {
       const derivedOpenColumnGroup = dimensionGroups.find((group) =>
         group.accessors.some((a) => a.columnId === openColumnId)
       );
-      // close the flyout if the column is no longer available
-      if (!derivedOpenColumnGroup) {
-        return setOpenDimension({});
-      }
       // update the group if it changed (e.g. due to a moving a column to another column via chart picker)
-      if (openColumnGroup?.groupId !== derivedOpenColumnGroup?.groupId) {
+      if (
+        openColumnGroup &&
+        derivedOpenColumnGroup &&
+        openColumnGroup?.groupId !== derivedOpenColumnGroup?.groupId
+      ) {
         setOpenDimension({
           ...openDimension,
           openColumnGroup: derivedOpenColumnGroup,
