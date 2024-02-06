@@ -12,7 +12,6 @@ import {
   ruleExecutionStatusValues,
   ruleExecutionStatusErrorReason,
   ruleExecutionStatusWarningReason,
-  filterStateStore,
 } from '../constants';
 import {
   ruleParamsSchema,
@@ -34,7 +33,6 @@ export type RuleExecutionStatusErrorReason =
   typeof ruleExecutionStatusErrorReason[keyof typeof ruleExecutionStatusErrorReason];
 export type RuleExecutionStatusWarningReason =
   typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
-export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
 
 export type RuleParams = TypeOf<typeof ruleParamsSchema>;
 export type RuleSnoozeSchedule = TypeOf<typeof snoozeScheduleSchema>;
