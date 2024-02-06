@@ -43,7 +43,7 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
             <SloIndicatorTypeBadge slo={slo} color="default" />
             <SloTimeWindowBadge slo={slo} color="default" />
             <SloRulesBadge rules={rules} onClick={handleCreateRule} />
-            <TagsList tags={slo.tags} noOfTagsToDisplay={1} color="default" />
+            <TagsList tags={slo.tags} noOfTagsToDisplay={1} color="default" ignoreEmpty />
           </>
         )}
       </EuiFlexGroup>
