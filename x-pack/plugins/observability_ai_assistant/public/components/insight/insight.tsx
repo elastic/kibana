@@ -169,9 +169,7 @@ function PromptEdit({
           display="base"
           color="danger"
           size="m"
-          onClick={() => {
-            onCancel();
-          }}
+          onClick={onCancel}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
