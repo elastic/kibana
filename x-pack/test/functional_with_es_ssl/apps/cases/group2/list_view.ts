@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import rison from '@kbn/rison';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -594,14 +593,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           customFields: { [customFields[0].key]: ['on'] },
         };
 
-        const search = `cases=${rison.encode(casesState)}`;
-
-        await cases.navigation.navigateToApp('cases', search);
+        await cases.casesTable.setStateToUrlAndNavigate(casesState);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
         const currentUrl = await browser.getCurrentUrl();
-        expect(new URL(currentUrl).search).to.be(`?${search}`);
+        expect(new URL(currentUrl).search).to.be(`?`);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -636,14 +633,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           customFields: { [customFields[0].key]: ['on'] },
         };
 
-        const search = `cases=${rison.encode(casesState)}`;
-
-        await cases.navigation.navigateToApp('cases', search);
+        await cases.casesTable.setStateToUrlAndNavigate(casesState);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
         const currentUrl = await browser.getCurrentUrl();
-        expect(new URL(currentUrl).search).to.be(`?${search}`);
+        expect(new URL(currentUrl).search).to.be(`?`);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -666,7 +661,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const search = `severity=${theCase.severity}&status=${theCase.status}&page=1&perPage=1sortField=createdAt&sortOrder=desc`;
 
-        await cases.navigation.navigateToApp('cases', search);
+        await cases.navigation.navigateToAllCasesList(search);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 

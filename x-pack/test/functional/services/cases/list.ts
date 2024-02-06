@@ -7,6 +7,7 @@
 
 import deepEqual from 'react-fast-compare';
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -490,6 +491,11 @@ export function CasesTableServiceProvider(
       for (const filter of filters) {
         await testSubjects.existOrFail(`options-filter-popover-button-${filter}`);
       }
+    },
+
+    async setStateToUrlAndNavigate(state: Record<string, unknown>) {
+      const encodedUrlParams = rison.encode(state);
+      await common.navigateToApp('cases', { search: `cases=${encodedUrlParams}` });
     },
   };
 }
