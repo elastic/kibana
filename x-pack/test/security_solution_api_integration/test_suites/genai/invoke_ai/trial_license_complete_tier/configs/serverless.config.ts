@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import getPort from 'get-port';
 import { createTestConfig } from '../../../../../config/serverless/config.base';
 
 export default createTestConfig({
   kbnTestServerArgs: [
     // used for connector simulators
-    `--xpack.actions.proxyUrl=http://localhost:${(async () =>
-      getPort({ port: getPort.makeRange(6200, 6299) }))()}`,
+    `--xpack.actions.proxyUrl=http://localhost:6200`,
     `--xpack.actions.enabledActionTypes=${JSON.stringify(['.bedrock', '.gen-ai'])}`,
   ],
   testFiles: [require.resolve('..')],
