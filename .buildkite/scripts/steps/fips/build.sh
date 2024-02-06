@@ -16,7 +16,6 @@ node scripts/build \
     --skip-generic-folders \
     --skip-platform-folders \
     --skip-cdn-assets \
-    --skip-archives \
     --docker-images \
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
