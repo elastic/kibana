@@ -22,12 +22,22 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navGroup',
       id: 'search_project_nav',
-      title: 'Elasticsearch',
+      title: 'Search',
       icon: 'logoElasticsearch',
       defaultIsCollapsed: false,
       isCollapsible: false,
       breadcrumbStatus: 'hidden',
       children: [
+        {
+          id: 'search_getting_started',
+          title: i18n.translate('navigation.nav.gettingStarted', {
+            defaultMessage: 'Home',
+          }),
+          link: 'dev_tools:console',
+          getIsActive: ({ pathNameSerialized, prepend }) => {
+            return pathNameSerialized.startsWith(prepend('/app/home'));
+          },
+        },
         {
           id: 'dev_tools',
           title: i18n.translate('navigation.nav.search.devTools', {
@@ -41,7 +51,7 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'explore',
           title: i18n.translate('navigation.nav.explore', {
-            defaultMessage: 'Explore',
+            defaultMessage: 'Kibana',
           }),
           children: [
             {
@@ -66,12 +76,6 @@ const navigationTree: NavigationTreeDefinition = {
                 );
               },
             },
-            {
-              link: 'management:triggersActions',
-              title: i18n.translate('navigation.nav.alerts', {
-                defaultMessage: 'Alerts',
-              }),
-            },
           ],
         },
         {
@@ -82,29 +86,171 @@ const navigationTree: NavigationTreeDefinition = {
           children: [
             {
               title: i18n.translate('navigation.nav.content.indices', {
-                defaultMessage: 'Index Management',
+                defaultMessage: 'Indices',
               }),
               link: 'management:index_management',
               breadcrumbStatus:
                 'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              renderAs: 'accordion',
+              children: [
+                {
+                  title: i18n.translate('navigation.nav.content.pipelines', {
+                    defaultMessage: 'search-github',
+                  }),
+                  link: 'management:ingest_pipelines',
+                  breadcrumbStatus:
+                    'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                  renderAs: 'accordion',
+                  children: [
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Overview',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Documents',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Index Mappings',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Pipelines',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                  ],
+                },
+              ],
             },
             {
-              title: i18n.translate('navigation.nav.content.pipelines', {
-                defaultMessage: 'Pipelines',
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'Connectors',
               }),
-              link: 'management:ingest_pipelines',
+              link: 'management:triggersActionsConnectors',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'Web crawlers',
+              }),
+              link: 'management:triggersActionsConnectors',
               breadcrumbStatus:
                 'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
           ],
         },
         {
-          id: 'security',
-          title: i18n.translate('navigation.nav.security', {
-            defaultMessage: 'Security',
+          id: 'apps',
+          title: i18n.translate('navigation.nav.apps', {
+            defaultMessage: 'Applications',
           }),
           children: [
             {
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'AI playground',
+              }),
+              link: 'management:api_keys',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'Search applications',
+              }),
+              link: 'management:index_management',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+              renderAs: 'accordion',
+              children: [
+                {
+                  title: i18n.translate('navigation.nav.content.pipelines', {
+                    defaultMessage: 'Test',
+                  }),
+                  link: 'management:ingest_pipelines',
+                  breadcrumbStatus:
+                    'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                  renderAs: 'accordion',
+                  children: [
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Docs explorer',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Content',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                    {
+                      title: i18n.translate('navigation.nav.content.pipelines', {
+                        defaultMessage: 'Connect',
+                      }),
+                      link: 'management:ingest_pipelines',
+                      breadcrumbStatus:
+                        'hidden' /* management sub-pages set their breadcrumbs themselves */,
+                      renderAs: 'item',
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'Behavioral analytics',
+              }),
+              link: 'management:api_keys',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+          ],
+        },
+        {
+          id: 'entsearch',
+          title: i18n.translate('navigation.nav.entsearch', {
+            defaultMessage: 'Enterprise Search',
+          }),
+          children: [
+            {
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'App Search',
+              }),
+              link: 'management:api_keys',
+              breadcrumbStatus:
+                'hidden' /* management sub-pages set their breadcrumbs themselves */,
+            },
+            {
+              title: i18n.translate('navigation.nav.content.indices', {
+                defaultMessage: 'Workplace Search',
+              }),
               link: 'management:api_keys',
               breadcrumbStatus:
                 'hidden' /* management sub-pages set their breadcrumbs themselves */,
@@ -116,15 +262,6 @@ const navigationTree: NavigationTreeDefinition = {
   ],
   footer: [
     {
-      type: 'navItem',
-      id: 'search_getting_started',
-      title: i18n.translate('navigation.nav.gettingStarted', {
-        defaultMessage: 'Get started',
-      }),
-      icon: 'launch',
-      link: 'home',
-    },
-    {
       type: 'navGroup',
       id: 'project_settings_project_nav',
       title: i18n.translate('navigation.nav.projectSettings', {
@@ -134,10 +271,17 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
+          title: i18n.translate('navigation.nav.projectSettings', {
+            defaultMessage: 'Trained models',
+          }),
+          link: 'fleet',
+        },
+        {
           link: 'management',
           title: i18n.translate('navigation.nav.mngt', {
             defaultMessage: 'Stack Management',
           }),
+          spaceBefore: null,
           renderAs: 'panelOpener',
           children: [
             {
@@ -199,21 +343,21 @@ const navigationTree: NavigationTreeDefinition = {
             },
           ],
         },
-        {
-          id: 'cloudLinkDeployment',
-          cloudLink: 'deployment',
-          title: i18n.translate('navigation.nav.performance', {
-            defaultMessage: 'Performance',
-          }),
-        },
-        {
-          id: 'cloudLinkUserAndRoles',
-          cloudLink: 'userAndRoles',
-        },
-        {
-          id: 'cloudLinkBilling',
-          cloudLink: 'billingAndSub',
-        },
+        // {
+        //   id: 'cloudLinkDeployment',
+        //   cloudLink: 'deployment',
+        //   title: i18n.translate('navigation.nav.performance', {
+        //     defaultMessage: 'Performance',
+        //   }),
+        // },
+        // {
+        //   id: 'cloudLinkUserAndRoles',
+        //   cloudLink: 'userAndRoles',
+        // },
+        // {
+        //   id: 'cloudLinkBilling',
+        //   cloudLink: 'billingAndSub',
+        // },
       ],
     },
   ],
