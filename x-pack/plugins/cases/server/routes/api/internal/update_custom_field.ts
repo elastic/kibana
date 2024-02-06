@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { INTERNAL_PATCH_CUSTOM_FIELDS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
-import type { caseApiV1 } from '../../../../common/types/api';
+import type { customFieldsApiV1 } from '../../../../common/types/api';
 import type { caseDomainV1 } from '../../../../common/types/domain';
 
 export const updateCustomFieldRoute = createCasesRoute({
@@ -27,7 +27,7 @@ export const updateCustomFieldRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
       const customFieldId = request.params.custom_field_id;
-      const details = request.body as caseApiV1.CustomFieldPatchRequest;
+      const details = request.body as customFieldsApiV1.CustomFieldPatchRequest;
 
       const res: caseDomainV1.Case = await casesClient.cases.updateCustomField({
         caseId,

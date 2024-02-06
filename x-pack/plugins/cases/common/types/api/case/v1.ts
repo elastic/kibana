@@ -427,14 +427,6 @@ export const CasePatchRequestRt = rt.intersection([
   rt.strict({ id: rt.string, version: rt.string }),
 ]);
 
-/**
- * Update custom_field
- */
-export const CustomFieldPatchRequestRt = rt.strict({
-  value: rt.union([rt.boolean, rt.null, CaseCustomFieldTextWithValidationValueRt]),
-  caseVersion: rt.string,
-});
-
 export const CasesPatchRequestRt = rt.strict({
   cases: limitedArraySchema({
     codec: CasePatchRequestRt,
@@ -522,4 +514,3 @@ export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
 export type CaseRequestCustomField = rt.TypeOf<typeof CustomFieldRt>;
 export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
 export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;
-export type CustomFieldPatchRequest = rt.TypeOf<typeof CustomFieldPatchRequestRt>;
