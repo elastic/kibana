@@ -12,7 +12,6 @@ import { SortFieldCase } from '../../../../common/ui';
 import { stringifyUrlParams } from './stringify_url_params';
 
 describe('stringifyUrlParams', () => {
-  const currentSearch = '';
   const commonProps = {
     page: 1,
     perPage: 5,
@@ -27,7 +26,7 @@ describe('stringifyUrlParams', () => {
       severity: [],
     };
 
-    expect(stringifyUrlParams(currentSearch, urlParams)).toMatchInlineSnapshot(
+    expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
       `"cases=(page:1,perPage:5,severity:!(),sortField:createdAt,sortOrder:desc,status:!())"`
     );
   });
@@ -39,7 +38,7 @@ describe('stringifyUrlParams', () => {
       severity: [CaseSeverity.LOW],
     };
 
-    expect(stringifyUrlParams(currentSearch, urlParams)).toMatchInlineSnapshot(
+    expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
       `"cases=(page:1,perPage:5,severity:!(low),sortField:createdAt,sortOrder:desc,status:!(open))"`
     );
   });
@@ -51,7 +50,7 @@ describe('stringifyUrlParams', () => {
       severity: [CaseSeverity.LOW, CaseSeverity.HIGH],
     };
 
-    expect(stringifyUrlParams(currentSearch, urlParams)).toMatchInlineSnapshot(
+    expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
       `"cases=(page:1,perPage:5,severity:!(low,high),sortField:createdAt,sortOrder:desc,status:!(open,closed))"`
     );
   });
@@ -63,7 +62,7 @@ describe('stringifyUrlParams', () => {
       severity: undefined,
     };
 
-    expect(stringifyUrlParams(currentSearch, urlParams)).toMatchInlineSnapshot(
+    expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
       `"cases=(page:1,perPage:5,sortField:createdAt,sortOrder:desc)"`
     );
   });
@@ -75,7 +74,7 @@ describe('stringifyUrlParams', () => {
       ...commonProps,
     };
 
-    expect(stringifyUrlParams(currentSearch, urlParams)).toMatchInlineSnapshot(
+    expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
       `"cases=(page:1,perPage:5,sortField:createdAt,sortOrder:desc)"`
     );
   });
@@ -90,16 +89,19 @@ describe('stringifyUrlParams', () => {
       customFields: { my_field: ['foo', 'bar'] },
     };
 
-    expect(stringifyUrlParams(currentSearch, urlParams)).toMatchInlineSnapshot(
+    expect(stringifyUrlParams(urlParams)).toMatchInlineSnapshot(
       `"cases=(assignees:!(),category:!(),customFields:(my_field:!(foo,bar)),owner:!(),page:1,perPage:10,reporters:!(),search:'',searchFields:!(title,description),severity:!(),sortField:createdAt,sortOrder:desc,status:!(),tags:!())"`
     );
   });
 
   it('replaces the cases query param correctly', () => {
     expect(
-      stringifyUrlParams('cases=(perPage:5)', {
-        perPage: 100,
-      })
+      stringifyUrlParams(
+        {
+          perPage: 100,
+        },
+        'cases=(perPage:5)'
+      )
     ).toMatchInlineSnapshot(`"cases=(perPage:100)"`);
   });
 
@@ -107,17 +109,23 @@ describe('stringifyUrlParams', () => {
     const search = 'status=foo&severity=foo&page=2&perPage=50&sortField=closedAt&sortOrder=asc';
 
     expect(
-      stringifyUrlParams(search, {
-        perPage: 100,
-      })
+      stringifyUrlParams(
+        {
+          perPage: 100,
+        },
+        search
+      )
     ).toMatchInlineSnapshot(`"cases=(perPage:100)"`);
   });
 
   it('keeps non cases state', () => {
     expect(
-      stringifyUrlParams('foo=bar', {
-        perPage: 100,
-      })
+      stringifyUrlParams(
+        {
+          perPage: 100,
+        },
+        'foo=bar'
+      )
     ).toMatchInlineSnapshot(`"cases=(perPage:100)&foo=bar"`);
   });
 });

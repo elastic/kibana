@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -581,10 +582,19 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         ];
 
         await cases.casesTable.setFiltersConfigurationInLocalStorage(lsState);
-
         await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
 
-        const search = `search=${theCase.title}&severity=${theCase.severity}&status=${theCase.status}&tags=${theCase.tags[0]}&assignees=${profiles[0].uid}&category=${theCase.category}&cf_${customFields[0].key}=on`;
+        const casesState = {
+          search: theCase.title,
+          severity: [theCase.severity],
+          status: [theCase.status],
+          tags: theCase.tags,
+          assignees: [profiles[0].uid],
+          category: [theCase.category],
+          customFields: { [customFields[0].key]: ['on'] },
+        };
+
+        const search = `cases=${rison.encode(casesState)}`;
 
         await cases.navigation.navigateToApp('cases', search);
         await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -616,7 +626,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
 
-        const search = `search=${theCase.title}&severity=${theCase.severity}&status=${theCase.status}&tags=${theCase.tags[0]}&assignees=${profiles[0].uid}&category=${theCase.category}&cf_${customFields[0].key}=on`;
+        const casesState = {
+          search: theCase.title,
+          severity: [theCase.severity],
+          status: [theCase.status],
+          tags: theCase.tags,
+          assignees: [profiles[0].uid],
+          category: [theCase.category],
+          customFields: { [customFields[0].key]: ['on'] },
+        };
+
+        const search = `cases=${rison.encode(casesState)}`;
 
         await cases.navigation.navigateToApp('cases', search);
         await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -632,6 +652,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'category',
           'assignees',
           customFields[0].key,
+        ]);
+      });
+
+      it('loads the state from a legacy URL', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          description: 'url testing',
+          severity: CaseSeverity.CRITICAL,
+        });
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const search = `severity=${theCase.severity}&status=${theCase.status}&page=1&perPage=1sortField=createdAt&sortOrder=desc`;
+
+        await cases.navigation.navigateToApp('cases', search);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentUrl = await browser.getCurrentUrl();
+        expect(new URL(currentUrl).search).to.be(`?${search}`);
+
+        await cases.casesTable.expectFiltersToBeActive([
+          'status',
+          'severity',
+          'tags',
+          'category',
+          'assignees',
         ]);
       });
 

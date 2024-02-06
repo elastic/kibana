@@ -107,7 +107,7 @@ const useAllCasesUrlState = (): [
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {
       const updatedQuery = allCasesUrlStateSerializer(updated);
-      const search = stringifyUrlParams(location.search, updatedQuery);
+      const search = stringifyUrlParams(updatedQuery, location.search);
 
       history[mode]({
         ...location,

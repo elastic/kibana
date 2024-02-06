@@ -10,8 +10,8 @@ import { ALL_CASES_STATE_URL_KEY, LEGACY_SUPPORTED_STATE_KEYS } from '../constan
 import type { AllCasesURLQueryParams } from '../types';
 
 export function stringifyUrlParams(
-  currentSearch: string,
-  allCasesUrlParams: AllCasesURLQueryParams
+  allCasesUrlParams: AllCasesURLQueryParams,
+  currentSearch: string = ''
 ): string {
   const encodedUrlParams = encode({ ...allCasesUrlParams });
 

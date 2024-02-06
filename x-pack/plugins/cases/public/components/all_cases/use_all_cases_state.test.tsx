@@ -14,7 +14,6 @@ import { DEFAULT_CASES_TABLE_STATE, DEFAULT_TABLE_LIMIT } from '../../containers
 import { SortFieldCase } from '../../containers/types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
 import { CaseStatuses } from '@kbn/cases-components';
-import { url as urlUtils } from '@kbn/kibana-utils-plugin/common';
 import { CaseSeverity } from '../../../common';
 import type { AllCasesTableState } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
@@ -99,7 +98,7 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account existing url query params on first run', () => {
-    mockLocation.search = stringifyUrlParams({ page: '2', perPage: '15' });
+    mockLocation.search = stringifyUrlParams({ page: 2, perPage: 15 });
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -112,7 +111,10 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('takes into account existing url filter options on first run', () => {
-    mockLocation.search = stringifyUrlParams({ severity: 'critical', status: 'open' });
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.CRITICAL],
+      status: [CaseStatuses.open],
+    });
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -144,7 +146,9 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('preserves non cases state url parameters', () => {
-    mockLocation.search = `status=open&foo=bar&foo=baz&test=my-test`;
+    mockLocation.search = `${stringifyUrlParams({
+      status: [CaseStatuses.open],
+    })}&foo=bar&foo=baz&test=my-test`;
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -155,9 +159,8 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: `${urlUtils.encodeUriQuery(
-        'page=1&perPage=10&sortField=createdAt&sortOrder=desc&severity=medium&status=open&'
-      )}foo=bar&foo=baz&test=my-test`,
+      search:
+        'cases=(page:1,perPage:10,severity:!(medium),sortField:createdAt,sortOrder:desc,status:!(open))&foo=bar&foo=baz&test=my-test',
     });
   });
 
@@ -217,7 +220,8 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('urlParams take precedence over localStorage query params values', () => {
-    mockLocation.search = stringifyUrlParams({ perPage: '15' });
+    mockLocation.search = stringifyUrlParams({ perPage: 15 });
+
     const existingLocalStorageValues = {
       queryParams: { ...DEFAULT_CASES_TABLE_STATE.queryParams, perPage: 20 },
       filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
@@ -236,7 +240,11 @@ describe('useAllCasesQueryParams', () => {
   });
 
   it('urlParams take precedence over localStorage filter options values', () => {
-    mockLocation.search = stringifyUrlParams({ severity: 'high', status: 'open' });
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.HIGH],
+      status: [CaseStatuses.open],
+    });
+
     const existingLocalStorageValues = {
       filterOptions: {
         ...DEFAULT_CASES_TABLE_STATE.filterOptions,
@@ -271,12 +279,15 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockReplace).toHaveBeenCalledWith({
-      search: urlUtils.encodeUriQuery('page=1&perPage=30&sortField=createdAt&sortOrder=desc'),
+      search: 'cases=(page:1,perPage:30,sortField:createdAt,sortOrder:desc)',
     });
   });
 
   it('loads the state from the URL correctly', () => {
-    mockLocation.search = urlUtils.encodeUriQuery('status=in-progress&severity=high');
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.HIGH],
+      status: [CaseStatuses['in-progress']],
+    });
 
     const { result } = renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -342,7 +353,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: urlUtils.encodeUriQuery('page=1&perPage=30&sortField=createdAt&sortOrder=desc'),
+      search: 'cases=(page:1,perPage:30,sortField:createdAt,sortOrder:desc)',
     });
   });
 
@@ -393,9 +404,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     expect(mockPush).toHaveBeenCalledWith({
-      search: urlUtils.encodeUriQuery(
-        'page=1&perPage=10&sortField=createdAt&sortOrder=desc&status=closed'
-      ),
+      search: 'cases=(page:1,perPage:10,sortField:createdAt,sortOrder:desc,status:!(closed))',
     });
   });
 
@@ -437,7 +446,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     it('url perPage query param cannot be > 100', () => {
-      mockLocation.search = stringifyUrlParams({ perPage: '1000' });
+      mockLocation.search = stringifyUrlParams({ perPage: 1000 });
 
       const { result } = renderHook(() => useAllCasesState(), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -465,6 +474,7 @@ describe('useAllCasesQueryParams', () => {
     });
 
     it('validate spelling of url sortOrder', () => {
+      // @ts-expect-error: testing invalid sortOrder
       mockLocation.search = stringifyUrlParams({ sortOrder: 'foobar' });
 
       const { result } = renderHook(() => useAllCasesState(), {
@@ -565,7 +575,10 @@ describe('useAllCasesQueryParams', () => {
     });
 
     it('does not load the state from the URL', () => {
-      mockLocation.search = 'status=in-progress&severity=high';
+      mockLocation.search = stringifyUrlParams({
+        severity: [CaseSeverity.HIGH],
+        status: [CaseStatuses['in-progress']],
+      });
 
       const { result } = renderHook(() => useAllCasesState(true), {
         wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
