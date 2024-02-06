@@ -6,18 +6,18 @@
  */
 
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
-import type { AllCasesURLQueryParams } from '../types';
 
 import { allCasesUrlStateDeserializer } from './all_cases_url_state_deserializer';
 import { parseUrlParams } from './parse_url_params';
 
 describe('allCasesUrlStateDeserializer', () => {
-  const defaultMap = Object.fromEntries(
-    Object.entries({
-      ...DEFAULT_CASES_TABLE_STATE.filterOptions,
-      ...DEFAULT_CASES_TABLE_STATE.queryParams,
-    }).map(([key, value]) => [key, Array.isArray(value) ? value : [value]])
-  ) as AllCasesURLQueryParams;
+  const { customFields, ...filterOptionsWithoutCustomFields } =
+    DEFAULT_CASES_TABLE_STATE.filterOptions;
+
+  const defaultMap = {
+    ...filterOptionsWithoutCustomFields,
+    ...DEFAULT_CASES_TABLE_STATE.queryParams,
+  };
 
   it('parses defaults correctly', () => {
     expect(allCasesUrlStateDeserializer(defaultMap)).toMatchInlineSnapshot(`
@@ -46,11 +46,8 @@ describe('allCasesUrlStateDeserializer', () => {
     `);
   });
 
-  it('parses string with invalid format correctly', () => {
-    const url = 'invalid-format in this url';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
+  it('parses an empty object correctly', () => {
+    expect(allCasesUrlStateDeserializer({})).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {},
         "queryParams": Object {},
@@ -59,10 +56,8 @@ describe('allCasesUrlStateDeserializer', () => {
   });
 
   it('does not return unknown values', () => {
-    const url = 'foo=bar';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
+    // @ts-expect-error: testing unknown values
+    expect(allCasesUrlStateDeserializer({ foo: 'bar' })).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {},
         "queryParams": Object {},
@@ -70,56 +65,19 @@ describe('allCasesUrlStateDeserializer', () => {
     `);
   });
 
-  it('parses a url with search=foo', () => {
-    const url = 'search=foo';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
-      Object {
-        "filterOptions": Object {
-          "search": "foo",
-        },
-        "queryParams": Object {},
-      }
-    `);
-  });
-
-  it('parses a url with status=', () => {
-    const url = 'status=';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
-      Object {
-        "filterOptions": Object {
-          "status": Array [],
-        },
-        "queryParams": Object {},
-      }
-    `);
-  });
-
   it('converts page to integer correctly', () => {
-    const url = 'page=1';
-
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.page
-    ).toBe(1);
+    // @ts-expect-error: testing integer conversion
+    expect(allCasesUrlStateDeserializer({ page: '1' }).queryParams.page).toBe(1);
   });
 
   it('sets perPage to the maximum allowed value if it is set to over the limit', () => {
-    const url = 'perPage=1000';
-
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.perPage
-    ).toBe(100);
+    // @ts-expect-error: testing integer conversion
+    expect(allCasesUrlStateDeserializer({ perPage: '1000' }).queryParams.perPage).toBe(100);
   });
 
   it('converts perPage to integer correctly', () => {
-    const url = 'perPage=2';
-
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.perPage
-    ).toBe(2);
+    // @ts-expect-error: testing integer conversion
+    expect(allCasesUrlStateDeserializer({ perPage: '2' }).queryParams.perPage).toBe(2);
   });
 
   it('sets the defaults to page and perPage correctly if they are not numbers', () => {
@@ -166,11 +124,15 @@ describe('allCasesUrlStateDeserializer', () => {
   });
 
   it('parses custom fields correctly', () => {
-    const url =
-      'cf_my-custom-field-1=foo&cf_my-custom-field-2=bar,baz&cf_my-custom-field-1=qux&cf_my-custom-field-4=';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
+    expect(
+      allCasesUrlStateDeserializer({
+        customFields: {
+          'my-custom-field-1': ['foo', 'qux'],
+          'my-custom-field-2': ['bar', 'baz'],
+          'my-custom-field-4': [],
+        },
+      })
+    ).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {
           "customFields": Object {
@@ -200,10 +162,7 @@ describe('allCasesUrlStateDeserializer', () => {
   });
 
   it('parses none assignees correctly', () => {
-    const url = 'assignees=none&assignees=elastic';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
+    expect(allCasesUrlStateDeserializer({ assignees: ['none', 'elastic'] })).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {
           "assignees": Array [

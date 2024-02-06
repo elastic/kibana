@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty, isNumber } from 'lodash';
+import { isEmpty } from 'lodash';
 import { CustomFieldTypes } from '../../../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
 import type { QueryParams, FilterOptions } from '../../../../common/ui';
@@ -41,13 +41,21 @@ export const allCasesUrlStateDeserializer = (
   };
 
   if (page) {
+    const pageAsInteger = stringToInteger(page);
+
     queryParamsParsed.page =
-      isNumber(page) && page > 0 ? page : DEFAULT_CASES_TABLE_STATE.queryParams.page;
+      pageAsInteger && pageAsInteger > 0
+        ? pageAsInteger
+        : DEFAULT_CASES_TABLE_STATE.queryParams.page;
   }
 
   if (perPage) {
+    const perPageAsInteger = stringToInteger(perPage);
+
     queryParamsParsed.perPage =
-      isNumber(page) && page > 0 ? perPage : DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
+      perPageAsInteger && perPageAsInteger > 0
+        ? perPageAsInteger
+        : DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
   }
 
   if (assignees) {
@@ -73,4 +81,14 @@ export const allCasesUrlStateDeserializer = (
   };
 
   return sanitizeState(state);
+};
+
+const stringToInteger = (value?: string | number): number | undefined => {
+  const num = Number(value);
+
+  if (isNaN(num)) {
+    return;
+  }
+
+  return num;
 };

@@ -19,18 +19,10 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
+        "page": 1,
+        "perPage": 10,
+        "sortField": "createdAt",
+        "sortOrder": "desc",
       }
     `);
   });
@@ -49,24 +41,18 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "cf_bar": Array [
-          "foo",
-        ],
-        "cf_foo": Array [
-          "bar",
-        ],
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
+        "customFields": Object {
+          "bar": Array [
+            "foo",
+          ],
+          "foo": Array [
+            "bar",
+          ],
+        },
+        "page": 1,
+        "perPage": 10,
+        "sortField": "createdAt",
+        "sortOrder": "desc",
       }
     `);
   });
@@ -84,42 +70,10 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
-      }
-    `);
-  });
-
-  it('converts page & perPage to string correctly', () => {
-    expect(
-      allCasesUrlStateSerializer({
-        filterOptions: DEFAULT_FILTER_OPTIONS,
-        queryParams: { ...DEFAULT_QUERY_PARAMS, page: 3, perPage: 20 },
-      })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "page": Array [
-          "3",
-        ],
-        "perPage": Array [
-          "20",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
+        "page": 1,
+        "perPage": 10,
+        "sortField": "createdAt",
+        "sortOrder": "desc",
       }
     `);
   });
@@ -132,52 +86,10 @@ describe('allCasesUrlStateSerializer', () => {
       })
     ).toMatchInlineSnapshot(`
       Object {
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
-      }
-    `);
-  });
-
-  it('converts values to array correctly', () => {
-    expect(
-      allCasesUrlStateSerializer({
-        filterOptions: {
-          ...DEFAULT_FILTER_OPTIONS,
-          assignees: ['elastic'],
-          search: 'title',
-        },
-        queryParams: DEFAULT_QUERY_PARAMS,
-      })
-    ).toMatchInlineSnapshot(`
-      Object {
-        "assignees": Array [
-          "elastic",
-        ],
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
-        "search": Array [
-          "title",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
+        "page": 1,
+        "perPage": 10,
+        "sortField": "createdAt",
+        "sortOrder": "desc",
       }
     `);
   });
@@ -197,18 +109,10 @@ describe('allCasesUrlStateSerializer', () => {
           "none",
           "elastic",
         ],
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
+        "page": 1,
+        "perPage": 10,
+        "sortField": "createdAt",
+        "sortOrder": "desc",
       }
     `);
   });

@@ -6,6 +6,7 @@
  */
 
 import { safeDecode } from '@kbn/rison';
+import { isPlainObject } from 'lodash';
 import { SortFieldCase } from '../../../../common/ui';
 import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constants';
 import type { AllCasesURLQueryParams } from '../types';
@@ -69,7 +70,7 @@ export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryPara
 
   const parsedAllCasesParams = safeDecode(allCasesParams);
 
-  if (!parsedAllCasesParams) {
+  if (!parsedAllCasesParams || !isPlainObject(parsedAllCasesParams)) {
     return {};
   }
 

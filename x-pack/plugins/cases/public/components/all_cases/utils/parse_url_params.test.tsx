@@ -5,16 +5,17 @@
  * 2.0.
  */
 
+import { encode } from '@kbn/rison';
 import { DEFAULT_FILTER_OPTIONS, DEFAULT_QUERY_PARAMS } from '../../../containers/constants';
 
 import { parseUrlParams } from './parse_url_params';
 
 describe('parseUrlParams', () => {
-  const { customFields, ...restFilterOptions } = DEFAULT_FILTER_OPTIONS;
-  // @ts-expect-error: filter options and query params are a valid record
   const defaultValuesAsURL = new URLSearchParams({
-    ...restFilterOptions,
-    ...DEFAULT_QUERY_PARAMS,
+    cases: encode({
+      ...DEFAULT_FILTER_OPTIONS,
+      ...DEFAULT_QUERY_PARAMS,
+    }),
   });
 
   it('parses the default filter options and query params correctly', () => {
@@ -22,35 +23,36 @@ describe('parseUrlParams', () => {
       Object {
         "assignees": Array [],
         "category": Array [],
+        "customFields": Object {},
         "owner": Array [],
-        "page": Array [
-          "1",
-        ],
-        "perPage": Array [
-          "10",
-        ],
+        "page": 1,
+        "perPage": 10,
         "reporters": Array [],
-        "search": Array [],
+        "search": "",
         "searchFields": Array [
           "title",
           "description",
         ],
         "severity": Array [],
-        "sortField": Array [
-          "createdAt",
-        ],
-        "sortOrder": Array [
-          "desc",
-        ],
+        "sortField": "createdAt",
+        "sortOrder": "desc",
         "status": Array [],
         "tags": Array [],
       }
     `);
   });
 
-  it('parses a mix of fields correctly and splits them correctly', () => {
-    const url =
-      'assignees=elastic&tags=a,b&owner=cases&category=&reporters=elastic&reporters=test&status=open&search=My title';
+  it('parses a mix of fields correctly', () => {
+    const state = {
+      assignees: ['elastic'],
+      tags: ['a', 'b'],
+      category: [],
+      status: ['open'],
+      search: 'My title',
+      owner: ['cases'],
+    };
+
+    const url = `cases=${encode(state)}`;
 
     expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
       Object {
@@ -61,13 +63,7 @@ describe('parseUrlParams', () => {
         "owner": Array [
           "cases",
         ],
-        "reporters": Array [
-          "elastic",
-          "test",
-        ],
-        "search": Array [
-          "My title",
-        ],
+        "search": "My title",
         "status": Array [
           "open",
         ],
@@ -87,94 +83,125 @@ describe('parseUrlParams', () => {
     expect(parseUrlParams(new URLSearchParams(''))).toMatchInlineSnapshot(`Object {}`);
   });
 
-  it('parses a string field with empty value', () => {
-    expect(parseUrlParams(new URLSearchParams('foo='))).toMatchInlineSnapshot(`
-      Object {
-        "foo": Array [],
-      }
-    `);
+  it('parses an unrecognized query param correctly', () => {
+    expect(parseUrlParams(new URLSearchParams('foo='))).toMatchInlineSnapshot(`Object {}`);
   });
 
-  it('parses a url with status=foo,bar', () => {
-    const url = 'status=foo,bar';
-
-    expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-      Object {
-        "status": Array [
-          "foo",
-          "bar",
-        ],
-      }
-    `);
+  it('parses an empty string correctly in the cases object correctly', () => {
+    expect(parseUrlParams(new URLSearchParams({ cases: '' }))).toMatchInlineSnapshot(`Object {}`);
   });
 
-  it('parses a url with status=foo', () => {
-    const url = 'status=foo';
-
-    expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-      Object {
-        "status": Array [
-          "foo",
-        ],
-      }
-    `);
+  it('parses a malformed rison url correctly', () => {
+    expect(parseUrlParams(new URLSearchParams({ cases: '!' }))).toMatchInlineSnapshot(`Object {}`);
   });
 
-  it('parses a url with status=foo&status=bar', () => {
-    const url = 'status=foo&status=bar';
-
-    expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-      Object {
-        "status": Array [
-          "foo",
-          "bar",
-        ],
-      }
-    `);
+  it('parses a rison url that is not an object correctly', () => {
+    for (const value of ['foo', true, false, ['bar'], null, 0]) {
+      expect(parseUrlParams(new URLSearchParams({ cases: encode(value) }))).toEqual({});
+    }
   });
 
-  it('parses a url with status=foo,bar&status=baz', () => {
-    const url = 'status=foo,bar&status=baz';
+  describe('legacy URLs', () => {
+    it('parses a legacy url with all legacy supported keys correctly', () => {
+      const url = 'status=foo&severity=foo&page=2&perPage=50&sortField=closedAt&sortOrder=asc';
 
-    expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-      Object {
-        "status": Array [
-          "foo",
-          "bar",
-          "baz",
-        ],
-      }
-    `);
-  });
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "page": "2",
+          "perPage": "50",
+          "severity": Array [
+            "foo",
+          ],
+          "sortField": "closedAt",
+          "sortOrder": "asc",
+          "status": Array [
+            "foo",
+          ],
+        }
+      `);
+    });
 
-  it('parses a url with status=foo,bar&status=baz,qux', () => {
-    const url = 'status=foo,bar&status=baz,qux';
+    it('parses a url with status=foo,bar', () => {
+      const url = 'status=foo,bar';
 
-    expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-      Object {
-        "status": Array [
-          "foo",
-          "bar",
-          "baz",
-          "qux",
-        ],
-      }
-    `);
-  });
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+              Object {
+                "status": Array [
+                  "foo",
+                  "bar",
+                ],
+              }
+          `);
+    });
 
-  it('parses a url with status=foo,bar&status=baz,qux&status=quux', () => {
-    const url = 'status=foo,bar&status=baz,qux&status=quux';
+    it('parses a url with status=foo', () => {
+      const url = 'status=foo';
 
-    expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-      Object {
-        "status": Array [
-          "foo",
-          "bar",
-          "baz",
-          "qux",
-          "quux",
-        ],
-      }
-    `);
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+              Object {
+                "status": Array [
+                  "foo",
+                ],
+              }
+          `);
+    });
+
+    it('parses a url with status=foo&status=bar', () => {
+      const url = 'status=foo&status=bar';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+              Object {
+                "status": Array [
+                  "foo",
+                  "bar",
+                ],
+              }
+          `);
+    });
+
+    it('parses a url with status=foo,bar&status=baz', () => {
+      const url = 'status=foo,bar&status=baz';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+              Object {
+                "status": Array [
+                  "foo",
+                  "bar",
+                  "baz",
+                ],
+              }
+          `);
+    });
+
+    it('parses a url with status=foo,bar&status=baz,qux', () => {
+      const url = 'status=foo,bar&status=baz,qux';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+              Object {
+                "status": Array [
+                  "foo",
+                  "bar",
+                  "baz",
+                  "qux",
+                ],
+              }
+          `);
+    });
+
+    it('parses a url with status=foo,bar&status=baz,qux&status=quux', () => {
+      const url = 'status=foo,bar&status=baz,qux&status=quux';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+              Object {
+                "status": Array [
+                  "foo",
+                  "bar",
+                  "baz",
+                  "qux",
+                  "quux",
+                ],
+              }
+          `);
+    });
   });
 });
