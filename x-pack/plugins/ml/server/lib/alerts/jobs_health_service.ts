@@ -10,13 +10,22 @@ import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/cor
 import { i18n } from '@kbn/i18n';
 import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { MlClient } from '../ml_client';
 import type { JobSelection } from '../../routes/schemas/alerting_schema';
 import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
-import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
+import {
+  ALERT_DATAFEED_RESULTS,
+  ALERT_DELAYED_DATA_RESULTS,
+  ALERT_JOB_ERRORS_RESULTS,
+  ALERT_MML_RESULTS,
+  ALL_JOBS_SELECTION,
+  HEALTH_CHECK_NAMES,
+} from '../../../common/constants/alerts';
 import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
 import type { GetGuards } from '../../shared_services/shared_services';
 import type {
+  AnomalyDetectionJobHealthAlertPayload,
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
   JobsErrorsResponse,
@@ -40,8 +49,9 @@ import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana'
 export interface TestResult {
   name: string;
   context: AnomalyDetectionJobsHealthAlertContext;
+  payload: AnomalyDetectionJobHealthAlertPayload;
   /**
-   * Indicates if the health check is  successful.
+   * Indicates if the health check is successful.
    */
   isHealthy: boolean;
 }
@@ -343,28 +353,28 @@ export function jobsHealthServiceProvider(
           const datafeedResults = isHealthy ? startedDatafeeds : notStartedDatafeeds;
           const { count, jobsString } = getJobsAlertingMessageValues(datafeedResults);
 
+          const message = isHealthy
+            ? i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage', {
+                defaultMessage:
+                  'Datafeed is started for {count, plural, one {job} other {jobs}} {jobsString}',
+                values: { count, jobsString },
+              })
+            : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage', {
+                defaultMessage:
+                  'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
+                values: { count, jobsString },
+              });
+
           results.push({
             isHealthy,
             name: HEALTH_CHECK_NAMES.datafeed.name,
+            payload: {
+              [ALERT_REASON]: message,
+              [ALERT_DATAFEED_RESULTS]: datafeedResults,
+            },
             context: {
               results: datafeedResults,
-              message: isHealthy
-                ? i18n.translate(
-                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedRecoveryMessage',
-                    {
-                      defaultMessage:
-                        'Datafeed is started for {count, plural, one {job} other {jobs}} {jobsString}',
-                      values: { count, jobsString },
-                    }
-                  )
-                : i18n.translate(
-                    'xpack.ml.alertTypes.jobsHealthAlertingRule.datafeedStateMessage',
-                    {
-                      defaultMessage:
-                        'Datafeed is not started for {count, plural, one {job} other {jobs}} {jobsString}',
-                      values: { count, jobsString },
-                    }
-                  ),
+              message,
             },
           });
         }
@@ -424,12 +434,20 @@ export function jobsHealthServiceProvider(
             }
           }
 
+          const mmlResults = isHealthy
+            ? okJobs
+            : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])];
+
           results.push({
             isHealthy,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
-              results: isHealthy ? okJobs : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])],
+              results: mmlResults,
               message,
+            },
+            payload: {
+              [ALERT_REASON]: message,
+              [ALERT_MML_RESULTS]: mmlResults,
             },
           });
         }
@@ -446,23 +464,33 @@ export function jobsHealthServiceProvider(
         const isHealthy = exceededThresholdAnnotations.length === 0;
         const { count, jobsString } = getJobsAlertingMessageValues(exceededThresholdAnnotations);
 
+        const message = isHealthy
+          ? i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
+              {
+                defaultMessage: 'No data delay has occurred.',
+              }
+            )
+          : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
+              defaultMessage:
+                '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
+              values: { count, jobsString },
+            });
+
+        const delayedDataResults = isHealthy
+          ? withinThresholdAnnotations
+          : exceededThresholdAnnotations;
+
         results.push({
           isHealthy,
           name: HEALTH_CHECK_NAMES.delayedData.name,
           context: {
-            results: isHealthy ? withinThresholdAnnotations : exceededThresholdAnnotations,
-            message: isHealthy
-              ? i18n.translate(
-                  'xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataRecoveryMessage',
-                  {
-                    defaultMessage: 'No data delay has occurred.',
-                  }
-                )
-              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.delayedDataMessage', {
-                  defaultMessage:
-                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {is} other {are}} suffering from delayed data.',
-                  values: { count, jobsString },
-                }),
+            results: delayedDataResults,
+            message,
+          },
+          payload: {
+            [ALERT_REASON]: message,
+            [ALERT_DELAYED_DATA_RESULTS]: delayedDataResults,
           },
         });
       }
@@ -472,25 +500,31 @@ export function jobsHealthServiceProvider(
         const { count, jobsString } = getJobsAlertingMessageValues(response);
         const isHealthy = response.length === 0;
 
+        const message = isHealthy
+          ? i18n.translate(
+              'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
+              {
+                defaultMessage:
+                  'No errors in the {count, plural, one {job} other {jobs}} messages.',
+                values: { count },
+              }
+            )
+          : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
+              defaultMessage:
+                '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
+              values: { count, jobsString },
+            });
+
         results.push({
           isHealthy,
           name: HEALTH_CHECK_NAMES.errorMessages.name,
           context: {
             results: response,
-            message: isHealthy
-              ? i18n.translate(
-                  'xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesRecoveredMessage',
-                  {
-                    defaultMessage:
-                      'No errors in the {count, plural, one {job} other {jobs}} messages.',
-                    values: { count },
-                  }
-                )
-              : i18n.translate('xpack.ml.alertTypes.jobsHealthAlertingRule.errorMessagesMessage', {
-                  defaultMessage:
-                    '{count, plural, one {Job} other {Jobs}} {jobsString} {count, plural, one {contains} other {contain}} errors in the messages.',
-                  values: { count, jobsString },
-                }),
+            message,
+          },
+          payload: {
+            [ALERT_REASON]: message,
+            [ALERT_JOB_ERRORS_RESULTS]: response,
           },
         });
       }

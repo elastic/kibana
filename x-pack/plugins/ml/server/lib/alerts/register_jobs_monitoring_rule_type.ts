@@ -85,6 +85,15 @@ export type AnomalyDetectionJobsHealthAlertContext = {
   message: string;
 } & AlertInstanceContext;
 
+export type AnomalyDetectionJobHealthAlertPayload = {
+  [ALERT_REASON]: string;
+} & (
+  | { [ALERT_MML_RESULTS]: MmlTestResponse[] }
+  | { [ALERT_DATAFEED_RESULTS]: NotStartedDatafeedResponse[] }
+  | { [ALERT_DELAYED_DATA_RESULTS]: DelayedDataResponse[] }
+  | { [ALERT_JOB_ERRORS_RESULTS]: JobsErrorsResponse[] }
+);
+
 export const ANOMALY_DETECTION_JOB_REALTIME_ISSUE = 'anomaly_detection_realtime_issue';
 
 export type AnomalyDetectionJobRealtimeIssue = typeof ANOMALY_DETECTION_JOB_REALTIME_ISSUE;
@@ -252,14 +261,12 @@ export function registerJobsMonitoringRuleType({
             .join(', ')}`
         );
 
-        unhealthyTests.forEach(({ name: alertName, context }) => {
+        unhealthyTests.forEach(({ name: alertName, context, payload }) => {
           alertsClient.report({
             id: alertName,
             actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
             context,
-            payload: {
-              [ALERT_REASON]: context.message,
-            },
+            payload,
           });
         });
       }
@@ -272,9 +279,7 @@ export function registerJobsMonitoringRuleType({
           alertsClient.setAlertData({
             id: recoveredAlertId,
             context: testResult.context,
-            payload: {
-              [ALERT_REASON]: testResult.context.message,
-            },
+            payload: testResult.payload,
           });
         }
       }
