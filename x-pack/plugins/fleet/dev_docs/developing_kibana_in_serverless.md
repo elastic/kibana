@@ -48,7 +48,16 @@ The project id is required for some functionality, such as the `isServerless` fl
 
 ### Fleet config
 
-It may be necessary for the Fleet config to accurately reflect the generated config for serverless projects, which is defined in [project-controller](https://github.com/elastic/project-controller/blob/69dc1e6b0761bd9c933c23c2a471f32e1b8f1d28/internal/application/kibana/fleet_config.go#L43). At the time of writing, this concerns the default Fleet Server host and default output:
+The `kibana.dev.yml` settings should be mostly the same as for stateful mode. There are however a few key differences.
+
+As noted above, the base path should not be set (`server.basePath` setting).
+
+To enroll agents with a standalone Fleet Server set:
+```yaml
+xpack.fleet.internal.fleetServerStandalone: true
+```
+
+Finally, it may be necessary for the Fleet config to accurately reflect the generated config for serverless projects, which is defined in [project-controller](https://github.com/elastic/project-controller/blob/69dc1e6b0761bd9c933c23c2a471f32e1b8f1d28/internal/application/kibana/fleet_config.go#L43). At the time of writing, this concerns the default Fleet Server host and default output:
 
 ```yaml
 xpack.fleet.fleetServerHosts:
