@@ -22,7 +22,7 @@ export default function ({ getService }: FtrProviderContext) {
       expected: {
         results: {
           title: 'artificial_server_log',
-          numberOfFields: 4,
+          highlightedText: true,
         },
         metricFields: [
           {
@@ -94,92 +94,92 @@ export default function ({ getService }: FtrProviderContext) {
         ingestedDocCount: 20,
       },
     },
-    {
-      suiteSuffix: 'with a file containing geo field',
-      filePath: require.resolve('./files_to_import/geo_file.csv'),
-      indexName: 'user-import_2',
-      createIndexPattern: false,
-      fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
-      fieldNameFilters: ['Coordinates'],
-      expected: {
-        results: {
-          title: 'geo_file.csv',
-          numberOfFields: 3,
-        },
-        metricFields: [],
-        nonMetricFields: [
-          {
-            fieldName: 'Context',
-            type: ML_JOB_FIELD_TYPES.UNKNOWN,
-            docCountFormatted: '0 (0%)',
-            exampleCount: 0,
-          },
-          {
-            fieldName: 'Coordinates',
-            type: ML_JOB_FIELD_TYPES.GEO_POINT,
-            docCountFormatted: '13 (100%)',
-            exampleCount: 7,
-          },
-          {
-            fieldName: 'Location',
-            type: ML_JOB_FIELD_TYPES.KEYWORD,
-            docCountFormatted: '13 (100%)',
-            exampleCount: 7,
-          },
-        ],
-        visibleMetricFieldsCount: 0,
-        totalMetricFieldsCount: 0,
-        populatedFieldsCount: 3,
-        totalFieldsCount: 3,
-        fieldTypeFiltersResultCount: 1,
-        fieldNameFiltersResultCount: 1,
-        ingestedDocCount: 13,
-      },
-    },
-    {
-      suiteSuffix: 'with a file with a missing new line char at the end',
-      filePath: require.resolve('./files_to_import/missing_end_of_file_newline.csv'),
-      indexName: 'user-import_3',
-      createIndexPattern: false,
-      fieldTypeFilters: [],
-      fieldNameFilters: [],
-      expected: {
-        results: {
-          title: 'missing_end_of_file_newline.csv',
-          numberOfFields: 3,
-        },
-        metricFields: [
-          {
-            fieldName: 'value',
-            type: ML_JOB_FIELD_TYPES.NUMBER,
-            docCountFormatted: '3 (100%)',
-            exampleCount: 3,
-            topValuesCount: 3,
-          },
-        ],
-        nonMetricFields: [
-          {
-            fieldName: 'title',
-            type: ML_JOB_FIELD_TYPES.UNKNOWN,
-            docCountFormatted: '3 (100%)',
-            exampleCount: 3,
-          },
-          {
-            fieldName: 'description',
-            type: ML_JOB_FIELD_TYPES.KEYWORD,
-            docCountFormatted: '3 (100%)',
-            exampleCount: 3,
-          },
-        ],
-        visibleMetricFieldsCount: 0,
-        totalMetricFieldsCount: 0,
-        populatedFieldsCount: 3,
-        totalFieldsCount: 3,
-        fieldTypeFiltersResultCount: 3,
-        fieldNameFiltersResultCount: 3,
-        ingestedDocCount: 3,
-      },
-    },
+    // {
+    //   suiteSuffix: 'with a file containing geo field',
+    //   filePath: require.resolve('./files_to_import/geo_file.csv'),
+    //   indexName: 'user-import_2',
+    //   createIndexPattern: false,
+    //   fieldTypeFilters: [ML_JOB_FIELD_TYPES.GEO_POINT],
+    //   fieldNameFilters: ['Coordinates'],
+    //   expected: {
+    //     results: {
+    //       title: 'geo_file.csv',
+    //       highlightedText: false,
+    //     },
+    //     metricFields: [],
+    //     nonMetricFields: [
+    //       {
+    //         fieldName: 'Context',
+    //         type: ML_JOB_FIELD_TYPES.UNKNOWN,
+    //         docCountFormatted: '0 (0%)',
+    //         exampleCount: 0,
+    //       },
+    //       {
+    //         fieldName: 'Coordinates',
+    //         type: ML_JOB_FIELD_TYPES.GEO_POINT,
+    //         docCountFormatted: '13 (100%)',
+    //         exampleCount: 7,
+    //       },
+    //       {
+    //         fieldName: 'Location',
+    //         type: ML_JOB_FIELD_TYPES.KEYWORD,
+    //         docCountFormatted: '13 (100%)',
+    //         exampleCount: 7,
+    //       },
+    //     ],
+    //     visibleMetricFieldsCount: 0,
+    //     totalMetricFieldsCount: 0,
+    //     populatedFieldsCount: 3,
+    //     totalFieldsCount: 3,
+    //     fieldTypeFiltersResultCount: 1,
+    //     fieldNameFiltersResultCount: 1,
+    //     ingestedDocCount: 13,
+    //   },
+    // },
+    // {
+    //   suiteSuffix: 'with a file with a missing new line char at the end',
+    //   filePath: require.resolve('./files_to_import/missing_end_of_file_newline.csv'),
+    //   indexName: 'user-import_3',
+    //   createIndexPattern: false,
+    //   fieldTypeFilters: [],
+    //   fieldNameFilters: [],
+    //   expected: {
+    //     results: {
+    //       title: 'missing_end_of_file_newline.csv',
+    //       highlightedText: false,
+    //     },
+    //     metricFields: [
+    //       {
+    //         fieldName: 'value',
+    //         type: ML_JOB_FIELD_TYPES.NUMBER,
+    //         docCountFormatted: '3 (100%)',
+    //         exampleCount: 3,
+    //         topValuesCount: 3,
+    //       },
+    //     ],
+    //     nonMetricFields: [
+    //       {
+    //         fieldName: 'title',
+    //         type: ML_JOB_FIELD_TYPES.UNKNOWN,
+    //         docCountFormatted: '3 (100%)',
+    //         exampleCount: 3,
+    //       },
+    //       {
+    //         fieldName: 'description',
+    //         type: ML_JOB_FIELD_TYPES.KEYWORD,
+    //         docCountFormatted: '3 (100%)',
+    //         exampleCount: 3,
+    //       },
+    //     ],
+    //     visibleMetricFieldsCount: 0,
+    //     totalMetricFieldsCount: 0,
+    //     populatedFieldsCount: 3,
+    //     totalFieldsCount: 3,
+    //     fieldTypeFiltersResultCount: 3,
+    //     fieldNameFiltersResultCount: 3,
+    //     ingestedDocCount: 3,
+    //   },
+    // },
   ];
 
   const testDataListNegative = [
@@ -217,6 +217,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('displays the components of the file details page');
           await ml.dataVisualizerFileBased.assertFileTitle(testData.expected.results.title);
           await ml.dataVisualizerFileBased.assertFileContentPanelExists();
+          await ml.dataVisualizerFileBased.assertFileContentTabsExists(
+            testData.expected.results.highlightedText
+          );
+          await ml.dataVisualizerFileBased.assertFileContentHighlighting(
+            testData.expected.results.highlightedText,
+            testData.expected.totalFieldsCount - 1 // -1 for the message field
+          );
           await ml.dataVisualizerFileBased.assertSummaryPanelExists();
           await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
 

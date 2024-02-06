@@ -50,7 +50,11 @@ export function useGrokHighlighter() {
             }
           }
           return (
-            <EuiText size="s" css={{ lineHeight: euiSizeL }}>
+            <EuiText
+              size="s"
+              css={{ lineHeight: euiSizeL }}
+              data-test-subj="dataVisualizerHighlightedLine"
+            >
               <code>{formattedWords}</code>
             </EuiText>
           );

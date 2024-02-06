@@ -105,17 +105,22 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
       </EuiTitle>
 
       {showParsedData ? (
-        <EuiTabs>
+        <EuiTabs data-test-subj="dataVisualizerFileContentsTabs">
           <EuiTab
             isSelected={selectedTab === TABS.PARSED}
             onClick={() => setSelectedTab(TABS.PARSED)}
+            data-test-subj="dataVisualizerFileContentsParsedTab"
           >
             <FormattedMessage
               id="xpack.dataVisualizer.file.fileContents.tab.parsedTitle"
               defaultMessage="Highlighted text"
             />
           </EuiTab>
-          <EuiTab isSelected={selectedTab === TABS.RAW} onClick={() => setSelectedTab(TABS.RAW)}>
+          <EuiTab
+            isSelected={selectedTab === TABS.RAW}
+            onClick={() => setSelectedTab(TABS.RAW)}
+            data-test-subj="dataVisualizerFileContentsRawTab"
+          >
             <FormattedMessage
               id="xpack.dataVisualizer.file.fileContents.tab.rawTitle"
               defaultMessage="Raw text"

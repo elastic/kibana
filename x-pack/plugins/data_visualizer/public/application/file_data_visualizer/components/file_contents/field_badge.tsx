@@ -30,6 +30,7 @@ export const FieldBadge: FC<Props> = ({ type, value, name }) => {
   return (
     <EuiToolTip title={name} content={tooltip}>
       <EuiBadge
+        data-test-subj="dataVisualizerFieldBadge"
         css={{
           // magic numbers to align the badges with the text
           // and to align the icon correctly inside the badge.
