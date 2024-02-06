@@ -19,7 +19,6 @@ export const metricValueFormatter = (value: number | null, metric: string = '') 
   let formatter = createFormatter('highPrecision');
   if (metric.endsWith('.pct')) formatter = createFormatter('percent');
   if (metric.endsWith('.bytes')) formatter = createFormatter('bytes');
-  if (metric.endsWith('.bits')) formatter = createFormatter('bits');
 
   return value == null ? noDataValue : formatter(value);
 };
