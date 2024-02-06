@@ -64,8 +64,6 @@ export function EditorFrame(props: EditorFrameProps) {
     visualization.activeId && props.visualizationMap[visualization.activeId]
   );
 
-  const abortController = new AbortController();
-
   const framePublicAPI: FramePublicAPI = useLensSelector((state) =>
     selectFramePublicAPI(state, datasourceMap)
   );
@@ -172,7 +170,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 getSuggestionForField={getSuggestionForField.current}
                 getUserMessages={props.getUserMessages}
                 addUserMessages={props.addUserMessages}
-                abortController={abortController}
               />
             </ErrorBoundary>
           )
@@ -189,7 +186,6 @@ export function EditorFrame(props: EditorFrameProps) {
                 getUserMessages={props.getUserMessages}
                 nowProvider={props.plugins.data.nowProvider}
                 core={props.core}
-                abortController={abortController}
                 showOnlyIcons
               />
             </ErrorBoundary>

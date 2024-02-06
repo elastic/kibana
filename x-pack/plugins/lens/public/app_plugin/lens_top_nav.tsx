@@ -288,8 +288,6 @@ export const LensTopNavMenu = ({
   getUserMessages,
   shortUrlService,
   isCurrentStateDirty,
-  onCancel,
-  isLoading,
 }: LensTopNavMenuProps) => {
   const {
     data,
@@ -357,7 +355,7 @@ export const LensTopNavMenu = ({
   const closeFieldEditor = useRef<() => void | undefined>();
   const closeDataViewEditor = useRef<() => void | undefined>();
 
-  const allLoaded = Object.values(datasourceStates).every((state) => state.isLoading === false);
+  const allLoaded = Object.values(datasourceStates).every(({ isLoading }) => isLoading === false);
 
   useEffect(() => {
     const activeDatasource =
@@ -1116,8 +1114,6 @@ export const LensTopNavMenu = ({
       appName={LENS_APP_NAME}
       displayStyle="detached"
       className="hide-for-sharing"
-      isLoading={isLoading}
-      onCancel={onCancel}
     />
   );
 };

@@ -112,7 +112,6 @@ export interface EditorFrameProps {
   indexPatternService: IndexPatternServiceAPI;
   getUserMessages: UserMessagesGetter;
   addUserMessages: AddUserMessages;
-  abortController?: AbortController;
 }
 
 export type VisualizationMap = Record<string, Visualization>;
