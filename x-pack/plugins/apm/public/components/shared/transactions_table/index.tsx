@@ -57,6 +57,7 @@ interface Props {
   start: string;
   end: string;
   saveTableOptionsToUrl?: boolean;
+  shouldShowSparkPlotsProp?: boolean;
 }
 
 export function TransactionsTable({
@@ -71,6 +72,7 @@ export function TransactionsTable({
   start,
   end,
   saveTableOptionsToUrl = false,
+  shouldShowSparkPlotsProp,
 }: Props) {
   const { link } = useApmRouter();
 
@@ -93,8 +95,7 @@ export function TransactionsTable({
   );
 
   const { isLarge } = useBreakpoints();
-  const shouldShowSparkPlots = !isLarge;
-
+  const shouldShowSparkPlots = shouldShowSparkPlotsProp ?? !isLarge;
   const { transactionType, serviceName } = useApmServiceContext();
   const [searchQuery, setSearchQueryDebounced] = useStateDebounced('');
 
