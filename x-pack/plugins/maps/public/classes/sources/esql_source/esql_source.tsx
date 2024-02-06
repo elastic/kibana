@@ -58,7 +58,7 @@ export class ESQLSource extends AbstractVectorSource implements IVectorSource {
     }
 
     if (!isValidStringConfig(descriptor.dataViewId)) {
-      throw new Error('Cannot create ESQLSourceDescriptor when adhocDataViewId is not provided');
+      throw new Error('Cannot create ESQLSourceDescriptor when dataViewId is not provided');
     }
 
     return {
