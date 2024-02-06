@@ -184,5 +184,96 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
       expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
     });
+
+    it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLHistogram');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+      await testSubjects.click('cancelFlyoutButton');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '10'
+      );
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      await PageObjects.lens.switchLayerSeriesType('area');
+      await testSubjects.click('applyFlyoutButton');
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Area');
+      await testSubjects.click('cancelFlyoutButton');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.revertUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '10'
+      );
+    });
+
+    it('should be able to load a saved search with custom vis, edit query and revert changes', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLHistogram');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+      await testSubjects.click('cancelFlyoutButton');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '10'
+      );
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+
+      // by changing the query we reset the histogram customization
+      await monacoEditor.setCodeEditorValue('from logstash-* | limit 100');
+      await testSubjects.click('querySubmitButton');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Bar vertical stacked');
+      await testSubjects.click('cancelFlyoutButton');
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '100'
+      );
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 100');
+
+      await PageObjects.discover.revertUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization');
+      expect(await testSubjects.getVisibleText('lns_layer_settings')).to.be('Line');
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '10'
+      );
+      expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+    });
   });
 }
