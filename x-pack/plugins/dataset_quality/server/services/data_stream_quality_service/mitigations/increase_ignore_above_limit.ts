@@ -80,6 +80,13 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
 
         return {
           type: 'applied',
+          changes: [
+            {
+              change: 'updated',
+              asset_type: 'component-template',
+              asset_name: componentTemplateName,
+            },
+          ],
         };
       },
   };

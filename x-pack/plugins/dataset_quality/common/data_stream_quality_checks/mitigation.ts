@@ -81,8 +81,24 @@ export const mitigationForCauseRT = rt.strict({
 
 export type MitigationForCause = rt.TypeOf<typeof mitigationForCauseRT>;
 
+export const mitigationApplicationChangeRT = rt.strict({
+  change: rt.keyof({
+    created: null,
+    updated: null,
+    removed: null,
+  }),
+  asset_type: rt.keyof({
+    'index-template': null,
+    'component-template': null,
+    'index-mapping': null,
+    'ingest-pipeline': null,
+  }),
+  asset_name: rt.string,
+});
+
 export const mitigationAppliedResultRT = rt.strict({
   type: rt.literal('applied'),
+  changes: rt.array(mitigationApplicationChangeRT),
 });
 
 export const mitigationErrorResultRT = rt.strict({
