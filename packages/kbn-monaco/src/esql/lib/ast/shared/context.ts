@@ -132,14 +132,14 @@ function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
 }
 function isBuiltinFunction(node: ESQLFunction) {
-  return Boolean(getFunctionDefinition(node.name)?.builtin);
+  return getFunctionDefinition(node.name)?.type === 'builtin';
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
   const { command, option, setting, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
-      if (['in', 'not_in'].includes(node.name)) {
+      if (['in', 'not_in'].includes(node.name) && Array.isArray(node.args[1])) {
         // command ... a in ( <here> )
         return { type: 'list' as const, command, node, option, setting };
       }

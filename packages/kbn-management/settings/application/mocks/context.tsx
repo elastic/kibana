@@ -21,6 +21,7 @@ import {
   getSettingsMock,
 } from '@kbn/management-settings-utilities/mocks/settings.mock';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
+import { getSettingsCapabilitiesMock } from '@kbn/management-settings-utilities/mocks/capabilities.mock';
 import { SettingsApplicationProvider, SettingsApplicationServices } from '../services';
 
 const createRootMock = () => {
@@ -42,10 +43,14 @@ export const createSettingsApplicationServicesMock = (
   ...createFormServicesMock(),
   getAllowlistedSettings: (scope: UiSettingsScope) =>
     scope === 'namespace' ? getSettingsMock() : hasGlobalSettings ? getGlobalSettingsMock() : {},
+  getSections: () => [],
+  getCapabilities: getSettingsCapabilitiesMock,
+  setBadge: jest.fn(),
   isCustomSetting: () => false,
   isOverriddenSetting: () => false,
   subscribeToUpdates: () => new Subscription(),
   addUrlToHistory: jest.fn(),
+  getToastsService: jest.fn(),
 });
 
 export const TestWrapper = ({
