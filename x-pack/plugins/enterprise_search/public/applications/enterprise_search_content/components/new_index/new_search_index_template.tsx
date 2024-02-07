@@ -61,11 +61,13 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
+    hasPrefix,
     language,
     rawName,
     languageSelectValue,
   } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue, setHasPrefix } = useActions(NewSearchIndexLogic);
+  setHasPrefix(type === INGESTION_METHOD_IDS.CRAWLER);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -195,12 +197,12 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus
-                    prepend="search-"
+                    prepend={hasPrefix ? 'search-' : ''}
                   />
                 </EuiFormRow>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineTwo',
+                    'xpack.enterprisecrawlerIndexName.content.newIndex.newcrawlerIndexNameIndexTemplate.nameInputHelpText.lineTwo',
                     {
                       defaultMessage:
                         'Names should be lowercase and cannot contain spaces or special characters.',
@@ -212,7 +214,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                 <EuiFormRow
                   isDisabled={disabled}
                   label={i18n.translate(
-                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
+                    'xpack.enterprisecrawlerIndexName.content.newIndex.newSearchIndexTemplate.languageInputLabel',
                     {
                       defaultMessage: 'Language analyzer',
                     }

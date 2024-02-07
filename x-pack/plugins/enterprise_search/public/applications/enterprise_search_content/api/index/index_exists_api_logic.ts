@@ -20,6 +20,10 @@ export interface IndexExistsApiResponse {
 export const fetchIndexExists = async ({
   indexName,
 }: IndexExistsApiParams): Promise<IndexExistsApiResponse> => {
+  if (!indexName) {
+    return { exists: false, indexName };
+  }
+
   const route = `/internal/enterprise_search/indices/${indexName}/exists`;
 
   const { exists } = await HttpLogic.values.http.get<{ exists: boolean }>(route);

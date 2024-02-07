@@ -26,12 +26,17 @@ describe('NewSearchIndexTemplate', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     setMockValues({
+      hasPrefix: false,
       language: null,
       languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
       name: 'my-name',
       rawName: 'MY$_RAW_$NAME',
     });
-    setMockActions({ makeRequest: jest.fn(), setLanguageSelectValue: jest.fn() });
+    setMockActions({
+      makeRequest: jest.fn(),
+      setHasPrefix: jest.fn(),
+      setLanguageSelectValue: jest.fn(),
+    });
   });
 
   it('renders', () => {

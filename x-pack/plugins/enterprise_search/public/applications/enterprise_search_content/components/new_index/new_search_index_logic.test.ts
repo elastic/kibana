@@ -25,6 +25,7 @@ const DEFAULT_VALUES: NewSearchIndexValues = {
   fullIndexName: 'search-',
   fullIndexNameExists: false,
   fullIndexNameIsValid: true,
+  hasPrefix: true,
   language: null,
   languageSelectValue: UNIVERSAL_LANGUAGE_VALUE,
   rawName: '',
