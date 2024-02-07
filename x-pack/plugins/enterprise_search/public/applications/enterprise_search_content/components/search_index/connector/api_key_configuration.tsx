@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { Status } from '../../../../../../common/types/api';
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
@@ -98,12 +99,11 @@ export const ApiKeyConfig: React.FC<{
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
       <EuiFlexItem>
         <EuiText size="s">
-          {!isNative
+          {isNative
             ? i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
                 {
-                  defaultMessage:
-                    'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
+                  defaultMessage: `This native connector's API key {apiKeyName} is managed internally by Elasticsearch, and is used for the connector to index documents to the created {indexName} index. If you need to rollover your API key you can do so by clicking "Generate API key".`,
                   values: {
                     apiKeyName: `${indexName}-connector`,
                     indexName,
@@ -111,10 +111,10 @@ export const ApiKeyConfig: React.FC<{
                 }
               )
             : i18n.translate(
-                'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
+                'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
                 {
                   defaultMessage:
-                    'This native connector\'s API key {apiKeyName} is managed internally by Elasticsearch, and is used for the connector to index documents to the created {indexName} index. There\'s no need to do anything here, but if you need to rollover your API key you can do so by clicking "Generate API key".',
+                    'First, generate an Elasticsearch API key. This {apiKeyName} key will enable read and write permissions for the connector to index documents to the created {indexName} index. Save the key in a safe place, as you will need it to configure your connector.',
                   values: {
                     apiKeyName: `${indexName}-connector`,
                     indexName,

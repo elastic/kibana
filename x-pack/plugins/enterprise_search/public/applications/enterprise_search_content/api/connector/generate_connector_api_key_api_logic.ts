@@ -26,8 +26,8 @@ export const generateApiKey = async ({
 }) => {
   const route = `/internal/enterprise_search/indices/${indexName}/api_key`;
   const params = {
-    isNative,
-    secretId,
+    is_native: isNative,
+    secret_id: secretId,
   };
   return await HttpLogic.values.http.post<ApiKey>(route, {
     body: JSON.stringify(params),

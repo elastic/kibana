@@ -149,7 +149,7 @@ export const NativeConnectorConfiguration: React.FC = () => {
                   children: (
                     <ApiKeyConfig
                       indexName={index.connector.name}
-                      hasApiKey={!!index.connector.api_key_id}
+                      hasApiKey={hasApiKey}
                       isNative
                       secretId={index.connector.api_key_secret_id}
                     />

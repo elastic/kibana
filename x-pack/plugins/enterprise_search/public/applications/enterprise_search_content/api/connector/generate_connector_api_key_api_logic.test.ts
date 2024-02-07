@@ -30,7 +30,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/api_key',
         {
-          body: '{"isNative":false,"secretId":null}',
+          body: '{"is_native":false,"secret_id":null}',
         }
       );
       await expect(result).resolves.toEqual('result');
@@ -46,7 +46,7 @@ describe('generateConnectorApiKeyApiLogic', () => {
       expect(http.post).toHaveBeenCalledWith(
         '/internal/enterprise_search/indices/indexName/api_key',
         {
-          body: '{"isNative":true,"secretId":"1234"}',
+          body: '{"is_native":true,"secret_id":"1234"}',
         }
       );
       await expect(result).resolves.toEqual('result');
