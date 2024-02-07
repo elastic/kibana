@@ -17,6 +17,7 @@ import type {
   ThresholdRuleCreateProps,
   NewTermsRuleCreateProps,
   NewTermsRuleUpdateProps,
+  EqlRuleCreateProps,
 } from './rule_schemas.gen';
 
 export const getCreateRulesSchemaMock = (ruleId = 'rule-1'): QueryRuleCreateProps => ({
