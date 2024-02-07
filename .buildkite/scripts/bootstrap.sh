@@ -2,8 +2,6 @@
 
 set -euo pipefail
 
-gcloud config get-value core/account
-
 source .buildkite/scripts/common/util.sh
 source .buildkite/scripts/common/setup_bazel.sh
 

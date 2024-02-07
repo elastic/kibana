@@ -12,17 +12,6 @@ var resolve = require('path').resolve;
 var pkg = require('../package.json');
 var kbnEs = require('@kbn/es');
 
-console.log('--- Running elasticsearch', {
-  whoami: process.env.USER,
-  pwd: process.env.PWD,
-  argv: process.argv,
-  gid: process.getgid(),
-  uid: process.getuid(),
-  groups: process.getgroups(),
-  pid: process.pid,
-  ppid: process.ppid,
-});
-
 kbnEs
   .run({
     license: 'basic',
