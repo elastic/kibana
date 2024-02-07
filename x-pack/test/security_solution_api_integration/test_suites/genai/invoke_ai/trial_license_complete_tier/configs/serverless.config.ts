@@ -11,7 +11,6 @@ export default createTestConfig({
   kbnTestServerArgs: [
     // used for connector simulators
     `--xpack.actions.proxyUrl=http://localhost:6200`,
-    `--xpack.actions.enabledActionTypes=${JSON.stringify(['.bedrock', '.gen-ai'])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {

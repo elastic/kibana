@@ -6,25 +6,27 @@
  */
 
 import type SuperTest from 'supertest';
-import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { Response } from 'superagent';
 
 /**
- * Gets the stats from the stats endpoint.
- * @param supertest The supertest agent.
- * @returns The detection metrics
+ * Executes an invoke AI action
+ * @param connectorId The connector id
+ * @param args The arguments to pass to the action
+ * @param supertest The supertest agent
  */
 export const postActionsClientExecute = async (
   connectorId: string,
   args: any,
   supertest: SuperTest.SuperTest<SuperTest.Test>
-  // log: ToolingLog
 ): Promise<Response> => {
   const response = await supertest
     .post(`/internal/elastic_assistant/actions/connector/${connectorId}/_execute`)
     .set('kbn-xsrf', 'true')
-    // TODO once merge with yuliia
-    // .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
     .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send(args);
 

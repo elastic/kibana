@@ -11,7 +11,8 @@ import { BedrockSimulator } from '@kbn/actions-simulators-plugin/server/bedrock_
 import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { postActionsClientExecute } from '../utils/post_actions_client_execute';
-import { getUrlPrefix, ObjectRemover } from '../../../../../alerting_api_integration/common/lib';
+import { ObjectRemover } from '../utils/object_remover';
+import { createConnector } from '../utils/create_connector';
 
 const mockRequest = {
   params: {
@@ -38,57 +39,10 @@ const mockRequest = {
   llmType: 'bedrock',
 };
 
-const connectorSetup = {
-  bedrock: {
-    connectorTypeId: '.bedrock',
-    name: 'A bedrock action',
-    secrets: {
-      accessKey: 'bedrockAccessKey',
-      secret: 'bedrockSecret',
-    },
-    config: {
-      defaultModel: 'anthropic.claude-v2',
-    },
-  },
-  openai: {
-    connectorTypeId: '.gen-ai',
-    name: 'An openai action',
-    secrets: {
-      apiKey: 'genAiApiKey',
-    },
-    config: {
-      apiProvider: 'OpenAI',
-    },
-  },
-};
-
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
   const configService = getService('config');
-  const createConnector = async (
-    apiUrl: string,
-    connectorType: 'bedrock' | 'openai',
-    spaceId?: string
-  ) => {
-    const { connectorTypeId, config, name, secrets } = connectorSetup[connectorType];
-    const result = await supertest
-      .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name,
-        connector_type_id: connectorTypeId,
-        config: { ...config, apiUrl },
-        secrets,
-      })
-      .expect(200);
-
-    const { body } = result;
-
-    objectRemover.add(spaceId ?? 'default', body.id, 'connector', 'actions');
-
-    return body.id;
-  };
 
   describe('@ess @serverless Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
     after(() => {
@@ -106,7 +60,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       before(async () => {
         apiUrl = await simulator.start();
-        bedrockActionId = await createConnector(apiUrl, 'bedrock');
+        bedrockActionId = await createConnector(supertest, objectRemover, apiUrl, 'bedrock');
       });
 
       after(() => {
@@ -137,7 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       before(async () => {
         apiUrl = await simulator.start();
-        openaiActionId = await createConnector(apiUrl, 'openai');
+        openaiActionId = await createConnector(supertest, objectRemover, apiUrl, 'openai');
       });
 
       after(() => {
