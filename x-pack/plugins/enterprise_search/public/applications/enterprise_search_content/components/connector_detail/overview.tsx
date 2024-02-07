@@ -100,10 +100,13 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {isConnectorIndex(indexData) && connector && (
-        <ConnectorStats connector={connector} indexData={indexData} />
+      {connector && connector.service_type !== 'elastic-crawler' && (
+        <ConnectorStats
+          connector={connector}
+          indexData={isConnectorIndex(indexData) ? indexData : undefined}
+        />
       )}
-      {isConnectorIndex(indexData) && (
+      {connector && connector.service_type !== 'elastic-crawler' && (
         <>
           <EuiSpacer />
           <SyncJobs />

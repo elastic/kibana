@@ -634,4 +634,40 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       return response.ok({ body: connectorResponse });
     })
   );
+  router.put(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}/index_name/{indexName}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+          indexName: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId, indexName } = request.params;
+
+      try {
+        await client.asCurrentUser.transport.request({
+          body: {
+            index_name: indexName,
+          },
+          method: 'PUT',
+          path: `/_connector/${connectorId}/_index_name`,
+        });
+        return response.ok();
+      } catch (error) {
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: `Could not find index ${indexName}`,
+            response,
+            statusCode: 404,
+          });
+        }
+        throw error;
+      }
+    })
+  );
 }
