@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { memo, useEffect, useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   EuiButton,
   EuiButtonIcon,
@@ -16,13 +17,12 @@ import {
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
-import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from 'react-intl';
+import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { getFleetManagedIndexTemplates } from '../api/api';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { RouteEntry } from '../../../../common/security_integrations/cribl/types';
 import { getPolicyConfigValueFromRouteEntries, getRouteEntriesFromPolicyConfig } from '../../../../common/security_integrations/cribl/translator';
-import { i18n } from '@kbn/i18n';
 
 const getDefaultRouteEntry = () => {
   return ({
@@ -218,7 +218,9 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
           <>
             <EuiCallOut
               size="s"
-              title="Be sure you have the right privileges in order to populate options for datastreams."
+              title={i18n.translate('xpack.securitySolution.securityIntegration.cribl.missingPermissionsCallout', {
+                defaultMessage: "Be sure you have the right privileges in order to populate options for datastreams.",
+              })}
               iconType="help"
               data-test-subj="missing_permissions_callout"
             />
