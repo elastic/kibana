@@ -15,6 +15,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -29,6 +30,7 @@ import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { benchmarksNavigation } from '../../common/navigation/constants';
+import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
@@ -60,51 +62,6 @@ const BenchmarkButtonLink = ({
       {getBenchmarkCisName(benchmarkId)}
     </EuiLink>
   );
-};
-
-export const getBenchmarkPlurals = (benchmarkId: string, accountEvaluation: number) => {
-  switch (benchmarkId) {
-    case 'cis_k8s':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkK8sAccountPlural"
-          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_azure':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAzureAccountPlural"
-          defaultMessage="{accountCount, plural, one {# subscription} other {# subscriptions}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_aws':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkAwsAccountPlural"
-          defaultMessage="{accountCount, plural, one {# account} other {# accounts}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_eks':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkEksAccountPlural"
-          defaultMessage="{accountCount, plural, one {# cluster} other {# clusters}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-    case 'cis_gcp':
-      return (
-        <FormattedMessage
-          id="xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkGcpAccountPlural"
-          defaultMessage="{accountCount, plural, one {# project} other {# projects}}"
-          values={{ accountCount: accountEvaluation || 0 }}
-        />
-      );
-  }
 };
 
 const ErrorMessageComponent = (error: { error: unknown }) => (
@@ -140,7 +97,9 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
   </FullSizeCenteredPage>
 );
 
-const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
+const getBenchmarkTableColumns = (
+  getBenchmarkDynamicValues
+): Array<EuiBasicTableColumn<Benchmark>> => [
   {
     field: 'id',
     name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkCisName', {
@@ -198,7 +157,21 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
     render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
-      return getBenchmarkPlurals(benchmark.id, benchmarkEvaluation);
+      // #################################################################################################
+      const resourcePlurals = getBenchmarkDynamicValues(
+        benchmark.id,
+        benchmarkEvaluation
+      ).resourcePlurals;
+
+      if (benchmarkEvaluation === 0) {
+        return (
+          <EuiButtonEmpty href={cspmIntegrationLink} iconType={'plusInCircle'} flush={'left'}>
+            {`Add ${resourcePlurals}`}
+          </EuiButtonEmpty>
+        );
+      }
+
+      return `${benchmarkEvaluation} ${resourcePlurals}`;
     },
   },
   {
@@ -237,6 +210,8 @@ export const BenchmarksTable = ({
   sorting,
   ...rest
 }: BenchmarksTableProps) => {
+  const { getBenchmarkDynamicValues } = useBenchmarkDynamicValues();
+
   const pagination: Pagination = {
     pageIndex: Math.max(pageIndex - 1, 0),
     pageSize,
@@ -261,7 +236,7 @@ export const BenchmarksTable = ({
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
       items={benchmarksSorted}
-      columns={BENCHMARKS_TABLE_COLUMNS}
+      columns={getBenchmarkTableColumns(getBenchmarkDynamicValues)}
       itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
       onChange={onChange}
