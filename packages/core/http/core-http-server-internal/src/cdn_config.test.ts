@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CdnConfig } from './cdn';
+import { CdnConfig } from './cdn_config';
 
 describe('CdnConfig', () => {
   it.each([
