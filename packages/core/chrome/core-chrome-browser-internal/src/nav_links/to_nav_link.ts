@@ -7,7 +7,11 @@
  */
 
 import type { IBasePath } from '@kbn/core-http-browser';
-import { type PublicAppInfo, type PublicAppDeepLinkInfo } from '@kbn/core-application-browser';
+import {
+  type PublicAppInfo,
+  type PublicAppDeepLinkInfo,
+  AppStatus,
+} from '@kbn/core-application-browser';
 import { appendAppPath } from '@kbn/core-application-browser-internal';
 import { NavLinkWrapper } from './nav_link';
 
@@ -15,17 +19,17 @@ export function toNavLink(
   app: PublicAppInfo,
   basePath: IBasePath,
   deepLink?: PublicAppDeepLinkInfo
-): NavLinkWrapper {
+): NavLinkWrapper | null {
   const relativeBaseUrl = basePath.prepend(app.appRoute!);
   const url = appendAppPath(relativeBaseUrl, deepLink?.path || app.defaultPath);
   const href = relativeToAbsolute(url);
   const baseUrl = relativeToAbsolute(relativeBaseUrl);
 
+  if (app.status === AppStatus.inaccessible) return null;
+
   return new NavLinkWrapper({
     ...(deepLink || app),
     ...(app.category ? { category: app.category } : {}), // deepLinks use the main app category
-    // hidden: deepLink ? isDeepNavLinkHidden(deepLink) : isAppNavLinkHidden(app),
-    // disabled: app.disabled,
     baseUrl,
     href,
     url,
