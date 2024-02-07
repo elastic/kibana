@@ -19,6 +19,9 @@ import {
   DEFAULT_PALETTE_NAME,
   DEFAULT_MAX_STOP,
   DEFAULT_MIN_STOP,
+  DEFAULT_FALLBACK_PALETTE,
+  LEGACY_COMPLIMENTARY_PALETTE,
+  COMPLEMENTARY_PALETTE,
 } from './constants';
 
 /** @internal **/
@@ -188,4 +191,15 @@ export function reversePalette(paletteColorRepresentation: ColorStop[] = []) {
       stop: stops[paletteColorRepresentation.length - i - 1],
     }))
     .reverse();
+}
+
+// This is a helper function used for backwards compatibility
+// for the mispelled complementary palette.
+// https://github.com/elastic/kibana/issues/161194
+export function getActivePaletteName(name?: string): string {
+  let paletteName = name || DEFAULT_FALLBACK_PALETTE;
+  if (paletteName === LEGACY_COMPLIMENTARY_PALETTE) {
+    paletteName = COMPLEMENTARY_PALETTE;
+  }
+  return paletteName;
 }
