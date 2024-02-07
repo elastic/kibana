@@ -1201,9 +1201,9 @@ export default ({ getService }: FtrProviderContext): void => {
                   version: postedCase.version,
                   customFields: [
                     {
-                      key: 'text_custom_field',
-                      type: CustomFieldTypes.TEXT,
-                      value: null,
+                      key: 'toggle_custom_field',
+                      type: CustomFieldTypes.TOGGLE,
+                      value: false,
                     },
                   ],
                 },
@@ -1212,8 +1212,8 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           expect(patchedCases[0].customFields).to.eql([
-            { ...originalValues[0], value: 'default value' },
             { ...originalValues[1], value: false },
+            { ...originalValues[0], value: 'default value' },
           ]);
         });
 
