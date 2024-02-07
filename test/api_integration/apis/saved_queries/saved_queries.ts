@@ -8,12 +8,12 @@
 
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common';
+import { SavedQueryAttributes, SAVED_QUERY_BASE_URL } from '@kbn/data-plugin/common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 // node scripts/functional_tests --config test/api_integration/config.js --grep="search session"
 
-const mockSavedQuery = {
+const mockSavedQuery: SavedQueryAttributes = {
   title: 'my title',
   description: 'my description',
   query: {
@@ -104,6 +104,20 @@ export default function ({ getService }: FtrProviderContext) {
                 expect(body.message).to.be('Query with title "my title" already exists');
               })
           ));
+
+      it('should leave filters and timefilter undefined if not provided', () =>
+        createQuery({ ...mockSavedQuery, filters: undefined, timefilter: undefined })
+          .expect(200)
+          .then(({ body }) =>
+            getQuery(body.id)
+              .expect(200)
+              .then(({ body: body2 }) => {
+                expect(body.attributes.filters).to.be(undefined);
+                expect(body.attributes.timefilter).to.be(undefined);
+                expect(body2.attributes.filters).to.be(undefined);
+                expect(body2.attributes.timefilter).to.be(undefined);
+              })
+          ));
     });
 
     describe('update', () => {
@@ -138,6 +152,41 @@ export default function ({ getService }: FtrProviderContext) {
                     expect(body2.message).to.be(
                       'Query with title "my duplicate title" already exists'
                     );
+                  })
+              )
+          ));
+
+      it('should remove filters and timefilter if not provided', () =>
+        createQuery({
+          ...mockSavedQuery,
+          filters: [{ meta: {}, query: {} }],
+          timefilter: {
+            from: 'now-7d',
+            to: 'now',
+            refreshInterval: {
+              pause: false,
+              value: 60000,
+            },
+          },
+        })
+          .expect(200)
+          .then(({ body }) =>
+            updateQuery(body.id, {
+              ...mockSavedQuery,
+              filters: undefined,
+              timefilter: undefined,
+            })
+              .expect(200)
+              .then(({ body: body2 }) =>
+                getQuery(body2.id)
+                  .expect(200)
+                  .then(({ body: body3 }) => {
+                    expect(body.attributes.filters).not.to.be(undefined);
+                    expect(body.attributes.timefilter).not.to.be(undefined);
+                    expect(body2.attributes.filters).to.be(undefined);
+                    expect(body2.attributes.timefilter).to.be(undefined);
+                    expect(body3.attributes.filters).to.be(undefined);
+                    expect(body3.attributes.timefilter).to.be(undefined);
                   })
               )
           ));

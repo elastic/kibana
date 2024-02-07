@@ -39,13 +39,13 @@ export function SaveQueryForm({
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
-    Boolean(savedQuery?.attributes.filters ?? true)
+    Boolean(savedQuery ? savedQuery.attributes.filters : true)
   );
   // Defaults to false because saved queries are meant to be as portable as possible and loading
   // a saved query with a time filter will override whatever the current value of the global timepicker
   // is. We expect this option to be used rarely and only when the user knows they want this behavior.
   const [shouldIncludeTimefilter, setIncludeTimefilter] = useState(
-    Boolean(savedQuery?.attributes.timefilter ?? false)
+    Boolean(savedQuery ? savedQuery.attributes.timefilter : false)
   );
   const [formErrors, setFormErrors] = useState<string[]>([]);
   const [saveIsDisabled, setSaveIsDisabled] = useState<boolean>(false);

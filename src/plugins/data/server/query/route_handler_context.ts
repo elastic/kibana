@@ -18,8 +18,11 @@ import { isQuery, SavedQueryAttributes } from '../../common';
 import { extract, inject } from '../../common/query/filters/persistable_state';
 import type { SavedQueryRestResponse } from './route_types';
 
-export interface InternalSavedQueryAttributes extends SavedQueryAttributes {
+export interface InternalSavedQueryAttributes
+  extends Omit<SavedQueryAttributes, 'filters' | 'timefilter'> {
   titleKeyword: string;
+  filters?: SavedQueryAttributes['filters'] | null;
+  timefilter?: SavedQueryAttributes['timefilter'] | null;
 }
 
 function injectReferences({
@@ -31,7 +34,23 @@ function injectReferences({
   SavedObject<InternalSavedQueryAttributes>,
   'id' | 'attributes' | 'namespaces' | 'references'
 >) {
-  const attributes: SavedQueryAttributes = omit(internalAttributes, 'titleKeyword');
+  const attributes: SavedQueryAttributes = omit(
+    internalAttributes,
+    'titleKeyword',
+    'filters',
+    'timefilter'
+  );
+
+  // filters or timefilter can be null if previously removed in an update,
+  // which isn't valid for the client model, so we conditionally add them
+  if (internalAttributes.filters) {
+    attributes.filters = inject(internalAttributes.filters, references);
+  }
+
+  if (internalAttributes.timefilter) {
+    attributes.timefilter = internalAttributes.timefilter;
+  }
+
   const { query } = attributes;
   if (isOfQueryType(query) && typeof query.query === 'string') {
     try {
@@ -41,18 +60,21 @@ function injectReferences({
       // Just keep it as a string
     }
   }
-  const filters = inject(attributes.filters ?? [], references);
-  return { id, attributes: { ...attributes, filters }, namespaces };
+
+  return { id, attributes, namespaces };
 }
 
 function extractReferences({
   title,
   description,
   query,
-  filters = [],
+  filters,
   timefilter,
 }: SavedQueryAttributes) {
-  const { state: extractedFilters, references } = extract(filters);
+  const { state: extractedFilters, references } = filters
+    ? extract(filters)
+    : { state: undefined, references: [] };
+
   const isOfQueryTypeQuery = isOfQueryType(query);
   let queryString = '';
   if (isOfQueryTypeQuery) {
@@ -71,8 +93,11 @@ function extractReferences({
       ...query,
       ...(queryString && { query: queryString }),
     },
-    filters: extractedFilters,
-    ...(timefilter && { timefilter }),
+    // Pass null instead of undefined for filters and timefilter
+    // to ensure they are removed from the saved object on update
+    // since the saved objects client ignores undefined values
+    filters: extractedFilters ?? null,
+    timefilter: timefilter ?? null,
   };
 
   return { attributes, references };
