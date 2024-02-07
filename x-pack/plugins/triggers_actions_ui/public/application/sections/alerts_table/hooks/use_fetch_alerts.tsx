@@ -266,11 +266,11 @@ const useFetchAlerts = ({
                   searchSubscription$.current.unsubscribe();
                 }
               },
-              error: (msg) => {
+              error: (error) => {
                 dispatch({ type: 'loading', loading: false });
                 onLoaded?.();
-                data.search.showError(msg);
                 searchSubscription$.current.unsubscribe();
+                throw error;
               },
             });
         }
