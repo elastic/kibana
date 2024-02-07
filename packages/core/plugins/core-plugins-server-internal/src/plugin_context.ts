@@ -236,6 +236,7 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
       staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
@@ -329,6 +330,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
       staticAssets: {
+        prependPublicUrl: (pathname: string) => deps.http.staticAssets.prependPublicUrl(pathname),
         getPluginAssetHref: (assetPath: string) =>
           deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
       },
