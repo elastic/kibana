@@ -16,7 +16,7 @@
   },
   "service.name": "",
   "config_id": "",
-  "timeout": "3m",
+  "timeout": "180",
   "__ui": {
     "is_tls_enabled": false
   },
