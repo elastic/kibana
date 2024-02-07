@@ -36,7 +36,7 @@ const isUnsafeConsoleCall = (node) => {
 /** @type {Rule} */
 module.exports = {
   meta: {
-    // fixable: 'code',
+    fixable: 'code',
     schema: [],
   },
   create: (context) => ({

@@ -17,12 +17,19 @@ export function createLogger(isDev: boolean): Logger {
   // TODO: Replace with a core logger once we implement it in https://github.com/elastic/kibana/issues/33796
   // For now, it logs only in dev mode
   const logger: Logger = {
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     fatal: (...args) => (isDev ? unsafeConsole.error(...args) : void 0),
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     error: (...args) => (isDev ? unsafeConsole.error(...args) : void 0),
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     warn: (...args) => (isDev ? unsafeConsole.warn(...args) : void 0),
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     info: (...args) => (isDev ? unsafeConsole.info(...args) : void 0),
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     debug: (...args) => (isDev ? unsafeConsole.debug(...args) : void 0),
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     trace: (...args) => (isDev ? unsafeConsole.trace(...args) : void 0),
+    // eslint-disable-next-line @kbn/eslint/no_unsafe_console
     log: (...args) => (isDev ? unsafeConsole.log(...args) : void 0),
     isLevelEnabled: () => true,
     get: () => logger,
