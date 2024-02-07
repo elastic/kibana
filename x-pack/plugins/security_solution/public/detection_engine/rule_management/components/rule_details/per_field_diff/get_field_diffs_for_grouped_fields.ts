@@ -380,7 +380,7 @@ export const getFieldDiffsForThreshold = (
     ...(currentCardinality !== targetCardinality
       ? [
           {
-            fieldName: 'cardiinality',
+            fieldName: 'cardinality',
             currentVersion: currentCardinality,
             targetVersion: targetCardinality,
           },

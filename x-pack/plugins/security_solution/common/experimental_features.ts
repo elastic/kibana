@@ -179,7 +179,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
    */
-  perFieldPrebuiltRulesDiffingEnabled: false,
+  perFieldPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
