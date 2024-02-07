@@ -19,6 +19,11 @@ export const BETA = i18n.translate('xpack.securitySolution.pages.common.beta', {
   defaultMessage: 'Beta',
 });
 
+export const BETA_TOOLTIP = i18n.translate('xpack.securitySolution.pages.common.beta.tooltip', {
+  defaultMessage:
+    'This functionality is in beta and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in beta are not subject to the support SLA of official GA features.',
+});
+
 export const UPDATE_ALERT_STATUS_FAILED = (conflicts: number) =>
   i18n.translate('xpack.securitySolution.pages.common.updateAlertStatusFailed', {
     values: { conflicts },
