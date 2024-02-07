@@ -41,6 +41,9 @@ export interface TransformStateReportResponse extends BaseTransformAlertResponse
   node_name?: string;
 }
 
+/**
+ * @deprecated This health check is no longer in use
+ */
 export interface ErrorMessagesTransformResponse extends BaseTransformAlertResponse {
   error_messages: Array<{ message: string; timestamp: number; node_name?: string }>;
 }
@@ -87,7 +90,6 @@ export const TRANSFORM_HEALTH_AAD_CONFIG: IRuleTypeAlerts<any> = {
           issues: { type: ES_FIELD_TYPES.OBJECT },
           transform_state: { type: ES_FIELD_TYPES.KEYWORD },
           node_name: { type: ES_FIELD_TYPES.KEYWORD },
-          error_messages: { type: ES_FIELD_TYPES.OBJECT },
         },
       },
     },

@@ -73,7 +73,6 @@ const TransformHealthAlertOptional = rt.partial({
   'kibana.alert.results': rt.array(
     rt.partial({
       description: schemaString,
-      error_messages: schemaUnknown,
       health_status: schemaString,
       issues: schemaUnknown,
       node_name: schemaString,
