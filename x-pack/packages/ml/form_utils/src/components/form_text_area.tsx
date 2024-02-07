@@ -34,7 +34,7 @@ export const FormTextArea = <FF extends string, FS extends string, VN extends st
   return (
     <EuiFormRow label={label} helpText={helpText} isInvalid={errors.length > 0} error={errors}>
       <EuiTextArea
-        data-test-subj={`${slice.name}${upperCaseField}Input`}
+        data-test-subj={`${slice.name}${upperCaseField}TextArea`}
         placeholder={
           typeof placeHolder === 'string'
             ? placeHolder
