@@ -202,7 +202,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                 </EuiFormRow>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
-                    'xpack.enterprisecrawlerIndexName.content.newIndex.newcrawlerIndexNameIndexTemplate.nameInputHelpText.lineTwo',
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.nameInputHelpText.lineTwo',
                     {
                       defaultMessage:
                         'Names should be lowercase and cannot contain spaces or special characters.',
@@ -214,7 +214,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                 <EuiFormRow
                   isDisabled={disabled}
                   label={i18n.translate(
-                    'xpack.enterprisecrawlerIndexName.content.newIndex.newSearchIndexTemplate.languageInputLabel',
+                    'xpack.enterpriseSearch.content.newIndex.newSearchIndexTemplate.languageInputLabel',
                     {
                       defaultMessage: 'Language analyzer',
                     }
