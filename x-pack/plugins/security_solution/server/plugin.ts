@@ -16,7 +16,8 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
-import { FLEET_ENDPOINT_PACKAGE, NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
+import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -655,20 +656,28 @@ export class Plugin implements ISecuritySolutionPlugin {
         }
       }
     );
-    
+
     if (registerIngestCallback) {
       registerIngestCallback(
         'packagePolicyCreate',
         async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
-          await getCriblPackagePolicyPostCreateOrUpdateCallback(core.elasticsearch.client.asInternalUser, packagePolicy, this.logger);
+          await getCriblPackagePolicyPostCreateOrUpdateCallback(
+            core.elasticsearch.client.asInternalUser,
+            packagePolicy,
+            this.logger
+          );
           return packagePolicy;
         }
       );
-  
+
       registerIngestCallback(
         'packagePolicyUpdate',
         async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
-          await getCriblPackagePolicyPostCreateOrUpdateCallback(core.elasticsearch.client.asInternalUser, packagePolicy, this.logger);
+          await getCriblPackagePolicyPostCreateOrUpdateCallback(
+            core.elasticsearch.client.asInternalUser,
+            packagePolicy,
+            this.logger
+          );
           return packagePolicy;
         }
       );

@@ -377,9 +377,9 @@ export const getPackagePolicyDeleteCallback = (
 export const getCriblPackagePolicyPostCreateOrUpdateCallback = async (
   esClient: ElasticsearchClient,
   packagePolicy: NewPackagePolicy,
-  logger: Logger,
+  logger: Logger
 ): Promise<void> => {
   if (isCriblPackagePolicy(packagePolicy)) {
-    return await putCriblRoutingPipeline(esClient, packagePolicy, logger);
+    return putCriblRoutingPipeline(esClient, packagePolicy, logger);
   }
 };

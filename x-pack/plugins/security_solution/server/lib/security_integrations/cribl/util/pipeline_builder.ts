@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { IngestPipelineRequest, ProcessorContainer, RouteEntry } from '../../../../../common/security_integrations/cribl/types';
+import type {
+  IngestPipelineRequest,
+  ProcessorContainer,
+  RouteEntry,
+} from '../../../../../common/security_integrations/cribl/types';
 
 export const buildPipelineRequest = (mappings: RouteEntry[]): IngestPipelineRequest => {
   return {
     _meta: {
-      "managed": true,
+      managed: true,
     },
     description: 'Pipeline for routing events from Cribl',
     processors: buildCriblRoutingProcessors(mappings),
@@ -21,15 +25,15 @@ export const buildPipelineRequest = (mappings: RouteEntry[]): IngestPipelineRequ
           value: '{{ _ingest.on_failure_message }}',
         },
       },
-    ]
+    ],
   };
-}
+};
 
 const buildCriblRoutingProcessors = (mappings: RouteEntry[]): ProcessorContainer[] => {
-  let processors: ProcessorContainer[] = [];
+  const processors: ProcessorContainer[] = [];
 
   mappings.forEach(function (mapping) {
-    const [, datasetName] = mapping.datastream.split("-");
+    const [, datasetName] = mapping.datastream.split('-');
     processors.push({
       reroute: {
         dataset: `${datasetName}`,
@@ -40,4 +44,4 @@ const buildCriblRoutingProcessors = (mappings: RouteEntry[]): ProcessorContainer
   });
 
   return processors;
-}
+};

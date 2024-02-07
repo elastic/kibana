@@ -18,18 +18,21 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from 'react-intl';
-import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
 import { getFleetManagedIndexTemplates } from '../api/api';
-import { RouteEntry } from '../../../../common/security_integrations/cribl/types';
-import { getPolicyConfigValueFromRouteEntries, getRouteEntriesFromPolicyConfig } from '../../../../common/security_integrations/cribl/translator';
+import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
+import {
+  getPolicyConfigValueFromRouteEntries,
+  getRouteEntriesFromPolicyConfig,
+} from '../../../../common/security_integrations/cribl/translator';
 import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
-  return ({
-    dataId: "",
-    datastream: ""
-  } as RouteEntry);
+  return {
+    dataId: '',
+    datastream: '',
+  };
 };
 
 interface RouteEntryComponentProps {
@@ -41,22 +44,22 @@ interface RouteEntryComponentProps {
   onDeleteEntry(index: number): void;
 }
 
-const RouteEntryComponent = React.memo<RouteEntryComponentProps>(({
-    index, 
-    routeEntries, 
-    datastreamOpts, 
-    onChangeCriblDataId, 
-    onChangeDatastream, 
-    onDeleteEntry
+const RouteEntryComponent = React.memo<RouteEntryComponentProps>(
+  ({
+    index,
+    routeEntries,
+    datastreamOpts,
+    onChangeCriblDataId,
+    onChangeDatastream,
+    onDeleteEntry,
   }) => {
-
     const routeEntry = routeEntries[index]; // the route entry for this row
 
-    const options = datastreamOpts.map(o => ({
+    const options = datastreamOpts.map((o) => ({
       label: o,
     }));
 
-    const selectedOption = options.filter(o => o.label === routeEntry.datastream);
+    const selectedOption = options.filter((o) => o.label === routeEntry.datastream);
 
     return (
       <>
@@ -65,7 +68,8 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(({
             <EuiFormRow label="Cribl _dataId field">
               <EuiFieldText
                 value={routeEntry.dataId}
-                onChange={(e) => onChangeCriblDataId(index, e.currentTarget.value)} />
+                onChange={(e) => onChangeCriblDataId(index, e.currentTarget.value)}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
@@ -82,13 +86,14 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(({
                 singleSelection
                 options={options}
                 selectedOptions={selectedOption}
-                onChange={o => {
+                onChange={(o) => {
                   if (o.length > 0) {
                     onChangeDatastream(index, o[0].label);
                   } else {
-                    onChangeDatastream(index, "");
+                    onChangeDatastream(index, '');
                   }
-                }} />
+                }}
+              />
             </EuiFormRow>
           </EuiFlexItem>
           <EuiFormRow hasEmptyLabelSpace>
@@ -99,7 +104,8 @@ const RouteEntryComponent = React.memo<RouteEntryComponentProps>(({
               isDisabled={routeEntries.length === 1}
               aria-label="entryDeleteButton"
               className="itemEntryDeleteButton"
-              data-test-subj="itemEntryDeleteButton" />
+              data-test-subj="itemEntryDeleteButton"
+            />
           </EuiFormRow>
         </EuiFlexGroup>
       </>
@@ -113,20 +119,19 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
 
     const [missingReqPermissions, setMissingReqPermissions] = useState<boolean>();
     const [datastreamOpts, setDatastreamOpts] = useState<string[]>([]);
-    
+
     useEffect(() => {
       const fetchData = async () => {
-
-        const {indexTemplates, permissionsError} = await getFleetManagedIndexTemplates(http!);
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+        const { indexTemplates, permissionsError } = await getFleetManagedIndexTemplates(http!);
         setDatastreamOpts(indexTemplates);
-        
+
         if (permissionsError) {
           setMissingReqPermissions(true);
         }
-
       };
       fetchData();
-    }, []);
+    }, [http]);
 
     const [routeEntries, setRouteEntries] = useState<RouteEntry[]>([]);
 
@@ -138,12 +143,10 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
           setRouteEntries(fromConfig);
           return;
         }
-      } 
-      const defaultRouteEntries = [
-        getDefaultRouteEntry(),
-      ]
+      }
+      const defaultRouteEntries = [getDefaultRouteEntry()];
       setRouteEntries(defaultRouteEntries);
-    }, []);
+    }, [isEditPage, newPolicy.vars]);
 
     const onChangeCriblDataId = (index: number, value: string) => {
       const newValues = [...routeEntries];
@@ -160,13 +163,10 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
     };
 
     const onAddEntry = () => {
-      const newValues = [
-        ...routeEntries,
-        getDefaultRouteEntry(),
-      ];
+      const newValues = [...routeEntries, getDefaultRouteEntry()];
       setRouteEntries(newValues);
       updateCriblPolicy(newValues);
-    }
+    };
 
     const onDeleteEntry = (index: number) => {
       const newValues = routeEntries.filter((_, idx) => idx !== index);
@@ -174,24 +174,24 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
       updateCriblPolicy(newValues);
     };
 
-    const updateCriblPolicy = (
-      updatedRouteEntries: RouteEntry[],
-    ) => {
+    const updateCriblPolicy = (updatedRouteEntries: RouteEntry[]) => {
       const updatedPolicy = {
         ...newPolicy,
         vars: {
           route_entries: {
-            value: getPolicyConfigValueFromRouteEntries(updatedRouteEntries)
-          }
-        }
+            value: getPolicyConfigValueFromRouteEntries(updatedRouteEntries),
+          },
+        },
       };
 
       // must have at least one filled in and all entries must have both filled in or neither
-      const isValid = hasAtLeastOneValidRouteEntry(updatedRouteEntries) && allRouteEntriesArePaired(updatedRouteEntries);
+      const isValid =
+        hasAtLeastOneValidRouteEntry(updatedRouteEntries) &&
+        allRouteEntriesArePaired(updatedRouteEntries);
 
       onChange({
-        isValid: isValid,
-        updatedPolicy: updatedPolicy
+        isValid,
+        updatedPolicy,
       });
     };
 
@@ -201,9 +201,12 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
           <>
             <EuiCallOut
               size="s"
-              title={i18n.translate('xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutTitle', {
-                defaultMessage: "Be sure you have the necessary privileges",
-              })}
+              title={i18n.translate(
+                'xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutTitle',
+                {
+                  defaultMessage: 'Be sure you have the necessary privileges',
+                }
+              )}
               iconType="help"
             >
               <p>
@@ -214,7 +217,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
               </p>
             </EuiCallOut>
             <EuiSpacer size="l" />
-            </>
+          </>
         )}
         <EuiFlexGroup>
           <EuiFlexItem>
@@ -241,13 +244,11 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
             <EuiSpacer size="s" />
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
-                <EuiButton
-                  fill
-                  size="s"
-                  iconType="plusInCircle"
-                  onClick={onAddEntry}
-                >
-                  Add
+                <EuiButton fill size="s" iconType="plusInCircle" onClick={onAddEntry}>
+                  <FormattedMessage
+                    id="xpack.securitySolution.securityIntegration.cribl.addButton"
+                    defaultMessage="Add"
+                  />
                 </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -258,3 +259,6 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
     );
   }
 );
+
+RouteEntryComponent.displayName = 'CriblRouteEntry';
+CustomCriblForm.displayName = 'CriblForm';

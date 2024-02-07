@@ -27,8 +27,8 @@ export const getFleetManagedIndexTemplatesRoute = (router: IRouter) => {
           const indexTemplates = (await esClient.indices.getIndexTemplate()).index_templates;
 
           const fleetManagedIndexTemplates = indexTemplates
-            .filter(t => t.index_template._meta?.managed_by === "fleet")
-            .map(t => t.name);
+            .filter((t) => t.index_template._meta?.managed_by === 'fleet')
+            .map((t) => t.name);
 
           return response.ok({
             body: fleetManagedIndexTemplates,

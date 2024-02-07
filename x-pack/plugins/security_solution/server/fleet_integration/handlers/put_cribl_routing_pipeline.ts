@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
+import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { IngestPipelineRequest } from '../../../common/security_integrations/cribl/types';
+import type { IngestPipelineRequest } from '../../../common/security_integrations/cribl/types';
 import { getRouteEntriesFromPolicyConfig } from '../../../common/security_integrations/cribl/translator';
 import { buildPipelineRequest } from '../../lib/security_integrations/cribl/util/pipeline_builder';
 import { SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE } from '../../../common/constants';
@@ -15,7 +15,7 @@ import { SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE } from '../../../common/co
 export const putCriblRoutingPipeline = async (
   esClient: ElasticsearchClient,
   policy: NewPackagePolicy,
-  logger: Logger,
+  logger: Logger
 ) => {
   const mappings = getRouteEntriesFromPolicyConfig(policy.vars);
   const pipelineConf = buildPipelineRequest(mappings);
@@ -28,15 +28,13 @@ const createOrUpdatePipeline = async (
   logger: Logger
 ) => {
   try {
-    console.log(pipelineConf);
     await esClient.transport.request({
       method: 'PUT',
       path: `_ingest/pipeline/${SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE}`,
-      body: pipelineConf
+      body: pipelineConf,
     });
     return true;
   } catch (e) {
-    console.log(e);
     const error = transformError(e);
     logger.error(`Failed to put Cribl integration routing pipeline. error: ${error.message}`);
   }
