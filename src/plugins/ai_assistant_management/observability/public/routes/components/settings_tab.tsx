@@ -9,6 +9,7 @@
 import React from 'react';
 import {
   EuiButton,
+  EuiComboBox,
   EuiDescribedFormGroup,
   EuiForm,
   EuiFormRow,
@@ -18,9 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAppContext } from '../../hooks/use_app_context';
-
-export const SELECTED_CONNECTOR_LOCAL_STORAGE_KEY =
-  'xpack.observabilityAiAssistant.lastUsedConnector';
+import { languages } from './languages';
 
 export function SettingsTab() {
   const {
@@ -50,6 +49,12 @@ export function SettingsTab() {
       path: '/kibana/spaces',
     });
   };
+
+  const languageOptions = languages.map((language) => ({
+    label: language,
+  }));
+
+  const { selectedLanguage, selectLanguage } = observabilityAIAssistant.useUserPreferredLanguage();
 
   return (
     <>
@@ -176,6 +181,58 @@ export function SettingsTab() {
                 aria-label={i18n.translate(
                   'aiAssistantManagementObservability.settingsPage.euiSelect.generativeAIProviderLabel',
                   { defaultMessage: 'Generative AI provider' }
+                )}
+              />
+            </EuiFormRow>
+          </EuiDescribedFormGroup>
+        </EuiForm>
+      </EuiPanel>
+
+      <EuiSpacer size="l" />
+
+      <EuiPanel hasBorder grow={false}>
+        <EuiForm component="form">
+          <EuiDescribedFormGroup
+            fullWidth
+            title={
+              <h3>
+                {i18n.translate(
+                  'aiAssistantManagementObservability.settingsPage.userPreferencesLabel',
+                  {
+                    defaultMessage: 'User preferences',
+                  }
+                )}
+              </h3>
+            }
+            description={i18n.translate(
+              'aiAssistantManagementObservability.settingsPage.connectYourElasticAITextLabel',
+              {
+                defaultMessage:
+                  'Select the language you wish the Assistant to use when generating responses.',
+              }
+            )}
+          >
+            <EuiFormRow
+              fullWidth
+              label={i18n.translate(
+                'aiAssistantManagementObservability.settingsPage.selectLanguageLabel',
+                {
+                  defaultMessage: 'Response language',
+                }
+              )}
+            >
+              <EuiComboBox
+                data-test-subj="settingsTabUserPreferredLanguage"
+                singleSelection={{ asPlainText: true }}
+                isClearable={false}
+                options={languageOptions}
+                selectedOptions={selectedLanguage ? [{ label: selectedLanguage }] : []}
+                onChange={(selected) => {
+                  selectLanguage(selected[0]?.label ?? '');
+                }}
+                aria-label={i18n.translate(
+                  'aiAssistantManagementObservability.settingsPage.userPreferences.responseLanguageLabel',
+                  { defaultMessage: 'Response language' }
                 )}
               />
             </EuiFormRow>

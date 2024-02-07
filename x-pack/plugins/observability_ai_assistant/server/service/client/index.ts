@@ -10,6 +10,7 @@ import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
+import dedent from 'dedent';
 import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { compact, isEmpty, last, merge, noop, omit, pick, take } from 'lodash';
@@ -132,7 +133,7 @@ export class ObservabilityAIAssistantClient {
       signal: AbortSignal;
       functionClient: ChatFunctionClient;
       persist: boolean;
-    } & ({ conversationId: string } | { title?: string })
+    } & ({ conversationId: string } | { title?: string } | { responseLanguage?: string })
   ): Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>> => {
     return new Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>(
       (subscriber) => {
@@ -146,6 +147,11 @@ export class ObservabilityAIAssistantClient {
 
         if ('title' in params) {
           title = params.title || '';
+        }
+
+        let responseLanguage = 'English';
+        if ('responseLanguage' in params) {
+          responseLanguage = params.responseLanguage || 'English';
         }
 
         let numFunctionsCalled: number = 0;
@@ -406,7 +412,7 @@ export class ObservabilityAIAssistantClient {
           subscriber.complete();
         };
 
-        next(messages).catch((error) => {
+        next(this.addResponseLanguage(messages, responseLanguage)).catch((error) => {
           if (!signal.aborted) {
             this.dependencies.logger.error(error);
           }
@@ -419,6 +425,7 @@ export class ObservabilityAIAssistantClient {
                 messages,
                 connectorId,
                 signal,
+                responseLanguage,
               }).catch((error) => {
                 this.dependencies.logger.error(
                   'Could not generate title, falling back to default title'
@@ -588,10 +595,12 @@ export class ObservabilityAIAssistantClient {
     messages,
     connectorId,
     signal,
+    responseLanguage,
   }: {
     messages: Message[];
     connectorId: string;
     signal: AbortSignal;
+    responseLanguage: string;
   }) => {
     const response$ = await this.chat('generate_title', {
       messages: [
@@ -599,9 +608,17 @@ export class ObservabilityAIAssistantClient {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
-            content: messages.slice(1).reduce((acc, curr) => {
-              return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Here is the content:'),
+            content: messages.slice(1).reduce(
+              (acc, curr) => {
+                return `${acc} ${curr.message.role}: ${curr.message.content}`;
+              },
+              dedent(`You are a helpful assistant for Elastic Observability.
+            Assume the following message is the start of a conversation between you and a user;
+            give this conversation a title based on the content below.
+            DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes.
+            This title is shown in a list of conversations to the user, so title it for the user, not for you.
+            Please create the title in ${responseLanguage}. Here is the content: `)
+            ),
           },
         },
       ],
@@ -738,5 +755,19 @@ export class ObservabilityAIAssistantClient {
 
   deleteKnowledgeBaseEntry = async (id: string) => {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
+  };
+
+  addResponseLanguage = (messages: Message[], responseLanguage: string): Message[] => {
+    const [systemMessage, ...rest] = messages;
+
+    const extendedSystemMessage: Message = {
+      ...systemMessage,
+      message: {
+        ...systemMessage.message,
+        content: `You MUST respond in the users preferred language which is: ${responseLanguage}. ${systemMessage.message.content}`,
+      },
+    };
+
+    return [extendedSystemMessage].concat(rest);
   };
 }

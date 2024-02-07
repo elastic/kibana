@@ -87,6 +87,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       t.partial({
         conversationId: t.string,
         title: t.string,
+        responseLanguage: t.string,
       }),
     ]),
   }),
@@ -100,7 +101,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, conversationId, title, persist },
+      body: { messages, connectorId, conversationId, title, persist, responseLanguage },
     } = params;
 
     const controller = new AbortController();
@@ -123,6 +124,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       persist,
       signal: controller.signal,
       functionClient,
+      responseLanguage,
     });
 
     return observableIntoStream(response$);

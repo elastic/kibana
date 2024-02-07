@@ -20,6 +20,7 @@ import { getAssistantSetupMessage } from '../service/get_assistant_setup_message
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { useKibana } from './use_kibana';
 import { useOnce } from './use_once';
+import { useUserPreferredLanguage } from './use_user_preferred_language';
 
 export enum ChatState {
   Ready = 'ready',
@@ -83,6 +84,8 @@ export function useChat({
   const {
     services: { notifications },
   } = useKibana();
+
+  const { selectedLanguage } = useUserPreferredLanguage();
 
   const onChatCompleteRef = useRef(onChatComplete);
   onChatCompleteRef.current = onChatComplete;
@@ -156,6 +159,7 @@ export function useChat({
         persist,
         signal: abortControllerRef.current.signal,
         conversationId,
+        responseLanguage: selectedLanguage || 'English',
       });
 
       function getPendingMessages() {
