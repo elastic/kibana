@@ -178,7 +178,7 @@ describe('getAppInfo', () => {
     });
   });
 
-  it('computes the deepLinks navLinkStatus when needed', () => {
+  it('computes the deepLinks visibleIn when needed', () => {
     expect(
       getAppInfo(
         createApp({

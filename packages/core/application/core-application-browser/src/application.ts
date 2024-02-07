@@ -101,7 +101,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
   status?: AppStatus;
 
   /**
-   * Optional list of locations where the app is visible. By default the app is visible everywhere (['globalSearch', 'sideNav'])
+   * Optional list of locations where the app is visible. By default the app is visible everywhere (`['globalSearch', 'sideNav']`)
    * unless its status is marked as `inaccessible`.
    */
   visibleIn?: AppDeepLinkLocations[];
