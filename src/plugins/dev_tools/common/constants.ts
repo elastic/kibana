@@ -6,5 +6,5 @@
  * Side Public License, v 1.
  */
 
-export const devToolsFeatureId = 'devTools';
-export const enableDockedConsoleUiSetting = 'devTools:enableDockedConsole';
+export const DEV_TOOLS_FEATURE_ID = 'devTools';
+export const ENABLE_DOCKED_CONSOLE_UI_SETTING_ID = 'devTools:enableDockedConsole';

@@ -6,10 +6,4 @@
  * Side Public License, v 1.
  */
 
-import { COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID } from '@kbn/management-settings-ids';
-import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/common';
-
-export const SEARCH_PROJECT_SETTINGS = [
-  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID,
-  ENABLE_DOCKED_CONSOLE_UI_SETTING_ID,
-];
+export { DEV_TOOLS_FEATURE_ID, ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from './constants';

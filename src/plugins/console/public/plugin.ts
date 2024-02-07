@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { enableDockedConsoleUiSetting } from '@kbn/dev-tools-plugin/public';
+import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/public';
 
 import { renderEmbeddableConsole } from './application/containers/embeddable';
 import {
@@ -109,7 +109,9 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     } = this.ctx.config.get<ClientConfigType>();
 
     const consoleStart: ConsolePluginStart = {};
-    const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(enableDockedConsoleUiSetting);
+    const embeddedConsoleUiSetting = core.uiSettings.get<boolean>(
+      ENABLE_DOCKED_CONSOLE_UI_SETTING_ID
+    );
     const embeddedConsoleAvailable =
       isConsoleUiEnabled &&
       isEmbeddedConsoleEnabled &&
