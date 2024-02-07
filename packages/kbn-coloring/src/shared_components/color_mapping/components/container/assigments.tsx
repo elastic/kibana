@@ -27,6 +27,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
+import { findLast } from 'lodash';
 import { Assignment } from '../assignment/assignment';
 import {
   addNewAssignment,
@@ -82,6 +83,11 @@ export function AssignmentsConfig({
   );
 
   const onClickAddNewAssignment = useCallback(() => {
+    const lastCategorical = findLast(assignments, (d) => {
+      return d.color.type === 'categorical';
+    });
+    const nextCategoricalIndex =
+      lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
     dispatch(
       addNewAssignment({
         rule:
@@ -96,7 +102,7 @@ export function AssignmentsConfig({
             ? {
                 type: 'categorical',
                 paletteId: palette.id,
-                colorIndex: assignments.length % palette.colorCount,
+                colorIndex: nextCategoricalIndex % palette.colorCount,
               }
             : { type: 'gradient' },
         touched: false,
@@ -106,6 +112,12 @@ export function AssignmentsConfig({
 
   const onClickAddAllCurrentCategories = useCallback(() => {
     if (data.type === 'categories') {
+      const lastCategorical = findLast(assignments, (d) => {
+        return d.color.type === 'categorical';
+      });
+      const nextCategoricalIndex =
+        lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
+
       const newAssignments: ColorMapping.Config['assignments'] = unmatchingCategories.map(
         (c, i) => {
           return {
@@ -118,7 +130,7 @@ export function AssignmentsConfig({
                 ? {
                     type: 'categorical',
                     paletteId: palette.id,
-                    colorIndex: (assignments.length + i) % palette.colorCount,
+                    colorIndex: (nextCategoricalIndex + i) % palette.colorCount,
                   }
                 : { type: 'gradient' },
             touched: false,

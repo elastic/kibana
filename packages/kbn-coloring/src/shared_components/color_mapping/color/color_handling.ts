@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 import chroma from 'chroma-js';
+import { findLast } from 'lodash';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
 import { getPalette, NeutralPalette } from '../palettes';
@@ -78,6 +79,12 @@ export function getColorFactory(
         })
       : [];
 
+  const lastCategorical = findLast(assignments, (d) => {
+    return d.color.type === 'categorical';
+  });
+  const nextCategoricalIndex =
+    lastCategorical?.color.type === 'categorical' ? lastCategorical.color.colorIndex + 1 : 0;
+
   return (category: string | string[]) => {
     if (typeof category === 'string' || Array.isArray(category)) {
       const nonAssignedCategoryIndex = notAssignedCategories.indexOf(category);
@@ -112,7 +119,8 @@ export function getColorFactory(
               : {
                   type: 'loop',
                   // those are applied here and depends on the current non-assigned category - auto-assignment list
-                  colorIndex: nonAssignedCategoryIndex - autoByOrderAssignments.length,
+                  colorIndex:
+                    nonAssignedCategoryIndex - autoByOrderAssignments.length + nextCategoricalIndex,
                   paletteId,
                 }
             : specialAssignments[0].color,
