@@ -167,6 +167,16 @@ BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-loca
 export BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE
 vault_get kibana-ci-bazel-remote-cache-local-dev service_account_json > "$BAZEL_LOCAL_DEV_CACHE_CREDENTIALS_FILE"
 
+# Export key for accessing bazel remote cache's GCS bucket
+BAZEL_REMOTE_CACHE_CREDENTIALS_FILE="$HOME/.kibana-ci-bazel-remote-cache-gcs.json"
+export BAZEL_REMOTE_CACHE_CREDENTIALS_FILE
+vault_get kibana-ci-bazel-remote-cache-sa-key key | base64 -d > "$BAZEL_REMOTE_CACHE_CREDENTIALS_FILE"
+
+# Setup GCS Service Account Proxy for CI
+KIBANA_SERVICE_ACCOUNT_PROXY_KEY="$(mktemp -d)/kibana-gcloud-service-account.json"
+export KIBANA_SERVICE_ACCOUNT_PROXY_KEY
+vault_get kibana-ci-sa-proxy-key key | base64 -d > "$KIBANA_SERVICE_ACCOUNT_PROXY_KEY"
+
 PIPELINE_PRE_COMMAND=${PIPELINE_PRE_COMMAND:-".buildkite/scripts/lifecycle/pipelines/$BUILDKITE_PIPELINE_SLUG/pre_command.sh"}
 if [[ -f "$PIPELINE_PRE_COMMAND" ]]; then
   source "$PIPELINE_PRE_COMMAND"
