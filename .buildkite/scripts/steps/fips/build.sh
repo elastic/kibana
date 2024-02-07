@@ -9,6 +9,7 @@ source .buildkite/scripts/steps/artifacts/env.sh
 
 echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
 mkdir -p target
+download_artifact "kibana-$FULL_VERSION-linux-x86_64.tar.gz" ./target --build "${KIBANA_BUILD_ID:-$BUILDKITE_BUILD_ID}"
 
 echo "--- Build FIPS image"
 node scripts/build \
@@ -16,6 +17,7 @@ node scripts/build \
     --skip-generic-folders \
     --skip-platform-folders \
     --skip-cdn-assets \
+    --skip-archives \
     --docker-images \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \
     --docker-push \
