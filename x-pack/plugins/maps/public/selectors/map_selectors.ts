@@ -338,7 +338,7 @@ export const getLayerList = createSelector(
           return null;
         }
       })
-      .filter(Boolean);
+      .filter((Boolean)) as ILayer[];
 
     const childrenMap = new Map<string, ILayer[]>();
     layers.forEach((layer) => {
