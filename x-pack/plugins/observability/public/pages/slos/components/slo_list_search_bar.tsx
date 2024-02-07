@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from 'styled-components';
 import { useIsMutating } from '@tanstack/react-query';
-import { TagsFilter } from './common/tags_filter';
+import { QuickFilters } from './common/quick_filters';
 import { useKibana } from '../../../utils/kibana_react';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/slo/constants';
 import { useCreateDataView } from '../../../hooks/use_create_data_view';
@@ -66,7 +66,7 @@ export function SloListSearchBar() {
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={loading}
         renderQueryInputAppend={() => (
-          <TagsFilter initialState={state} loading={loading} onStateChange={onStateChange} />
+          <QuickFilters initialState={state} loading={loading} onStateChange={onStateChange} />
         )}
         filters={filters}
         onFiltersUpdated={(newFilters) => {
@@ -80,6 +80,7 @@ export function SloListSearchBar() {
         showDatePicker={false}
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
+        saveQueryMenuVisibility="globally_managed"
       />
     </Container>
   );

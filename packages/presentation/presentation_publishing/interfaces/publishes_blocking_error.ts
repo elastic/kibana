@@ -22,6 +22,4 @@ export const apiPublishesBlockingError = (
  * Gets this API's fatal error as a reactive variable which will cause re-renders on change.
  */
 export const useBlockingError = (api: Partial<PublishesBlockingError> | undefined) =>
-  useStateFromPublishingSubject<Error | undefined, PublishesBlockingError['blockingError']>(
-    api?.blockingError
-  );
+  useStateFromPublishingSubject(api?.blockingError);
