@@ -6,38 +6,25 @@
  */
 
 import React from 'react';
+import { useSummaryPanelContext } from '../../../hooks';
 
-import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
 import {
   summaryPanelActiveDatasetsText,
   summaryPanelActiveDatasetsTooltipText,
-  summaryPanelLast24hText,
   tableSummaryOfText,
 } from '../../../../common/translations';
+import { LastDayDataPlaceholder } from './last_day_data_placeholder';
 
 export function ActiveDatasets() {
+  const { datasetsActivity, isDatasetsActivityLoading } = useSummaryPanelContext();
+  const text = `${datasetsActivity.active} ${tableSummaryOfText} ${datasetsActivity.total}`;
+
   return (
-    <EuiPanel hasBorder>
-      <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{summaryPanelActiveDatasetsText}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={summaryPanelActiveDatasetsTooltipText} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="xs">
-              {summaryPanelLast24hText}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiTitle size="m">
-          <h3>9 {tableSummaryOfText} 10</h3>
-        </EuiTitle>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <LastDayDataPlaceholder
+      title={summaryPanelActiveDatasetsText}
+      tooltip={summaryPanelActiveDatasetsTooltipText}
+      value={text}
+      isLoading={isDatasetsActivityLoading}
+    />
   );
 }

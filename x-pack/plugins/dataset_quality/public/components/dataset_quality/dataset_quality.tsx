@@ -13,6 +13,8 @@ import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
 import { DatasetQualityController } from '../../controller';
 import { SummaryPanel } from './summary_panel/summary_panel';
+import { SummaryPanelProvider } from '../../hooks';
+import { DataStreamsStatsService } from '../../services/data_streams_stats';
 
 export interface DatasetQualityProps {
   controller: DatasetQualityController;
@@ -27,6 +29,10 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
   return ({ controller }: DatasetQualityProps) => {
     const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 
+    const dataStreamStatsClient = new DataStreamsStatsService().start({
+      http: core.http,
+    }).client;
+
     const datasetQualityProviderValue: DatasetQualityContextValue = useMemo(
       () => ({
         service: controller.service,
@@ -35,11 +41,16 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
     );
 
     return (
-      <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
-        <KibanaContextProviderForPlugin>
-          <DatasetQuality />
-        </KibanaContextProviderForPlugin>
-      </DatasetQualityContext.Provider>
+      <SummaryPanelProvider
+        dataStreamStatsClient={dataStreamStatsClient}
+        toasts={core.notifications.toasts}
+      >
+        <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
+          <KibanaContextProviderForPlugin>
+            <DatasetQuality />
+          </KibanaContextProviderForPlugin>
+        </DatasetQualityContext.Provider>
+      </SummaryPanelProvider>
     );
   };
 };

@@ -7,36 +7,23 @@
 
 import React from 'react';
 
-import { EuiFlexGroup, EuiPanel, EuiFlexItem, EuiTitle, EuiText, EuiIconTip } from '@elastic/eui';
+import { formatBytes } from '../../../../common/utils';
+import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelEstimatedDataText,
   summaryPanelEstimatedDataTooltipText,
-  summaryPanelLast24hText,
 } from '../../../../common/translations';
+import { LastDayDataPlaceholder } from './last_day_data_placeholder';
 
 export function EstimatedData() {
+  const { estimatedData, isEstimatedDataLoading } = useSummaryPanelContext();
+
   return (
-    <EuiPanel hasBorder>
-      <EuiFlexGroup gutterSize="m" direction="column">
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{summaryPanelEstimatedDataText}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiIconTip content={summaryPanelEstimatedDataTooltipText} />
-            </EuiFlexItem>
-          </EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="xs">
-              {summaryPanelLast24hText}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiTitle size="m">
-          <h3>10GB</h3>
-        </EuiTitle>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <LastDayDataPlaceholder
+      title={summaryPanelEstimatedDataText}
+      tooltip={summaryPanelEstimatedDataTooltipText}
+      value={formatBytes(estimatedData.estimatedDataInBytes)}
+      isLoading={isEstimatedDataLoading}
+    />
   );
 }

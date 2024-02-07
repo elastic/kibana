@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './dataset_name';
-export * from './formatters';
+export * from './src';

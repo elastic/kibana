@@ -17,7 +17,9 @@ import {
   EuiText,
   EuiHealth,
   EuiIconTip,
+  EuiSkeletonTitle,
 } from '@elastic/eui';
+import { useSummaryPanelContext } from '../../../hooks';
 import {
   summaryPanelQualityDegradedText,
   summaryPanelQualityGoodText,
@@ -25,8 +27,12 @@ import {
   summaryPanelQualityText,
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
+import { mapPercentagesToQualityCounts } from '../../quality_indicator';
 
 export function DatasetsQualityIndicators() {
+  const { datasetsQuality, isDatasetsQualityLoading } = useSummaryPanelContext();
+  const qualityCounts = mapPercentagesToQualityCounts(datasetsQuality.percentages);
+
   return (
     <EuiPanel hasBorder>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -39,15 +45,26 @@ export function DatasetsQualityIndicators() {
           </EuiFlexItem>
         </EuiFlexGroup>
         <EuiFlexGroup gutterSize="m" alignItems="flexEnd">
-          <QualityIndicator value="1" quality="danger" description={summaryPanelQualityPoorText} />
-          <VerticalRule />
           <QualityIndicator
-            value="4"
-            quality="warning"
-            description={summaryPanelQualityDegradedText}
+            value={qualityCounts.poor}
+            quality="danger"
+            description={summaryPanelQualityPoorText}
+            isLoading={isDatasetsQualityLoading}
           />
           <VerticalRule />
-          <QualityIndicator value="8" quality="success" description={summaryPanelQualityGoodText} />
+          <QualityIndicator
+            value={qualityCounts.degraded}
+            quality="warning"
+            description={summaryPanelQualityDegradedText}
+            isLoading={isDatasetsQualityLoading}
+          />
+          <VerticalRule />
+          <QualityIndicator
+            value={qualityCounts.good}
+            quality="success"
+            description={summaryPanelQualityGoodText}
+            isLoading={isDatasetsQualityLoading}
+          />
         </EuiFlexGroup>
       </EuiFlexGroup>
     </EuiPanel>
@@ -58,20 +75,26 @@ const QualityIndicator = ({
   value,
   quality,
   description,
+  isLoading,
 }: {
-  value: string;
+  value: number;
   quality: 'success' | 'danger' | 'warning';
   description: string;
+  isLoading: boolean;
 }) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiTitle size="m">
-        <h3>
-          <EuiHealth textSize="inherit" color={quality}>
-            {value}
-          </EuiHealth>
-        </h3>
-      </EuiTitle>
+      {isLoading ? (
+        <EuiSkeletonTitle size="m" />
+      ) : (
+        <EuiTitle size="m">
+          <h3>
+            <EuiHealth textSize="inherit" color={quality}>
+              {value}
+            </EuiHealth>
+          </h3>
+        </EuiTitle>
+      )}
       <EuiText color={quality}>
         <h5>{description}</h5>
       </EuiText>
