@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { pick } from 'lodash';
 import type { Suggestion } from '@kbn/lens-plugin/public';
 import type { ExternalVisContext } from '../types';
 
@@ -21,7 +22,7 @@ export const toExternalVisContextJSONString = (
     return undefined;
   }
 
-  return JSON.stringify(visContext);
+  return JSON.stringify(pick(visContext, ['attributes', 'requestData', 'suggestionType']));
 };
 
 export const fromExternalVisContextJSONString = (
