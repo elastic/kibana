@@ -28,8 +28,7 @@ import { createEndpointHost } from '../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../tasks/delete_all_endpoint_data';
 import { APP_CASES_PATH } from '../../../../../common/constants';
 
-// Failing: See https://github.com/elastic/kibana/issues/169343
-describe.skip('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Response console', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
   let indexedPolicy: IndexedFleetEndpointPolicyResponse;
   let policy: PolicyData;
   let createdHost: CreateAndEnrollEndpointHostResponse;

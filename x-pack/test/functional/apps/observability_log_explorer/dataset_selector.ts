@@ -31,7 +31,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const noIntegrationsTitle = 'No integrations found';
   const noUncategorizedTitle = 'No data streams found';
 
-  describe('Dataset Selector', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/168105
+  describe.skip('Dataset Selector', () => {
     before(async () => {
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
       await PageObjects.observabilityLogExplorer.removeInstalledPackages();

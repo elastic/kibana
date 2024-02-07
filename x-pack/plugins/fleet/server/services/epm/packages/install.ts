@@ -572,17 +572,20 @@ async function installPackageCommon(options: {
       return { error: err, installType, installSource };
     }
 
+    // Saved object client need to be scopped with the package space for saved object tagging
+    const savedObjectClientWithSpace = appContextService.getInternalUserSOClientForSpaceId(spaceId);
+
     const savedObjectsImporter = appContextService
       .getSavedObjects()
-      .createImporter(savedObjectsClient, { importSizeLimit: 15_000 });
+      .createImporter(savedObjectClientWithSpace, { importSizeLimit: 15_000 });
 
     const savedObjectTagAssignmentService = appContextService
       .getSavedObjectsTagging()
-      .createInternalAssignmentService({ client: savedObjectsClient });
+      .createInternalAssignmentService({ client: savedObjectClientWithSpace });
 
     const savedObjectTagClient = appContextService
       .getSavedObjectsTagging()
-      .createTagClient({ client: savedObjectsClient });
+      .createTagClient({ client: savedObjectClientWithSpace });
 
     // try installing the package, if there was an error, call error handler and rethrow
     // @ts-expect-error status is string instead of InstallResult.status 'installed' | 'already_installed'

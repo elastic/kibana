@@ -28,6 +28,11 @@ import * as obj from '.';
 
 jest.mock('../../app_context', () => {
   const logger = { error: jest.fn(), debug: jest.fn(), warn: jest.fn(), info: jest.fn() };
+  const mockedSavedObjectTagging = {
+    createInternalAssignmentService: jest.fn(),
+    createTagClient: jest.fn(),
+  };
+
   return {
     appContextService: {
       getLogger: jest.fn(() => {
@@ -38,13 +43,12 @@ jest.mock('../../app_context', () => {
         createImporter: jest.fn(),
       })),
       getConfig: jest.fn(() => ({})),
-      getSavedObjectsTagging: jest.fn(() => ({
-        createInternalAssignmentService: jest.fn(),
-        createTagClient: jest.fn(),
-      })),
+      getSavedObjectsTagging: jest.fn(() => mockedSavedObjectTagging),
+      getInternalUserSOClientForSpaceId: jest.fn(),
     },
   };
 });
+
 jest.mock('.');
 jest.mock('../registry', () => {
   return {
@@ -145,6 +149,7 @@ describe('install', () => {
 
     mockGetBundledPackageByPkgKey.mockReset();
     (install._installPackage as jest.Mock).mockClear();
+    jest.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReset();
   });
 
   describe('registry', () => {
@@ -347,6 +352,38 @@ describe('install', () => {
       });
 
       expect(response.status).toEqual('installed');
+    });
+
+    it('should use a scopped to package space soClient for tagging', async () => {
+      const mockedTaggingSo = savedObjectsClientMock.create();
+      jest
+        .mocked(appContextService.getInternalUserSOClientForSpaceId)
+        .mockReturnValue(mockedTaggingSo);
+      jest
+        .spyOn(obj, 'getInstallationObject')
+        .mockImplementationOnce(() => Promise.resolve({ attributes: { version: '1.2.0' } } as any));
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      await installPackage({
+        spaceId: 'test',
+        installSource: 'registry',
+        pkgkey: 'apache-1.3.0',
+        savedObjectsClient: savedObjectsClientMock.create(),
+        esClient: {} as ElasticsearchClient,
+      });
+
+      expect(appContextService.getInternalUserSOClientForSpaceId).toBeCalledWith('test');
+      expect(appContextService.getSavedObjectsTagging().createTagClient).toBeCalledWith(
+        expect.objectContaining({
+          client: mockedTaggingSo,
+        })
+      );
+      expect(
+        appContextService.getSavedObjectsTagging().createInternalAssignmentService
+      ).toBeCalledWith(
+        expect.objectContaining({
+          client: mockedTaggingSo,
+        })
+      );
     });
   });
 

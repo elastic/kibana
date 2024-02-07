@@ -149,7 +149,7 @@ export function generateMappings(
   isIndexModeTimeSeries = false
 ): IndexTemplateMappings {
   const dynamicTemplates: Array<Record<string, Properties>> = [];
-  const dynamicTemplateNames = new Set<string>();
+  const dynamicTemplateNames: Record<string, number> = {};
   const runtimeFields: RuntimeFields = {};
 
   const { properties } = _generateMappings(
@@ -163,8 +163,16 @@ export function generateMappings(
         runtimeProperties?: Properties;
       }) => {
         const name = dynamicMapping.path;
-        if (dynamicTemplateNames.has(name)) {
-          return;
+        if (name in dynamicTemplateNames) {
+          if (name.includes('*') && dynamicMapping.properties?.type === 'object') {
+            // This is a conflicting intermediate object, use the last one so
+            // more specific templates are chosen before.
+            const index = dynamicTemplateNames[name];
+            delete dynamicTemplateNames[name];
+            dynamicTemplates.splice(index, 1);
+          } else {
+            return;
+          }
         }
 
         const dynamicTemplate: Properties = {};
@@ -182,8 +190,8 @@ export function generateMappings(
           dynamicTemplate.path_match = dynamicMapping.pathMatch;
         }
 
-        dynamicTemplateNames.add(name);
-        dynamicTemplates.push({ [dynamicMapping.path]: dynamicTemplate });
+        const size = dynamicTemplates.push({ [name]: dynamicTemplate });
+        dynamicTemplateNames[name] = size - 1;
       },
       addRuntimeField: (runtimeField: { path: string; properties: Properties }) => {
         runtimeFields[`${runtimeField.path}`] = runtimeField.properties;
