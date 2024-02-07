@@ -185,6 +185,11 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
+
+  /**
+   * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
+   */
+  perFieldPrebuiltRulesDiffingEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
