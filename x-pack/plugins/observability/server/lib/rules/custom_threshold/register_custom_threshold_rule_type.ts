@@ -58,11 +58,13 @@ export const searchConfigurationSchema = schema.object({
     }),
     query: schema.string(),
   }),
-  filter: schema.arrayOf(
-    schema.object({
-      query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-      meta: schema.recordOf(schema.string(), schema.any()),
-    })
+  filter: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        meta: schema.recordOf(schema.string(), schema.any()),
+      })
+    )
   ),
 });
 

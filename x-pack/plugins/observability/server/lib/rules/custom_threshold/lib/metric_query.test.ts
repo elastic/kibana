@@ -39,27 +39,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       language: 'kuery',
       query: '',
     },
-    filter: [
-      {
-        meta: {
-          alias: null,
-          disabled: false,
-          field: 'service.name',
-          key: 'service.name',
-          negate: false,
-          params: {
-            query: 'synth-node-2',
-          },
-          type: 'phrase',
-          index: 'dataset-logs-*-*',
-        },
-        query: {
-          match_phrase: {
-            'service.name': 'synth-node-2',
-          },
-        },
-      },
-    ],
   };
 
   const groupBy = 'host.doggoname';
@@ -69,7 +48,7 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     end: moment().valueOf(),
   };
 
-  describe('when passed no filterQuery', () => {
+  describe('when passed no KQL query', () => {
     const searchBody = getElasticsearchMetricQuery(
       expressionParams,
       timeframe,
@@ -113,16 +92,16 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     });
   });
 
-  describe('when passed a filterQuery', () => {
+  describe('when passed a KQL query', () => {
     // This is adapted from a real-world query that previously broke alerts
     // We want to make sure it doesn't override any existing filters
     // https://github.com/elastic/kibana/issues/68492
-    const filterQuery = 'NOT host.name:dv* and NOT host.name:ts*';
+    const query = 'NOT host.name:dv* and NOT host.name:ts*';
     const currentSearchConfiguration = {
       ...searchConfiguration,
       query: {
         language: 'kuery',
-        query: filterQuery,
+        query,
       },
     };
 
@@ -203,6 +182,62 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
             },
           },
         })
+      );
+    });
+  });
+
+  describe('when passed a filter', () => {
+    const currentSearchConfiguration = {
+      ...searchConfiguration,
+      query: {
+        language: 'kuery',
+        query: '',
+      },
+      filter: [
+        {
+          meta: {
+            alias: null,
+            disabled: false,
+            field: 'service.name',
+            key: 'service.name',
+            negate: false,
+            params: {
+              query: 'synth-node-2',
+            },
+            type: 'phrase',
+            index: 'dataset-logs-*-*',
+          },
+          query: {
+            match_phrase: {
+              'service.name': 'synth-node-2',
+            },
+          },
+        },
+      ],
+    };
+
+    const searchBody = getElasticsearchMetricQuery(
+      expressionParams,
+      timeframe,
+      timeFieldName,
+      100,
+      true,
+      currentSearchConfiguration,
+      void 0,
+      groupBy
+    );
+    test('includes a range filter', () => {
+      expect(
+        searchBody.query.bool.filter.find((filter) => filter.hasOwnProperty('range'))
+      ).toBeTruthy();
+    });
+
+    test('includes a metric field filter', () => {
+      expect(searchBody.query.bool.filter).toMatchObject(
+        expect.arrayContaining([
+          { range: { mockedTimeFieldName: expect.any(Object) } },
+          { match_phrase: { 'service.name': 'synth-node-2' } },
+        ])
       );
     });
   });

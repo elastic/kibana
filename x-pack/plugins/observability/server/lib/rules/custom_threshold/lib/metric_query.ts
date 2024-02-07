@@ -9,7 +9,7 @@ import moment from 'moment';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Filter } from '@kbn/es-query';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
-import { getParsedSearchConfiguration } from '../../../../utils/get_parsed_filtered_query';
+import { getSearchConfigurationBoolQuery } from '../../../../utils/get_parsed_filtered_query';
 import { SearchConfigurationType } from '../types';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
@@ -54,7 +54,7 @@ export const createBoolQuery = (
   };
   const filters = QueryDslQueryContainerToFilter([rangeQuery, ...additionalQueries]);
 
-  return getParsedSearchConfiguration(searchConfiguration, filters);
+  return getSearchConfigurationBoolQuery(searchConfiguration, filters);
 };
 
 export const getElasticsearchMetricQuery = (

@@ -27,7 +27,7 @@ export const getParsedFilterQuery: (filter: string | undefined) => Array<Record<
   }
 };
 
-export const getParsedSearchConfiguration: (
+export const getSearchConfigurationBoolQuery: (
   searchConfiguration: SearchConfigurationType,
   additionalFilters: Filter[]
 ) => { bool: BoolQuery } = (searchConfiguration, additionalFilters) => {
