@@ -7,12 +7,12 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { Logger } from '@kbn/core/server';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
+import { buildRuleKey } from '../../../../common/utils/rules_states';
 import {
-  buildRuleKey,
   getBenchmarkRules,
   muteDetectionRules,
   setRulesStates,
-  updateRulesStates,
+  updateBenchmarkRulesStates,
 } from './utils';
 import type {
   BulkActionBenchmarkRulesResponse,
@@ -43,9 +43,12 @@ export const bulkActionBenchmarkRulesHandler = async (
   );
   const newRulesStates = setRulesStates(rulesKeys, muteStatesMap[action], rulesToUpdate);
 
-  const newCspSettings = await updateRulesStates(encryptedSoClient, newRulesStates);
+  const updatedBenchmarkRulesStates = await updateBenchmarkRulesStates(
+    encryptedSoClient,
+    newRulesStates
+  );
   const disabledDetectionRules =
     action === 'mute' ? await muteDetectionRules(soClient, detectionRulesClient, rulesIds) : [];
 
-  return { newCspSettings, disabledRules: disabledDetectionRules };
+  return { updatedBenchmarkRulesStates, disabledDetectionRules };
 };

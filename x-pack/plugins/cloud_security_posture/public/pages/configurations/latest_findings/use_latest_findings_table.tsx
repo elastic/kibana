@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { useMemo } from 'react';
+import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { Evaluation } from '../../../../common/types_old';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
@@ -18,25 +18,25 @@ import { useLatestFindings } from './use_latest_findings';
 const columnsLocalStorageKey = 'cloudPosture:latestFindings:columns';
 
 export const useLatestFindingsTable = ({
-  dataView,
   getDefaultQuery,
   nonPersistedFilters,
   showDistributionBar,
 }: {
-  dataView: DataView;
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   nonPersistedFilters?: Filter[];
   showDistributionBar?: boolean;
 }) => {
+  const { dataView } = useDataViewContext();
+
   const cloudPostureDataTable = useCloudPostureDataTable({
-    dataView,
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
     nonPersistedFilters,
   });
 
-  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureDataTable;
+  const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages, pageSize } =
+    cloudPostureDataTable;
 
   const {
     data,
@@ -47,6 +47,7 @@ export const useLatestFindingsTable = ({
     query,
     sort,
     enabled: !queryError,
+    pageSize,
   });
 
   const rows = useMemo(() => getRowsFromPages(data?.pages), [data?.pages, getRowsFromPages]);

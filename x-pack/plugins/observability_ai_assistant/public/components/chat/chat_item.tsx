@@ -127,6 +127,7 @@ export function ChatItem({
 
   const handleInlineEditSubmit = (newMessage: Message) => {
     handleToggleEdit();
+
     return onEditSubmit(newMessage);
   };
 

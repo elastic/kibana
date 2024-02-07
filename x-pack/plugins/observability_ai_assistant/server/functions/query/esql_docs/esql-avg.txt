@@ -1,0 +1,11 @@
+AVG
+
+Syntax
+AVG(column)
+column
+Numeric column. If null, the function returns null.
+DescriptionThe average of a numeric field.Supported typesThe result is always a double no matter the input type.Example
+```esql
+FROM employees
+| STATS AVG(height)
+```

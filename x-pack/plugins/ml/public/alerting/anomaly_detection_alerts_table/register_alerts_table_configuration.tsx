@@ -76,7 +76,6 @@ export function registerAlertsTableConfiguration(
       }),
       initialWidth: 150,
       isSortable: true,
-      schema: 'numeric',
     },
     {
       id: ALERT_START,

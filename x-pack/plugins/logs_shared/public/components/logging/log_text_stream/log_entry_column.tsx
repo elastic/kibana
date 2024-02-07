@@ -24,7 +24,7 @@ const FIELD_COLUMN_MIN_WIDTH_CHARACTERS = 10;
 const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
 const COLUMN_PADDING = 8;
 
-interface LogEntryColumnProps {
+export interface LogEntryColumnProps {
   baseWidth: string;
   growWeight: number;
   shrinkWeight: number;

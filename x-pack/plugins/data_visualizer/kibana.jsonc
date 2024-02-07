@@ -17,7 +17,8 @@
       "uiActions",
       "charts",
       "unifiedSearch",
-      "savedSearch"
+      "savedSearch",
+      "fieldFormats"
     ],
     "optionalPlugins": [
       "security",
@@ -35,7 +36,8 @@
       "esUiShared",
       "fieldFormats",
       "uiActions",
-      "lens"
+      "lens",
+      "textBasedLanguages",
     ]
   }
 }

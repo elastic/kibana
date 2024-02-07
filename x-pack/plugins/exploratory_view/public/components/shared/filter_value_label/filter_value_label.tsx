@@ -77,7 +77,7 @@ export function FilterValueLabel({
   const filter = buildFilterLabel({ field, value, label, dataView, negate });
 
   const {
-    services: { uiSettings, docLinks },
+    services: { uiSettings, docLinks, dataViews },
   } = useKibana<ObservabilityAppServices>();
 
   return dataView ? (
@@ -101,6 +101,7 @@ export function FilterValueLabel({
         'editFilter',
         'disableFilter',
       ]}
+      dataViews={dataViews}
     />
   ) : null;
 }

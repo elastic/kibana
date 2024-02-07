@@ -59,7 +59,10 @@ export async function createRule<Params extends RuleParams = never>(
   // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
   const data = {
     ...initialData,
-    actions: addGeneratedActionValues(initialData.actions as NormalizedAlertAction[]),
+    actions: await addGeneratedActionValues(
+      initialData.actions as NormalizedAlertAction[],
+      context
+    ),
   };
 
   const id = options?.id || SavedObjectsUtils.generateId();

@@ -284,13 +284,13 @@ exports[`Field Renderers #whoisRenderer it renders correctly against snapshot 1`
     >
       iana.org
       <span
-        class="emotion-euiLink__externalIcon"
+        class="emotion-EuiExternalLinkIcon"
         data-euiicon-type="popout"
       >
         External link
       </span>
       <span
-        class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+        class="emotion-euiScreenReaderOnly"
       >
         (opens in a new tab or window)
       </span>

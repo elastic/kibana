@@ -5,19 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { screen, waitFor } from '@testing-library/react';
-
-import { render } from '../../utils/test_helper';
-import { useKibana } from '../../utils/kibana_react';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { useLicense } from '../../hooks/use_license';
-import { SlosWelcomePage } from './slos_welcome';
+import React from 'react';
+import Router from 'react-router-dom';
+import { paths } from '../../../common/locators/paths';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../../common/locators/paths';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useLicense } from '../../hooks/use_license';
+import { useKibana } from '../../utils/kibana_react';
+import { render } from '../../utils/test_helper';
+import { SlosWelcomePage } from './slos_welcome';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
@@ -56,6 +61,9 @@ describe('SLOs Welcome Page', () => {
     jest.clearAllMocks();
     mockKibana();
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    jest
+      .spyOn(Router, 'useLocation')
+      .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
   });
 
   describe('when the incorrect license is found', () => {

@@ -30,6 +30,7 @@
     "discover": ["src/plugins/discover", "packages/kbn-discover-utils"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
+    "presentationPanel": "src/plugins/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
     "esUi": "src/plugins/es_ui_shared",
@@ -135,12 +136,14 @@
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
     "visualizationUiComponents": "packages/kbn-visualization-ui-components",
+    "visualizationUtils": "packages/kbn-visualization-utils",
     "unifiedDocViewer": ["src/plugins/unified_doc_viewer", "packages/kbn-unified-doc-viewer"],
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
     "unifiedHistogram": "src/plugins/unified_histogram",
     "unifiedDataTable": "packages/kbn-unified-data-table",
-    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge"
+    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
+    "managedContentBadge": "packages/kbn-managed-content-badge"
   },
   "translations": []
 }

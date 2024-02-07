@@ -51,7 +51,7 @@ export function ProfilingLinks({
           target="_blank"
         >
           {i18n.translate('xpack.infra.flamegraph.profilingFeedbackLink', {
-            defaultMessage: 'Give feedback about profiling',
+            defaultMessage: 'Give feedback',
           })}
         </EuiLink>
       </EuiFlexItem>

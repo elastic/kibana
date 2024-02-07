@@ -18,6 +18,7 @@ interface AggregationParams {
   mlClient?: MlClient;
   start: number;
   end: number;
+  searchQuery: string | undefined;
 }
 
 export type ServiceHealthStatusesResponse = Array<{
@@ -30,6 +31,7 @@ export async function getHealthStatuses({
   mlClient,
   start,
   end,
+  searchQuery,
 }: AggregationParams): Promise<ServiceHealthStatusesResponse> {
   if (!mlClient) {
     return [];
@@ -40,6 +42,7 @@ export async function getHealthStatuses({
     environment,
     start,
     end,
+    searchQuery,
   });
 
   return anomalies.serviceAnomalies.map((anomalyStats) => {

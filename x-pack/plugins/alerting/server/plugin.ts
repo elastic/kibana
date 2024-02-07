@@ -459,7 +459,6 @@ export class AlertingPlugin {
       security,
       licenseState,
     } = this;
-
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
@@ -508,6 +507,7 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
+      uiSettings: core.uiSettings,
     });
 
     rulesSettingsClientFactory.initialize({

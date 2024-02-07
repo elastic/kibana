@@ -34,7 +34,7 @@ import {
   VectorLayerDescriptor,
 } from '../../../../../common/descriptor_types';
 import { ESSearchSource } from '../../../sources/es_search_source';
-import { IESSource } from '../../../sources/es_source';
+import { hasESSourceMethod, isESVectorTileSource } from '../../../sources/es_source';
 import { InnerJoin } from '../../../joins/inner_join';
 import { LayerIcon } from '../../layer';
 import { MvtSourceData, syncMvtSourceData } from './mvt_source_data';
@@ -91,10 +91,11 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   async getBounds(getDataRequestContext: (layerId: string) => DataRequestContext) {
     // Add filter to narrow bounds to features with matching join keys
     let joinKeyFilter;
-    if (this.getSource().isESSource()) {
+    const source = this.getSource();
+    if (hasESSourceMethod(source, 'getIndexPattern')) {
       const { join, joinPropertiesMap } = this._getJoinResults();
       if (join && joinPropertiesMap) {
-        const indexPattern = await (this.getSource() as IESSource).getIndexPattern();
+        const indexPattern = await source.getIndexPattern();
         const joinField = getField(indexPattern, join.getLeftField().getName());
         joinKeyFilter = buildPhrasesFilter(
           joinField,
@@ -120,7 +121,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   getFeatureId(feature: Feature): string | number | undefined {
-    if (!this.getSource().isESSource()) {
+    if (!isESVectorTileSource(this.getSource())) {
       return feature.id;
     }
 
@@ -130,7 +131,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   getLayerIcon(isTocIcon: boolean): LayerIcon {
-    if (!this.getSource().isESSource()) {
+    if (!isESVectorTileSource(this.getSource())) {
       // Only ES-sources can have a special meta-tile, not 3rd party vector tile sources
       return {
         icon: this.getCurrentStyle().getIcon(false),

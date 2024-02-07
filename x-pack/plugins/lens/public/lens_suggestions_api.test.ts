@@ -70,7 +70,7 @@ describe('suggestionsApi', () => {
     };
     const suggestions = suggestionsApi({ context, dataView, datasourceMap, visualizationMap });
     expect(datasourceMap.textBased.getDatasourceSuggestionsForVisualizeField).toHaveBeenCalledWith(
-      { layers: {}, fieldList: [], indexPatternRefs: [], initialContext: context },
+      { layers: {}, indexPatternRefs: [], initialContext: context },
       'index1',
       '',
       { index1: { id: 'index1' } }

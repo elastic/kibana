@@ -99,16 +99,34 @@ export const useIndicesConfigurationFormState = ({
 
   const isFormValid = useMemo(() => errors.length <= 0, [errors]);
 
-  const isFormDirty = useMemo(() => Object.keys(formStateChanges).length > 0, [formStateChanges]);
+  const getUnsavedChanges = ({
+    changedConfig,
+    existingConfig,
+  }: {
+    changedConfig: FormStateChanges;
+    existingConfig?: FormState;
+  }) => {
+    return Object.fromEntries(
+      Object.entries(changedConfig).filter(([key, value]) => {
+        const existingValue = existingConfig?.[key as keyof FormState];
+        // don't highlight changes that were added and removed
+        if (value === '' && existingValue == null) {
+          return false;
+        }
+
+        return existingValue !== value;
+      })
+    );
+  };
 
   return {
     errors,
     fieldProps,
     formState,
     formStateChanges,
-    isFormDirty,
     isFormValid,
     resetForm,
+    getUnsavedChanges,
   };
 };
 

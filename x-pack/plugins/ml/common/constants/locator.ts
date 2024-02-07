@@ -40,6 +40,7 @@ export const ML_PAGES = {
    * Page: Data Visualizer
    * Open index data visualizer viewer page
    */
+  DATA_VISUALIZER_ESQL: 'datavisualizer/esql',
   DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
   ANOMALY_DETECTION_CREATE_JOB: 'jobs/new_job',
   ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: 'jobs/new_job/recognize',

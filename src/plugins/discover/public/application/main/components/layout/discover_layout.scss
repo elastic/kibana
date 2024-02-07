@@ -58,6 +58,10 @@ discover-app {
   flex-grow: 0;
 }
 
+.dscPageContent__panelsToggleWhenNoResults {
+  padding: $euiSizeS;
+}
+
 .dscTable {
   // needs for scroll container of lagacy table
   min-height: 0;

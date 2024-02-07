@@ -25,9 +25,9 @@ describe('TableActions', () => {
         onTogglePinned={jest.fn()}
       />
     );
-    expect(screen.getByTestId('addFilterForValueButton-message')).toBeDisabled();
-    expect(screen.getByTestId('addFilterOutValueButton-message')).toBeDisabled();
-    expect(screen.getByTestId('addExistsFilterButton-message')).toBeDisabled();
+    expect(screen.queryByTestId('addFilterForValueButton-message')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('addFilterOutValueButton-message')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('addExistsFilterButton-message')).not.toBeInTheDocument();
     expect(screen.getByTestId('toggleColumnButton-message')).not.toBeDisabled();
     expect(screen.getByTestId('togglePinFilterButton-message')).not.toBeDisabled();
   });

@@ -6,28 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CommandDefinition, CommandOptionsDefinition, FunctionDefinition } from './types';
-
-export function getCommandOrOptionsSignature({
-  name,
-  signature,
-  ...rest
-}: CommandDefinition | CommandOptionsDefinition): string {
-  const args = signature.params
-    .map(({ name: argName, type }) => {
-      return `<${argName}>`;
-    })
-    .join(' ');
-  const optionArgs =
-    'options' in rest ? rest.options.map(getCommandOrOptionsSignature).join(' ') : '';
-  const signatureString = `${name.toUpperCase()} ${args}${
-    signature.multipleParams ? `[, ${args}]` : ''
-  }${optionArgs ? ' ' + optionArgs : ''}`;
-  if ('wrapped' in rest && rest.wrapped) {
-    return `${rest.wrapped[0]}${signatureString}${rest.wrapped[1]}${rest.optional ? '?' : ''}`;
-  }
-  return signatureString;
-}
+import { CommandDefinition, FunctionDefinition } from './types';
 
 export function getFunctionSignatures(
   { name, signatures }: FunctionDefinition,

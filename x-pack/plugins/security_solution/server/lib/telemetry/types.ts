@@ -458,6 +458,8 @@ export interface ValueListResponse {
   indicatorMatchMetricsResponse: ValueListIndicatorMatchResponseAggregation;
 }
 
+export type Nullable<T> = T | null | undefined;
+
 export interface ExtraInfo {
   clusterInfo: ESClusterInfo;
   licenseInfo: ESLicense | undefined;

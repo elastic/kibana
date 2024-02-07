@@ -276,6 +276,11 @@ export class SessionIndex {
         ({ body, statusCode } = await this.writeNewSessionDocument(sessionValue, {
           ignore404: false,
         }));
+        if (statusCode !== 201) {
+          this.options.logger.error(
+            `Failed to write a new session (status code: ${statusCode}): ${JSON.stringify(body)}.`
+          );
+        }
       }
 
       return {

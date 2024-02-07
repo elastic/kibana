@@ -33,5 +33,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./_context_encoded_url_params'));
     loadTestFile(require.resolve('./_hide_announcements'));
     loadTestFile(require.resolve('./_data_view_edit'));
+    loadTestFile(require.resolve('./_field_list_new_fields'));
   });
 }

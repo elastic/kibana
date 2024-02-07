@@ -52,7 +52,6 @@
       "profilingDataAccess"
     ],
     "requiredBundles": [
-      "advancedSettings",
       "fleet",
       "kibanaReact",
       "kibanaUtils",

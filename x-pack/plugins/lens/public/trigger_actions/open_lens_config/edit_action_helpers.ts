@@ -6,7 +6,8 @@
  */
 import React from 'react';
 import './helpers.scss';
-import { IEmbeddable, tracksOverlays } from '@kbn/embeddable-plugin/public';
+import { tracksOverlays } from '@kbn/presentation-containers';
+import { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
@@ -23,6 +24,7 @@ interface Context {
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
+  if (!embeddable?.getInput) return false;
   // display the action only if dashboard is on editable mode
   const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);
