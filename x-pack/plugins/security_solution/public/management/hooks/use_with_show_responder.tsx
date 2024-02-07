@@ -28,6 +28,9 @@ import {
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
+import {
+  useIsExperimentalFeatureEnabled
+} from "@kbn/security-solution-plugin/public/common/hooks/use_experimental_features";
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
@@ -52,6 +55,9 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
   const consoleManager = useConsoleManager();
   const endpointPrivileges = useUserPrivileges().endpointPrivileges;
   const isEnterpriseLicense = useLicense().isEnterprise();
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
 
   return useCallback(
     (props: ResponderInfoProps) => {
@@ -129,7 +135,7 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
             },
             consoleProps,
             PageTitleComponent: () => {
-              if (agentType === 'sentinel_one') {
+              if (isSentinelOneV1Enabled && agentType === 'sentinel_one') {
                 return (
                   <EuiFlexGroup>
                     <EuiFlexItem>{RESPONDER_PAGE_TITLE}</EuiFlexItem>
@@ -154,6 +160,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
           .show();
       }
     },
-    [endpointPrivileges, isEnterpriseLicense, consoleManager]
+    [endpointPrivileges, isEnterpriseLicense, isSentinelOneV1Enabled, consoleManager]
   );
 };
