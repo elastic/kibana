@@ -61,6 +61,7 @@ describe('helpers', () => {
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: '.alerts-security.alerts-default',
       sameFamily: 7,
+      checkedAt: 1706526408000,
     };
 
     const alertIndexWithSameFamily: PatternRollup = {
@@ -260,6 +261,7 @@ describe('helpers', () => {
               ],
               pattern: 'packetbeat-*',
               sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -361,6 +363,7 @@ describe('helpers', () => {
               ],
               pattern: 'packetbeat-*',
               sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -450,6 +453,7 @@ describe('helpers', () => {
               indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
               markdownComments: [],
               pattern: 'packetbeat-*',
+              checkedAt: undefined,
             },
           },
           sizeInBytes: 1464758182,
@@ -510,6 +514,7 @@ describe('helpers', () => {
               ],
               pattern: 'packetbeat-*',
               sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
