@@ -18,6 +18,7 @@ interface DocumentationPopoverProps {
   sections?: LanguageDocumentationSections;
   buttonProps?: Omit<EuiButtonIconProps, 'iconType'>;
   searchInDescription?: boolean;
+  linkToDocumentation?: string;
 }
 
 function DocumentationPopover({
@@ -25,6 +26,7 @@ function DocumentationPopover({
   sections,
   buttonProps,
   searchInDescription,
+  linkToDocumentation,
 }: DocumentationPopoverProps) {
   const [isHelpOpen, setIsHelpOpen] = useState<boolean>(false);
 
@@ -60,6 +62,7 @@ function DocumentationPopover({
         language={language}
         sections={sections}
         searchInDescription={searchInDescription}
+        linkToDocumentation={linkToDocumentation}
       />
     </EuiPopover>
   );
