@@ -209,6 +209,7 @@ export function ServiceOverview() {
                           )}
                         </EuiLink>
                       }
+                      shouldShowSparkPlotsProp={!isSingleColumn}
                     />
                   </EuiPanel>
                 </EuiFlexItem>
