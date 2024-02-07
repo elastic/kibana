@@ -33,7 +33,7 @@ import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import './saved_query_management_list.scss';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { debounce } from 'lodash';
+import { debounce, max } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
@@ -285,7 +285,7 @@ export const SavedQueryManagementList = ({
   const onDelete = useCallback(
     (savedQueryToDelete: SavedQuery) => {
       const onDeleteSavedQuery = async (savedQueryId: string) => {
-        setTotalQueryCount((currentTotalQueryCount) => currentTotalQueryCount - 1);
+        setTotalQueryCount((currentTotalQueryCount) => max([0, currentTotalQueryCount - 1])!);
         setCurrentPageQueries(
           currentPageQueries.filter((currentSavedQuery) => currentSavedQuery.id !== savedQueryId)
         );
