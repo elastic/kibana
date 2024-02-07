@@ -263,8 +263,13 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     setExpandAdvancedOptions((prevState) => !prevState);
   }, []);
 
-  // always show sourcerer in timeline
-  return indicesExist || scopeId === SourcererScopeName.timeline ? (
+  const showSourcerer = useMemo(() => {
+    return (
+      indicesExist || [SourcererScopeName.analyzer, SourcererScopeName.timeline].includes(scopeId)
+    );
+  }, [indicesExist, scopeId]);
+
+  return showSourcerer ? (
     <EuiPopover
       panelClassName="sourcererPopoverPanel"
       button={

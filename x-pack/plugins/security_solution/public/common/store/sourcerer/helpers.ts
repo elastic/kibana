@@ -26,6 +26,8 @@ const getPatternListFromScope = (
       return signalIndexName != null ? [signalIndexName] : [];
     case SourcererScopeName.timeline:
       return sortWithExcludesAtEnd(patternList);
+    default:
+      return sortWithExcludesAtEnd(patternList);
   }
 };
 
@@ -122,11 +124,13 @@ export const checkIfIndicesExist = ({
   scopeId,
   signalIndexName,
   isDefaultDataViewSelected,
-}: CheckIfIndicesExistParams) =>
-  scopeId === SourcererScopeName.detections
+}: CheckIfIndicesExistParams) => {
+  // TODO: lmao https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L403
+  return scopeId === SourcererScopeName.detections
     ? patternList.includes(`${signalIndexName}`)
     : scopeId === SourcererScopeName.default
     ? isDefaultDataViewSelected
       ? patternList.filter((i) => i !== signalIndexName).length > 0
       : patternList.length > 0
     : patternList.length > 0;
+};

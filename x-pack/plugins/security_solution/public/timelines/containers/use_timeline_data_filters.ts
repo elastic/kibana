@@ -6,7 +6,6 @@
  */
 
 import { useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
 
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import {
@@ -15,8 +14,7 @@ import {
   endSelector,
 } from '../../common/components/super_date_picker/selectors';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useSourcererDataView, getScopeFromPath } from '../../common/containers/sourcerer';
-import { sourcererSelectors } from '../../common/store';
+import { useSourcererDataView } from '../../common/containers/sourcerer';
 
 export function useTimelineDataFilters(isActiveTimelines: boolean) {
   const getStartSelector = useMemo(() => startSelector(), []);
@@ -44,23 +42,8 @@ export function useTimelineDataFilters(isActiveTimelines: boolean) {
       return getEndSelector(state.inputs.global);
     }
   });
-  const getDefaultDataViewSelector = useMemo(
-    () => sourcererSelectors.defaultDataViewSelector(),
-    []
-  );
-  const defaultDataView = useDeepEqualSelector(getDefaultDataViewSelector);
-  const { pathname } = useLocation();
-  const { selectedPatterns: nonTimelinePatterns } = useSourcererDataView(
-    getScopeFromPath(pathname)
-  );
 
-  const { selectedPatterns: timelinePatterns } = useSourcererDataView(SourcererScopeName.timeline);
-
-  const selectedPatterns = useMemo(() => {
-    return isActiveTimelines
-      ? [...new Set([...timelinePatterns, ...defaultDataView.patternList])]
-      : [...new Set([...nonTimelinePatterns, ...defaultDataView.patternList])];
-  }, [isActiveTimelines, timelinePatterns, nonTimelinePatterns, defaultDataView.patternList]);
+  const { selectedPatterns } = useSourcererDataView(SourcererScopeName.analyzer);
 
   return {
     selectedPatterns,

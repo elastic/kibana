@@ -187,6 +187,7 @@ export const useInitSourcerer = (
   // Related to timeline
   useEffect(() => {
     if (
+      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSourcerer == null &&
@@ -207,7 +208,20 @@ export const useInitSourcerer = (
           ),
         })
       );
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.analyzer,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            SourcererScopeName.analyzer,
+            signalIndexName,
+            true
+          ),
+        })
+      );
     } else if (
+      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       signalIndexNameSourcerer != null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current &&
@@ -221,6 +235,18 @@ export const useInitSourcerer = (
           selectedPatterns: getScopePatternListSelection(
             defaultDataView,
             SourcererScopeName.timeline,
+            signalIndexNameSourcerer,
+            true
+          ),
+        })
+      );
+      dispatch(
+        sourcererActions.setSelectedDataView({
+          id: SourcererScopeName.analyzer,
+          selectedDataViewId: defaultDataView.id,
+          selectedPatterns: getScopePatternListSelection(
+            defaultDataView,
+            SourcererScopeName.analyzer,
             signalIndexNameSourcerer,
             true
           ),
@@ -313,6 +339,7 @@ export const useInitSourcerer = (
   // Related to the detection page
   useEffect(() => {
     if (
+      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       scopeId === SourcererScopeName.detections &&
       isSignalIndexExists &&
       signalIndexName != null &&
@@ -333,6 +360,7 @@ export const useInitSourcerer = (
         })
       );
     } else if (
+      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       scopeId === SourcererScopeName.detections &&
       signalIndexNameSourcerer != null &&
       initialTimelineSourcerer.current &&
@@ -425,26 +453,26 @@ export const useSourcererDataView = (
     [legacyDataView, missingPatterns.length, selectedDataView]
   );
 
-  const indicesExist = useMemo(
-    () =>
-      loading || sourcererDataView.loading
-        ? true
-        : checkIfIndicesExist({
-            scopeId,
-            signalIndexName,
-            patternList: sourcererDataView.patternList,
-            isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
-          }),
-    [
-      defaultDataView.id,
-      loading,
-      scopeId,
-      signalIndexName,
-      sourcererDataView.id,
-      sourcererDataView.loading,
-      sourcererDataView.patternList,
-    ]
-  );
+  const indicesExist = useMemo(() => {
+    if (loading || sourcererDataView.loading) {
+      return true;
+    } else {
+      return checkIfIndicesExist({
+        scopeId,
+        signalIndexName,
+        patternList: sourcererDataView.patternList,
+        isDefaultDataViewSelected: sourcererDataView.id === defaultDataView.id,
+      });
+    }
+  }, [
+    defaultDataView.id,
+    loading,
+    scopeId,
+    signalIndexName,
+    sourcererDataView.id,
+    sourcererDataView.loading,
+    sourcererDataView.patternList,
+  ]);
 
   const browserFields = useCallback(() => {
     const { browserFields: dataViewBrowserFields } = getDataViewStateFromIndexFields(
