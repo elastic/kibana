@@ -27,7 +27,7 @@ import type { GetGuards } from '../../shared_services/shared_services';
 import type {
   AnomalyDetectionJobHealthAlertPayload,
   AnomalyDetectionJobsHealthAlertContext,
-  DelayedDataResponse,
+  DelayedDataPayloadResponse,
   JobsErrorsResponse,
   JobsHealthExecutorOptions,
   MmlTestPayloadResponse,
@@ -89,6 +89,14 @@ export function jobsHealthServiceProvider(
           model_bytes_memory_limit: bytesFormatter(payload.model_bytes_memory_limit),
           peak_model_bytes: bytesFormatter(payload.peak_model_bytes),
           model_bytes_exceeded: bytesFormatter(payload.model_bytes_exceeded),
+        };
+      },
+      delayedDataFormatter: (payload: DelayedDataPayloadResponse) => {
+        return {
+          job_id: payload.job_id,
+          annotation: payload.annotation,
+          missed_docs_count: payload.missed_docs_count,
+          end_timestamp: dateFormatter(payload.end_timestamp),
         };
       },
     };
@@ -244,7 +252,7 @@ export function jobsHealthServiceProvider(
       jobs: MlJob[],
       timeInterval: string | null,
       docsCount: number | null
-    ): Promise<[DelayedDataResponse[], DelayedDataResponse[]]> {
+    ): Promise<[DelayedDataPayloadResponse[], DelayedDataPayloadResponse[]]> {
       const jobIds = getJobIds(jobs);
       const datafeeds = await getDatafeeds(jobIds);
 
@@ -257,8 +265,6 @@ export function jobsHealthServiceProvider(
 
       const defaultLookbackInterval = resolveLookbackInterval(resultJobs, datafeeds!);
       const earliestMs = getDelayedDataLookbackTimestamp(timeInterval, defaultLookbackInterval);
-
-      const { dateFormatter } = await getFormatters();
 
       const annotationsData = (
         await annotationService.getDelayedDataAnnotations({
@@ -291,12 +297,6 @@ export function jobsHealthServiceProvider(
             v.end_timestamp > getDelayedDataLookbackTimestamp(timeInterval, jobLookbackInterval);
 
           return isEndTimestampWithinRange;
-        })
-        .map((v) => {
-          return {
-            ...v,
-            end_timestamp: dateFormatter(v.end_timestamp),
-          };
         });
 
       return partition(annotationsData, (v) => {
@@ -500,7 +500,7 @@ export function jobsHealthServiceProvider(
           isHealthy,
           name: HEALTH_CHECK_NAMES.delayedData.name,
           context: {
-            results: delayedDataResults,
+            results: delayedDataResults.map((await getFormatters()).delayedDataFormatter),
             message,
           },
           payload: {
