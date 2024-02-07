@@ -6,40 +6,29 @@
  * Side Public License, v 1.
  */
 
+import { Result } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
-import { i18n } from '@kbn/i18n';
-
-import { CONNECTORS_INDEX, fetchConnectorById } from '..';
-
-import { ConnectorDocument, ConnectorStatus } from '../types/connectors';
 
 export const updateConnectorServiceType = async (
   client: ElasticsearchClient,
   connectorId: string,
   serviceType: string
 ) => {
-  const connector = await fetchConnectorById(client, connectorId);
-
-  if (connector) {
-    const result = await client.index<ConnectorDocument>({
-      document: {
-        ...connector,
-        configuration: {},
-        service_type: serviceType,
-        status:
-          connector.status === ConnectorStatus.CREATED
-            ? ConnectorStatus.CREATED
-            : ConnectorStatus.NEEDS_CONFIGURATION,
-      },
-      id: connectorId,
-      index: CONNECTORS_INDEX,
-    });
-    return result;
-  } else {
-    throw new Error(
-      i18n.translate('searchConnectors.server.connectors.serviceType.error', {
-        defaultMessage: 'Could not find document',
-      })
-    );
-  }
+  // First clear connector configuration
+  await client.transport.request<Result>({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_configuration`,
+    body: {
+      configuration: {},
+    },
+  });
+  // Then update service type, on startup connector framework
+  // will populate missing config fields
+  return await client.transport.request<Result>({
+    method: 'PUT',
+    path: `/_connector/${connectorId}/_service_type`,
+    body: {
+      service_type: serviceType,
+    },
+  });
 };
