@@ -41,6 +41,9 @@ export const createThresholdAlertType = (
         },
       },
     },
+    schemas: {
+      params: { type: 'zod', schema: ThresholdRuleParams },
+    },
     actionGroups: [
       {
         id: 'default',

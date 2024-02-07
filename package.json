@@ -832,7 +832,6 @@
     "@kbn/uptime-plugin": "link:x-pack/plugins/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
-    "@kbn/url-state": "link:packages/kbn-url-state",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
     "@kbn/use-tracked-promise": "link:packages/kbn-use-tracked-promise",
@@ -1065,7 +1064,6 @@
     "react-popper-tooltip": "^3.1.1",
     "react-redux": "^7.2.8",
     "react-resizable": "^3.0.4",
-    "react-resize-detector": "^7.1.1",
     "react-reverse-portal": "^2.1.0",
     "react-router": "^5.3.4",
     "react-router-config": "^5.1.1",
@@ -1520,7 +1518,7 @@
     "blob-polyfill": "^7.0.20220408",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^120.0.0",
+    "chromedriver": "^121.0.0",
     "clean-webpack-plugin": "^3.0.0",
     "cli-progress": "^3.12.0",
     "cli-table3": "^0.6.1",
@@ -1684,7 +1682,8 @@
     "xml-crypto": "^5.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
-    "yarn-deduplicate": "^6.0.2"
+    "yarn-deduplicate": "^6.0.2",
+    "zod-to-json-schema": "^3.22.3"
   },
   "packageManager": "yarn@1.22.21"
 }

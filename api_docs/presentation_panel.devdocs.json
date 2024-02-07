@@ -85,15 +85,31 @@
             "section": "def-common.HasParentApi",
             "text": "HasParentApi"
           },
-          "<",
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
           },
-          " & Partial<Pick<",
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -165,15 +181,31 @@
             "section": "def-common.HasParentApi",
             "text": "HasParentApi"
           },
-          "<",
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
           },
-          " & Partial<Pick<",
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -301,15 +333,31 @@
             "section": "def-common.HasParentApi",
             "text": "HasParentApi"
           },
-          "<",
+          "<Partial<",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "common",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-common.PublishesViewMode",
+            "text": "PublishesViewMode"
+          },
+          "> & ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
             "docId": "kibKbnPresentationContainersPluginApi",
-            "section": "def-common.PresentationContainer",
-            "text": "PresentationContainer"
+            "section": "def-common.PublishesLastSavedState",
+            "text": "PublishesLastSavedState"
           },
-          " & Partial<Pick<",
+          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ") => Promise<string>; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -435,15 +483,31 @@
                     "section": "def-common.HasParentApi",
                     "text": "HasParentApi"
                   },
-                  "<",
+                  "<Partial<",
+                  {
+                    "pluginId": "@kbn/presentation-publishing",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationPublishingPluginApi",
+                    "section": "def-common.PublishesViewMode",
+                    "text": "PublishesViewMode"
+                  },
+                  "> & ",
                   {
                     "pluginId": "@kbn/presentation-containers",
                     "scope": "common",
                     "docId": "kibKbnPresentationContainersPluginApi",
-                    "section": "def-common.PresentationContainer",
-                    "text": "PresentationContainer"
+                    "section": "def-common.PublishesLastSavedState",
+                    "text": "PublishesLastSavedState"
                   },
-                  " & Partial<Pick<",
+                  " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.PanelPackage",
+                    "text": "PanelPackage"
+                  },
+                  ") => Promise<string>; } & Partial<Pick<",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",

@@ -6428,10 +6428,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/url-state@link:packages/kbn-url-state":
-  version "0.0.0"
-  uid ""
-
 "@kbn/usage-collection-plugin@link:src/plugins/usage_collection":
   version "0.0.0"
   uid ""
@@ -11913,7 +11909,7 @@ axe-core@^4.8.2:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.8.2.tgz#2f6f3cde40935825cf4465e3c1c9e77b240ff6ae"
   integrity sha512-/dlp0fxyM3R8YW7MFzaHWXrf4zzbr0vaYb23VBFCl83R7nWNPg/yaQw2Dc8jzCMmDVLhSdzH8MjrsuIUuvX+6g==
 
-axios@1.6.3, axios@^1.0.0, axios@^1.3.4, axios@^1.6.0:
+axios@1.6.3, axios@^1.0.0, axios@^1.3.4, axios@^1.6.0, axios@^1.6.5:
   version "1.6.3"
   resolved "https://registry.npmjs.org/axios/-/axios-1.6.3.tgz#7f50f23b3aa246eff43c54834272346c396613f4"
   integrity sha512-fWyNdeawGam70jXSVlKl+SUNVcL6j6W79CuSIPfi6HnDUmSCH6gyUys/HrqHeA/wU0Az41rRgean494d0Jb+ww==
@@ -13202,13 +13198,13 @@ chrome-trace-event@^1.0.2:
   dependencies:
     tslib "^1.9.0"
 
-chromedriver@^120.0.0:
-  version "120.0.0"
-  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-120.0.0.tgz#34d60a6726a104a348d8dbf82106ca45a430684b"
-  integrity sha512-LGy2LhWRBiqDarFIU8gQ43EEyj+07Tc3JuUhthkESAwZ99lrifSnKZwKU0aVwansU84+k6bt71z7K3dkk65gZg==
+chromedriver@^121.0.0:
+  version "121.0.0"
+  resolved "https://registry.yarnpkg.com/chromedriver/-/chromedriver-121.0.0.tgz#f8d11dce8e5ce4b6ad75e2b84eed17a0eecabfb9"
+  integrity sha512-ZIKEdZrQAfuzT/RRofjl8/EZR99ghbdBXNTOcgJMKGP6N/UL6lHUX4n6ONWBV18pDvDFfQJ0x58h5AdOaXIOMw==
   dependencies:
     "@testim/chrome-version" "^1.1.4"
-    axios "^1.6.0"
+    axios "^1.6.5"
     compare-versions "^6.1.0"
     extract-zip "^2.0.1"
     https-proxy-agent "^5.0.1"
@@ -26020,13 +26016,6 @@ react-resizable@^3.0.4:
     prop-types "15.x"
     react-draggable "^4.0.3"
 
-react-resize-detector@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/react-resize-detector/-/react-resize-detector-7.1.1.tgz#18d5b84909d5ab13abe0a68ddf0fb8e80c553dfc"
-  integrity sha512-rU54VTstNzFLZAmMNHqt8xINjDWP7SQR05A2HUW0OGvl4vcrXzgaxrrqAY5tZMfkLkoYm5u0i0qGqCjdc2jyAA==
-  dependencies:
-    lodash "^4.17.21"
-
 react-reverse-portal@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.1.0.tgz#3c572e1c0d9e49b8febf4bf2fd43b9819ce6f508"
@@ -32075,10 +32064,10 @@ zip-stream@^4.1.0:
     compress-commons "^4.1.0"
     readable-stream "^3.6.0"
 
-zod-to-json-schema@^3.20.4:
-  version "3.21.4"
-  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.21.4.tgz#de97c5b6d4a25e9d444618486cb55c0c7fb949fd"
-  integrity sha512-fjUZh4nQ1s6HMccgIeE0VP4QG/YRGPmyjO9sAh890aQKPEk3nqbfUXhMFaC+Dr5KvYBm8BCyvfpZf2jY9aGSsw==
+zod-to-json-schema@^3.20.4, zod-to-json-schema@^3.22.3:
+  version "3.22.3"
+  resolved "https://registry.yarnpkg.com/zod-to-json-schema/-/zod-to-json-schema-3.22.3.tgz#1c71f9fa23f80b2f3b5eed537afa8a13a66a5200"
+  integrity sha512-9isG8SqRe07p+Aio2ruBZmLm2Q6Sq4EqmXOiNpDxp+7f0LV6Q/LX65fs5Nn+FV/CzfF3NLBoksXbS2jNYIfpKw==
 
 zod@^3.22.3:
   version "3.22.3"

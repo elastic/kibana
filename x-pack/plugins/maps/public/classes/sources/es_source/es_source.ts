@@ -105,17 +105,6 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     return true;
   }
 
-  getIndexPatternIds(): string[] {
-    return [this.getIndexPatternId()];
-  }
-
-  getQueryableIndexPatternIds(): string[] {
-    if (this.getApplyGlobalQuery()) {
-      return [this.getIndexPatternId()];
-    }
-    return [];
-  }
-
   cloneDescriptor(): AbstractSourceDescriptor {
     const clonedDescriptor = copyPersistentState(this._descriptor);
     // id used as uuid to track requests in inspector
