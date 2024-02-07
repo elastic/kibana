@@ -22,6 +22,30 @@ export const AVERAGE_I18N = (metric: string) =>
     },
   });
 
+export const PERCENTILE_99_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.p99', {
+    defaultMessage: '99th percentile of {metric}',
+    values: {
+      metric,
+    },
+  });
+
+export const PERCENTILE_95_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.p95', {
+    defaultMessage: '95th percentile of {metric}',
+    values: {
+      metric,
+    },
+  });
+
+export const RATE_I18N = (metric: string) =>
+  i18n.translate('xpack.observability.customThreshold.rule.aggregators.rate', {
+    defaultMessage: 'Rate of {metric}',
+    values: {
+      metric,
+    },
+  });
+
 export const MAX_I18N = (metric: string) =>
   i18n.translate('xpack.observability.customThreshold.rule.aggregators.max', {
     defaultMessage: 'Max {metric}',
@@ -70,10 +94,24 @@ export const BELOW_TEXT = i18n.translate(
   }
 );
 
+export const BELOW_OR_EQ_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.belowOrEqual',
+  {
+    defaultMessage: 'below or equal',
+  }
+);
+
 export const ABOVE_TEXT = i18n.translate(
   'xpack.observability.customThreshold.rule.threshold.above',
   {
     defaultMessage: 'above',
+  }
+);
+
+export const ABOVE_OR_EQ_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.aboveOrEqual',
+  {
+    defaultMessage: 'above or equal',
   }
 );
 
