@@ -23,12 +23,9 @@ export const EmptyIndex: React.FC<EmptyIndexProps> = ({ onCreateIndexClick }) =>
           <EuiEmptyPrompt
             title={
               <h2>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.aiPlayground.emptyIndex.h2.addData',
-                  {
-                    defaultMessage: 'Add data',
-                  }
-                )}
+                {i18n.translate('aiPlayground.emptyIndex.h2.addData', {
+                  defaultMessage: 'Add data',
+                })}
               </h2>
             }
             iconType="plusInCircle"
@@ -36,12 +33,9 @@ export const EmptyIndex: React.FC<EmptyIndexProps> = ({ onCreateIndexClick }) =>
             color="subdued"
             body={
               <p>
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.aiPlayground.emptyIndex.p.addDataAndIndexLabel',
-                  {
-                    defaultMessage: 'To use the AI Playground, create an index and add some data.',
-                  }
-                )}
+                {i18n.translate('aiPlayground.emptyIndex.p.addDataAndIndexLabel', {
+                  defaultMessage: 'To use the AI Playground, create an index and add some data.',
+                })}
               </p>
             }
             actions={
@@ -52,12 +46,9 @@ export const EmptyIndex: React.FC<EmptyIndexProps> = ({ onCreateIndexClick }) =>
                 iconType="plusInCircle"
                 onClick={onCreateIndexClick}
               >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.content.aiPlayground.emptyIndex.newIndexButtonLabel',
-                  {
-                    defaultMessage: 'Create an index',
-                  }
-                )}
+                {i18n.translate('aiPlayground.emptyIndex.newIndexButtonLabel', {
+                  defaultMessage: 'Create an index',
+                })}
               </EuiButton>
             }
           />

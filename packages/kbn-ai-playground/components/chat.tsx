@@ -74,7 +74,7 @@ export const Chat = () => {
           <EuiFlexItem grow={false}>
             <QuestionInput
               placeholder={i18n.translate(
-                'xpack.enterpriseSearch.content.aiPlayground.questionInput.askQuestionPlaceholder',
+                'aiPlayground.chat.questionInput.askQuestionPlaceholder',
                 {
                   defaultMessage: 'Ask a question',
                 }
@@ -83,12 +83,9 @@ export const Chat = () => {
               onChange={setQuestion}
               button={
                 <EuiButtonIcon
-                  aria-label={i18n.translate(
-                    'xpack.enterpriseSearch.content.aiPlayground.sendButtonAriaLabel',
-                    {
-                      defaultMessage: 'Send a question',
-                    }
-                  )}
+                  aria-label={i18n.translate('aiPlayground.chat.sendButtonAriaLabel', {
+                    defaultMessage: 'Send a question',
+                  })}
                   display={isSendButtonDisabled ? 'empty' : 'base'}
                   size="s"
                   type="submit"

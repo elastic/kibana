@@ -31,12 +31,12 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
   return (
     <EuiComment
       username={currentUserProfile?.user.username}
-      event={i18n.translate('xpack.enterpriseSearch.content.aiPlayground.message.user.event', {
+      event={i18n.translate('aiPlayground.chat.message.user.event', {
         defaultMessage: 'asked',
       })}
       timestamp={
         createdAt &&
-        i18n.translate('xpack.enterpriseSearch.content.aiPlayground.message.user.createdAt', {
+        i18n.translate('aiPlayground.chat.message.user.createdAt', {
           defaultMessage: 'on {date}',
           values: {
             date: moment(createdAt).format('MMM DD, YYYY'),
@@ -50,10 +50,9 @@ export const UserMessage: React.FC<UserMessageProps> = ({ content, createdAt }) 
       actions={
         <CopyActionButton
           copyText={String(content)}
-          ariaLabel={i18n.translate(
-            'xpack.enterpriseSearch.content.aiPlayground.message.user.copyLabel',
-            { defaultMessage: 'Copy user message' }
-          )}
+          ariaLabel={i18n.translate('aiPlayground.chat.message.user.copyLabel', {
+            defaultMessage: 'Copy user message',
+          })}
         />
       }
     >

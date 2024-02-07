@@ -19,37 +19,25 @@ export const ChatSidebar: React.FC = () => {
   return (
     <>
       <InstructionsField
-        label={i18n.translate(
-          'xpack.enterpriseSearch.content.aiPlayground.instructionsField.label',
-          {
-            defaultMessage: 'Instructions',
-          }
-        )}
-        placeholder={i18n.translate(
-          'xpack.enterpriseSearch.content.aiPlayground.instructionsField.placeholder',
-          {
-            defaultMessage: 'Replace me',
-          }
-        )}
-        helpText={i18n.translate(
-          'xpack.enterpriseSearch.content.aiPlayground.instructionsField.help',
-          {
-            defaultMessage:
-              'This is the instruction or question you want the AI to respond to. Be clear and specific for the best results.',
-          }
-        )}
+        label={i18n.translate('aiPlayground.sidebar.instructionsField.label', {
+          defaultMessage: 'Instructions',
+        })}
+        placeholder={i18n.translate('aiPlayground.sidebar.instructionsField.placeholder', {
+          defaultMessage: 'Replace me',
+        })}
+        helpText={i18n.translate('aiPlayground.sidebar.instructionsField.help', {
+          defaultMessage:
+            'This is the instruction or question you want the AI to respond to. Be clear and specific for the best results.',
+        })}
         value={prompt}
         onChange={setPrompt}
       />
 
       <EuiFormRow>
         <EuiSwitch
-          label={i18n.translate(
-            'xpack.enterpriseSearch.content.aiPlayground.citationsField.label',
-            {
-              defaultMessage: 'Include citations',
-            }
-          )}
+          label={i18n.translate('aiPlayground.sidebar.citationsField.label', {
+            defaultMessage: 'Include citations',
+          })}
           checked={isIncludeCitations}
           onChange={(e) => setIncludeCitations(e.target.checked)}
         />

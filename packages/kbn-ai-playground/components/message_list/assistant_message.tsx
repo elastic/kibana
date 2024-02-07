@@ -21,18 +21,15 @@ type AssistantMessageProps = Pick<MessageType, 'content' | 'createdAt'>;
 export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, createdAt }) => {
   return (
     <EuiComment
-      username={i18n.translate(
-        'xpack.enterpriseSearch.content.aiPlayground.message.assistant.username',
-        {
-          defaultMessage: 'AI',
-        }
-      )}
-      event={i18n.translate('xpack.enterpriseSearch.content.aiPlayground.message.assistant.event', {
+      username={i18n.translate('aiPlayground.chat.message.assistant.username', {
+        defaultMessage: 'AI',
+      })}
+      event={i18n.translate('aiPlayground.chat.message.assistant.event', {
         defaultMessage: 'responded',
       })}
       timestamp={
         createdAt &&
-        i18n.translate('xpack.enterpriseSearch.content.aiPlayground.message.assistant.createdAt', {
+        i18n.translate('aiPlayground.chat.message.assistant.createdAt', {
           defaultMessage: 'on {date}',
           values: {
             date: moment(createdAt).format('MMM DD, YYYY'),
@@ -41,7 +38,7 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, cre
       }
       timelineAvatar="compute"
       timelineAvatarAriaLabel={i18n.translate(
-        'xpack.enterpriseSearch.content.aiPlayground.message.assistant.avatarAriaLabel',
+        'aiPlayground.chat.message.assistant.avatarAriaLabel',
         {
           defaultMessage: 'AI',
         }
@@ -49,10 +46,9 @@ export const AssistantMessage: React.FC<AssistantMessageProps> = ({ content, cre
       actions={
         <CopyActionButton
           copyText={String(content)}
-          ariaLabel={i18n.translate(
-            'xpack.enterpriseSearch.content.aiPlayground.message.assistant.copyLabel',
-            { defaultMessage: 'Copy assistant message' }
-          )}
+          ariaLabel={i18n.translate('aiPlayground.chat.message.assistant.copyLabel', {
+            defaultMessage: 'Copy assistant message',
+          })}
         />
       }
     >

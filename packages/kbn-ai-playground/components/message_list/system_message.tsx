@@ -17,18 +17,12 @@ interface SystemMessageProps {
 export const SystemMessage: React.FC<SystemMessageProps> = ({ content }) => {
   return (
     <EuiComment
-      username={i18n.translate(
-        'xpack.enterpriseSearch.content.aiPlayground.message.system.username',
-        {
-          defaultMessage: 'system',
-        }
-      )}
-      timelineAvatarAriaLabel={i18n.translate(
-        'xpack.enterpriseSearch.content.aiPlayground.message.system.avatarAriaLabel',
-        {
-          defaultMessage: 'System',
-        }
-      )}
+      username={i18n.translate('aiPlayground.chat.message.system.username', {
+        defaultMessage: 'system',
+      })}
+      timelineAvatarAriaLabel={i18n.translate('aiPlayground.chat.message.system.avatarAriaLabel', {
+        defaultMessage: 'System',
+      })}
       event={content}
       timelineAvatar="dot"
       eventColor="subdued"
