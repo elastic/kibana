@@ -5,13 +5,18 @@
  * 2.0.
  */
 
-import type { ResponseActionsApiCommandNames } from '../service/response_actions/constants';
+import type { HostStatus } from '.';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../service/response_actions/constants';
+import {} from '../service/response_actions/constants';
 
 export interface AgentStatusInfo {
   id: string;
   found: boolean;
-  agentType: string;
-  status: string;
+  agentType: ResponseActionAgentType;
+  status: HostStatus;
   isolated: boolean;
   lastSeen: string; // ISO date
   pendingActions: Record<ResponseActionsApiCommandNames, number>;

@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
+import { getAgentStatus } from '../../services/agent/agent_status';
 import { errorHandler } from '../error_handler';
 import type { EndpointAgentStatusRequestQueryParams } from '../../../../common/api/endpoint/agent/get_agent_status_route';
 import { EndpointAgentStatusRequestSchema } from '../../../../common/api/endpoint/agent/get_agent_status_route';
@@ -88,6 +89,19 @@ export const getAgentStatusRouteHandler = (
       `Retrieving status for: agentType [${agentType}], agentIds: [${agentIds.join(', ')}]`
     );
 
-    return response.noContent();
+    try {
+      return response.ok({
+        body: {
+          data: await getAgentStatus({
+            agentType,
+            agentIds,
+            logger,
+            connectorActionsClient: (await context.actions).getActionsClient(),
+          }),
+        },
+      });
+    } catch (e) {
+      return errorHandler(logger, response, e);
+    }
   };
 };
