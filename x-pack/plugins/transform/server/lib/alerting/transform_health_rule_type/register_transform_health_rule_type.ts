@@ -74,7 +74,7 @@ interface RegisterParams {
 
 export const TRANSFORM_HEALTH_AAD_INDEX_NAME = 'transform.health';
 
-export const TRANSFORM_HEALTH_AAD_CONFIG: IRuleTypeAlerts<any> = {
+export const TRANSFORM_HEALTH_AAD_CONFIG: IRuleTypeAlerts<TransformHealthAlert> = {
   context: TRANSFORM_HEALTH_AAD_INDEX_NAME,
   mappings: {
     fieldMap: {
