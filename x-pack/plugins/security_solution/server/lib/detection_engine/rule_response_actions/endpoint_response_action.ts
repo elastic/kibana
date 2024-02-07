@@ -29,7 +29,7 @@ export const endpointResponseAction = (
     command,
     rule_id: alerts[0][ALERT_RULE_UUID],
     rule_name: alerts[0][ALERT_RULE_NAME],
-    agent_type: 'endpoint',
+    agent_type: 'endpoint' as const,
   };
 
   if (isIsolateAction(responseAction.params)) {
