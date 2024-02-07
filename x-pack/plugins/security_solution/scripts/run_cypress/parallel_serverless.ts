@@ -179,7 +179,7 @@ async function resetCredentials(
 
   const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
     const response = await axios.post(
-      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-credentials`,
+      `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset_internal-credentials`,
       {},
       {
         headers: {
