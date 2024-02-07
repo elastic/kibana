@@ -30,7 +30,7 @@ import type {
   DelayedDataResponse,
   JobsErrorsResponse,
   JobsHealthExecutorOptions,
-  MmlTestResponse,
+  MmlTestPayloadResponse,
   NotStartedDatafeedResponse,
 } from './register_jobs_monitoring_rule_type';
 import {
@@ -71,11 +71,26 @@ export function jobsHealthServiceProvider(
    */
   const getFormatters = memoize(async () => {
     const fieldFormatsRegistry = await getFieldsFormatRegistry();
-    const dateFormatter = fieldFormatsRegistry.deserialize({ id: 'date' });
-    const bytesFormatter = fieldFormatsRegistry.deserialize({ id: 'bytes' });
+    const dateFormat = fieldFormatsRegistry.deserialize({ id: 'date' });
+    const bytesFormat = fieldFormatsRegistry.deserialize({ id: 'bytes' });
+
+    const dateFormatter = dateFormat.convert.bind(dateFormat);
+    const bytesFormatter = bytesFormat.convert.bind(bytesFormat);
+
     return {
-      dateFormatter: dateFormatter.convert.bind(dateFormatter),
-      bytesFormatter: bytesFormatter.convert.bind(bytesFormatter),
+      dateFormatter,
+      bytesFormatter,
+      mmlResultsFormatter: (payload: MmlTestPayloadResponse) => {
+        return {
+          job_id: payload.job_id,
+          memory_status: payload.memory_status,
+          log_time: dateFormatter(payload.log_time),
+          model_bytes: bytesFormatter(payload.model_bytes),
+          model_bytes_memory_limit: bytesFormatter(payload.model_bytes_memory_limit),
+          peak_model_bytes: bytesFormatter(payload.peak_model_bytes),
+          model_bytes_exceeded: bytesFormatter(payload.model_bytes_exceeded),
+        };
+      },
     };
   });
 
@@ -199,10 +214,8 @@ export function jobsHealthServiceProvider(
      * Gets the model memory report for opened jobs.
      * @param jobIds
      */
-    async getMmlReport(jobIds: string[]): Promise<MmlTestResponse[]> {
+    async getMmlReport(jobIds: string[]): Promise<MmlTestPayloadResponse[]> {
       const jobsStats = await getJobStats(jobIds);
-
-      const { dateFormatter, bytesFormatter } = await getFormatters();
 
       return jobsStats
         .filter((j) => j.state === 'opened')
@@ -210,11 +223,11 @@ export function jobsHealthServiceProvider(
           return {
             job_id: jobId,
             memory_status: modelSizeStats.memory_status,
-            log_time: dateFormatter(modelSizeStats.log_time),
-            model_bytes: bytesFormatter(modelSizeStats.model_bytes),
-            model_bytes_memory_limit: bytesFormatter(modelSizeStats.model_bytes_memory_limit),
-            peak_model_bytes: bytesFormatter(modelSizeStats.peak_model_bytes),
-            model_bytes_exceeded: bytesFormatter(modelSizeStats.model_bytes_exceeded),
+            log_time: modelSizeStats.log_time,
+            model_bytes: modelSizeStats.model_bytes,
+            model_bytes_memory_limit: modelSizeStats.model_bytes_memory_limit!,
+            peak_model_bytes: modelSizeStats.peak_model_bytes!,
+            model_bytes_exceeded: modelSizeStats.model_bytes_exceeded!,
           };
         });
     },
@@ -438,11 +451,13 @@ export function jobsHealthServiceProvider(
             ? okJobs
             : [...(hardLimitJobs ?? []), ...(softLimitJobs ?? [])];
 
+          const { mmlResultsFormatter } = await getFormatters();
+
           results.push({
             isHealthy,
             name: HEALTH_CHECK_NAMES.mml.name,
             context: {
-              results: mmlResults,
+              results: mmlResults.map(mmlResultsFormatter),
               message,
             },
             payload: {

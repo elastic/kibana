@@ -8,6 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES, KibanaRequest } from '@kbn/core/server';
 import type {
+  ByteSize,
+  DateTime,
   MlDatafeedState,
   MlJobState,
   MlJobStats,
@@ -45,11 +47,21 @@ type ModelSizeStats = MlJobStats['model_size_stats'];
 export interface MmlTestResponse {
   job_id: string;
   memory_status: ModelSizeStats['memory_status'];
-  log_time: ModelSizeStats['log_time'];
+  log_time: string;
   model_bytes: string;
   model_bytes_memory_limit: string;
   peak_model_bytes: string;
   model_bytes_exceeded: string;
+}
+
+export interface MmlTestPayloadResponse {
+  job_id: string;
+  memory_status: ModelSizeStats['memory_status'];
+  log_time: ModelSizeStats['log_time'];
+  model_bytes: ByteSize;
+  model_bytes_memory_limit: ByteSize;
+  peak_model_bytes: ByteSize;
+  model_bytes_exceeded: ByteSize;
 }
 
 export interface NotStartedDatafeedResponse {
@@ -67,6 +79,15 @@ export interface DelayedDataResponse {
   missed_docs_count: number;
   /** Timestamp of the latest finalized bucket with missing docs */
   end_timestamp: string;
+}
+
+export interface DelayedDataPayloadResponse {
+  job_id: string;
+  /** Annotation string */
+  annotation: string;
+  /** Number of missed documents */
+  missed_docs_count: number;
+  end_timestamp: DateTime;
 }
 
 export interface JobsErrorsResponse {
@@ -88,9 +109,9 @@ export type AnomalyDetectionJobsHealthAlertContext = {
 export type AnomalyDetectionJobHealthAlertPayload = {
   [ALERT_REASON]: string;
 } & (
-  | { [ALERT_MML_RESULTS]: MmlTestResponse[] }
+  | { [ALERT_MML_RESULTS]: MmlTestPayloadResponse[] }
   | { [ALERT_DATAFEED_RESULTS]: NotStartedDatafeedResponse[] }
-  | { [ALERT_DELAYED_DATA_RESULTS]: DelayedDataResponse[] }
+  | { [ALERT_DELAYED_DATA_RESULTS]: DelayedDataPayloadResponse[] }
   | { [ALERT_JOB_ERRORS_RESULTS]: JobsErrorsResponse[] }
 );
 
