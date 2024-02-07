@@ -47,6 +47,7 @@ export interface AlertRuleData {
   revision: number;
   spaceId: string;
   tags: string[];
+  alertDelay: number;
 }
 
 export interface AlertRule {
@@ -111,12 +112,14 @@ export interface ProcessAndLogAlertsOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
+  alertDelay: number;
 }
 
 export interface ProcessAlertsOpts {
   flappingSettings: RulesSettingsFlappingProperties;
   notifyOnActionGroupChange: boolean;
   maintenanceWindowIds: string[];
+  alertDelay: number;
 }
 
 export interface LogAlertsOpts {
