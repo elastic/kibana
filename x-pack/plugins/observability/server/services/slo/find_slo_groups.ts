@@ -4,15 +4,26 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { findSLOGroupsResponseSchema } from '@kbn/slo-schema';
-import { Logger } from '@kbn/core/server';
-import { typedSearch } from '../../utils/queries';
-import { IllegalArgumentError } from '../../errors';
 import {
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  FindSLOGroupsParams,
+  FindSLOGroupsResponse,
+  findSLOGroupsResponseSchema,
+  Pagination,
+} from '@kbn/slo-schema';
+import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
+import { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import {
+  AggregationsAggregationContainer,
+  QueryDslQueryContainer,
+  Sort,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SubAggregateOf } from '@kbn/es-types/src';
+import { IllegalArgumentError } from '../../errors';
+import { typedSearch } from '../../utils/queries';
+import { ObservabilityRequestHandlerContext } from '../..';
+import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,
+  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../../common/slo/constants';
 import { Status } from '../../domain/models';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
@@ -40,8 +51,55 @@ interface SliDocument {
   'slo.id': string;
 }
 
+const aggs = {
+  worst: {
+    top_hits: {
+      sort: {
+        errorBudgetRemaining: {
+          order: 'asc',
+        },
+      } as Sort,
+      _source: {
+        includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
+      },
+      size: 1,
+    },
+  },
+  violated: {
+    filter: {
+      term: {
+        status: 'VIOLATED',
+      },
+    },
+  },
+  healthy: {
+    filter: {
+      term: {
+        status: 'HEALTHY',
+      },
+    },
+  },
+  degrading: {
+    filter: {
+      term: {
+        status: 'DEGRADING',
+      },
+    },
+  },
+  noData: {
+    filter: {
+      term: {
+        status: 'NO_DATA',
+      },
+    },
+  },
+};
+
+type Aggs = typeof aggs;
+
 export class FindSLOGroups {
   constructor(
+    private context: ObservabilityRequestHandlerContext,
     private esClient: ElasticsearchClient,
     private logger: Logger,
     private spaceId: string
@@ -59,68 +117,32 @@ export class FindSLOGroups {
       this.logger.error(`Failed to parse filters: ${e.message}`);
     }
 
-    const response = await typedSearch(this.esClient, {
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-      size: 0,
-      query: {
-        bool: {
-          filter: [
-            { term: { spaceId: this.spaceId } },
-            getElastichsearchQueryOrThrow(kqlQuery),
-            ...(parsedFilters.filter ?? []),
-          ],
-        },
+    const query = {
+      bool: {
+        filter: [
+          { term: { spaceId: this.spaceId } },
+          getElastichsearchQueryOrThrow(kqlQuery),
+          ...(parsedFilters.filter ?? []),
+        ],
       },
-      body: {
-        aggs: {
-          groupBy: {
-            terms: {
-              field: groupBy,
-              size: 10000,
-            },
-            aggs: {
-              worst: {
-                top_hits: {
-                  sort: {
-                    errorBudgetRemaining: {
-                      order: 'asc',
-                    },
-                  },
-                  _source: {
-                    includes: ['sliValue', 'status', 'slo.id', 'slo.instanceId', 'slo.name'],
-                  },
-                  size: 1,
-                },
+    };
+
+    if (groupBy === 'savedQueries') {
+      return this.groupBySavedQueries(query);
+    } else {
+      const queryParams = {
+        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        size: 0,
+        query,
+        body: {
+          aggs: {
+            groupBy: {
+              terms: {
+                field: groupBy,
+                size: 10000,
               },
-              violated: {
-                filter: {
-                  term: {
-                    status: 'VIOLATED',
-                  },
-                },
-              },
-              healthy: {
-                filter: {
-                  term: {
-                    status: 'HEALTHY',
-                  },
-                },
-              },
-              degrading: {
-                filter: {
-                  term: {
-                    status: 'DEGRADING',
-                  },
-                },
-              },
-              noData: {
-                filter: {
-                  term: {
-                    status: 'NO_DATA',
-                  },
-                },
-              },
-              bucket_sort: {
+              aggs: {
+                ...aggs,
                 bucket_sort: {
                   sort: [
                     {
@@ -131,28 +153,74 @@ export class FindSLOGroups {
                   ],
                   from: (pagination.page - 1) * pagination.perPage,
                   size: pagination.perPage,
-                },
+                } as any,
+              },
+            },
+            distinct_items: {
+              cardinality: {
+                field: groupBy,
               },
             },
           },
-          distinct_items: {
-            cardinality: {
-              field: groupBy,
-            },
-          },
         },
+      };
+      const response = await typedSearch<unknown, typeof queryParams>(this.esClient, queryParams);
+
+      const total = response.aggregations?.distinct_items?.value ?? 0;
+      const results =
+        response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
+          const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
+          return [
+            ...acc,
+            {
+              group: bucket.key,
+              groupBy,
+              summary: {
+                total: bucket.doc_count ?? 0,
+                worst: sliDocument,
+                violated: bucket.violated?.doc_count,
+                healthy: bucket.healthy?.doc_count,
+                degrading: bucket.degrading?.doc_count,
+                noData: bucket.noData?.doc_count,
+              },
+            },
+          ];
+        }, [] as Array<Record<'group' | 'groupBy' | 'summary', any>>) ?? [];
+      return findSLOGroupsResponseSchema.encode({
+        page: pagination.page,
+        perPage: pagination.perPage,
+        total,
+        results,
+      });
+    }
+  }
+
+  async groupBySavedQueries(query: QueryDslQueryContainer) {
+    const savedQueriesAggs = await this.findSavedQueries();
+    const response = await typedSearch(this.esClient, {
+      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      size: 0,
+      query,
+      body: {
+        aggs: savedQueriesAggs as Record<string, AggregationsAggregationContainer>,
       },
     });
 
-    const total = response.aggregations?.distinct_items?.value ?? 0;
+    const total = Object.keys(savedQueriesAggs).length;
+    const aggsResult = Object.entries(response.aggregations ?? {});
     const results =
-      response.aggregations?.groupBy?.buckets.reduce((acc, bucket) => {
-        const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
-        return [
-          ...acc,
-          {
-            group: bucket.key,
-            groupBy,
+      (aggsResult
+        .map(([group, aggBucket]) => {
+          const bucket = aggBucket as {
+            doc_count: number;
+          } & SubAggregateOf<{ aggs: Aggs }, unknown>;
+          if (bucket.doc_count === 0) {
+            return;
+          }
+          const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
+          return {
+            group,
+            groupBy: 'savedQueries',
             summary: {
               total: bucket.doc_count ?? 0,
               worst: sliDocument,
@@ -161,14 +229,38 @@ export class FindSLOGroups {
               degrading: bucket.degrading?.doc_count,
               noData: bucket.noData?.doc_count,
             },
-          },
-        ];
-      }, [] as Array<Record<'group' | 'groupBy' | 'summary', any>>) ?? [];
-    return findSLOGroupsResponseSchema.encode({
-      page: pagination.page,
-      perPage: pagination.perPage,
+          };
+        })
+        .filter((item) => item && item.summary.total > 0) as Array<
+        Record<'group' | 'groupBy' | 'summary', any>
+      >) ?? [];
+    return {
+      page: 1,
+      perPage: total,
       total,
       results,
+    };
+  }
+  async findSavedQueries() {
+    const savedQuery = await this.context.savedQuery;
+
+    // @ts-expect-error
+    const { savedQueries } = await savedQuery.getAll();
+    const data = savedQueries as Array<SavedObject<SavedQueryAttributes>>;
+    const resultAggs: Record<string, AggregationsAggregationContainer> = {};
+    data.forEach(({ attributes: { title, query } }) => {
+      resultAggs[title] = {
+        filter: {
+          bool: {
+            filter: [
+              { term: { spaceId: this.spaceId } },
+              getElastichsearchQueryOrThrow(String(query.query)),
+            ],
+          },
+        },
+        aggs,
+      };
     });
+    return resultAggs;
   }
 }

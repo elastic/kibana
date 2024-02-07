@@ -12,7 +12,13 @@ import type { SearchState } from '../hooks/use_url_search_state';
 import type { Option } from './slo_context_menu';
 import { ContextMenuItem, SLOContextMenu } from './slo_context_menu';
 
-export type GroupByField = 'ungrouped' | 'slo.tags' | 'status' | 'slo.indicator.type';
+export type GroupByField =
+  | 'ungrouped'
+  | 'slo.tags'
+  | 'status'
+  | 'slo.indicator.type'
+  | 'savedQueries';
+
 export interface Props {
   onStateChange: (newState: Partial<SearchState>) => void;
   state: SearchState;
@@ -71,6 +77,16 @@ export function SloGroupBy({ onStateChange, state }: Props) {
       value: 'slo.indicator.type',
       onClick: () => {
         handleChangeGroupBy('slo.indicator.type');
+      },
+    },
+    {
+      label: i18n.translate('xpack.observability.slo.list.groupBy.savedQueries', {
+        defaultMessage: 'Saved queries',
+      }),
+      checked: groupBy === 'savedQueries',
+      value: 'savedQueries',
+      onClick: () => {
+        handleChangeGroupBy('savedQueries');
       },
     },
   ];
