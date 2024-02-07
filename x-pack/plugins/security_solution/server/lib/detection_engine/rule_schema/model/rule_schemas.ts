@@ -185,6 +185,7 @@ export const ThreatSpecificRuleParams = z.object({
   concurrentSearches: ConcurrentSearches.optional(),
   itemsPerSearch: ItemsPerSearch.optional(),
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type ThreatRuleParams = BaseRuleParams & ThreatSpecificRuleParams;

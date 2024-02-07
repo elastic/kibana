@@ -15,46 +15,29 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import React, { Fragment } from 'react';
-import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { flyoutCancelText } from '../../../common/translations';
 import { useDatasetQualityFlyout } from '../../hooks';
 import { DatasetSummary, DatasetSummaryLoading } from './dataset_summary';
 import { Header } from './header';
 import { IntegrationSummary } from './integration_summary';
+import { FlyoutProps } from './types';
 
-interface FlyoutProps {
-  dataset: DataStreamStat;
-  closeFlyout: () => void;
-}
-
-export function Flyout({ dataset, closeFlyout }: FlyoutProps) {
-  const {
-    dataStreamStat,
-    dataStreamDetails,
-    dataStreamStatLoading,
-    dataStreamDetailsLoading,
-    fieldFormats,
-  } = useDatasetQualityFlyout({
-    type: DEFAULT_DATASET_TYPE,
-    dataset: dataset.name,
-    namespace: dataset.namespace,
-  });
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function Flyout({ dataset, closeFlyout }: FlyoutProps) {
+  const { dataStreamStat, dataStreamDetails, dataStreamDetailsLoading, fieldFormats } =
+    useDatasetQualityFlyout();
 
   return (
     <EuiFlyout onClose={closeFlyout} ownFocus={false} data-component-name={'datasetQualityFlyout'}>
       <>
         <Header dataStreamStat={dataset} />
         <EuiFlyoutBody>
-          {dataStreamStatLoading || dataStreamDetailsLoading ? (
+          {dataStreamDetailsLoading ? (
             <DatasetSummaryLoading />
           ) : dataStreamStat ? (
             <Fragment>
-              <DatasetSummary
-                dataStreamStat={dataStreamStat}
-                dataStreamDetails={dataStreamDetails}
-                fieldFormats={fieldFormats}
-              />
+              <DatasetSummary dataStreamDetails={dataStreamDetails} fieldFormats={fieldFormats} />
               <EuiSpacer />
               {dataStreamStat.integration && (
                 <IntegrationSummary integration={dataStreamStat.integration} />

@@ -33,4 +33,4 @@ export type GetDataStreamDetailsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>;
 
 export type { DataStreamStat } from './data_stream_stat';
-export type { DataStreamDetails } from './data_stream_details';
+export type { DataStreamDetails } from '../api_types';

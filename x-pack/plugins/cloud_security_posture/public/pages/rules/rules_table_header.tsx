@@ -51,7 +51,7 @@ interface RulesTableToolbarProps {
   selectedRules: CspBenchmarkRulesWithStates[];
   refetchRulesStates: () => void;
   setEnabledDisabledItemsFilter: (filterState: string) => void;
-  currentEnabledDisabledItemsFilterState: string;
+  enabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
 }
@@ -78,7 +78,7 @@ export const RulesTableHeader = ({
   selectedRules,
   refetchRulesStates,
   setEnabledDisabledItemsFilter,
-  currentEnabledDisabledItemsFilterState,
+  enabledDisabledItemsFilterState,
   setSelectAllRules,
   setSelectedRules,
 }: RulesTableToolbarProps) => {
@@ -92,26 +92,14 @@ export const RulesTableHeader = ({
     key: option,
     label: option,
   }));
-  const [isEnabledRulesFilterOn, setIsEnabledRulesFilterOn] = useState(false);
-  const [isDisabledRulesFilterOn, setisDisabledRulesFilterOn] = useState(false);
 
   const toggleEnabledRulesFilter = () => {
-    setIsEnabledRulesFilterOn(!isEnabledRulesFilterOn);
-    setisDisabledRulesFilterOn(
-      isDisabledRulesFilterOn && !isEnabledRulesFilterOn ? false : isDisabledRulesFilterOn
-    );
-    if (currentEnabledDisabledItemsFilterState === 'enabled')
-      setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilterState === 'enabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('enabled');
   };
 
   const toggleDisabledRulesFilter = () => {
-    setisDisabledRulesFilterOn(!isDisabledRulesFilterOn);
-    setIsEnabledRulesFilterOn(
-      isEnabledRulesFilterOn && !isDisabledRulesFilterOn ? false : isEnabledRulesFilterOn
-    );
-    if (currentEnabledDisabledItemsFilterState === 'disabled')
-      setEnabledDisabledItemsFilter('no-filter');
+    if (enabledDisabledItemsFilterState === 'disabled') setEnabledDisabledItemsFilter('no-filter');
     else setEnabledDisabledItemsFilter('disabled');
   };
 
@@ -186,7 +174,7 @@ export const RulesTableHeader = ({
             <EuiFilterGroup>
               <EuiFilterButton
                 withNext
-                hasActiveFilters={isEnabledRulesFilterOn}
+                hasActiveFilters={enabledDisabledItemsFilterState === 'enabled'}
                 onClick={toggleEnabledRulesFilter}
                 data-test-subj={RULES_ENABLED_FILTER}
               >
@@ -196,7 +184,7 @@ export const RulesTableHeader = ({
                 />
               </EuiFilterButton>
               <EuiFilterButton
-                hasActiveFilters={isDisabledRulesFilterOn}
+                hasActiveFilters={enabledDisabledItemsFilterState === 'disabled'}
                 onClick={toggleDisabledRulesFilter}
                 data-test-subj={RULES_DISABLED_FILTER}
               >

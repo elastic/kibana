@@ -544,7 +544,6 @@
         "team:kibana-presentation",
         "team:kibana-data-discovery",
         "team:platform-deployment-management",
-        "team:infra-monitoring-ui",
         "team:kibana-gis",
         "team:security-solution"
       ],
@@ -644,13 +643,13 @@
         "@xstate/"
       ],
       "reviewers": [
-        "team:infra-monitoring-ui"
+        "team:obs-ux-logs"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Infra Monitoring UI",
+        "Team:Obs UX Logs",
         "release_note:skip"
       ],
       "enabled": true,
@@ -662,13 +661,13 @@
         "@opentelemetry/"
       ],
       "reviewers": [
-        "team:infra-monitoring-ui"
+        "team:monitoring"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Infra Monitoring UI"
+        "Team:Monitoring"
       ],
       "enabled": true
     }

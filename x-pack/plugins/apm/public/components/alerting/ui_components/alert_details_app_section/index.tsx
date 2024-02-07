@@ -21,6 +21,7 @@ import React, { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { EuiCallOut } from '@elastic/eui';
+import { CoreStart } from '@kbn/core/public';
 import { SERVICE_ENVIRONMENT } from '../../../../../common/es_fields/apm';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { TimeRangeMetadataContextProvider } from '../../../../context/time_range_metadata/time_range_metadata_context';
@@ -35,6 +36,7 @@ import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
 } from './types';
+import { createCallApmApi } from '../../../../services/rest/create_call_apm_api';
 
 export function AlertDetailsAppSection({
   rule,
@@ -42,6 +44,12 @@ export function AlertDetailsAppSection({
   timeZone,
   setAlertSummaryFields,
 }: AlertDetailsAppSectionProps) {
+  const alertRuleTypeId = alert.fields[ALERT_RULE_TYPE_ID];
+  const alertEvaluationValue = alert.fields[ALERT_EVALUATION_VALUE];
+  const alertEvaluationThreshold = alert.fields[ALERT_EVALUATION_THRESHOLD];
+  const environment = alert.fields[SERVICE_ENVIRONMENT];
+  const serviceName = String(alert.fields[SERVICE_NAME]);
+
   useEffect(() => {
     const alertSummaryFields = [
       {
@@ -52,8 +60,8 @@ export function AlertDetailsAppSection({
           />
         ),
         value: formatAlertEvaluationValue(
-          alert?.fields[ALERT_RULE_TYPE_ID],
-          alert?.fields[ALERT_EVALUATION_VALUE]
+          alertRuleTypeId,
+          alertEvaluationValue
         ),
       },
       {
@@ -64,8 +72,8 @@ export function AlertDetailsAppSection({
           />
         ),
         value: formatAlertEvaluationValue(
-          alert?.fields[ALERT_RULE_TYPE_ID],
-          alert?.fields[ALERT_EVALUATION_THRESHOLD]
+          alertRuleTypeId,
+          alertEvaluationThreshold
         ),
       },
       {
@@ -75,7 +83,7 @@ export function AlertDetailsAppSection({
             defaultMessage="Service environment"
           />
         ),
-        value: alert?.fields[SERVICE_ENVIRONMENT],
+        value: environment,
       },
       {
         label: (
@@ -84,20 +92,27 @@ export function AlertDetailsAppSection({
             defaultMessage="Service name"
           />
         ),
-        value: alert?.fields[SERVICE_NAME],
+        value: serviceName,
       },
     ];
     setAlertSummaryFields(alertSummaryFields);
-  }, [alert?.fields, setAlertSummaryFields]);
+  }, [
+    alertRuleTypeId,
+    alertEvaluationValue,
+    alertEvaluationThreshold,
+    environment,
+    serviceName,
+    setAlertSummaryFields,
+  ]);
 
-  const {
-    services: { uiSettings },
-  } = useKibana();
+  const { services } = useKibana();
+
+  useEffect(() => {
+    createCallApmApi(services as CoreStart);
+  }, [services]);
 
   const params = rule.params;
-  const environment = alert.fields[SERVICE_ENVIRONMENT];
   const latencyAggregationType = getAggsTypeFromRule(params.aggregationType);
-  const serviceName = String(alert.fields[SERVICE_NAME]);
   const timeRange = getPaddedAlertTimeRange(
     alert.fields[ALERT_START]!,
     alert.fields[ALERT_END]
@@ -141,7 +156,7 @@ export function AlertDetailsAppSection({
         end={to}
         kuery=""
         useSpanName={false}
-        uiSettings={uiSettings!}
+        uiSettings={services.uiSettings!}
       >
         <ChartPointerEventContextProvider>
           <EuiFlexItem>
