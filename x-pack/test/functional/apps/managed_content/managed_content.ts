@@ -126,6 +126,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
+    describe('library views', () => {
+      const assertInspectorReadonly = async (name: string) => {
+        log.debug(`making sure table list inspector for ${name} is read-only`);
+        await listingTable.searchForItemWithName(name);
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.inspectVisualization();
+        expect(await listingTable.inspectorFieldsReadonly()).to.be(true);
+        await listingTable.closeInspector();
+      };
+
+      it('visualize library: managed content is read-only', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([
+          'Unmanaged lens vis',
+          'Unmanaged legacy visualization',
+          'Unmanaged map',
+        ]);
+
+        await assertInspectorReadonly('Managed lens vis');
+        await assertInspectorReadonly('Managed legacy visualization');
+        await assertInspectorReadonly('Managed map');
+      });
+
+      it('dashboard library: managed content is read-only', async () => {
+        await PageObjects.dashboard.gotoDashboardListingURL();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([]);
+
+        await assertInspectorReadonly('Managed dashboard');
+      });
+    });
+
     describe('managed panels in dashboards', () => {
       it('inlines panels when managed dashboard cloned', async () => {
         await PageObjects.common.navigateToActualUrl(
@@ -168,43 +205,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
 
         expect(byRefSignifiers.length).to.be(4);
-      });
-    });
-
-    describe('library views', () => {
-      const assertInspectorReadonly = async (name: string) => {
-        log.debug(`making sure table list inspector for ${name} is read-only`);
-        await listingTable.searchForItemWithName(name);
-        await listingTable.waitUntilTableIsLoaded();
-        await listingTable.inspectVisualization();
-        expect(await listingTable.inspectorFieldsReadonly()).to.be(true);
-        await listingTable.closeInspector();
-      };
-
-      it('visualize library: managed content is read-only', async () => {
-        await PageObjects.visualize.gotoVisualizationLandingPage();
-
-        const deletableItems = await listingTable.getAllSelectableItemsNames();
-
-        expect(deletableItems).to.eql([
-          'Unmanaged lens vis',
-          'Unmanaged legacy visualization',
-          'Unmanaged map',
-        ]);
-
-        await assertInspectorReadonly('Managed lens vis');
-        await assertInspectorReadonly('Managed legacy visualization');
-        await assertInspectorReadonly('Managed map');
-      });
-
-      it('dashboard library: managed content is read-only', async () => {
-        await PageObjects.dashboard.gotoDashboardListingURL();
-
-        const deletableItems = await listingTable.getAllSelectableItemsNames();
-
-        expect(deletableItems).to.eql([]);
-
-        await assertInspectorReadonly('Managed dashboard');
       });
     });
   });
