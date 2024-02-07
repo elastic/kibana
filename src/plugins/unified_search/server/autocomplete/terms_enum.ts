@@ -52,8 +52,7 @@ export async function termsEnumSuggestions(
       },
     },
   };
-  console.log(JSON.stringify(body));
 
-  const result = await esClient.termsEnum({ index, body }, { signal: abortSignal });
-  return result.terms;
+  const { terms } = await esClient.termsEnum({ index, body }, { signal: abortSignal });
+  return terms;
 }
