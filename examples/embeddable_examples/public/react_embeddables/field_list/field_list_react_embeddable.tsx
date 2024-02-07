@@ -9,45 +9,39 @@
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import { Reference } from '@kbn/content-management-utils';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart, type DataView } from '@kbn/data-views-plugin/public';
 import {
-  DefaultEmbeddableApi,
+  DataViewsPublicPluginStart,
+  DATA_VIEW_SAVED_OBJECT_TYPE,
+  type DataView,
+} from '@kbn/data-views-plugin/public';
+import {
   initializeReactEmbeddableTitles,
   initializeReactEmbeddableUuid,
   ReactEmbeddableFactory,
   RegisterReactEmbeddable,
   registerReactEmbeddableFactory,
-  SerializedReactEmbeddableTitles,
   useReactEmbeddableApiHandle,
   useReactEmbeddableUnsavedChanges,
 } from '@kbn/embeddable-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { apiIsPresentationContainer } from '@kbn/presentation-containers';
-import { EmbeddableApiContext, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
-import { IncompatibleActionError, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
   UnifiedFieldListSidebarContainer,
   type UnifiedFieldListSidebarContainerProps,
 } from '@kbn/unified-field-list';
+import { cloneDeep } from 'lodash';
 import React, { useEffect, useState } from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { FIELD_LIST_DATA_VIEW_REF_NAME, FIELD_LIST_ID } from './constants';
+import { FieldListApi, FieldListSerializedStateState } from './types';
 
 const DataViewPicker = withSuspense(LazyDataViewPicker, null);
-
-type FieldListSerializedStateState = SerializedReactEmbeddableTitles & {
-  dataViewId?: string;
-  selectedFieldNames?: string[];
-};
-
-type FieldListApi = DefaultEmbeddableApi;
-
-const UNIFIED_FIELD_LIST_ID = 'unified_field_list';
-const ADD_UNIFIED_FIELD_LIST_ID_ACTION_ID = 'create_unified_field_list';
 
 const getCreationOptions: UnifiedFieldListSidebarContainerProps['getCreationOptions'] = () => {
   return {
@@ -64,13 +58,11 @@ export const registerFieldListFactory = (
   core: CoreStart,
   {
     dataViews,
-    uiActions,
     data,
     charts,
     fieldFormats,
   }: {
     dataViews: DataViewsPublicPluginStart;
-    uiActions: UiActionsStart;
     data: DataPublicPluginStart;
     charts: ChartsPluginStart;
     fieldFormats: FieldFormatsStart;
@@ -81,7 +73,15 @@ export const registerFieldListFactory = (
     FieldListApi
   > = {
     deserializeState: (state) => {
-      return state.rawState as FieldListSerializedStateState;
+      const serializedState = cloneDeep(state.rawState) as FieldListSerializedStateState;
+      // inject the reference
+      const dataViewIdRef = state.references?.find(
+        (ref) => ref.name === FIELD_LIST_DATA_VIEW_REF_NAME
+      );
+      if (dataViewIdRef && serializedState) {
+        serializedState.dataViewId = dataViewIdRef?.id;
+      }
+      return serializedState;
     },
     getComponent: async (initialState, maybeId) => {
       const uuid = initializeReactEmbeddableUuid(maybeId);
@@ -120,12 +120,23 @@ export const registerFieldListFactory = (
             unsavedChanges,
             resetUnsavedChanges,
             serializeState: async () => {
+              const dataViewId = selectedDataViewId$.getValue();
+              const references: Reference[] = dataViewId
+                ? [
+                    {
+                      type: DATA_VIEW_SAVED_OBJECT_TYPE,
+                      name: FIELD_LIST_DATA_VIEW_REF_NAME,
+                      id: dataViewId,
+                    },
+                  ]
+                : [];
               return {
                 rawState: {
                   ...serializeTitles(),
-                  dataViewId: selectedDataViewId$.getValue(),
+                  // here we skip serializing the dataViewId, because the reference contains that information.
                   selectedFieldNames: selectedFieldNames$.getValue(),
                 },
+                references,
               };
             },
           },
@@ -206,24 +217,5 @@ export const registerFieldListFactory = (
     },
   };
 
-  registerReactEmbeddableFactory(UNIFIED_FIELD_LIST_ID, fieldListEmbeddableFactory);
-
-  uiActions.registerAction<EmbeddableApiContext>({
-    id: ADD_UNIFIED_FIELD_LIST_ID_ACTION_ID,
-    getIconType: () => 'indexOpen',
-    isCompatible: async ({ embeddable }) => {
-      return apiIsPresentationContainer(embeddable);
-    },
-    execute: async ({ embeddable }) => {
-      if (!apiIsPresentationContainer(embeddable)) throw new IncompatibleActionError();
-      embeddable.addNewPanel({
-        panelType: UNIFIED_FIELD_LIST_ID,
-      });
-    },
-    getDisplayName: () =>
-      i18n.translate('embeddableExamples.unifiedFieldList.displayName', {
-        defaultMessage: 'Field list',
-      }),
-  });
-  uiActions.attachAction('ADD_PANEL_TRIGGER', ADD_UNIFIED_FIELD_LIST_ID_ACTION_ID);
+  registerReactEmbeddableFactory(FIELD_LIST_ID, fieldListEmbeddableFactory);
 };

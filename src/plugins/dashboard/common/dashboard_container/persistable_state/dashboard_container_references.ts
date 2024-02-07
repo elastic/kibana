@@ -52,7 +52,12 @@ export const createInject = (
         const filteredReferences = getReferencesForPanelId(key, references);
         const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
 
-        // Inject dashboard references back in
+        /**
+         * Inject saved object ID back into the explicit input.
+         *
+         * TODO move this logic into the persistable state service inject method for each panel type
+         * that could be by value or by reference
+         */
         if (panel.panelRefName !== undefined) {
           const matchingReference = panelReferences.find(
             (reference) => reference.name === panel.panelRefName
@@ -125,7 +130,12 @@ export const createExtract = (
 
       // Run every panel through the state service to get the nested references
       for (const [id, panel] of Object.entries(workingState.panels)) {
-        // If the panel is a saved object, then we will make the reference for that saved object and change the explicit input
+        /**
+         * Extract saved object ID reference from the explicit input.
+         *
+         * TODO move this logic into the persistable state service extract method for each panel type
+         * that could be by value or by reference.
+         */
         if (panel.explicitInput.savedObjectId) {
           panel.panelRefName = `panel_${id}`;
 

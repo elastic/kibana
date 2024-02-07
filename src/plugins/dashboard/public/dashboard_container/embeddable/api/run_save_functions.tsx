@@ -152,12 +152,13 @@ export function runSaveAs(this: DashboardContainer) {
         batch(() => {
           this.dispatch.setStateFromSaveModal(stateFromSaveModal);
           this.dispatch.setLastSavedInput(dashboardStateToSave);
-          this.lastSavedState.next();
           if (this.controlGroup && persistableControlGroupInput) {
             this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
           }
         });
       }
+      this.savedObjectReferences = saveResult.references ?? [];
+      this.lastSavedState.next();
       resolve(saveResult);
       return saveResult;
     };
@@ -209,6 +210,7 @@ export async function runQuickSave(this: DashboardContainer) {
     lastSavedId,
   });
 
+  this.savedObjectReferences = saveResult.references ?? [];
   this.dispatch.setLastSavedInput(dashboardStateToSave);
   this.lastSavedState.next();
   if (this.controlGroup && persistableControlGroupInput) {
@@ -287,6 +289,7 @@ export async function runClone(this: DashboardContainer) {
           title: newTitle,
         },
       });
+      this.savedObjectReferences = saveResult.references ?? [];
       resolve(saveResult);
       return saveResult.id
         ? {

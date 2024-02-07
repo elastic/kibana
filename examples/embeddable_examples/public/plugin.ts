@@ -38,6 +38,7 @@ import {
 import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown/eui_markdown_react_embeddable';
 import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 import { registerFieldListFactory } from './react_embeddables/field_list/field_list_react_embeddable';
+import { registerCreateFieldListAction } from './react_embeddables/field_list/create_field_list_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -112,6 +113,8 @@ export class EmbeddableExamplesPlugin
     deps: EmbeddableExamplesStartDependencies
   ): EmbeddableExamplesStart {
     registerFieldListFactory(core, deps);
+    registerCreateFieldListAction(deps.uiActions);
+
     registerMarkdownEditorEmbeddable();
     registerCreateEuiMarkdownAction(deps.uiActions);
 

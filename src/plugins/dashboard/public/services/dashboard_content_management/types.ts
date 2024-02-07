@@ -98,6 +98,7 @@ export interface SaveDashboardProps {
 export interface SaveDashboardReturn {
   id?: string;
   error?: string;
+  references?: Reference[];
   redirectRequired?: boolean;
 }
 
