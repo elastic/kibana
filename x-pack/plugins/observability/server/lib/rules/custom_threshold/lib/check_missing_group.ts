@@ -12,7 +12,7 @@ import { isString, get, identity } from 'lodash';
 import { SearchConfigurationType } from '../types';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
-import { calculateCurrentTimeframe, createBoolQuery } from './metric_query';
+import { calculateCurrentTimeFrame, createBoolQuery } from './metric_query';
 
 export interface MissingGroupsRecord {
   key: string;
@@ -33,7 +33,7 @@ export const checkMissingGroups = async (
   if (missingGroups.length === 0) {
     return missingGroups;
   }
-  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
+  const currentTimeFrame = calculateCurrentTimeFrame(metricParams, timeframe);
   const groupByFields = isString(groupBy) ? [groupBy] : groupBy ? groupBy : [];
 
   const searches = missingGroups.flatMap((group) => {
@@ -47,8 +47,7 @@ export const checkMissingGroups = async (
       }
     );
     const query = createBoolQuery(
-      metricParams,
-      currentTimeframe,
+      currentTimeFrame,
       timeFieldName,
       searchConfiguration,
       groupByQueries
