@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { enableDockedConsoleUiSetting } from '@kbn/dev-tools-plugin/common/constants';
+import { enableDockedConsoleUiSetting } from '@kbn/dev-tools-plugin/public';
 
 import { renderEmbeddableConsole } from './application/containers/embeddable';
 import {
