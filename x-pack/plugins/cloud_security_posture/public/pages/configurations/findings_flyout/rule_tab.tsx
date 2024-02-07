@@ -8,10 +8,16 @@
 import { EuiBadge, EuiDescriptionList, EuiLink, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
+import { RulesDetectionRuleCounter } from '../../rules/rules_detection_rule_counter';
 import { CisKubernetesIcons, CspFlyoutMarkdown } from './findings_flyout';
 
-export const getRuleList = (rule: CspFinding['rule'], ruleFlyoutLink?: string) => [
+export const getRuleList = (
+  rule: CspFinding['rule'],
+  ruleState = 'unmuted',
+  ruleFlyoutLink?: string
+) => [
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.nameTitle', {
       defaultMessage: 'Name',
@@ -34,6 +40,20 @@ export const getRuleList = (rule: CspFinding['rule'], ruleFlyoutLink?: string) =
       defaultMessage: 'Description',
     }),
     description: <CspFlyoutMarkdown>{rule.description}</CspFlyoutMarkdown>,
+  },
+  {
+    title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.AlertsTitle', {
+      defaultMessage: 'Alerts',
+    }),
+    description:
+      ruleState === 'unmuted' ? (
+        <RulesDetectionRuleCounter benchmarkRule={rule} />
+      ) : (
+        <FormattedMessage
+          id="xpack.csp.findings.findingsFlyout.ruleTab.disabledRuleText"
+          defaultMessage="Disabled"
+        />
+      ),
   },
   {
     title: i18n.translate('xpack.csp.findings.findingsFlyout.ruleTab.tagsTitle', {
