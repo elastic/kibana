@@ -6,6 +6,7 @@
  */
 
 import { CustomFieldTypes } from '../../../common/types/domain';
+import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
 import { updateCustomField } from './update_custom_field';
@@ -30,7 +31,7 @@ describe('Update custom field', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    clientArgs.services.caseService.getCase.mockResolvedValue({ ...theCase });
+    clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
 
     casesClient.configure.get = jest.fn().mockResolvedValue([
       {
@@ -131,14 +132,14 @@ describe('Update custom field', () => {
         updatedAttributes: {
           customFields: [
             {
-              key: 'first_key',
-              type: CustomFieldTypes.TEXT as const,
-              value: 'this is a text field value',
-            },
-            {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE as const,
               value: true,
+            },
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT as const,
+              value: 'this is a text field value',
             },
           ],
           updated_at: expect.any(String),
@@ -147,6 +148,23 @@ describe('Update custom field', () => {
         refresh: false,
       })
     );
+  });
+
+  it('does not throw error when customField value is null and the custom field is not required', async () => {
+    await expect(
+      updateCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'second_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: null,
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).resolves.not.toThrow();
   });
 
   it('throws error when customField value is null and the custom field is required', async () => {
@@ -168,21 +186,43 @@ describe('Update custom field', () => {
     );
   });
 
-  it('does not throw error when customField value is null and the custom field is not required', async () => {
+  it('throws error when required customField of type text has value as empty string', async () => {
     await expect(
       updateCustomField(
         {
           caseId: mockCases[0].id,
-          customFieldId: 'second_key',
+          customFieldId: 'first_key',
           request: {
             caseVersion: mockCases[0].version ?? '',
-            value: null,
+            value: '            ',
           },
         },
         clientArgs,
         casesClient
       )
-    ).resolves.not.toThrow();
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The value field cannot be an empty string.,Invalid value \\"            \\" supplied to \\"value\\""`
+    );
+  });
+
+  it('throws error when customField value is undefined and the custom field is required', async () => {
+    await expect(
+      updateCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'first_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            // @ts-expect-error: undefined value
+            value: undefined,
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+    );
   });
 
   it('throws error when customField key is not present in configuration', async () => {
@@ -223,5 +263,63 @@ describe('Update custom field', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Failed to update customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"foobar\\" supplied to \\"value\\""`
     );
+  });
+
+  describe('Validate max user actions', () => {
+    it('passes validation if max user actions per case is not reached', async () => {
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE - 1,
+      });
+
+      // @ts-ignore: only the array length matters here
+      clientArgs.services.userActionService.creator.buildUserActions.mockReturnValue({
+        [mockCases[0].id]: [1],
+      });
+
+      clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
+
+      await expect(
+        updateCustomField(
+          {
+            caseId: mockCases[0].id,
+            customFieldId: 'first_key',
+            request: {
+              caseVersion: mockCases[0].version ?? '',
+              value: 'foobar',
+            },
+          },
+          clientArgs,
+          casesClient
+        )
+      ).resolves.not.toThrow();
+    });
+
+    it(`throws an error when the user actions to be created will reach ${MAX_USER_ACTIONS_PER_CASE}`, async () => {
+      clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+        [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
+      });
+
+      // @ts-ignore: only the array length matters here
+      clientArgs.services.userActionService.creator.buildUserActions.mockReturnValue({
+        [mockCases[0].id]: [1, 2, 3],
+      });
+
+      await expect(
+        updateCustomField(
+          {
+            caseId: mockCases[0].id,
+            customFieldId: 'first_key',
+            request: {
+              caseVersion: mockCases[0].version ?? '',
+              value: 'foobar',
+            },
+          },
+          clientArgs,
+          casesClient
+        )
+      ).rejects.toThrow(
+        `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      );
+    });
   });
 });

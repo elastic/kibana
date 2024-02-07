@@ -12,7 +12,9 @@ import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../commo
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
 import type { ICasesCustomField } from '../../custom_fields';
 import { casesCustomFields } from '../../custom_fields';
-import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
+import { MAX_CUSTOM_FIELDS_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
+import type { CaseUserActionService } from '../../services';
+import type { UserActionsDict } from '../../services/user_actions/types';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -182,5 +184,35 @@ export const validateSearchCasesCustomFields = ({
     }
 
     customFieldsMapping?.validateFilteringValues(value);
+  });
+};
+
+/**
+ * Throws an error if any of the requests attempt to create a number of user actions that would put
+ * it's case over the limit.
+ */
+export const validateMaxUserActionsReached = async ({
+  userActionsDict,
+  userActionService,
+}: {
+  userActionsDict: UserActionsDict;
+  userActionService: CaseUserActionService;
+}) => {
+  if (userActionsDict == null) {
+    return;
+  }
+
+  const currentTotals = await userActionService.getMultipleCasesUserActionsTotal({
+    caseIds: Object.keys(userActionsDict),
+  });
+
+  Object.keys(currentTotals).forEach((caseId) => {
+    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
+
+    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+      throw Boom.badRequest(
+        `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      );
+    }
   });
 };

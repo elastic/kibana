@@ -76,7 +76,7 @@ describe('Custom Fields', () => {
       });
     });
 
-    it(`throws an error when a text customFields is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
+    it(`throws an error when a text customField is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
       expect(
         PathReporter.report(
           CustomFieldPatchRequestRt.decode({
@@ -87,6 +87,17 @@ describe('Custom Fields', () => {
       ).toContain(
         `The length of the value is too long. The maximum length is ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}.`
       );
+    });
+
+    it('throws an error when a text customField is empty', () => {
+      expect(
+        PathReporter.report(
+          CustomFieldPatchRequestRt.decode({
+            caseVersion: 'WzQ3LDFd',
+            value: '',
+          })
+        )
+      ).toContain('The value field cannot be an empty string.');
     });
   });
 });

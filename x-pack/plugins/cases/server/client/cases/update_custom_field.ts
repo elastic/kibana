@@ -9,12 +9,8 @@ import Boom from '@hapi/boom';
 
 import type { CasesClient, CasesClientArgs } from '..';
 
-import type {
-  CaseRequestCustomField,
-  CaseRequestCustomFields,
-  CustomFieldPatchRequest,
-} from '../../../common/types/api';
-import { CustomFieldsRt } from '../../../common/types/api';
+import type { CustomFieldPatchRequest } from '../../../common/types/api';
+import { CaseRequestCustomFieldsRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
@@ -25,6 +21,7 @@ import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
+  validateMaxUserActionsReached,
 } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 
@@ -84,19 +81,26 @@ export const updateCustomField = async (
       throw Boom.badRequest('cannot find custom field');
     }
 
-    const decodedCustomFields = decodeWithExcessOrThrow(CustomFieldsRt)([
+    const customFieldsToUpdate = [
       {
         value,
         type: foundCustomField.type,
         key: customFieldId,
       },
       ...caseToUpdate.attributes.customFields.filter((field) => field.key !== customFieldId),
-    ]);
+    ];
+
+    const decodedCustomFields =
+      decodeWithExcessOrThrow(CaseRequestCustomFieldsRt)(customFieldsToUpdate);
 
     const updatedAt = new Date().toISOString();
 
     if (value == null && foundCustomField.required) {
       throw Boom.badRequest('Custom field value cannot be null or undefined.');
+    }
+
+    if (value && typeof value === 'string' && value.trim() === '' && foundCustomField.required) {
+      throw Boom.badRequest('Required custom field of type text value cannot be empty.');
     }
 
     validateCustomFieldKeysAgainstConfiguration({
@@ -109,40 +113,29 @@ export const updateCustomField = async (
       customFieldsConfiguration: configurations[0].customFields,
     });
 
-    const customFieldsToUpdate: CaseRequestCustomFields = caseToUpdate.attributes.customFields.map(
-      (cf) => {
-        if (cf.key === customFieldId) {
-          return {
-            value,
-            type: foundCustomField.type,
-            key: customFieldId,
-          } as CaseRequestCustomField;
-        }
-        return cf;
-      }
-    );
-
     const patchCasesPayload = {
       caseId,
       originalCase: caseToUpdate,
       updatedAttributes: {
-        customFields: customFieldsToUpdate,
+        customFields: decodedCustomFields,
         updated_at: updatedAt,
         updated_by: user,
       },
       version: caseVersion,
     };
 
-    const updatedCase = await caseService.patchCase({
-      ...patchCasesPayload,
-      refresh: false,
-    });
-
     const userActionsDict = userActionService.creator.buildUserActions({
       updatedCases: {
         cases: [patchCasesPayload],
       },
       user,
+    });
+
+    await validateMaxUserActionsReached({ userActionsDict, userActionService });
+
+    const updatedCase = await caseService.patchCase({
+      ...patchCasesPayload,
+      refresh: false,
     });
 
     const returnUpdatedCase = flattenCaseSavedObject({
