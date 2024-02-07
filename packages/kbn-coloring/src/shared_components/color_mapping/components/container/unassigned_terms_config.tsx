@@ -21,7 +21,10 @@ import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';
 import { updateSpecialAssignmentColor } from '../../state/color_mapping';
 import { getPalette, NeutralPalette } from '../../palettes';
-import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../../config/default_color_mapping';
+import {
+  DEFAULT_NEUTRAL_PALETTE_INDEX,
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
+} from '../../config/default_color_mapping';
 import { SpecialAssignment } from '../assignment/special_assignment';
 import { ColorMapping } from '../../config';
 import { selectColorMode, selectPalette, selectSpecialAssignments } from '../../state/selectors';
@@ -43,7 +46,7 @@ export function UnassignedTermsConfig({
   const palette = useSelector(selectPalette(getPaletteFn));
   const colorMode = useSelector(selectColorMode);
   const specialAssignments = useSelector(selectSpecialAssignments);
-  const otherAssignment = specialAssignments[0];
+  const otherAssignment = specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX];
 
   const colorModes: EuiButtonGroupOptionProps[] = [
     {

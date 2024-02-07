@@ -6,9 +6,14 @@
  */
 
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
-import { ColorMapping, EUIAmsterdamColorBlindPalette, ElasticBrandPalette } from '@kbn/coloring';
+import {
+  ColorMapping,
+  EUIAmsterdamColorBlindPalette,
+  ElasticBrandPalette,
+  DEFAULT_COLOR_MAPPING_CONFIG,
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
+} from '@kbn/coloring';
 import faker from 'faker';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring/src/shared_components/color_mapping/config/default_color_mapping';
 
 const exampleAssignment = (
   valuesCount = 1,
@@ -66,7 +71,7 @@ const MANUAL_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
 
 const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
   {
-    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[0],
+    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
     color: {
       type: 'categorical',
       paletteId: EUIAmsterdamColorBlindPalette.id,
@@ -76,7 +81,7 @@ const specialAssignmentsPalette: ColorMapping.Config['specialAssignments'] = [
 ];
 const specialAssignmentsCustom1: ColorMapping.Config['specialAssignments'] = [
   {
-    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[0],
+    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
     color: {
       type: 'colorCode',
       colorCode: '#501a0e',
@@ -85,7 +90,7 @@ const specialAssignmentsCustom1: ColorMapping.Config['specialAssignments'] = [
 ];
 const specialAssignmentsCustom2: ColorMapping.Config['specialAssignments'] = [
   {
-    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[0],
+    ...DEFAULT_COLOR_MAPPING_CONFIG.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
     color: {
       type: 'colorCode',
       colorCode: 'red',

@@ -9,6 +9,7 @@
 import { createSlice } from '@reduxjs/toolkit';
 import type { PayloadAction } from '@reduxjs/toolkit';
 import type { ColorMapping } from '../config';
+import { DEFAULT_OTHER_ASSIGNMENT_INDEX } from '../config/default_color_mapping';
 
 export interface RootState {
   colorMapping: ColorMapping.Config;
@@ -119,9 +120,21 @@ export const colorMappingSlice = createSlice({
     },
     removeAssignment: (state, action: PayloadAction<number>) => {
       state.assignments.splice(action.payload, 1);
+      if (state.assignments.length === 0) {
+        state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
+          ...state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+          color: { type: 'loop' },
+          touched: true,
+        };
+      }
     },
     removeAllAssignments: (state) => {
       state.assignments = [];
+      state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX] = {
+        ...state.specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX],
+        color: { type: 'loop' },
+        touched: true,
+      };
     },
     changeColorMode: (state, action: PayloadAction<ColorMapping.Config['colorMode']>) => {
       state.colorMode = { ...action.payload };

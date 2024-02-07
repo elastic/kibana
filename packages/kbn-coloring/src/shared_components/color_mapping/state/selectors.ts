@@ -21,3 +21,6 @@ export function selectSpecialAssignments(state: RootState) {
 export function selectColorPickerVisibility(state: RootState) {
   return state.ui.colorPicker;
 }
+export function selectComputedAssignments(state: RootState) {
+  return state.colorMapping.assignments;
+}

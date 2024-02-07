@@ -13,6 +13,7 @@ import { NeutralPalette } from '../palettes/neutral';
 import { getColor, getGradientColorScale } from '../color/color_handling';
 
 export const DEFAULT_NEUTRAL_PALETTE_INDEX = 1;
+export const DEFAULT_OTHER_ASSIGNMENT_INDEX = 0;
 
 /**
  * The default color mapping used in Kibana, starts with the EUI color palette
@@ -70,11 +71,17 @@ export function getColorsFromMapping(
   } else {
     const palette = getPaletteFn(paletteId);
     const otherColors =
-      specialAssignments[0].color.type === 'loop'
+      specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
         ? Array.from({ length: palette.colorCount }, (d, i) =>
             palette.getColor(i, isDarkMode, true)
           )
-        : [getColor(specialAssignments[0].color, getPaletteFn, isDarkMode)];
+        : [
+            getColor(
+              specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
+              getPaletteFn,
+              isDarkMode
+            ),
+          ];
     return [
       ...assignments.map((a) => {
         return a.color.type === 'gradient' ? '' : getColor(a.color, getPaletteFn, isDarkMode);

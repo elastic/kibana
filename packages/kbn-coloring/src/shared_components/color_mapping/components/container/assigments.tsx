@@ -33,15 +33,12 @@ import {
   addNewAssignment,
   addNewAssignments,
   removeAllAssignments,
-  RootState,
 } from '../../state/color_mapping';
-import { selectColorMode, selectPalette } from '../../state/selectors';
+import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { ColorMapping } from '../../config';
 import { getPalette, NeutralPalette } from '../../palettes';
 import { ruleMatch } from '../../color/rule_matching';
-
-const selectComputedAssignments = (state: RootState) => state.colorMapping.assignments;
 
 export function AssignmentsConfig({
   data,

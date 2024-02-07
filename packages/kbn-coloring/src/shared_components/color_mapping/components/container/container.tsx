@@ -16,7 +16,7 @@ import { PaletteSelector } from '../palette_selector/palette_selector';
 import { changeGradientSortOrder } from '../../state/color_mapping';
 import { ColorMapping } from '../../config';
 import { getPalette } from '../../palettes';
-import { selectColorMode, selectPalette } from '../../state/selectors';
+import { selectColorMode, selectComputedAssignments, selectPalette } from '../../state/selectors';
 import { ColorMappingInputData } from '../../categorical_color_mapping';
 import { Gradient } from '../palette_selector/gradient';
 import { NeutralPalette } from '../../palettes/neutral';
@@ -42,6 +42,7 @@ export function Container({
 
   const palette = useSelector(selectPalette(getPaletteFn));
   const colorMode = useSelector(selectColorMode);
+  const assignments = useSelector(selectComputedAssignments);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" justifyContent="flexStart">
@@ -123,9 +124,11 @@ export function Container({
           />
         </EuiFormRow>
       </EuiFlexItem>
-      <EuiFlexItem>
-        <UnassignedTermsConfig data={data} isDarkMode={isDarkMode} palettes={palettes} />
-      </EuiFlexItem>
+      {assignments.length > 0 && (
+        <EuiFlexItem>
+          <UnassignedTermsConfig data={data} isDarkMode={isDarkMode} palettes={palettes} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

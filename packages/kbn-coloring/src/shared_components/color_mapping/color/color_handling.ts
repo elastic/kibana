@@ -13,7 +13,10 @@ import { getPalette, NeutralPalette } from '../palettes';
 import { ColorMappingInputData } from '../categorical_color_mapping';
 import { ruleMatch } from './rule_matching';
 import { GradientColorMode } from '../config/types';
-import { DEFAULT_NEUTRAL_PALETTE_INDEX } from '../config/default_color_mapping';
+import {
+  DEFAULT_NEUTRAL_PALETTE_INDEX,
+  DEFAULT_OTHER_ASSIGNMENT_INDEX,
+} from '../config/default_color_mapping';
 
 export function getAssignmentColor(
   colorMode: ColorMapping.Config['colorMode'],
@@ -113,7 +116,7 @@ export function getColorFactory(
         return getAssignmentColor(
           colorMode,
           // TODO: the specialAssignment[0] position is arbitrary, we should fix it better
-          specialAssignments[0].color.type === 'loop'
+          specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color.type === 'loop'
             ? colorMode.type === 'gradient'
               ? { type: 'gradient' }
               : {
@@ -123,7 +126,7 @@ export function getColorFactory(
                     nonAssignedCategoryIndex - autoByOrderAssignments.length + nextCategoricalIndex,
                   paletteId,
                 }
-            : specialAssignments[0].color,
+            : specialAssignments[DEFAULT_OTHER_ASSIGNMENT_INDEX].color,
           getPaletteFn,
           isDarkMode,
           indexIfGradient,
