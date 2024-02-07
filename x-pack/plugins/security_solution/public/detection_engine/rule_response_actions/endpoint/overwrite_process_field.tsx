@@ -24,8 +24,7 @@ const OverwriteFieldComponent = ({
     return {
       defaultValue: true,
       label: i18n.translate('xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel', {
-        defaultMessage: 'Use {pid} as process identifier',
-        values: { pid: process.pid },
+        defaultMessage: 'Use process.pid as process identifier',
       }),
     };
   }, []);
