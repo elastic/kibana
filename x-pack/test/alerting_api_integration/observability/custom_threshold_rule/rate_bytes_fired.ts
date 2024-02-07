@@ -53,7 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
             metrics: [{ name: 'system.network.in.bytes', method: 'exp', start: 10, end: 100 }],
           },
         ],
-        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
+        indexing: {
+          dataset: 'fake_hosts' as Dataset,
+          eventsPerCycle: 1,
+          interval: 10000,
+          alignEventsToInterval: true,
+        },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await waitForDocumentInIndex({
