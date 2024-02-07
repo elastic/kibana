@@ -44,6 +44,7 @@
     "@kbn/unified-field-list",
     "@kbn/unified-search-plugin",
     "@kbn/xstate-utils",
+    "@kbn/logs-explorer-plugin",
   ],
   "exclude": [
     "target/**/*"
