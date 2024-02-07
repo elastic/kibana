@@ -171,7 +171,12 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
 
     const tokenObjects = await this.getDecryptedTokenObjects({ filter });
 
-    return tokenObjects.length === 1 ? this.convertTokenObjectToToken(tokenObjects[0]) : null;
+    return tokenObjects.length === 1
+      ? this.convertTokenObjectToToken(
+          await this.getPolicyIdNameDictionary([tokenObjects[0].attributes.policy_id]),
+          tokenObjects[0]
+        )
+      : null;
   }
 
   public async getTokenMetadata(
@@ -183,27 +188,50 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     const includeFilter = policyIdFilter ? `.*${policyIdFilter}.*` : undefined;
 
     const tokenObjects = await this.getTokenObjectsByIncludeFilter(includeFilter, excludePolicyIds);
+    const tokenObjectsCurrentPage = tokenObjects.slice((page - 1) * perPage, page * perPage);
+    const policyIds = tokenObjectsCurrentPage.map(
+      (tokenObject) => tokenObject._source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id
+    );
+    const policyIdNameDictionary = await this.getPolicyIdNameDictionary(policyIds);
 
-    const items: UninstallTokenMetadata[] = tokenObjects
-      .slice((page - 1) * perPage, page * perPage)
-      .map<UninstallTokenMetadata>(({ _id, _source }) => {
+    const items: UninstallTokenMetadata[] = tokenObjectsCurrentPage.map<UninstallTokenMetadata>(
+      ({ _id, _source }) => {
         this.assertPolicyId(_source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE]);
         this.assertCreatedAt(_source.created_at);
+        const policyId = _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id;
 
         return {
           id: _id.replace(`${UNINSTALL_TOKENS_SAVED_OBJECT_TYPE}:`, ''),
-          policy_id: _source[UNINSTALL_TOKENS_SAVED_OBJECT_TYPE].policy_id,
+          policy_id: policyId,
+          policy_name: policyIdNameDictionary[policyId] ?? null,
           created_at: _source.created_at,
         };
-      });
+      }
+    );
 
     return { items, total: tokenObjects.length, page, perPage };
   }
 
+  private async getPolicyIdNameDictionary(policyIds: string[]): Promise<Record<string, string>> {
+    const agentPolicies = await agentPolicyService.getByIDs(this.soClient, policyIds, {
+      ignoreMissing: true,
+    });
+
+    return agentPolicies.reduce((dict, policy) => {
+      dict[policy.id] = policy.name;
+      return dict;
+    }, {} as Record<string, string>);
+  }
+
   private async getDecryptedTokensForPolicyIds(policyIds: string[]): Promise<UninstallToken[]> {
     const tokenObjects = await this.getDecryptedTokenObjectsForPolicyIds(policyIds);
+    const policyIdNameDictionary = await this.getPolicyIdNameDictionary(
+      tokenObjects.map((obj) => obj.attributes.policy_id)
+    );
 
-    return tokenObjects.map(this.convertTokenObjectToToken);
+    return tokenObjects.map((tokenObject) =>
+      this.convertTokenObjectToToken(policyIdNameDictionary, tokenObject)
+    );
   }
 
   private async getDecryptedTokenObjectsForPolicyIds(
@@ -280,12 +308,15 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return tokenObjects;
   }
 
-  private convertTokenObjectToToken = ({
-    id: _id,
-    attributes,
-    created_at: createdAt,
-    error,
-  }: SavedObjectsFindResult<UninstallTokenSOAttributes>): UninstallToken => {
+  private convertTokenObjectToToken = (
+    policyIdNameDictionary: Record<string, string>,
+    {
+      id: _id,
+      attributes,
+      created_at: createdAt,
+      error,
+    }: SavedObjectsFindResult<UninstallTokenSOAttributes>
+  ): UninstallToken => {
     if (error) {
       throw new UninstallTokenError(`Error when reading Uninstall Token with id '${_id}'.`);
     }
@@ -297,6 +328,7 @@ export class UninstallTokenService implements UninstallTokenServiceInterface {
     return {
       id: _id,
       policy_id: attributes.policy_id,
+      policy_name: policyIdNameDictionary[attributes.policy_id] ?? null,
       token: attributes.token || attributes.token_plain,
       created_at: createdAt,
     };

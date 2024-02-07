@@ -11,6 +11,7 @@ import {
   GetUninstallTokenResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
+import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { addUninstallTokenToPolicy, generateNPolicies } from '../../helpers';
@@ -32,10 +33,13 @@ export default function (providerContext: FtrProviderContext) {
 
     describe('GET uninstall_tokens', () => {
       describe('pagination', () => {
-        let generatedPolicyIds: Set<string>;
+        let generatedPolicies: Map<string, AgentPolicy>;
 
         before(async () => {
-          generatedPolicyIds = new Set(await generateNPolicies(supertest, 20));
+          const generatedPoliciesArray = await generateNPolicies(supertest, 20);
+
+          generatedPolicies = new Map();
+          generatedPoliciesArray.forEach((policy) => generatedPolicies.set(policy.id, policy));
         });
 
         after(async () => {
@@ -48,23 +52,27 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           const body: GetUninstallTokensMetadataResponse = response.body;
-          expect(body.total).to.equal(generatedPolicyIds.size);
+          expect(body.total).to.equal(generatedPolicies.size);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
 
-          expect(body.items.length).to.equal(generatedPolicyIds.size);
+          expect(body.items.length).to.equal(generatedPolicies.size);
           body.items.forEach(({ policy_id: policyId }) =>
-            expect(generatedPolicyIds.has(policyId)).to.be(true)
+            expect(generatedPolicies.has(policyId)).to.be(true)
           );
         });
 
-        it('should return token metadata with creation date and id', async () => {
+        it('should return token metadata with creation date, id, and correct policy name', async () => {
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
 
           const body: GetUninstallTokensMetadataResponse = response.body;
           expect(body.items[0]).to.have.property('policy_id');
+          expect(body.items[0]).to.have.property('policy_name');
+          expect(body.items[0].policy_name).to.equal(
+            generatedPolicies.get(body.items[0].policy_id)?.name
+          );
           expect(body.items[0]).to.have.property('created_at');
           expect(body.items[0]).to.have.property('id');
 
@@ -75,13 +83,14 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return default perPage number of token metadata if total is above default perPage', async () => {
-          generatedPolicyIds.add((await generateNPolicies(supertest, 1))[0]);
+          const additionalPolicy = (await generateNPolicies(supertest, 1))[0];
+          generatedPolicies.set(additionalPolicy.id, additionalPolicy);
 
           const response1 = await supertest
             .get(uninstallTokensRouteService.getListPath())
             .expect(200);
           const body1: GetUninstallTokensMetadataResponse = response1.body;
-          expect(body1.total).to.equal(generatedPolicyIds.size);
+          expect(body1.total).to.equal(generatedPolicies.size);
           expect(body1.page).to.equal(1);
           expect(body1.perPage).to.equal(20);
           expect(body1.items.length).to.equal(20);
@@ -91,7 +100,7 @@ export default function (providerContext: FtrProviderContext) {
             .query({ page: 2 })
             .expect(200);
           const body2: GetUninstallTokensMetadataResponse = response2.body;
-          expect(body2.total).to.equal(generatedPolicyIds.size);
+          expect(body2.total).to.equal(generatedPolicies.size);
           expect(body2.page).to.equal(2);
           expect(body2.perPage).to.equal(20);
           expect(body2.items.length).to.equal(1);
@@ -110,7 +119,7 @@ export default function (providerContext: FtrProviderContext) {
               .expect(200);
 
             const body: GetUninstallTokensMetadataResponse = response.body;
-            expect(body.total).to.equal(generatedPolicyIds.size);
+            expect(body.total).to.equal(generatedPolicies.size);
             expect(body.perPage).to.equal(8);
             expect(body.page).to.equal(i);
 
@@ -118,9 +127,9 @@ export default function (providerContext: FtrProviderContext) {
             receivedPolicyIds.push(...receivedIds);
           }
 
-          expect(receivedPolicyIds.length).to.equal(generatedPolicyIds.size);
+          expect(receivedPolicyIds.length).to.equal(generatedPolicies.size);
           receivedPolicyIds.forEach((policyId) =>
-            expect(generatedPolicyIds.has(policyId)).to.be(true)
+            expect(generatedPolicies.has(policyId)).to.be(true)
           );
         });
 
@@ -151,15 +160,15 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('when there are multiple tokens for a policy', () => {
-        let generatedPolicyIdsArray: string[];
+        let generatedPolicies: AgentPolicy[];
         let timestampBeforeAddingNewTokens: number;
 
         before(async () => {
-          generatedPolicyIdsArray = await generateNPolicies(supertest, 20);
+          generatedPolicies = await generateNPolicies(supertest, 20);
 
           timestampBeforeAddingNewTokens = Date.now();
 
-          const savingAdditionalTokensPromises = generatedPolicyIdsArray.map((id) =>
+          const savingAdditionalTokensPromises = generatedPolicies.map(({ id }) =>
             addUninstallTokenToPolicy(kibanaServer, id, `${id} latest token`)
           );
 
@@ -176,7 +185,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
 
           const body: GetUninstallTokensMetadataResponse = response.body;
-          expect(body.total).to.equal(generatedPolicyIdsArray.length);
+          expect(body.total).to.equal(generatedPolicies.length);
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
 
@@ -188,10 +197,10 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('when `policyId` query param is used', () => {
-        let generatedPolicyIdsArray: string[];
+        let generatedPolicyArray: AgentPolicy[];
 
         before(async () => {
-          generatedPolicyIdsArray = await generateNPolicies(supertest, 5);
+          generatedPolicyArray = await generateNPolicies(supertest, 5);
         });
 
         after(async () => {
@@ -199,7 +208,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return token metadata for full policyID if found', async () => {
-          const selectedPolicyId = generatedPolicyIdsArray[3];
+          const selectedPolicyId = generatedPolicyArray[3].id;
 
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
@@ -216,7 +225,7 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         it('should return token metadata for partial policyID if found', async () => {
-          const selectedPolicyId = generatedPolicyIdsArray[2];
+          const selectedPolicyId = generatedPolicyArray[2].id;
 
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
@@ -293,6 +302,7 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(body.item.id).to.equal(generatedUninstallTokenId);
         expect(body.item.policy_id).to.equal('the policy id');
+        expect(body.item.policy_name).to.equal(null);
         expect(body.item.token).to.equal('the token');
         expect(body.item).to.have.property('created_at');
       });

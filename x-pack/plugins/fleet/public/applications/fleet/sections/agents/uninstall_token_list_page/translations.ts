@@ -11,6 +11,10 @@ export const POLICY_ID_TITLE = i18n.translate('xpack.fleet.uninstallTokenList.po
   defaultMessage: 'Policy ID',
 });
 
+export const POLICY_NAME_TITLE = i18n.translate('xpack.fleet.uninstallTokenList.policyNameTitle', {
+  defaultMessage: 'Policy name',
+});
+
 export const CREATED_AT_TITLE = i18n.translate('xpack.fleet.uninstallTokenList.createdAtTitle', {
   defaultMessage: 'Created at',
 });

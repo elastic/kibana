@@ -89,12 +89,14 @@ describe('UninstallTokenList page', () => {
     const uninstallTokenMetadataFixture1: UninstallTokenMetadata = {
       id: 'id-1',
       policy_id: 'policy-id-1',
+      policy_name: 'Policy Name 1',
       created_at: '2023-06-19T08:47:31.457Z',
     };
 
     const uninstallTokenMetadataFixture2: UninstallTokenMetadata = {
       id: 'id-2',
       policy_id: 'policy-id-2',
+      policy_name: 'Policy Name 2',
       created_at: '2023-06-20T08:47:31.457Z',
     };
 
@@ -129,6 +131,7 @@ describe('UninstallTokenList page', () => {
 
       expect(renderResult.queryByTestId('uninstallTokenListTable')).toBeInTheDocument();
       expect(renderResult.queryByText('policy-id-1')).toBeInTheDocument();
+      expect(renderResult.queryByText('Policy Name 1')).toBeInTheDocument();
     });
 
     it('should hide token by default', () => {

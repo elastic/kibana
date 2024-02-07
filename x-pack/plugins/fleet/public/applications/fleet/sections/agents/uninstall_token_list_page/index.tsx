@@ -33,16 +33,12 @@ import {
   POLICY_ID_TITLE,
   SEARCH_BY_POLICY_ID_PLACEHOLDER,
   TOKEN_TITLE,
+  POLICY_NAME_TITLE,
 } from './translations';
 
-const PolicyIdField = ({ policyId }: { policyId: string }) => (
-  <EuiText
-    size="s"
-    className="eui-textTruncate"
-    title={policyId}
-    data-test-subj="uninstallTokensPolicyIdField"
-  >
-    {policyId}
+const TextField = ({ text, dataTestSubj }: { text: string; dataTestSubj?: string }) => (
+  <EuiText size="s" className="eui-textTruncate" title={text} data-test-subj={dataTestSubj}>
+    {text}
   </EuiText>
 );
 
@@ -91,9 +87,16 @@ export const UninstallTokenListPage = () => {
   const columns: Array<EuiBasicTableColumn<UninstallTokenMetadata>> = useMemo(
     () => [
       {
+        field: 'policy_name',
+        name: POLICY_NAME_TITLE,
+        render: (policyName: string) => <TextField text={policyName} />,
+      },
+      {
         field: 'policy_id',
         name: POLICY_ID_TITLE,
-        render: (policyId: string) => <PolicyIdField policyId={policyId} />,
+        render: (policyId: string) => (
+          <TextField text={policyId} dataTestSubj="uninstallTokensPolicyIdField" />
+        ),
       },
       {
         field: 'created_at',
