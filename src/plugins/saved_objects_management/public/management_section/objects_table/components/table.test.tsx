@@ -14,6 +14,8 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { actionServiceMock } from '../../../services/action_service.mock';
 import { columnServiceMock } from '../../../services/column_service.mock';
 import { Table, TableProps } from './table';
+import { render, screen, waitFor } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 
 const defaultProps: TableProps = {
   basePath: httpServiceMock.createSetupContract().basePath,
@@ -153,5 +155,40 @@ describe('Table', () => {
     expect(onActionRefresh).not.toHaveBeenCalled();
     someAction.onClick();
     expect(onActionRefresh).toHaveBeenCalled();
+  });
+
+  describe('managed content', () => {
+    it('keeps the delete button disabled when the selection only contains managed SOs', async () => {
+      const selectedSavedObjects = [
+        { type: 'visualization', managed: true },
+        { type: 'search', managed: true },
+        { type: 'index-pattern', managed: true },
+      ] as any;
+
+      const { rerender } = render(
+        <I18nProvider>
+          <Table {...defaultProps} selectedSavedObjects={selectedSavedObjects} />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
+      });
+
+      rerender(
+        <I18nProvider>
+          <Table
+            {...defaultProps}
+            selectedSavedObjects={[...selectedSavedObjects, { type: 'lens', managed: false }]}
+          />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeEnabled();
+        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
+      });
+    });
   });
 });
