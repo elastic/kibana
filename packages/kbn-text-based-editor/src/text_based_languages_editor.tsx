@@ -108,6 +108,9 @@ export interface TextBasedLanguagesEditorProps {
   editorIsInline?: boolean;
   /** Disables the submit query action*/
   disableSubmitAction?: boolean;
+
+  /** when set to true enables query cancellation **/
+  allowQueryCancellation?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -161,6 +164,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
+  allowQueryCancellation,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -189,7 +193,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   });
 
   const onQuerySubmit = useCallback(() => {
-    if (isQueryLoading) {
+    if (isQueryLoading && allowQueryCancellation) {
       abortController?.abort();
       setIsQueryLoading(false);
     } else {
@@ -203,7 +207,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       }
       onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading]);
+  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
 
   useEffect(() => {
     if (!isLoading) setIsQueryLoading(false);
@@ -879,10 +883,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }}
                         detectTimestamp={detectTimestamp}
                         editorIsInline={editorIsInline}
-                        disableSubmitAction={isQueryLoading}
+                        disableSubmitAction={disableSubmitAction}
                         hideRunQueryText={hideRunQueryText}
                         isSpaceReduced={isSpaceReduced}
-                        isLoading={isLoading}
+                        isLoading={isQueryLoading}
+                        allowQueryCancellation={allowQueryCancellation}
                       />
                     )}
                   </div>
@@ -972,9 +977,10 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
-          disableSubmitAction={isQueryLoading}
+          disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
-          isLoading={isLoading}
+          isLoading={isQueryLoading}
+          allowQueryCancellation={allowQueryCancellation}
           {...editorMessages}
         />
       )}

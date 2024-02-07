@@ -449,6 +449,7 @@ export function LensEditConfigurationFlyout({
                   }
                 }}
                 isDisabled={false}
+                allowQueryCancellation={true}
               />
             </EuiFlexItem>
           )}
