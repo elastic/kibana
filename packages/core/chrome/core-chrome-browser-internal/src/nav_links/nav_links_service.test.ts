@@ -12,7 +12,7 @@ import { type App, AppStatus } from '@kbn/core-application-browser';
 import { NavLinksService } from './nav_links_service';
 
 const availableApps: ReadonlyMap<string, App> = new Map([
-  ['app1', { id: 'app1', order: 0, title: 'App 1', mount: () => () => undefined }],
+  ['app1', { id: 'app1', order: 0, title: 'App 1', icon: 'app1', mount: () => () => undefined }],
   [
     'app2',
     {
@@ -27,6 +27,7 @@ const availableApps: ReadonlyMap<string, App> = new Map([
           order: 50,
           title: 'Deep App 1',
           path: '/deepapp1',
+          visibleIn: ['sideNav'],
           deepLinks: [
             {
               id: 'deepApp2',

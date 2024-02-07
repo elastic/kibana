@@ -8,6 +8,7 @@
 
 import type { Observable } from 'rxjs';
 import type { AppCategory } from '@kbn/core-application-common';
+import type { AppDeepLinkLocations } from '@kbn/core-application-browser';
 
 /**
  * @public
@@ -73,6 +74,8 @@ export interface ChromeNavLink {
    * to disable the nav link when the license is expired.
    */
   readonly disabled?: boolean;
+
+  readonly visibleIn: AppDeepLinkLocations[];
 }
 
 /**
