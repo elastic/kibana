@@ -51,7 +51,30 @@ export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssi
         history.push(next);
       },
       navigateToConversationsApp: (path, ...args) => {
-        navigateToApp('observabilityAIAssistant', { path, ...args });
+        const [_, route, routeParam] = path.split('/');
+
+        const sanitized = routeParam.replace('{', '').replace('}', '');
+
+        const pathKey = args[0]?.path;
+
+        if (typeof pathKey !== 'object') {
+          return;
+        }
+
+        if (Object.keys(pathKey).length === 0) {
+          navigateToApp('observabilityAIAssistant', {
+            path: route,
+          });
+          return;
+        }
+
+        if (Object.keys(pathKey).length === 1) {
+          navigateToApp('observabilityAIAssistant', {
+            // @ts-expect-error
+            path: `${route}/${pathKey[sanitized]}`,
+          });
+          return;
+        }
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
