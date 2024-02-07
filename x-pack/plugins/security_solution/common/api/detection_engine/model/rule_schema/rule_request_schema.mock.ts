@@ -213,3 +213,14 @@ export const getUpdateNewTermsSchemaMock = (
   new_terms_fields: ['user.name'],
   history_window_start: 'now-7d',
 });
+
+export const getCreateEqlRuleSchemaMock = (ruleId = 'rule-1'): EqlRuleCreateProps => ({
+  description: 'Event correlation index pattern rule',
+  name: 'Event correlation index pattern rule',
+  severity: 'high',
+  risk_score: 55,
+  rule_id: ruleId,
+  type: 'eql',
+  language: 'eql',
+  query: 'process where process.name == "regsvr32.exe"',
+});

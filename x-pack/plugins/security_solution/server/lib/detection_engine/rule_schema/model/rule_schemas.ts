@@ -152,7 +152,7 @@ export const EqlSpecificRuleParams = z.object({
   filters: RuleFilterArray.optional(),
   eventCategoryOverride: EventCategoryOverride.optional(),
   timestampField: TimestampField.optional(),
-  tiebreakerField: TiebreakerField.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type EqlRuleParams = BaseRuleParams & EqlSpecificRuleParams;
