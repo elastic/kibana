@@ -454,7 +454,7 @@ export const generateAlertInstance = (
       flapping: false,
       maintenanceWindowIds: maintenanceWindowIds || [],
       pendingRecoveredCount: 0,
-      activeCount: 0,
+      activeCount: 1,
     },
     state: {
       bar: false,
