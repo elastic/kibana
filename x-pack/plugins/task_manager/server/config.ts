@@ -62,6 +62,10 @@ const requeueInvalidTasksConfig = schema.object({
   max_attempts: schema.number({ defaultValue: 100, min: 1, max: 500 }),
 });
 
+const requestTimeoutsConfig = schema.object({
+  update_by_query: schema.number({ defaultValue: 1000 * 60, min: 1000, max: 1000 * 60 * 10 }),
+});
+
 export const configSchema = schema.object(
   {
     allow_reading_invalid_state: schema.boolean({ defaultValue: true }),
@@ -156,6 +160,7 @@ export const configSchema = schema.object(
       min: 1,
     }),
     claim_strategy: schema.string({ defaultValue: CLAIM_STRATEGY_DEFAULT }),
+    request_timeouts: requestTimeoutsConfig,
   },
   {
     validate: (config) => {
@@ -179,3 +184,4 @@ export type RequeueInvalidTasksConfig = TypeOf<typeof requeueInvalidTasksConfig>
 export type TaskManagerConfig = TypeOf<typeof configSchema>;
 export type TaskExecutionFailureThreshold = TypeOf<typeof taskExecutionFailureThresholdSchema>;
 export type EventLoopDelayConfig = TypeOf<typeof eventLoopDelaySchema>;
+export type RequestTimeoutsConfig = TypeOf<typeof requestTimeoutsConfig>;
