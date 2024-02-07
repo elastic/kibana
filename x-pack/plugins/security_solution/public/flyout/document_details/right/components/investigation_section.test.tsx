@@ -71,9 +71,15 @@ describe('<InvestigationSection />', () => {
   });
 
   it('should not render investigation guide when document is not signal', () => {
+    const mockGetFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'alert';
+      }
+    };
     const { getByTestId, queryByTestId } = renderInvestigationSection(true, {
       ...panelContextValue,
-      documentIsSignal: false,
+      getFieldsData: mockGetFieldsData,
     });
     expect(queryByTestId(INVESTIGATION_GUIDE_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(HIGHLIGHTED_FIELDS_TITLE_TEST_ID)).toBeInTheDocument();

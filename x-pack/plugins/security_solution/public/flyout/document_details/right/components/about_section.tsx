@@ -14,6 +14,7 @@ import { AlertDescription } from './alert_description';
 import { Reason } from './reason';
 import { MitreAttack } from './mitre_attack';
 import { getField } from '../../shared/utils';
+import { EventKind } from '../../shared/constants/event_kinds';
 import { useRightPanelContext } from '../context';
 import { isEcsAllowedValue } from '../utils/event_utils';
 import { EventCategoryDescription } from './event_category_description';
@@ -28,15 +29,17 @@ export interface AboutSectionProps {
 }
 
 /**
- * Most top section of the overview tab. It contains the description, reason and mitre attack information (for a document of type alert).
+ * Most top section of the overview tab.
+ * For alerts (event.kind is signal), it contains the description, reason and mitre attack information.
+ * For generic events (event.kind is event), it shows the event category description and event renderer.
+ * For all other events, it shows the event kind description, a list of event categories and event renderer.
  */
 export const AboutSection: VFC<AboutSectionProps> = ({ expanded = true }) => {
-  const { getFieldsData, documentIsSignal } = useRightPanelContext();
-
+  const { getFieldsData } = useRightPanelContext();
   const eventKind = getField(getFieldsData('event.kind'));
   const eventKindInECS = eventKind && isEcsAllowedValue('event.kind', eventKind);
 
-  if (documentIsSignal) {
+  if (eventKind === EventKind.signal) {
     return (
       <ExpandableSection
         expanded={expanded}

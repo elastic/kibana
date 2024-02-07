@@ -21,7 +21,7 @@ export interface RightPanelTabType {
   'data-test-subj': string;
 }
 
-const overviewTab: RightPanelTabType = {
+export const overviewTab: RightPanelTabType = {
   id: 'overview',
   'data-test-subj': OVERVIEW_TAB_TEST_ID,
   name: (
@@ -33,7 +33,7 @@ const overviewTab: RightPanelTabType = {
   content: <OverviewTab />,
 };
 
-const tableTab: RightPanelTabType = {
+export const tableTab: RightPanelTabType = {
   id: 'table',
   'data-test-subj': TABLE_TAB_TEST_ID,
   name: (
@@ -45,7 +45,7 @@ const tableTab: RightPanelTabType = {
   content: <TableTab />,
 };
 
-const jsonTab: RightPanelTabType = {
+export const jsonTab: RightPanelTabType = {
   id: 'json',
   'data-test-subj': JSON_TAB_TEST_ID,
   name: (
@@ -55,18 +55,4 @@ const jsonTab: RightPanelTabType = {
     />
   ),
   content: <JsonTab />,
-};
-
-/**
- * Helper funtion that returns tabs to display in the document details expandable flyout right section
- * @param documentIsSignal
- * @param showEventOverview
- */
-export const getRightPanelTabs = (
-  documentIsSignal: boolean,
-  showEventOverview: boolean
-): RightPanelTabType[] => {
-  return documentIsSignal || showEventOverview
-    ? [overviewTab, tableTab, jsonTab]
-    : [tableTab, jsonTab];
 };

@@ -140,9 +140,15 @@ describe('<InsightsSection />', () => {
   });
 
   it('should not render threat intel and correlations insights component when document is not signal', () => {
+    const getFieldsData = (field: string) => {
+      switch (field) {
+        case 'event.kind':
+          return 'metric';
+      }
+    };
     const contextValue = {
       eventId: 'some_Id',
-      getFieldsData: mockGetFieldsData,
+      getFieldsData,
       documentIsSignal: false,
     } as unknown as RightPanelContext;
 

@@ -8,9 +8,8 @@
 import type { BrowserFields, TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import React, { createContext, memo, useContext, useMemo } from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+
 import { TableId } from '@kbn/securitysolution-data-table';
-import { getField } from '../shared/utils';
-import { EventKind } from '../shared/constants/event_kinds';
 import { useEventDetails } from '../shared/hooks/use_event_details';
 import { FlyoutError } from '../../shared/components/flyout_error';
 import { FlyoutLoading } from '../../shared/components/flyout_loading';
@@ -65,10 +64,6 @@ export interface RightPanelContext {
    * Boolean to indicate whether it is a preview flyout
    */
   isPreview: boolean;
-  /**
-   * Is the document a signal document (alert)
-   */
-  documentIsSignal: boolean;
 }
 
 export const RightPanelContext = createContext<RightPanelContext | undefined>(undefined);
@@ -94,7 +89,6 @@ export const RightPanelProvider = memo(
 
     const { ruleId } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const { rule: maybeRule } = useRuleWithFallback(ruleId);
-    const documentIsSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
 
     const contextValue = useMemo(
       () =>
@@ -116,7 +110,6 @@ export const RightPanelProvider = memo(
               refetchFlyoutData,
               getFieldsData,
               isPreview: scopeId === TableId.rulePreview,
-              documentIsSignal,
             }
           : undefined,
       [
@@ -130,7 +123,6 @@ export const RightPanelProvider = memo(
         searchHit,
         refetchFlyoutData,
         getFieldsData,
-        documentIsSignal,
       ]
     );
 

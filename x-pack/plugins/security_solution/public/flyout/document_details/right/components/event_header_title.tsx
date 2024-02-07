@@ -17,7 +17,7 @@ import { useRightPanelContext } from '../context';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { FLYOUT_EVENT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { getField } from '../../shared/utils';
-import { getCategoryTitle } from '../utils/event_utils';
+import { EVENT_CATEGORY_TO_FIELD } from '../utils/event_utils';
 
 /**
  * Event details flyout right section header
@@ -30,15 +30,19 @@ export const EventHeaderTitle: FC = memo(() => {
   const eventCategory = getField(getFieldsData('event.category'));
 
   const title = useMemo(() => {
+    let eventTitle;
     if (eventKind === 'event' && eventCategory) {
-      return getCategoryTitle(getFieldsData, eventCategory);
+      const fieldName = EVENT_CATEGORY_TO_FIELD[eventCategory];
+      eventTitle = getField(getFieldsData(fieldName));
+    } else if (eventKind && eventKind !== null) {
+      eventTitle = startCase(eventKind);
     }
-    if (eventKind && eventKind !== null) {
-      return startCase(eventKind);
-    }
-    return i18n.translate('xpack.securitySolution.flyout.right.title.eventTitle', {
-      defaultMessage: 'Event details',
-    });
+    return (
+      eventTitle ??
+      i18n.translate('xpack.securitySolution.flyout.right.title.eventTitle', {
+        defaultMessage: 'Event details',
+      })
+    );
   }, [eventKind, getFieldsData, eventCategory]);
 
   return (

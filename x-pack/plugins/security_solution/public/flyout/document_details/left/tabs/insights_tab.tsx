@@ -27,6 +27,8 @@ import {
 } from '../components/threat_intelligence_details';
 import { PREVALENCE_TAB_ID, PrevalenceDetails } from '../components/prevalence_details';
 import { CORRELATIONS_TAB_ID, CorrelationsDetails } from '../components/correlations_details';
+import { getField } from '../../shared/utils';
+import { EventKind } from '../../shared/constants/event_kinds';
 
 const insightsButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -72,27 +74,27 @@ const insightsButtons: EuiButtonGroupOptionProps[] = [
 ];
 
 /**
- * Helper function to get the insight tabs based on whether document is alert or non-alert
- * alert: entities, threat intelligence, prevalence, correlations
- * non-alert: entities, prevalence
- * @param documentIsSignal
- * @returns insight buttons
- */
-const getInsightsButtons = (documentIsSignal: boolean) => {
-  return documentIsSignal
-    ? insightsButtons
-    : insightsButtons.filter((tab) => tab.id === ENTITIES_TAB_ID || tab.id === PREVALENCE_TAB_ID);
-};
-
-/**
  * Insights view displayed in the document details expandable flyout left section
  */
 export const InsightsTab: React.FC = memo(() => {
-  const { eventId, indexName, scopeId, documentIsSignal } = useLeftPanelContext();
+  const { eventId, indexName, scopeId, getFieldsData } = useLeftPanelContext();
+  const eventKind = getField(getFieldsData('event.kind'));
   const { openLeftPanel } = useExpandableFlyoutApi();
   const panels = useExpandableFlyoutState();
   const activeInsightsId = panels.left?.path?.subTab ?? ENTITIES_TAB_ID;
-  const buttonGroup = useMemo(() => getInsightsButtons(documentIsSignal), [documentIsSignal]);
+
+  // insight tabs based on whether document is alert or non-alert
+  // alert: entities, threat intelligence, prevalence, correlations
+  // non-alert: entities, prevalence
+  const buttonGroup = useMemo(
+    () =>
+      eventKind === EventKind.signal
+        ? insightsButtons
+        : insightsButtons.filter(
+            (tab) => tab.id === ENTITIES_TAB_ID || tab.id === PREVALENCE_TAB_ID
+          ),
+    [eventKind]
+  );
 
   const onChangeCompressed = useCallback(
     (optionId: string) => {

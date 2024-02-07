@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat } from '@elastic/ecs';
 import { i18n } from '@kbn/i18n';
-import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
-import { getField } from '../../shared/utils';
 
 export interface AllowedValue {
   description?: string;
@@ -65,7 +63,7 @@ export const getEcsAllowedValueDescription = (fieldName: string, value: string):
 };
 
 // mapping of event category to the field displayed as title
-const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
+export const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
   authentication: '',
   configuration: '',
   database: '',
@@ -84,19 +82,4 @@ const EVENT_CATEGORY_TO_FIELD: Record<string, string> = {
   threat: '',
   vulnerability: '',
   web: '',
-};
-
-/**
- * Returns the proper title for the document given by event category
- * @param getFieldsData
- * @param eventCategory
- * @returns event category title
- */
-export const getCategoryTitle = (getFieldsData: GetFieldsData, eventCategory: string): string => {
-  return (
-    getField(getFieldsData(EVENT_CATEGORY_TO_FIELD[eventCategory])) ??
-    i18n.translate('xpack.securitySolution.flyout.right.title.eventTitle', {
-      defaultMessage: 'Event details',
-    })
-  );
 };

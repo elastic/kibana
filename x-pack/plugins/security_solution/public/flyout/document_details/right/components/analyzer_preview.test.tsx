@@ -73,7 +73,6 @@ describe('<AnalyzerPreview />', () => {
     const wrapper = renderAnalyzerPreview({
       ...mockContextValue,
       dataFormattedForFieldBrowser: [],
-      documentIsSignal: false,
     });
 
     expect(mockUseAlertPrevalenceFromProcessTree).toHaveBeenCalledWith({

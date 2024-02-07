@@ -14,10 +14,12 @@ import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { RightPanelTabType } from './tabs';
-import { getRightPanelTabs } from './tabs';
+import * as tabs from './tabs';
 import { PanelFooter } from './footer';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useShowEventOverview } from './hooks/use_show_event_overview';
+import { getField } from '../shared/utils';
+import { EventKind } from '../shared/constants/event_kinds';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
 export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
@@ -37,16 +39,20 @@ export interface RightPanelProps extends FlyoutPanelProps {
  */
 export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
   const { openRightPanel, closeFlyout } = useExpandableFlyoutApi();
-  const { eventId, indexName, scopeId, isPreview, documentIsSignal } = useRightPanelContext();
+  const { eventId, indexName, scopeId, isPreview, dataAsNestedObject, getFieldsData } =
+    useRightPanelContext();
+  const isEventKindSignal = getField(getFieldsData('event.kind')) === EventKind.signal;
 
   const expandableEventFlyoutEnabled = useIsExperimentalFeatureEnabled(
     'expandableEventFlyoutEnabled'
   );
-  const showEventOverview = useShowEventOverview() && expandableEventFlyoutEnabled;
-  const tabsDisplayed = useMemo(
-    () => getRightPanelTabs(documentIsSignal, showEventOverview),
-    [documentIsSignal, showEventOverview]
-  );
+  const showEventOverview =
+    useShowEventOverview({ getFieldsData, dataAsNestedObject }) && expandableEventFlyoutEnabled;
+  const tabsDisplayed = useMemo(() => {
+    return isEventKindSignal || showEventOverview
+      ? [tabs.overviewTab, tabs.tableTab, tabs.jsonTab]
+      : [tabs.tableTab, tabs.jsonTab];
+  }, [isEventKindSignal, showEventOverview]);
 
   const selectedTabId = useMemo(() => {
     const defaultTab = tabsDisplayed[0].id;
@@ -83,7 +89,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
-      <PanelNavigation flyoutIsExpandable={documentIsSignal || showEventOverview} />
+      <PanelNavigation flyoutIsExpandable={isEventKindSignal || showEventOverview} />
       <PanelHeader
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}

@@ -10,9 +10,8 @@ import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import type { LeftPanelPaths } from '.';
-import { getLeftPanelTabs } from './tabs';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
-import { useLeftPanelContext } from './context';
+import type { LeftPanelTabType } from './tabs';
 
 export interface PanelHeaderProps {
   /**
@@ -24,39 +23,44 @@ export interface PanelHeaderProps {
    * @param selected
    */
   setSelectedTabId: (selected: LeftPanelPaths) => void;
+  /**
+   * Tabs display at the top of left panel
+   */
+  tabs: LeftPanelTabType[];
 }
 
 /**
  * Header at the top of the left section.
  * Displays the insights, investigation and response tabs (visualize is hidden for 8.9+).
  */
-export const PanelHeader: VFC<PanelHeaderProps> = memo(({ selectedTabId, setSelectedTabId }) => {
-  const { documentIsSignal } = useLeftPanelContext();
-  const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
-  const renderTabs = getLeftPanelTabs(documentIsSignal, false).map((tab, index) => (
-    <EuiTab
-      onClick={() => onSelectedTabChanged(tab.id)}
-      isSelected={tab.id === selectedTabId}
-      key={index}
-      data-test-subj={tab['data-test-subj']}
-    >
-      {tab.name}
-    </EuiTab>
-  ));
+export const PanelHeader: VFC<PanelHeaderProps> = memo(
+  ({ selectedTabId, setSelectedTabId, tabs }) => {
+    const onSelectedTabChanged = (id: LeftPanelPaths) => setSelectedTabId(id);
+    const renderTabs = tabs.map((tab, index) => (
+      <EuiTab
+        onClick={() => onSelectedTabChanged(tab.id)}
+        isSelected={tab.id === selectedTabId}
+        key={index}
+        data-test-subj={tab['data-test-subj']}
+      >
+        {tab.name}
+      </EuiTab>
+    ));
 
-  return (
-    <FlyoutHeader
-      css={css`
-        background-color: ${useEuiBackgroundColor('subdued')};
-        padding-bottom: 0 !important;
-        border-block-end: none !important;
-      `}
-    >
-      <EuiTabs size="l" expand>
-        {renderTabs}
-      </EuiTabs>
-    </FlyoutHeader>
-  );
-});
+    return (
+      <FlyoutHeader
+        css={css`
+          background-color: ${useEuiBackgroundColor('subdued')};
+          padding-bottom: 0 !important;
+          border-block-end: none !important;
+        `}
+      >
+        <EuiTabs size="l" expand>
+          {renderTabs}
+        </EuiTabs>
+      </FlyoutHeader>
+    );
+  }
+);
 
 PanelHeader.displayName = 'PanelHeader';

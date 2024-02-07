@@ -40,7 +40,7 @@ describe('<EventHeaderTitle />', () => {
   });
 
   it('should render component', () => {
-    const { getByTestId } = renderHeader({ ...mockContextValue, documentIsSignal: false });
+    const { getByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(SEVERITY_VALUE_TEST_ID)).toBeInTheDocument();
@@ -57,7 +57,6 @@ describe('<EventHeaderTitle />', () => {
     };
     const { getByTestId } = renderHeader({
       ...mockContextValue,
-      documentIsSignal: false,
       getFieldsData: mockGetFieldsData,
     });
 
@@ -77,7 +76,6 @@ describe('<EventHeaderTitle />', () => {
     };
     const { getByTestId } = renderHeader({
       ...mockContextValue,
-      documentIsSignal: false,
       getFieldsData: mockGetFieldsData,
     });
 
@@ -85,10 +83,7 @@ describe('<EventHeaderTitle />', () => {
   });
 
   it('should fallback title if event kind is null', () => {
-    const { getByTestId } = renderHeader({
-      ...mockContextValue,
-      documentIsSignal: false,
-    });
+    const { getByTestId } = renderHeader({ ...mockContextValue, getFieldsData: () => '' });
 
     expect(getByTestId(EVENT_HEADER_TEXT_TEST_ID)).toHaveTextContent('Event details');
   });

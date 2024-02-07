@@ -11,6 +11,7 @@ import {
   ALERT_SEVERITY,
   ALERT_SUPPRESSION_DOCS_COUNT,
 } from '@kbn/rule-data-utils';
+import { EventKind } from '../constants/event_kinds';
 
 const mockFieldData: Record<string, string[]> = {
   [ALERT_SEVERITY]: ['low'],
@@ -20,6 +21,7 @@ const mockFieldData: Record<string, string[]> = {
   [ALERT_REASON]: ['reason'],
   [ALERT_SUPPRESSION_DOCS_COUNT]: ['1'],
   '@timestamp': ['2023-01-01T00:00:00.000Z'],
+  'event.kind': [EventKind.signal],
 };
 
 /**

@@ -15,6 +15,7 @@ import { FlyoutHeaderTabs } from '../../shared/components/flyout_header_tabs';
 import { AlertHeaderTitle } from './components/alert_header_title';
 import { EventHeaderTitle } from './components/event_header_title';
 import { useRightPanelContext } from './context';
+import { useBasicDataFromDetailsData } from '../../../timelines/components/side_panel/event_details/helpers';
 
 export interface PanelHeaderProps {
   /**
@@ -34,7 +35,8 @@ export interface PanelHeaderProps {
 
 export const PanelHeader: FC<PanelHeaderProps> = memo(
   ({ selectedTabId, setSelectedTabId, tabs }) => {
-    const { documentIsSignal } = useRightPanelContext();
+    const { dataFormattedForFieldBrowser } = useRightPanelContext();
+    const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
     const onSelectedTabChanged = (id: RightPanelPaths) => setSelectedTabId(id);
     const renderTabs = tabs.map((tab, index) => (
       <EuiTab
@@ -49,7 +51,7 @@ export const PanelHeader: FC<PanelHeaderProps> = memo(
 
     return (
       <FlyoutHeader>
-        {documentIsSignal ? <AlertHeaderTitle /> : <EventHeaderTitle />}
+        {isAlert ? <AlertHeaderTitle /> : <EventHeaderTitle />}
         <EuiSpacer size="m" />
         <FlyoutHeaderTabs>{renderTabs}</FlyoutHeaderTabs>
       </FlyoutHeader>

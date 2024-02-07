@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { showEventOverview } from './use_show_event_overview';
+import { useShowEventOverview } from './use_show_event_overview';
+import { renderHook } from '@testing-library/react-hooks';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
 const getFieldsData = jest.fn();
@@ -21,7 +22,10 @@ describe('showEventOverview', () => {
             return 'alert';
           }
         });
-        expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(true);
+        const hookResult = renderHook(() =>
+          useShowEventOverview({ getFieldsData, dataAsNestedObject }).valueOf()
+        );
+        expect(hookResult.result.current).toBe(true);
       });
 
       it('should return false if event.kind is not an ecs allowed values', () => {
@@ -30,12 +34,18 @@ describe('showEventOverview', () => {
             return 'not ecs';
           }
         });
-        expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(false);
+        const hookResult = renderHook(() =>
+          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+        );
+        expect(hookResult.result.current).toBe(false);
       });
 
       it('should return false if event.kind is notavailable', () => {
         getFieldsData.mockImplementation(() => {});
-        expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(false);
+        const hookResult = renderHook(() =>
+          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+        );
+        expect(hookResult.result.current).toBe(false);
       });
     });
 
@@ -49,7 +59,10 @@ describe('showEventOverview', () => {
             return 'file';
           }
         });
-        expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(true);
+        const hookResult = renderHook(() =>
+          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+        );
+        expect(hookResult.result.current).toBe(true);
       });
 
       it('should return false if event.category is not an ecs allowed values', () => {
@@ -61,7 +74,10 @@ describe('showEventOverview', () => {
             return 'not ecs';
           }
         });
-        expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(false);
+        const hookResult = renderHook(() =>
+          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+        );
+        expect(hookResult.result.current).toBe(false);
       });
       it('should return false if event.category is not available', () => {
         getFieldsData.mockImplementation((field: string) => {
@@ -69,7 +85,10 @@ describe('showEventOverview', () => {
             return 'event';
           }
         });
-        expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(false);
+        const hookResult = renderHook(() =>
+          useShowEventOverview({ getFieldsData, dataAsNestedObject })
+        );
+        expect(hookResult.result.current).toBe(false);
       });
     });
   });
@@ -77,7 +96,10 @@ describe('showEventOverview', () => {
   describe('event renderer is available', () => {
     const dataAsNestedObject = { event: { module: ['suricata'] } } as unknown as Ecs;
     it('should return true', () => {
-      expect(showEventOverview(getFieldsData, dataAsNestedObject)).toBe(true);
+      const hookResult = renderHook(() =>
+        useShowEventOverview({ getFieldsData, dataAsNestedObject })
+      );
+      expect(hookResult.result.current).toBe(true);
     });
   });
 });

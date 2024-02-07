@@ -26,5 +26,4 @@ export const mockContextValue: LeftPanelContext = {
   dataAsNestedObject: mockDataAsNestedObject,
   investigationFields: [],
   isPreview: false,
-  documentIsSignal: true,
 };

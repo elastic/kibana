@@ -27,7 +27,7 @@ export interface LeftPanelTabType {
   content: React.ReactElement;
 }
 
-const visualizeTab: LeftPanelTabType = {
+export const visualizeTab: LeftPanelTabType = {
   id: 'visualize',
   'data-test-subj': VISUALIZE_TAB_TEST_ID,
   name: (
@@ -39,7 +39,7 @@ const visualizeTab: LeftPanelTabType = {
   content: <VisualizeTab />,
 };
 
-const insightsTab: LeftPanelTabType = {
+export const insightsTab: LeftPanelTabType = {
   id: 'insights',
   'data-test-subj': INSIGHTS_TAB_TEST_ID,
   name: (
@@ -51,7 +51,7 @@ const insightsTab: LeftPanelTabType = {
   content: <InsightsTab />,
 };
 
-const investigationTab: LeftPanelTabType = {
+export const investigationTab: LeftPanelTabType = {
   id: 'investigation',
   'data-test-subj': INVESTIGATION_TAB_TEST_ID,
   name: (
@@ -63,7 +63,7 @@ const investigationTab: LeftPanelTabType = {
   content: <InvestigationTab />,
 };
 
-const responseTab: LeftPanelTabType = {
+export const responseTab: LeftPanelTabType = {
   id: 'response',
   'data-test-subj': RESPONSE_TAB_TEST_ID,
   name: (
@@ -73,25 +73,4 @@ const responseTab: LeftPanelTabType = {
     />
   ),
   content: <ResponseTab />,
-};
-
-/**
- * Helper funtion that returns tabs to display in the document details expandable flyout left section
- * @param documentIsSignal
- * @param showVisualizeTab
- */
-export const getLeftPanelTabs = (
-  documentIsSignal: boolean,
-  showVisualizeTab: boolean
-): LeftPanelTabType[] => {
-  let tabs;
-  if (documentIsSignal) {
-    tabs = [insightsTab, investigationTab, responseTab];
-  } else {
-    tabs = [insightsTab];
-  }
-  if (showVisualizeTab) {
-    return [visualizeTab, ...tabs];
-  }
-  return tabs;
 };
