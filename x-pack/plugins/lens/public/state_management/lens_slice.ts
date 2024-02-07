@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createAction, createReducer, current, PayloadAction } from '@reduxjs/toolkit';
+import { createAction, createReducer, current } from '@reduxjs/toolkit';
 import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import { mapValues, uniq } from 'lodash';
 import { Filter, Query } from '@kbn/es-query';
@@ -463,6 +463,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
       })
       .addCase(changeIndexPattern, (state, { payload }) => {
         const { visualizationIds, datasourceIds, layerId, indexPatternId, dataViews } = payload;
+        if (!dataViews.indexPatterns) {
+          throw new Error('Invariant: indexPatterns should be defined');
+        }
         const newIndexPatternRefs = [...state.dataViews.indexPatternRefs];
         const availableRefs = new Set(newIndexPatternRefs.map((ref) => ref.id));
         // check for missing refs
