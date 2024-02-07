@@ -41,9 +41,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     },
     filter: [
       {
-        $state: {
-          store: 'appState',
-        },
         meta: {
           alias: null,
           disabled: false,
