@@ -10,5 +10,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('observability cases', function () {
     loadTestFile(require.resolve('./list_view'));
+    loadTestFile(require.resolve('./custom_fields'));
   });
 }

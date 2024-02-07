@@ -6,6 +6,12 @@
  */
 
 import { BACK_TO_RULE_DETAILS, EDIT_SUBMIT_BUTTON } from '../screens/edit_rule';
+import { editRuleUrl } from '../urls/edit_rule';
+import { visit } from './navigation';
+
+export function visitEditRulePage(ruleId: string): void {
+  visit(editRuleUrl(ruleId));
+}
 
 export const saveEditedRule = () => {
   cy.get(EDIT_SUBMIT_BUTTON).should('exist').click({ force: true });

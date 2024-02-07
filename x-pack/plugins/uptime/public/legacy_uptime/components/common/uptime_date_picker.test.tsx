@@ -10,7 +10,7 @@ import { UptimeDatePicker } from './uptime_date_picker';
 import { startPlugins } from '../../lib/__mocks__/uptime_plugin_start_mock';
 import { createMemoryHistory } from 'history';
 import { render } from '../../lib/helper/rtl_helpers';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 
 describe('UptimeDatePicker component', () => {
   jest.setTimeout(10_000);

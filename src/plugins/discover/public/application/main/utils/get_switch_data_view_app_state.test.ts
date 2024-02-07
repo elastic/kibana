@@ -9,6 +9,8 @@
 import { getDataViewAppState } from './get_switch_data_view_app_state';
 import { DataView } from '@kbn/data-views-plugin/public';
 
+const emptyDefaultColumns: string[] = [];
+
 /**
  * Helper function returning an data view
  */
@@ -36,23 +38,36 @@ const getDataView = (id: string, timeFieldName: string, fields: string[]) => {
 };
 
 const currentDataView = getDataView('curr', '', ['category', 'name']);
-const nextDataView = getDataView('next', '', ['category']);
+const nextDataView = getDataView('next', '', ['category', 'user_default_column']);
 
 describe('Discover getDataViewAppState', () => {
   test('removing fields that are not part of the next data view, keeping unknown fields ', async () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
+      emptyDefaultColumns,
       ['category', 'name', 'unknown'],
       [['category', 'desc']]
     );
     expect(result.columns).toEqual(['category', 'unknown']);
     expect(result.sort).toEqual([['category', 'desc']]);
   });
+  test('removing fields that are not part of the next data view and adding default columns', async () => {
+    const result = getDataViewAppState(
+      currentDataView,
+      nextDataView,
+      ['user_default_column', 'user_unknown_default_column'],
+      ['category', 'name', 'user_default_column'],
+      [['category', 'desc']]
+    );
+    expect(result.columns).toEqual(['category', 'user_default_column']);
+    expect(result.sort).toEqual([['category', 'desc']]);
+  });
   test('removing sorted by fields that are not part of the next data view', async () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
+      emptyDefaultColumns,
       ['name'],
       [
         ['category', 'desc'],
@@ -66,6 +81,7 @@ describe('Discover getDataViewAppState', () => {
     const result = getDataViewAppState(
       currentDataView,
       nextDataView,
+      emptyDefaultColumns,
       ['name'],
       [
         ['category', 'desc'],
@@ -80,7 +96,13 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
     const next = getDataView('b', 'timeFieldB', ['timeFieldB']);
 
-    const result = getDataViewAppState(current, next, [], [['timeFieldA', 'desc']]);
+    const result = getDataViewAppState(
+      current,
+      next,
+      emptyDefaultColumns,
+      [],
+      [['timeFieldA', 'desc']]
+    );
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldB', 'desc']]);
   });
@@ -89,7 +111,13 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('a', 'timeFieldA', ['timeFieldA']);
     const next = getDataView('b', '', ['timeFieldA']);
 
-    const result = getDataViewAppState(current, next, [], [['timeFieldA', 'desc']]);
+    const result = getDataViewAppState(
+      current,
+      next,
+      emptyDefaultColumns,
+      [],
+      [['timeFieldA', 'desc']]
+    );
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([]);
   });
@@ -97,7 +125,7 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('b', '', ['timeFieldA']);
     const next = getDataView('a', 'timeFieldA', ['timeFieldA']);
 
-    const result = getDataViewAppState(current, next, [], []);
+    const result = getDataViewAppState(current, next, emptyDefaultColumns, [], []);
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timeFieldA', 'desc']]);
   });
@@ -105,8 +133,16 @@ describe('Discover getDataViewAppState', () => {
     const current = getDataView('timebased', 'timefield', ['timefield']);
     const next = getDataView('timebased2', 'timefield2', ['timefield', 'timefield2']);
 
-    const result = getDataViewAppState(current, next, [], [['timefield', 'desc']]);
+    const result = getDataViewAppState(
+      current,
+      next,
+      emptyDefaultColumns,
+      [],
+      [['timefield', 'desc']]
+    );
     expect(result.columns).toEqual([]);
     expect(result.sort).toEqual([['timefield2', 'desc']]);
   });
+
+  // TODO: add tests
 });

@@ -1,0 +1,89 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render should not render when no shard details are provided 1`] = `""`;
+
+exports[`render should render with failures 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="xxxs"
+      >
+        <h4>
+          Shards
+        </h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <OpenShardFailureFlyoutButton
+        failures={
+          Array [
+            Object {},
+          ]
+        }
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      2 total shards
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      1 of 2 successful
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`render should render with no failures 1`] = `
+<Fragment>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiTitle
+        size="xxxs"
+      >
+        <h4>
+          Shards
+        </h4>
+      </EuiTitle>
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <OpenShardFailureFlyoutButton
+        failures={Array []}
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiFlexGroup
+    justifyContent="spaceBetween"
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      2 total shards
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      2 of 2 successful
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

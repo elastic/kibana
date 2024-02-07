@@ -9,7 +9,7 @@ Runs a connector by ID.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification]. For a preview, check out <<connector-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/actions/docs/openapi[open API specification].
 ====
 
 [[execute-connector-api-request]]
@@ -59,6 +59,32 @@ refer to <<action-types>>.
 .`Params` properties
 [%collapsible%open]
 ====
+
+.Email connectors
+[%collapsible%open]
+=====
+`bcc`::
+(Optional, array of strings) A list of "blind carbon copy" email addresses.
+Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.
+
+`cc`::
+(Optional, array of strings) A list of "carbon copy" email addresses.
+Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.
+
+`message`::
+(Required, string) The email message text. Markdown format is supported.
+
+`subject`::
+(Required, string) The subject line of the email.
+
+`to`::
+(Required^*^, array of strings)
+A list of email addresses.
+Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.
+There must be at least one recipient in `to`, `cc`, or `bcc`.
+
+For more information, refer to <<email-action-type>>.
+=====
 
 .Index connectors
 [%collapsible%open]

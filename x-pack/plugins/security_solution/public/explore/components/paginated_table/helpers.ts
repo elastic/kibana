@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { PaginationInputPaginated } from '../../../../common/search_strategy';
+import type { PaginationInputPaginatedInput } from '../../../../common/api/search_strategy';
 
 export const generateTablePaginationOptions = (
   activePage: number,
   limit: number,
   isBucketSort?: boolean
-): PaginationInputPaginated => {
+): PaginationInputPaginatedInput => {
   const cursorStart = activePage * limit;
   return {
     activePage,

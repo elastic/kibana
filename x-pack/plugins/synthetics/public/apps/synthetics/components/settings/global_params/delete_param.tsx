@@ -55,7 +55,7 @@ export const DeleteParam = ({
             <p data-test-subj="uptimeDeleteParamFailure">
               {' '}
               {i18n.translate('xpack.synthetics.paramManagement.paramDeleteFailuresMessage.name', {
-                defaultMessage: 'Param {name} deleted successfully.',
+                defaultMessage: 'Param {name} failed to delete.',
                 values: { name },
               })}
             </p>

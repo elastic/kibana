@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -32,10 +32,11 @@ import {
   APP_WRAPPER_CLASS,
   useExecutionContext,
 } from '../../../../shared_imports';
+import { Section } from '../../../../../common/constants';
 import { useAppContext } from '../../../app_context';
 import { useLoadDataStreams } from '../../../services/api';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
-import { Section } from '../home';
 import { DataStreamTable } from './data_stream_table';
 import { DataStreamDetailPanel } from './data_stream_detail_panel';
 import { filterDataStreams, isSelectedDataStreamHidden } from '../../../lib/data_streams';
@@ -66,6 +67,10 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
     page: 'indexManagementDataStreamsTab',
   });
 
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.dataStreams);
+  }, []);
+
   const [isIncludeStatsChecked, setIsIncludeStatsChecked] = useState(false);
   const {
     error,
@@ -79,7 +84,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
   const [filters, setFilters] = useState<Filters<DataStreamFilterName>>({
     managed: {
       name: i18n.translate('xpack.idxMgmt.dataStreamList.viewManagedLabel', {
-        defaultMessage: 'Fleet-managed data streams',
+        defaultMessage: 'Managed data streams',
       }),
       checked: 'on',
     },
@@ -123,7 +128,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
           <EuiText color="subdued">
             <FormattedMessage
               id="xpack.idxMgmt.dataStreamList.dataStreamsDescription"
-              defaultMessage="Data streams store time-series data across multiple indices. {learnMoreLink}"
+              defaultMessage="Data streams store time-series data across multiple indices and can be created from index templates. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink
@@ -221,7 +226,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
             {' ' /* We need this space to separate these two sentences. */}
             {isFleetEnabled ? (
               <FormattedMessage
-                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerMessage"
+                id="xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaFleetMessage"
                 defaultMessage="Get started with data streams in {link}."
                 values={{
                   link: (
@@ -230,7 +235,7 @@ export const DataStreamList: React.FunctionComponent<RouteComponentProps<MatchPa
                       href={getUrlForApp('fleet')}
                     >
                       {i18n.translate(
-                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaIngestManagerLink',
+                        'xpack.idxMgmt.dataStreamList.emptyPrompt.noDataStreamsCtaFleetLink',
                         {
                           defaultMessage: 'Fleet',
                         }

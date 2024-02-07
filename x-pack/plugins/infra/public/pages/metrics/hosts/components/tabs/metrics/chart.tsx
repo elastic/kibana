@@ -5,38 +5,35 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import type { XYVisualOptions } from '@kbn/lens-embeddable-utils';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { useDataView } from '../../../../../../hooks/use_data_view';
+import { METRIC_CHART_HEIGHT } from '../../../../../../common/visualizations/constants';
 import { LensChart } from '../../../../../../components/lens';
-import { useMetricsDataViewContext } from '../../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { buildCombinedHostsFilter } from '../../../../../../utils/filters/build';
 import { useHostsTableContext } from '../../../hooks/use_hosts_table';
 import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
-import { METRIC_CHART_HEIGHT } from '../../../constants';
-import { XYChartLayerParams } from '../../../../../../common/visualizations/types';
 
-export interface ChartProps extends Pick<TypedLensByValueInput, 'id' | 'overrides' | 'title'> {
-  layers: XYChartLayerParams[];
-  visualOptions?: XYVisualOptions;
-}
+export type ChartProps = LensConfig & {
+  id: string;
+};
 
-export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProps) => {
-  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
-  const { dataView } = useMetricsDataViewContext();
-  const { requestTs, loading } = useHostsViewContext();
+export const Chart = ({ id, ...chartProps }: ChartProps) => {
+  const { searchCriteria } = useUnifiedSearchContext();
+  const { loading, searchSessionId } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
 
   const shouldUseSearchCriteria = currentPage.length === 0;
 
-  // prevents requestTs and searchCriteria state from reloading the chart
+  // prevents searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: requestTs,
-    dateRange: parsedDateRange,
+    dateRange: searchCriteria.dateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
+    searchSessionId,
   });
 
   const filters = useMemo(() => {
@@ -49,24 +46,19 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
             dataView,
           }),
         ];
-  }, [searchCriteria.filters, currentPage, dataView, shouldUseSearchCriteria]);
+  }, [shouldUseSearchCriteria, searchCriteria.filters, currentPage, dataView]);
 
   return (
     <LensChart
+      {...chartProps}
       id={`hostsView-metricChart-${id}`}
       borderRadius="m"
-      dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       height={METRIC_CHART_HEIGHT}
-      layers={layers}
-      visualOptions={visualOptions}
-      lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       filters={filters}
       query={afterLoadedState.query}
-      title={title}
-      overrides={overrides}
-      visualizationType="lnsXY"
+      searchSessionId={afterLoadedState.searchSessionId}
     />
   );
 };

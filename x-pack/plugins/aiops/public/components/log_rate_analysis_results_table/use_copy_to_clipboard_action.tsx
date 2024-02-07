@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiCopy, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { isSignificantTerm, type SignificantTerm } from '@kbn/ml-agg-utils';
+import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
 
 import { TableActionButton } from './table_action_button';
 import { getTableItemAsKQL } from './get_table_item_as_kql';
@@ -23,8 +23,8 @@ const copyToClipboardButtonLabel = i18n.translate(
   }
 );
 
-const copyToClipboardSignificantTermMessage = i18n.translate(
-  'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantTermMessage',
+const copyToClipboardSignificantItemMessage = i18n.translate(
+  'xpack.aiops.logRateAnalysis.resultsTable.linksMenu.copyToClipboardSignificantItemMessage',
   {
     defaultMessage: 'Copy field/value pair as KQL syntax to clipboard',
   }
@@ -38,9 +38,9 @@ const copyToClipboardGroupMessage = i18n.translate(
 );
 
 export const useCopyToClipboardAction = (): TableItemAction => ({
-  render: (tableItem: SignificantTerm | GroupTableItem) => {
-    const message = isSignificantTerm(tableItem)
-      ? copyToClipboardSignificantTermMessage
+  render: (tableItem: SignificantItem | GroupTableItem) => {
+    const message = isSignificantItem(tableItem)
+      ? copyToClipboardSignificantItemMessage
       : copyToClipboardGroupMessage;
     return (
       <EuiToolTip content={message}>

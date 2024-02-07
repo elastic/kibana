@@ -27,6 +27,7 @@ import {
 import { useGetOneAgentPolicyFull, useGetOneAgentPolicy, useStartServices } from '../../../hooks';
 import { Loading } from '../../../components';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+import { API_VERSIONS } from '../../../../../../common/constants';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -65,9 +66,9 @@ export const AgentPolicyYamlFlyout = memo<{ policyId: string; onClose: () => voi
       </>
     );
 
-    const downloadLink = core.http.basePath.prepend(
-      agentPolicyRouteService.getInfoFullDownloadPath(policyId)
-    );
+    const downloadLink =
+      core.http.basePath.prepend(agentPolicyRouteService.getInfoFullDownloadPath(policyId)) +
+      `?apiVersion=${API_VERSIONS.public.v1}`;
 
     return (
       <EuiFlyout onClose={onClose} size="l" maxWidth={640}>

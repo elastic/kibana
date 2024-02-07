@@ -15,9 +15,9 @@ import useObservable from 'react-use/lib/useObservable';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 
-import { KibanaContextProvider, RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
@@ -81,7 +81,11 @@ export const IntegrationsAppContext: React.FC<{
     const CloudContext = startServices.cloud?.CloudContextProvider || EmptyContext;
 
     return (
-      <RedirectAppLinks application={startServices.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: startServices.application,
+        }}
+      >
         <startServices.i18n.Context>
           <KibanaContextProvider services={{ ...startServices }}>
             <EuiErrorBoundary>
@@ -104,7 +108,6 @@ export const IntegrationsAppContext: React.FC<{
                                       <FlyoutContextProvider>
                                         <IntegrationsHeader {...{ setHeaderActionMenu, theme$ }} />
                                         {children}
-                                        <Chat />
                                       </FlyoutContextProvider>
                                     </PackageInstallProvider>
                                   </AgentPolicyContextProvider>

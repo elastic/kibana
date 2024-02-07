@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/logging';
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup, ElasticsearchClient } from '@kbn/core/server';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { curry, range, times } from 'lodash';
 import {
@@ -28,6 +28,7 @@ export const EscapableStrings = {
   escapableHtml: '<&>',
   escapableDoubleQuote: '"double quote"',
   escapableLineFeed: 'line\x0afeed',
+  escapableLink: 'https://te_st.com/',
 };
 
 export const DeepContextVariables = {
@@ -83,6 +84,7 @@ function getAlwaysFiringAlertType() {
     validate: {
       params: paramsSchema,
     },
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -150,6 +152,7 @@ function getCumulativeFiringAlertType() {
       { id: 'default', name: 'Default' },
       { id: 'other', name: 'Other' },
     ],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -201,6 +204,7 @@ function getNeverFiringAlertType() {
     validate: {
       params: paramsSchema,
     },
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -244,6 +248,7 @@ function getFailingAlertType() {
         name: 'Default',
       },
     ],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -284,6 +289,7 @@ function getExceedsAlertLimitRuleType() {
         name: 'Default',
       },
     ],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -340,6 +346,7 @@ function getAuthorizationAlertType(core: CoreSetup<FixtureStartDeps>) {
       },
     ],
     defaultActionGroupId: 'default',
+    category: 'kibana',
     producer: 'alertsFixture',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -429,6 +436,7 @@ function getValidationAlertType() {
         name: 'Default',
       },
     ],
+    category: 'kibana',
     producer: 'alertsFixture',
     minimumLicenseRequired: 'basic',
     isExportable: true,
@@ -459,6 +467,7 @@ function getPatternFiringAlertType() {
     id: 'test.patternFiring',
     name: 'Test: Firing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -543,6 +552,7 @@ function getPatternFiringAlertsAsDataRuleType() {
     id: 'test.patternFiringAad',
     name: 'Test: Firing on a Pattern and writing Alerts as Data',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'management',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -641,6 +651,7 @@ function getPatternSuccessOrFailureAlertType() {
     id: 'test.patternSuccessOrFailure',
     name: 'Test: Succeeding or failing on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -689,6 +700,7 @@ function getPatternFiringAutoRecoverFalseAlertType() {
     id: 'test.patternFiringAutoRecoverFalse',
     name: 'Test: Firing on a Pattern with Auto Recover: false',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -765,6 +777,7 @@ function getLongRunningPatternRuleType(cancelAlertsOnRuleTimeout: boolean = true
     }`,
     name: 'Test: Run Long on a Pattern',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -809,6 +822,7 @@ function getCancellableRuleType() {
     id: 'test.cancellableRule',
     name: 'Test: Rule That Implements Cancellation',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -895,6 +909,7 @@ function getAlwaysFiringAlertAsDataRuleType(
     validate: {
       params: paramsSchema,
     },
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -941,6 +956,137 @@ function getAlwaysFiringAlertAsDataRuleType(
   });
 }
 
+function getWaitingRuleType(logger: Logger) {
+  const ParamsType = schema.object({
+    source: schema.string(),
+    alerts: schema.number(),
+  });
+  type ParamsType = TypeOf<typeof ParamsType>;
+  interface State extends RuleTypeState {
+    runCount?: number;
+  }
+  const id = 'test.waitingRule';
+
+  const result: RuleType<
+    ParamsType,
+    never,
+    State,
+    {},
+    {},
+    'default',
+    'recovered',
+    { runCount: number }
+  > = {
+    id,
+    name: 'Test: Rule that waits for a signal before finishing',
+    actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
+    producer: 'alertsFixture',
+    defaultActionGroupId: 'default',
+    minimumLicenseRequired: 'basic',
+    isExportable: true,
+    doesSetRecoveryContext: true,
+    validate: { params: ParamsType },
+    alerts: {
+      context: id.toLowerCase(),
+      shouldWrite: true,
+      mappings: {
+        fieldMap: {
+          runCount: { required: false, type: 'long' },
+        },
+      },
+    },
+    async executor(alertExecutorOptions) {
+      const { services, state, params } = alertExecutorOptions;
+      const { source, alerts } = params;
+
+      const alertsClient = services.alertsClient;
+      if (!alertsClient) throw new Error(`Expected alertsClient!`);
+
+      const runCount = (state.runCount || 0) + 1;
+      const es = services.scopedClusterClient.asInternalUser;
+
+      await sendSignal(logger, es, id, source, `rule-starting-${runCount}`);
+      await waitForSignal(logger, es, id, source, `rule-complete-${runCount}`);
+
+      for (let i = 0; i < alerts; i++) {
+        alertsClient.report({
+          id: `alert-${i}`,
+          actionGroup: 'default',
+          payload: { runCount },
+        });
+      }
+
+      return { state: { runCount } };
+    },
+  };
+
+  return result;
+}
+
+async function sendSignal(
+  logger: Logger,
+  es: ElasticsearchClient,
+  id: string,
+  source: string,
+  reference: string
+) {
+  logger.info(`rule type ${id} sending signal ${reference}`);
+  await es.index({ index: ES_TEST_INDEX_NAME, refresh: 'true', body: { source, reference } });
+}
+
+async function waitForSignal(
+  logger: Logger,
+  es: ElasticsearchClient,
+  id: string,
+  source: string,
+  reference: string
+) {
+  let docs: unknown[] = [];
+  for (let attempt = 0; attempt < 20; attempt++) {
+    docs = await getSignalDocs(es, source, reference);
+    if (docs.length > 0) {
+      logger.info(`rule type ${id} received signal ${reference}`);
+      break;
+    }
+
+    logger.info(`rule type ${id} waiting for signal ${reference}`);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  }
+  if (docs.length === 0) {
+    throw new Error(`Expected to find docs with source ${source}`);
+  }
+}
+
+async function getSignalDocs(es: ElasticsearchClient, source: string, reference: string) {
+  const body = {
+    query: {
+      bool: {
+        must: [
+          {
+            term: {
+              source,
+            },
+          },
+          {
+            term: {
+              reference,
+            },
+          },
+        ],
+      },
+    },
+  };
+  const params = {
+    index: ES_TEST_INDEX_NAME,
+    size: 1000,
+    _source: false,
+    body,
+  };
+  const result = await es.search(params, { meta: true });
+  return result?.body?.hits?.hits || [];
+}
+
 export function defineAlertTypes(
   core: CoreSetup<FixtureStartDeps>,
   { alerting, ruleRegistry }: Pick<FixtureSetupDeps, 'alerting' | 'ruleRegistry'>,
@@ -950,6 +1096,7 @@ export function defineAlertTypes(
     id: 'test.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -965,6 +1112,7 @@ export function defineAlertTypes(
     id: 'test.gold.noop',
     name: 'Test: Noop',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'gold',
@@ -980,6 +1128,7 @@ export function defineAlertTypes(
     id: 'test.onlyContextVariables',
     name: 'Test: Only Context Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -998,6 +1147,7 @@ export function defineAlertTypes(
     id: 'test.onlyStateVariables',
     name: 'Test: Only State Variables',
     actionGroups: [{ id: 'default', name: 'Default' }],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     actionVariables: {
@@ -1021,6 +1171,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -1047,6 +1198,7 @@ export function defineAlertTypes(
           name: 'Default',
         },
       ],
+      category: 'kibana',
       producer: 'alertsFixture',
       defaultActionGroupId: 'default',
       minimumLicenseRequired: 'basic',
@@ -1076,6 +1228,7 @@ export function defineAlertTypes(
     async executor() {
       return { state: {} };
     },
+    category: 'kibana',
     producer: 'alertsFixture',
     validate: {
       params: schema.any(),
@@ -1098,6 +1251,7 @@ export function defineAlertTypes(
         name: 'Default',
       },
     ],
+    category: 'kibana',
     producer: 'alertsFixture',
     defaultActionGroupId: 'default',
     minimumLicenseRequired: 'basic',
@@ -1162,4 +1316,5 @@ export function defineAlertTypes(
   alerting.registerType(getAlwaysFiringAlertAsDataRuleType(logger, { ruleRegistry }));
   alerting.registerType(getPatternFiringAutoRecoverFalseAlertType());
   alerting.registerType(getPatternFiringAlertsAsDataRuleType());
+  alerting.registerType(getWaitingRuleType(logger));
 }

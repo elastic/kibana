@@ -76,7 +76,6 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         "filters": Array [],
         "toolsRight": Array [
           <EuiButton
-            color="primary"
             data-test-subj="mlCalendarButtonCreate"
             isDisabled={false}
             size="s"
@@ -104,6 +103,7 @@ exports[`CalendarsListTable renders the table with all calendars 1`] = `
         ],
       }
     }
+    searchFormat="eql"
     selection={
       Object {
         "onSelectionChange": [Function],

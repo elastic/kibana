@@ -10,6 +10,7 @@ import { omit } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { ValidationBadValueError, ValidationSettingNotFoundError } from '../ui_settings_errors';
 
 export interface BaseUiSettingsDefaultsClientOptions {
   overrides?: Record<string, any>;
@@ -70,6 +71,24 @@ export abstract class BaseUiSettingsClient implements IUiSettingsClient {
   isSensitive(key: string): boolean {
     const definition = this.defaults[key];
     return !!definition?.sensitive;
+  }
+
+  async validate(key: string, value: unknown) {
+    if (value == null) {
+      throw new ValidationBadValueError();
+    }
+    const definition = this.defaults[key];
+    if (!definition) {
+      throw new ValidationSettingNotFoundError(key);
+    }
+    if (definition.schema) {
+      try {
+        definition.schema.validate(value);
+      } catch (error) {
+        return { valid: false, errorMessage: error.message };
+      }
+    }
+    return { valid: true };
   }
 
   protected validateKey(key: string, value: unknown) {

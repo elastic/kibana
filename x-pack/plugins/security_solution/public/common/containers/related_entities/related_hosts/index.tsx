@@ -12,7 +12,7 @@ import { RelatedEntitiesQueries } from '../../../../../common/search_strategy/se
 import type { RelatedHost } from '../../../../../common/search_strategy/security_solution/related_entities/related_hosts';
 import { useSearchStrategy } from '../../use_search_strategy';
 import { FAIL_RELATED_HOSTS } from './translations';
-import { useIsExperimentalFeatureEnabled } from '../../../hooks/use_experimental_features';
+import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 export interface UseUserRelatedHostsResult {
   inspect: InspectResponse;
@@ -50,7 +50,8 @@ export const useUserRelatedHosts = ({
     errorMessage: FAIL_RELATED_HOSTS,
     abort: skip,
   });
-  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+
+  const isNewRiskScoreModuleInstalled = useIsNewRiskScoreModuleInstalled();
 
   const userRelatedHostsResponse = useMemo(
     () => ({
@@ -69,9 +70,9 @@ export const useUserRelatedHosts = ({
       factoryQueryType: RelatedEntitiesQueries.relatedHosts,
       userName,
       from,
-      isNewRiskScoreModuleAvailable,
+      isNewRiskScoreModuleInstalled,
     }),
-    [indexNames, from, userName, isNewRiskScoreModuleAvailable]
+    [indexNames, from, userName, isNewRiskScoreModuleInstalled]
   );
 
   useEffect(() => {

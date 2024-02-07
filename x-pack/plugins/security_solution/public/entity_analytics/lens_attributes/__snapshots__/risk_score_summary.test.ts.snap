@@ -1,0 +1,180 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`getRiskScoreSummaryAttributes should render 1`] = `
+Object {
+  "description": "",
+  "references": Array [],
+  "state": Object {
+    "adHocDataViews": Object {
+      "2cc5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+        "allowNoIndex": false,
+        "fieldAttrs": Object {},
+        "fieldFormats": Object {},
+        "id": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "risk-score.risk-score-default",
+        "runtimeFieldMap": Object {},
+        "sourceFilters": Array [],
+        "timeFieldName": "@timestamp",
+        "title": "risk-score.risk-score-default",
+      },
+    },
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "2cc5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+            "columnOrder": Array [
+              "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+              "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+            ],
+            "columns": Object {
+              "2cc5663b-f062-43f8-8688-fc8166c2ca8e": Object {
+                "customLabel": true,
+                "dataType": "number",
+                "filter": Object {
+                  "language": "kuery",
+                  "query": "",
+                },
+                "isBucketed": false,
+                "label": "Risk value",
+                "operationType": "last_value",
+                "params": Object {
+                  "format": Object {
+                    "id": "number",
+                    "params": Object {
+                      "compact": false,
+                      "decimals": 0,
+                    },
+                  },
+                  "sortField": "@timestamp",
+                },
+                "reducedTimeRange": "",
+                "scale": "ratio",
+                "sourceField": "user.risk.calculated_score_norm",
+                "timeShift": "",
+              },
+            },
+            "ignoreGlobalFilters": false,
+            "incompleteColumns": Object {},
+            "linkToLayers": Array [
+              "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+            ],
+            "sampling": 1,
+          },
+        },
+      },
+      "indexpattern": Object {
+        "layers": Object {},
+      },
+      "textBased": Object {
+        "layers": Object {},
+      },
+    },
+    "filters": Array [
+      Object {
+        "meta": Object {
+          "alias": null,
+          "disabled": false,
+          "key": "host.id",
+          "negate": false,
+          "params": Object {
+            "query": "123",
+          },
+          "type": "phrase",
+        },
+        "query": Object {
+          "match_phrase": Object {
+            "host.id": "123",
+          },
+        },
+      },
+    ],
+    "internalReferences": Array [
+      Object {
+        "id": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "indexpattern-datasource-layer-2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+        "type": "index-pattern",
+      },
+      Object {
+        "id": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+        "name": "indexpattern-datasource-layer-2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+        "type": "index-pattern",
+      },
+    ],
+    "query": Object {
+      "language": "kql",
+      "query": "host.name: *",
+    },
+    "visualization": Object {
+      "layerId": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+      "layerType": "data",
+      "metricAccessor": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+      "palette": Object {
+        "name": "custom",
+        "params": Object {
+          "colorStops": Array [
+            Object {
+              "color": "#98a2b3",
+              "stop": 0,
+            },
+            Object {
+              "color": "#54B399",
+              "stop": 20,
+            },
+            Object {
+              "color": "#D6BF57",
+              "stop": 40,
+            },
+            Object {
+              "color": "#DA8B45",
+              "stop": 70,
+            },
+            Object {
+              "color": "#E7664C",
+              "stop": 90,
+            },
+          ],
+          "continuity": "above",
+          "maxSteps": 5,
+          "name": "custom",
+          "progression": "fixed",
+          "rangeMax": null,
+          "rangeMin": 0,
+          "rangeType": "number",
+          "reverse": false,
+          "steps": 3,
+          "stops": Array [
+            Object {
+              "color": "#98a2b3",
+              "stop": 20,
+            },
+            Object {
+              "color": "#54B399",
+              "stop": 40,
+            },
+            Object {
+              "color": "#D6BF57",
+              "stop": 70,
+            },
+            Object {
+              "color": "#DA8B45",
+              "stop": 90,
+            },
+            Object {
+              "color": "#E7664C",
+              "stop": 100,
+            },
+          ],
+        },
+        "type": "palette",
+      },
+      "subtitle": "Low",
+      "trendlineLayerId": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+      "trendlineLayerType": "metricTrendline",
+      "trendlineMetricAccessor": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+      "trendlineTimeAccessor": "2cc5663b-f062-43f8-8688-fc8166c2ca8e",
+    },
+  },
+  "title": "Risk score summary",
+  "visualizationType": "lnsMetric",
+}
+`;

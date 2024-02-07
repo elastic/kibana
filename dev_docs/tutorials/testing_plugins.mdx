@@ -479,6 +479,7 @@ The more interesting logic is in `renderApp`:
 /** public/application.ts */
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { switchMap } from 'rxjs';
 
 import { AppMountParameters, CoreStart } from 'src/core/public';
 import { AppRoot } from './components/app_root';
@@ -493,10 +494,10 @@ export const renderApp = (
 
   // uiSettings subscription
   const uiSettingsClient = core.uiSettings.client;
-  const pollingSubscription = uiSettingClient.get$('mysetting1').subscribe(async mySetting1 => {
+  const pollingSubscription = uiSettingClient.get$('mysetting1').pipe(switchMap(async (mySetting1) => {
     const value = core.http.fetch(/** use `mySetting1` in request **/);
     // ...
-  });
+  })).subscribe();
 
   // Render app
   ReactDOM.render(

@@ -28,8 +28,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
   deserialize: (value: any, aggConfig?: TAggConfig) => any;
   toExpressionAst?: (value: any) => ExpressionAstExpression[] | ExpressionAstExpression | undefined;
   options: any[];
-  valueType?: any;
-
+  getValueType: (aggConfig: IAggConfig) => any;
   onChange?(agg: TAggConfig): void;
   shouldShow?(agg: TAggConfig): boolean;
 
@@ -71,6 +70,7 @@ export class BaseParamType<TAggConfig extends IAggConfig = IAggConfig> {
     this.options = config.options;
     this.modifyAggConfigOnSearchRequestStart =
       config.modifyAggConfigOnSearchRequestStart || function () {};
-    this.valueType = config.valueType || config.type;
+
+    this.getValueType = config.getValueType;
   }
 }

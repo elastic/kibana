@@ -4,152 +4,46 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import datemath from '@elastic/datemath';
 import { notImplemented } from '@hapi/boom';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { omit } from 'lodash';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
-  ALERT_STATUS,
-  ALERT_STATUS_ACTIVE,
-} from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { KnowledgeBaseEntry } from '../../../common/types';
+  ContextDefinition,
+  FunctionDefinition,
+  KnowledgeBaseEntryRole,
+} from '../../../common/types';
+import type { RecalledEntry } from '../../service/knowledge_base_service';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 
-const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
+const getFunctionsRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'GET /internal/observability_ai_assistant/functions',
   options: {
     tags: ['access:ai_assistant'],
   },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        method: t.union([
-          t.literal('GET'),
-          t.literal('POST'),
-          t.literal('PATCH'),
-          t.literal('PUT'),
-          t.literal('DELETE'),
-        ]),
-        path: t.string,
-      }),
-      t.partial({
-        body: t.any,
-      }),
-    ]),
-  }),
-  handler: async (resources): Promise<unknown> => {
-    const { method, path, body } = resources.params.body;
-
-    const response = await (
-      await resources.context.core
-    ).elasticsearch.client.asCurrentUser.transport.request({
-      method,
-      path,
-      body,
-    });
-
-    return response;
-  },
-});
-
-const OMITTED_ALERT_FIELDS = [
-  'tags',
-  'event.action',
-  'event.kind',
-  'kibana.alert.rule.execution.uuid',
-  'kibana.alert.rule.revision',
-  'kibana.alert.rule.tags',
-  'kibana.alert.rule.uuid',
-  'kibana.alert.workflow_status',
-  'kibana.space_ids',
-  'kibana.alert.time_range',
-  'kibana.version',
-] as const;
-
-const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/alerts',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  params: t.type({
-    body: t.intersection([
-      t.type({
-        featureIds: t.array(t.string),
-        start: t.string,
-        end: t.string,
-      }),
-      t.partial({
-        filter: t.string,
-        includeRecovered: toBooleanRt,
-      }),
-    ]),
-  }),
   handler: async (
     resources
   ): Promise<{
-    content: {
-      total: number;
-      alerts: ParsedTechnicalFields[];
-    };
+    functionDefinitions: FunctionDefinition[];
+    contextDefinitions: ContextDefinition[];
   }> => {
-    const {
-      featureIds,
-      start: startAsDatemath,
-      end: endAsDatemath,
-      filter,
-      includeRecovered,
-    } = resources.params.body;
+    const { service, request } = resources;
 
-    const racContext = await resources.context.rac;
-    const alertsClient = await racContext.getAlertsClient();
-
-    const start = datemath.parse(startAsDatemath)!.valueOf();
-    const end = datemath.parse(endAsDatemath)!.valueOf();
-
-    const kqlQuery = !filter ? [] : [toElasticsearchQuery(fromKueryExpression(filter))];
-
-    const response = await alertsClient.find({
-      featureIds,
-
-      query: {
-        bool: {
-          filter: [
-            {
-              range: {
-                '@timestamp': {
-                  gte: start,
-                  lte: end,
-                },
-              },
-            },
-            ...kqlQuery,
-            ...(!includeRecovered
-              ? [
-                  {
-                    term: {
-                      [ALERT_STATUS]: ALERT_STATUS_ACTIVE,
-                    },
-                  },
-                ]
-              : []),
-          ],
-        },
-      },
+    const controller = new AbortController();
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
     });
 
-    // trim some fields
-    const alerts = response.hits.hits.map((hit) =>
-      omit(hit._source, ...OMITTED_ALERT_FIELDS)
-    ) as unknown as ParsedTechnicalFields[];
+    const client = await service.getClient({ request });
+
+    const functionClient = await service.getFunctionClient({
+      signal: controller.signal,
+      resources,
+      client,
+    });
 
     return {
-      content: {
-        total: (response.hits as { total: { value: number } }).total.value,
-        alerts,
-      },
+      functionDefinitions: functionClient.getFunctions().map((fn) => fn.definition),
+      contextDefinitions: functionClient.getContexts(),
     };
   },
 });
@@ -157,23 +51,34 @@ const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
 const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
-    body: t.type({
-      queries: t.array(nonEmptyStringRt),
-    }),
+    body: t.intersection([
+      t.type({
+        queries: t.array(nonEmptyStringRt),
+      }),
+      t.partial({
+        categories: t.array(t.string),
+      }),
+    ]),
   }),
   options: {
     tags: ['access:ai_assistant'],
   },
   handler: async (
     resources
-  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
+  ): Promise<{
+    entries: RecalledEntry[];
+  }> => {
     const client = await resources.service.getClient({ request: resources.request });
+
+    const {
+      body: { queries, categories },
+    } = resources.params;
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.recall(resources.params.body.queries);
+    return client.recall({ queries, categories });
   },
 });
 
@@ -208,68 +113,23 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       labels,
     } = resources.params.body;
 
-    return client.summarize({
+    return client.createKnowledgeBaseEntry({
       entry: {
         confidence,
         id,
+        doc_id: id,
         is_correction: isCorrection,
         text,
         public: isPublic,
         labels,
+        role: KnowledgeBaseEntryRole.AssistantSummarization,
       },
     });
   },
 });
 
-const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/functions/kb_status',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  handler: async (
-    resources
-  ): Promise<{
-    ready: boolean;
-    error?: any;
-    deployment_state?: string;
-    allocation_state?: string;
-  }> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    return await client.getKnowledgeBaseStatus();
-  },
-});
-
-const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/setup_kb',
-  options: {
-    tags: ['access:ai_assistant'],
-    timeout: {
-      idleSocket: 20 * 60 * 1000, // 20 minutes
-    },
-  },
-  handler: async (resources): Promise<{}> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    await client.setupKnowledgeBase();
-
-    return {};
-  },
-});
-
 export const functionRoutes = {
-  ...functionElasticsearchRoute,
+  ...getFunctionsRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
-  ...setupKnowledgeBaseRoute,
-  ...getKnowledgeBaseStatus,
-  ...functionAlertsRoute,
 };

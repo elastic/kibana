@@ -6,6 +6,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
+import { isEmpty } from 'lodash';
 import type {
   FieldConfig,
   ValidationConfig,
@@ -176,7 +177,7 @@ export const removeItemFromSessionStorage = (key: string) => {
   window.sessionStorage.removeItem(key);
 };
 
-export const stringifyToURL = (parsedParams: Record<string, string>) =>
+export const stringifyToURL = (parsedParams: Record<string, string> | URLSearchParams) =>
   new URLSearchParams(parsedParams).toString();
 export const parseURL = (queryString: string) =>
   Object.fromEntries(new URLSearchParams(queryString));
@@ -224,4 +225,12 @@ export const parseCaseUsers = ({
   }
 
   return { userProfiles, reporterAsArray };
+};
+
+export const convertCustomFieldValue = (value: string | boolean) => {
+  if (typeof value === 'string' && isEmpty(value)) {
+    return null;
+  }
+
+  return value;
 };

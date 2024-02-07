@@ -5,9 +5,18 @@
  * 2.0.
  */
 
-import type { FromSchema } from 'json-schema-to-ts';
 import type { JSONSchema } from 'json-schema-to-ts';
-import React from 'react';
+import type OpenAI from 'openai';
+import type { Observable } from 'rxjs';
+import { ChatCompletionChunkEvent, MessageAddEvent } from './conversation_complete';
+
+export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
+  choices: Array<
+    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
+      delta: { content?: string; function_call?: { name?: string; arguments?: string } };
+    }
+  >;
+};
 
 export enum MessageRole {
   System = 'system',
@@ -15,6 +24,18 @@ export enum MessageRole {
   User = 'user',
   Function = 'function',
   Elastic = 'elastic',
+}
+
+export enum KnowledgeBaseEntryRole {
+  AssistantSummarization = 'assistant_summarization',
+  UserEntry = 'user_entry',
+  Elastic = 'elastic',
+}
+
+export interface PendingMessage {
+  message: Message['message'];
+  aborted?: boolean;
+  error?: any;
 }
 
 export interface Message {
@@ -61,10 +82,12 @@ export interface KnowledgeBaseEntry {
   '@timestamp': string;
   id: string;
   text: string;
+  doc_id: string;
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   public: boolean;
-  labels: Record<string, string>;
+  labels?: Record<string, string>;
+  role: KnowledgeBaseEntryRole;
 }
 
 export type CompatibleJSONSchema = Exclude<JSONSchema, boolean>;
@@ -74,49 +97,32 @@ export interface ContextDefinition {
   description: string;
 }
 
-interface FunctionResponse {
-  content?: any;
-  data?: any;
+export type FunctionResponse =
+  | {
+      content?: any;
+      data?: any;
+    }
+  | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
+
+export enum FunctionVisibility {
+  AssistantOnly = 'assistantOnly',
+  UserOnly = 'userOnly',
+  Internal = 'internal',
+  All = 'all',
 }
 
-interface FunctionOptions<TParameters extends CompatibleJSONSchema = CompatibleJSONSchema> {
+export interface FunctionDefinition<
+  TParameters extends CompatibleJSONSchema = CompatibleJSONSchema
+> {
   name: string;
   description: string;
-  descriptionForUser: string;
+  visibility?: FunctionVisibility;
+  descriptionForUser?: string;
   parameters: TParameters;
   contexts: string[];
 }
 
-type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
-  options: { arguments: TArguments; messages: Message[] },
-  signal: AbortSignal
-) => Promise<TResponse>;
-
-type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
-  arguments: TArguments;
-  response: TResponse;
-}) => React.ReactNode;
-
-export interface FunctionDefinition {
-  options: FunctionOptions;
-  respond: (
-    options: { arguments: any; messages: Message[] },
-    signal: AbortSignal
-  ) => Promise<FunctionResponse>;
-  render?: RenderFunction<any, any>;
-}
-
 export type RegisterContextDefinition = (options: ContextDefinition) => void;
-
-export type RegisterFunctionDefinition = <
-  TParameters extends CompatibleJSONSchema,
-  TResponse extends FunctionResponse,
-  TArguments = FromSchema<TParameters>
->(
-  options: FunctionOptions<TParameters>,
-  respond: RespondFunction<TArguments, TResponse>,
-  render?: RenderFunction<TArguments, TResponse>
-) => void;
 
 export type ContextRegistry = Map<string, ContextDefinition>;
 export type FunctionRegistry = Map<string, FunctionDefinition>;

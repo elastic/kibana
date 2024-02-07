@@ -6,43 +6,31 @@
  */
 
 import { ProcessorFields } from './format_synthetics_policy';
-import { MonitorFields } from '../../../../common/runtime_types';
-
-type Fields = Record<string, string | boolean>;
+import { HeartbeatFields, MonitorFields } from '../../../../common/runtime_types';
 
 interface FieldProcessor {
   add_fields: {
     target: string;
-    fields: Fields;
+    fields: HeartbeatFields;
   };
 }
 
-export const processorsFormatter = (config: Partial<MonitorFields & ProcessorFields>) => {
-  const fields: Fields = {
-    'monitor.fleet_managed': true,
-  };
-  if (config.test_run_id) {
-    fields.test_run_id = config.test_run_id;
-  }
-  if (config.run_once) {
-    fields.run_once = config.run_once;
-  }
-  if (config.config_id) {
-    fields.config_id = config.config_id;
-  }
-  if (config['monitor.project.name']) {
-    fields['monitor.project.name'] = config['monitor.project.name'];
-  }
-  if (config['monitor.project.id']) {
-    fields['monitor.project.id'] = config['monitor.project.id'];
-  }
-  if (config['monitor.id']) {
-    fields['monitor.id'] = config['monitor.id'];
-  }
+export const processorsFormatter = (config: MonitorFields & ProcessorFields) => {
   const processors: FieldProcessor[] = [
     {
       add_fields: {
-        fields,
+        fields: {
+          'monitor.fleet_managed': true,
+          config_id: config.config_id,
+          test_run_id: config.test_run_id,
+          run_once: config.run_once,
+          'monitor.id': config['monitor.id'],
+          'monitor.project.name': config['monitor.project.name'],
+          'monitor.project.id': config['monitor.project.id'],
+          meta: {
+            space_id: config.space_id,
+          },
+        },
         target: '',
       },
     },

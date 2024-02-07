@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams, type CodePointCharStream } from 'antlr4ts';
-import { monaco } from '../../monaco_imports';
-import { AutocompleteListener } from '../lib/autocomplete/autocomplete_listener';
+import { CharStreams } from 'antlr4ts';
+import type { monaco } from '../../monaco_imports';
 import type { BaseWorkerDefinition } from '../../types';
 import { getParser, ROOT_STATEMENT } from '../lib/antlr_facade';
-import { ANTLREErrorListener } from '../../common/error_listener';
+import { AstListener } from '../lib/ast/ast_factory';
+import { ESQLErrorListener } from '../lib/monaco/esql_error_listener';
 
 export class ESQLWorker implements BaseWorkerDefinition {
   private readonly _ctx: monaco.worker.IWorkerContext;
@@ -33,7 +33,7 @@ export class ESQLWorker implements BaseWorkerDefinition {
     const inputStream = this.getModelCharStream(modelUri);
 
     if (inputStream) {
-      const errorListener = new ANTLREErrorListener();
+      const errorListener = new ESQLErrorListener();
       const parser = getParser(inputStream, errorListener);
 
       parser[ROOT_STATEMENT]();
@@ -43,32 +43,21 @@ export class ESQLWorker implements BaseWorkerDefinition {
     return [];
   }
 
-  private async provideAutocompleteSuggestionFromRawString(
-    inputStream: CodePointCharStream | undefined
-  ) {
-    if (inputStream) {
-      const errorListener = new ANTLREErrorListener();
-      const parseListener = new AutocompleteListener();
-      const parser = getParser(inputStream, errorListener, parseListener);
-
-      parser[ROOT_STATEMENT]();
-
-      return parseListener.getAutocompleteSuggestions();
+  async getAst(text: string | undefined) {
+    if (!text) {
+      return { ast: [], errors: [] };
     }
-  }
+    const inputStream = CharStreams.fromString(text);
+    const errorListener = new ESQLErrorListener();
+    const parserListener = new AstListener();
+    const parser = getParser(inputStream, errorListener, parserListener);
 
-  public async provideAutocompleteSuggestions(
-    modelUri: string,
-    meta: {
-      word: string;
-      line: number;
-      index: number;
-    }
-  ) {
-    return this.provideAutocompleteSuggestionFromRawString(this.getModelCharStream(modelUri));
-  }
+    parser[ROOT_STATEMENT]();
 
-  public async provideAutocompleteSuggestionsFromString(text: string) {
-    return this.provideAutocompleteSuggestionFromRawString(CharStreams.fromString(text));
+    const { ast } = parserListener.getAst();
+    return {
+      ast,
+      errors: errorListener.getErrors(),
+    };
   }
 }

@@ -190,7 +190,7 @@
                 "section": "def-common.MountPoint",
                 "text": "MountPoint"
               },
-              "<HTMLElement>) => void"
+              "<HTMLElement> | undefined) => void"
             ],
             "path": "packages/react/kibana_mount/mount_point_portal.tsx",
             "deprecated": false,
@@ -211,12 +211,12 @@
                     "section": "def-common.MountPoint",
                     "text": "MountPoint"
                   },
-                  "<HTMLElement>"
+                  "<HTMLElement> | undefined"
                 ],
                 "path": "packages/react/kibana_mount/mount_point_portal.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -243,7 +243,15 @@
             "section": "def-common.I18nStart",
             "text": "I18nStart"
           },
-          "; theme: ",
+          "; analytics?: ",
+          {
+            "pluginId": "@kbn/core-analytics-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+            "section": "def-common.AnalyticsServiceStart",
+            "text": "AnalyticsServiceStart"
+          },
+          " | undefined; theme: ",
           {
             "pluginId": "@kbn/react-kibana-context-common",
             "scope": "common",

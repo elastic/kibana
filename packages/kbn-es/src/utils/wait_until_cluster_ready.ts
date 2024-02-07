@@ -9,7 +9,7 @@
 import { Client } from '@elastic/elasticsearch';
 import { HealthStatus } from '@elastic/elasticsearch/lib/api/types';
 import { ToolingLog } from '@kbn/tooling-log';
-const DEFAULT_READY_TIMEOUT = 60 * 1000; // 1 minute
+const DEFAULT_READY_TIMEOUT = 120 * 1000; // 2 minutes
 
 export type ClusterReadyStatus = 'green' | 'yellow';
 export interface WaitOptions {
@@ -36,6 +36,9 @@ export async function waitUntilClusterReady({
 }: WaitOptions) {
   let attempt = 0;
   const start = Date.now();
+
+  // The loop will continue until timeout even if SIGINT is signaled, so force exit
+  process.on('SIGINT', () => process.exit());
 
   log.info(`waiting for ES cluster to report a ${expectedStatus} status`);
 

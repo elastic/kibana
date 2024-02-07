@@ -173,7 +173,6 @@ function onPackagePolicyCreateOrUpdate({
 
     const internalESClient = await createInternalESClient({
       debug: false,
-      apmIndices,
       elasticsearchClient: asInternalUser,
     });
 
@@ -181,6 +180,7 @@ function onPackagePolicyCreateOrUpdate({
       internalESClient,
       fleetPluginStart,
       packagePolicy,
+      apmIndices,
     });
   };
 }

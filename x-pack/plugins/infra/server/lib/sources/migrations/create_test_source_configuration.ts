@@ -16,9 +16,6 @@ export const createTestSourceConfiguration = (
   attributes: {
     name: 'TEST CONFIGURATION',
     description: '',
-    fields: {
-      message: ['TEST MESSAGE FIELD'],
-    },
     inventoryDefaultView: '0',
     metricsExplorerDefaultView: '0',
     logColumns: [

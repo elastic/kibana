@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { isSignificantTerm } from './type_guards';
+import { isSignificantItem } from './type_guards';
 
-describe('isSignificantTerm', () => {
-  it('identifies significant terms', () => {
-    expect(isSignificantTerm({})).toBeFalsy();
-    expect(isSignificantTerm({ fieldName: 'response_code' })).toBeFalsy();
-    expect(isSignificantTerm({ fieldValue: '500' })).toBeFalsy();
+describe('isSignificantItem', () => {
+  it('identifies significant items', () => {
+    expect(isSignificantItem({})).toBeFalsy();
+    expect(isSignificantItem({ fieldName: 'response_code' })).toBeFalsy();
+    expect(isSignificantItem({ fieldValue: '500' })).toBeFalsy();
     expect(
-      isSignificantTerm({
+      isSignificantItem({
+        key: 'response_code:500',
+        type: 'keyword',
         fieldName: 'response_code',
         fieldValue: '500',
         doc_count: 1819,

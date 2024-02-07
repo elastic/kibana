@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { executeAsyncByChunks } from './helpers';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
@@ -28,7 +29,8 @@ export function registerFlushRoute({ router, lib: { handleEsError } }: RouteDepe
       };
 
       try {
-        await client.asCurrentUser.indices.flush(params);
+        await executeAsyncByChunks(params, client, 'flush');
+
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

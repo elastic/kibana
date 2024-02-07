@@ -6,35 +6,21 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
-import { act } from 'react-dom/test-utils';
-import { mount, ReactWrapper } from 'enzyme';
-
+import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
 import {
-  ViewMode,
-  EmbeddablePanel,
-  isErrorEmbeddable,
-  CONTEXT_MENU_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import {
-  EMPTY_EMBEDDABLE,
   ContactCardEmbeddable,
-  CONTACT_CARD_EMBEDDABLE,
+  ContactCardEmbeddableFactory,
   ContactCardEmbeddableInput,
   ContactCardEmbeddableOutput,
-  ContactCardEmbeddableFactory,
+  CONTACT_CARD_EMBEDDABLE,
+  EMPTY_EMBEDDABLE,
 } from '@kbn/embeddable-plugin/public/lib/test_samples/embeddables';
-import { I18nProvider } from '@kbn/i18n-react';
 import type { TimeRange } from '@kbn/es-query';
-import { findTestSubject, nextTick } from '@kbn/test-jest-helpers';
-import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
-import { setStubKibanaServices } from '@kbn/embeddable-plugin/public/mocks';
 import { mockedReduxEmbeddablePackage } from '@kbn/presentation-util-plugin/public/mocks';
-import { createEditModeActionDefinition } from '@kbn/embeddable-plugin/public/lib/test_samples';
 
-import { DashboardContainer } from './dashboard_container';
-import { pluginServices } from '../../services/plugin_services';
 import { buildMockDashboard, getSampleDashboardInput, getSampleDashboardPanel } from '../../mocks';
+import { pluginServices } from '../../services/plugin_services';
+import { DashboardContainer } from './dashboard_container';
 
 const embeddableFactory = new ContactCardEmbeddableFactory((() => null) as any, {} as any);
 pluginServices.getServices().embeddable.getEmbeddableFactory = jest
@@ -43,11 +29,13 @@ pluginServices.getServices().embeddable.getEmbeddableFactory = jest
 
 test('DashboardContainer initializes embeddables', (done) => {
   const container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 
@@ -94,11 +82,13 @@ test('DashboardContainer.replacePanel', (done) => {
   const ID = '123';
 
   const container = buildMockDashboard({
-    panels: {
-      [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: ID },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        [ID]: getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: ID },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
   let counter = 0;
@@ -126,19 +116,22 @@ test('DashboardContainer.replacePanel', (done) => {
   );
 
   // replace the panel now
-  container.replacePanel(container.getInput().panels[ID], {
-    type: EMPTY_EMBEDDABLE,
-    explicitInput: { id: ID },
-  });
+  container.replaceEmbeddable(
+    container.getInput().panels[ID].explicitInput.id,
+    { id: ID },
+    EMPTY_EMBEDDABLE
+  );
 });
 
 test('Container view mode change propagates to existing children', async () => {
   const container = buildMockDashboard({
-    panels: {
-      '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
-        explicitInput: { firstName: 'Sam', id: '123' },
-        type: CONTACT_CARD_EMBEDDABLE,
-      }),
+    overrides: {
+      panels: {
+        '123': getSampleDashboardPanel<ContactCardEmbeddableInput>({
+          explicitInput: { firstName: 'Sam', id: '123' },
+          type: CONTACT_CARD_EMBEDDABLE,
+        }),
+      },
     },
   });
 
@@ -167,10 +160,15 @@ test('Container view mode change propagates to new children', async () => {
 
 test('searchSessionId propagates to children', async () => {
   const searchSessionId1 = 'searchSessionId1';
+  const sampleInput = getSampleDashboardInput();
   const container = new DashboardContainer(
-    getSampleDashboardInput(),
+    sampleInput,
     mockedReduxEmbeddablePackage,
-    searchSessionId1
+    searchSessionId1,
+    0,
+    undefined,
+    undefined,
+    { lastSavedInput: sampleInput }
   );
   const embeddable = await container.addNewEmbeddable<
     ContactCardEmbeddableInput,
@@ -183,82 +181,6 @@ test('searchSessionId propagates to children', async () => {
   expect(embeddable.getInput().searchSessionId).toBe(searchSessionId1);
 });
 
-test('DashboardContainer in edit mode shows edit mode actions', async () => {
-  // mock embeddable dependencies so that the embeddable panel renders
-  setStubKibanaServices();
-  const uiActionsSetup = uiActionsPluginMock.createSetupContract();
-
-  const editModeAction = createEditModeActionDefinition();
-  uiActionsSetup.registerAction(editModeAction);
-  uiActionsSetup.addTriggerAction(CONTEXT_MENU_TRIGGER, editModeAction);
-
-  const container = buildMockDashboard({ viewMode: ViewMode.VIEW });
-
-  const embeddable = await container.addNewEmbeddable<
-    ContactCardEmbeddableInput,
-    ContactCardEmbeddableOutput,
-    ContactCardEmbeddable
-  >(CONTACT_CARD_EMBEDDABLE, {
-    firstName: 'Bob',
-  });
-
-  let wrapper: ReactWrapper;
-  await act(async () => {
-    wrapper = await mount(
-      <I18nProvider>
-        <EmbeddablePanel embeddable={embeddable} />
-      </I18nProvider>
-    );
-  });
-  const component = wrapper!;
-  await component.update();
-  await nextTick();
-
-  const button = findTestSubject(component, 'embeddablePanelToggleMenuIcon');
-
-  expect(button.length).toBe(1);
-  act(() => {
-    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  });
-  await nextTick();
-  await component.update();
-
-  expect(findTestSubject(component, `embeddablePanelContextMenuOpen`).length).toBe(1);
-
-  const editAction = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-
-  expect(editAction.length).toBe(0);
-
-  act(() => {
-    container.updateInput({ viewMode: ViewMode.EDIT });
-  });
-  await nextTick();
-  await component.update();
-
-  act(() => {
-    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  });
-  await nextTick();
-  component.update();
-
-  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(0);
-
-  act(() => {
-    findTestSubject(component, 'embeddablePanelToggleMenuIcon').simulate('click');
-  });
-  await nextTick();
-  component.update();
-
-  expect(findTestSubject(component, 'embeddablePanelContextMenuOpen').length).toBe(1);
-
-  await nextTick();
-  component.update();
-
-  // TODO: Address this.
-  // const action = findTestSubject(component, `embeddablePanelAction-${editModeAction.id}`);
-  // expect(action.length).toBe(1);
-});
-
 describe('getInheritedInput', () => {
   const dashboardTimeRange = {
     to: 'now',
@@ -268,8 +190,10 @@ describe('getInheritedInput', () => {
 
   test('Should pass dashboard timeRange and timeslice to panel when panel does not have custom time range', async () => {
     const container = buildMockDashboard({
-      timeRange: dashboardTimeRange,
-      timeslice: dashboardTimeslice,
+      overrides: {
+        timeRange: dashboardTimeRange,
+        timeslice: dashboardTimeslice,
+      },
     });
     const embeddable = await container.addNewEmbeddable<ContactCardEmbeddableInput>(
       CONTACT_CARD_EMBEDDABLE,
@@ -291,8 +215,10 @@ describe('getInheritedInput', () => {
 
   test('Should not pass dashboard timeRange and timeslice to panel when panel has custom time range', async () => {
     const container = buildMockDashboard({
-      timeRange: dashboardTimeRange,
-      timeslice: dashboardTimeslice,
+      overrides: {
+        timeRange: dashboardTimeRange,
+        timeslice: dashboardTimeslice,
+      },
     });
     const embeddableTimeRange = {
       to: 'now',

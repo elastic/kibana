@@ -19,7 +19,8 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  describe('Deprecation pages', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/167090
+  describe.skip('Deprecation pages', function () {
     this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
@@ -27,7 +28,7 @@ export default function upgradeAssistantFunctionalTests({
       try {
         /**
          * Trigger "Total shards" ES Upgrade readiness check
-         * the number of shards in the test cluster is 25-27
+         * the number of shards in the test cluster is 25-29
          * so 5 max shards per node should trigger this check
          * on both local and CI environments.
          */
@@ -53,7 +54,7 @@ export default function upgradeAssistantFunctionalTests({
             persistent: {
               cluster: {
                 // initial cluster setting from x-pack/test/functional/config.upgrade_assistant.js
-                max_shards_per_node: 27,
+                max_shards_per_node: 29,
               },
             },
           },

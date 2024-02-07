@@ -12,4 +12,5 @@ import { DEV_TOOLS_TITLE } from './dev_tools_translations';
 export const devToolsNavLink: ProjectNavigationLink = {
   id: ExternalPageName.devTools,
   title: DEV_TOOLS_TITLE,
+  sideNavIcon: 'editorCodeBlock',
 };

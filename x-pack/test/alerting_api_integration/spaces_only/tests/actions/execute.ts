@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { IValidatedEvent, nanosToMillis } from '@kbn/event-log-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/lib/action_execution_source';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { Spaces } from '../../scenarios';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../common/lib';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
@@ -131,6 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: true,
+        errorSource: TaskErrorSource.USER,
       });
 
       await validateEventLog({
@@ -326,6 +328,7 @@ export default function ({ getService }: FtrProviderContext) {
           message: 'an error occurred while running the action',
           serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
           retry: true,
+          errorSource: TaskErrorSource.USER,
         });
       });
     });

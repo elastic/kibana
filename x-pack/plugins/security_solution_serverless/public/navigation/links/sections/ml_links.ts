@@ -81,7 +81,7 @@ export const mlNavCategories: ProjectLinkCategory[] = [
     linkIds: [
       ExternalPageName.mlFileUpload,
       ExternalPageName.mlIndexDataVisualizer,
-      ExternalPageName.mlDataComparison,
+      ExternalPageName.mlDataDrift,
     ],
   },
   {
@@ -176,10 +176,10 @@ export const mlNavLinks: ProjectNavigationLink[] = [
     description: i18n.INDEX_DATA_VISUALIZER_DESC,
   },
   {
-    id: ExternalPageName.mlDataComparison,
-    title: i18n.DATA_COMPARISON_TITLE,
+    id: ExternalPageName.mlDataDrift,
+    title: i18n.DATA_DRIFT_TITLE,
     landingIcon: IconRapidBarGraphLazy,
-    description: i18n.DATA_COMPARISON_DESC,
+    description: i18n.DATA_DRIFT_TITLE,
   },
   {
     id: ExternalPageName.mlExplainLogRateSpikes,

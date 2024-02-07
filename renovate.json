@@ -119,6 +119,27 @@
       "enabled": true
     },
     {
+      "groupName": "LaunchDarkly",
+      "matchPackageNames": [
+        "launchdarkly-js-client-sdk",
+        "launchdarkly-node-server-sdk"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Security",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "APM",
       "matchPackageNames": [
         "elastic-apm-node",
@@ -256,11 +277,8 @@
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": [
-        "eslint-plugin-cypress"
-      ],
       "matchPackagePatterns": [
-        "^cypress"
+        "cypress"
       ],
       "reviewers": [
         "Team:apm",
@@ -272,6 +290,23 @@
       "labels": [
         "buildkite-ci",
         "ci:all-cypress-suites"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "security solution modules",
+      "matchPackageNames": [
+        "zod",
+        "langchain"
+      ],
+      "reviewers": [
+        "Team: SecuritySolution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution"
       ],
       "enabled": true
     },
@@ -327,7 +362,7 @@
     {
       "groupName": "scss",
       "packageNames": [
-        "node-sass"
+        "sass-embedded"
       ],
       "reviewers": [
         "team:kibana-operations"
@@ -423,11 +458,37 @@
       "matchPackagePatterns": [
         "^@storybook"
       ],
+      "excludePackageNames": [
+        "@storybook/testing-react"
+      ],
       "labels": [
         "Team:Operations",
-        "release_note:skip"
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
       ],
-      "enabled": true
+      "enabled": true,
+      "allowedVersions": "<7.0"
+    },
+    {
+      "groupName": "@storybook/testing-react",
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "matchPackageNames": [
+        "@storybook/testing-react"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "ci:build-storybooks",
+        "backport:skip"
+      ],
+      "enabled": true,
+      "allowedVersions": "<2.0"
     },
     {
       "groupName": "react-query",
@@ -483,7 +544,6 @@
         "team:kibana-presentation",
         "team:kibana-data-discovery",
         "team:platform-deployment-management",
-        "team:infra-monitoring-ui",
         "team:kibana-gis",
         "team:security-solution"
       ],
@@ -583,13 +643,13 @@
         "@xstate/"
       ],
       "reviewers": [
-        "team:infra-monitoring-ui"
+        "team:obs-ux-logs"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Infra Monitoring UI",
+        "Team:Obs UX Logs",
         "release_note:skip"
       ],
       "enabled": true,
@@ -601,13 +661,13 @@
         "@opentelemetry/"
       ],
       "reviewers": [
-        "team:infra-monitoring-ui"
+        "team:monitoring"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:Infra Monitoring UI"
+        "Team:Monitoring"
       ],
       "enabled": true
     }

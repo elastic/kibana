@@ -1,0 +1,16 @@
+openapi: 3.0.0
+info:
+  title: EQL Rule Attributes
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    EventCategoryOverride:
+      type: string
+    TimestampField:
+      type: string
+      description: Contains the event timestamp used for sorting a sequence of events
+    TiebreakerField:
+      type: string
+      description: Sets a secondary field for sorting events

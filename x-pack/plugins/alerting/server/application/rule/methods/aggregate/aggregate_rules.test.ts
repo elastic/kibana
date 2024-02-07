@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
@@ -26,6 +27,7 @@ import { fromKueryExpression, nodeTypes } from '@kbn/es-query';
 import { RecoveredActionGroup } from '../../../../../common';
 import { DefaultRuleAggregationResult } from '../../../../routes/rule/apis/aggregate/types';
 import { defaultRuleAggregationFactory } from '.';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 const taskManager = taskManagerMock.createStart();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -56,8 +58,11 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
   maxScheduledPerMinute: 1000,
   internalSavedObjectsRepository,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -78,10 +83,12 @@ describe('aggregate()', () => {
       recoveryActionGroup: RecoveredActionGroup,
       id: 'myType',
       name: 'myType',
+      category: 'test',
       producer: 'myApp',
       enabledInLicense: true,
       hasAlertsMappings: false,
       hasFieldsForAAD: false,
+      validLegacyConsumers: [],
     },
   ]);
   beforeEach(() => {
@@ -159,6 +166,7 @@ describe('aggregate()', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           recoveryActionGroup: RecoveredActionGroup,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -166,6 +174,7 @@ describe('aggregate()', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ])
     );
@@ -283,7 +292,7 @@ describe('aggregate()', () => {
         filter: undefined,
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },
@@ -344,7 +353,7 @@ describe('aggregate()', () => {
         ]),
         page: 1,
         perPage: 0,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         aggs: {
           status: {
             terms: { field: 'alert.attributes.executionStatus.status' },

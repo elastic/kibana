@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { FactoryQueryTypes } from '../../../../../common/search_strategy/security_solution';
 import {
   NetworkQueries,
   NetworkKpiQueries,
@@ -16,7 +15,6 @@ import { networkKpiNetworkEvents } from './kpi/network_events';
 import { networkKpiTlsHandshakes } from './kpi/tls_handshakes';
 import { networkKpiUniqueFlows } from './kpi/unique_flows';
 import { networkKpiUniquePrivateIps } from './kpi/unique_private_ips';
-import type { SecuritySolutionFactory } from '../types';
 import { networkDetails } from './details';
 import { networkDns } from './dns';
 import { networkHttp } from './http';
@@ -26,10 +24,9 @@ import { networkTopCountries } from './top_countries';
 import { networkTopNFlow } from './top_n_flow';
 import { networkUsers } from './users';
 
-export const networkFactory: Record<
-  NetworkQueries | NetworkKpiQueries,
-  SecuritySolutionFactory<FactoryQueryTypes>
-> = {
+// TODO: add safer type for the strategy map
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export const networkFactory: Record<NetworkQueries | NetworkKpiQueries, any> = {
   [NetworkQueries.details]: networkDetails,
   [NetworkQueries.dns]: networkDns,
   [NetworkQueries.http]: networkHttp,

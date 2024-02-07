@@ -12,6 +12,7 @@ import { isEqual } from 'lodash';
 import type { Filter } from '@kbn/es-query';
 import { useCallback } from 'react';
 import type { TableId } from '@kbn/securitysolution-data-table';
+import { useBulkAlertAssigneesItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_assignees_items';
 import { useBulkAlertTagsItems } from '../../../common/components/toolbar/bulk_actions/use_bulk_alert_tags_items';
 import type { inputsModel, State } from '../../../common/store';
 import { useShallowEqualSelector } from '../../../common/hooks/use_selector';
@@ -93,7 +94,11 @@ export const getBulkActionHook =
       refetch: refetchGlobalQuery,
     });
 
-    const items = [...alertActions, timelineAction, ...alertTagsItems];
+    const { alertAssigneesItems, alertAssigneesPanels } = useBulkAlertAssigneesItems({
+      onAssigneesUpdate: refetchGlobalQuery,
+    });
 
-    return [{ id: 0, items }, ...alertTagsPanels];
+    const items = [...alertActions, timelineAction, ...alertTagsItems, ...alertAssigneesItems];
+
+    return [{ id: 0, items }, ...alertTagsPanels, ...alertAssigneesPanels];
   };

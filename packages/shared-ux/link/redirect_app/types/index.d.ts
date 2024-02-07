@@ -32,7 +32,11 @@ export interface RedirectAppLinksKibanaDependencies {
 }
 
 /** Props for the `RedirectAppLinks` component. */
-export type RedirectAppLinksProps = RedirectAppLinksServices | RedirectAppLinksKibanaDependencies;
+export type RedirectAppLinksProps = (
+  | RedirectAppLinksServices
+  | RedirectAppLinksKibanaDependencies
+) &
+  DetailedHTMLProps<HTMLAttributes<HTMLDivElement>, HTMLDivElement>;
 
 /** Props for the `RedirectAppLinksComponent`. */
 export interface RedirectAppLinksComponentProps

@@ -6,4 +6,5 @@ enum:
   - m
   - h
   - d
-example: "m"
+examples:
+  - "m"

@@ -58,6 +58,7 @@ describe('getSavedSearch', () => {
           description: 'description',
           grid: {},
           hideChart: false,
+          sampleSize: 100,
         },
         id: 'ccf1af80-2297-11ec-86e0-1155ffb9c7a7',
         type: 'search',
@@ -93,6 +94,7 @@ describe('getSavedSearch', () => {
         "hideChart": false,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": undefined,
+        "managed": false,
         "references": Array [
           Object {
             "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
@@ -103,6 +105,7 @@ describe('getSavedSearch', () => {
         "refreshInterval": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": 100,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],
@@ -198,6 +201,7 @@ describe('getSavedSearch', () => {
         "hideChart": true,
         "id": "ccf1af80-2297-11ec-86e0-1155ffb9c7a7",
         "isTextBasedQuery": true,
+        "managed": false,
         "references": Array [
           Object {
             "id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
@@ -208,6 +212,7 @@ describe('getSavedSearch', () => {
         "refreshInterval": undefined,
         "rowHeight": undefined,
         "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "searchSource": Object {
           "create": [MockFunction],
           "createChild": [MockFunction],

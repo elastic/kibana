@@ -84,9 +84,9 @@ describe('UserProfilesPopover', () => {
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
-          items={Array []}
+        <EuiContextMenuPanelClass
           title="Title"
         >
           <UserProfilesSelectable
@@ -120,7 +120,7 @@ describe('UserProfilesPopover', () => {
               ]
             }
           />
-        </EuiContextMenuPanel>
+        </EuiContextMenuPanelClass>
       </EuiPopover>
     `);
   });

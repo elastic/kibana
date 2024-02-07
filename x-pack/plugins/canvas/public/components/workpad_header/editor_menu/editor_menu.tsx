@@ -68,12 +68,14 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
           trackCanvasUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
-        if ('aliasPath' in visType) {
-          appId = visType.aliasApp;
-          path = visType.aliasPath;
-        } else {
+        if (!('alias' in visType)) {
+          // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
+        } else if (visType.alias && 'path' in visType.alias) {
+          // this visualization **is** an alias, and it has an app to redirect to for creation
+          appId = visType.alias.app;
+          path = visType.alias.path;
         }
       } else {
         appId = 'visualize';
@@ -134,7 +136,8 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
     .getAliases()
     .sort(({ promotion: a = false }: VisTypeAlias, { promotion: b = false }: VisTypeAlias) =>
       a === b ? 0 : a ? -1 : 1
-    );
+    )
+    .filter(({ disableCreate }: VisTypeAlias) => !disableCreate);
 
   const factories = unwrappedEmbeddableFactories
     .filter(
@@ -142,7 +145,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
         isEditable &&
         !isContainerType &&
         canCreateNew() &&
-        !['visualization', 'ml'].some((factoryType) => {
+        !['visualization', 'ml', 'links'].some((factoryType) => {
           return type.includes(factoryType);
         })
     )

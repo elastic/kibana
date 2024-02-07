@@ -76,7 +76,7 @@ describe('Find rules route', () => {
       expect(result.ok).toHaveBeenCalled();
     });
 
-    test('rejects unknown query params', async () => {
+    test('ignores unknown query params', async () => {
       const request = requestMock.create({
         method: 'get',
         path: DETECTION_ENGINE_RULES_URL_FIND,
@@ -86,7 +86,7 @@ describe('Find rules route', () => {
       });
       const result = server.validate(request);
 
-      expect(result.badRequest).toHaveBeenCalledWith('invalid keys "invalid_value"');
+      expect(result.ok).toHaveBeenCalled();
     });
   });
 });

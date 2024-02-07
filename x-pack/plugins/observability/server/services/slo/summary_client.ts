@@ -15,7 +15,7 @@ import {
   toMomentUnitOfTime,
 } from '@kbn/slo-schema';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { DateRange, SLO, Summary } from '../../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../../domain/services';
 import { toDateRange } from '../../domain/services/date_range';

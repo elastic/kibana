@@ -5,26 +5,24 @@
  * 2.0.
  */
 
-import { format, UrlObject } from 'url';
 import { FtrConfigProviderContext } from '@kbn/test';
 import supertest from 'supertest';
-import { getRoutePaths } from '@kbn/profiling-plugin/common';
+import { format, UrlObject } from 'url';
 import { ProfilingFtrConfigName } from '../configs';
+import { createProfilingApiClient } from './api_supertest';
+import { createProfilingUsers } from './create_profiling_users';
+import {
+  PROFILING_TEST_PASSWORD,
+  ProfilingUsername,
+} from './create_profiling_users/authentication';
 import {
   FtrProviderContext,
   InheritedFtrProviderContext,
   InheritedServices,
 } from './ftr_provider_context';
 import { RegistryProvider } from './registry';
-import { createProfilingApiClient } from './api_supertest';
-import {
-  ProfilingUsername,
-  PROFILING_TEST_PASSWORD,
-} from './create_profiling_users/authentication';
-import { createProfilingUsers } from './create_profiling_users';
 
 export type CreateTestConfig = ReturnType<typeof createTestConfig>;
-const profilingRoutePaths = getRoutePaths();
 
 export async function getProfilingApiClient({
   kibanaServer,
@@ -111,19 +109,6 @@ export function createTestConfig(
           });
 
           await supertest(kibanaServerUrl).post('/api/fleet/setup').set('kbn-xsrf', 'foo');
-
-          const result = await adminUser({
-            endpoint: `GET ${profilingRoutePaths.HasSetupESResources}`,
-          });
-          if (!result.body.has_setup) {
-            // eslint-disable-next-line no-console
-            console.log('Setting up Universal Profiling');
-            await adminUser({
-              endpoint: `POST ${profilingRoutePaths.HasSetupESResources}`,
-            });
-            // eslint-disable-next-line no-console
-            console.log('Universal Profiling set up');
-          }
 
           return {
             noAccessUser: await getProfilingApiClient({

@@ -179,13 +179,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
             URL template help
           </span>
           <span
-            class="emotion-euiLink__externalIcon"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+            class="emotion-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
@@ -244,13 +244,13 @@ exports[`UrlFormatEditor should render normally 1`] = `
             Label template help
           </span>
           <span
-            class="emotion-euiLink__externalIcon"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+            class="emotion-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>

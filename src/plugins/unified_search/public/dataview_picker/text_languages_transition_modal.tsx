@@ -8,7 +8,7 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-
+import { getLanguageDisplayName } from '@kbn/es-query';
 import {
   EuiModal,
   EuiModalBody,
@@ -39,7 +39,7 @@ export default function TextBasedLanguagesTransitionModal({
     setDismissModalChecked(e.target.checked);
   }, []);
 
-  const language = textBasedLanguage?.toUpperCase();
+  const language = getLanguageDisplayName(textBasedLanguage);
   return (
     <EuiModal onClose={() => setIsTextLangTransitionModalVisible(false)} style={{ width: 700 }}>
       <EuiModalHeader>

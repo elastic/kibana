@@ -11,26 +11,25 @@ import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 're
 
 import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
 import { ControlError } from '../../control_group/component/control_error_component';
 
 import './range_slider.scss';
+import { MIN_POPOVER_WIDTH } from '../../constants';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
-  const {
-    dataViews: { get: getDataViewById },
-  } = pluginServices.getServices();
   const rangeSlider = useRangeSlider();
   const rangeSliderRef = useRef<EuiDualRangeProps | null>(null);
 
   // Embeddable explicit input
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const value = rangeSlider.select((state) => state.explicitInput.value);
+  const step = rangeSlider.select((state) => state.explicitInput.step);
 
-  // Embeddable cmponent state
+  // Embeddable component state
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
   const error = rangeSlider.select((state) => state.componentState.error);
@@ -43,8 +42,8 @@ export const RangeSliderControl: FC = () => {
 
   // React component state
   const [displayedValue, setDisplayedValue] = useState<RangeValue>(value ?? ['', '']);
-  const [fieldFormatter, setFieldFormatter] = useState(() => (toFormat: string) => toFormat);
 
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
   const debouncedOnChange = useMemo(
     () =>
       debounce((newRange: RangeValue) => {
@@ -52,22 +51,6 @@ export const RangeSliderControl: FC = () => {
       }, 750),
     [rangeSlider.dispatch]
   );
-
-  /**
-   * derive field formatter from fieldSpec and dataViewId
-   */
-  useEffect(() => {
-    (async () => {
-      if (!dataViewId || !fieldSpec) return;
-      // dataViews are cached, and should always be available without having to hit ES.
-      const dataView = await getDataViewById(dataViewId);
-      setFieldFormatter(
-        () =>
-          dataView?.getFormatterForField(fieldSpec).getConverterFor('text') ??
-          ((toFormat: string) => toFormat)
-      );
-    })();
-  }, [fieldSpec, dataViewId, getDataViewById]);
 
   /**
    * This will recalculate the displayed min/max of the range slider to allow for selections smaller
@@ -80,8 +63,14 @@ export const RangeSliderControl: FC = () => {
       selectedValue[0] === '' ? min : parseFloat(selectedValue[0]),
       selectedValue[1] === '' ? max : parseFloat(selectedValue[1]),
     ];
-    return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
-  }, [min, max, value]);
+
+    if (!step) return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
+
+    const minTick = Math.floor(Math.min(selectedMin, min) / step) * step;
+    const maxTick = Math.ceil(Math.max(selectedMax, max) / step) * step;
+
+    return [Math.min(selectedMin, min, minTick), Math.max(selectedMax, max ?? Infinity, maxTick)];
+  }, [min, max, value, step]);
 
   /**
    * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
@@ -93,20 +82,33 @@ export const RangeSliderControl: FC = () => {
 
   const ticks: EuiRangeTick[] = useMemo(() => {
     return [
-      { value: min ?? -Infinity, label: fieldFormatter(String(min)) },
-      { value: max ?? Infinity, label: fieldFormatter(String(max)) },
+      { value: displayedMin ?? -Infinity, label: fieldFormatter(String(displayedMin)) },
+      { value: displayedMax ?? Infinity, label: fieldFormatter(String(displayedMax)) },
     ];
-  }, [min, max, fieldFormatter]);
+  }, [displayedMin, displayedMax, fieldFormatter]);
 
   const levels = useMemo(() => {
+    if (!step || min === undefined || max === undefined) {
+      return [
+        {
+          min: min ?? -Infinity,
+          max: max ?? Infinity,
+          color: 'success',
+        },
+      ];
+    }
+
+    const roundedMin = Math.floor(min / step) * step;
+    const roundedMax = Math.ceil(max / step) * step;
+
     return [
       {
-        min: min ?? -Infinity,
-        max: max ?? Infinity,
+        min: roundedMin,
+        max: roundedMax,
         color: 'success',
       },
     ];
-  }, [min, max]);
+  }, [step, min, max]);
 
   const disablePopover = useMemo(
     () =>
@@ -128,15 +130,20 @@ export const RangeSliderControl: FC = () => {
       placeholder: string;
     }) => {
       return {
-        isInvalid,
+        isInvalid: undefined, // disabling this prop to handle our own validation styling
         placeholder,
         readOnly: false, // overwrites `canOpenPopover` to ensure that the inputs are always clickable
-        className: 'rangeSliderAnchor__fieldNumber',
+        className: `rangeSliderAnchor__fieldNumber ${
+          isInvalid
+            ? 'rangeSliderAnchor__fieldNumber--invalid'
+            : 'rangeSliderAnchor__fieldNumber--valid'
+        }`,
         'data-test-subj': `rangeSlider__${testSubj}`,
         value: inputValue === placeholder ? '' : inputValue,
+        title: !isInvalid && step ? '' : undefined, // overwrites native number input validation error when the value falls between two steps
       };
     },
-    [isInvalid]
+    [isInvalid, step]
   );
 
   return error ? (
@@ -148,11 +155,15 @@ export const RangeSliderControl: FC = () => {
         id={id}
         fullWidth
         showTicks
+        step={step}
         ticks={ticks}
         levels={levels}
         min={displayedMin}
         max={displayedMax}
         isLoading={isLoading}
+        inputPopoverProps={{
+          panelMinWidth: MIN_POPOVER_WIDTH,
+        }}
         onMouseUp={() => {
           // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
           // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to

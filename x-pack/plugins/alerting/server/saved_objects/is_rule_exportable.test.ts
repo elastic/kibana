@@ -15,6 +15,8 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { isRuleExportable } from './is_rule_exportable';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { AlertingConfig } from '../config';
+import { RULE_SAVED_OBJECT_TYPE } from '.';
 
 let ruleTypeRegistryParams: ConstructorOptions;
 let logger: MockedLogger;
@@ -27,6 +29,7 @@ beforeEach(() => {
   mockedLicenseState = licenseStateMock.create();
   logger = loggerMock.create();
   ruleTypeRegistryParams = {
+    config: {} as AlertingConfig,
     logger: loggingSystemMock.create().get(),
     taskManager,
     alertsService: null,
@@ -35,6 +38,7 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    latestRuleVersion: 1,
   };
 });
 
@@ -54,6 +58,7 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: true,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -63,7 +68,7 @@ describe('isRuleExportable', () => {
       isRuleExportable(
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             enabled: true,
             name: 'rule-name',
@@ -113,6 +118,7 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -122,7 +128,7 @@ describe('isRuleExportable', () => {
       isRuleExportable(
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             enabled: true,
             name: 'rule-name',
@@ -175,6 +181,7 @@ describe('isRuleExportable', () => {
       minimumLicenseRequired: 'basic',
       isExportable: false,
       executor: jest.fn(),
+      category: 'test',
       producer: 'alerts',
       validate: {
         params: { validate: (params) => params },
@@ -184,7 +191,7 @@ describe('isRuleExportable', () => {
       isRuleExportable(
         {
           id: '1',
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           attributes: {
             enabled: true,
             name: 'rule-name',

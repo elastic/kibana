@@ -64,7 +64,7 @@ import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
   ScreenshotOption,
@@ -514,13 +514,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
       return {
         id: 'syntheticsMonitorConfigIsAlertEnabled',
-        label: field?.value
-          ? i18n.translate('xpack.synthetics.monitorConfig.enabledAlerting.label', {
-              defaultMessage: 'Disable status alerts on this monitor',
-            })
-          : i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
-              defaultMessage: 'Enable status alerts on this monitor',
-            }),
+        label: i18n.translate('xpack.synthetics.monitorConfig.disabledAlerting.label', {
+          defaultMessage: 'Enable status alerts on this monitor',
+        }),
         checked: field?.value || false,
         onChange: async (event) => {
           setValue(AlertConfigKey.STATUS_ENABLED, !!event.target.checked);
@@ -541,13 +537,9 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         formState.defaultValues?.[ConfigKey.MONITOR_SOURCE_TYPE] === SourceType.PROJECT;
       return {
         id: 'syntheticsMonitorConfigIsTlsAlertEnabled',
-        label: field?.value
-          ? i18n.translate('xpack.synthetics.monitorConfig.edit.alertTlsEnabled.label', {
-              defaultMessage: 'Disable TLS alerts on this monitor.',
-            })
-          : i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
-              defaultMessage: 'Enable TLS alerts on this monitor.',
-            }),
+        label: i18n.translate('xpack.synthetics.monitorConfig.create.alertTlsEnabled.label', {
+          defaultMessage: 'Enable TLS alerts on this monitor.',
+        }),
         checked: field?.value || false,
         onChange: async (event) => {
           setValue(AlertConfigKey.TLS_ENABLED, !!event.target.checked);
@@ -877,7 +869,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validResponseStatusCheck: (value) => {
-          const validateFn = validate[DataStream.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
+          const validateFn = validate[MonitorTypeEnum.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
           if (validateFn) {
             return !validateFn({
               [ConfigKey.RESPONSE_STATUS_CHECK]: value,
@@ -1057,7 +1049,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validParams: (value) => {
-          const validateFn = validate[DataStream.BROWSER][ConfigKey.PARAMS];
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
           if (validateFn) {
             return validateFn({
               [ConfigKey.PARAMS]: value,
@@ -1343,7 +1335,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validPlaywrightOptions: (value) => {
-          const validateFn = validate[DataStream.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
           if (validateFn) {
             return validateFn({
               [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
@@ -1587,6 +1579,25 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           return true;
         },
       },
+    }),
+  },
+  [ConfigKey.MAX_ATTEMPTS]: {
+    fieldKey: ConfigKey.MAX_ATTEMPTS,
+    component: Switch,
+    controlled: true,
+    props: ({ setValue, field, trigger }): EuiSwitchProps => ({
+      disabled: readOnly,
+      id: 'syntheticsMonitorConfigMaxAttempts',
+      label: i18n.translate('xpack.synthetics.monitorConfig.retest.label', {
+        defaultMessage: 'Enable retest on failure',
+      }),
+      checked: field?.value === 2,
+      onChange: async (event) => {
+        const isChecked = !!event.target.checked;
+        setValue(ConfigKey.MAX_ATTEMPTS, isChecked ? 2 : 1);
+        await trigger(ConfigKey.MAX_ATTEMPTS);
+      },
+      'data-test-subj': 'syntheticsEnableAttemptSwitch',
     }),
   },
 });

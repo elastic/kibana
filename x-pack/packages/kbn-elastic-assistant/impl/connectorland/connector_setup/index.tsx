@@ -10,11 +10,10 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
-import { GEN_AI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/public/common';
+import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import { Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -26,7 +25,7 @@ import * as i18n from '../translations';
 import { useAssistantContext } from '../../assistant_context';
 import { useLoadConnectors } from '../use_load_connectors';
 import { AssistantAvatar } from '../../assistant/assistant_avatar/assistant_avatar';
-import { getGenAiConfig } from '../helpers';
+import { getActionTypeTitle, getGenAiConfig } from '../helpers';
 
 const ConnectorButtonWrapper = styled.div`
   margin-bottom: 10px;
@@ -65,20 +64,8 @@ export const useConnectorSetup = ({
     return conversationHasNoPresentationData(conversation);
   });
   const { data: actionTypes } = useLoadActionTypes({ http });
-  const actionType: ActionType = useMemo(
-    () =>
-      actionTypes?.find((at) => at.id === GEN_AI_CONNECTOR_ID) ?? {
-        enabledInConfig: true,
-        enabledInLicense: true,
-        isSystemActionType: false,
-        minimumLicenseRequired: 'platinum',
-        supportedFeatureIds: ['general'],
-        id: '.gen-ai',
-        name: 'Generative AI',
-        enabled: true,
-      },
-    [actionTypes]
-  );
+
+  const [selectedActionType, setSelectedActionType] = useState<ActionType | null>(null);
 
   // User constants
   const userName = useMemo(
@@ -144,7 +131,7 @@ export const useConnectorSetup = ({
         (message?.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
       return (
         <StreamingText
-          text={message.content}
+          text={message.content ?? ''}
           delay={enableStreaming ? 50 : 0}
           onStreamingComplete={
             isLastMessage ? onHandleLastMessageStreamingComplete : onHandleMessageStreamingComplete
@@ -190,6 +177,45 @@ export const useConnectorSetup = ({
     [assistantName, commentBody, conversation.messages, currentMessageIndex, userName]
   );
 
+  const onSaveConnector = useCallback(
+    (connector: ActionConnector) => {
+      const config = getGenAiConfig(connector);
+      // add action type title to new connector
+      const connectorTypeTitle = getActionTypeTitle(actionTypeRegistry.get(connector.actionTypeId));
+      Object.values(conversations).forEach((c) => {
+        setApiConfig({
+          conversationId: c.id,
+          apiConfig: {
+            ...c.apiConfig,
+            connectorId: connector.id,
+            connectorTypeTitle,
+            provider: config?.apiProvider,
+            model: config?.defaultModel,
+          },
+        });
+      });
+
+      refetchConnectors?.();
+      setIsConnectorModalVisible(false);
+      appendMessage({
+        conversationId: conversation.id,
+        message: {
+          role: 'assistant',
+          content: i18n.CONNECTOR_SETUP_COMPLETE,
+          timestamp: new Date().toLocaleString(),
+        },
+      });
+    },
+    [
+      actionTypeRegistry,
+      appendMessage,
+      conversation.id,
+      conversations,
+      refetchConnectors,
+      setApiConfig,
+    ]
+  );
+
   return {
     comments,
     prompt: (
@@ -204,6 +230,7 @@ export const useConnectorSetup = ({
             <EuiTextAlign textAlign="center">
               <EuiBadge
                 color="hollow"
+                data-test-subj="skip-setup-button"
                 onClick={handleSkipSetup}
                 onClickAriaLabel={i18n.CONNECTOR_SETUP_SKIP}
               >
@@ -213,36 +240,13 @@ export const useConnectorSetup = ({
           </SkipEuiText>
         )}
         {isConnectorModalVisible && (
-          <ConnectorAddModal
-            actionType={actionType}
-            onClose={() => setIsConnectorModalVisible(false)}
-            postSaveEventHandler={(connector: ActionConnector) => {
-              const config = getGenAiConfig(connector);
-              // Add connector to all conversations
-              Object.values(conversations).forEach((c) => {
-                setApiConfig({
-                  conversationId: c.id,
-                  apiConfig: {
-                    ...c.apiConfig,
-                    connectorId: connector.id,
-                    provider: config?.apiProvider,
-                    model: config?.defaultModel,
-                  },
-                });
-              });
-
-              refetchConnectors?.();
-              setIsConnectorModalVisible(false);
-              appendMessage({
-                conversationId: conversation.id,
-                message: {
-                  role: 'assistant',
-                  content: 'Connector setup complete!',
-                  timestamp: new Date().toLocaleString(),
-                },
-              });
-            }}
+          <AddConnectorModal
             actionTypeRegistry={actionTypeRegistry}
+            actionTypes={actionTypes}
+            onClose={() => setIsConnectorModalVisible(false)}
+            onSaveConnector={onSaveConnector}
+            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+            selectedActionType={selectedActionType}
           />
         )}
       </div>

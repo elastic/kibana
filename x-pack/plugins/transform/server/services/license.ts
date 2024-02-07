@@ -36,7 +36,7 @@ interface SetupSettings {
   coreStart: CoreStart;
 }
 
-type TransformRequestHandlerContext = CustomRequestHandlerContext<{
+export type TransformRequestHandlerContext = CustomRequestHandlerContext<{
   alerting?: AlertingApiRequestHandlerContext;
 }>;
 

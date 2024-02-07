@@ -12,6 +12,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../../../screens/alerts_detection_rules';
 import {
+  disableAutoRefresh,
   selectRulesByName,
   unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
@@ -20,9 +21,9 @@ import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../../tasks/common';
-import { login, visitWithoutDateRange } from '../../../../tasks/login';
-import { DETECTIONS_RULE_MANAGEMENT_URL } from '../../../../urls/navigation';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',
@@ -33,22 +34,17 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-// FLAKY: https://github.com/elastic/kibana/issues/165643
-describe.skip(
+describe(
   'Rules table: selection',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       /* Create and install two mock rules */
-      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
-      visitWithoutDateRange(DETECTIONS_RULE_MANAGEMENT_URL);
+      createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
+      visit(RULES_MANAGEMENT_URL);
       waitForPrebuiltDetectionRulesToBeLoaded();
+      disableAutoRefresh();
     });
 
     it('should correctly update the selection label when rules are individually selected and unselected', () => {

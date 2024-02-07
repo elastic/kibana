@@ -24,6 +24,7 @@ import type { SharePluginStart } from '@kbn/share-plugin/public';
 
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import { ExtensionsService } from '../services';
 import { UiMetricService, NotificationService, HttpService } from './services';
 
@@ -42,6 +43,7 @@ export interface AppDependencies {
     isFleetEnabled: boolean;
     share: SharePluginStart;
     cloud?: CloudSetup;
+    console?: ConsolePluginStart;
   };
   services: {
     uiMetricService: UiMetricService;
@@ -52,8 +54,9 @@ export interface AppDependencies {
   config: {
     enableIndexActions: boolean;
     enableLegacyTemplates: boolean;
-    enableIndexDetailsPage: boolean;
     enableIndexStats: boolean;
+    editableIndexSettings: 'all' | 'limited';
+    enableDataStreamsStorageColumn: boolean;
   };
   history: ScopedHistory;
   setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];

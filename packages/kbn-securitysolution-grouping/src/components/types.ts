@@ -76,7 +76,8 @@ export type GroupStatsRenderer<T> = (
 export type GroupPanelRenderer<T> = (
   selectedGroup: string,
   fieldBucket: RawBucket<T>,
-  nullGroupMessage?: string
+  nullGroupMessage?: string,
+  isLoading?: boolean
 ) => JSX.Element | undefined;
 
 export type OnGroupToggle = (params: {

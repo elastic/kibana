@@ -15,7 +15,6 @@ export { split } from './streaming';
 export type { BatchedFunc } from './batching/types';
 
 export { DISABLE_BFETCH } from '../common/constants';
-export { BfetchRequestError } from '../common/bfetch_error';
 
 export function plugin(initializerContext: PluginInitializerContext) {
   return new BfetchPublicPlugin(initializerContext);

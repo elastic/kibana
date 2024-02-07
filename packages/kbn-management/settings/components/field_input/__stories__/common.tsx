@@ -13,7 +13,7 @@ import { action } from '@storybook/addon-actions';
 import { EuiPanel } from '@elastic/eui';
 import { UiSettingsType } from '@kbn/core-ui-settings-common';
 import {
-  OnChangeFn,
+  OnInputChangeFn,
   SettingType,
   UiSettingMetadata,
   UnsavedFieldChange,
@@ -75,7 +75,16 @@ export const getStory = (title: string, description: string) =>
     },
     decorators: [
       (Story) => (
-        <FieldInputProvider showDanger={action('showDanger')}>
+        <FieldInputProvider
+          showDanger={action('showDanger')}
+          validateChange={async (key, value) => {
+            action(`validateChange`)({
+              key,
+              value,
+            });
+            return { successfulValidation: true, valid: true };
+          }}
+        >
           <EuiPanel style={{ width: 500 }}>
             <Story />
           </EuiPanel>
@@ -108,17 +117,17 @@ export const getInputStory = (type: SettingType, params: Params = {}) => {
       setting,
     });
 
-    const onChange: OnChangeFn<typeof type> = (newChange) => {
+    const onInputChange: OnInputChangeFn<typeof type> = (newChange) => {
       setUnsavedChange(newChange);
 
-      action('onChange')({
+      action('onInputChange')({
         type,
         unsavedValue: newChange?.unsavedValue,
         savedValue: field.savedValue,
       });
     };
 
-    return <FieldInput {...{ field, unsavedChange, onChange, isSavingEnabled }} />;
+    return <FieldInput {...{ field, unsavedChange, onInputChange, isSavingEnabled }} />;
   };
 
   Story.argTypes = {

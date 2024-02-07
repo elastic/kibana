@@ -19,7 +19,7 @@ import { applicationServiceFactory } from './application/application_service';
 import { chromeServiceFactory } from './chrome/chrome_service';
 import { coreContextServiceFactory } from './core_context/core_context_service';
 import { dashboardCapabilitiesServiceFactory } from './dashboard_capabilities/dashboard_capabilities_service';
-import { dashboardSessionStorageServiceFactory } from './dashboard_session_storage/dashboard_session_storage_service';
+import { dashboardBackupServiceFactory } from './dashboard_backup/dashboard_backup_service';
 import { dataServiceFactory } from './data/data_service';
 import { dataViewEditorServiceFactory } from './data_view_editor/data_view_editor_service';
 import { documentationLinksServiceFactory } from './documentation_links/documentation_links_service';
@@ -44,19 +44,20 @@ import { dashboardContentManagementServiceFactory } from './dashboard_content_ma
 import { contentManagementServiceFactory } from './content_management/content_management_service';
 import { serverlessServiceFactory } from './serverless/serverless_service';
 import { noDataPageServiceFactory } from './no_data_page/no_data_page_service';
+import { uiActionsServiceFactory } from './ui_actions/ui_actions_service';
 
 const providers: PluginServiceProviders<DashboardServices, DashboardPluginServiceParams> = {
   dashboardContentManagement: new PluginServiceProvider(dashboardContentManagementServiceFactory, [
-    'dashboardSessionStorage',
     'savedObjectsTagging',
     'initializerContext',
+    'dashboardBackup',
     'screenshotMode',
     'notifications',
     'embeddable',
     'spaces',
     'data',
   ]),
-  dashboardSessionStorage: new PluginServiceProvider(dashboardSessionStorageServiceFactory, [
+  dashboardBackup: new PluginServiceProvider(dashboardBackupServiceFactory, [
     'notifications',
     'spaces',
   ]),
@@ -88,6 +89,7 @@ const providers: PluginServiceProviders<DashboardServices, DashboardPluginServic
   contentManagement: new PluginServiceProvider(contentManagementServiceFactory),
   serverless: new PluginServiceProvider(serverlessServiceFactory),
   noDataPage: new PluginServiceProvider(noDataPageServiceFactory),
+  uiActions: new PluginServiceProvider(uiActionsServiceFactory),
 };
 
 export const pluginServices = new PluginServices<DashboardServices>();

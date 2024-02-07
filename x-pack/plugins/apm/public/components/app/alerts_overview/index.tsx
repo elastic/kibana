@@ -53,6 +53,7 @@ export function AlertsOverview() {
         timefilter: { timefilter: timeFilterService },
       },
     },
+    uiSettings,
   } = services;
 
   const useToasts = () => notifications!.toasts;
@@ -98,7 +99,12 @@ export function AlertsOverview() {
               rangeTo={rangeTo}
               rangeFrom={rangeFrom}
               status={alertStatusFilter}
-              services={{ timeFilterService, AlertsSearchBar, useToasts }}
+              services={{
+                timeFilterService,
+                AlertsSearchBar,
+                useToasts,
+                uiSettings,
+              }}
             />
           </EuiFlexItem>
         </EuiFlexItem>
@@ -110,10 +116,9 @@ export function AlertsOverview() {
               }
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={[AlertConsumers.APM]}
+              featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
-              showExpandToDetails={false}
             />
           )}
         </EuiFlexItem>

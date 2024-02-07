@@ -29,11 +29,12 @@ export interface UseChatSendProps {
   setUserPrompt: React.Dispatch<React.SetStateAction<string | null>>;
 }
 
-interface UseChatSend {
+export interface UseChatSend {
   handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
   handleSendMessage: (promptText: string) => void;
+  handleRegenerateResponse: () => void;
   isLoading: boolean;
 }
 
@@ -54,7 +55,8 @@ export const useChatSend = ({
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
   const { isLoading, sendMessages } = useSendMessages();
-  const { appendMessage, appendReplacements, clearConversation } = useConversation();
+  const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
+    useConversation();
 
   const handlePromptChange = (prompt: string) => {
     setPromptTextPreview(prompt);
@@ -91,26 +93,61 @@ export const useChatSend = ({
       setPromptTextPreview('');
 
       const rawResponse = await sendMessages({
-        http,
         apiConfig: currentConversation.apiConfig,
+        http,
         messages: updatedMessages,
+        onNewReplacements,
+        replacements: currentConversation.replacements ?? {},
       });
+
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);
       appendMessage({ conversationId: currentConversation.id, message: responseMessage });
     },
     [
       allSystemPrompts,
-      currentConversation,
-      selectedPromptContexts,
       appendMessage,
-      setSelectedPromptContexts,
-      setPromptTextPreview,
-      sendMessages,
-      http,
       appendReplacements,
+      currentConversation.apiConfig,
+      currentConversation.id,
+      currentConversation.messages.length,
+      currentConversation.replacements,
       editingSystemPromptId,
+      http,
+      selectedPromptContexts,
+      sendMessages,
+      setPromptTextPreview,
+      setSelectedPromptContexts,
     ]
   );
+
+  const handleRegenerateResponse = useCallback(async () => {
+    const onNewReplacements = (newReplacements: Record<string, string>) =>
+      appendReplacements({
+        conversationId: currentConversation.id,
+        replacements: newReplacements,
+      });
+
+    const updatedMessages = removeLastMessage(currentConversation.id);
+
+    const rawResponse = await sendMessages({
+      apiConfig: currentConversation.apiConfig,
+      http,
+      messages: updatedMessages,
+      onNewReplacements,
+      replacements: currentConversation.replacements ?? {},
+    });
+    const responseMessage: Message = getMessageFromRawResponse(rawResponse);
+    appendMessage({ conversationId: currentConversation.id, message: responseMessage });
+  }, [
+    appendMessage,
+    appendReplacements,
+    currentConversation.apiConfig,
+    currentConversation.id,
+    currentConversation.replacements,
+    http,
+    removeLastMessage,
+    sendMessages,
+  ]);
 
   const handleButtonSendMessage = useCallback(
     (message: string) => {
@@ -146,6 +183,7 @@ export const useChatSend = ({
     handleOnChatCleared,
     handlePromptChange,
     handleSendMessage,
+    handleRegenerateResponse,
     isLoading,
   };
 };

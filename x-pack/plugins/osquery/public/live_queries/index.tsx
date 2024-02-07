@@ -26,6 +26,7 @@ interface LiveQueryProps {
   agentPolicyIds?: string[];
   onSuccess?: () => void;
   query?: string;
+  timeout?: number;
   savedQueryId?: string;
   ecs_mapping?: ECSMapping;
   agentsField?: boolean;
@@ -55,6 +56,7 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
   hideAgentsField,
   packId,
   agentSelection,
+  timeout,
 }) => {
   const { data: hasActionResultsPrivileges, isLoading } = useActionResultsPrivileges();
 
@@ -93,11 +95,12 @@ const LiveQueryComponent: React.FC<LiveQueryProps> = ({
       query: initialQuery,
       savedQueryId,
       ecs_mapping,
+      timeout,
       packId,
     };
 
     return !isEmpty(pickBy(initialValue, (value) => !isEmpty(value))) ? initialValue : undefined;
-  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId]);
+  }, [alertIds, ecs_mapping, initialAgentSelection, initialQuery, packId, savedQueryId, timeout]);
 
   if (isLoading) {
     return <EuiSkeletonText lines={10} />;

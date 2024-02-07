@@ -9,8 +9,6 @@ import {
   ConnectorStatus,
   DisplayType,
   FieldType,
-  FilteringPolicy,
-  FilteringRuleRule,
   FilteringValidationState,
   SyncStatus,
 } from '@kbn/search-connectors';
@@ -35,6 +33,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {
         foo: {
           default_value: '',
@@ -78,8 +77,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -102,8 +101,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -161,6 +160,7 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
   {
     connector: {
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {
         foo: {
           default_value: '',
@@ -204,8 +204,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },
@@ -228,8 +228,8 @@ export const indices: ElasticsearchIndexWithIngestion[] = [
                 field: '_',
                 id: 'DEFAULT',
                 order: 0,
-                policy: FilteringPolicy.INCLUDE,
-                rule: FilteringRuleRule.REGEX,
+                policy: 'include',
+                rule: 'regex',
                 updated_at: expect.any(String),
                 value: '.*',
               },

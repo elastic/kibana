@@ -18,7 +18,23 @@ describe('UpdateSearchApplicationApiLogic', () => {
   });
   describe('updateSearchApplication', () => {
     it('calls correct api', async () => {
-      const searchApplication = { name: 'my-search-application', indices: ['an-index'] };
+      const searchApplication = {
+        name: 'my-search-application',
+        indices: ['an-index'],
+        template: {
+          script: {
+            source: '"query":{"term":{"{{field_name}}":["{{field_value}}"',
+            lang: 'mustache',
+            options: {
+              content_type: 'application/json;charset=utf-8',
+            },
+            params: {
+              field_name: 'hello',
+              field_value: 'world',
+            },
+          },
+        },
+      };
       const response = { result: 'updated' };
       const promise = Promise.resolve(response);
       http.put.mockReturnValue(promise);
@@ -27,7 +43,14 @@ describe('UpdateSearchApplicationApiLogic', () => {
       expect(http.put).toHaveBeenCalledWith(
         '/internal/enterprise_search/search_applications/my-search-application',
         {
-          body: '{"indices":["an-index"],"name":"my-search-application"}',
+          body:
+            '{"indices":["an-index"],' +
+            '"name":"my-search-application",' +
+            '"template":{' +
+            '"script":{"source":"\\"query\\":{\\"term\\":{\\"{{field_name}}\\":[\\"{{field_value}}\\"",' +
+            '"lang":"mustache",' +
+            '"options":{"content_type":"application/json;charset=utf-8"},' +
+            '"params":{"field_name":"hello","field_value":"world"}}}}',
         }
       );
       await expect(result).resolves.toEqual(response);

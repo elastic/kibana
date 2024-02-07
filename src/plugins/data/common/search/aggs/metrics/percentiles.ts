@@ -43,7 +43,7 @@ export const getPercentilesMetricAgg = () => {
     title: i18n.translate('data.search.aggs.metrics.percentilesTitle', {
       defaultMessage: 'Percentiles',
     }),
-    valueType: 'number',
+    getValueType: () => 'number',
     makeLabel(agg) {
       return i18n.translate('data.search.aggs.metrics.percentilesLabel', {
         defaultMessage: 'Percentiles of {field}',

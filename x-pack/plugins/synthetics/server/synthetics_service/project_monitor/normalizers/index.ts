@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
-import { DataStream, Locations, ProjectMonitor } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import { getNormalizeBrowserFields } from './browser_monitor';
 import { getNormalizeICMPFields } from './icmp_monitor';
 import { getNormalizeTCPFields } from './tcp_monitor';
@@ -14,19 +14,19 @@ import { NormalizedProjectProps } from './common_fields';
 
 export const normalizeProjectMonitor = (props: NormalizedProjectProps) => {
   const { monitor } = props;
-  const type = monitor.type || DataStream.BROWSER;
+  const type = monitor.type || MonitorTypeEnum.BROWSER;
 
   switch (type) {
-    case DataStream.BROWSER:
+    case MonitorTypeEnum.BROWSER:
       return getNormalizeBrowserFields(props);
 
-    case DataStream.HTTP:
+    case MonitorTypeEnum.HTTP:
       return getNormalizeHTTPFields(props);
 
-    case DataStream.TCP:
+    case MonitorTypeEnum.TCP:
       return getNormalizeTCPFields(props);
 
-    case DataStream.ICMP:
+    case MonitorTypeEnum.ICMP:
       return getNormalizeICMPFields(props);
     default:
       throw new Error(`Unsupported monitor type ${monitor.type}`);

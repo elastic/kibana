@@ -7,6 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS } from '@kbn/fleet-plugin/server/constants';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   BENCHMARK_SCORE_INDEX_PATTERN,
@@ -24,6 +25,10 @@ import { CloudSecurityPostureConfig } from '../config';
 interface IndexTemplateSettings {
   index: {
     default_pipeline: string;
+    codec?: string;
+    mapping?: {
+      ignore_malformed: boolean;
+    };
   };
   lifecycle?: { name: string };
 }
@@ -65,7 +70,7 @@ export const initializeCspIndices = async (
   }
 };
 
-const createBenchmarkScoreIndex = async (
+export const createBenchmarkScoreIndex = async (
   esClient: ElasticsearchClient,
   cloudSecurityPostureConfig: CloudSecurityPostureConfig,
   logger: Logger
@@ -77,7 +82,7 @@ const createBenchmarkScoreIndex = async (
 
     const settings: IndexTemplateSettings = {
       index: {
-        default_pipeline: latestFindingsPipelineIngestConfig.id,
+        default_pipeline: scorePipelineIngestConfig.id,
       },
       lifecycle: { name: '' },
     };
@@ -226,6 +231,10 @@ const updateIndexTemplate = async (
     ...template?.settings, // nothing inside
     index: {
       default_pipeline: latestFindingsPipelineIngestConfig.id,
+      codec: 'best_compression',
+      mapping: {
+        ignore_malformed: true,
+      },
     },
     lifecycle: { name: '' },
   };
@@ -234,15 +243,21 @@ const updateIndexTemplate = async (
   try {
     await esClient.indices.putIndexTemplate({
       name: indexTemplateName,
-      index_patterns: indexPattern,
-      priority: 500,
-      template: {
-        mappings: template?.mappings,
-        settings,
-        aliases: template?.aliases,
+      body: {
+        index_patterns: indexPattern,
+        priority: 500,
+        template: {
+          mappings: template?.mappings,
+          settings,
+          aliases: template?.aliases,
+        },
+        _meta,
+        composed_of: composedOf.filter((ct) => ct !== STACK_COMPONENT_TEMPLATE_LOGS_SETTINGS),
+        // @ts-expect-error es client do not contains this yet
+        ignore_missing_component_templates: composedOf.filter((templateName) =>
+          templateName.endsWith('@custom')
+        ),
       },
-      _meta,
-      composed_of: composedOf,
     });
 
     logger.info(`Updated index template successfully [Name: ${indexTemplateName}]`);

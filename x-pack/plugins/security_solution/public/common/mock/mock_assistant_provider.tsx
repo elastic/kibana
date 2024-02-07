@@ -22,7 +22,6 @@ window.HTMLElement.prototype.scrollIntoView = jest.fn();
 export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) => {
   const actionTypeRegistry = actionTypeRegistryMock.create();
   const mockHttp = httpServiceMock.createStartContract({ basePath: '/test' });
-  mockHttp.get.mockResolvedValue([]);
   const mockAssistantAvailability: AssistantAvailability = {
     hasAssistantPrivilege: false,
     hasConnectorsAllPrivilege: true,
@@ -34,10 +33,10 @@ export const MockAssistantProviderComponent: React.FC<Props> = ({ children }) =>
     <AssistantProvider
       actionTypeRegistry={actionTypeRegistry}
       assistantAvailability={mockAssistantAvailability}
-      assistantLangChain={false}
       augmentMessageCodeBlocks={jest.fn(() => [])}
       baseAllow={[]}
       baseAllowReplacement={[]}
+      basePath={'https://localhost:5601/kbn'}
       defaultAllow={[]}
       docLinks={{
         ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',

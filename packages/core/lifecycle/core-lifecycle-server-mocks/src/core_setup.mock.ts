@@ -70,6 +70,10 @@ export function createCoreSetupMock({
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
     },
+    plugins: {
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
+    },
     getStartServices: jest
       .fn<Promise<[ReturnType<typeof createCoreStartMock>, object, any]>, []>()
       .mockResolvedValue([createCoreStartMock(), pluginStartDeps, pluginStartContract]),

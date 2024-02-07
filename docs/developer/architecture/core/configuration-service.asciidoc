@@ -35,7 +35,7 @@ export type MyPluginConfigType = TypeOf<typeof config.schema>;
 
 * Read config value exposed via `PluginInitializerContext`:
 
-*my_plugin/server/index.ts*
+*my_plugin/server/plugin.ts*
 [source,typescript]
 ----
 import type { PluginInitializerContext } from '@kbn/core/server';

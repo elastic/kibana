@@ -6,15 +6,13 @@
  */
 
 import { combineReducers } from 'redux';
-import { getDetailPanelReducer } from './detail_panel';
 import { indices } from './indices';
 import { rowStatus } from './row_status';
 import { tableState } from './table_state';
 
-export const getReducer = ({ uiMetricService }) =>
+export const getReducer = () =>
   combineReducers({
     indices,
     rowStatus,
     tableState,
-    detailPanel: getDetailPanelReducer(uiMetricService),
   });

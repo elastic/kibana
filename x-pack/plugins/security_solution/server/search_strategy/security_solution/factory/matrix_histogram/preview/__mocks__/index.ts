@@ -5,15 +5,20 @@
  * 2.0.
  */
 
+import type { MatrixHistogramRequestOptions } from '../../../../../../../common/api/search_strategy';
+import { MatrixHistogramQuery } from '../../../../../../../common/api/search_strategy';
 import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
 
-export const mockOptions = {
+export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: ['.siem-preview-signals-default'],
   filterQuery:
     '{"bool":{"must":[],"filter":[{"match_all":{}},{"bool":{"filter":[{"bool":{"should":[{"match":{"signal.rule.id":"test-preview-id"}}],"minimum_should_match":1}}]}}],"should":[],"must_not":[]}}',
   histogramType: MatrixHistogramType.preview,
   timerange: { interval: '12h', from: '2020-09-08T14:23:04.482Z', to: '2020-09-09T14:23:04.482Z' },
   stackByField: 'event.category',
+  includeMissingData: false,
+  isPtrIncluded: false,
+  factoryQueryType: MatrixHistogramQuery,
 };
 
 export const expectedDsl = {

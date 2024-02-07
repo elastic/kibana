@@ -27,11 +27,15 @@ export function ErrorMetadata({ error }: Props) {
               processorEvent: ProcessorEvent.error,
               id: error.error.id,
             },
+            query: {
+              start: error['@timestamp'],
+              end: error['@timestamp'],
+            },
           },
         }
       );
     },
-    [error.error.id]
+    [error]
   );
 
   const sections = useMemo(

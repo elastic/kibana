@@ -9,7 +9,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppMountParameters, IBasePath, ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 const FooApp = ({
   appId,
@@ -23,7 +23,11 @@ const FooApp = ({
   application: ApplicationStart;
 }) => (
   <div data-test-subj={`app-${appId}`}>
-    <RedirectAppLinks application={application}>
+    <RedirectAppLinks
+      coreStart={{
+        application,
+      }}
+    >
       <h1>{appId}</h1>
       <div>
         <a data-test-subj="applink-basic-test" href={basePath.prepend(`/app/${targetAppId}`)}>

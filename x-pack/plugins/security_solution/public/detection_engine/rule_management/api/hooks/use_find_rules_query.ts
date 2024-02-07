@@ -8,8 +8,9 @@
 import type { UseQueryOptions } from '@tanstack/react-query';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../common/constants';
-import type { FilterOptions, PaginationOptions, Rule, SortingOptions } from '../../logic';
+import type { FilterOptions, PaginationOptions, SortingOptions } from '../../logic';
 import { fetchRules } from '../api';
 import { DEFAULT_QUERY_OPTIONS } from './constants';
 
@@ -22,7 +23,7 @@ export interface FindRulesQueryArgs {
 const FIND_RULES_QUERY_KEY = ['GET', DETECTION_ENGINE_RULES_URL_FIND];
 
 export interface RulesQueryResponse {
-  rules: Rule[];
+  rules: RuleResponse[];
   total: number;
 }
 
@@ -100,7 +101,7 @@ export const useUpdateRulesCache = () => {
    * we can merge those rules with the existing cache to avoid an extra roundtrip to re-fetch updated rules.
    */
   return useCallback(
-    (newRules: Rule[]) => {
+    (newRules: RuleResponse[]) => {
       queryClient.setQueriesData<ReturnType<typeof useFindRulesQuery>['data']>(
         FIND_RULES_QUERY_KEY,
         (currentData) =>
@@ -122,7 +123,10 @@ export const useUpdateRulesCache = () => {
  * @param currentRules
  * @param newRules
  */
-export function updateRules(currentRules: Rule[], newRules: Rule[]): Rule[] {
+export function updateRules(
+  currentRules: RuleResponse[],
+  newRules: RuleResponse[]
+): RuleResponse[] {
   const newRulesMap = new Map(newRules.map((rule) => [rule.id, rule]));
 
   if (currentRules.some((rule) => newRulesMap.has(rule.id))) {

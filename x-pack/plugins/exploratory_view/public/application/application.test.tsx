@@ -13,6 +13,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { ExploratoryViewPublicPluginsStart } from '../plugin';
 import { renderApp } from '.';
+import { mockService } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 describe('renderApp', () => {
   const originalConsole = global.console;
@@ -28,7 +29,6 @@ describe('renderApp', () => {
 
   it('renders', async () => {
     const plugins = {
-      usageCollection: { reportUiCounter: noop },
       data: {
         query: {
           timefilter: {
@@ -42,6 +42,8 @@ describe('renderApp', () => {
           },
         },
       },
+      usageCollection: { reportUiCounter: noop },
+      observabilityAIAssistant: { service: mockService },
     } as unknown as ExploratoryViewPublicPluginsStart;
 
     const core = {

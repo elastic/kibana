@@ -28,10 +28,12 @@ import {
   DefaultCreateCustomIntegrationContext,
   WithErrors,
   WithPreviouslyCreatedIntegration,
-  WithTouchedFields,
-  WithFields,
 } from './types';
-import { replaceSpecialChars } from '../../components/create/utils';
+import {
+  datasetNameWillBePrefixed,
+  executeFieldsPipeline,
+  prefixDatasetName,
+} from './pipelines/fields';
 
 export const createPureCreateCustomIntegrationStateMachine = (
   initialContext: DefaultCreateCustomIntegrationContext = DEFAULT_CONTEXT
@@ -211,32 +213,12 @@ export const createPureCreateCustomIntegrationStateMachine = (
             : {};
         }),
         storeFields: actions.assign((context, event) => {
-          return event.type === 'UPDATE_FIELDS'
-            ? ({
-                fields: {
-                  ...context.fields,
-                  ...event.fields,
-                  integrationName:
-                    event.fields.integrationName !== undefined
-                      ? replaceSpecialChars(event.fields.integrationName)
-                      : context.fields.integrationName,
-                  datasets:
-                    event.fields.datasets !== undefined
-                      ? event.fields.datasets.map((dataset) => ({
-                          ...dataset,
-                          name: replaceSpecialChars(dataset.name),
-                        }))
-                      : context.fields.datasets,
-                },
-                touchedFields: {
-                  ...context.touchedFields,
-                  ...Object.keys(event.fields).reduce<WithTouchedFields['touchedFields']>(
-                    (acc, field) => ({ ...acc, [field]: true }),
-                    {} as WithTouchedFields['touchedFields']
-                  ),
-                },
-              } as WithFields & WithTouchedFields)
-            : {};
+          if (event.type === 'UPDATE_FIELDS') {
+            const [contextResult] = executeFieldsPipeline(context, event);
+            return contextResult;
+          } else {
+            return {};
+          }
         }),
         resetValues: actions.assign((context, event) => {
           return {
@@ -315,7 +297,15 @@ export const createCreateCustomIntegrationStateMachine = ({
         }),
       }),
       save: (context) => {
-        return integrationsClient.createCustomIntegration(context.fields);
+        return integrationsClient.createCustomIntegration({
+          ...context.fields,
+          datasets: context.fields.datasets.map((dataset) => ({
+            ...dataset,
+            name: datasetNameWillBePrefixed(dataset.name, context.fields.integrationName)
+              ? prefixDatasetName(dataset.name, context.fields.integrationName)
+              : dataset.name,
+          })),
+        });
       },
       cleanup: (context) => {
         return integrationsClient.deleteCustomIntegration({

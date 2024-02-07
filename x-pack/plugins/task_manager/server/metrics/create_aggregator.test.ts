@@ -6,12 +6,16 @@
  */
 
 import sinon from 'sinon';
-import { Subject, Observable } from 'rxjs';
+import { Subject } from 'rxjs';
 import { take, bufferCount, skip } from 'rxjs/operators';
-import { isTaskManagerStatEvent, isTaskPollingCycleEvent, isTaskRunEvent } from '../task_events';
+import {
+  isTaskManagerMetricEvent,
+  isTaskManagerStatEvent,
+  isTaskPollingCycleEvent,
+  isTaskRunEvent,
+} from '../task_events';
 import { TaskLifecycleEvent } from '../polling_lifecycle';
 import { AggregatedStat } from '../lib/runtime_statistics_aggregator';
-import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';
 import { TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
 import { TaskClaimMetric, TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
@@ -24,6 +28,8 @@ import {
 import { TaskRunMetric, TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import * as TaskClaimMetricsAggregatorModule from './task_claim_metrics_aggregator';
 import { metricsAggregatorMock } from './metrics_aggregator.mock';
+import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
+import { TaskOverdueMetric, TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
 const mockMetricsAggregator = metricsAggregatorMock.create();
 const config: TaskManagerConfig = {
@@ -67,6 +73,7 @@ const config: TaskManagerConfig = {
   },
   version_conflict_threshold: 80,
   worker_utilization_running_average_window: 5,
+  claim_strategy: 'default',
 };
 
 describe('createAggregator', () => {
@@ -76,7 +83,7 @@ describe('createAggregator', () => {
 
   describe('with TaskClaimMetricsAggregator', () => {
     test('returns a cumulative count of successful polling cycles and total polling cycles', async () => {
-      const pollingCycleEvents = [
+      const events = [
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
@@ -90,16 +97,13 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
       const taskClaimAggregator = createAggregator({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$: new Subject<boolean>(),
+        eventFilter: (event: TaskLifecycleEvent) => isTaskPollingCycleEvent(event),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       });
 
@@ -109,8 +113,8 @@ describe('createAggregator', () => {
             // skip initial metric which is just initialized data which
             // ensures we don't stall on combineLatest
             skip(1),
-            take(pollingCycleEvents.length),
-            bufferCount(pollingCycleEvents.length)
+            take(events.length),
+            bufferCount(events.length)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -160,15 +164,15 @@ describe('createAggregator', () => {
             resolve();
           });
 
-        for (const event of pollingCycleEvents) {
+        for (const event of events) {
           events$.next(event);
         }
       });
     });
 
-    test('resets count when resetMetric$ event is received', async () => {
-      const resetMetrics$ = new Subject<boolean>();
-      const pollingCycleEvents1 = [
+    test('resets count when reset$ event is received', async () => {
+      const reset$ = new Subject<boolean>();
+      const events1 = [
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
@@ -177,7 +181,7 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
 
-      const pollingCycleEvents2 = [
+      const events2 = [
         taskClaimSuccessEvent,
         taskClaimFailureEvent,
         taskClaimFailureEvent,
@@ -185,16 +189,13 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
       const taskClaimAggregator = createAggregator({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$,
+        eventFilter: (event: TaskLifecycleEvent) => isTaskPollingCycleEvent(event),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       });
 
@@ -204,8 +205,8 @@ describe('createAggregator', () => {
             // skip initial metric which is just initialized data which
             // ensures we don't stall on combineLatest
             skip(1),
-            take(pollingCycleEvents1.length + pollingCycleEvents2.length),
-            bufferCount(pollingCycleEvents1.length + pollingCycleEvents2.length)
+            take(events1.length + events2.length),
+            bufferCount(events1.length + events2.length)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -256,11 +257,11 @@ describe('createAggregator', () => {
             resolve();
           });
 
-        for (const event of pollingCycleEvents1) {
+        for (const event of events1) {
           events$.next(event);
         }
-        resetMetrics$.next(true);
-        for (const event of pollingCycleEvents2) {
+        reset$.next(true);
+        for (const event of events2) {
           events$.next(event);
         }
       });
@@ -269,7 +270,7 @@ describe('createAggregator', () => {
     test('resets count when configured metrics reset interval expires', async () => {
       const clock = sinon.useFakeTimers();
       clock.tick(0);
-      const pollingCycleEvents1 = [
+      const events1 = [
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
         taskClaimSuccessEvent,
@@ -278,7 +279,7 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
 
-      const pollingCycleEvents2 = [
+      const events2 = [
         taskClaimSuccessEvent,
         taskClaimFailureEvent,
         taskClaimFailureEvent,
@@ -286,19 +287,16 @@ describe('createAggregator', () => {
         taskClaimSuccessEvent,
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
       const taskClaimAggregator = createAggregator({
         key: 'task_claim',
-        taskPollingLifecycle,
+        events$,
         config: {
           ...config,
           metrics_reset_interval: 10,
         },
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) => isTaskPollingCycleEvent(taskEvent),
+        reset$: new Subject<boolean>(),
+        eventFilter: (event: TaskLifecycleEvent) => isTaskPollingCycleEvent(event),
         metricsAggregator: new TaskClaimMetricsAggregator(),
       });
 
@@ -308,8 +306,8 @@ describe('createAggregator', () => {
             // skip initial metric which is just initialized data which
             // ensures we don't stall on combineLatest
             skip(1),
-            take(pollingCycleEvents1.length + pollingCycleEvents2.length),
-            bufferCount(pollingCycleEvents1.length + pollingCycleEvents2.length)
+            take(events1.length + events2.length),
+            bufferCount(events1.length + events2.length)
           )
           .subscribe((metrics: Array<AggregatedStat<TaskClaimMetric>>) => {
             expect(metrics[0]).toEqual({
@@ -360,11 +358,11 @@ describe('createAggregator', () => {
             resolve();
           });
 
-        for (const event of pollingCycleEvents1) {
+        for (const event of events1) {
           events$.next(event);
         }
         clock.tick(20);
-        for (const event of pollingCycleEvents2) {
+        for (const event of events2) {
           events$.next(event);
         }
 
@@ -398,17 +396,14 @@ describe('createAggregator', () => {
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
       const taskRunAggregator = createAggregator({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
-          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
+        reset$: new Subject<boolean>(),
+        eventFilter: (event: TaskLifecycleEvent) =>
+          isTaskRunEvent(event) || isTaskManagerStatEvent(event),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
 
@@ -430,6 +425,8 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
               },
             });
@@ -441,10 +438,24 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -456,10 +467,24 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -471,11 +496,31 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -487,11 +532,31 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -503,11 +568,31 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -519,11 +604,31 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -535,12 +640,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -552,12 +683,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -569,12 +726,38 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -586,12 +769,38 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -603,13 +812,45 @@ describe('createAggregator', () => {
                   not_timed_out: 6,
                   total: 6,
                   delay: { counts: [4, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -621,13 +862,45 @@ describe('createAggregator', () => {
                   not_timed_out: 6,
                   total: 6,
                   delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -639,13 +912,45 @@ describe('createAggregator', () => {
                   not_timed_out: 7,
                   total: 7,
                   delay: { counts: [4, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 4, not_timed_out: 5, total: 5 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 4,
+                    not_timed_out: 5,
+                    total: 5,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -657,13 +962,45 @@ describe('createAggregator', () => {
                   not_timed_out: 7,
                   total: 7,
                   delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 4, not_timed_out: 5, total: 5 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 4,
+                    not_timed_out: 5,
+                    total: 5,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -675,13 +1012,45 @@ describe('createAggregator', () => {
                   not_timed_out: 8,
                   total: 8,
                   delay: { counts: [5, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 2,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 4, not_timed_out: 6, total: 6 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 3, not_timed_out: 5, total: 5 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 4,
+                    not_timed_out: 6,
+                    total: 6,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 5,
+                    total: 5,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -693,13 +1062,45 @@ describe('createAggregator', () => {
                   not_timed_out: 8,
                   total: 8,
                   delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 2,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 4, not_timed_out: 6, total: 6 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 3, not_timed_out: 5, total: 5 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 4,
+                    not_timed_out: 6,
+                    total: 6,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 5,
+                    total: 5,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -711,13 +1112,45 @@ describe('createAggregator', () => {
                   not_timed_out: 9,
                   total: 9,
                   delay: { counts: [6, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 2,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 5, not_timed_out: 7, total: 7 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 4, not_timed_out: 6, total: 6 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 5,
+                    not_timed_out: 7,
+                    total: 7,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 4,
+                    not_timed_out: 6,
+                    total: 6,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -729,13 +1162,45 @@ describe('createAggregator', () => {
                   not_timed_out: 9,
                   total: 9,
                   delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 2,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 5, not_timed_out: 7, total: 7 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 4, not_timed_out: 6, total: 6 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 5,
+                    not_timed_out: 7,
+                    total: 7,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 4,
+                    not_timed_out: 6,
+                    total: 6,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -747,15 +1212,59 @@ describe('createAggregator', () => {
                   not_timed_out: 10,
                   total: 10,
                   delay: { counts: [7, 2, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 3,
+                  user_errors: 0,
                 },
                 by_type: {
-                  actions: { success: 0, not_timed_out: 1, total: 1 },
-                  alerting: { success: 5, not_timed_out: 7, total: 7 },
-                  'actions:webhook': { success: 0, not_timed_out: 1, total: 1 },
-                  'alerting:__index-threshold': { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 4, not_timed_out: 6, total: 6 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  actions: {
+                    success: 0,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  alerting: {
+                    success: 5,
+                    not_timed_out: 7,
+                    total: 7,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  'actions:webhook': {
+                    success: 0,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:__index-threshold': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 4,
+                    not_timed_out: 6,
+                    total: 6,
+                    framework_errors: 2,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -769,7 +1278,7 @@ describe('createAggregator', () => {
     });
 
     test('resets count when resetMetric$ event is received', async () => {
-      const resetMetrics$ = new Subject<boolean>();
+      const reset$ = new Subject<boolean>();
       const taskRunEvents1 = [
         getTaskManagerStatEvent(3.234),
         getTaskRunSuccessEvent('alerting:example'),
@@ -796,17 +1305,14 @@ describe('createAggregator', () => {
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
       const taskRunAggregator = createAggregator({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$,
         config,
-        resetMetrics$,
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
-          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
+        reset$,
+        eventFilter: (event: TaskLifecycleEvent) =>
+          isTaskRunEvent(event) || isTaskManagerStatEvent(event),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
 
@@ -828,6 +1334,8 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
               },
             });
@@ -839,10 +1347,24 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -854,10 +1376,24 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -869,11 +1405,31 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -885,11 +1441,31 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -901,11 +1477,31 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -917,11 +1513,31 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -933,12 +1549,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -950,12 +1592,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -967,12 +1635,38 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -985,12 +1679,38 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 0, not_timed_out: 0, total: 0 },
-                  'alerting:example': { success: 0, not_timed_out: 0, total: 0 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1002,12 +1722,38 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1019,12 +1765,38 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1036,12 +1808,38 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1053,12 +1851,38 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1070,12 +1894,38 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1087,12 +1937,38 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1104,12 +1980,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1121,12 +2023,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1138,14 +2066,52 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  framework_errors: 2,
+                  user_errors: 0,
                 },
                 by_type: {
-                  actions: { success: 0, not_timed_out: 1, total: 1 },
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'actions:webhook': { success: 0, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  actions: {
+                    success: 0,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'actions:webhook': {
+                    success: 0,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1155,7 +2121,7 @@ describe('createAggregator', () => {
         for (const event of taskRunEvents1) {
           events$.next(event);
         }
-        resetMetrics$.next(true);
+        reset$.next(true);
         for (const event of taskRunEvents2) {
           events$.next(event);
         }
@@ -1191,20 +2157,17 @@ describe('createAggregator', () => {
         getTaskRunFailedEvent('actions:webhook'),
       ];
       const events$ = new Subject<TaskLifecycleEvent>();
-      const taskPollingLifecycle = taskPollingLifecycleMock.create({
-        events$: events$ as Observable<TaskLifecycleEvent>,
-      });
 
       const taskRunAggregator = createAggregator({
         key: 'task_run',
-        taskPollingLifecycle,
+        events$,
         config: {
           ...config,
           metrics_reset_interval: 10,
         },
-        resetMetrics$: new Subject<boolean>(),
-        taskEventFilter: (taskEvent: TaskLifecycleEvent) =>
-          isTaskRunEvent(taskEvent) || isTaskManagerStatEvent(taskEvent),
+        reset$: new Subject<boolean>(),
+        eventFilter: (event: TaskLifecycleEvent) =>
+          isTaskRunEvent(event) || isTaskManagerStatEvent(event),
         metricsAggregator: new TaskRunMetricsAggregator(),
       });
 
@@ -1226,6 +2189,8 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
               },
             });
@@ -1237,10 +2202,24 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1252,10 +2231,24 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1267,11 +2260,31 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1283,11 +2296,31 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1299,11 +2332,31 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1315,11 +2368,31 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1331,12 +2404,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [2, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1348,12 +2447,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1365,12 +2490,38 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [3, 1, 0, 1], values: [10, 20, 30, 40] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 1, not_timed_out: 1, total: 1 },
-                  telemetry: { success: 1, not_timed_out: 1, total: 1 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1383,12 +2534,38 @@ describe('createAggregator', () => {
                   not_timed_out: 0,
                   total: 0,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 0, not_timed_out: 0, total: 0 },
-                  'alerting:example': { success: 0, not_timed_out: 0, total: 0 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1400,12 +2577,38 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1], values: [10] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1417,12 +2620,38 @@ describe('createAggregator', () => {
                   not_timed_out: 1,
                   total: 1,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 1, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 1, not_timed_out: 1, total: 1 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 1,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1434,12 +2663,38 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [1, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1451,12 +2706,38 @@ describe('createAggregator', () => {
                   not_timed_out: 2,
                   total: 2,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 0,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 2, total: 2 },
-                  'alerting:example': { success: 2, not_timed_out: 2, total: 2 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 2,
+                    total: 2,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1468,12 +2749,38 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [2, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1485,12 +2792,38 @@ describe('createAggregator', () => {
                   not_timed_out: 3,
                   total: 3,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 2, not_timed_out: 3, total: 3 },
-                  'alerting:example': { success: 2, not_timed_out: 3, total: 3 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 2,
+                    not_timed_out: 3,
+                    total: 3,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1502,12 +2835,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [3, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1519,12 +2878,38 @@ describe('createAggregator', () => {
                   not_timed_out: 4,
                   total: 4,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  framework_errors: 1,
+                  user_errors: 0,
                 },
                 by_type: {
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1536,14 +2921,52 @@ describe('createAggregator', () => {
                   not_timed_out: 5,
                   total: 5,
                   delay: { counts: [4, 1], values: [10, 20] },
+                  framework_errors: 2,
+                  user_errors: 0,
                 },
                 by_type: {
-                  actions: { success: 0, not_timed_out: 1, total: 1 },
-                  alerting: { success: 3, not_timed_out: 4, total: 4 },
-                  'actions:webhook': { success: 0, not_timed_out: 1, total: 1 },
-                  'alerting:example': { success: 3, not_timed_out: 4, total: 4 },
-                  report: { success: 0, not_timed_out: 0, total: 0 },
-                  telemetry: { success: 0, not_timed_out: 0, total: 0 },
+                  actions: {
+                    success: 0,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  alerting: {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'actions:webhook': {
+                    success: 0,
+                    not_timed_out: 1,
+                    total: 1,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  'alerting:example': {
+                    success: 3,
+                    not_timed_out: 4,
+                    total: 4,
+                    framework_errors: 1,
+                    user_errors: 0,
+                  },
+                  report: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
+                  telemetry: {
+                    success: 0,
+                    not_timed_out: 0,
+                    total: 0,
+                    framework_errors: 0,
+                    user_errors: 0,
+                  },
                 },
               },
             });
@@ -1563,8 +2986,185 @@ describe('createAggregator', () => {
     });
   });
 
-  test('should filter task lifecycle events using specified taskEventFilter', () => {
-    const pollingCycleEvents = [
+  describe('with TaskOverdueMetricsAggregator', () => {
+    test('returns latest values for task overdue by time', async () => {
+      const events = [
+        getTaskManagerMetricEvent({
+          numOverdueTasks: {
+            'alerting:example': [{ key: 40, doc_count: 1 }],
+            'alerting:.index-threshold': [
+              { key: 20, doc_count: 2 },
+              { key: 120, doc_count: 1 },
+            ],
+            'actions:webhook': [{ key: 0, doc_count: 2 }],
+            'actions:.email': [{ key: 0, doc_count: 1 }],
+            total: [
+              { key: 0, doc_count: 3 },
+              { key: 20, doc_count: 2 },
+              { key: 40, doc_count: 1 },
+              { key: 120, doc_count: 1 },
+            ],
+          },
+        }),
+        getTaskManagerMetricEvent({
+          numOverdueTasks: {
+            total: [],
+          },
+        }),
+        getTaskManagerMetricEvent({
+          numOverdueTasks: {
+            telemetry: [
+              { key: 0, doc_count: 1 },
+              { key: 20, doc_count: 1 },
+            ],
+            reporting: [{ key: 0, doc_count: 1 }],
+            'actions:webhook': [
+              { key: 0, doc_count: 3 },
+              { key: 30, doc_count: 2 },
+              { key: 50, doc_count: 1 },
+            ],
+            'actions:.email': [{ key: 0, doc_count: 11 }],
+            total: [
+              { key: 0, doc_count: 16 },
+              { key: 20, doc_count: 1 },
+              { key: 30, doc_count: 2 },
+              { key: 50, doc_count: 1 },
+            ],
+          },
+        }),
+      ];
+      const events$ = new Subject<TaskLifecycleEvent>();
+
+      const taskOverdueAggregator = createAggregator({
+        key: 'task_overdue',
+        events$,
+        config,
+        reset$: new Subject<boolean>(),
+        eventFilter: (event: TaskLifecycleEvent) => isTaskManagerMetricEvent(event),
+        metricsAggregator: new TaskOverdueMetricsAggregator(),
+      });
+
+      return new Promise<void>((resolve) => {
+        taskOverdueAggregator
+          .pipe(
+            // skip initial metric which is just initialized data which
+            // ensures we don't stall on combineLatest
+            skip(1),
+            take(events.length),
+            bufferCount(events.length)
+          )
+          .subscribe((metrics: Array<AggregatedStat<TaskOverdueMetric>>) => {
+            expect(metrics[0]).toEqual({
+              key: 'task_overdue',
+              value: {
+                overall: {
+                  overdue_by: {
+                    counts: [3, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+                    values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                  },
+                },
+                by_type: {
+                  'alerting:example': {
+                    overdue_by: {
+                      counts: [0, 0, 0, 0, 1],
+                      values: [10, 20, 30, 40, 50],
+                    },
+                  },
+                  'alerting:__index-threshold': {
+                    overdue_by: {
+                      counts: [0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                    },
+                  },
+                  alerting: {
+                    overdue_by: {
+                      counts: [0, 0, 2, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120, 130],
+                    },
+                  },
+                  'actions:webhook': {
+                    overdue_by: {
+                      counts: [2],
+                      values: [10],
+                    },
+                  },
+                  'actions:__email': {
+                    overdue_by: {
+                      counts: [1],
+                      values: [10],
+                    },
+                  },
+                  actions: {
+                    overdue_by: {
+                      counts: [3],
+                      values: [10],
+                    },
+                  },
+                },
+              },
+            });
+            expect(metrics[1]).toEqual({
+              key: 'task_overdue',
+              value: {
+                overall: { overdue_by: { counts: [], values: [] } },
+                by_type: {},
+              },
+            });
+            expect(metrics[2]).toEqual({
+              key: 'task_overdue',
+              value: {
+                overall: {
+                  overdue_by: {
+                    counts: [16, 0, 1, 2, 0, 1],
+                    values: [10, 20, 30, 40, 50, 60],
+                  },
+                },
+                by_type: {
+                  telemetry: {
+                    overdue_by: {
+                      counts: [1, 0, 1],
+                      values: [10, 20, 30],
+                    },
+                  },
+                  reporting: {
+                    overdue_by: {
+                      counts: [1],
+                      values: [10],
+                    },
+                  },
+                  'actions:webhook': {
+                    overdue_by: {
+                      counts: [3, 0, 0, 2, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60],
+                    },
+                  },
+                  'actions:__email': {
+                    overdue_by: {
+                      counts: [11],
+                      values: [10],
+                    },
+                  },
+                  actions: {
+                    overdue_by: {
+                      counts: [14, 0, 0, 2, 0, 1],
+                      values: [10, 20, 30, 40, 50, 60],
+                    },
+                  },
+                },
+              },
+            });
+            resolve();
+          });
+
+        for (const event of events) {
+          events$.next(event);
+        }
+      });
+    });
+  });
+
+  test('should filter task lifecycle events using specified eventFilter', () => {
+    const events = [
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
@@ -1577,17 +3177,15 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = jest.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
-    const taskPollingLifecycle = taskPollingLifecycleMock.create({
-      events$: events$ as Observable<TaskLifecycleEvent>,
-    });
+
     const aggregator = createAggregator({
       key: 'test',
-      taskPollingLifecycle,
+      events$,
       config,
-      resetMetrics$: new Subject<boolean>(),
-      taskEventFilter,
+      reset$: new Subject<boolean>(),
+      eventFilter,
       metricsAggregator: new TaskClaimMetricsAggregator(),
     });
 
@@ -1597,27 +3195,27 @@ describe('createAggregator', () => {
           // skip initial metric which is just initialized data which
           // ensures we don't stall on combineLatest
           skip(1),
-          take(pollingCycleEvents.length),
-          bufferCount(pollingCycleEvents.length)
+          take(events.length),
+          bufferCount(events.length)
         )
         .subscribe(() => {
           resolve();
         });
 
-      for (const event of pollingCycleEvents) {
+      for (const event of events) {
         events$.next(event);
       }
 
-      expect(taskEventFilter).toHaveBeenCalledTimes(pollingCycleEvents.length);
+      expect(eventFilter).toHaveBeenCalledTimes(events.length);
     });
   });
 
-  test('should call metricAggregator to process task lifecycle events', () => {
+  test('should call metricAggregator to process events', () => {
     const spy = jest
       .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
       .mockImplementation(() => mockMetricsAggregator);
 
-    const pollingCycleEvents = [
+    const events = [
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
@@ -1630,18 +3228,16 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = jest.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
-    const taskPollingLifecycle = taskPollingLifecycleMock.create({
-      events$: events$ as Observable<TaskLifecycleEvent>,
-    });
+
     const aggregator = createAggregator({
       key: 'test',
-      taskPollingLifecycle,
+      events$,
       config,
-      resetMetrics$: new Subject<boolean>(),
-      taskEventFilter,
-      metricsAggregator: mockMetricsAggregator,
+      reset$: new Subject<boolean>(),
+      eventFilter,
+      metricsAggregator: new TaskClaimMetricsAggregator(),
     });
 
     return new Promise<void>((resolve) => {
@@ -1650,22 +3246,20 @@ describe('createAggregator', () => {
           // skip initial metric which is just initialized data which
           // ensures we don't stall on combineLatest
           skip(1),
-          take(pollingCycleEvents.length),
-          bufferCount(pollingCycleEvents.length)
+          take(events.length),
+          bufferCount(events.length)
         )
         .subscribe(() => {
           resolve();
         });
 
-      for (const event of pollingCycleEvents) {
+      for (const event of events) {
         events$.next(event);
       }
 
       expect(mockMetricsAggregator.initialMetric).toHaveBeenCalledTimes(1);
-      expect(mockMetricsAggregator.processTaskLifecycleEvent).toHaveBeenCalledTimes(
-        pollingCycleEvents.length
-      );
-      expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(pollingCycleEvents.length);
+      expect(mockMetricsAggregator.processEvent).toHaveBeenCalledTimes(events.length);
+      expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(events.length);
       expect(mockMetricsAggregator.reset).not.toHaveBeenCalled();
       spy.mockRestore();
     });
@@ -1676,8 +3270,8 @@ describe('createAggregator', () => {
       .spyOn(TaskClaimMetricsAggregatorModule, 'TaskClaimMetricsAggregator')
       .mockImplementation(() => mockMetricsAggregator);
 
-    const resetMetrics$ = new Subject<boolean>();
-    const pollingCycleEvents = [
+    const reset$ = new Subject<boolean>();
+    const events = [
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
       taskClaimSuccessEvent,
@@ -1690,17 +3284,15 @@ describe('createAggregator', () => {
       taskClaimFailureEvent,
       taskClaimSuccessEvent,
     ];
-    const taskEventFilter = jest.fn().mockReturnValue(true);
+    const eventFilter = jest.fn().mockReturnValue(true);
     const events$ = new Subject<TaskLifecycleEvent>();
-    const taskPollingLifecycle = taskPollingLifecycleMock.create({
-      events$: events$ as Observable<TaskLifecycleEvent>,
-    });
+
     const aggregator = createAggregator({
       key: 'test',
-      taskPollingLifecycle,
+      events$,
       config,
-      resetMetrics$,
-      taskEventFilter,
+      reset$,
+      eventFilter,
       metricsAggregator: mockMetricsAggregator,
     });
 
@@ -1710,30 +3302,28 @@ describe('createAggregator', () => {
           // skip initial metric which is just initialized data which
           // ensures we don't stall on combineLatest
           skip(1),
-          take(pollingCycleEvents.length),
-          bufferCount(pollingCycleEvents.length)
+          take(events.length),
+          bufferCount(events.length)
         )
         .subscribe(() => {
           resolve();
         });
 
-      for (const event of pollingCycleEvents) {
+      for (const event of events) {
         events$.next(event);
       }
 
       for (let i = 0; i < 5; i++) {
-        events$.next(pollingCycleEvents[i]);
+        events$.next(events[i]);
       }
-      resetMetrics$.next(true);
-      for (let i = 0; i < pollingCycleEvents.length; i++) {
-        events$.next(pollingCycleEvents[i]);
+      reset$.next(true);
+      for (let i = 0; i < events.length; i++) {
+        events$.next(events[i]);
       }
 
       expect(mockMetricsAggregator.initialMetric).toHaveBeenCalledTimes(1);
-      expect(mockMetricsAggregator.processTaskLifecycleEvent).toHaveBeenCalledTimes(
-        pollingCycleEvents.length
-      );
-      expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(pollingCycleEvents.length);
+      expect(mockMetricsAggregator.processEvent).toHaveBeenCalledTimes(events.length);
+      expect(mockMetricsAggregator.collect).toHaveBeenCalledTimes(events.length);
       expect(mockMetricsAggregator.reset).toHaveBeenCalledTimes(1);
       spy.mockRestore();
     });

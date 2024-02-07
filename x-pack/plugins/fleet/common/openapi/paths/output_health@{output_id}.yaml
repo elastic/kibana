@@ -1,0 +1,31 @@
+get:
+  summary: Get latest output health
+  tags:
+    - Outputs
+  responses:
+    '200':
+      description: OK
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              state:
+                type: string
+                description: state of output, HEALTHY or DEGRADED
+              message:
+                type: string
+                description: long message if unhealthy
+              timestamp:
+                type: string
+                description: timestamp of reported state
+    '400':
+      $ref: ../components/responses/error.yaml
+  operationId: get-output-health
+parameters:
+  - schema:
+      type: string
+    name: outputId
+    in: path
+    required: true
+

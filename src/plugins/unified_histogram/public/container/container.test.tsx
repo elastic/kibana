@@ -33,7 +33,7 @@ describe('UnifiedHistogramContainer', () => {
         requestAdapter={new RequestAdapter()}
         searchSessionId={'123'}
         timeRange={{ from: 'now-15m', to: 'now' }}
-        resizeRef={{ current: null }}
+        container={null}
       />
     );
     expect(component.update().isEmptyRender()).toBe(true);
@@ -62,7 +62,7 @@ describe('UnifiedHistogramContainer', () => {
         requestAdapter={new RequestAdapter()}
         searchSessionId={'123'}
         timeRange={{ from: 'now-15m', to: 'now' }}
-        resizeRef={{ current: null }}
+        container={null}
       />
     );
     await act(() => new Promise((resolve) => setTimeout(resolve, 0)));

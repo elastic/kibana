@@ -7,13 +7,12 @@
  */
 
 import { textBasedQueryStateToAstWithValidation } from '@kbn/data-plugin/common';
-import { isCompleteResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import { DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Datatable, isExpressionValueError } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { MutableRefObject, useEffect, useRef } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { catchError, filter, lastValueFrom, map, Observable, of, pluck } from 'rxjs';
 import {
   UnifiedHistogramFetchStatus,
@@ -66,8 +65,6 @@ export const useTotalHits = ({
     });
   });
 
-  useEffectOnce(fetch);
-
   useEffect(() => {
     const subscription = refetch$.subscribe(fetch);
     return () => subscription.unsubscribe();
@@ -102,13 +99,11 @@ const fetchTotalHits = async ({
   abortController.current?.abort();
   abortController.current = undefined;
 
-  // Either the chart is visible, in which case Lens will make the request,
-  // or there is no hits context, which means the total hits should be hidden
-  if (chartVisible || !hits) {
+  if (chartVisible) {
     return;
   }
 
-  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits.total);
+  onTotalHitsChange?.(UnifiedHistogramFetchStatus.loading, hits?.total);
 
   const newAbortController = new AbortController();
 
@@ -209,7 +204,7 @@ const fetchTotalHitsSearchSource = async ({
       disableWarningToasts: true, // TODO: show warnings as a badge next to total hits number
     })
     .pipe(
-      filter((res) => isCompleteResponse(res)),
+      filter((res) => !isRunningResponse(res)),
       map((res) => res.rawResponse.hits.total as number),
       catchError((error: Error) => of(error))
     );

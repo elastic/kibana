@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
@@ -20,9 +21,10 @@ import {
   openKibanaNavigation,
 } from '../../../tasks/kibana_navigation';
 import { ALERTS_PAGE } from '../../../screens/kibana_navigation';
-import { postDataView } from '../../../tasks/common';
+import { postDataView } from '../../../tasks/api_calls/common';
+import { navigateToAlertsPageInServerless } from '../../../tasks/serverless/navigation';
 
-describe('pinned filters', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('ESS - pinned filters', { tags: ['@ess'] }, () => {
   before(() => {
     postDataView('audit*');
   });
@@ -32,7 +34,7 @@ describe('pinned filters', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('show pinned filters on security', () => {
-    visitWithoutDateRange(DISCOVER_WITH_PINNED_FILTER_URL);
+    visit(DISCOVER_WITH_PINNED_FILTER_URL);
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
     openKibanaNavigation();
@@ -42,11 +44,39 @@ describe('pinned filters', { tags: ['@ess', '@serverless', '@brokenInServerless'
   });
 
   it('does not show discover filters on security', () => {
-    visitWithoutDateRange(DISCOVER_WITH_FILTER_URL);
+    visit(DISCOVER_WITH_FILTER_URL);
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
 
     openKibanaNavigation();
     navigateFromKibanaCollapsibleTo(ALERTS_PAGE);
+
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
+  });
+});
+
+describe('SERVERLESS - pinned filters', { tags: ['@serverless'] }, () => {
+  before(() => {
+    postDataView('audit*');
+  });
+
+  beforeEach(() => {
+    login();
+  });
+
+  it('show pinned filters on security', () => {
+    visit(DISCOVER_WITH_PINNED_FILTER_URL);
+
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).find(GLOBAL_SEARCH_BAR_PINNED_FILTER).should('exist');
+    navigateToAlertsPageInServerless();
+
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: test-host');
+  });
+
+  it('does not show discover filters on security', () => {
+    visit(DISCOVER_WITH_FILTER_URL);
+    cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('exist');
+
+    navigateToAlertsPageInServerless();
 
     cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('not.exist');
   });

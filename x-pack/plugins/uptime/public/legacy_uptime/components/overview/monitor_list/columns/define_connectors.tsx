@@ -12,17 +12,7 @@ import { ReactRouterEuiLink } from '../../../common/react_router_helpers';
 import { SETTINGS_ROUTE } from '../../../../../../common/constants';
 import { ENABLE_STATUS_ALERT } from './translations';
 
-interface Props {
-  showPopover?: boolean;
-  showHelpText?: boolean;
-  showLabel?: boolean;
-}
-
-export const DefineAlertConnectors = ({
-  showPopover = false,
-  showHelpText = false,
-  showLabel = false,
-}: Props) => {
+export const DefineAlertConnectors = () => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
   const onButtonClick = () => setIsPopoverOpen((val) => !val);
@@ -32,46 +22,22 @@ export const DefineAlertConnectors = ({
     <EuiPopover
       button={
         <>
-          <EuiFormRow
-            helpText={
-              showHelpText ? (
-                <FormattedMessage
-                  id="xpack.uptime.monitorList.defineConnector.description"
-                  defaultMessage="Define a default connector in {link} to enable monitor status alerts."
-                  values={{
-                    link: (
-                      <ReactRouterEuiLink
-                        to={SETTINGS_ROUTE + '?focusConnectorField=true'}
-                        data-test-subj={'uptimeSettingsLink'}
-                        target="_blank"
-                      >
-                        <FormattedMessage
-                          id="xpack.uptime.page_header.defineConnector.settingsLink"
-                          defaultMessage="Settings"
-                        />
-                      </ReactRouterEuiLink>
-                    ),
-                  }}
-                />
-              ) : undefined
-            }
-          >
+          <EuiFormRow>
             <EuiSwitch
               id={'defineAlertSettingsSwitch'}
               label={ENABLE_STATUS_ALERT}
-              showLabel={showLabel}
+              showLabel={false}
               aria-label={ENABLE_STATUS_ALERT}
               // this switch is read only, no onChange applied
-              onChange={showPopover ? onButtonClick : () => {}}
+              onChange={onButtonClick}
               checked={false}
               compressed={true}
-              disabled={!showPopover}
               data-test-subj={'uptimeDisplayDefineConnector'}
             />
           </EuiFormRow>
         </>
       }
-      isOpen={showPopover ? isPopoverOpen : false}
+      isOpen={isPopoverOpen}
       closePopover={closePopover}
     >
       <EuiText style={{ width: '350px' }} data-test-subj={'uptimeSettingsDefineConnector'}>

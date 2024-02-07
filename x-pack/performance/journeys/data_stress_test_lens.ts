@@ -13,5 +13,5 @@ export const journey = new Journey({
 }).step('Go to dashboard', async ({ page, kbnUrl, kibanaServer, kibanaPage }) => {
   await kibanaServer.uiSettings.update({ 'histogram:maxBars': 100 });
   await page.goto(kbnUrl.get(`/app/dashboards#/view/92b143a0-2e9c-11ed-b1b6-a504560b392c`));
-  await kibanaPage.waitForVisualizations(1);
+  await kibanaPage.waitForVisualizations({ count: 1 });
 });

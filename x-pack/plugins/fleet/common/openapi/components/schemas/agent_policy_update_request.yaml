@@ -27,9 +27,9 @@ properties:
     type: string
     nullable: true
   unenroll_timeout:
-    type: number
+    type: integer
   inactivity_timeout:
-    type: number
+    type: integer
   agent_features:
     type: array
     items:

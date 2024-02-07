@@ -90,8 +90,10 @@ export class MetricsService
 
   private async refreshMetrics() {
     const metrics = await this.metricsCollector!.collect();
-    const { message, meta } = getEcsOpsMetricsLog(metrics);
-    this.opsMetricsLogger.debug(message!, meta);
+    if (this.opsMetricsLogger.isLevelEnabled('debug')) {
+      const { message, meta } = getEcsOpsMetricsLog(metrics);
+      this.opsMetricsLogger.debug(message!, meta);
+    }
     this.metricsCollector!.reset();
     this.metrics$.next(metrics);
   }

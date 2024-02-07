@@ -10,7 +10,7 @@ import {
   rangeQuery,
   termQuery,
 } from '@kbn/observability-plugin/server';
-import { ApmRuleType } from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import {
   SERVICE_NAME,
   TRANSACTION_TYPE,
@@ -21,7 +21,7 @@ import { environmentQuery } from '../../../../../common/utils/environment_query'
 import { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
 import { APMConfig } from '../../../..';
@@ -96,7 +96,7 @@ export async function getTransactionErrorRateChartPreview({
               searchConfiguration?.query?.query as string
             ),
             ...rangeQuery(start, end),
-            ...getDocumentTypeFilterForTransactions(
+            ...getBackwardCompatibleDocumentTypeFilter(
               searchAggregatedTransactions
             ),
             {

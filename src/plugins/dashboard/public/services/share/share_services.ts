@@ -19,9 +19,10 @@ export const shareServiceFactory: ShareServiceFactory = ({ startPlugins }) => {
   const { share } = startPlugins;
   if (!share) return {};
 
-  const { toggleShareContextMenu } = share;
+  const { toggleShareContextMenu, url } = share;
 
   return {
+    url,
     toggleShareContextMenu,
   };
 };

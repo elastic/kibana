@@ -9,16 +9,8 @@ import { shallow } from 'enzyme';
 import React from 'react';
 
 import '../../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
+import { TestProviders, createMockStore } from '../../../../common/mock';
 import { useMountAppended } from '../../../../common/utils/use_mount_appended';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { hostsModel } from '../../store';
 import { HostsTableType } from '../../store/model';
 import { HostsTable } from '.';
@@ -57,15 +49,8 @@ jest.mock('../../../../helper_hooks', () => ({
 
 describe('Hosts Table', () => {
   const loadPage = jest.fn();
-  const state: State = mockGlobalState;
-  const { storage } = createSecuritySolutionStorageMock();
-
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+  const store = createMockStore();
   const mount = useMountAppended();
-
-  beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
 
   describe('rendering', () => {
     test('it renders the default Hosts table', () => {
@@ -89,7 +74,7 @@ describe('Hosts Table', () => {
       expect(wrapper.find('HostsTable')).toMatchSnapshot();
     });
 
-    test('it renders "Host Risk classification" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
+    test('it renders "Host Risk level" column when "isPlatinumOrTrialLicense" is truthy and user has risk-entity capability', () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
@@ -113,7 +98,7 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.risk_4')).toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk classification' column when 'isPlatinumOrTrialLicense' is falsy", () => {
+    test("it doesn't renders 'Host Risk level' column when 'isPlatinumOrTrialLicense' is falsy", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: false });
       mockUseHasSecurityCapability.mockReturnValue(true);
 
@@ -137,7 +122,7 @@ describe('Hosts Table', () => {
       expect(queryByTestId('tableHeaderCell_node.riskScore_4')).not.toBeInTheDocument();
     });
 
-    test("it doesn't renders 'Host Risk classification' column when user doesn't has entity-analytics capabilities", () => {
+    test("it doesn't renders 'Host Risk level' column when user doesn't has entity-analytics capabilities", () => {
       mockUseMlCapabilities.mockReturnValue({ isPlatinumOrTrialLicense: true });
       mockUseHasSecurityCapability.mockReturnValue(false);
 

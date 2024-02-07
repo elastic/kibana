@@ -8,7 +8,7 @@
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
   DataPublicPluginStart,
-  isCompleteResponse,
+  isRunningResponse,
 } from '@kbn/data-plugin/public';
 import { IKibanaSearchRequest } from '@kbn/data-plugin/common';
 import {
@@ -18,6 +18,10 @@ import {
   UXHasDataResponse,
 } from '@kbn/observability-plugin/public';
 import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
+import {
+  inpQuery,
+  transformINPResponse,
+} from '../../../services/data/inp_query';
 import {
   coreWebVitalsQuery,
   transformCoreWebVitalsResponse,
@@ -39,42 +43,58 @@ async function getCoreWebVitalsResponse({
   dataStartPlugin,
 }: WithDataPlugin<FetchDataParams>) {
   const dataViewResponse = await callApmApi(
-    'GET /internal/apm/data_view/title',
+    'GET /internal/apm/data_view/index_pattern',
     {
       signal: null,
     }
   );
 
-  return await esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
-    params: {
-      index: dataViewResponse.apmDataViewTitle,
-      ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
-        serviceName: serviceName ? [serviceName] : undefined,
-      }),
-    },
-  });
+  return await Promise.all([
+    esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
+      params: {
+        index: dataViewResponse.apmDataViewIndexPattern,
+        ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
+          serviceName: serviceName ? [serviceName] : undefined,
+        }),
+      },
+    }),
+    esQuery<ReturnType<typeof inpQuery>>(dataStartPlugin, {
+      params: {
+        index: dataViewResponse.apmDataViewIndexPattern,
+        ...inpQuery(absoluteTime.start, absoluteTime.end, undefined, {
+          serviceName: serviceName ? [serviceName] : undefined,
+        }),
+      },
+    }),
+  ]);
 }
 
 const CORE_WEB_VITALS_DEFAULTS: UXMetrics = {
   coreVitalPages: 0,
   cls: 0,
-  fid: 0,
   lcp: 0,
   tbt: 0,
   fcp: 0,
   lcpRanks: DEFAULT_RANKS,
-  fidRanks: DEFAULT_RANKS,
+  inpRanks: DEFAULT_RANKS,
   clsRanks: DEFAULT_RANKS,
 };
 
 export const fetchUxOverviewDate = async (
   params: WithDataPlugin<FetchDataParams>
 ): Promise<UxFetchDataResponse> => {
-  const coreWebVitalsResponse = await getCoreWebVitalsResponse(params);
+  const [coreWebVitalsResponse, inpResponse] = await getCoreWebVitalsResponse(
+    params
+  );
+  const data =
+    transformCoreWebVitalsResponse(coreWebVitalsResponse) ??
+    CORE_WEB_VITALS_DEFAULTS;
+  const inpData = transformINPResponse(inpResponse);
   return {
-    coreWebVitals:
-      transformCoreWebVitalsResponse(coreWebVitalsResponse) ??
-      CORE_WEB_VITALS_DEFAULTS,
+    coreWebVitals: {
+      ...data,
+      ...(inpData ? { inp: inpData?.inp, inpRanks: inpData?.inpRanks } : {}),
+    },
     appLink: `/app/ux?rangeFrom=${params.relativeTime.start}&rangeTo=${params.relativeTime.end}`,
   };
 };
@@ -83,7 +103,7 @@ export async function hasRumData(
   params: WithDataPlugin<HasDataParams>
 ): Promise<UXHasDataResponse> {
   const dataViewResponse = await callApmApi(
-    'GET /internal/apm/data_view/title',
+    'GET /internal/apm/data_view/index_pattern',
     {
       signal: null,
     }
@@ -93,7 +113,7 @@ export async function hasRumData(
     params.dataStartPlugin,
     {
       params: {
-        index: dataViewResponse.apmDataViewTitle,
+        index: dataViewResponse.apmDataViewIndexPattern,
         ...hasRumDataQuery({
           start: params?.absoluteTime?.start,
           end: params?.absoluteTime?.end,
@@ -102,7 +122,10 @@ export async function hasRumData(
     }
   );
 
-  return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewTitle);
+  return formatHasRumResult(
+    esQueryResponse,
+    dataViewResponse.apmDataViewIndexPattern
+  );
 }
 
 async function esQuery<T>(
@@ -117,7 +140,7 @@ async function esQuery<T>(
         })
         .subscribe({
           next: (result) => {
-            if (isCompleteResponse(result)) {
+            if (!isRunningResponse(result)) {
               resolve(result.rawResponse as any);
               search$.unsubscribe();
             }

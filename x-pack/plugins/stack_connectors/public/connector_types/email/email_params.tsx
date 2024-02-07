@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiComboBox, EuiButtonEmpty, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -15,8 +15,6 @@ import {
   TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EmailActionParams } from '../types';
-import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
-import { TextAreaWithAutocomplete } from '../../components/text_area_with_autocomplete';
 
 const noop = () => {};
 
@@ -32,8 +30,8 @@ export const EmailParamsFields = ({
   onBlur = noop,
   showEmailSubjectAndMessage = true,
   useDefaultMessage,
+  ruleTypeId,
 }: ActionParamsProps<EmailActionParams>) => {
-  const isMustacheAutocompleteOn = getIsExperimentalFeatureEnabled('isMustacheAutocompleteOn');
   const { to, cc, bcc, subject, message } = actionParams;
   const toOptions = to ? to.map((label: string) => ({ label })) : [];
   const ccOptions = cc ? cc.map((label: string) => ({ label })) : [];
@@ -63,10 +61,6 @@ export const EmailParamsFields = ({
   const isCCInvalid: boolean = errors.cc !== undefined && errors.cc.length > 0 && cc !== undefined;
   const isBCCInvalid: boolean =
     errors.bcc !== undefined && errors.bcc.length > 0 && bcc !== undefined;
-
-  const TextAreaComponent = useMemo(() => {
-    return isMustacheAutocompleteOn ? TextAreaWithAutocomplete : TextAreaWithMessageVariables;
-  }, [isMustacheAutocompleteOn]);
 
   return (
     <>
@@ -239,7 +233,7 @@ export const EmailParamsFields = ({
         </EuiFormRow>
       )}
       {showEmailSubjectAndMessage && (
-        <TextAreaComponent
+        <TextAreaWithMessageVariables
           index={index}
           editAction={editAction}
           messageVariables={messageVariables}

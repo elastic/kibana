@@ -15,12 +15,13 @@ import React from 'react';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import '@kbn/code-editor-mock/jest_helper';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { EditRoleMappingPage } from './edit_role_mapping_page';
 import { JSONRuleEditor } from './rule_editor_panel/json_rule_editor';
 import { VisualRuleEditor } from './rule_editor_panel/visual_rule_editor';
-import type { Role } from '../../../../common/model';
+import type { Role } from '../../../../common';
 import { RoleComboBox } from '../../role_combo_box';
 import type { RolesAPIClient } from '../../roles';
 import { rolesAPIClientMock } from '../../roles/roles_api_client.mock';

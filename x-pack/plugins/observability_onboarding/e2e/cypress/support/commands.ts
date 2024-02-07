@@ -107,9 +107,9 @@ Cypress.Commands.add('installCustomIntegration', (integrationName: string) => {
       force: true,
       integrationName,
       datasets: [
-        { name: 'access', type: 'logs' },
-        { name: 'error', type: 'metrics' },
-        { name: 'warning', type: 'logs' },
+        { name: `${integrationName}.access`, type: 'logs' },
+        { name: `${integrationName}.error`, type: 'metrics' },
+        { name: `${integrationName}.warning`, type: 'logs' },
       ],
     },
     headers: {
@@ -144,7 +144,7 @@ Cypress.Commands.add('deleteIntegration', (integrationName: string) => {
         },
         headers: {
           'kbn-xsrf': 'e2e_test',
-          'Elastic-Api-Version': '1',
+          'Elastic-Api-Version': '2023-10-31',
         },
         auth: { user: 'editor', pass: 'changeme' },
       });

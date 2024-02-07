@@ -85,6 +85,7 @@ export interface PostBulkAgentUnenrollRequest {
     agents: string[] | string;
     force?: boolean;
     revoke?: boolean;
+    includeInactive?: boolean;
   };
 }
 

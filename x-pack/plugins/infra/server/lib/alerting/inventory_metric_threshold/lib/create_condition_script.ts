@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { Comparator } from '../../../../../common/alerting/metrics';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { convertMetricValue } from './convert_metric_value';
 
 export const createConditionScript = (
@@ -25,7 +25,8 @@ export const createConditionScript = (
   }
   if (comparator === Comparator.OUTSIDE_RANGE && threshold.length === 2) {
     return {
-      source: `params.value < params.threshold0 && params.value > params.threshold1 ? 1 : 0`,
+      // OUTSIDE_RANGE/NOT BETWEEN is the opposite of BETWEEN. Use the BETWEEN condition and switch the 1 and 0
+      source: `params.value > params.threshold0 && params.value < params.threshold1 ? 0 : 1`,
       params: {
         threshold0: threshold[0],
         threshold1: threshold[1],

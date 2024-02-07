@@ -5,17 +5,17 @@
  * 2.0.
  */
 
-import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IKibanaResponse } from '@kbn/core/server';
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
-import { buildSiemResponse } from '../../../../routes/utils';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
+import { buildSiemResponse } from '../../../../routes/utils';
 
 import type { GetRuleExecutionResultsResponse } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  GET_RULE_EXECUTION_RESULTS_URL,
   GetRuleExecutionResultsRequestParams,
   GetRuleExecutionResultsRequestQuery,
+  GET_RULE_EXECUTION_RESULTS_URL,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 /**
@@ -36,8 +36,8 @@ export const getRuleExecutionResultsRoute = (router: SecuritySolutionPluginRoute
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidation(GetRuleExecutionResultsRequestParams),
-            query: buildRouteValidation(GetRuleExecutionResultsRequestQuery),
+            params: buildRouteValidationWithZod(GetRuleExecutionResultsRequestParams),
+            query: buildRouteValidationWithZod(GetRuleExecutionResultsRequestQuery),
           },
         },
       },

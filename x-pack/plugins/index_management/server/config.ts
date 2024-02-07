@@ -32,9 +32,23 @@ const schemaLatest = schema.object(
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
-    dev: schema.object({ enableIndexDetailsPage: schema.boolean({ defaultValue: false }) }),
+    dev: schema.object({
+      // deprecated as unused after index details page has been implemented
+      enableIndexDetailsPage: schema.boolean({ defaultValue: false }),
+    }),
     enableIndexStats: offeringBasedSchema({
       // Index stats information is disabled in serverless; refer to the serverless.yml file as the source of truth
+      // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
+      serverless: schema.boolean({ defaultValue: true }),
+    }),
+    editableIndexSettings: offeringBasedSchema({
+      // on serverless only a limited set of index settings can be edited
+      serverless: schema.oneOf([schema.literal('all'), schema.literal('limited')], {
+        defaultValue: 'all',
+      }),
+    }),
+    enableDataStreamsStorageColumn: offeringBasedSchema({
+      // The Storage size column in Data streams is disabled in serverless; refer to the serverless.yml file as the source of truth
       // We take this approach in order to have a central place (serverless.yml) for serverless config across Kibana
       serverless: schema.boolean({ defaultValue: true }),
     }),
@@ -47,13 +61,12 @@ const configLatest: PluginConfigDescriptor<IndexManagementConfig> = {
     ui: true,
     enableIndexActions: true,
     enableLegacyTemplates: true,
-    dev: {
-      enableIndexDetailsPage: true,
-    },
     enableIndexStats: true,
+    editableIndexSettings: true,
+    enableDataStreamsStorageColumn: true,
   },
   schema: schemaLatest,
-  deprecations: () => [],
+  deprecations: ({ unused }) => [unused('dev.enableIndexDetailsPage', { level: 'warning' })],
 };
 
 export type IndexManagementConfig = TypeOf<typeof schemaLatest>;

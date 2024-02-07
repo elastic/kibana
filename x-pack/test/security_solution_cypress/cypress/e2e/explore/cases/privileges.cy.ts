@@ -9,7 +9,7 @@ import type { TestCaseWithoutTimeline } from '../../../objects/case';
 import { ALL_CASES_CREATE_NEW_CASE_BTN, ALL_CASES_NAME } from '../../../screens/all_cases';
 
 import { goToCreateNewCase } from '../../../tasks/all_cases';
-import { cleanKibana, deleteCases } from '../../../tasks/common';
+import { deleteAllCasesItems } from '../../../tasks/api_calls/common';
 
 import {
   backToCases,
@@ -17,7 +17,8 @@ import {
   fillCasesMandatoryfields,
   filterStatusOpen,
 } from '../../../tasks/create_new_case';
-import { login, loginWithUser, visitWithUser } from '../../../tasks/login';
+import { login, loginWithUser } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   createUsersAndRoles,
   deleteUsersAndRoles,
@@ -48,9 +49,8 @@ const testCase: TestCaseWithoutTimeline = {
   owner: 'securitySolution',
 };
 
-describe('Cases privileges', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Cases privileges', { tags: ['@ess'] }, () => {
   before(() => {
-    cleanKibana();
     createUsersAndRoles(usersToCreate, rolesToCreate);
   });
 
@@ -60,13 +60,13 @@ describe('Cases privileges', { tags: ['@ess', '@serverless', '@brokenInServerles
 
   beforeEach(() => {
     login();
-    deleteCases();
+    deleteAllCasesItems();
   });
 
   for (const user of [secAllUser, secReadCasesAllUser, secAllCasesNoDeleteUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, () => {
       loginWithUser(user);
-      visitWithUser(CASES_URL, user);
+      visit(CASES_URL);
       goToCreateNewCase();
       fillCasesMandatoryfields(testCase);
       createCase();
@@ -80,7 +80,7 @@ describe('Cases privileges', { tags: ['@ess', '@serverless', '@brokenInServerles
   for (const user of [secAllCasesOnlyReadDeleteUser]) {
     it(`User ${user.username} with role(s) ${user.roles.join()} cannot create a case`, () => {
       loginWithUser(user);
-      visitWithUser(CASES_URL, user);
+      visit(CASES_URL);
       cy.get(ALL_CASES_CREATE_NEW_CASE_BTN).should('not.exist');
     });
   }

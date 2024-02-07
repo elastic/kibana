@@ -29,6 +29,7 @@ const baseAllowlistFields: AllowlistFields = {
     malware_signature: true,
     memory_region: true,
     protection: true,
+    services: true,
     session_info: true,
     real: {
       entity_id: true,

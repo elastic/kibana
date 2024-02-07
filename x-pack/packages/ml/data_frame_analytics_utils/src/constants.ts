@@ -36,6 +36,7 @@ export const DEFAULT_RESULTS_FIELD = 'ml';
  */
 export const JOB_MAP_NODE_TYPES = {
   ANALYTICS: 'analytics',
+  ANALYTICS_JOB_MISSING: 'analytics-job-missing',
   TRANSFORM: 'transform',
   INDEX: 'index',
   TRAINED_MODEL: 'trainedModel',

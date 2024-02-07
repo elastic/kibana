@@ -8,8 +8,9 @@
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import {
   getBenchmarkFromPackagePolicy,
-  getBenchmarkTypeFilter,
+  getBenchmarkFilter,
   cleanupCredentials,
+  getBenchmarkFilterQueryV2,
 } from './helpers';
 
 describe('test helper methods', () => {
@@ -60,9 +61,56 @@ describe('test helper methods', () => {
     const typeK8s = getBenchmarkFromPackagePolicy(mockPackagePolicy.inputs);
     expect(typeK8s).toMatch('cis_k8s');
   });
+
   it('get benchmark type filter based on a benchmark id', () => {
-    const typeFilter = getBenchmarkTypeFilter('cis_eks');
+    const typeFilter = getBenchmarkFilter('cis_eks');
     expect(typeFilter).toMatch('csp-rule-template.attributes.metadata.benchmark.id: "cis_eks"');
+  });
+
+  it('should return a string with the correct filter when given a benchmark type and section', () => {
+    const typeAndSectionFilter = getBenchmarkFilter('cis_k8s', 'API Server');
+
+    expect(typeAndSectionFilter).toMatch(
+      'csp-rule-template.attributes.metadata.benchmark.id: "cis_k8s" AND csp-rule-template.attributes.metadata.section: "API Server"'
+    );
+  });
+
+  it('get benchmark filter query based on a benchmark Id, version', () => {
+    const typeFilter = getBenchmarkFilterQueryV2('cis_eks', '1.0.1');
+    expect(typeFilter).toMatch(
+      'csp-rule-template.attributes.metadata.benchmark.id:cis_eks AND csp-rule-template.attributes.metadata.benchmark.version:"v1.0.1"'
+    );
+  });
+
+  it('get benchmark filter query based on a benchmark Id, version and multiple sections and rule numbers', () => {
+    const mockSelectParams = {
+      section: ['section_1', 'section_2'],
+      ruleNumber: ['1a', '2b', '3c'],
+    };
+    const typeFilter = getBenchmarkFilterQueryV2('cis_eks', '1.0.1', mockSelectParams);
+    expect(typeFilter).toMatch(
+      'csp-rule-template.attributes.metadata.benchmark.id:cis_eks AND csp-rule-template.attributes.metadata.benchmark.version:"v1.0.1" AND (csp-rule-template.attributes.metadata.section: "section_1" OR csp-rule-template.attributes.metadata.section: "section_2") AND (csp-rule-template.attributes.metadata.benchmark.rule_number: "1a" OR csp-rule-template.attributes.metadata.benchmark.rule_number: "2b" OR csp-rule-template.attributes.metadata.benchmark.rule_number: "3c")'
+    );
+  });
+
+  it('get benchmark filter query based on a benchmark Id, version and just sections', () => {
+    const mockSelectParams = {
+      section: ['section_1', 'section_2'],
+    };
+    const typeFilter = getBenchmarkFilterQueryV2('cis_eks', '1.0.1', mockSelectParams);
+    expect(typeFilter).toMatch(
+      'csp-rule-template.attributes.metadata.benchmark.id:cis_eks AND csp-rule-template.attributes.metadata.benchmark.version:"v1.0.1" AND (csp-rule-template.attributes.metadata.section: "section_1" OR csp-rule-template.attributes.metadata.section: "section_2")'
+    );
+  });
+
+  it('get benchmark filter query based on a benchmark Id, version and just rule numbers', () => {
+    const mockSelectParams = {
+      ruleNumber: ['1a', '2b', '3c'],
+    };
+    const typeFilter = getBenchmarkFilterQueryV2('cis_eks', '1.0.1', mockSelectParams);
+    expect(typeFilter).toMatch(
+      'csp-rule-template.attributes.metadata.benchmark.id:cis_eks AND csp-rule-template.attributes.metadata.benchmark.version:"v1.0.1" AND (csp-rule-template.attributes.metadata.benchmark.rule_number: "1a" OR csp-rule-template.attributes.metadata.benchmark.rule_number: "2b" OR csp-rule-template.attributes.metadata.benchmark.rule_number: "3c")'
+    );
   });
 
   describe('cleanupCredentials', () => {

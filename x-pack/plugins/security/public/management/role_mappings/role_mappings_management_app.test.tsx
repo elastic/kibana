@@ -89,7 +89,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":false}
+        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":false}
       </div>
     `);
 
@@ -111,7 +111,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":true}
+        Role Mappings Page: {"notifications":{"toasts":{}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/","search":"","hash":""}},"readOnly":true}
       </div>
     `);
 
@@ -136,7 +136,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"action":"edit","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}},"readOnly":false}
+        Role Mapping Edit Page: {"action":"edit","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit","search":"","hash":""}},"readOnly":false}
       </div>
     `);
 
@@ -166,7 +166,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}},"readOnly":false}
+        Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}},"readOnly":false}
       </div>
     `);
 
@@ -197,7 +197,7 @@ describe('roleMappingsManagementApp', () => {
     expect(docTitle.reset).not.toHaveBeenCalled();
     expect(container).toMatchInlineSnapshot(`
       <div>
-        Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":""},"anonymousPaths":{},"externalUrl":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}},"readOnly":true}
+        Role Mapping Edit Page: {"action":"edit","name":"role@mapping","roleMappingsAPI":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"rolesAPIClient":{"http":{"basePath":{"basePath":"","serverBasePath":"","assetsHrefBase":""},"anonymousPaths":{},"externalUrl":{},"staticAssets":{}}},"notifications":{"toasts":{}},"docLinks":{},"history":{"action":"PUSH","length":1,"location":{"pathname":"/edit/role@mapping","search":"","hash":""}},"readOnly":true}
       </div>
     `);
 

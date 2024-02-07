@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import type { Exception } from '../objects/exception';
+import { RULE_MANAGEMENT_PAGE_BREADCRUMB } from '../screens/breadcrumbs';
 import { PAGE_CONTENT_SPINNER } from '../screens/common/page';
 import { RULE_STATUS } from '../screens/create_new_rule';
 import {
@@ -29,11 +31,11 @@ import {
   EDIT_EXCEPTION_BTN,
   ENDPOINT_EXCEPTIONS_TAB,
   EDIT_RULE_SETTINGS_LINK,
-  BACK_TO_RULES_TABLE,
   EXCEPTIONS_TAB_EXPIRED_FILTER,
   EXCEPTIONS_TAB_ACTIVE_FILTER,
   RULE_NAME_HEADER,
 } from '../screens/rule_details';
+import { RuleDetailsTabs, ruleDetailsUrl } from '../urls/rule_details';
 import {
   addExceptionConditions,
   addExceptionFlyoutItemName,
@@ -41,14 +43,36 @@ import {
   submitNewExceptionItem,
 } from './exceptions';
 import { addsFields, closeFieldsBrowser, filterFieldsBrowser } from './fields_browser';
+import { visit } from './navigation';
 
-export const enablesRule = () => {
+interface VisitRuleDetailsPageOptions {
+  tab?: RuleDetailsTabs;
+  role?: SecurityRoleName;
+}
+
+export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsPageOptions): void {
+  visit(ruleDetailsUrl(ruleId, options?.tab));
+}
+
+export const clickEnableRuleSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
   cy.get(RULE_SWITCH).click();
   cy.wait('@bulk_action').then(({ response }) => {
     cy.wrap(response?.statusCode).should('eql', 200);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', true);
+  });
+};
+
+export const clickDisableRuleSwitch = () => {
+  // Rules get enabled via _bulk_action endpoint
+  cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
+  cy.get(RULE_SWITCH).should('be.visible');
+  cy.get(RULE_SWITCH).click();
+  cy.wait('@bulk_action').then(({ response }) => {
+    cy.wrap(response?.statusCode).should('eql', 200);
+    cy.wrap(response?.body.attributes.results.updated[0].enabled).should('eql', false);
   });
 };
 
@@ -140,7 +164,7 @@ export const waitForTheRuleToBeExecuted = () => {
 };
 
 export const goBackToRulesTable = () => {
-  cy.get(BACK_TO_RULES_TABLE).click();
+  cy.get(RULE_MANAGEMENT_PAGE_BREADCRUMB).click();
 };
 
 export const getDetails = (title: string | RegExp) =>

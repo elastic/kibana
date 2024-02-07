@@ -61,9 +61,8 @@ export class OptionsListEmbeddableFactory
   public isFieldCompatible = (field: DataViewField) => {
     return (
       !field.spec.scripted &&
-      ((field.aggregatable && field.type === 'string') ||
-        field.type === 'boolean' ||
-        field.type === 'ip')
+      field.aggregatable &&
+      ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type)
     );
   };
 

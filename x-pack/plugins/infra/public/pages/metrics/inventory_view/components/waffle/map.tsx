@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { nodesToWaffleMap } from '../../lib/nodes_to_wafflemap';
 import { isWaffleMapGroupWithGroups, isWaffleMapGroupWithNodes } from '../../lib/type_guards';
 import { InfraWaffleMapBounds, InfraWaffleMapOptions } from '../../../../../lib/lib';
@@ -16,7 +17,6 @@ import { GroupOfGroups } from './group_of_groups';
 import { GroupOfNodes } from './group_of_nodes';
 import { applyWaffleMapLayout } from '../../lib/apply_wafflemap_layout';
 import { SnapshotNode } from '../../../../../../common/http_api/snapshot_api';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { sortNodes } from '../../lib/sort_nodes';
 
 interface Props {
@@ -27,9 +27,9 @@ interface Props {
   currentTime: number;
   onFilter: (filter: string) => void;
   bounds: InfraWaffleMapBounds;
-  dataBounds: InfraWaffleMapBounds;
   bottomMargin: number;
   staticHeight: boolean;
+  detailsItemId: string | null;
 }
 
 export const Map: React.FC<Props> = ({
@@ -40,9 +40,9 @@ export const Map: React.FC<Props> = ({
   formatter,
   bounds,
   nodeType,
-  dataBounds,
   bottomMargin,
   staticHeight,
+  detailsItemId,
 }) => {
   const sortedNodes = sortNodes(options.sort, nodes);
   const map = nodesToWaffleMap(sortedNodes);
@@ -70,6 +70,7 @@ export const Map: React.FC<Props> = ({
                       bounds={bounds}
                       nodeType={nodeType}
                       currentTime={currentTime}
+                      detailsItemId={detailsItemId}
                     />
                   );
                 }
@@ -85,6 +86,7 @@ export const Map: React.FC<Props> = ({
                       bounds={bounds}
                       nodeType={nodeType}
                       currentTime={currentTime}
+                      detailsItemId={detailsItemId}
                     />
                   );
                 }

@@ -40,4 +40,5 @@ export interface AlertStatus {
   activeStartDate?: string;
   flapping: boolean;
   maintenanceWindowIds?: string[];
+  tracked: boolean;
 }

@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/custom-icons",
+  "owner": "@elastic/obs-ux-logs-team"
+}

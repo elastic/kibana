@@ -12,7 +12,13 @@ import { createCaseSavedObjectResponse } from '../test_utils';
 import { transformSavedObjectToExternalModel } from '../cases/transform';
 import { alertComment, comment } from '../../mocks';
 import type { UserActionsDict } from './types';
-import { CaseSeverity, CaseStatuses, ConnectorTypes } from '../../../common/types/domain';
+import {
+  CaseSeverity,
+  CaseStatuses,
+  ConnectorTypes,
+  CustomFieldTypes,
+} from '../../../common/types/domain';
+import type { PatchCasesArgs } from '../cases/types';
 
 export const casePayload: CasePostRequest = {
   title: 'Case SIR',
@@ -137,6 +143,143 @@ export const patchTagsCasesRequest = {
         tags: ['a', 'b'],
       },
       originalCase: originalCases[0],
+    },
+  ],
+};
+
+const originalCasesWithCustomFields = [
+  {
+    ...createCaseSavedObjectResponse({
+      overrides: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'old value',
+          },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            value: 'old value 2',
+          },
+        ],
+      },
+    }),
+    id: '1',
+  },
+].map((so) => transformSavedObjectToExternalModel(so));
+
+export const patchAddCustomFieldsToOriginalCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'this is a text field value',
+          },
+        ],
+      },
+      originalCase: originalCases[0],
+    },
+  ],
+};
+
+export const patchUpdateCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'updated value',
+          },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            value: 'old value 2',
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchUpdateResetCustomFieldsCasesRequest: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: null,
+          },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            value: 'new custom field 2',
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchNewCustomFieldConfAdded: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'new value',
+          },
+          {
+            key: 'string_custom_field_2',
+            type: CustomFieldTypes.TEXT,
+            value: 'old value 2',
+          },
+          {
+            key: 'string_custom_field_3',
+            type: CustomFieldTypes.TEXT,
+            value: null,
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
+    },
+  ],
+};
+
+export const patchCustomFieldConfRemoved: PatchCasesArgs = {
+  cases: [
+    {
+      ...createCaseSavedObjectResponse(),
+      caseId: '1',
+      updatedAttributes: {
+        customFields: [
+          {
+            key: 'string_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'new value',
+          },
+        ],
+      },
+      originalCase: originalCasesWithCustomFields[0],
     },
   ],
 };

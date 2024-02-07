@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Field } from '../../../hooks/slo/use_fetch_index_pattern_fields';
+import { FieldSpec } from '@kbn/data-views-plugin/common';
 
 export interface Option {
   label: string;
@@ -13,7 +13,7 @@ export interface Option {
 }
 
 export function createOptionsFromFields(
-  fields: Field[],
+  fields: FieldSpec[],
   filterFn?: (option: Option) => boolean
 ): Option[] {
   const options = fields

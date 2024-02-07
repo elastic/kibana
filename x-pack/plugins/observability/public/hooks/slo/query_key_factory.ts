@@ -10,20 +10,28 @@ import type { Indicator } from '@kbn/slo-schema';
 interface SloListFilter {
   kqlQuery: string;
   page: number;
+  perPage: number;
   sortBy: string;
   sortDirection: string;
+  filters: string;
+  lastRefresh?: number;
 }
 
-interface CompositeSloKeyFilter {
-  name: string;
+interface SloGroupListFilter {
   page: number;
-  sortBy: string;
+  perPage: number;
+  groupBy: string;
+  kqlQuery: string;
+  filters: string;
+  lastRefresh?: number;
 }
 
 export const sloKeys = {
   all: ['slo'] as const,
   lists: () => [...sloKeys.all, 'list'] as const,
   list: (filters: SloListFilter) => [...sloKeys.lists(), filters] as const,
+  group: (filters: SloGroupListFilter) => [...sloKeys.groups(), filters] as const,
+  groups: () => [...sloKeys.all, 'group'] as const,
   details: () => [...sloKeys.all, 'details'] as const,
   detail: (sloId?: string) => [...sloKeys.details(), sloId] as const,
   rules: () => [...sloKeys.all, 'rules'] as const,
@@ -34,27 +42,13 @@ export const sloKeys = {
   historicalSummaries: () => [...sloKeys.all, 'historicalSummary'] as const,
   historicalSummary: (list: Array<{ sloId: string; instanceId: string }>) =>
     [...sloKeys.historicalSummaries(), list] as const,
-  definitions: (search: string) => [...sloKeys.all, 'definitions', search] as const,
+  definitions: (search: string, page: number, perPage: number, includeOutdatedOnly: boolean) =>
+    [...sloKeys.all, 'definitions', search, page, perPage, includeOutdatedOnly] as const,
   globalDiagnosis: () => [...sloKeys.all, 'globalDiagnosis'] as const,
   burnRates: (sloId: string, instanceId: string | undefined) =>
     [...sloKeys.all, 'burnRates', sloId, instanceId] as const,
-  preview: (indicator?: Indicator) => [...sloKeys.all, 'preview', indicator] as const,
+  preview: (indicator: Indicator, range: { start: number; end: number }) =>
+    [...sloKeys.all, 'preview', indicator, range] as const,
 };
 
-export const compositeSloKeys = {
-  all: ['compositeSlo'] as const,
-  lists: () => [...compositeSloKeys.all, 'list'] as const,
-  list: (filters: CompositeSloKeyFilter) => [...compositeSloKeys.lists(), filters] as const,
-  details: () => [...compositeSloKeys.all, 'details'] as const,
-  detail: (sloId?: string) => [...compositeSloKeys.details(), sloId] as const,
-  rules: () => [...compositeSloKeys.all, 'rules'] as const,
-  rule: (sloIds: string[]) => [...compositeSloKeys.rules(), sloIds] as const,
-  activeAlerts: () => [...compositeSloKeys.all, 'activeAlerts'] as const,
-  activeAlert: (sloIds: string[]) => [...compositeSloKeys.activeAlerts(), sloIds] as const,
-  historicalSummaries: () => [...compositeSloKeys.all, 'historicalSummary'] as const,
-  historicalSummary: (sloIds: string[]) =>
-    [...compositeSloKeys.historicalSummaries(), sloIds] as const,
-  globalDiagnosis: () => [...compositeSloKeys.all, 'globalDiagnosis'] as const,
-};
-
-export type SloKeys = typeof compositeSloKeys | typeof sloKeys;
+export type SloKeys = typeof sloKeys;

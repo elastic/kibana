@@ -18,7 +18,6 @@ import {
   DEFAULT_APP_REFRESH_INTERVAL,
   DEFAULT_APP_TIME_RANGE,
   DEFAULT_BYTES_FORMAT,
-  DEFAULT_DARK_MODE,
   DEFAULT_DATE_FORMAT,
   DEFAULT_DATE_FORMAT_TZ,
   DEFAULT_FROM,
@@ -47,11 +46,12 @@ import { mockApm } from '../apm/service.mock';
 import { cloudExperimentsMock } from '@kbn/cloud-experiments-plugin/common/mocks';
 import { guidedOnboardingMock } from '@kbn/guided-onboarding-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
-import { of } from 'rxjs';
-import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { NavigationProvider } from '@kbn/security-solution-navigation';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
+import { savedSearchPluginMock } from '@kbn/saved-search-plugin/public/mocks';
+import { contractStartServicesMock } from '../../../mocks';
+import { getDefaultConfigSettings } from '../../../../common/config_settings';
 
 const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_TIME_RANGE]: { from: 'now-15m', to: 'now', mode: 'quick' },
@@ -68,7 +68,6 @@ const mockUiSettings: Record<string, unknown> = {
   [DEFAULT_BYTES_FORMAT]: '0,0.[0]b',
   [DEFAULT_DATE_FORMAT_TZ]: 'UTC',
   [DEFAULT_DATE_FORMAT]: 'MMM D, YYYY @ HH:mm:ss.SSS',
-  [DEFAULT_DARK_MODE]: false,
   [DEFAULT_RULES_TABLE_REFRESH_SETTING]: {
     on: DEFAULT_RULE_REFRESH_INTERVAL_ON,
     value: DEFAULT_RULE_REFRESH_INTERVAL_VALUE,
@@ -116,14 +115,17 @@ export const createStartServicesMock = (
   const discover = discoverPluginMock.createStartContract();
   const cases = mockCasesContract();
   const dataViewServiceMock = dataViewPluginMocks.createStartContract();
-  cases.helpers.getUICapabilities.mockReturnValue(noCasesPermissions());
+  cases.helpers.canUseCases.mockReturnValue(noCasesPermissions());
   const triggersActionsUi = triggersActionsUiMock.createStart();
   const cloudExperiments = cloudExperimentsMock.createStartMock();
   const guidedOnboarding = guidedOnboardingMock.createStart();
   const cloud = cloudMock.createStart();
+  const mockSetHeaderActionMenu = jest.fn();
 
   return {
     ...core,
+    ...contractStartServicesMock,
+    configSettings: getDefaultConfigSettings(),
     apm,
     cases,
     unifiedSearch,
@@ -195,9 +197,7 @@ export const createStartServicesMock = (
       locator,
     },
     telemetry: {},
-    theme: {
-      theme$: themeServiceMock.createTheme$(),
-    },
+    theme: themeServiceMock.createSetupContract(),
     timelines: {
       getLastUpdated: jest.fn(),
       getFieldBrowser: jest.fn(),
@@ -216,10 +216,10 @@ export const createStartServicesMock = (
       ...cloud,
       isCloudEnabled: false,
     },
-    isSidebarEnabled$: of(true),
-    upselling: new UpsellingService(),
     customDataService,
     uiActions: uiActionsPluginMock.createStartContract(),
+    savedSearch: savedSearchPluginMock.createStartContract(),
+    setHeaderActionMenu: mockSetHeaderActionMenu,
   } as unknown as StartServices;
 };
 

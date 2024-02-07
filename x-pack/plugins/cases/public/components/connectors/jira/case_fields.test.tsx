@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { omit } from 'lodash/fp';
-import { waitFor, screen, fireEvent, act, within } from '@testing-library/react';
+import { waitFor, screen, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { connector, issues } from '../mock';
@@ -101,9 +101,10 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
+    expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('issueTypeSelect')).toBeInTheDocument();
+
     await waitFor(() => {
-      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
-      expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
       expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
     });
   });
@@ -115,15 +116,15 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    const issueTypeSelect = screen.getByTestId('issueTypeSelect');
+    const issueTypeSelect = await screen.findByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
-    userEvent.selectOptions(issueTypeSelect, 'Task');
-
-    await waitFor(() => {
-      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
-      expect(screen.getByTestId('search-parent-issues')).toBeInTheDocument();
+    fireEvent.change(issueTypeSelect, {
+      target: { value: 'Task' },
     });
+
+    expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
   });
 
   it('sets parent correctly', async () => {
@@ -132,13 +133,11 @@ describe('Jira Fields', () => {
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
+    const input = await screen.findByTestId('comboBoxSearchInput');
 
-    await act(async () => {
-      const event = { target: { value: 'parentId' } };
-      fireEvent.change(screen.getByTestId('comboBoxSearchInput'), event);
-    });
+    fireEvent.change(input, { target: { value: 'parentId' } });
 
-    expect(screen.getByText('parentId')).toBeInTheDocument();
+    expect(input).toHaveValue('parentId');
   });
 
   it('searches parent correctly', async () => {
@@ -148,15 +147,18 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    const checkbox = within(screen.getByTestId('search-parent-issues')).getByTestId(
+    const checkbox = within(await screen.findByTestId('search-parent-issues')).getByTestId(
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Person Task{enter}');
-    expect(checkbox).toHaveValue('Person Task');
+    fireEvent.change(checkbox, {
+      target: { value: 'Person Task{enter}' },
+    });
+
+    expect(checkbox).toHaveValue('Person Task{enter}');
   });
 
-  it('disabled the fields when loading issue types', () => {
+  it('disabled the fields when loading issue types', async () => {
     useGetIssueTypesMock.mockReturnValue({ ...useGetIssueTypesResponse, isLoading: true });
 
     appMockRenderer.render(
@@ -165,11 +167,11 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('issueTypeSelect')).toBeDisabled();
-    expect(screen.getByTestId('prioritySelect')).toBeDisabled();
+    expect(await screen.findByTestId('issueTypeSelect')).toBeDisabled();
+    expect(await screen.findByTestId('prioritySelect')).toBeDisabled();
   });
 
-  it('disabled the priority when loading fields', () => {
+  it('disabled the priority when loading fields', async () => {
     useGetFieldsByIssueTypeMock.mockReturnValue({
       ...useGetFieldsByIssueTypeResponse,
       isLoading: true,
@@ -181,7 +183,7 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('prioritySelect')).toBeDisabled();
+    expect(await screen.findByTestId('prioritySelect')).toBeDisabled();
   });
 
   it('hides the priority if not supported', () => {
@@ -212,27 +214,27 @@ describe('Jira Fields', () => {
     expect(screen.queryByTestId('search-parent-issues')).not.toBeVisible();
   });
 
-  it('sets issue type correctly', () => {
+  it('sets issue type correctly', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('issueTypeSelect'), '10007');
-    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
+    userEvent.selectOptions(await screen.findByTestId('issueTypeSelect'), '10007');
+    expect(await screen.findByTestId('issueTypeSelect')).toHaveValue('10007');
   });
 
-  it('sets priority correctly', () => {
+  it('sets priority correctly', async () => {
     appMockRenderer.render(
       <MockFormWrapperComponent fields={fields}>
         <Fields connector={connector} />
       </MockFormWrapperComponent>
     );
 
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), 'Low');
+    userEvent.selectOptions(await screen.findByTestId('prioritySelect'), 'Low');
 
-    expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
+    expect(await screen.findByTestId('prioritySelect')).toHaveValue('Low');
   });
 
   it('should submit Jira connector', async () => {
@@ -242,25 +244,25 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    const issueTypeSelect = screen.getByTestId('issueTypeSelect');
+    const issueTypeSelect = await screen.findByTestId('issueTypeSelect');
     expect(issueTypeSelect).toBeInTheDocument();
 
     userEvent.selectOptions(issueTypeSelect, 'Bug');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
-      expect(screen.getByTestId('search-parent-issues')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('search-parent-issues')).toBeInTheDocument();
 
-    const checkbox = within(screen.getByTestId('search-parent-issues')).getByTestId(
+    const checkbox = within(await screen.findByTestId('search-parent-issues')).getByTestId(
       'comboBoxSearchInput'
     );
 
-    userEvent.type(checkbox, 'Person Task{enter}');
-    userEvent.selectOptions(screen.getByTestId('prioritySelect'), ['Low']);
+    fireEvent.change(checkbox, {
+      target: { value: 'Person Task' },
+    });
+    userEvent.selectOptions(await screen.findByTestId('prioritySelect'), ['Low']);
 
-    expect(screen.getByTestId('issueTypeSelect')).toHaveValue('10007');
-    expect(screen.getByTestId('prioritySelect')).toHaveValue('Low');
+    expect(await screen.findByTestId('issueTypeSelect')).toHaveValue('10007');
+    expect(await screen.findByTestId('prioritySelect')).toHaveValue('Low');
     expect(checkbox).toHaveValue('Person Task');
   });
 
@@ -271,17 +273,16 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
+    expect(await screen.findByTestId('prioritySelect')).toBeInTheDocument();
+    expect(await screen.findByTestId('issueTypeSelect')).toBeInTheDocument();
+
     await waitFor(() => {
-      expect(screen.getByTestId('prioritySelect')).toBeInTheDocument();
-      expect(screen.getByTestId('issueTypeSelect')).toBeInTheDocument();
       expect(screen.queryByTestId('search-parent-issues')).toBeInTheDocument();
     });
 
-    userEvent.click(screen.getByTestId('submit-form'));
+    userEvent.click(await screen.findByTestId('submit-form'));
 
-    await waitFor(() => {
-      expect(screen.getByText('Issue type is required')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Issue type is required')).toBeInTheDocument();
   });
 
   it('should not show the loading skeleton when loading issue types', async () => {
@@ -330,6 +331,6 @@ describe('Jira Fields', () => {
       </MockFormWrapperComponent>
     );
 
-    expect(screen.getByTestId('fields-by-issue-type-loading')).toBeInTheDocument();
+    expect(await screen.findByTestId('fields-by-issue-type-loading')).toBeInTheDocument();
   });
 });

@@ -10,26 +10,48 @@ import { SLOResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import React from 'react';
 import { useKibana } from '../../../utils/kibana_react';
-import { useLensDefinition } from './use_lens_definition';
+import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
+import { AlertAnnotation, TimeRange, useLensDefinition } from './use_lens_definition';
 
 interface Props {
   slo: SLOResponse;
-  fromRange: Date;
+  dataTimeRange: TimeRange;
+  threshold: number;
+  alertTimeRange?: TimeRange;
+  showErrorRateAsLine?: boolean;
+  annotations?: AlertAnnotation[];
 }
 
-export function ErrorRateChart({ slo, fromRange }: Props) {
+export function ErrorRateChart({
+  slo,
+  dataTimeRange,
+  threshold,
+  alertTimeRange,
+  showErrorRateAsLine,
+  annotations,
+}: Props) {
   const {
     lens: { EmbeddableComponent },
   } = useKibana().services;
-  const lensDef = useLensDefinition(slo);
+  const lensDef = useLensDefinition(
+    slo,
+    threshold,
+    alertTimeRange,
+    annotations,
+    showErrorRateAsLine
+  );
+  const delayInSeconds = getDelayInSecondsFromSLO(slo);
+
+  const from = moment(dataTimeRange.from).subtract(delayInSeconds, 'seconds').toISOString();
+  const to = moment(dataTimeRange.to).subtract(delayInSeconds, 'seconds').toISOString();
 
   return (
     <EmbeddableComponent
       id="sloErrorRateChart"
       style={{ height: 190 }}
       timeRange={{
-        from: fromRange.toISOString(),
-        to: moment().toISOString(),
+        from,
+        to,
       }}
       attributes={lensDef}
       viewMode={ViewMode.VIEW}

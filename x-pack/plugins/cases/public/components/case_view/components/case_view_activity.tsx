@@ -10,13 +10,14 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { isEqual } from 'lodash';
+import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import { useGetCaseUsers } from '../../../containers/use_get_case_users';
 import { useGetCaseConnectors } from '../../../containers/use_get_case_connectors';
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
 import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
-import type { UseFetchAlertData } from '../../../../common/ui/types';
+import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
 import type { CasesNavigation } from '../../links';
@@ -38,6 +39,7 @@ import { CaseViewTabs } from '../case_view_tabs';
 import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
+import { CustomFields } from './custom_fields';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -72,6 +74,8 @@ export const CaseViewActivity = ({
 
   const { data: caseUsers, isLoading: isLoadingCaseUsers } = useGetCaseUsers(caseData.id);
 
+  const { data: casesConfiguration } = useGetCaseConfiguration();
+
   const { userProfiles, reporterAsArray } = parseCaseUsers({
     caseUsers,
     createdBy: caseData.createdBy,
@@ -84,15 +88,6 @@ export const CaseViewActivity = ({
 
   const { data: currentUserProfile, isFetching: isLoadingCurrentUserProfile } =
     useGetCurrentUserProfile();
-
-  const onShowAlertDetails = useCallback(
-    (alertId: string, index: string) => {
-      if (showAlertDetails) {
-        showAlertDetails(alertId, index);
-      }
-    },
-    [showAlertDetails]
-  );
 
   const { onUpdateField, isLoading, loadingKey } = useOnUpdateField({
     caseData,
@@ -143,6 +138,16 @@ export const CaseViewActivity = ({
       onUpdateField({
         key: 'connector',
         value: connector,
+      });
+    },
+    [onUpdateField]
+  );
+
+  const onSubmitCustomFields = useCallback(
+    (customFields: CaseUICustomField[]) => {
+      onUpdateField({
+        key: 'customFields',
+        value: customFields,
       });
     },
     [onUpdateField]
@@ -205,8 +210,9 @@ export const CaseViewActivity = ({
                 onRuleDetailsClick={ruleDetailsNavigation?.onClick}
                 caseConnectors={caseConnectors}
                 data={caseData}
+                casesConfiguration={casesConfiguration}
                 actionsNavigation={actionsNavigation}
-                onShowAlertDetails={onShowAlertDetails}
+                onShowAlertDetails={showAlertDetails}
                 onUpdateField={onUpdateField}
                 statusActionButton={
                   permissions.update ? (
@@ -283,6 +289,12 @@ export const CaseViewActivity = ({
               key={caseData.connector.id}
             />
           ) : null}
+          <CustomFields
+            isLoading={isLoading && loadingKey === 'customFields'}
+            customFields={caseData.customFields}
+            customFieldsConfiguration={casesConfiguration.customFields}
+            onSubmit={onSubmitCustomFields}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

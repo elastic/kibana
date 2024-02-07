@@ -18,25 +18,23 @@ const createMock = (): jest.Mocked<SlackApiService> => {
         type: 'message',
       },
     })),
-    getChannels: jest.fn().mockImplementation(() => [
+    postBlockkit: jest.fn().mockImplementation(() => ({
+      ok: true,
+      channel: 'general',
+      message: {
+        text: 'a blockkit message',
+      },
+    })),
+    validChannelId: jest.fn().mockImplementation(() => [
       {
         ok: true,
-        channels: [
-          {
-            id: 'channel_id_1',
-            name: 'general',
-            is_channel: true,
-            is_archived: false,
-            is_private: true,
-          },
-          {
-            id: 'channel_id_2',
-            name: 'privat',
-            is_channel: true,
-            is_archived: false,
-            is_private: false,
-          },
-        ],
+        channels: {
+          id: 'channel_id_1',
+          name: 'general',
+          is_channel: true,
+          is_archived: false,
+          is_private: true,
+        },
       },
     ]),
   };
@@ -55,35 +53,28 @@ describe('api', () => {
     externalService = slackServiceMock.create();
   });
 
-  test('getChannels', async () => {
-    const res = await api.getChannels({
+  test('validChannelId', async () => {
+    const res = await api.validChannelId({
       externalService,
+      params: { channelId: 'channel_id_1' },
     });
 
     expect(res).toEqual([
       {
-        channels: [
-          {
-            id: 'channel_id_1',
-            is_archived: false,
-            is_channel: true,
-            is_private: true,
-            name: 'general',
-          },
-          {
-            id: 'channel_id_2',
-            is_archived: false,
-            is_channel: true,
-            is_private: false,
-            name: 'privat',
-          },
-        ],
+        channels: {
+          id: 'channel_id_1',
+          is_archived: false,
+          is_channel: true,
+          is_private: true,
+          name: 'general',
+        },
+
         ok: true,
       },
     ]);
   });
 
-  test('postMessage', async () => {
+  test('postMessage with channels params', async () => {
     const res = await api.postMessage({
       externalService,
       params: { channels: ['general'], text: 'a message' },
@@ -94,6 +85,37 @@ describe('api', () => {
       message: {
         text: 'a message',
         type: 'message',
+      },
+      ok: true,
+    });
+  });
+
+  test('postMessage with channelIds params', async () => {
+    const res = await api.postMessage({
+      externalService,
+      params: { channelIds: ['general'], text: 'a message' },
+    });
+
+    expect(res).toEqual({
+      channel: 'general',
+      message: {
+        text: 'a message',
+        type: 'message',
+      },
+      ok: true,
+    });
+  });
+
+  test('postBlockkit with channelIds params', async () => {
+    const res = await api.postBlockkit({
+      externalService,
+      params: { channelIds: ['general'], text: 'a blockkit message' },
+    });
+
+    expect(res).toEqual({
+      channel: 'general',
+      message: {
+        text: 'a blockkit message',
       },
       ok: true,
     });

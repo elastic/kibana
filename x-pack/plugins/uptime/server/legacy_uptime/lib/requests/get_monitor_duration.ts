@@ -6,6 +6,10 @@
  */
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import {
+  EXCLUDE_RUN_ONCE_FILTER,
+  SUMMARY_FILTER,
+} from '../../../../common/constants/client_defaults';
 import { UMElasticsearchQueryFn } from '../adapters';
 import { LocationDurationLine, MonitorDurationResult } from '../../../../common/types';
 import { QUERY, UNNAMED_LOCATION } from '../../../../common/constants';
@@ -30,6 +34,8 @@ export const getMonitorDurationChart: UMElasticsearchQueryFn<
     query: {
       bool: {
         filter: [
+          SUMMARY_FILTER,
+          EXCLUDE_RUN_ONCE_FILTER,
           { range: { '@timestamp': { gte: dateStart, lte: dateEnd } } },
           { term: { 'monitor.id': monitorId } },
           { range: { 'monitor.duration.us': { gt: 0 } } },

@@ -19,6 +19,7 @@ import { Client, HttpConnection } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { ArtifactLicense } from '@kbn/es';
+import type { ServerlessOptions } from '@kbn/es/src/utils';
 import { CI_PARALLEL_PROCESS_PREFIX } from '../ci_parallel_process_prefix';
 import { esTestConfig } from './es_test_config';
 
@@ -70,6 +71,10 @@ export interface CreateTestEsClusterOptions {
    */
   esArgs?: string[];
   esFrom?: string;
+  esServerlessOptions?: Pick<
+    ServerlessOptions,
+    'image' | 'tag' | 'resources' | 'host' | 'kibanaUrl' | 'projectType'
+  >;
   esJavaOpts?: string;
   /**
    * License to run your cluster under. Keep in mind that a `trial` license
@@ -164,6 +169,7 @@ export function createTestEsCluster<
     writeLogsToPath,
     basePath = Path.resolve(REPO_ROOT, '.es'),
     esFrom = esTestConfig.getBuildFrom(),
+    esServerlessOptions,
     dataArchive,
     nodes = [{ name: 'node-01' }],
     esArgs: customEsArgs = [],
@@ -236,18 +242,24 @@ export function createTestEsCluster<
       } else if (esFrom === 'snapshot') {
         installPath = (await firstNode.installSnapshot(config)).installPath;
       } else if (esFrom === 'serverless') {
-        return await firstNode.runServerless({
+        if (!esServerlessOptions) {
+          throw new Error(
+            `'esServerlessOptions' must be defined to start Elasticsearch in serverless mode`
+          );
+        }
+        await firstNode.runServerless({
           basePath,
           esArgs: customEsArgs,
+          ...esServerlessOptions,
           port,
           clean: true,
-          teardown: true,
           background: true,
           files,
           ssl,
           kill: true, // likely don't need this but avoids any issues where the ESS cluster wasn't cleaned up
           waitForReady: true,
         });
+        return;
       } else if (Path.isAbsolute(esFrom)) {
         installPath = esFrom;
       } else {
@@ -276,9 +288,9 @@ export function createTestEsCluster<
           });
         }
 
-        nodeStartPromises.push(async () => {
+        nodeStartPromises.push(() => {
           log.info(`[es] starting node ${node.name} on port ${nodePort}`);
-          return await this.nodes[i].start(installPath, {
+          return this.nodes[i].start(installPath, {
             password: config.password,
             esArgs: assignArgs(esArgs, overriddenArgs),
             esJavaOpts,
@@ -293,7 +305,7 @@ export function createTestEsCluster<
         });
       }
 
-      await Promise.all(extractDirectoryPromises.map(async (extract) => await extract()));
+      await Promise.all(extractDirectoryPromises.map((extract) => extract()));
       for (const start of nodeStartPromises) {
         await start();
       }

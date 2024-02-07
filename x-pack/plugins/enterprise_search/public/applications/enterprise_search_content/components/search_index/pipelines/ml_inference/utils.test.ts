@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isValidPipelineName } from './utils';
+import { isValidPipelineName, normalizeModelName } from './utils';
 
 describe('ml inference utils', () => {
   describe('isValidPipelineName', () => {
@@ -22,6 +22,18 @@ describe('ml inference utils', () => {
       expect(isValidPipelineName('a_pipeline_name_1%')).toEqual(false);
       expect(isValidPipelineName('a_pipeline_name_1^')).toEqual(false);
       expect(isValidPipelineName('a_pipeline_name_1"')).toEqual(false);
+    });
+  });
+  describe('normalizeModelName', () => {
+    it('no normalization', () => {
+      expect(normalizeModelName('valid_model_name_123')).toEqual('valid_model_name_123');
+      expect(normalizeModelName('valid-model-name-123')).toEqual('valid-model-name-123');
+    });
+    it('normalize model name', () => {
+      expect(normalizeModelName('.elser_model_2')).toEqual('_elser_model_2');
+      expect(normalizeModelName('model!@with#$special%^chars&*123')).toEqual(
+        'model__with__special__chars__123'
+      );
     });
   });
 });

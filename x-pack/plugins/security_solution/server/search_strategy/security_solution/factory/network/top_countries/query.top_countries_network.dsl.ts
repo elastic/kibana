@@ -5,13 +5,10 @@
  * 2.0.
  */
 
+import type { NetworkTopCountriesRequestOptions } from '../../../../../../common/api/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 import { assertUnreachable } from '../../../../../../common/utility_types';
-import type {
-  Direction,
-  NetworkTopCountriesRequestOptions,
-  SortField,
-} from '../../../../../../common/search_strategy';
+import type { Direction } from '../../../../../../common/search_strategy';
 import {
   FlowTargetSourceDest,
   NetworkTopTablesFields,
@@ -77,7 +74,7 @@ export const buildTopCountriesQuery = ({
 };
 
 const getFlowTargetAggs = (
-  sort: SortField<NetworkTopTablesFields>,
+  sort: NetworkTopCountriesRequestOptions['sort'],
   flowTarget: FlowTargetSourceDest,
   querySize: number
 ) => ({
@@ -137,7 +134,7 @@ type QueryOrder =
   | { source_ips: Direction };
 
 const getQueryOrder = (
-  networkTopCountriesSortField: SortField<NetworkTopTablesFields>
+  networkTopCountriesSortField: NetworkTopCountriesRequestOptions['sort']
 ): QueryOrder => {
   switch (networkTopCountriesSortField.field) {
     case NetworkTopTablesFields.bytes_in:
@@ -151,5 +148,8 @@ const getQueryOrder = (
     case NetworkTopTablesFields.source_ips:
       return { source_ips: networkTopCountriesSortField.direction };
   }
-  assertUnreachable(networkTopCountriesSortField.field);
+
+  throw new Error(
+    `Invalid networkTopCountriesSortField ${JSON.stringify(networkTopCountriesSortField)}`
+  );
 };

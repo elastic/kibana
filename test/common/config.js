@@ -67,6 +67,21 @@ export default function () {
             appenders: ['deprecation'],
           },
         ])}`,
+        // Add meta info to the logs so FTR logs are more actionable
+        `--logging.appenders.default=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: '[%date][%level][%logger] %message %meta',
+          },
+        })}`,
+        `--logging.appenders.console=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: '[%date][%level][%logger] %message %meta',
+          },
+        })}`,
       ],
     },
     services,

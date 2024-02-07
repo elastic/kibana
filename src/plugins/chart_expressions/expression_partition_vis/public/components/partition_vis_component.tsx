@@ -113,7 +113,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
     hasOpenedOnAggBasedEditor,
   } = props;
   const visParams = useMemo(() => filterOutConfig(visType, preVisParams), [preVisParams, visType]);
-  const chartTheme = props.chartsThemeService.useChartsTheme();
   const chartBaseTheme = props.chartsThemeService.useChartsBaseTheme();
 
   const {
@@ -179,11 +178,8 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
   const onRenderChange = useCallback(
     (isRendered: boolean = true) => {
       if (isRendered) {
-        // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-        window.requestAnimationFrame(() => {
-          props.renderComplete();
-          setChartIsLoaded(true);
-        });
+        props.renderComplete();
+        setChartIsLoaded(true);
       }
     },
     [props]
@@ -380,12 +376,19 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
       getPartitionTheme(
         visType,
         visParams,
-        chartTheme,
+        chartBaseTheme,
         containerDimensions,
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [visType, visParams, chartTheme, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
+    [
+      visType,
+      visParams,
+      chartBaseTheme,
+      containerDimensions,
+      rescaleFactor,
+      hasOpenedOnAggBasedEditor,
+    ]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
@@ -577,7 +580,6 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                   // Chart background should be transparent for the usage at Canvas.
                   { background: { color: 'transparent' } },
                   themeOverrides,
-                  chartTheme,
                   {
                     legend: {
                       labelOptions: {
@@ -594,6 +596,7 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
                 onRenderChange={onRenderChange}
                 ariaLabel={props.visParams.ariaLabel}
                 ariaUseDefaultSummary={!props.visParams.ariaLabel}
+                locale={i18n.getLocale()}
                 {...settingsOverrides}
               />
               <Partition

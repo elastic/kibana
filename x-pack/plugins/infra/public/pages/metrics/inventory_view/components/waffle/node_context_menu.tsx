@@ -21,12 +21,13 @@ import {
   ActionMenuDivider,
   useLinkProps,
 } from '@kbn/observability-shared-plugin/public';
+import { findInventoryModel, findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { AlertFlyout } from '../../../../../alerting/inventory/components/alert_flyout';
 import { InfraWaffleMapNode, InfraWaffleMapOptions } from '../../../../../lib/lib';
 import { useNodeDetailsRedirect } from '../../../../link_to';
-import { findInventoryModel, findInventoryFields } from '../../../../../../common/inventory_models';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { navigateToUptime } from '../../lib/navigate_to_uptime';
 
 interface Props {
@@ -43,7 +44,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
-    const { application, share, locators } = services;
+    const { application, share } = services;
+    const { nodeLogsLocator } = getLogsLocatorsFromUrlService(share.url);
     const uiCapabilities = application?.capabilities;
     // Due to the changing nature of the fields between APM and this UI,
     // We need to have some exceptions until 7.0 & ECS is finalized. Reference
@@ -64,7 +66,16 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
     const inventoryId = useMemo(() => {
       if (nodeType === 'host') {
         if (node.ip) {
-          return { label: <EuiCode>host.ip</EuiCode>, value: node.ip };
+          return {
+            label: (
+              <EuiCode>
+                {i18n.translate('xpack.infra.inventoryId.host.ipCodeLabel', {
+                  defaultMessage: 'host.ip',
+                })}
+              </EuiCode>
+            ),
+            value: node.ip,
+          };
         }
       } else {
         const { id } = findInventoryFields(nodeType);
@@ -78,7 +89,7 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
 
     const nodeDetailMenuItemLinkProps = useLinkProps({
       ...getNodeDetailUrl({
-        assetType: node.type,
+        assetType: nodeType,
         assetId: node.id,
         search: {
           from: nodeDetailFrom,
@@ -100,8 +111,8 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
         defaultMessage: '{inventoryName} logs',
         values: { inventoryName: inventoryModel.singularDisplayName },
       }),
-      href: locators.nodeLogsLocator.getRedirectUrl({
-        nodeType,
+      href: nodeLogsLocator.getRedirectUrl({
+        nodeField: findInventoryFields(nodeType).id,
         nodeId: node.id,
         time: currentTime,
       }),
@@ -171,7 +182,10 @@ export const NodeContextMenu: React.FC<Props & { theme?: EuiTheme }> = withTheme
             )}
             <SectionLinks>
               <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
-              <SectionLink {...nodeDetailMenuItem} />
+              <SectionLink
+                data-test-subj="viewAssetDetailsContextMenuItem"
+                {...nodeDetailMenuItem}
+              />
               <SectionLink data-test-subj="viewApmTracesContextMenuItem" {...apmTracesMenuItem} />
               <SectionLink {...uptimeMenuItem} color={'primary'} />
             </SectionLinks>

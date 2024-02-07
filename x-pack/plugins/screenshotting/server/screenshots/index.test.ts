@@ -66,8 +66,10 @@ describe('Screenshot Observable Pipeline', () => {
       headers: {},
       layout: {},
       urls: ['/welcome/home/start/index.htm'],
+      taskInstanceFields: { startedAt: null, retryAt: null },
     };
     config = {
+      enabled: true,
       poolSize: 1,
       capture: {
         timeouts: {

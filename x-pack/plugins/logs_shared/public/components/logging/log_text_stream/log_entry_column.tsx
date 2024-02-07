@@ -8,6 +8,7 @@
 import { useMemo } from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import moment from 'moment';
 import { TextScale } from '../../../../common/log_text_scale';
 import {
   LogColumnRenderConfiguration,
@@ -23,7 +24,7 @@ const FIELD_COLUMN_MIN_WIDTH_CHARACTERS = 10;
 const DETAIL_FLYOUT_ICON_MIN_WIDTH = 32;
 const COLUMN_PADDING = 8;
 
-interface LogEntryColumnProps {
+export interface LogEntryColumnProps {
   baseWidth: string;
   growWeight: number;
   shrinkWeight: number;
@@ -142,7 +143,7 @@ export const useColumnWidths = ({
   timeFormat?: TimeFormat;
 }) => {
   const { CharacterDimensionsProbe, dimensions } = useMeasuredCharacterDimensions(scale);
-  const referenceTime = useMemo(() => Date.now(), []);
+  const referenceTime = useMemo(() => moment().toISOString(), []);
   const formattedCurrentDate = useFormattedTime(referenceTime, { format: timeFormat });
   const columnWidths = useMemo(
     () => getColumnWidths(columnConfigurations, dimensions.width, formattedCurrentDate.length),

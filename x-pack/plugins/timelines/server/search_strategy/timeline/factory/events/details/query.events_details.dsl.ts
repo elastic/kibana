@@ -6,7 +6,7 @@
  */
 
 import { JsonObject } from '@kbn/utility-types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { RunTimeMappings } from '../../../../../../common/api/search_strategy/model/runtime_mappings';
 
 export const buildTimelineDetailsQuery = ({
   authFilter,
@@ -17,7 +17,7 @@ export const buildTimelineDetailsQuery = ({
   authFilter?: JsonObject;
   id: string;
   indexName: string;
-  runtimeMappings: MappingRuntimeFields;
+  runtimeMappings: RunTimeMappings;
 }) => {
   const basicFilter = {
     terms: {

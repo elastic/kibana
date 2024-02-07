@@ -100,6 +100,7 @@ export function createMergedEsQuery(
       uiSettings ? getEsQueryConfig(uiSettings) : undefined
     );
   }
+
   return combinedQuery;
 }
 

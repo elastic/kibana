@@ -22,6 +22,8 @@ import {
   threat_mapping,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   AlertSuppression,
   EventCategoryOverride,
@@ -47,12 +49,12 @@ import {
   Threshold,
   TiebreakerField,
   TimestampField,
-  anomaly_threshold,
-} from '../../../../model';
+} from '../../../../model/rule_schema_legacy';
 
 import {
   BuildingBlockObject,
   RuleEqlQuery,
+  RuleEsqlQuery,
   InlineKqlQuery,
   RuleKqlQuery,
   RuleDataSource,
@@ -63,6 +65,7 @@ import {
 } from './diffable_field_types';
 
 import { buildSchema } from './build_schema';
+import { anomaly_threshold } from '../../../../model/schemas';
 
 export type DiffableCommonFields = t.TypeOf<typeof DiffableCommonFields>;
 export const DiffableCommonFields = buildSchema({
@@ -145,6 +148,17 @@ export const DiffableEqlFields = buildSchema({
     timestamp_field: TimestampField,
     tiebreaker_field: TiebreakerField,
   },
+});
+
+export type DiffableEsqlFields = t.TypeOf<typeof DiffableEsqlFields>;
+export const DiffableEsqlFields = buildSchema({
+  required: {
+    type: t.literal('esql'),
+    esql_query: RuleEsqlQuery, // NOTE: new field
+  },
+  // this is a new type of rule, no prebuilt rules created yet.
+  // new properties might be added here during further rule type development
+  optional: {},
 });
 
 export type DiffableThreatMatchFields = t.TypeOf<typeof DiffableThreatMatchFields>;
@@ -232,6 +246,7 @@ export const DiffableRule = t.intersection([
     DiffableCustomQueryFields,
     DiffableSavedQueryFields,
     DiffableEqlFields,
+    DiffableEsqlFields,
     DiffableThreatMatchFields,
     DiffableThresholdFields,
     DiffableMachineLearningFields,

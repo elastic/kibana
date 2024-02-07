@@ -195,6 +195,12 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
@@ -229,6 +235,12 @@ export const updateAgentPolicyHandler: FleetRequestHandler<
       body,
     });
   } catch (error) {
+    if (error.statusCode) {
+      return response.customError({
+        statusCode: error.statusCode,
+        body: { message: error.message },
+      });
+    }
     return defaultFleetErrorHandler({ error, response });
   }
 };
@@ -297,9 +309,12 @@ export const getFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     try {
+      const agentVersion =
+        await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
       const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
         soClient,
         request.params.agentPolicyId,
+        agentVersion,
         { standalone: request.query.standalone === true }
       );
       if (fullAgentConfigMap) {
@@ -356,9 +371,12 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
 
   if (request.query.kubernetes === true) {
     try {
+      const agentVersion =
+        await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
       const fullAgentConfigMap = await agentPolicyService.getFullAgentConfigMap(
         soClient,
         request.params.agentPolicyId,
+        agentVersion,
         { standalone: request.query.standalone === true }
       );
       if (fullAgentConfigMap) {
@@ -411,10 +429,18 @@ export const getK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+      fleetServer,
+      token,
+      agentVersion
+    );
     if (fullAgentManifest) {
       const body: GetFullAgentManifestResponse = {
         item: fullAgentManifest,
@@ -437,10 +463,18 @@ export const downloadK8sManifest: FleetRequestHandler<
   undefined,
   TypeOf<typeof GetK8sManifestRequestSchema.query>
 > = async (context, request, response) => {
+  const fleetContext = await context.fleet;
+
   try {
     const fleetServer = request.query.fleetServer ?? '';
     const token = request.query.enrolToken ?? '';
-    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(fleetServer, token);
+    const agentVersion =
+      await fleetContext.agentClient.asInternalUser.getLatestAgentAvailableVersion();
+    const fullAgentManifest = await agentPolicyService.getFullAgentManifest(
+      fleetServer,
+      token,
+      agentVersion
+    );
     if (fullAgentManifest) {
       const body = fullAgentManifest;
       const headers: ResponseHeaders = {

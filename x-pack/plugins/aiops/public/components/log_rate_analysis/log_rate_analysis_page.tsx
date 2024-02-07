@@ -6,22 +6,27 @@
  */
 
 import React, { useCallback, useEffect, useState, FC } from 'react';
+import { isEqual } from 'lodash';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { EuiFlexGroup, EuiFlexItem, EuiPageBody, EuiPageSection, EuiSpacer } from '@elastic/eui';
 
 import { Filter, FilterStateStore, Query } from '@kbn/es-query';
 import { useUrlState, usePageUrlState } from '@kbn/ml-url-state';
-
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import type { WindowParameters } from '@kbn/aiops-utils';
+
 import { useDataSource } from '../../hooks/use_data_source';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import {
-  getDefaultAiOpsListState,
-  type AiOpsPageUrlState,
-} from '../../application/utils/url_state';
+  getDefaultLogRateAnalysisAppState,
+  appStateToWindowParameters,
+  windowParametersToAppState,
+  type LogRateAnalysisPageUrlState,
+} from '../../application/url_state/log_rate_analysis';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
 import { SearchPanel } from '../search_panel';
 import { useLogRateAnalysisResultsTableRowContext } from '../log_rate_analysis_results_table/log_rate_analysis_results_table_row_provider';
@@ -36,12 +41,12 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
   const { data: dataService } = useAiopsAppContext();
   const { dataView, savedSearch } = useDataSource();
 
-  const { currentSelectedSignificantTerm, currentSelectedGroup } =
+  const { currentSelectedSignificantItem, currentSelectedGroup } =
     useLogRateAnalysisResultsTableRowContext();
 
-  const [aiopsListState, setAiopsListState] = usePageUrlState<AiOpsPageUrlState>(
-    'AIOPS_INDEX_VIEWER',
-    getDefaultAiOpsListState()
+  const [stateFromUrl, setUrlState] = usePageUrlState<LogRateAnalysisPageUrlState>(
+    'logRateAnalysis',
+    getDefaultLogRateAnalysisAppState()
   );
   const [globalState, setGlobalState] = useUrlState('_g');
 
@@ -66,20 +71,20 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
         setSelectedSavedSearch(null);
       }
 
-      setAiopsListState({
-        ...aiopsListState,
+      setUrlState({
+        ...stateFromUrl,
         searchQuery: searchParams.searchQuery,
         searchString: searchParams.searchString,
         searchQueryLanguage: searchParams.queryLanguage,
         filters: searchParams.filters,
       });
     },
-    [selectedSavedSearch, aiopsListState, setAiopsListState]
+    [selectedSavedSearch, stateFromUrl, setUrlState]
   );
 
   const { searchQueryLanguage, searchString, searchQuery } = useSearch(
     { dataView, savedSearch },
-    aiopsListState
+    stateFromUrl
   );
 
   const { timefilter } = useData(
@@ -87,7 +92,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     'log_rate_analysis',
     searchQuery,
     setGlobalState,
-    currentSelectedSignificantTerm,
+    currentSelectedSignificantItem,
     currentSelectedGroup
   );
 
@@ -108,10 +113,14 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
 
   useEffect(() => {
     if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
+      if (
+        !isEqual({ from: globalState.time.from, to: globalState.time.to }, timefilter.getTime())
+      ) {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [JSON.stringify(globalState?.time), timefilter]);
@@ -131,6 +140,17 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
     });
   }, [dataService, searchQueryLanguage, searchString]);
 
+  const onWindowParametersHandler = (wp?: WindowParameters, replace = false) => {
+    if (!isEqual(windowParametersToAppState(wp), stateFromUrl.wp)) {
+      setUrlState(
+        {
+          wp: windowParametersToAppState(wp),
+        },
+        replace
+      );
+    }
+  };
+
   return (
     <EuiPageBody data-test-subj="aiopsLogRateAnalysisPage" paddingSize="none" panelled={false}>
       <PageHeader />
@@ -147,9 +167,11 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             />
           </EuiFlexItem>
           <LogRateAnalysisContent
+            initialAnalysisStart={appStateToWindowParameters(stateFromUrl.wp)}
             dataView={dataView}
-            setGlobalState={setGlobalState}
+            embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
+            onWindowParametersChange={onWindowParametersHandler}
             stickyHistogram={stickyHistogram}
           />
         </EuiFlexGroup>

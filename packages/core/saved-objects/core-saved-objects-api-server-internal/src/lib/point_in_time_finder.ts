@@ -93,7 +93,12 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         await this.close();
       }
 
-      yield results;
+      // do not yield first page if empty, unless there are aggregations
+      // (in which case we always want to return at least one page)
+      if (lastResultsCount > 0 || this.#findOptions.aggs) {
+        yield results;
+      }
+
       // We've reached the end when there are fewer hits than our perPage size,
       // or when `close()` has been called.
     } while (this.#open && lastResultsCount >= this.#findOptions.perPage!);

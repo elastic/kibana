@@ -11,10 +11,9 @@ import type {
   CasesSubFeatureId,
   AssistantSubFeatureId,
 } from '@kbn/security-solution-features/keys';
-import type { ExperimentalFeatures } from '../../../common';
 
 export interface AppFeaturesConfigurator {
-  security: (experimentalFlags: ExperimentalFeatures) => AppFeaturesConfig<SecuritySubFeatureId>;
+  security: () => AppFeaturesConfig<SecuritySubFeatureId>;
   cases: () => AppFeaturesConfig<CasesSubFeatureId>;
   securityAssistant: () => AppFeaturesConfig<AssistantSubFeatureId>;
 }

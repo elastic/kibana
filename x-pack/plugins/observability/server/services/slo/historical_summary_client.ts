@@ -20,7 +20,7 @@ import {
 import { assertNever } from '@kbn/std';
 import * as t from 'io-ts';
 import moment from 'moment';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { DateRange, HistoricalSummary, SLO, SLOId } from '../../domain/models';
 import {
   computeSLI,
@@ -279,6 +279,7 @@ function generateSearchQuery(
               window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
+              gap_policy: 'insert_zeros',
             },
           },
           cumulative_total: {
@@ -287,6 +288,7 @@ function generateSearchQuery(
               window: timeWindowDurationInDays * bucketsPerDay,
               shift: 1,
               script: 'MovingFunctions.sum(values)',
+              gap_policy: 'insert_zeros',
             },
           },
         },

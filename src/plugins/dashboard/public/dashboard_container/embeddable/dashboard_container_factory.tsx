@@ -6,26 +6,30 @@
  * Side Public License, v 1.
  */
 
-import { Observable } from 'rxjs';
 import { i18n } from '@kbn/i18n';
+import { Observable } from 'rxjs';
 
+import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 import {
   Container,
-  ErrorEmbeddable,
   ContainerOutput,
+  EmbeddableAppContext,
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
   EmbeddablePackageState,
+  ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddablePersistableStateService } from '@kbn/embeddable-plugin/common';
 
 import { DASHBOARD_CONTAINER_TYPE } from '..';
-import type { DashboardContainer } from './dashboard_container';
+import { createExtract, createInject, DashboardContainerInput } from '../../../common';
 import { DEFAULT_DASHBOARD_INPUT } from '../../dashboard_constants';
-import { createInject, createExtract, DashboardContainerInput } from '../../../common';
-import { LoadDashboardReturn } from '../../services/dashboard_content_management/types';
+import {
+  LoadDashboardReturn,
+  SavedDashboardInput,
+} from '../../services/dashboard_content_management/types';
+import type { DashboardContainer } from './dashboard_container';
 
 export type DashboardContainerFactory = EmbeddableFactory<
   DashboardContainerInput,
@@ -34,7 +38,7 @@ export type DashboardContainerFactory = EmbeddableFactory<
 >;
 
 export interface DashboardCreationOptions {
-  getInitialInput?: () => Partial<DashboardContainerInput>;
+  getInitialInput?: () => Partial<SavedDashboardInput>;
 
   getIncomingEmbeddable?: () => EmbeddablePackageState | undefined;
 
@@ -58,7 +62,20 @@ export interface DashboardCreationOptions {
   validateLoadedSavedObject?: (result: LoadDashboardReturn) => 'valid' | 'invalid' | 'redirected';
 
   isEmbeddedExternally?: boolean;
+
+  getEmbeddableAppContext?: (dashboardId?: string) => EmbeddableAppContext;
 }
+
+export const dashboardTypeDisplayName = i18n.translate('dashboard.factory.displayName', {
+  defaultMessage: 'Dashboard',
+});
+
+export const dashboardTypeDisplayLowercase = i18n.translate(
+  'dashboard.factory.displayNameLowercase',
+  {
+    defaultMessage: 'dashboard',
+  }
+);
 
 export class DashboardContainerFactoryDefinition
   implements
@@ -80,11 +97,7 @@ export class DashboardContainerFactoryDefinition
     return false;
   };
 
-  public readonly getDisplayName = () => {
-    return i18n.translate('dashboard.factory.displayName', {
-      defaultMessage: 'Dashboard',
-    });
-  };
+  public readonly getDisplayName = () => dashboardTypeDisplayName;
 
   public getDefaultInput(): Partial<DashboardContainerInput> {
     return DEFAULT_DASHBOARD_INPUT;

@@ -6,8 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { DiscoverEnhancedPlugin } from './plugin';
 
 export { config } from './config';
 
-export const plugin = (context: PluginInitializerContext) => new DiscoverEnhancedPlugin(context);
+export const plugin = async (context: PluginInitializerContext) => {
+  const { DiscoverEnhancedPlugin } = await import('./plugin');
+  return new DiscoverEnhancedPlugin(context);
+};

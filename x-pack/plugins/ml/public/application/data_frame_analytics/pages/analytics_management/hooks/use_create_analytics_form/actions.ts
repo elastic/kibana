@@ -18,7 +18,7 @@ export enum ACTION {
   RESET_FORM,
   SET_ADVANCED_EDITOR_RAW_STRING,
   SET_FORM_STATE,
-  SET_INDEX_PATTERN_TITLES,
+  SET_DATA_VIEW_TITLES,
   SET_IS_JOB_CREATED,
   SET_IS_JOB_STARTED,
   SET_IS_MODAL_BUTTON_DISABLED,
@@ -51,9 +51,9 @@ export type Action =
     }
   | { type: ACTION.SET_FORM_STATE; payload: Partial<State['form']> }
   | {
-      type: ACTION.SET_INDEX_PATTERN_TITLES;
+      type: ACTION.SET_DATA_VIEW_TITLES;
       payload: {
-        indexPatternsMap: SourceIndexMap;
+        dataViewsMap: SourceIndexMap;
       };
     }
   | { type: ACTION.SET_IS_JOB_CREATED; isJobCreated: State['isJobCreated'] }

@@ -5,20 +5,15 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
 import { useMemo } from 'react';
 
 export const useKibanaHeader = () => {
-  const { euiTheme } = useEuiTheme();
-  const headerHeight = useMemo(() => {
-    const wrapper = document.querySelector(`[data-test-subj="kibanaChrome"]`);
+  const actionMenuHeight = useMemo(() => {
+    // only in serverless
+    const actionMenu = document.querySelector(`[data-test-subj="kibanaProjectHeaderActionMenu"]`);
 
-    if (!wrapper) {
-      return parseInt(euiTheme.size.xxxl, 10) * 2;
-    }
+    return actionMenu?.getBoundingClientRect().height ?? 0;
+  }, []);
 
-    return wrapper.getBoundingClientRect().top;
-  }, [euiTheme]);
-
-  return { headerHeight };
+  return { actionMenuHeight };
 };

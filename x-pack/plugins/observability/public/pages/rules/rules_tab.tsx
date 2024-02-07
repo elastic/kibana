@@ -9,8 +9,10 @@ import React, { useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { RuleStatus } from '@kbn/triggers-actions-ui-plugin/public';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
+import { observabilityAlertFeatureIds } from '../../../common/constants';
 
 interface RulesTabProps {
   setRefresh: React.Dispatch<React.SetStateAction<Date>>;
@@ -73,6 +75,7 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
 
   return (
     <RuleList
+      filterConsumers={observabilityAlertFeatureIds}
       filteredRuleTypes={filteredRuleTypes}
       lastRunOutcomeFilter={stateLastResponse}
       refresh={stateRefresh}
@@ -95,6 +98,7 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
       onSearchFilterChange={handleSearchFilterChange}
       onStatusFilterChange={handleStatusFilterChange}
       onTypeFilterChange={handleTypeFilterChange}
+      initialSelectedConsumer={AlertConsumers.LOGS}
     />
   );
 }

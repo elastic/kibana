@@ -25,5 +25,7 @@
     "@kbn/i18n-react",
     "@kbn/utility-types",
     "@kbn/shared-ux-router",
+    "@kbn/reporting-export-types-pdf-common",
+    "@kbn/reporting-export-types-png-common",
   ]
 }

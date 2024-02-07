@@ -13,30 +13,30 @@ import {
 } from '@kbn/test-jest-helpers';
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
-import {
-  IndexDetailsPage,
-  IndexDetailsSection,
-} from '../../../public/application/sections/home/index_list/details_page';
+
+import { IndexDetailsTabId } from '../../../common/constants';
+import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
 
 let routerMock: typeof reactRouterMock;
-const testBedConfig: AsyncTestBedConfig = {
+const getTestBedConfig = (initialEntry?: string): AsyncTestBedConfig => ({
   memoryRouter: {
-    initialEntries: [`/indices/${testIndexName}`],
-    componentRoutePath: `/indices/:indexName/:indexDetailsSection?`,
+    initialEntries: [initialEntry ?? `/indices/index_details?indexName=${testIndexName}`],
+    componentRoutePath: `/indices/index_details`,
     onRouter: (router) => {
       routerMock = router;
     },
   },
   doMountAsync: true,
-};
+});
 
 export interface IndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
   actions: {
     getHeader: () => string;
-    clickIndexDetailsTab: (tab: IndexDetailsSection) => Promise<void>;
+    clickIndexDetailsTab: (tab: IndexDetailsTabId) => Promise<void>;
+    getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
       getCodeBlockContent: () => string;
@@ -67,6 +67,7 @@ export interface IndexDetailsPageTestBed extends TestBed {
     errorSection: {
       isDisplayed: () => boolean;
       clickReloadButton: () => Promise<void>;
+      noIndexNameMessageIsDisplayed: () => boolean;
     };
     stats: {
       getCodeBlockContent: () => string;
@@ -77,20 +78,32 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isWarningDisplayed: () => boolean;
     };
     overview: {
-      indexStatsContentExists: () => boolean;
-      indexDetailsContentExists: () => boolean;
+      storageDetailsExist: () => boolean;
+      getStorageDetailsContent: () => string;
+      statusDetailsExist: () => boolean;
+      getStatusDetailsContent: () => string;
+      aliasesDetailsExist: () => boolean;
+      getAliasesDetailsContent: () => string;
+      dataStreamDetailsExist: () => boolean;
+      getDataStreamDetailsContent: () => string;
+      reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
     };
   };
 }
 
-export const setup = async (
-  httpSetup: HttpSetup,
-  overridingDependencies: any = {}
-): Promise<IndexDetailsPageTestBed> => {
+export const setup = async ({
+  httpSetup,
+  dependencies = {},
+  initialEntry,
+}: {
+  httpSetup: HttpSetup;
+  dependencies?: any;
+  initialEntry?: string;
+}): Promise<IndexDetailsPageTestBed> => {
   const initTestBed = registerTestBed(
-    WithAppDependencies(IndexDetailsPage, httpSetup, overridingDependencies),
-    testBedConfig
+    WithAppDependencies(IndexDetailsPage, httpSetup, dependencies),
+    getTestBedConfig(initialEntry)
   );
   const testBed = await initTestBed();
   const { find, component, exists } = testBed;
@@ -105,16 +118,25 @@ export const setup = async (
       });
       component.update();
     },
+    noIndexNameMessageIsDisplayed: () => {
+      return exists('indexDetailsNoIndexNameError');
+    },
   };
   const getHeader = () => {
     return component.find('[data-test-subj="indexDetailsHeader"] h1').text();
   };
 
-  const clickIndexDetailsTab = async (tab: IndexDetailsSection) => {
+  const clickIndexDetailsTab = async (tab: IndexDetailsTabId) => {
     await act(async () => {
       find(`indexDetailsTab-${tab}`).simulate('click');
     });
     component.update();
+  };
+
+  const getIndexDetailsTabs = () => {
+    return component
+      .find('div[role="tablist"] button[data-test-subj^="indexDetailsTab"]')
+      .map((tab) => tab.text());
   };
 
   const getActiveTabContent = () => {
@@ -122,11 +144,35 @@ export const setup = async (
   };
 
   const overview = {
-    indexStatsContentExists: () => {
-      return exists('overviewTabIndexStats');
+    storageDetailsExist: () => {
+      return exists('indexDetailsStorage');
     },
-    indexDetailsContentExists: () => {
-      return exists('overviewTabIndexDetails');
+    getStorageDetailsContent: () => {
+      return find('indexDetailsStorage').text();
+    },
+    statusDetailsExist: () => {
+      return exists('indexDetailsStatus');
+    },
+    getStatusDetailsContent: () => {
+      return find('indexDetailsStatus').text();
+    },
+    aliasesDetailsExist: () => {
+      return exists('indexDetailsAliases');
+    },
+    getAliasesDetailsContent: () => {
+      return find('indexDetailsAliases').text();
+    },
+    dataStreamDetailsExist: () => {
+      return exists('indexDetailsDataStream');
+    },
+    getDataStreamDetailsContent: () => {
+      return find('indexDetailsDataStream').text();
+    },
+    reloadDataStreamDetails: async () => {
+      await act(async () => {
+        find('indexDetailsDataStreamReload').simulate('click');
+      });
+      component.update();
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
@@ -272,6 +318,7 @@ export const setup = async (
     actions: {
       getHeader,
       clickIndexDetailsTab,
+      getIndexDetailsTabs,
       getActiveTabContent,
       mappings,
       settings,

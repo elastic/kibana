@@ -68,13 +68,6 @@ export const ALIAS_FIELD_LABEL = i18n.translate(
   }
 );
 
-export const ALIAS_REQUIRED_FIELD_LABEL = i18n.translate(
-  'xpack.stackConnectors.components.opsgenie.aliasRequiredLabel',
-  {
-    defaultMessage: 'Alias (required)',
-  }
-);
-
 export const ALIAS_IS_REQUIRED = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.requiredAliasTextField',
   {
@@ -149,5 +142,12 @@ export const OPSGENIE_USER_HELP = i18n.translate(
   'xpack.stackConnectors.components.opsgenie.fieldUserHelpText',
   {
     defaultMessage: 'The display name for the owner.',
+  }
+);
+
+export const REQUIRED_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.opsgenie.fieldRequiredLabel',
+  {
+    defaultMessage: 'Required',
   }
 );

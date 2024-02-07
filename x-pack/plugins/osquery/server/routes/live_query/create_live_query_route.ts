@@ -45,7 +45,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         const {
           osquery: { writeLiveQueries, runSavedQueries },
-        } = await coreStartServices.capabilities.resolveCapabilities(request);
+        } = await coreStartServices.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'osquery.*',
+        });
 
         const isInvalid = !(
           writeLiveQueries ||

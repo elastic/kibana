@@ -184,6 +184,7 @@ export const AutocompleteFieldMatchAnyComponent: React.FC<AutocompleteFieldMatch
           onSearchChange={handleSearchChange}
           onCreateOption={handleCreateOption}
           isInvalid={selectedField != null && error != null}
+          isCaseSensitive
           onBlur={setIsTouchedValue}
           data-test-subj="valuesAutocompleteMatchAny"
           fullWidth

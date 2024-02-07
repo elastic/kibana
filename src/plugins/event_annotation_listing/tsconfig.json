@@ -40,7 +40,9 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/core-notifications-browser-mocks",
     "@kbn/core-notifications-browser",
-    "@kbn/core-saved-objects-api-browser"
+    "@kbn/core-saved-objects-api-browser",
+    "@kbn/content-management-table-list-view-common",
+    "@kbn/test-eui-helpers"
   ],
   "exclude": [
     "target/**/*",

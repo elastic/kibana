@@ -82,6 +82,10 @@ export const FID_LABEL = i18n.translate('xpack.exploratoryView.expView.fieldLabe
   defaultMessage: 'First input delay',
 });
 
+export const INP_LABEL = i18n.translate('xpack.exploratoryView.expView.fieldLabels.inp', {
+  defaultMessage: 'Interaction to next paint',
+});
+
 export const CLS_LABEL = i18n.translate('xpack.exploratoryView.expView.fieldLabels.cls', {
   defaultMessage: 'Cumulative layout shift',
 });

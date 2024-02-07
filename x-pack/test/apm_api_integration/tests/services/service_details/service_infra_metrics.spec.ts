@@ -6,6 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import archives_metadata from '../../../common/fixtures/es_archiver/archives_metadata';
 
@@ -94,6 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
+                environment: ENVIRONMENT_ALL.value,
               },
             },
           });
@@ -124,6 +126,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
+                environment: ENVIRONMENT_ALL.value,
               },
             },
           });
@@ -151,6 +154,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               query: {
                 start,
                 end,
+                environment: ENVIRONMENT_ALL.value,
               },
             },
           });

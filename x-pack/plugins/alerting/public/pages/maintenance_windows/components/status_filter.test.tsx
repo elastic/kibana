@@ -6,7 +6,7 @@
  */
 
 import { Query } from '@elastic/eui';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import React from 'react';
 
 import { AppMockRenderer, createAppMockRenderer } from '../../../lib/test_utils';

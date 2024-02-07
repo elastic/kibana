@@ -6,13 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { CoreApi } from './core';
+import type { Version } from '@kbn/object-versioning';
+import type { CoreApi, StorageContextGetTransformFn } from './core';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface SetupDependencies {}
+export interface ContentManagementServerSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface ContentManagementServerStartDependencies {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerSetup extends CoreApi {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ContentManagementServerStart {}
+
+export type GetTransformsFactoryFn = (
+  contentTypeId: string,
+  requestVersion: Version,
+  options?: { cacheEnabled?: boolean }
+) => StorageContextGetTransformFn;

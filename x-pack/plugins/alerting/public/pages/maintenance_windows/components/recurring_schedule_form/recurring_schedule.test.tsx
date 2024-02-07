@@ -19,6 +19,7 @@ const initialValue: FormProps = {
   startDate: '2023-03-24',
   endDate: '2023-03-26',
   recurring: true,
+  categoryIds: [],
 };
 
 describe('RecurringSchedule', () => {
@@ -93,7 +94,7 @@ describe('RecurringSchedule', () => {
     const endsInput = within(result.getByTestId('ends-field')).getByTestId('never');
 
     expect(frequencyInput).toHaveValue('3');
-    expect(endsInput).toBeChecked();
+    expect(endsInput).toHaveAttribute('aria-pressed', 'true');
   });
 
   it('should prefill the form when provided with initialValue', () => {
@@ -118,7 +119,7 @@ describe('RecurringSchedule', () => {
       'Press the down key to open a popover containing a calendar.'
     );
     expect(frequencyInput).toHaveValue('1');
-    expect(endsInput).toBeChecked();
+    expect(endsInput).toHaveAttribute('aria-pressed', 'true');
     expect(untilInput).toHaveValue('03/24/2023');
   });
 });

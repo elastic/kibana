@@ -16,6 +16,7 @@ import {
   TestSubActionConnector,
 } from './mocks';
 import { register } from './register';
+import { ServiceParams } from './types';
 
 describe('Registration', () => {
   const renderedVariables = { body: '' };
@@ -30,7 +31,8 @@ describe('Registration', () => {
       config: TestConfigSchema,
       secrets: TestSecretsSchema,
     },
-    Service: TestSubActionConnector,
+    getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
+      new TestSubActionConnector(serviceParams),
     renderParameterTemplates: mockRenderParameterTemplates,
   };
 
@@ -75,9 +77,9 @@ describe('Registration', () => {
     const actionId = 'action-id';
 
     const { renderParameterTemplates } = actionTypeRegistry.register.mock.calls[0][0];
-    const rendered = renderParameterTemplates?.(params, variables, actionId);
+    const rendered = renderParameterTemplates?.(logger, params, variables, actionId);
 
-    expect(mockRenderParameterTemplates).toHaveBeenCalledWith(params, variables, actionId);
+    expect(mockRenderParameterTemplates).toHaveBeenCalledWith(logger, params, variables, actionId);
     expect(rendered).toBe(renderedVariables);
   });
 });

@@ -132,7 +132,12 @@ const PacksTableComponent = () => {
 
       return (
         <EuiToolTip position="top" content={playText}>
-          <EuiButtonIcon iconType="play" onClick={handlePlayClick(item)} isDisabled={!enabled} />
+          <EuiButtonIcon
+            iconType="play"
+            onClick={handlePlayClick(item)}
+            isDisabled={!enabled}
+            data-test-subj={`play-${item.name}-button`}
+          />
         </EuiToolTip>
       );
     },

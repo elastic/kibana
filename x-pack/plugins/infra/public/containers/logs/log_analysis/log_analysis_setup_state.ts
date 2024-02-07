@@ -8,6 +8,7 @@
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
+import { JobType } from '../../../../common/http_api/latest';
 import {
   combineDatasetFilters,
   DatasetFilter,
@@ -30,21 +31,21 @@ type SetupHandler = (
   datasetFilter: DatasetFilter
 ) => void;
 
-interface AnalysisSetupStateArguments<JobType extends string> {
+interface AnalysisSetupStateArguments<T extends JobType> {
   cleanUpAndSetUpModule: SetupHandler;
-  moduleDescriptor: ModuleDescriptor<JobType>;
+  moduleDescriptor: ModuleDescriptor<T>;
   setUpModule: SetupHandler;
   sourceConfiguration: ModuleSourceConfiguration;
 }
 
 const fourWeeksInMs = 86400000 * 7 * 4;
 
-export const useAnalysisSetupState = <JobType extends string>({
+export const useAnalysisSetupState = <T extends JobType>({
   cleanUpAndSetUpModule,
   moduleDescriptor: { validateSetupDatasets, validateSetupIndices },
   setUpModule,
   sourceConfiguration,
-}: AnalysisSetupStateArguments<JobType>) => {
+}: AnalysisSetupStateArguments<T>) => {
   const { services } = useKibanaContextForPlugin();
   const [startTime, setStartTime] = useState<number | undefined>(Date.now() - fourWeeksInMs);
   const [endTime, setEndTime] = useState<number | undefined>(undefined);

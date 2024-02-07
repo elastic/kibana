@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INDICES_URL } from '../../../urls/risk_score';
 import type { RiskScoreEntity } from '../../risk_scores/common';
 import { getLatestTransformIndex, getPivotTransformIndex } from '../../risk_scores/indices';
@@ -17,7 +18,11 @@ export const createIndex = (options: {
     method: 'put',
     url: `${INDICES_URL}/create`,
     body: options,
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+    },
   });
 };
 
@@ -29,7 +34,11 @@ export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceI
       body: {
         indices: [getPivotTransformIndex(riskScoreEntity, spaceId)],
       },
-      headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+      headers: {
+        'kbn-xsrf': 'cypress-creds',
+        'x-elastic-internal-origin': 'security-solution',
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+      },
       failOnStatusCode: false,
     })
     .then(() => {
@@ -39,7 +48,11 @@ export const deleteRiskScoreIndicies = (riskScoreEntity: RiskScoreEntity, spaceI
         body: {
           indices: [getLatestTransformIndex(riskScoreEntity, spaceId)],
         },
-        headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+        headers: {
+          'kbn-xsrf': 'cypress-creds',
+          'x-elastic-internal-origin': 'security-solution',
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
         failOnStatusCode: false,
       });
     });

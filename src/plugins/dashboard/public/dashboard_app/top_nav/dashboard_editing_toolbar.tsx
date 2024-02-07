@@ -5,25 +5,25 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { css } from '@emotion/react';
 import React, { useCallback } from 'react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { useEuiTheme } from '@elastic/eui';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { isExplicitInputWithAttributes } from '@kbn/embeddable-plugin/public';
 
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { EditorMenu } from './editor_menu';
 import { useDashboardAPI } from '../dashboard_app';
 import { pluginServices } from '../../services/plugin_services';
 import { ControlsToolbarButton } from './controls_toolbar_button';
-import { DASHBOARD_APP_ID, DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
+import { DASHBOARD_UI_METRIC_ID } from '../../dashboard_constants';
 import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
 
-export function DashboardEditingToolbar() {
+export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const {
     usageCollection,
     data: { search },
@@ -54,12 +54,14 @@ export function DashboardEditingToolbar() {
           trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
         }
 
-        if ('aliasPath' in visType) {
-          appId = visType.aliasApp;
-          path = visType.aliasPath;
-        } else {
+        if (!('alias' in visType)) {
+          // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
+        } else if (visType.alias && 'path' in visType.alias) {
+          // this visualization **is** an alias, and it has an app to redirect to for creation
+          appId = visType.alias.app;
+          path = visType.alias.path;
         }
       } else {
         appId = 'visualize';
@@ -69,52 +71,99 @@ export function DashboardEditingToolbar() {
       stateTransferService.navigateToEditor(appId, {
         path,
         state: {
-          originatingApp: DASHBOARD_APP_ID,
+          originatingApp: dashboard.getAppContext()?.currentAppId,
+          originatingPath: dashboard.getAppContext()?.getCurrentPath?.(),
           searchSessionId: search.session.getSessionId(),
         },
       });
     },
-    [stateTransferService, search.session, trackUiMetric]
+    [stateTransferService, dashboard, search.session, trackUiMetric]
   );
 
+  /**
+   * embeddableFactory: Required, you can get the factory from embeddableStart.getEmbeddableFactory(<embeddable type, i.e. lens>)
+   * initialInput: Optional, use it in case you want to pass your own input to the factory
+   * dismissNotification: Optional, if not passed a toast will appear in the dashboard
+   */
   const createNewEmbeddable = useCallback(
-    async (embeddableFactory: EmbeddableFactory) => {
+    async (
+      embeddableFactory: EmbeddableFactory,
+      initialInput?: Partial<EmbeddableInput>,
+      dismissNotification?: boolean
+    ) => {
       if (trackUiMetric) {
         trackUiMetric(METRIC_TYPE.CLICK, embeddableFactory.type);
       }
 
-      let explicitInput: Awaited<ReturnType<typeof embeddableFactory.getExplicitInput>>;
+      let explicitInput: Partial<EmbeddableInput>;
+      let attributes: unknown;
       try {
-        explicitInput = await embeddableFactory.getExplicitInput();
+        if (initialInput) {
+          explicitInput = initialInput;
+        } else {
+          const explicitInputReturn = await embeddableFactory.getExplicitInput(
+            undefined,
+            dashboard
+          );
+          if (isExplicitInputWithAttributes(explicitInputReturn)) {
+            explicitInput = explicitInputReturn.newInput;
+            attributes = explicitInputReturn.attributes;
+          } else {
+            explicitInput = explicitInputReturn;
+          }
+        }
       } catch (e) {
         // error likely means user canceled embeddable creation
         return;
       }
 
-      const newEmbeddable = await dashboard.addNewEmbeddable(embeddableFactory.type, explicitInput);
+      const newEmbeddable = await dashboard.addNewEmbeddable(
+        embeddableFactory.type,
+        explicitInput,
+        attributes
+      );
 
       if (newEmbeddable) {
         dashboard.setScrollToPanelId(newEmbeddable.id);
         dashboard.setHighlightPanelId(newEmbeddable.id);
-        toasts.addSuccess({
-          title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
-          'data-test-subj': 'addEmbeddableToDashboardSuccess',
-        });
+
+        if (!dismissNotification) {
+          toasts.addSuccess({
+            title: dashboardReplacePanelActionStrings.getSuccessMessage(newEmbeddable.getTitle()),
+            'data-test-subj': 'addEmbeddableToDashboardSuccess',
+          });
+        }
       }
+      return newEmbeddable;
     },
     [trackUiMetric, dashboard, toasts]
   );
 
+  const deleteEmbeddable = useCallback(
+    (embeddableId: string) => {
+      dashboard.removeEmbeddable(embeddableId);
+    },
+    [dashboard]
+  );
+
   const extraButtons = [
-    <EditorMenu createNewVisType={createNewVisType} createNewEmbeddable={createNewEmbeddable} />,
+    <EditorMenu
+      createNewVisType={createNewVisType}
+      createNewEmbeddable={createNewEmbeddable}
+      deleteEmbeddable={deleteEmbeddable}
+      isDisabled={isDisabled}
+    />,
     <AddFromLibraryButton
       onClick={() => dashboard.addFromLibrary()}
       size="s"
       data-test-subj="dashboardAddFromLibraryButton"
+      isDisabled={isDisabled}
     />,
   ];
   if (dashboard.controlGroup) {
-    extraButtons.push(<ControlsToolbarButton controlGroup={dashboard.controlGroup} />);
+    extraButtons.push(
+      <ControlsToolbarButton isDisabled={isDisabled} controlGroup={dashboard.controlGroup} />
+    );
   }
 
   return (
@@ -128,6 +177,7 @@ export function DashboardEditingToolbar() {
           primaryButton: (
             <ToolbarButton
               type="primary"
+              isDisabled={isDisabled}
               iconType="lensApp"
               size="s"
               onClick={createNewVisType(lensAlias)}

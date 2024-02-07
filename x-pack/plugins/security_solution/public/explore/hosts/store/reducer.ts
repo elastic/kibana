@@ -6,7 +6,8 @@
  */
 
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
-import { Direction, HostsFields, RiskScoreFields } from '../../../../common/search_strategy';
+import { HostsFields } from '../../../../common/api/search_strategy/hosts/model/sort';
+import { Direction, RiskScoreFields } from '../../../../common/search_strategy';
 
 import { DEFAULT_TABLE_ACTIVE_PAGE, DEFAULT_TABLE_LIMIT } from '../../../common/store/constants';
 

@@ -64,6 +64,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.packages.0.version=latest`,
         ...(registryPort ? [`--xpack.fleet.registryUrl=http://localhost:${registryPort}`] : []),
         `--xpack.fleet.developer.bundledPackageLocation=${BUNDLED_PACKAGE_DIR}`,
+        `--xpack.fleet.developer.disableBundledPackagesCache=true`,
         '--xpack.cloudSecurityPosture.enabled=true',
         `--xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout=10`,
         `--xpack.fleet.packageVerification.gpgKeyPath=${getFullPath(
@@ -71,7 +72,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         )}`,
         `--xpack.securitySolution.enableExperimental=${JSON.stringify(['endpointRbacEnabled'])}`,
         `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'secretsStorage',
+          'outputSecretsStorage',
           'agentTamperProtectionEnabled',
         ])}`,
         `--logging.loggers=${JSON.stringify([

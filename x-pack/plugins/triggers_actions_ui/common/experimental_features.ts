@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type ExperimentalFeatures = typeof allowedExperimentalValues;
+export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValues]: boolean };
 
 /**
  * A list of allowed values that can be used in `xpack.trigger_actions_ui.enableExperimental`.
@@ -19,6 +19,8 @@ export const allowedExperimentalValues = Object.freeze({
   rulesDetailLogs: true,
   ruleUseExecutionStatus: false,
   ruleKqlBar: false,
+  isMustacheAutocompleteOn: false,
+  showMustacheAutocompleteSwitch: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
@@ -29,7 +31,8 @@ const allowedKeys = Object.keys(allowedExperimentalValues) as Readonly<Experimen
 
 /**
  * Parses the string value used in `xpack.trigger_actions_ui.enableExperimental` kibana configuration,
- * which should be a string of values delimited by a comma (`,`)
+ * which should be a string of values delimited by a comma (`,`):
+ * xpack.trigger_actions_ui.enableExperimental: ['ruleStatusFilter', 'ruleTagFilter']
  *
  * @param configValue
  * @throws TriggersActionsUIInvalidExperimentalValue
@@ -42,7 +45,6 @@ export const parseExperimentalConfigValue = (configValue: string[]): Experimenta
       throw new TriggersActionsUIInvalidExperimentalValue(`[${value}] is not valid.`);
     }
 
-    // @ts-expect-error ts upgrade v4.7.4
     enabledFeatures[value as keyof ExperimentalFeatures] = true;
   }
 

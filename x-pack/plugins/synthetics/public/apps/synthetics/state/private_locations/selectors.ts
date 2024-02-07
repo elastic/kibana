@@ -13,3 +13,9 @@ export const selectAgentPolicies = createSelector(getState, (state) => state);
 
 export const selectAddingNewPrivateLocation = (state: AppState) =>
   state.agentPolicies.isAddingNewPrivateLocation ?? false;
+
+export const selectPrivateLocationsLoading = (state: AppState) =>
+  state.agentPolicies.fetchLoading ?? false;
+
+export const selectPrivateLocations = (state: AppState) =>
+  state.agentPolicies.privateLocations ?? [];

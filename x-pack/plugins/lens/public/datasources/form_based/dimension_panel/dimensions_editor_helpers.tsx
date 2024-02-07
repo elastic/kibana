@@ -25,6 +25,7 @@ import {
 } from '../operations';
 import { isColumnOfType } from '../operations/definitions/helpers';
 import { FormBasedLayer } from '../types';
+import { MAX_TERMS_OTHER_ENABLED } from '../operations/definitions/terms/constants';
 
 export const formulaOperationName = 'formula';
 export const staticValueOperationName = 'static_value';
@@ -34,6 +35,37 @@ export const optionallySortableOperationNames = ['percentile', 'percentile_ranks
 export const nonQuickFunctions = new Set([formulaOperationName, staticValueOperationName]);
 
 export type TemporaryState = typeof quickFunctionsName | typeof staticValueOperationName | 'none';
+
+export function isLayerChangingDueToOtherBucketChange(
+  prevLayer: FormBasedLayer,
+  newLayer: FormBasedLayer
+) {
+  // Finds the other bucket in prevState and return its value
+  const prevStateTermsColumns = Object.entries(prevLayer.columns)
+    .map(([id, column]) => {
+      if (isColumnOfType<TermsIndexPatternColumn>('terms', column)) {
+        return { id, otherBucket: column.params.otherBucket, termsSize: column.params.size };
+      }
+    })
+    .filter(nonNullable);
+  // Checks if the terms columns have changed the otherBucket value programatically.
+  // This happens when the terms size is greater than equal MAX_TERMS_OTHER_ENABLED
+  // and the previous state terms size is lower than MAX_TERMS_OTHER_ENABLED
+  const hasChangedOtherBucket = prevStateTermsColumns.some(({ id, otherBucket, termsSize }) => {
+    const newStateTermsColumn = newLayer.columns[id];
+    if (!isColumnOfType<TermsIndexPatternColumn>('terms', newStateTermsColumn)) {
+      return false;
+    }
+
+    return (
+      newStateTermsColumn.params.otherBucket !== otherBucket &&
+      !newStateTermsColumn.params.otherBucket &&
+      newStateTermsColumn.params.size >= MAX_TERMS_OTHER_ENABLED &&
+      termsSize < MAX_TERMS_OTHER_ENABLED
+    );
+  });
+  return hasChangedOtherBucket;
+}
 
 export function isLayerChangingDueToDecimalsPercentile(
   prevLayer: FormBasedLayer,

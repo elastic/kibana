@@ -41,7 +41,7 @@ import {
   StepPanelContent,
   StepPanelFooter,
 } from '../../shared/step_panel';
-import { BackButton } from './back_button';
+import { BackButton } from '../../shared/back_button';
 import { getFilename } from './get_filename';
 
 const customIntegrationsTestSubjects = {
@@ -92,10 +92,14 @@ export function ConfigureLogs() {
             resetOnCreation: false,
             errorOnFailedCleanup: false,
           },
-          fields: {
-            integrationName,
-            datasets: [{ name: datasetName, type: 'logs' as const }],
-          },
+          ...(integrationName !== undefined && datasetName !== undefined
+            ? {
+                fields: {
+                  integrationName,
+                  datasets: [{ name: datasetName, type: 'logs' as const }],
+                },
+              }
+            : {}),
           previouslyCreatedIntegration: lastCreatedIntegrationOptions,
         },
       }}
@@ -231,7 +235,10 @@ export function ConfigureLogsContent() {
                       <EuiFlexItem grow={false}>
                         <EuiButtonIcon
                           iconType="trash"
-                          aria-label="Delete"
+                          aria-label={i18n.translate(
+                            'xpack.observability_onboarding.configureLogsContent.euiButtonIcon.deleteLabel',
+                            { defaultMessage: 'Delete' }
+                          )}
                           onClick={() => removeLogFilePath(index)}
                           data-test-subj={`obltOnboardingLogFilePathDelete-${index}`}
                         />
@@ -326,7 +333,7 @@ export function ConfigureLogsContent() {
                     color: euiTheme.colors.primaryText,
                     fontSize: xsFontSize,
                   },
-                  '.euiAccordion__iconButton svg': {
+                  '.euiAccordion__arrow svg': {
                     stroke: euiTheme.colors.primary,
                     width: euiTheme.size.m,
                     height: euiTheme.size.m,
@@ -419,7 +426,7 @@ export function ConfigureLogsContent() {
                   helpText={
                     <FormattedMessage
                       id="xpack.observability_onboarding.configureLogs.customConfig.helper"
-                      defaultMessage="Here YAML configuration options can be used to be added to your configuration. Be careful using this as it might break your configuration file. {learnMoreLink}"
+                      defaultMessage="Add YAML configuration options to your agent configuration. Be careful using this feature as it can break your configuration file. {learnMoreLink}"
                       values={{
                         learnMoreLink: (
                           <EuiLink
@@ -427,7 +434,7 @@ export function ConfigureLogsContent() {
                             external
                             target="_blank"
                             href={
-                              'https://www.elastic.co/guide/en/observability/current/ingest-logs-metrics-uptime.html'
+                              'https://www.elastic.co/guide/en/beats/filebeat/current/multiline-examples.html'
                             }
                           >
                             {i18n.translate(

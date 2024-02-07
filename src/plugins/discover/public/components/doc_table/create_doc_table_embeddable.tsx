@@ -17,6 +17,7 @@ export function DiscoverDocTableEmbeddable(renderProps: DocTableEmbeddableProps)
         columns={renderProps.columns}
         rows={renderProps.rows}
         rowsPerPageState={renderProps.rowsPerPageState}
+        sampleSizeState={renderProps.sampleSizeState}
         onUpdateRowsPerPage={renderProps.onUpdateRowsPerPage}
         totalHitCount={renderProps.totalHitCount}
         dataView={renderProps.dataView}

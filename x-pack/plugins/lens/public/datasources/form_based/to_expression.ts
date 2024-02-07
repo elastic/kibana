@@ -244,8 +244,8 @@ function getExpressionForLayer(
               ? col.label
               : operationDefinitionMap[col.operationType].getDefaultLabel(
                   col,
-                  indexPattern,
-                  layer.columns
+                  layer.columns,
+                  indexPattern
                 ),
           },
         ];
@@ -400,8 +400,8 @@ function getExpressionForLayer(
                 ? col.label
                 : operationDefinitionMap[col.operationType].getDefaultLabel(
                     col,
-                    indexPattern,
-                    layer.columns
+                    layer.columns,
+                    indexPattern
                   ),
             ],
             targetUnit: [col.timeScale!],

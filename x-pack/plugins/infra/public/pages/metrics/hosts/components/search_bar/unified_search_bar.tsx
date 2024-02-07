@@ -14,7 +14,7 @@ import { useKibanaHeader } from '../../../../../hooks/use_kibana_header';
 import { useKibanaContextForPlugin } from '../../../../../hooks/use_kibana';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
-import { useMetricsDataViewContext } from '../../hooks/use_data_view';
+import { useMetricsDataViewContext } from '../../hooks/use_metrics_data_view';
 import { LimitOptions } from './limit_options';
 import { HostLimitOptions } from '../../types';
 
@@ -57,7 +57,11 @@ export const UnifiedSearchBar = () => {
               defaultMessage: 'Search hosts (E.g. cloud.provider:gcp AND system.load.1 > 0.5)',
             })}
             onQuerySubmit={handleRefresh}
-            showSaveQuery={Boolean(application?.capabilities?.visualize?.saveQuery)}
+            saveQueryMenuVisibility={
+              application?.capabilities?.visualize?.saveQuery
+                ? 'allowed_by_app_privilege'
+                : 'globally_managed'
+            }
             showDatePicker
             showFilterBar
             showQueryInput
@@ -98,13 +102,13 @@ export const UnifiedSearchBar = () => {
 
 const StickyContainer = ({ children }: { children: React.ReactNode }) => {
   const { euiTheme } = useEuiTheme();
-  const { headerHeight } = useKibanaHeader();
+  const { actionMenuHeight } = useKibanaHeader();
 
   return (
     <div
       css={css`
         position: sticky;
-        top: ${headerHeight}px;
+        top: calc(${actionMenuHeight}px + var(--euiFixedHeadersOffset, 0));
         z-index: ${euiTheme.levels.navigation};
         background: ${euiTheme.colors.emptyShade};
         padding: ${euiTheme.size.m} ${euiTheme.size.l} 0px;

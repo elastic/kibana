@@ -9,7 +9,6 @@ import { getOr } from 'lodash/fp';
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
-  KpiRiskScoreRequestOptions,
   KpiRiskScoreStrategyResponse,
   RiskQueries,
   RiskSeverity,
@@ -25,9 +24,9 @@ interface AggBucket {
 }
 
 export const kpiRiskScore: SecuritySolutionFactory<RiskQueries.kpiRiskScore> = {
-  buildDsl: (options: KpiRiskScoreRequestOptions) => buildKpiRiskScoreQuery(options),
+  buildDsl: (options) => buildKpiRiskScoreQuery(options),
   parse: async (
-    options: KpiRiskScoreRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<KpiRiskScoreStrategyResponse> => {
     const inspect = {

@@ -8,6 +8,7 @@
 import React, { FC } from 'react';
 import { Redirect } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ML_PAGES } from '../../../../locator';
 import { NavigateToPath, useMlKibana } from '../../../contexts/kibana';
 import { createPath, MlRoute, PageLoader, PageProps } from '../../router';
@@ -15,6 +16,7 @@ import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers } from '../../resolvers';
 import { Page, preConfiguredJobRedirect } from '../../../jobs/new_job/pages/index_or_search';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
+import { NavigateToPageButton } from '../../components/navigate_to_page_button';
 
 enum MODE {
   NEW_JOB,
@@ -24,6 +26,7 @@ enum MODE {
 interface IndexOrSearchPageProps extends PageProps {
   nextStepPath: string;
   mode: MODE;
+  extraButtons?: React.ReactNode;
 }
 
 const getBreadcrumbs = (navigateToPath: NavigateToPath, basePath: string) => [
@@ -104,14 +107,28 @@ export const dataVizIndexOrSearchRouteFactory = (
   title: i18n.translate('xpack.ml.selectDataViewLabel', {
     defaultMessage: 'Select Data View',
   }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
-      deps={deps}
-      mode={MODE.DATAVISUALIZER}
-    />
-  ),
+  render: (props, deps) => {
+    const button = (
+      <NavigateToPageButton
+        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
+        title={
+          <FormattedMessage
+            id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
+            defaultMessage="Use ES|QL"
+          />
+        }
+      />
+    );
+    return (
+      <PageWrapper
+        {...props}
+        nextStepPath={createPath(ML_PAGES.DATA_VISUALIZER_INDEX_VIEWER)}
+        deps={deps}
+        mode={MODE.DATAVISUALIZER}
+        extraButtons={button}
+      />
+    );
+  },
   breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
 });
 
@@ -185,27 +202,7 @@ export const changePointDetectionIndexOrSearchRouteFactory = (
   breadcrumbs: getChangePointDetectionBreadcrumbs(navigateToPath, basePath),
 });
 
-export const dataComparisonIndexOrSearchRouteFactory = (
-  navigateToPath: NavigateToPath,
-  basePath: string
-): MlRoute => ({
-  id: 'data_view_data_comparison',
-  path: createPath(ML_PAGES.DATA_COMPARISON_INDEX_SELECT),
-  title: i18n.translate('xpack.ml.selectDataViewLabel', {
-    defaultMessage: 'Select Data View',
-  }),
-  render: (props, deps) => (
-    <PageWrapper
-      {...props}
-      nextStepPath={createPath(ML_PAGES.DATA_COMPARISON)}
-      deps={deps}
-      mode={MODE.NEW_JOB}
-    />
-  ),
-  breadcrumbs: getDataVisBreadcrumbs(navigateToPath, basePath),
-});
-
-const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
+const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode, extraButtons }) => {
   const {
     services: {
       http: { basePath },
@@ -227,7 +224,7 @@ const PageWrapper: FC<IndexOrSearchPageProps> = ({ nextStepPath, mode }) => {
   );
   return (
     <PageLoader context={context}>
-      <Page {...{ nextStepPath }} />
+      <Page {...{ nextStepPath, extraButtons }} />
     </PageLoader>
   );
 };

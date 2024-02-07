@@ -10,6 +10,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -55,6 +56,9 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   kibanaVersion,
   isAuthenticationTypeAPIKey: jest.fn(),
   getAuthenticationAPIKey: jest.fn(),
+  getAlertIndicesAlias: jest.fn(),
+  alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -72,10 +76,12 @@ describe('listRuleTypes', () => {
     recoveryActionGroup: RecoveredActionGroup,
     id: 'alertingAlertType',
     name: 'alertingAlertType',
+    category: 'test',
     producer: 'alerts',
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   };
   const myAppAlertType: RegistryRuleType = {
     actionGroups: [],
@@ -86,10 +92,12 @@ describe('listRuleTypes', () => {
     recoveryActionGroup: RecoveredActionGroup,
     id: 'myAppAlertType',
     name: 'myAppAlertType',
+    category: 'test',
     producer: 'myApp',
     enabledInLicense: true,
     hasAlertsMappings: false,
     hasFieldsForAAD: false,
+    validLegacyConsumers: [],
   };
   const setOfAlertTypes = new Set([myAppAlertType, alertingAlertType]);
 
@@ -130,10 +138,12 @@ describe('listRuleTypes', () => {
         recoveryActionGroup: RecoveredActionGroup,
         id: 'myType',
         name: 'myType',
+        category: 'test',
         producer: 'myApp',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       },
       {
         id: 'myOtherType',
@@ -143,10 +153,12 @@ describe('listRuleTypes', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         recoveryActionGroup: RecoveredActionGroup,
+        category: 'test',
         producer: 'alerts',
         enabledInLicense: true,
         hasAlertsMappings: false,
         hasFieldsForAAD: false,
+        validLegacyConsumers: [],
       },
     ]);
     beforeEach(() => {
@@ -163,6 +175,7 @@ describe('listRuleTypes', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           recoveryActionGroup: RecoveredActionGroup,
+          category: 'test',
           producer: 'alerts',
           authorizedConsumers: {
             myApp: { read: true, all: true },
@@ -170,6 +183,7 @@ describe('listRuleTypes', () => {
           enabledInLicense: true,
           hasAlertsMappings: false,
           hasFieldsForAAD: false,
+          validLegacyConsumers: [],
         },
       ]);
       authorization.filterByRuleTypeAuthorization.mockResolvedValue(authorizedTypes);

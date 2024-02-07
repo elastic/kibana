@@ -14,7 +14,11 @@ import { formatColumn } from '../common/expressions/format_column';
 import { counterRate } from '../common/expressions/counter_rate';
 import { getTimeScale } from '../common/expressions/time_scale/time_scale';
 import { collapse } from '../common/expressions/collapse';
-import { identity } from '../common/expressions/identity';
+import {
+  formulaIntervalFn,
+  formulaNowFn,
+  formulaTimeRangeFn,
+} from '../common/expressions/formula_context';
 
 type TimeScaleArguments = Parameters<typeof getTimeScale>;
 
@@ -26,6 +30,9 @@ export const setupExpressions = (
   getForceNow: TimeScaleArguments[2]
 ) => {
   [
+    formulaTimeRangeFn,
+    formulaNowFn,
+    formulaIntervalFn,
     collapse,
     counterRate,
     identity,

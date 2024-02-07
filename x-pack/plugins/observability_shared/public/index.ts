@@ -10,6 +10,7 @@ export type {
   ObservabilitySharedPlugin,
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
+  ProfilingLocators,
 } from './plugin';
 export const plugin = () => {
   return new ObservabilitySharedPlugin();
@@ -19,8 +20,8 @@ export type {
   ObservabilityPageTemplateProps,
   LazyObservabilityPageTemplateProps,
   NavigationSection,
+  NavigationEntry,
 } from './components/page_template/page_template';
-export type { NavigationEntry } from './components/page_template/page_template';
 export { HeaderMenuPortal } from './components/header_menu';
 export { useObservabilityTourContext, observTourStepStorageKey } from './components/tour';
 export { ActionMenu, ActionMenuDivider } from './components/action_menu/action_menu';
@@ -42,7 +43,9 @@ export type { AddInspectorRequest } from './contexts/inspector/inspector_context
 export { useInspectorContext } from './contexts/inspector/use_inspector_context';
 
 export { useTheme } from './hooks/use_theme';
+export { useEditableSettings } from './hooks/use_editable_settings';
 export { useEsSearch, createEsParams } from './hooks/use_es_search';
+export { useValuesList } from './hooks/use_values_list';
 export { useFetcher, FETCH_STATUS } from './hooks/use_fetcher';
 export type { FetcherResult } from './hooks/use_fetcher';
 export { useKibanaSpace } from './hooks/use_kibana_space';
@@ -55,16 +58,15 @@ export {
 } from './hooks/use_track_metric';
 export type { TrackEvent } from './hooks/use_track_metric';
 export { useQuickTimeRanges } from './hooks/use_quick_time_ranges';
-export { useGetUserCasesPermissions } from './hooks/use_get_user_cases_permissions';
 export { useTimeZone } from './hooks/use_time_zone';
-export { useChartTheme } from './hooks/use_chart_theme';
+export { useChartThemes } from './hooks/use_chart_theme';
 export { useLinkProps, shouldHandleLinkEvent } from './hooks/use_link_props';
 export type { LinkDescriptor, Options as UseLinkPropsOptions } from './hooks/use_link_props';
 export { NavigationWarningPromptProvider, Prompt } from './components/navigation_warning_prompt';
 
 export type { ApmIndicesConfig, UXMetrics } from './types';
 
-export { noCasesPermissions } from './utils/cases_permissions';
+export { noCasesPermissions, allCasesPermissions } from './utils/cases_permissions';
 
 export {
   type ObservabilityActionContextMenuItemProps,
@@ -78,5 +80,19 @@ export {
   sloFeatureId,
 } from '../common';
 
-export { EMBEDDABLE_FLAMEGRAPH } from './components/profiling/embeddables';
-export { EmbeddableFlamegraph } from './components/profiling/embeddables/embeddable_flamegraph';
+export {
+  EMBEDDABLE_FLAMEGRAPH,
+  EMBEDDABLE_FUNCTIONS,
+  EMBEDDABLE_PROFILING_SEARCH_BAR,
+  EMBEDDABLE_STACK_TRACES,
+  EmbeddableFlamegraph,
+  EmbeddableFunctions,
+  EmbeddableProfilingSearchBar,
+  EmbeddableStackTraces,
+  type EmbeddableProfilingSearchBarProps,
+} from './components/profiling/embeddables';
+
+export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
+export { FeatureFeedbackButton } from './components/feature_feedback_button/feature_feedback_button';
+export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
+export { FieldValueSelection, FieldValueSuggestions } from './components';

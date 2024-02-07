@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { matchPath } from 'react-router-dom';
 import type { GetTrailingBreadcrumbs } from '../../common/components/navigation/breadcrumbs/types';
+import { CREATE_DASHBOARD_TITLE } from './translations';
 
 /**
  * This module should only export this function.
@@ -13,6 +15,10 @@ import type { GetTrailingBreadcrumbs } from '../../common/components/navigation/
  * We should be careful to not import unnecessary modules in this file to avoid increasing the main app bundle size.
  */
 export const getTrailingBreadcrumbs: GetTrailingBreadcrumbs = (params, getSecuritySolutionUrl) => {
+  if (matchPath(params.pathName, { path: '/create' })) {
+    return [{ text: CREATE_DASHBOARD_TITLE }];
+  }
+
   const breadcrumbName = params?.state?.dashboardName;
   if (breadcrumbName) {
     return [{ text: breadcrumbName }];

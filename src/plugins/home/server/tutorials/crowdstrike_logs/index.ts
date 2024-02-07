@@ -43,7 +43,7 @@ export function crowdstrikeLogsSpecProvider(context: TutorialContext): TutorialS
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-crowdstrike.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/crowdstrike.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/crowdstrike.svg'),
     artifacts: {
       dashboards: [],
       application: {

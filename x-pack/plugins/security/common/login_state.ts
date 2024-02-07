@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LoginLayout } from './licensing';
+import type { LoginLayout } from '@kbn/security-plugin-types-common';
 
 export interface LoginSelectorProvider {
   type: string;

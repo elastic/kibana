@@ -11,10 +11,9 @@ import {
   Settings,
   Partition,
   PartitionLayout,
-  LIGHT_THEME,
   DARK_THEME,
+  LIGHT_THEME,
 } from '@elastic/charts';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { EuiComboBox, EuiComboBoxOptionOption, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -29,7 +28,7 @@ import { useFieldFormatter, useMlKibana } from '../../contexts/kibana';
 import { useRefresh } from '../../routing/use_refresh';
 import { getMemoryItemColor } from '../memory_item_colors';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 interface Props {
   node?: string;
@@ -65,19 +64,9 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   } = useMlKibana();
   const isDarkTheme = useIsDarkTheme(themeService);
 
-  const { theme, baseTheme } = useMemo(
-    () =>
-      isDarkTheme
-        ? { theme: EUI_CHARTS_THEME_DARK, baseTheme: DARK_THEME }
-        : { theme: EUI_CHARTS_THEME_LIGHT, baseTheme: LIGHT_THEME },
-    [isDarkTheme]
-  );
+  const baseTheme = useMemo(() => (isDarkTheme ? DARK_THEME : LIGHT_THEME), [isDarkTheme]);
 
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 
   const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
   const { displayErrorToast } = useToastNotificationService();
@@ -137,7 +126,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.memoryUsage.treeMap.fetchFailedErrorMessage', {
-          defaultMessage: 'Models memory usage fetch failed',
+          defaultMessage: 'Error loading model memory usage data',
         })
       );
     }
@@ -177,7 +166,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
 
         {data.length ? (
           <Chart>
-            <Settings baseTheme={baseTheme} theme={theme.theme} />
+            <Settings baseTheme={baseTheme} locale={i18n.getLocale()} />
             <Partition<MemoryUsageInfo>
               id="memoryUsageTreeMap"
               data={data}

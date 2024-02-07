@@ -7,6 +7,7 @@
 
 import type { AssetWithoutTimestamp } from '@kbn/assetManager-plugin/common/types_api';
 import type { WriteSamplesPostBody } from '@kbn/assetManager-plugin/server';
+import { apm, infra, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { SuperTest, Test } from 'supertest';
 
@@ -42,4 +43,62 @@ export async function viewSampleAssetDocs(supertest: KibanaSupertest) {
   expect(response).to.have.property('body');
   expect(response.body).to.have.property('results');
   return response.body.results as AssetWithoutTimestamp[];
+}
+
+export function generateServicesData({
+  from,
+  to,
+  count = 1,
+}: {
+  from: string;
+  to: string;
+  count: number;
+}) {
+  const range = timerange(from, to);
+
+  const services = Array(count)
+    .fill(0)
+    .map((_, idx) =>
+      apm
+        .service({
+          name: `service-${idx}`,
+          environment: 'production',
+          agentName: 'nodejs',
+        })
+        .instance(`my-host-${idx}`)
+    );
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp, index) =>
+      services.map((service) =>
+        service
+          .transaction({ transactionName: 'GET /foo' })
+          .timestamp(timestamp)
+          .duration(500)
+          .success()
+      )
+    );
+}
+
+export function generateHostsData({
+  from,
+  to,
+  count = 1,
+}: {
+  from: string;
+  to: string;
+  count: number;
+}) {
+  const range = timerange(from, to);
+
+  const hosts = Array(count)
+    .fill(0)
+    .map((_, idx) => infra.host(`my-host-${idx}`));
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp, index) => hosts.map((host) => host.cpu().timestamp(timestamp)));
 }

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { StartServicesAccessor } from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
@@ -37,13 +37,18 @@ export interface SavedSearchServerStartDeps {
 export class SavedSearchServerPlugin
   implements Plugin<object, object, object, SavedSearchServerStartDeps>
 {
+  constructor(private initializerContext: PluginInitializerContext) {}
+
   public setup(
     core: CoreSetup,
     { data, contentManagement, expressions }: SavedSearchPublicSetupDependencies
   ) {
     contentManagement.register({
       id: SavedSearchType,
-      storage: new SavedSearchStorage(),
+      storage: new SavedSearchStorage({
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+        logger: this.initializerContext.logger.get('storage'),
+      }),
       version: {
         latest: LATEST_VERSION,
       },

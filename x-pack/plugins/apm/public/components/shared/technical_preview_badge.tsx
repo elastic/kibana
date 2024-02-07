@@ -23,7 +23,7 @@ export function TechnicalPreviewBadge({ icon, size, style }: Props) {
         'xpack.apm.technicalPreviewBadgeDescription',
         {
           defaultMessage:
-            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+            'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
         }
       )}
       iconType={icon}

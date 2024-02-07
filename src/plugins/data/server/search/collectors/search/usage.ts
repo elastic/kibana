@@ -9,7 +9,7 @@
 import { once, debounce } from 'lodash';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { IEsSearchResponse, ISearchOptions } from '../../../../common';
-import { isCompleteResponse } from '../../../../common';
+import { isRunningResponse } from '../../../../common';
 import { CollectedUsage } from './register';
 
 const SAVED_OBJECT_ID = 'search-telemetry';
@@ -86,7 +86,7 @@ export function searchUsageObserver(
 ) {
   return {
     next(response: IEsSearchResponse) {
-      if (isRestore || !isCompleteResponse(response)) return;
+      if (isRestore || isRunningResponse(response)) return;
       logger.debug(`trackSearchStatus:success, took:${response.rawResponse.took}`);
       usage?.trackSuccess(response.rawResponse.took);
     },

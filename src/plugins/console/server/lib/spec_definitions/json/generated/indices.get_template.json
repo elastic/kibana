@@ -8,6 +8,7 @@
       "flat_settings": "__flag__",
       "local": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ]
@@ -22,7 +23,7 @@
     "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates.html",
     "availability": {
       "stack": true,
-      "serverless": true
+      "serverless": false
     }
   }
 }

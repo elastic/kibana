@@ -7,7 +7,6 @@
 
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 import React, { createContext, useMemo } from 'react';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 import { UptimeAppColors } from '../app/uptime_app';
 
@@ -36,7 +35,6 @@ const defaultContext: UptimeThemeContextValues = {
   },
   chartTheme: {
     baseTheme: LIGHT_THEME,
-    theme: EUI_CHARTS_THEME_LIGHT.theme,
   },
 };
 
@@ -76,7 +74,6 @@ export const UptimeThemeContextProvider: React.FC<ThemeContextProps> = ({ darkMo
       colors,
       chartTheme: {
         baseTheme: darkMode ? DARK_THEME : LIGHT_THEME,
-        theme: darkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
       },
     };
   }, [colors, darkMode]);

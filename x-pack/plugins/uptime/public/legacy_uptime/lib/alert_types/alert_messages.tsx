@@ -11,7 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import type { CoreTheme } from '@kbn/core/public';
 import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
-import { RedirectAppLinks, toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnector } from '../../../../common/rules/types';
 import { kibanaService } from '../../state/kibana_service';
@@ -29,7 +30,11 @@ export const simpleAlertEnabled = (
       defaultMessage: 'Rule successfully enabled ',
     }),
     text: toMountPoint(
-      <RedirectAppLinks application={kibanaService.core.application}>
+      <RedirectAppLinks
+        coreStart={{
+          application: kibanaService.core.application,
+        }}
+      >
         <EuiText>
           <FormattedMessage
             id="xpack.uptime.overview.alerts.enabled.success.description"

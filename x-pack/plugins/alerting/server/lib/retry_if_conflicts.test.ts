@@ -8,6 +8,7 @@
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { retryIfConflicts, RetryForConflictsAttempts } from './retry_if_conflicts';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 
 describe('retry_if_conflicts', () => {
   beforeEach(() => {
@@ -47,7 +48,9 @@ describe('retry_if_conflicts', () => {
         MockOperationName,
         getOperationConflictsTimes(RetryForConflictsAttempts + 1)
       )
-    ).rejects.toThrowError(SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId));
+    ).rejects.toThrowError(
+      SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId)
+    );
     expect(MockLogger.debug).toBeCalledTimes(RetryForConflictsAttempts);
     expect(MockLogger.warn).toBeCalledTimes(1);
     expect(MockLogger.warn).toBeCalledWith(`${MockOperationName} conflict, exceeded retries`);
@@ -71,7 +74,7 @@ function getOperationConflictsTimes(times: number) {
   return async function OperationConflictsTimes() {
     times--;
     if (times >= 0) {
-      throw SavedObjectsErrorHelpers.createConflictError('alert', MockAlertId);
+      throw SavedObjectsErrorHelpers.createConflictError(RULE_SAVED_OBJECT_TYPE, MockAlertId);
     }
 
     return MockResult;

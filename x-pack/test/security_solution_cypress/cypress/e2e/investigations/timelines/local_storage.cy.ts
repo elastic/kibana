@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { reload } from '../../../tasks/common';
-import { login, visit } from '../../../tasks/login';
-import { HOSTS_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { openEvents } from '../../../tasks/hosts/main';
 import { DATAGRID_HEADERS, DATAGRID_HEADER } from '../../../screens/timeline';
 import { waitsForEventsToBeLoaded } from '../../../tasks/hosts/events';
 import { removeColumn } from '../../../tasks/timeline';
 
-describe('persistent timeline', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('persistent timeline', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     login();
-    visit(HOSTS_URL);
+    visitWithTimeRange(hostsUrl('allHosts'));
     openEvents();
     waitsForEventsToBeLoaded();
 
@@ -33,7 +33,7 @@ describe('persistent timeline', { tags: ['@ess', '@serverless', '@brokenInServer
 
     cy.get(DATAGRID_HEADER(COLUMN)).should('exist');
     removeColumn(COLUMN);
-    reload();
+    cy.reload();
     waitsForEventsToBeLoaded();
 
     /* After the deletion of the message column and the reload of the page, we make sure

@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/elastic-assistant-plugin",
-  "owner": "@elastic/security-solution",
+  "owner": "@elastic/security-generative-ai",
   "description": "Server APIs for the Elastic AI Assistant",
   "plugin": {
     "id": "elasticAssistant",
@@ -9,7 +9,8 @@
     "browser": false,
     "requiredPlugins": [
       "actions",
-      "data"
+      "data",
+      "ml"
     ]
   }
 }

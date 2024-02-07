@@ -232,6 +232,327 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
       });
+
+      describe('request meta', () => {
+        describe('es', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          query: {
+                            match_all: {},
+                          },
+                        },
+                      },
+                    },
+                    options: {
+                      strategy: 'es',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_search',
+              querystring: 'ignore_unavailable=true',
+            });
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          query: {
+                            bool: {
+                              filter: [
+                                {
+                                  error_query: {
+                                    indices: [
+                                      {
+                                        error_type: 'exception',
+                                        message: 'simulated failure',
+                                        name: '.kibana',
+                                      },
+                                    ],
+                                  },
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                    options: {
+                      strategy: 'es',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_search',
+              querystring: 'ignore_unavailable=true',
+            });
+          });
+        });
+
+        describe('ese', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          query: {
+                            match_all: {},
+                          },
+                        },
+                      },
+                    },
+                    options: {
+                      strategy: 'ese',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_async_search',
+              querystring:
+                'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
+            });
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        body: {
+                          bool: {
+                            filter: [
+                              {
+                                error_query: {
+                                  indices: [
+                                    {
+                                      error_type: 'exception',
+                                      message: 'simulated failure',
+                                      name: '.kibana',
+                                    },
+                                  ],
+                                },
+                              },
+                            ],
+                          },
+                        },
+                      },
+                    },
+                    options: {
+                      strategy: 'ese',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_async_search',
+              querystring:
+                'batched_reduce_size=64&ccs_minimize_roundtrips=true&wait_for_completion_timeout=200ms&keep_on_completion=false&keep_alive=60000ms&ignore_unavailable=true',
+            });
+          });
+        });
+
+        describe('esql', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        query: 'from .kibana | limit 1',
+                      },
+                    },
+                    options: {
+                      strategy: 'esql',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/_query',
+            });
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        query: 'fro .kibana | limit 1',
+                      },
+                    },
+                    options: {
+                      strategy: 'esql',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/_query',
+            });
+          });
+        });
+
+        describe('sql', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        query: 'SELECT * FROM ".kibana" LIMIT 1',
+                      },
+                    },
+                    options: {
+                      strategy: 'sql',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/_sql',
+              querystring: 'format=json',
+            });
+          });
+
+          it(`should return request meta when request fails`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        query: 'SELEC * FROM ".kibana" LIMIT 1',
+                      },
+                    },
+                    options: {
+                      strategy: 'sql',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].error.attributes.requestParams).to.eql({
+              method: 'POST',
+              path: '/_sql',
+              querystring: 'format=json',
+            });
+          });
+        });
+
+        describe('eql', () => {
+          it(`should return request meta`, async () => {
+            const resp = await supertest
+              .post(`/internal/bsearch`)
+              .set(ELASTIC_HTTP_VERSION_HEADER, BFETCH_ROUTE_VERSION_LATEST)
+              .send({
+                batch: [
+                  {
+                    request: {
+                      params: {
+                        index: '.kibana',
+                        query: 'any where true',
+                        timestamp_field: 'created_at',
+                      },
+                    },
+                    options: {
+                      strategy: 'eql',
+                    },
+                  },
+                ],
+              });
+
+            const jsonBody = parseBfetchResponse(resp);
+
+            expect(resp.status).to.be(200);
+            expect(jsonBody[0].result.requestParams).to.eql({
+              method: 'POST',
+              path: '/.kibana/_eql/search',
+              querystring: 'ignore_unavailable=true',
+            });
+          });
+        });
+      });
     });
   });
 }

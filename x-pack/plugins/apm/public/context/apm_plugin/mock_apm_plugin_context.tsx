@@ -13,11 +13,16 @@ import { merge } from 'lodash';
 import { coreMock } from '@kbn/core/public/mocks';
 import { UrlService } from '@kbn/share-plugin/common/url_service';
 import { createObservabilityRuleTypeRegistryMock } from '@kbn/observability-plugin/public';
+import {
+  LogsLocatorParams,
+  NodeLogsLocatorParams,
+  TraceLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { MlLocatorDefinition } from '@kbn/ml-plugin/public';
 import { enableComparisonByDefault } from '@kbn/observability-plugin/public';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
-import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
+import { apmEnableProfilingIntegration } from '@kbn/observability-plugin/common';
 import { ApmPluginContext, ApmPluginContextValue } from './apm_plugin_context';
 import { ConfigSchema } from '../..';
 import { createCallApmApi } from '../../services/rest/create_call_apm_api';
@@ -57,6 +62,7 @@ const mockCore = merge({}, coreStart, {
           value: 100000,
         },
         [enableComparisonByDefault]: true,
+        [apmEnableProfilingIntegration]: true,
       };
       return uiSettings[key];
     },
@@ -79,6 +85,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    profilingIntegrationAvailable: false,
   },
   serverless: { enabled: false },
 };
@@ -108,11 +115,32 @@ const mockPlugin = {
       },
     },
   },
+  observabilityShared: {
+    locators: {
+      profiling: {
+        flamegraphLocator: {
+          getRedirectUrl: () => '/profiling/flamegraphs/flamegraph',
+        },
+        topNFunctionsLocator: {
+          getRedirectUrl: () => '/profiling/functions/topn',
+        },
+        stacktracesLocator: {
+          getRedirectUrl: () => '/profiling/stacktraces/threads',
+        },
+      },
+    },
+  },
 };
 
-export const infraLocatorsMock: InfraLocators = {
-  logsLocator: sharePluginMock.createLocator(),
-  nodeLogsLocator: sharePluginMock.createLocator(),
+export const observabilityLogsExplorerLocatorsMock = {
+  allDatasetsLocator: sharePluginMock.createLocator(),
+  singleDatasetLocator: sharePluginMock.createLocator(),
+};
+
+export const logsLocatorsMock = {
+  logsLocator: sharePluginMock.createLocator<LogsLocatorParams>(),
+  nodeLogsLocator: sharePluginMock.createLocator<NodeLogsLocatorParams>(),
+  traceLogsLocator: sharePluginMock.createLocator<TraceLogsLocatorParams>(),
 };
 
 const mockCorePlugins = {
@@ -137,10 +165,8 @@ export const mockApmPluginContextValue = {
   plugins: mockPlugin,
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   corePlugins: mockCorePlugins,
-  infra: {
-    locators: infraLocatorsMock,
-  },
   deps: {},
+  share: sharePluginMock.createSetupContract(),
   unifiedSearch: mockUnifiedSearch,
   uiActions: {
     getTriggerCompatibleActions: () => Promise.resolve([]),

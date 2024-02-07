@@ -23,6 +23,10 @@ get:
             type: array
             items:
               type: object
+              required:
+                - email
+                - full_name
+                - username
               properties:
                 $ref: '../components/schemas/user_properties.yaml'
           examples:
@@ -34,7 +38,3 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

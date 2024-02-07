@@ -17,28 +17,7 @@
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
 
-import { omit } from 'lodash';
 import * as rt from 'io-ts';
-
-/**
- * Source configuration config file properties.
- * These are properties that can appear in the kibana.yml file.
- * This is a legacy method of providing properties, and will be deprecated in the future (v 8.0.0).
- */
-
-export const sourceConfigurationConfigFilePropertiesRT = rt.type({
-  sources: rt.type({
-    default: rt.partial({
-      fields: rt.partial({
-        message: rt.array(rt.string),
-      }),
-    }),
-  }),
-});
-
-export type SourceConfigurationConfigFileProperties = rt.TypeOf<
-  typeof sourceConfigurationConfigFilePropertiesRT
->;
 
 /**
  * Log columns
@@ -104,18 +83,6 @@ export type LogIndexNameReference = rt.TypeOf<typeof logIndexNameReferenceRT>;
 export const logIndexReferenceRT = rt.union([logIndexPatternReferenceRT, logIndexNameReferenceRT]);
 export type LogIndexReference = rt.TypeOf<typeof logIndexReferenceRT>;
 
-/**
- * Fields
- */
-
-const SourceConfigurationFieldsRT = rt.type({
-  message: rt.array(rt.string),
-});
-
-/**
- * Properties that represent a full source configuration, which is the result of merging static values with
- * saved values.
- */
 export const SourceConfigurationRT = rt.type({
   name: rt.string,
   description: rt.string,
@@ -123,7 +90,6 @@ export const SourceConfigurationRT = rt.type({
   logIndices: logIndexReferenceRT,
   inventoryDefaultView: rt.string,
   metricsExplorerDefaultView: rt.string,
-  fields: SourceConfigurationFieldsRT,
   logColumns: rt.array(SourceConfigurationColumnRuntimeType),
   anomalyThreshold: rt.number,
 });
@@ -131,20 +97,8 @@ export const SourceConfigurationRT = rt.type({
 /**
  * Stored source configuration as read from and written to saved objects
  */
-const SavedSourceConfigurationFieldsRuntimeType = rt.partial(
-  omit(SourceConfigurationFieldsRT.props, ['message'])
-);
 
-export type InfraSavedSourceConfigurationFields = rt.TypeOf<
-  typeof SavedSourceConfigurationFieldsRuntimeType
->;
-
-export const SavedSourceConfigurationRuntimeType = rt.intersection([
-  rt.partial(omit(SourceConfigurationRT.props, ['fields'])),
-  rt.partial({
-    fields: SavedSourceConfigurationFieldsRuntimeType,
-  }),
-]);
+export const SavedSourceConfigurationRuntimeType = rt.partial(SourceConfigurationRT.props);
 
 export interface InfraSavedSourceConfiguration
   extends rt.TypeOf<typeof SavedSourceConfigurationRuntimeType> {}
@@ -154,10 +108,8 @@ export interface InfraSavedSourceConfiguration
  * hardcoded defaults.
  */
 
-const StaticSourceConfigurationFieldsRuntimeType = rt.partial(SourceConfigurationFieldsRT.props);
 export const StaticSourceConfigurationRuntimeType = rt.partial({
   ...SourceConfigurationRT.props,
-  fields: StaticSourceConfigurationFieldsRuntimeType,
 });
 
 export interface InfraStaticSourceConfiguration
@@ -167,11 +119,8 @@ export interface InfraStaticSourceConfiguration
  * Full source configuration type after all cleanup has been done at the edges
  */
 
-export type InfraSourceConfigurationFields = rt.TypeOf<typeof SourceConfigurationFieldsRT>;
-
 export const SourceConfigurationRuntimeType = rt.type({
   ...SourceConfigurationRT.props,
-  fields: SourceConfigurationFieldsRT,
   logColumns: rt.array(SourceConfigurationColumnRuntimeType),
 });
 

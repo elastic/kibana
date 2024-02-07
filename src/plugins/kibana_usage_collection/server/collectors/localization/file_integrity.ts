@@ -27,7 +27,7 @@ export async function getIntegrityHashes(filepaths: string[]): Promise<Integriti
 
 export async function getIntegrityHash(filepath: string): Promise<Hash | null> {
   try {
-    const output = createHash('md5');
+    const output = createHash('sha256');
 
     await pipeline(fs.createReadStream(filepath), output);
     const data = output.read();

@@ -37,7 +37,7 @@ export class GenAiStreamingResponseExamplePlugin
   ) {
     core.application.register({
       id: 'GenAiStreamingResponseExample',
-      title: 'Generative AI Streaming Response Example',
+      title: 'OpenAI Streaming Response Example',
       navLinkStatus: AppNavLinkStatus.hidden,
       async mount(params: AppMountParameters) {
         const [coreStart, depsStart] = await core.getStartServices();
@@ -48,9 +48,8 @@ export class GenAiStreamingResponseExamplePlugin
 
     developerExamples.register({
       appId: 'GenAiStreamingResponseExample',
-      title: 'Generative AI Streaming Response Example',
-      description:
-        'This example demonstrates how to stream a response from a Generative AI connector',
+      title: 'OpenAI Streaming Response Example',
+      description: 'This example demonstrates how to stream a response from an OpenAI connector',
     });
   }
 

@@ -55,6 +55,7 @@ export interface MonitoringStats {
 }
 
 export enum HealthStatus {
+  Uninitialized = 'uninitialized',
   OK = 'OK',
   Warning = 'warn',
   Error = 'error',

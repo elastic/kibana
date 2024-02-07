@@ -58,7 +58,22 @@ exports[`EPM template tests loading base.yml: base.yml 1`] = `
 
 exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroachdb_dynamic_templates.yml 1`] = `
 {
-  "properties": {},
+  "properties": {
+    "cockroachdb": {
+      "properties": {
+        "status": {
+          "properties": {
+            "labels": {
+              "type": "object",
+              "dynamic": true
+            }
+          },
+          "type": "object",
+          "dynamic": true
+        }
+      }
+    }
+  },
   "dynamic_templates": [
     {
       "cockroachdb.status.labels": {
@@ -103,6 +118,16 @@ exports[`EPM template tests loading cockroachdb_dynamic_templates.yml: cockroach
         },
         "match_mapping_type": "*",
         "path_match": "cockroachdb.status.*.histogram"
+      }
+    },
+    {
+      "cockroachdb.status.*": {
+        "mapping": {
+          "type": "object",
+          "dynamic": true
+        },
+        "match_mapping_type": "object",
+        "path_match": "cockroachdb.status.*"
       }
     }
   ]
@@ -837,39 +862,24 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
         "network_summary": {
           "properties": {
             "ip": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
+              "type": "object",
+              "dynamic": true
             },
             "tcp": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
+              "type": "object",
+              "dynamic": true
             },
             "udp": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
+              "type": "object",
+              "dynamic": true
             },
             "udp_lite": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
+              "type": "object",
+              "dynamic": true
             },
             "icmp": {
-              "properties": {
-                "*": {
-                  "type": "object"
-                }
-              }
+              "type": "object",
+              "dynamic": true
             }
           }
         },
@@ -882,6 +892,10 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
             "cmdline": {
               "type": "keyword",
               "ignore_above": 2048
+            },
+            "env": {
+              "type": "object",
+              "dynamic": true
             },
             "cpu": {
               "properties": {
@@ -1076,8 +1090,14 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                           }
                         }
                       }
+                    },
+                    "percpu": {
+                      "type": "object",
+                      "dynamic": true
                     }
-                  }
+                  },
+                  "type": "object",
+                  "dynamic": true
                 },
                 "memory": {
                   "properties": {
@@ -1355,7 +1375,9 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 }
               }
             }
-          }
+          },
+          "type": "object",
+          "dynamic": true
         },
         "raid": {
           "properties": {
@@ -1388,8 +1410,14 @@ exports[`EPM template tests loading system.yml: system.yml 1`] = `
                 },
                 "failed": {
                   "type": "long"
+                },
+                "states": {
+                  "type": "object",
+                  "dynamic": true
                 }
-              }
+              },
+              "type": "object",
+              "dynamic": true
             },
             "blocks": {
               "properties": {

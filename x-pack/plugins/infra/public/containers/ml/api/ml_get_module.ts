@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
-import { jobCustomSettingsRT } from '../../../../common/log_analysis';
+import { jobCustomSettingsRT } from '../../../../common/infra_ml';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
 export const callGetMlModuleAPI = async (moduleId: string, fetch: HttpHandler) => {

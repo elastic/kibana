@@ -6,10 +6,15 @@
  */
 
 import { useMemo } from 'react';
+import { getIndexListFromEsqlQuery } from '@kbn/securitysolution-utils';
 import { useSecurityJobs } from '../../../common/components/ml_popover/hooks/use_security_jobs';
 import { useGetInstalledJob } from '../../../common/components/ml/hooks/use_get_jobs';
 
-export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndices?: string[]) => {
+export const useRuleIndices = (
+  machineLearningJobId?: string[],
+  defaultRuleIndices?: string[],
+  esqlQuery?: string
+) => {
   const memoMlJobIds = useMemo(() => machineLearningJobId ?? [], [machineLearningJobId]);
   const { loading: mlSecurityJobLoading, jobs } = useSecurityJobs();
   const memoSelectedMlJobs = useMemo(
@@ -32,10 +37,12 @@ export const useRuleIndices = (machineLearningJobId?: string[], defaultRuleIndic
   const memoRuleIndices = useMemo(() => {
     if (memoMlIndices.length > 0) {
       return memoMlIndices;
+    } else if (esqlQuery) {
+      return getIndexListFromEsqlQuery(esqlQuery);
     } else {
       return defaultRuleIndices ?? [];
     }
-  }, [defaultRuleIndices, memoMlIndices]);
+  }, [defaultRuleIndices, esqlQuery, memoMlIndices]);
 
   return {
     mlJobLoading: mlSecurityJobLoading || mlInstalledJobLoading,

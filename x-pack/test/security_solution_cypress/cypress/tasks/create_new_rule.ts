@@ -15,6 +15,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-alerting-types';
 import type {
   EqlRuleCreateProps,
+  EsqlRuleCreateProps,
   MachineLearningRuleCreateProps,
   NewTermsRuleCreateProps,
   QueryRuleCreateProps,
@@ -22,7 +23,7 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/model';
-import type { Actions } from '../objects/types';
+import type { Actions, AlertsFilter } from '../objects/types';
 // For some reason importing these functions from ../../public/detections/pages/detection_engine/rules/helpers
 // causes a "Webpack Compilation Error" in this file specifically, even though it imports fine in the test files
 // in ../e2e/*, so we have a copy of the implementations in the cypress helpers.
@@ -30,6 +31,12 @@ import { convertHistoryStartToSize, getHumanizedDuration } from '../helpers/rule
 
 import {
   ABOUT_CONTINUE_BTN,
+  ALERT_SUPPRESSION_DURATION_INPUT,
+  ALERT_SUPPRESSION_FIELDS_COMBO_BOX,
+  ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS,
+  THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX,
+  ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION,
+  ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL,
   ABOUT_EDIT_TAB,
   ACTIONS_EDIT_TAB,
   ADD_FALSE_POSITIVE_BTN,
@@ -48,6 +55,10 @@ import {
   EQL_QUERY_INPUT,
   EQL_QUERY_VALIDATION_SPINNER,
   EQL_TYPE,
+  ESQL_TYPE,
+  ESQL_QUERY_BAR,
+  ESQL_QUERY_BAR_EXPAND_BTN,
+  ESQL_QUERY_BAR_INPUT_AREA,
   FALSE_POSITIVES_INPUT,
   IMPORT_QUERY_FROM_SAVED_TIMELINE_LINK,
   INDICATOR_MATCH_TYPE,
@@ -74,6 +85,7 @@ import {
   RULE_DESCRIPTION_INPUT,
   RULE_NAME_INPUT,
   RULE_NAME_OVERRIDE,
+  RULE_NAME_OVERRIDE_FOR_ESQL,
   RULE_TIMESTAMP_OVERRIDE,
   RULES_CREATION_FORM,
   RULES_CREATION_PREVIEW_BUTTON,
@@ -109,11 +121,19 @@ import {
   CREATE_WITHOUT_ENABLING_BTN,
   RULE_INDICES,
   ALERTS_INDEX_BUTTON,
+  INVESTIGATIONS_INPUT,
 } from '../screens/create_new_rule';
 import {
   INDEX_SELECTOR,
   CREATE_ACTION_CONNECTOR_BTN,
   EMAIL_ACTION_BTN,
+  ACTIONS_ALERTS_QUERY_FILTER_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON,
+  ACTIONS_ALERTS_QUERY_FILTER_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON,
+  ACTIONS_ALERTS_TIMEFRAME_START_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_END_INPUT,
+  ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT,
 } from '../screens/common/rule_actions';
 import { fillIndexConnectorForm, fillEmailConnectorForm } from './common/rule_actions';
 import { TOAST_ERROR } from '../screens/shared';
@@ -121,23 +141,18 @@ import { ALERTS_TABLE_COUNT } from '../screens/timeline';
 import { TIMELINE } from '../screens/timelines';
 import { EUI_FILTER_SELECT_ITEM, COMBO_BOX_INPUT } from '../screens/common/controls';
 import { ruleFields } from '../data/detection_engine';
-import { BACK_TO_RULES_TABLE } from '../screens/rule_details';
 import { waitForAlerts } from './alerts';
 import { refreshPage } from './security_header';
 import { EMPTY_ALERT_TABLE } from '../screens/alerts';
 
 export const createAndEnableRule = () => {
-  cy.get(CREATE_AND_ENABLE_BTN).click({ force: true });
+  cy.get(CREATE_AND_ENABLE_BTN).click();
   cy.get(CREATE_AND_ENABLE_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const createRuleWithoutEnabling = () => {
-  cy.get(CREATE_WITHOUT_ENABLING_BTN).click({ force: true });
+  cy.get(CREATE_WITHOUT_ENABLING_BTN).click();
   cy.get(CREATE_WITHOUT_ENABLING_BTN).should('not.exist');
-  cy.get(BACK_TO_RULES_TABLE).click({ force: true });
-  cy.get(BACK_TO_RULES_TABLE).should('not.exist');
 };
 
 export const fillAboutRule = (rule: RuleCreateProps) => {
@@ -294,6 +309,23 @@ export const fillReferenceUrls = (referenceUrls: string[] = ruleFields.reference
   return referenceUrls;
 };
 
+export const fillCustomInvestigationFields = (
+  fields: string[] = ruleFields.investigationFields.field_names
+) => {
+  fields.forEach((field) => {
+    cy.get(INVESTIGATIONS_INPUT).type(`${field}{enter}`, { force: true });
+  });
+  return fields;
+};
+
+export const fillAboutRuleMinimumAndContinue = (rule: RuleCreateProps) => {
+  cy.get(RULE_NAME_INPUT).clear();
+  cy.get(RULE_NAME_INPUT).type(rule.name);
+  cy.get(RULE_DESCRIPTION_INPUT).clear();
+  cy.get(RULE_DESCRIPTION_INPUT).type(rule.description);
+  getAboutContinueButton().should('exist').click();
+};
+
 export const fillAboutRuleAndContinue = (rule: RuleCreateProps) => {
   fillAboutRule(rule);
   getAboutContinueButton().should('exist').click({ force: true });
@@ -359,6 +391,12 @@ export const fillAboutRuleWithOverrideAndContinue = (rule: RuleCreateProps) => {
   getAboutContinueButton().should('exist').click({ force: true });
 };
 
+export const fillOverrideEsqlRuleName = (value: string) => {
+  cy.get(RULE_NAME_OVERRIDE_FOR_ESQL).within(() => {
+    cy.get(COMBO_BOX_INPUT).type(`${value}{enter}`);
+  });
+};
+
 // called after import rule from saved timeline
 // if alerts index is created, it is included in the timeline
 // to be consistent in multiple test runs, remove it if it's there
@@ -402,6 +440,13 @@ export const fillScheduleRuleAndContinue = (rule: RuleCreateProps) => {
   cy.get(SCHEDULE_CONTINUE_BUTTON).click({ force: true });
 };
 
+/**
+ * use default schedule options
+ */
+export const skipScheduleRuleAction = () => {
+  cy.get(SCHEDULE_CONTINUE_BUTTON).click();
+};
+
 export const fillFrom = (from: RuleIntervalFrom = ruleFields.ruleIntervalFrom) => {
   const value = from.slice(0, from.length - 1);
   const type = from.slice(from.length - 1);
@@ -426,6 +471,25 @@ export const fillRuleAction = (actions: Actions) => {
         break;
     }
   });
+};
+
+export const fillRuleActionFilters = (alertsFilter: AlertsFilter) => {
+  cy.get(ACTIONS_ALERTS_QUERY_FILTER_BUTTON).click();
+  cy.get(ACTIONS_ALERTS_QUERY_FILTER_INPUT()).type(alertsFilter.query.kql);
+
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_FILTER_BUTTON).click();
+  alertsFilter.timeframe.days.forEach((day) =>
+    cy.get(ACTIONS_ALERTS_TIMEFRAME_WEEKDAY_BUTTON(day)).click()
+  );
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_START_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.hours.start}{enter}`);
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_END_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.hours.end}{enter}`);
+  cy.get(ACTIONS_ALERTS_TIMEFRAME_TIMEZONE_INPUT)
+    .first()
+    .type(`{selectall}${alertsFilter.timeframe.timezone}{enter}`);
 };
 
 export const fillDefineThresholdRuleAndContinue = (rule: ThresholdRuleCreateProps) => {
@@ -480,7 +544,7 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(INPUT).type(rule.new_terms_fields[0], { delay: 35 });
 
   cy.get(EUI_FILTER_SELECT_ITEM).click();
-  // eslint-disable-next-line cypress/unsafe-to-chain-command
+
   cy.focused().type('{esc}'); // Close combobox dropdown so next inputs can be interacted with
   const historySize = convertHistoryStartToSize(rule.history_window_start);
   const historySizeNumber = historySize.slice(0, historySize.length - 1);
@@ -489,6 +553,46 @@ export const fillDefineNewTermsRuleAndContinue = (rule: NewTermsRuleCreateProps)
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_SIZE).type(historySizeNumber);
   cy.get(NEW_TERMS_INPUT_AREA).find(NEW_TERMS_HISTORY_TIME_TYPE).select(historySizeType);
   cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click({ force: true });
+};
+
+export const fillEsqlQueryBar = (query: string) => {
+  // eslint-disable-next-line cypress/no-force
+  cy.get(ESQL_QUERY_BAR_INPUT_AREA).type(query, { force: true });
+};
+
+export const clearEsqlQueryBar = () => {
+  // monaco editor under the hood is quite complex in matter to clear it
+  // underlying textarea holds just the last character of query displayed in search bar
+  // in order to clear it - it requires to select all text within editor and type in it
+  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd}a' : '{ctrl}a');
+};
+
+/**
+ * expands query bar, so query is not obscured on narrow screens
+ * and validation message is not covered by input menu tooltip
+ */
+export const expandEsqlQueryBar = () => {
+  cy.get(ESQL_QUERY_BAR_EXPAND_BTN).click();
+};
+
+export const fillDefineEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
+  cy.get(ESQL_QUERY_BAR).contains('ES|QL query');
+  fillEsqlQueryBar(rule.query);
+
+  cy.get(DEFINE_CONTINUE_BUTTON).should('exist').click();
+};
+
+/**
+ * fills only required(name, description) and specific to ES|QL(rule name override) fields on about page
+ */
+export const fillAboutSpecificEsqlRuleAndContinue = (rule: EsqlRuleCreateProps) => {
+  fillRuleName(rule.name);
+  fillDescription(rule.description);
+
+  expandAdvancedSettings();
+  // this field defined to be returned in rule query
+  fillOverrideEsqlRuleName(rule.rule_name_override ?? '');
+  getAboutContinueButton().click();
 };
 
 /**
@@ -611,6 +715,11 @@ export const getCustomQueryInvalidationText = () => cy.contains(CUSTOM_QUERY_REQ
  * @param rule The rule to use to fill in everything
  */
 export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCreateProps) => {
+  fillDefineIndicatorMatchRule(rule);
+  continueFromDefineStep();
+};
+
+export const fillDefineIndicatorMatchRule = (rule: ThreatMatchRuleCreateProps) => {
   if (rule.index) {
     fillIndexAndIndicatorIndexPattern(rule.index, rule.threat_index);
   }
@@ -619,6 +728,12 @@ export const fillDefineIndicatorMatchRuleAndContinue = (rule: ThreatMatchRuleCre
     indicatorIndexField: rule.threat_mapping[0].entries[0].value,
   });
   getCustomIndicatorQueryInput().type('{selectall}{enter}*:*');
+};
+
+/**
+ * presses continue on form Define step
+ */
+export const continueFromDefineStep = () => {
   getDefineContinueButton().should('exist').click({ force: true });
 };
 
@@ -673,6 +788,10 @@ export const selectNewTermsRuleType = () => {
   cy.get(NEW_TERMS_TYPE).click({ force: true });
 };
 
+export const selectEsqlRuleType = () => {
+  cy.get(ESQL_TYPE).click();
+};
+
 export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
   cy.waitUntil(
     () => {
@@ -702,6 +821,52 @@ export const selectAndLoadSavedQuery = (queryName: string, queryValue: string) =
   cy.get(APPLY_SELECTED_SAVED_QUERY_BUTTON).click();
 
   cy.get(CUSTOM_QUERY_INPUT).should('have.value', queryValue);
+};
+
+export const enablesAndPopulatesThresholdSuppression = (
+  interval: number,
+  timeUnit: 's' | 'm' | 'h'
+) => {
+  // enable suppression is unchecked so the rest of suppression components are disabled
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.disabled').should('be.checked');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION)
+    .should('be.disabled')
+    .should('not.be.checked');
+
+  // enables suppression for threshold rule
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).should('not.be.checked');
+  cy.get(THRESHOLD_ENABLE_SUPPRESSION_CHECKBOX).siblings('label').click();
+
+  setAlertSuppressionDuration(interval, timeUnit);
+
+  // rule execution radio option is disabled, per time interval becomes enabled when suppression enabled
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).should('be.disabled');
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).should('be.enabled').should('be.checked');
+};
+
+export const fillAlertSuppressionFields = (fields: string[]) => {
+  fields.forEach((field) => {
+    cy.get(ALERT_SUPPRESSION_FIELDS_COMBO_BOX).type(`${field}{enter}`);
+  });
+};
+
+export const selectAlertSuppressionPerInterval = () => {
+  // checkbox is covered by label, force:true is a workaround
+  // click on label not working, likely because it has child components
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_TIME_INTERVAL).click({ force: true });
+};
+
+export const selectAlertSuppressionPerRuleExecution = () => {
+  cy.get(ALERT_SUPPRESSION_DURATION_PER_RULE_EXECUTION).siblings('label').click();
+};
+
+export const selectDoNotSuppressForMissingFields = () => {
+  cy.get(ALERT_SUPPRESSION_MISSING_FIELDS_DO_NOT_SUPPRESS).siblings('label').click();
+};
+
+export const setAlertSuppressionDuration = (interval: number, timeUnit: 's' | 'm' | 'h') => {
+  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).first().type(`{selectall}${interval}`);
+  cy.get(ALERT_SUPPRESSION_DURATION_INPUT).eq(1).select(timeUnit);
 };
 
 export const checkLoadQueryDynamically = () => {

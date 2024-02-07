@@ -14,7 +14,7 @@ import { ScopedHistory } from '@kbn/core/public';
 
 import { TemplateDeserialized } from '../../../../common';
 import { PageError, PageLoading, attemptToURIDecode, Error } from '../../../shared_imports';
-import { breadcrumbService } from '../../services/breadcrumbs';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../services/breadcrumbs';
 import { useLoadIndexTemplate, updateTemplate } from '../../services/api';
 import { getTemplateDetailsLink } from '../../services/routing';
 import { TemplateForm } from '../../components';
@@ -46,7 +46,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   const { error, data: template, isLoading } = useLoadIndexTemplate(decodedTemplateName, isLegacy);
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs('templateEdit');
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.templateEdit);
   }, []);
 
   const onSave = async (updatedTemplate: TemplateDeserialized) => {
@@ -70,6 +70,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
   };
 
   let isSystemTemplate;
+  let isDeprecatedTemplate;
 
   if (isLoading) {
     return (
@@ -100,6 +101,7 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
     } = template;
 
     isSystemTemplate = templateName && templateName.startsWith('.');
+    isDeprecatedTemplate = template?.deprecated;
 
     if (type === 'cloudManaged') {
       return (
@@ -148,6 +150,27 @@ export const TemplateEdit: React.FunctionComponent<RouteComponentProps<MatchPara
           </EuiCallOut>
           <EuiSpacer size="l" />
         </Fragment>
+      )}
+      {isDeprecatedTemplate && (
+        <>
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningTitle"
+                defaultMessage="This index template is deprecated"
+              />
+            }
+            iconType="warning"
+            color="warning"
+            data-test-subj="deprecatedIndexTemplateCallout"
+          >
+            <FormattedMessage
+              id="xpack.idxMgmt.templateEdit.deprecatedTemplateWarningDescription"
+              defaultMessage="This index template is no longer supported and might be removed in a future release. Instead, use one of the other index templates available or create a new one."
+            />
+          </EuiCallOut>
+          <EuiSpacer size="l" />
+        </>
       )}
 
       <TemplateForm

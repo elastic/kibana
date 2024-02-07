@@ -43,7 +43,12 @@ export const LoadingCategorization: FC<Props> = ({ onClose }) => (
           <EuiFlexItem>
             <EuiFlexGroup justifyContent="spaceAround">
               <EuiFlexItem grow={false} css={{ textAlign: 'center' }}>
-                <EuiButton onClick={() => onClose()}>Cancel</EuiButton>
+                <EuiButton
+                  data-test-subj="aiopsLoadingCategorizationCancelButton"
+                  onClick={() => onClose()}
+                >
+                  Cancel
+                </EuiButton>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>

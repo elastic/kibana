@@ -299,6 +299,21 @@ export class InspectorService extends FtrService {
     return this.testSubjects.find('inspectorRequestDetailResponse');
   }
 
+  public async getRequest(
+    codeEditorIndex: number = 0
+  ): Promise<{ command: string; body: Record<string, any> }> {
+    await (await this.getOpenRequestDetailRequestButton()).click();
+
+    await this.monacoEditor.waitCodeEditorReady('inspectorRequestCodeViewerContainer');
+    const requestString = await this.monacoEditor.getCodeEditorValue(codeEditorIndex);
+    this.log.debug('Request string from inspector:', requestString);
+    const openBraceIndex = requestString.indexOf('{');
+    return {
+      command: openBraceIndex >= 0 ? requestString.substring(0, openBraceIndex).trim() : '',
+      body: openBraceIndex >= 0 ? JSON.parse(requestString.substring(openBraceIndex)) : {},
+    };
+  }
+
   public async getResponse(): Promise<Record<string, any>> {
     await (await this.getOpenRequestDetailResponseButton()).click();
 

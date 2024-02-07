@@ -7,6 +7,6 @@
 
 import { Plugin } from './plugin';
 
-export function plugin() {
+export async function plugin() {
   return new Plugin();
 }

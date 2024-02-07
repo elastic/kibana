@@ -8,6 +8,7 @@
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin/server';
+import type { CompatibleModule } from '../../../common/constants/app';
 import type { GetGuards } from '../shared_services';
 import { DataRecognizer, dataRecognizerFactory } from '../../models/data_recognizer';
 import { moduleIdParamSchema, setupModuleBodySchema } from '../../routes/schemas/modules';
@@ -29,7 +30,8 @@ export interface ModulesProvider {
 
 export function getModulesProvider(
   getGuards: GetGuards,
-  getDataViews: () => DataViewsPluginStart
+  getDataViews: () => DataViewsPluginStart,
+  compatibleModuleType: CompatibleModule | null
 ): ModulesProvider {
   return {
     modulesProvider(request: KibanaRequest, savedObjectsClient: SavedObjectsClientContract) {
@@ -47,12 +49,13 @@ export function getModulesProvider(
                 savedObjectsClient,
                 dataViewsService,
                 mlSavedObjectService,
-                request
+                request,
+                compatibleModuleType
               );
               return dr.findMatches(...args);
             });
         },
-        async getModule(moduleId: string) {
+        async getModule(...args) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetJobs'])
@@ -64,9 +67,10 @@ export function getModulesProvider(
                 savedObjectsClient,
                 dataViewsService,
                 mlSavedObjectService,
-                request
+                request,
+                compatibleModuleType
               );
-              return dr.getModule(moduleId);
+              return dr.getModule(...args);
             });
         },
         async listModules() {
@@ -81,7 +85,8 @@ export function getModulesProvider(
                 savedObjectsClient,
                 dataViewsService,
                 mlSavedObjectService,
-                request
+                request,
+                compatibleModuleType
               );
               return dr.listModules();
             });
@@ -98,7 +103,8 @@ export function getModulesProvider(
                 savedObjectsClient,
                 dataViewsService,
                 mlSavedObjectService,
-                request
+                request,
+                compatibleModuleType
               );
               return dr.setup(
                 payload.moduleId,

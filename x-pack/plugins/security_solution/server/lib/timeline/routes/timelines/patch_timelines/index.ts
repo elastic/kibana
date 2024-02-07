@@ -28,72 +28,77 @@ export const patchTimelinesRoute = (
   _: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.patch(
-    {
+  router.versioned
+    .patch({
       path: TIMELINE_URL,
-      validate: {
-        body: buildRouteValidationWithExcess(patchTimelineSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response): Promise<IKibanaResponse<PatchTimelinesResponse>> => {
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { body: buildRouteValidationWithExcess(patchTimelineSchema) },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response): Promise<IKibanaResponse<PatchTimelinesResponse>> => {
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const frameworkRequest = await buildFrameworkRequest(context, security, request);
-        const { timelineId, timeline, version } = request.body;
-        const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
-          timeline;
+        try {
+          const frameworkRequest = await buildFrameworkRequest(context, security, request);
+          const { timelineId, timeline, version } = request.body;
+          const { templateTimelineId, templateTimelineVersion, timelineType, title, status } =
+            timeline;
 
-        const compareTimelinesStatus = new CompareTimelinesStatus({
-          status,
-          title,
-          timelineType,
-          timelineInput: {
-            id: timelineId,
-            version,
-          },
-          templateTimelineInput: {
-            id: templateTimelineId,
-            version: templateTimelineVersion,
-          },
-          frameworkRequest,
-        });
-
-        await compareTimelinesStatus.init();
-        if (compareTimelinesStatus.isUpdatable) {
-          const updatedTimeline = await createTimelines({
-            frameworkRequest,
-            timeline,
-            timelineSavedObjectId: timelineId,
-            timelineVersion: version,
-          });
-
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: updatedTimeline,
-              },
+          const compareTimelinesStatus = new CompareTimelinesStatus({
+            status,
+            title,
+            timelineType,
+            timelineInput: {
+              id: timelineId,
+              version,
             },
+            templateTimelineInput: {
+              id: templateTimelineId,
+              version: templateTimelineVersion,
+            },
+            frameworkRequest,
           });
-        } else {
-          const error = compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.update);
-          return siemResponse.error(
-            error || {
-              statusCode: 405,
-              body: 'update timeline error',
-            }
-          );
+
+          await compareTimelinesStatus.init();
+          if (compareTimelinesStatus.isUpdatable) {
+            const updatedTimeline = await createTimelines({
+              frameworkRequest,
+              timeline,
+              timelineSavedObjectId: timelineId,
+              timelineVersion: version,
+            });
+
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: updatedTimeline,
+                },
+              },
+            });
+          } else {
+            const error = compareTimelinesStatus.checkIsFailureCases(TimelineStatusActions.update);
+            return siemResponse.error(
+              error || {
+                statusCode: 405,
+                body: 'update timeline error',
+              }
+            );
+          }
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
         }
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

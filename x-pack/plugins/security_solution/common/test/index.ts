@@ -5,17 +5,31 @@
  * 2.0.
  */
 
-// For the source of these roles please consult the PR these were introduced https://github.com/elastic/kibana/pull/81866#issue-511165754
+import serverlessRoleDefinitions from '@kbn/es/src/serverless_resources/security_roles.json';
+import essRoleDefinitions from './ess_roles.json';
+
+type ServerlessSecurityRoleName = keyof typeof serverlessRoleDefinitions;
+type EssSecurityRoleName = keyof typeof essRoleDefinitions;
+
+export const KNOWN_SERVERLESS_ROLE_DEFINITIONS = serverlessRoleDefinitions;
+export const KNOWN_ESS_ROLE_DEFINITIONS = essRoleDefinitions;
+
+export type SecurityRoleName = ServerlessSecurityRoleName | EssSecurityRoleName;
+
 export enum ROLES {
-  soc_manager = 'soc_manager',
-  reader = 'reader',
+  // Serverless roles
   t1_analyst = 't1_analyst',
   t2_analyst = 't2_analyst',
+  t3_analyst = 't3_analyst',
+  rule_author = 'rule_author',
+  soc_manager = 'soc_manager',
+  detections_admin = 'detections_admin',
+  platform_engineer = 'platform_engineer',
+  // ESS roles
+  reader = 'reader',
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
-  rule_author = 'rule_author',
-  platform_engineer = 'platform_engineer',
-  detections_admin = 'detections_admin',
+  no_risk_engine_privileges = 'no_risk_engine_privileges',
 }
 
 /**

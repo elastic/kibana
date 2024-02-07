@@ -26,14 +26,14 @@ export const TextInput = ({
   field,
   unsavedChange,
   isSavingEnabled,
-  onChange: onChangeProp,
+  onInputChange,
 }: TextInputProps) => {
   const onChange: EuiFieldTextProps['onChange'] = (event) => {
     const inputValue = event.target.value;
     onUpdate({ type: field.type, unsavedValue: inputValue });
   };
 
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
+  const onUpdate = useUpdate({ onInputChange, field });
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;

@@ -28,6 +28,10 @@ describe('FullStoryShipper', () => {
     );
   });
 
+  afterEach(() => {
+    fullstoryShipper.shutdown();
+  });
+
   describe('extendContext', () => {
     describe('FS.identify', () => {
       test('calls `identify` when the userId is provided', () => {
@@ -118,6 +122,21 @@ describe('FullStoryShipper', () => {
           cloudId_str: 'test-es-org-id',
           labels: { serverless_str: 'test' },
         });
+      });
+
+      test('emits once only if nothing changes', () => {
+        const context = {
+          userId: 'test-user-id',
+          version: '1.2.3',
+          cloudId: 'test-es-org-id',
+          labels: { serverless: 'test' },
+          foo: 'bar',
+        };
+        fullstoryShipper.extendContext(context);
+        fullstoryShipper.extendContext(context);
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledTimes(1);
+        fullstoryShipper.extendContext(context);
+        expect(fullStoryApiMock.setVars).toHaveBeenCalledTimes(1);
       });
     });
   });

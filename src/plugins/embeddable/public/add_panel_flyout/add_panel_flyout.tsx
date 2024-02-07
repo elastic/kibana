@@ -103,7 +103,8 @@ export const AddPanelFlyout = ({
 
       const embeddable = await container.addNewEmbeddable<SavedObjectEmbeddableInput>(
         factoryForSavedObjectType.type,
-        { savedObjectId: id }
+        { savedObjectId: id },
+        savedObject.attributes
       );
       onAddPanel?.(embeddable.id);
 

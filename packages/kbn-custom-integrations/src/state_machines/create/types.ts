@@ -19,7 +19,9 @@ export interface WithTouchedFields {
   touchedFields: Record<keyof CreateCustomIntegrationOptions, boolean>;
 }
 
-export type CreateInitialState = WithOptions & WithFields & WithPreviouslyCreatedIntegration;
+export type CreateInitialState = Partial<WithOptions> &
+  Partial<WithFields> &
+  WithPreviouslyCreatedIntegration;
 
 export interface WithOptions {
   options: {
@@ -91,11 +93,13 @@ export type CreateCustomIntegrationTypestate =
 
 export type CreateCustomIntegrationContext = CreateCustomIntegrationTypestate['context'];
 
+export interface UpdateFieldsEvent {
+  type: 'UPDATE_FIELDS';
+  fields: Partial<CreateCustomIntegrationOptions>;
+}
+
 export type CreateCustomIntegrationEvent =
-  | {
-      type: 'UPDATE_FIELDS';
-      fields: Partial<CreateCustomIntegrationOptions>;
-    }
+  | UpdateFieldsEvent
   | {
       type: 'INITIALIZE';
     }

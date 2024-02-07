@@ -143,7 +143,7 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
       class="euiPanel euiPanel--primary euiPanel--paddingMedium euiCallOut euiCallOut--primary emotion-euiPanel-none-m-primary-euiCallOut"
     >
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+        class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <dl
           class="euiDescriptionList emotion-euiDescriptionList-row-left"
@@ -178,13 +178,13 @@ exports[`PingListExpandedRow renders link to docs if body is not recorded but it
               >
                 docs
                 <span
-                  class="emotion-euiLink__externalIcon"
+                  class="emotion-EuiExternalLinkIcon"
                   data-euiicon-type="popout"
                 >
                   External link
                 </span>
                 <span
-                  class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+                  class="emotion-euiScreenReaderOnly"
                 >
                   (opens in a new tab or window)
                 </span>

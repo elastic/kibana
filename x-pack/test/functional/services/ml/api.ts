@@ -223,7 +223,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndex(
       indices: string,
-      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping
+      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping,
+      settings?: Record<string, estypes.IndicesIndexSettings> | estypes.IndicesIndexSettings
     ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
@@ -233,7 +234,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.indices.create({
         index: indices,
-        ...(mappings ? { body: { mappings } } : {}),
+        body: {
+          ...(mappings ? { mappings } : {}),
+          ...(settings ? { settings } : {}),
+        },
       });
       expect(body)
         .to.have.property('acknowledged')
@@ -1337,6 +1341,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
+    async getTrainedModelStatsES(): Promise<estypes.MlGetTrainedModelsStatsResponse> {
+      log.debug(`Getting trained models stats`);
+      const { body, status } = await esSupertest.get(`/_ml/trained_models/_stats`);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model stats fetched');
+      return body;
+    },
+
     async deleteTrainedModelES(modelId: string) {
       log.debug(`Deleting trained model with id "${modelId}"`);
       const { body, status } = await esSupertest
@@ -1359,10 +1372,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async stopTrainedModelDeploymentES(modelId: string) {
-      log.debug(`Stopping trained model deployment with id "${modelId}"`);
+    async stopTrainedModelDeploymentES(deploymentId: string) {
+      log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
       const { body, status } = await esSupertest.post(
-        `/_ml/trained_models/${modelId}/deployment/_stop`
+        `/_ml/trained_models/${deploymentId}/deployment/_stop`
       );
       this.assertResponseStatusCode(200, status, body);
 
@@ -1371,13 +1384,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async stopAllTrainedModelDeploymentsES() {
       log.debug(`Stopping all trained model deployments`);
-      const getModelsRsp = await this.getTrainedModelsES();
-      for (const model of getModelsRsp.trained_model_configs) {
-        if (this.isInternalModelId(model.model_id)) {
-          log.debug(`> Skipping internal ${model.model_id}`);
+      const getModelsRsp = await this.getTrainedModelStatsES();
+      for (const modelStats of getModelsRsp.trained_model_stats) {
+        if (this.isInternalModelId(modelStats.model_id)) {
+          log.debug(`> Skipping internal ${modelStats.model_id}`);
           continue;
         }
-        await this.stopTrainedModelDeploymentES(model.model_id);
+        if (modelStats.deployment_stats === undefined) {
+          log.debug(`> Skipping, no deployment stats for ${modelStats.model_id} found`);
+          continue;
+        }
+        await this.stopTrainedModelDeploymentES(modelStats.deployment_stats.deployment_id);
       }
     },
 
@@ -1494,7 +1511,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         });
       this.assertResponseStatusCode(200, status, ingestPipeline);
 
-      log.debug('> Ingest pipeline crated');
+      log.debug('> Ingest pipeline created');
       return ingestPipeline;
     },
 
@@ -1546,6 +1563,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       this.assertResponseStatusCode(200, status, module);
 
       log.debug('Module set up');
+      return module;
+    },
+
+    async getModule(moduleId: string) {
+      log.debug(`Get module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .get(`/internal/ml/modules/get_module/${moduleId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
       return module;
     },
   };

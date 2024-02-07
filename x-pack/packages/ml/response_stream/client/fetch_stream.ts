@@ -8,7 +8,7 @@
 import startsWith from 'lodash/startsWith';
 import type { Reducer, ReducerAction } from 'react';
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
 
 type GeneratorError = string | null;
 
@@ -42,7 +42,8 @@ export async function* fetchStream<B extends object, R extends Reducer<any, any>
   apiVersion: string | undefined,
   abortCtrl: React.MutableRefObject<AbortController>,
   body?: B,
-  ndjson = true
+  ndjson = true,
+  headers?: HttpFetchOptions['headers']
 ): AsyncGenerator<[GeneratorError, ReducerAction<R> | Array<ReducerAction<R>> | undefined]> {
   let stream: Readonly<Response> | undefined;
 
@@ -52,6 +53,7 @@ export async function* fetchStream<B extends object, R extends Reducer<any, any>
       version: apiVersion,
       asResponse: true,
       rawResponse: true,
+      headers,
       ...(body && Object.keys(body).length > 0 ? { body: JSON.stringify(body) } : {}),
     });
 

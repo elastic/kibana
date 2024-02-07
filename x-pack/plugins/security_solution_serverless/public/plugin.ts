@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { getSecurityGetStartedComponent } from './get_started';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
@@ -18,9 +17,14 @@ import type {
 } from './types';
 import { registerUpsellings } from './upselling';
 import { createServices } from './common/services/create_services';
-import { configureNavigation } from './navigation';
+import { setupNavigation, startNavigation } from './navigation';
 import { setRoutes } from './pages/routes';
-import { projectAppLinksSwitcher } from './navigation/links/app_links';
+import {
+  parseExperimentalConfigValue,
+  type ExperimentalFeatures,
+} from '../common/experimental_features';
+import { getCloudUrl, getProjectFeaturesUrl } from './navigation/links/util';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -32,17 +36,25 @@ export class SecuritySolutionServerlessPlugin
     >
 {
   private config: ServerlessSecurityPublicConfig;
+  private experimentalFeatures: ExperimentalFeatures;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ServerlessSecurityPublicConfig>();
+    this.experimentalFeatures = {} as ExperimentalFeatures;
   }
 
   public setup(
-    _core: CoreSetup,
+    core: CoreSetup,
     setupDeps: SecuritySolutionServerlessPluginSetupDeps
   ): SecuritySolutionServerlessPluginSetup {
-    setupDeps.securitySolution.setAppLinksSwitcher(projectAppLinksSwitcher);
+    const { securitySolution } = setupDeps;
 
+    this.experimentalFeatures = parseExperimentalConfigValue(
+      this.config.enableExperimental,
+      securitySolution.experimentalFeatures
+    ).features;
+
+    setupNavigation(core, setupDeps);
     return {};
   }
 
@@ -53,15 +65,22 @@ export class SecuritySolutionServerlessPlugin
     const { securitySolution } = startDeps;
     const { productTypes } = this.config;
 
-    const services = createServices(core, startDeps);
+    const services = createServices(core, startDeps, this.experimentalFeatures);
 
-    registerUpsellings(securitySolution.getUpselling(), this.config.productTypes, services);
+    registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
-    securitySolution.setGetStartedPage(getSecurityGetStartedComponent(services, productTypes));
-    securitySolution.setDashboardsLandingCallout(getDashboardsLandingCallout(services));
-    securitySolution.setIsILMAvailable(false);
-
-    configureNavigation(services, this.config);
+    securitySolution.setComponents({
+      DashboardsLandingCallout: getDashboardsLandingCallout(services),
+    });
+    securitySolution.setOnboardingPageSettings.setProductTypes(productTypes);
+    securitySolution.setOnboardingPageSettings.setProjectFeaturesUrl(
+      getProjectFeaturesUrl(services.cloud)
+    );
+    securitySolution.setOnboardingPageSettings.setProjectsUrl(
+      getCloudUrl('projects', services.cloud)
+    );
+    setOnboardingSettings(services);
+    startNavigation(services);
     setRoutes(services);
 
     return {};

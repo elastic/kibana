@@ -5,21 +5,20 @@
  * 2.0.
  */
 
-import { EuiButton, EuiErrorBoundary } from '@elastic/eui';
-import React from 'react';
-import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
+import { EuiErrorBoundary } from '@elastic/eui';
+import React, { useContext } from 'react';
+import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
+import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { MetricsPageTemplate } from '../page_template';
 import { hostsTitle } from '../../../translations';
-import { MetricsDataViewProvider } from './hooks/use_data_view';
+import { MetricsDataViewProvider } from './hooks/use_metrics_data_view';
 import { fullHeightContentStyles } from '../../../page_template.styles';
 import { HostContainer } from './components/hosts_container';
 import { BetaBadge } from '../../../components/beta_badge';
@@ -27,22 +26,10 @@ import { NoRemoteCluster } from '../../../components/empty_states';
 
 const HOSTS_FEEDBACK_LINK =
   'https://docs.google.com/forms/d/e/1FAIpQLScRHG8TIVb1Oq8ZhD4aks3P1TmgiM58TY123QpDCcBz83YC6w/viewform';
-const KIBANA_VERSION_QUERY_PARAM = 'entry.548460210';
-
-const getHostFeedbackURL = (kibanaVersion?: string) => {
-  const url = new URL(HOSTS_FEEDBACK_LINK);
-  if (kibanaVersion) {
-    url.searchParams.append(KIBANA_VERSION_QUERY_PARAM, kibanaVersion);
-  }
-
-  return url.href;
-};
 
 export const HostsPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
-  const {
-    services: { kibanaVersion },
-  } = useKibanaContextForPlugin();
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
 
   useTrackPageview({ app: 'infra_metrics', path: 'hosts' });
   useTrackPageview({ app: 'infra_metrics', path: 'hosts', delay: 15000 });
@@ -95,18 +82,13 @@ export const HostsPage = () => {
               </div>
             ),
             rightSideItems: [
-              <EuiButton
+              <FeatureFeedbackButton
                 data-test-subj="infraHostsPageTellUsWhatYouThinkButton"
-                href={getHostFeedbackURL(kibanaVersion)}
-                target="_blank"
-                color="warning"
-                iconType="editorComment"
-              >
-                <FormattedMessage
-                  id="xpack.infra.hostsPage.tellUsWhatYouThinkLink"
-                  defaultMessage="Tell us what you think!"
-                />
-              </EuiButton>,
+                formUrl={HOSTS_FEEDBACK_LINK}
+                kibanaVersion={kibanaVersion}
+                isCloudEnv={isCloudEnv}
+                isServerlessEnv={isServerlessEnv}
+              />,
             ],
           }}
           pageSectionProps={{

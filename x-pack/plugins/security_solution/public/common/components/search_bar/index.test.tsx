@@ -6,19 +6,12 @@
  */
 
 import React from 'react';
-import {
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-} from '../../mock';
+import { createMockStore, mockGlobalState, TestProviders } from '../../mock';
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { SearchBarComponent } from '.';
 import type { SavedQuery } from '@kbn/data-plugin/public';
 import { FilterManager } from '@kbn/data-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { createStore } from '../../store';
 import { inputsActions } from '../../store/inputs';
 import { InputsModelId } from '../../store/inputs/constants';
 
@@ -68,6 +61,7 @@ describe('SearchBarComponent', () => {
       fields: [],
       title: '',
     },
+    sourcererDataView: {},
     updateSearch: jest.fn(),
     setSavedQuery: jest.fn(),
     setSearchBarFilter: jest.fn(),
@@ -86,7 +80,7 @@ describe('SearchBarComponent', () => {
 
   const pollForSignalIndex = jest.fn();
   beforeEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   it('calls pollForSignalIndex on Refresh button click', () => {
@@ -136,8 +130,7 @@ describe('SearchBarComponent', () => {
       },
     };
 
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state);
 
     render(
       <TestProviders store={store}>
@@ -173,8 +166,7 @@ describe('SearchBarComponent', () => {
       },
     };
 
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
+    const store = createMockStore(state);
 
     render(
       <TestProviders store={store}>
@@ -188,9 +180,7 @@ describe('SearchBarComponent', () => {
   });
 
   it('calls useUpdateUrlParam when query query changes', async () => {
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
+    const store = createMockStore();
     render(
       <TestProviders store={store}>
         <SearchBarComponent {...props} />
@@ -213,9 +203,7 @@ describe('SearchBarComponent', () => {
   });
 
   it('calls useUpdateUrlParam when filters change', async () => {
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
+    const store = createMockStore();
     render(
       <TestProviders store={store}>
         <SearchBarComponent {...props} />
@@ -249,9 +237,7 @@ describe('SearchBarComponent', () => {
   });
 
   it('calls useUpdateUrlParam when savedQuery changes', async () => {
-    const { storage } = createSecuritySolutionStorageMock();
-    const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
+    const store = createMockStore();
     render(
       <TestProviders store={store}>
         <SearchBarComponent {...props} />
@@ -283,9 +269,7 @@ describe('SearchBarComponent', () => {
 
   describe('Timerange', () => {
     it('calls useUpdateUrlParam when global timerange changes', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
+      const store = createMockStore();
       render(
         <TestProviders store={store}>
           <SearchBarComponent {...props} />
@@ -319,9 +303,7 @@ describe('SearchBarComponent', () => {
     });
 
     it('calls useUpdateUrlParam when timeline timerange changes', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
+      const store = createMockStore();
       render(
         <TestProviders store={store}>
           <SearchBarComponent {...props} />
@@ -358,11 +340,9 @@ describe('SearchBarComponent', () => {
     });
 
     it('initializes timerange URL param with redux date on mount', async () => {
-      const { storage } = createSecuritySolutionStorageMock();
-      const store = createStore(mockGlobalState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
       jest.clearAllMocks();
       render(
-        <TestProviders store={store}>
+        <TestProviders>
           <SearchBarComponent {...props} />
         </TestProviders>
       );

@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Query } from '@kbn/es-query';
@@ -19,7 +18,7 @@ import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { STACK_ALERTS_FEATURE_ID } from '../../../../common/constants';
+import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 
 function validateQuery(query: Query) {
   try {
@@ -39,15 +38,9 @@ interface Props {
 
 export const QueryInput = (props: Props) => {
   const {
-    data,
-    dataViews,
-    docLinks,
-    http,
-    notifications,
-    storage,
-    uiSettings,
-    unifiedSearch,
-    usageCollection,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = useKibana<{
     data: DataPublicPluginStart;
     dataViews: DataViewsPublicPluginStart;
@@ -82,17 +75,6 @@ export const QueryInput = (props: Props) => {
         }
       }}
       appName={STACK_ALERTS_FEATURE_ID}
-      deps={{
-        unifiedSearch,
-        notifications,
-        http,
-        docLinks,
-        uiSettings,
-        data,
-        dataViews,
-        storage,
-        usageCollection,
-      }}
     />
   );
 };

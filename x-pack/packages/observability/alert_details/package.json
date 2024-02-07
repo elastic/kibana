@@ -1,8 +1,8 @@
 {
   "name": "@kbn/observability-alert-details",
   "descriptio": "Helper and components related to alert details",
-  "author": "Actionable Observability",
   "private": true,
   "version": "1.0.0",
-  "license": "Elastic License 2.0"
+  "license": "Elastic License 2.0",
+  "sideEffects": false
 }

@@ -12,8 +12,13 @@ import type { PaletteOutput } from '@kbn/coloring';
 import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import { getOverridesFor } from '@kbn/chart-expressions-common';
+import {
+  type ChartSizeSpec,
+  getOverridesFor,
+  useSizeTransitionVeil,
+} from '@kbn/chart-expressions-common';
 import { isVisDimension } from '@kbn/visualizations-plugin/common/utils';
+import { i18n } from '@kbn/i18n';
 import {
   GaugeRenderProps,
   GaugeLabelMajorMode,
@@ -177,6 +182,8 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     chartsThemeService,
     renderComplete,
     overrides,
+    shouldUseVeil,
+    setChartSize,
   }) => {
     const {
       shape: gaugeType,
@@ -246,13 +253,30 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
     const onRenderChange = useCallback(
       (isRendered: boolean = true) => {
         if (isRendered) {
-          // this requestAnimationFrame call is a temporary fix for https://github.com/elastic/elastic-charts/issues/2124
-          window.requestAnimationFrame(() => {
-            renderComplete();
-          });
+          renderComplete();
         }
       },
       [renderComplete]
+    );
+
+    const chartSizeSpec: ChartSizeSpec = {
+      maxDimensions: {
+        ...(gaugeType === GaugeShapes.HORIZONTAL_BULLET
+          ? {
+              x: { value: 600, unit: 'pixels' },
+              y: { value: 300, unit: 'pixels' },
+            }
+          : {
+              y: { value: 600, unit: 'pixels' },
+              x: { value: 300, unit: 'pixels' },
+            }),
+      },
+    };
+
+    const { veil, onResize, containerRef } = useSizeTransitionVeil(
+      chartSizeSpec,
+      setChartSize,
+      shouldUseVeil
     );
 
     const table = data;
@@ -262,8 +286,6 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       // Chart is not ready
       return null;
     }
-
-    const chartTheme = chartsThemeService.useChartsTheme();
 
     const metricColumn = table.columns.find((col) => col.id === accessors.metric);
 
@@ -363,16 +385,19 @@ export const GaugeComponent: FC<GaugeRenderProps> = memo(
       : {};
 
     return (
-      <div className="gauge__wrapper">
+      <div className="gauge__wrapper" ref={containerRef}>
+        {veil}
         <Chart {...getOverridesFor(overrides, 'chart')}>
           <Settings
             noResults={<EmptyPlaceholder icon={icon} renderComplete={onRenderChange} />}
             debugState={window._echDebugStateFlag ?? false}
-            theme={[{ background: { color: 'transparent' } }, chartTheme]}
+            theme={[{ background: { color: 'transparent' } }]}
             baseTheme={chartBaseTheme}
             ariaLabel={args.ariaLabel}
             ariaUseDefaultSummary={!args.ariaLabel}
             onRenderChange={onRenderChange}
+            onResize={onResize}
+            locale={i18n.getLocale()}
             {...getOverridesFor(overrides, 'settings')}
           />
           <Goal

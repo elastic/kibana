@@ -26,7 +26,9 @@ describe('getContextFactory', () => {
     expect(coreStart.uiSettings.asScopedToClient).toHaveBeenCalledWith(soClient);
 
     expect(coreStart.capabilities.resolveCapabilities).toHaveBeenCalledTimes(1);
-    expect(coreStart.capabilities.resolveCapabilities).toHaveBeenCalledWith(request);
+    expect(coreStart.capabilities.resolveCapabilities).toHaveBeenCalledWith(request, {
+      capabilityPath: '*',
+    });
 
     expect(context).toEqual({
       core: {

@@ -15,13 +15,13 @@ import type { MlCapabilities } from '../../shared';
 function createDeepLinks(
   mlCapabilities: MlCapabilities,
   isFullLicense: boolean,
-  isServerless: boolean
+  showMLNavMenu: boolean
 ) {
   function getNavStatus(
     visible: boolean,
     showInServerless: boolean = true
   ): AppNavLinkStatus | undefined {
-    if (isServerless) {
+    if (showMLNavMenu === false) {
       // in serverless the status needs to be "visible" rather than "default"
       // for the links to appear in the nav menu.
       return showInServerless && visible ? AppNavLinkStatus.visible : AppNavLinkStatus.hidden;
@@ -145,7 +145,7 @@ function createDeepLinks(
           defaultMessage: 'Memory Usage',
         }),
         path: `/${ML_PAGES.MEMORY_USAGE}`,
-        navLinkStatus: getNavStatus(isFullLicense, false),
+        navLinkStatus: getNavStatus(isFullLicense, true),
       };
     },
 
@@ -263,13 +263,24 @@ function createDeepLinks(
       };
     },
 
-    getDataComparisonDeepLink: (): AppDeepLink<LinkId> => {
+    getESQLDataVisualizerDeepLink: (): AppDeepLink<LinkId> => {
       return {
-        id: 'dataComparison',
-        title: i18n.translate('xpack.ml.deepLink.dataComparison', {
-          defaultMessage: 'Data Comparison',
+        id: 'indexDataVisualizer',
+        title: i18n.translate('xpack.ml.deepLink.esqlDataVisualizer', {
+          defaultMessage: 'ES|QL Data Visualizer',
         }),
-        path: `/${ML_PAGES.DATA_COMPARISON_INDEX_SELECT}`,
+        path: `/${ML_PAGES.DATA_VISUALIZER_ESQL}`,
+        navLinkStatus: getNavStatus(true),
+      };
+    },
+
+    getDataDriftDeepLink: (): AppDeepLink<LinkId> => {
+      return {
+        id: 'dataDrift',
+        title: i18n.translate('xpack.ml.deepLink.dataDrift', {
+          defaultMessage: 'Data Drift',
+        }),
+        path: `/${ML_PAGES.DATA_DRIFT_INDEX_SELECT}`,
         navLinkStatus: getNavStatus(true),
       };
     },
@@ -279,8 +290,8 @@ function createDeepLinks(
 export function getDeepLinks(
   isFullLicense: boolean,
   mlCapabilities: MlCapabilities,
-  isServerless: boolean
+  showMLNavMenu: boolean
 ) {
-  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless);
+  const links = createDeepLinks(mlCapabilities, isFullLicense, showMLNavMenu);
   return Object.values(links).map((link) => link());
 }

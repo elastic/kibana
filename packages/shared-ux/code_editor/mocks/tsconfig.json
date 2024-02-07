@@ -4,17 +4,21 @@
     "outDir": "target/types",
     "types": [
       "jest",
-      "node"
+      "node",
+      "react",
+      "@emotion/react/types/css-prop",
+      "@kbn/ambient-ui-types",
     ]
   },
   "include": [
     "**/*.ts",
+    "**/*.tsx",
+    "../../../../typings/**/*",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
   ],
   "kbn_references": [
-    "@kbn/shared-ux-storybook-mock",
-    "@kbn/code-editor-types",
+    "@kbn/monaco",
   ]
 }

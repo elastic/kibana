@@ -40,8 +40,6 @@ export interface LogRateAnalysisContentWrapperProps {
   stickyHistogram?: boolean;
   /** App dependencies */
   appDependencies: AiopsAppDependencies;
-  /** On global timefilter update */
-  setGlobalState?: any;
   /** Timestamp for start of initial analysis */
   initialAnalysisStart?: number | WindowParameters;
   /** Optional time range */
@@ -58,13 +56,14 @@ export interface LogRateAnalysisContentWrapperProps {
    */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional flag to indicate whether kibana is running in serverless */
-  isServerless?: boolean;
+  showFrozenDataTierChoice?: boolean;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
 }
 
 export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProps> = ({
   dataView,
   appDependencies,
-  setGlobalState,
   initialAnalysisStart,
   timeRange,
   esSearchQuery,
@@ -72,7 +71,8 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
-  isServerless = false,
+  showFrozenDataTierChoice = true,
+  embeddingOrigin,
 }) => {
   if (!dataView) return null;
 
@@ -85,6 +85,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
   const datePickerDeps = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
+    showFrozenDataTierChoice,
   };
 
   return (
@@ -96,7 +97,6 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
               <DatePickerContextProvider {...datePickerDeps}>
                 <LogRateAnalysisContent
                   dataView={dataView}
-                  setGlobalState={setGlobalState}
                   initialAnalysisStart={initialAnalysisStart}
                   timeRange={timeRange}
                   esSearchQuery={esSearchQuery}
@@ -104,6 +104,7 @@ export const LogRateAnalysisContentWrapper: FC<LogRateAnalysisContentWrapperProp
                   barColorOverride={barColorOverride}
                   barHighlightColorOverride={barHighlightColorOverride}
                   onAnalysisCompleted={onAnalysisCompleted}
+                  embeddingOrigin={embeddingOrigin}
                 />
               </DatePickerContextProvider>
             </StorageContextProvider>

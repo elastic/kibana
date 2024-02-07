@@ -10,20 +10,23 @@ import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey'
 import { i18n } from '@kbn/i18n';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { DataTableRecord, ShouldShowFieldInTableHandler } from '../types';
+import type { DataTableRecord, ShouldShowFieldInTableHandler, FormattedHit } from '../types';
 import { formatFieldValue } from './format_value';
 
-const formattedHitCache = new WeakMap<SearchHit, FormattedHit>();
-
-type FormattedHit = Array<readonly [fieldName: string, formattedValue: string]>;
+const formattedHitCache = new WeakMap<
+  SearchHit,
+  { formattedHit: FormattedHit; maxEntries: number }
+>();
 
 /**
  * Returns a formatted document in form of key/value pairs of the fields name and a formatted value.
  * The value returned in each pair is an HTML string which is safe to be applied to the DOM, since
  * it's formatted using field formatters.
- * @param hit The hit to format
- * @param dataView The corresponding data view
- * @param shouldShowFieldHandler A function to check a field.
+ * @param hit
+ * @param dataView
+ * @param shouldShowFieldHandler
+ * @param maxEntries
+ * @param fieldFormats
  */
 export function formatHit(
   hit: DataTableRecord,
@@ -33,40 +36,35 @@ export function formatHit(
   fieldFormats: FieldFormatsStart
 ): FormattedHit {
   const cached = formattedHitCache.get(hit.raw);
-  if (cached) {
-    return cached;
+  if (cached && cached.maxEntries === maxEntries) {
+    return cached.formattedHit;
   }
 
   const highlights = hit.raw.highlight ?? {};
   // Flatten the object using the flattenHit implementation we use across Discover for flattening documents.
   const flattened = hit.flattened;
 
-  const highlightPairs: Array<[fieldName: string, formattedValue: string]> = [];
-  const sourcePairs: Array<[fieldName: string, formattedValue: string]> = [];
+  const highlightPairs: FormattedHit = [];
+  const sourcePairs: FormattedHit = [];
 
   // Add each flattened field into the corresponding array for highlighted or other fields,
   // depending on whether the original hit had a highlight for it. That way we can later
   // put highlighted fields first in the document summary.
   Object.entries(flattened).forEach(([key, val]) => {
     // Retrieve the (display) name of the fields, if it's a mapped field on the data view
-    const displayKey = dataView.fields.getByName(key)?.displayName;
+    const field = dataView.fields.getByName(key);
+    const displayKey = field?.displayName;
     const pairs = highlights[key] ? highlightPairs : sourcePairs;
     // Format the raw value using the regular field formatters for that field
-    const formattedValue = formatFieldValue(
-      val,
-      hit.raw,
-      fieldFormats,
-      dataView,
-      dataView.fields.getByName(key)
-    );
+    const formattedValue = formatFieldValue(val, hit.raw, fieldFormats, dataView, field);
     // If the field was a mapped field, we validate it against the fieldsToShow list, if not
     // we always include it into the result.
     if (displayKey) {
       if (shouldShowFieldHandler(key)) {
-        pairs.push([displayKey, formattedValue]);
+        pairs.push([displayKey, formattedValue, key]);
       }
     } else {
-      pairs.push([key, formattedValue]);
+      pairs.push([key, formattedValue, key]);
     }
   });
   const pairs = [...highlightPairs, ...sourcePairs];
@@ -83,8 +81,9 @@ export function formatHit(
               values: { count: pairs.length - maxEntries },
             }),
             '',
+            null,
           ] as const,
         ];
-  formattedHitCache.set(hit.raw, formatted);
+  formattedHitCache.set(hit.raw, { formattedHit: formatted, maxEntries });
   return formatted;
 }

@@ -6,5 +6,6 @@
  */
 
 export * from './datavisualizer';
+export * from './data_drift';
 export * from './index_based';
 export * from './file_based';

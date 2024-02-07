@@ -20,13 +20,17 @@ import {
   EuiSkeletonText,
 } from '@elastic/eui';
 
-import { Filter, Query } from '@kbn/es-query';
+import type { Filter, Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import type { SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { stringHash } from '@kbn/ml-string-hash';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
+
+import type { Category } from '../../../common/api/log_categorization/types';
+
 import { useDataSource } from '../../hooks/use_data_source';
 import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
@@ -34,12 +38,12 @@ import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
   getDefaultLogCategorizationAppState,
   type LogCategorizationPageUrlState,
-} from '../../application/utils/url_state';
+} from '../../application/url_state/log_pattern_analysis';
 
 import { SearchPanel } from '../search_panel';
 import { PageHeader } from '../page_header';
 
-import type { EventRate, Category, SparkLinesPerCategory } from './use_categorize_request';
+import type { EventRate } from './use_categorize_request';
 import { useCategorizeRequest } from './use_categorize_request';
 import { CategoryTable } from './category_table';
 import { DocumentCountChart } from './document_count_chart';
@@ -47,11 +51,17 @@ import { InformationText } from './information_text';
 import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
+import type { DocumentStats } from '../../hooks/use_document_count_stats';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
 
-export const LogCategorizationPage: FC = () => {
+interface LogCategorizationPageProps {
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin: string;
+}
+
+export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddingOrigin }) => {
   const {
     notifications: { toasts },
   } = useAiopsAppContext();
@@ -71,14 +81,14 @@ export const LogCategorizationPage: FC = () => {
   const [globalState, setGlobalState] = useUrlState('_g');
   const [selectedField, setSelectedField] = useState<string | undefined>();
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
-  const [selectedSavedSearch, setSelectedDataView] = useState(savedSearch);
+  const [selectedSavedSearch, setSelectedSavedSearch] = useState(savedSearch);
+  const [previousDocumentStatsHash, setPreviousDocumentStatsHash] = useState<number>(0);
   const [loading, setLoading] = useState(false);
   const [totalCount, setTotalCount] = useState(0);
   const [eventRate, setEventRate] = useState<EventRate>([]);
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
-    sparkLines: SparkLinesPerCategory;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -91,7 +101,7 @@ export const LogCategorizationPage: FC = () => {
 
   useEffect(() => {
     if (savedSearch) {
-      setSelectedDataView(savedSearch);
+      setSelectedSavedSearch(savedSearch);
     }
   }, [savedSearch]);
 
@@ -114,7 +124,7 @@ export const LogCategorizationPage: FC = () => {
       // When the user loads saved search and then clear or modify the query
       // we should remove the saved search and replace it with the index pattern id
       if (selectedSavedSearch !== null) {
-        setSelectedDataView(null);
+        setSelectedSavedSearch(null);
       }
 
       setUrlState({
@@ -150,14 +160,13 @@ export const LogCategorizationPage: FC = () => {
         to: globalState.time.to,
       });
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [JSON.stringify(globalState?.time), timefilter]);
+  }, [globalState?.time, timefilter]);
 
   const fields = useMemo(
     () =>
       dataView.fields
         .filter(
-          ({ displayName, esTypes, count }) =>
+          ({ displayName, esTypes }) =>
             esTypes && esTypes.includes('text') && !['_id', '_index'].includes(displayName)
         )
         .map(({ displayName }) => ({
@@ -165,29 +174,6 @@ export const LogCategorizationPage: FC = () => {
         })),
     [dataView]
   );
-
-  useEffect(() => {
-    if (documentStats.documentCountStats?.buckets) {
-      randomSampler.setDocCount(documentStats.totalCount);
-      setEventRate(
-        Object.entries(documentStats.documentCountStats.buckets).map(([key, docCount]) => ({
-          key: +key,
-          docCount,
-        }))
-      );
-      setData(null);
-      setFieldValidationResult(null);
-      setTotalCount(documentStats.totalCount);
-    }
-  }, [
-    documentStats,
-    earliest,
-    latest,
-    searchQueryLanguage,
-    searchString,
-    searchQuery,
-    randomSampler,
-  ]);
 
   const loadCategories = useCallback(async () => {
     setLoading(true);
@@ -197,31 +183,35 @@ export const LogCategorizationPage: FC = () => {
     const { getIndexPattern, timeFieldName: timeField } = dataView;
     const index = getIndexPattern();
 
-    if (selectedField === undefined || timeField === undefined) {
+    if (
+      selectedField === undefined ||
+      timeField === undefined ||
+      earliest === undefined ||
+      latest === undefined
+    ) {
       setLoading(false);
       return;
     }
 
     cancelRequest();
 
+    const timeRange = {
+      from: earliest,
+      to: latest,
+    };
+
     try {
       const [validationResult, categorizationResult] = await Promise.all([
-        runValidateFieldRequest(index, selectedField, timeField, earliest, latest, searchQuery),
-        runCategorizeRequest(
-          index,
-          selectedField,
-          timeField,
-          earliest,
-          latest,
-          searchQuery,
-          intervalMs
-        ),
+        runValidateFieldRequest(index, selectedField, timeField, timeRange, searchQuery, {
+          [AIOPS_TELEMETRY_ID.AIOPS_ANALYSIS_RUN_ORIGIN]: embeddingOrigin,
+        }),
+
+        runCategorizeRequest(index, selectedField, timeField, timeRange, searchQuery, intervalMs),
       ]);
 
       setFieldValidationResult(validationResult);
       setData({
         categories: categorizationResult.categories,
-        sparkLines: categorizationResult.sparkLinesPerCategory,
       });
     } catch (error) {
       toasts.addError(error, {
@@ -243,6 +233,44 @@ export const LogCategorizationPage: FC = () => {
     runCategorizeRequest,
     intervalMs,
     toasts,
+    embeddingOrigin,
+  ]);
+
+  useEffect(() => {
+    const buckets = documentStats.documentCountStats?.buckets;
+    if (buckets === undefined) {
+      return;
+    }
+
+    const hash = createDocumentStatsHash(documentStats);
+    if (hash !== previousDocumentStatsHash) {
+      randomSampler.setDocCount(documentStats.totalCount);
+      setEventRate(
+        Object.entries(buckets).map(([key, docCount]) => ({
+          key: +key,
+          docCount,
+        }))
+      );
+      setData(null);
+      setFieldValidationResult(null);
+      setTotalCount(documentStats.totalCount);
+      if (fieldValidationResult !== null) {
+        loadCategories();
+      }
+    }
+    setPreviousDocumentStatsHash(hash);
+  }, [
+    documentStats,
+    earliest,
+    latest,
+    searchQueryLanguage,
+    searchString,
+    searchQuery,
+    randomSampler,
+    totalCount,
+    previousDocumentStatsHash,
+    fieldValidationResult,
+    loadCategories,
   ]);
 
   useEffect(
@@ -322,7 +350,12 @@ export const LogCategorizationPage: FC = () => {
               />
             </EuiButton>
           ) : (
-            <EuiButton onClick={() => cancelRequest()}>Cancel</EuiButton>
+            <EuiButton
+              data-test-subj="aiopsLogCategorizationPageCancelButton"
+              onClick={() => cancelRequest()}
+            >
+              Cancel
+            </EuiButton>
           )}
         </EuiFlexItem>
         <EuiFlexItem />
@@ -338,7 +371,6 @@ export const LogCategorizationPage: FC = () => {
             eventRate={eventRate}
             pinnedCategory={pinnedCategory}
             selectedCategory={selectedCategory}
-            sparkLines={data?.sparkLines ?? {}}
             totalCount={totalCount}
             documentCountStats={documentStats.documentCountStats}
           />
@@ -363,7 +395,6 @@ export const LogCategorizationPage: FC = () => {
           aiopsListState={stateFromUrl}
           dataViewId={dataView.id!}
           eventRate={eventRate}
-          sparkLines={data.sparkLines}
           selectedField={selectedField}
           pinnedCategory={pinnedCategory}
           setPinnedCategory={setPinnedCategory}
@@ -375,3 +406,15 @@ export const LogCategorizationPage: FC = () => {
     </EuiPageBody>
   );
 };
+
+/**
+ * Creates a hash from the document stats to determine if the document stats have changed.
+ */
+function createDocumentStatsHash(documentStats: DocumentStats) {
+  const lastTimeStampMs = documentStats.documentCountStats?.lastDocTimeStampMs;
+  const totalCount = documentStats.documentCountStats?.totalCount;
+  const times = Object.keys(documentStats.documentCountStats?.buckets ?? {});
+  const firstBucketTimeStamp = times.length ? times[0] : undefined;
+  const lastBucketTimeStamp = times.length ? times[times.length - 1] : undefined;
+  return stringHash(`${lastTimeStampMs}${totalCount}${firstBucketTimeStamp}${lastBucketTimeStamp}`);
+}

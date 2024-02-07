@@ -108,8 +108,9 @@ export const AddParamFlyout = ({
 
   useEffect(() => {
     if (isEditingItem) {
+      const { id: _id, ...dataToEdit } = isEditingItem;
       setIsFlyoutVisible(true);
-      form.reset(isEditingItem);
+      form.reset(dataToEdit);
     }
     // no need to add form value, it keeps changing on reset
     // eslint-disable-next-line react-hooks/exhaustive-deps

@@ -8,8 +8,4 @@
 
 export { pluginServices } from './plugin_services';
 
-export type {
-  PresentationCapabilitiesService,
-  PresentationDashboardsService,
-  PresentationLabsService,
-} from './types';
+export type { PresentationCapabilitiesService, PresentationLabsService } from './types';

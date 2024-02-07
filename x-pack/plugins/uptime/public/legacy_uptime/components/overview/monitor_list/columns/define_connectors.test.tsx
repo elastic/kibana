@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { DefineAlertConnectors } from './define_connectors';
-import { screen } from '@testing-library/react';
-import { fireEvent } from '@testing-library/dom';
+import { screen, fireEvent } from '@testing-library/react';
 import { ENABLE_STATUS_ALERT } from './translations';
 import { render } from '../../../../lib/helper/rtl_helpers';
 
@@ -21,21 +20,23 @@ describe('EnableAlertComponent', () => {
 
     fireEvent.click(screen.getByTestId('uptimeDisplayDefineConnector'));
 
-    expect(screen.queryByTestId('uptimeSettingsDefineConnector')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('uptimeSettingsDefineConnector')).toBeInTheDocument();
   });
 
   it('shows label when showLabel is true', () => {
-    render(<DefineAlertConnectors showLabel />);
-    expect(screen.getByText(ENABLE_STATUS_ALERT)).toBeInTheDocument();
+    render(<DefineAlertConnectors />);
+    expect(screen.getByLabelText(ENABLE_STATUS_ALERT)).toBeInTheDocument();
   });
 
   it('shows helpText when showHelpText is true', () => {
-    render(<DefineAlertConnectors showHelpText />);
+    render(<DefineAlertConnectors />);
+    fireEvent.click(screen.getByTestId('uptimeDisplayDefineConnector'));
+
     expect(screen.getByText(/Define a default connector/)).toBeInTheDocument();
   });
 
   it('renders popover on click when showPopover is true', () => {
-    render(<DefineAlertConnectors showPopover />);
+    render(<DefineAlertConnectors />);
 
     fireEvent.click(screen.getByTestId('uptimeDisplayDefineConnector'));
 

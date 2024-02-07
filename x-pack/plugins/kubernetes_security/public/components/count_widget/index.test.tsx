@@ -10,7 +10,7 @@ import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
 import { GlobalFilter } from '../../types';
 import { CountWidget, LOADING_TEST_ID, TOOLTIP_TEST_ID, VALUE_TEST_ID } from '.';
 import { useFetchCountWidgetData } from './hooks';
-import { fireEvent, waitFor } from '@testing-library/dom';
+import { fireEvent, waitFor } from '@testing-library/react';
 
 const TITLE = 'Count Widget Title';
 const GLOBAL_FILTER: GlobalFilter = {

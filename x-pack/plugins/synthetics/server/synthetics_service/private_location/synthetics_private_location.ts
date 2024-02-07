@@ -8,12 +8,16 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { NewPackagePolicyWithId } from '@kbn/fleet-plugin/server/services/package_policy';
 import { cloneDeep } from 'lodash';
 import { SavedObjectError } from '@kbn/core-saved-objects-common';
+import { DEFAULT_NAMESPACE_STRING } from '../../../common/constants/monitor_defaults';
 import {
   BROWSER_TEST_NOW_RUN,
   LIGHTWEIGHT_TEST_NOW_RUN,
 } from '../synthetics_monitor/synthetics_monitor_client';
 import { scheduleCleanUpTask } from './clean_up_task';
-import { getAgentPoliciesAsInternalUser } from '../../routes/settings/private_locations/get_agent_policies';
+import {
+  getAgentPoliciesAsInternalUser,
+  getAgentPolicyAsInternalUser,
+} from '../../routes/settings/private_locations/get_agent_policies';
 import { SyntheticsServerSetup } from '../../types';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';
 import {
@@ -66,7 +70,7 @@ export class SyntheticsPrivateLocation {
     return `${config.id}-${locId}-${spaceId}`;
   }
 
-  generateNewPolicy(
+  async generateNewPolicy(
     config: HeartbeatConfig,
     privateLocation: PrivateLocationAttributes,
     newPolicyTemplate: NewPackagePolicy,
@@ -74,7 +78,7 @@ export class SyntheticsPrivateLocation {
     globalParams: Record<string, string>,
     testRunId?: string,
     runOnce?: boolean
-  ): (NewPackagePolicy & { policy_id: string }) | null {
+  ): Promise<(NewPackagePolicy & { policy_id: string }) | null> {
     const { label: locName } = privateLocation;
 
     const newPolicy = cloneDeep(newPolicyTemplate);
@@ -92,13 +96,16 @@ export class SyntheticsPrivateLocation {
           newPolicy.name = `${config[ConfigKey.NAME]}-${locName}-${spaceId}`;
         }
       }
-      newPolicy.namespace = config[ConfigKey.NAMESPACE];
+      const configNameSpace = config[ConfigKey.NAMESPACE];
+
+      newPolicy.namespace = await this.getPolicyNameSpace(configNameSpace, privateLocation);
 
       const { formattedPolicy } = formatSyntheticsPolicy(
         newPolicy,
         config.type,
         {
           ...(config as Partial<MonitorFields>),
+          space_id: spaceId,
           config_id: config.fields?.config_id,
           location_name: stringifyString(privateLocation.label),
           location_id: privateLocation.id,
@@ -152,7 +159,7 @@ export class SyntheticsPrivateLocation {
             );
           }
 
-          const newPolicy = this.generateNewPolicy(
+          const newPolicy = await this.generateNewPolicy(
             config,
             location,
             newPolicyTemplate,
@@ -226,7 +233,7 @@ export class SyntheticsPrivateLocation {
 
       const location = allPrivateLocations?.find((loc) => loc.id === privateLocation?.id)!;
 
-      const newPolicy = this.generateNewPolicy(
+      const newPolicy = await this.generateNewPolicy(
         config,
         location,
         newPolicyTemplate,
@@ -278,7 +285,7 @@ export class SyntheticsPrivateLocation {
         const hasPolicy = existingPolicies?.some((policy) => policy.id === currId);
         try {
           if (hasLocation) {
-            const newPolicy = this.generateNewPolicy(
+            const newPolicy = await this.generateNewPolicy(
               config,
               privateLocation,
               newPolicyTemplate,
@@ -356,7 +363,7 @@ export class SyntheticsPrivateLocation {
 
   async createPolicyBulk(newPolicies: NewPackagePolicyWithId[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
     if (esClient && newPolicies.length > 0) {
       return await this.server.fleet.packagePolicyService.bulkCreate(
         soClient,
@@ -368,8 +375,8 @@ export class SyntheticsPrivateLocation {
 
   async updatePolicyBulk(policiesToUpdate: NewPackagePolicyWithId[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
-    if (soClient && esClient && policiesToUpdate.length > 0) {
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    if (policiesToUpdate.length > 0) {
       const { failedPolicies } = await this.server.fleet.packagePolicyService.bulkUpdate(
         soClient,
         esClient,
@@ -384,8 +391,8 @@ export class SyntheticsPrivateLocation {
 
   async deletePolicyBulk(policyIdsToDelete: string[]) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
-    if (soClient && esClient && policyIdsToDelete.length > 0) {
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
+    if (policyIdsToDelete.length > 0) {
       try {
         return await this.server.fleet.packagePolicyService.delete(
           soClient,
@@ -403,7 +410,7 @@ export class SyntheticsPrivateLocation {
 
   async deleteMonitors(configs: HeartbeatConfig[], spaceId: string) {
     const soClient = this.server.coreStart.savedObjects.createInternalRepository();
-    const esClient = this.server.uptimeEsClient.baseESClient;
+    const esClient = this.server.coreStart.elasticsearch.client.asInternalUser;
 
     const policyIdsToDelete = [];
     for (const config of configs) {
@@ -436,6 +443,17 @@ export class SyntheticsPrivateLocation {
 
   async getAgentPolicies() {
     return await getAgentPoliciesAsInternalUser(this.server);
+  }
+
+  async getPolicyNameSpace(configNameSpace: string, privateLocation: PrivateLocationAttributes) {
+    if (configNameSpace && configNameSpace !== DEFAULT_NAMESPACE_STRING) {
+      return configNameSpace;
+    }
+    if (privateLocation.namespace) {
+      return privateLocation.namespace;
+    }
+    const agentPolicy = await getAgentPolicyAsInternalUser(this.server, privateLocation.id);
+    return agentPolicy?.namespace ?? DEFAULT_NAMESPACE_STRING;
   }
 }
 

@@ -49,12 +49,17 @@ const TabIdRT = rt.union([
   rt.literal(ContentTabIds.OVERVIEW),
   rt.literal(ContentTabIds.METADATA),
   rt.literal(ContentTabIds.PROCESSES),
+  rt.literal(ContentTabIds.PROFILING),
   rt.literal(ContentTabIds.LOGS),
   rt.literal(ContentTabIds.ANOMALIES),
   rt.literal(ContentTabIds.OSQUERY),
 ]);
 
 const AssetDetailsUrlStateRT = rt.partial({
+  autoRefresh: rt.partial({
+    isPaused: rt.boolean,
+    interval: rt.number,
+  }),
   dateRange: rt.type({
     from: rt.string,
     to: rt.string,
@@ -64,6 +69,7 @@ const AssetDetailsUrlStateRT = rt.partial({
   processSearch: rt.string,
   metadataSearch: rt.string,
   logsSearch: rt.string,
+  profilingSearch: rt.string,
 });
 
 const AssetDetailsUrlRT = rt.union([AssetDetailsUrlStateRT, rt.null]);

@@ -27,6 +27,7 @@ describe('ConfigSchema', () => {
           },
           "zoom": 2,
         },
+        "enabled": true,
         "networkPolicy": Object {
           "enabled": true,
           "rules": Array [
@@ -87,6 +88,7 @@ describe('ConfigSchema', () => {
           },
           "zoom": 2,
         },
+        "enabled": true,
         "networkPolicy": Object {
           "enabled": true,
           "rules": Array [

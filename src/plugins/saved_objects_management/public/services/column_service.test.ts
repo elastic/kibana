@@ -58,5 +58,14 @@ describe('SavedObjectsManagementColumnRegistry', () => {
         `"Saved Objects Management Column with id 'my-column' already exists"`
       );
     });
+
+    it('does not register space column when SpacesApi.hasOnlyDefaultSpace is true', () => {
+      const column = createColumn('foo');
+      setup.register(column);
+      const start = service.start(spacesPluginMock.createStartContract(true));
+      expect(start.getAll()).toEqual(
+        expect.not.arrayContaining([expect.any(ShareToSpaceSavedObjectsManagementColumn)])
+      );
+    });
   });
 });

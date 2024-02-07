@@ -135,6 +135,9 @@ export class ProcRunner {
         // wait for process to complete
         await proc.outcomePromise;
       }
+    } catch (e) {
+      this.log.error(e);
+      throw e;
     } finally {
       // while the procRunner closes promises will resolve/reject because
       // processes and stopping, but consumers of run() shouldn't have to

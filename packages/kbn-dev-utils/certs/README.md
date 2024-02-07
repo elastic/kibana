@@ -37,13 +37,16 @@ __IMPORTANT:__ CA keystore (ca.p12) is not checked in intentionally, talk to @el
 bin/elasticsearch-certutil ca --out ca.p12 -days 18250 --pass castorepass
 
 # Generate the PKCS #12 keystore for Elasticsearch and sign it with the CA
-bin/elasticsearch-certutil cert --out elasticsearch.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name elasticsearch --dns localhost --pass storepass
+bin/elasticsearch-certutil cert --out elasticsearch.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name elasticsearch --dns localhost,host.docker.internal,es01,es02,es03 --pass storepass
 
 # Generate the PKCS #12 keystore for Kibana and sign it with the CA
-bin/elasticsearch-certutil cert --out kibana.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name kibana --dns localhost --pass storepass
+bin/elasticsearch-certutil cert --out kibana.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name kibana --dns localhost,host.docker.internal,es01,es02,es03 --pass storepass
+
+# Generate the PKCS #12 keystore for Fleet Server and sign it with the CA
+bin/elasticsearch-certutil cert --out fleet_server.p12 -days 18250 --ca ca.p12 --ca-pass castorepass --name fleet_server --dns localhost,host.docker.internal,es01,es02,es03 --pass storepass
 
 # Copy the PKCS #12 keystore for Elasticsearch with an empty password
-openssl pkcs12 -in elasticsearch.p12 -nodes -passin pass:"storepass" -passout pass:"" | openssl pkcs12 -export -out elasticsearch_emptypassword.p12 -passout pass:""
+openssl pkcs12 -in elasticsearch.p12 -nodes -passin pass:"storepass" -passout pass:"" | openssl pkcs12 -export -legacy -out elasticsearch_emptypassword.p12 -passout pass:""
 
 # Manually create "elasticsearch_nopassword.p12" -- this can be done on macOS by importing the P12 key store into the Keychain and exporting it again
 
@@ -51,14 +54,20 @@ openssl pkcs12 -in elasticsearch.p12 -nodes -passin pass:"storepass" -passout pa
 openssl pkcs12 -in elasticsearch.p12 -out ca.crt -cacerts -passin pass:"storepass" -passout pass:
 
 # Extract the PEM-formatted PKCS #1 private key for Elasticsearch
-openssl pkcs12 -in elasticsearch.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out elasticsearch.key
+openssl pkcs12 -in elasticsearch.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out elasticsearch.key -traditional
 
 # Extract the PEM-formatted X.509 certificate for Elasticsearch
 openssl pkcs12 -in elasticsearch.p12 -out elasticsearch.crt -clcerts -passin pass:"storepass" -passout pass:
 
 # Extract the PEM-formatted PKCS #1 private key for Kibana
-openssl pkcs12 -in kibana.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out kibana.key
+openssl pkcs12 -in kibana.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out kibana.key -traditional
 
 # Extract the PEM-formatted X.509 certificate for Kibana
 openssl pkcs12 -in kibana.p12 -out kibana.crt -clcerts -passin pass:"storepass" -passout pass:
+
+# Extract the PEM-formatted PKCS #1 private key for Fleet Server
+openssl pkcs12 -in fleet_server.p12 -nocerts -passin pass:"storepass" -passout pass:"keypass" | openssl rsa -passin pass:keypass -out fleet_server.key -traditional
+
+# Extract the PEM-formatted X.509 certificate for Fleet Server
+openssl pkcs12 -in fleet_server.p12 -out fleet_server.crt -clcerts -passin pass:"storepass" -passout pass:
 ```

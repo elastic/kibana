@@ -6,27 +6,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest } from '@kbn/core/server';
-import {
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
+import type {
   MlDatafeedState,
   MlJobState,
   MlJobStats,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
+import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
+  RecoveredActionGroupId,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
+import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
+import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
+import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { ML_ALERT_TYPES } from '../../../common/constants/alerts';
 import { PLUGIN_ID } from '../../../common/constants/app';
 import { MINIMUM_FULL_LICENSE } from '../../../common/license';
 import {
   anomalyDetectionJobsHealthRuleParams,
-  AnomalyDetectionJobsHealthRuleParams,
+  type AnomalyDetectionJobsHealthRuleParams,
 } from '../../routes/schemas/alerting_schema';
-import { RegisterAlertParams } from './register_ml_alerts';
+import type { RegisterAlertParams } from './register_ml_alerts';
 import type { JobMessage } from '../../../common/types/audit_message';
 
 type ModelSizeStats = MlJobStats['model_size_stats'];
@@ -90,7 +94,8 @@ export type JobsHealthExecutorOptions = RuleExecutorOptions<
   Record<string, unknown>,
   Record<string, unknown>,
   AnomalyDetectionJobsHealthAlertContext,
-  AnomalyDetectionJobRealtimeIssue
+  AnomalyDetectionJobRealtimeIssue,
+  DefaultAlert
 >;
 
 export function registerJobsMonitoringRuleType({
@@ -104,7 +109,9 @@ export function registerJobsMonitoringRuleType({
     RuleTypeState,
     AlertInstanceState,
     AnomalyDetectionJobsHealthAlertContext,
-    AnomalyDetectionJobRealtimeIssue
+    AnomalyDetectionJobRealtimeIssue,
+    RecoveredActionGroupId,
+    DefaultAlert
   >({
     id: ML_ALERT_TYPES.AD_JOBS_HEALTH,
     name: i18n.translate('xpack.ml.jobsHealthAlertingRule.name', {
@@ -114,6 +121,12 @@ export function registerJobsMonitoringRuleType({
     defaultActionGroupId: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
     validate: {
       params: anomalyDetectionJobsHealthRuleParams,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: anomalyDetectionJobsHealthRuleParams,
+      },
     },
     actionVariables: {
       context: [
@@ -137,15 +150,23 @@ export function registerJobsMonitoringRuleType({
         },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: PLUGIN_ID,
     minimumLicenseRequired: MINIMUM_FULL_LICENSE,
     isExportable: true,
     doesSetRecoveryContext: true,
+    alerts: DEFAULT_AAD_CONFIG,
     async executor(options) {
       const {
         services,
         rule: { name },
       } = options;
+
+      const { alertsClient } = services;
+
+      if (!alertsClient) {
+        throw new AlertsClientError();
+      }
 
       const fakeRequest = {} as KibanaRequest;
       const { getTestsResults } = mlServicesProviders.jobsHealthServiceProvider(
@@ -164,19 +185,30 @@ export function registerJobsMonitoringRuleType({
             .join(', ')}`
         );
 
-        unhealthyTests.forEach(({ name: alertInstanceName, context }) => {
-          const alertInstance = services.alertFactory.create(alertInstanceName);
-          alertInstance.scheduleActions(ANOMALY_DETECTION_JOB_REALTIME_ISSUE, context);
+        unhealthyTests.forEach(({ name: alertName, context }) => {
+          alertsClient.report({
+            id: alertName,
+            actionGroup: ANOMALY_DETECTION_JOB_REALTIME_ISSUE,
+            context,
+            payload: {
+              [ALERT_REASON]: context.message,
+            },
+          });
         });
       }
 
       // Set context for recovered alerts
-      const { getRecoveredAlerts } = services.alertFactory.done();
-      for (const recoveredAlert of getRecoveredAlerts()) {
-        const recoveredAlertId = recoveredAlert.getId();
+      for (const recoveredAlert of alertsClient.getRecoveredAlerts()) {
+        const recoveredAlertId = recoveredAlert.alert.getId();
         const testResult = executionResult.find((v) => v.name === recoveredAlertId);
         if (testResult) {
-          recoveredAlert.setContext(testResult.context);
+          alertsClient.setAlertData({
+            id: recoveredAlertId,
+            context: testResult.context,
+            payload: {
+              [ALERT_REASON]: testResult.context.message,
+            },
+          });
         }
       }
 

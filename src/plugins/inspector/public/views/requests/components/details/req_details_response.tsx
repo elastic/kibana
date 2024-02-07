@@ -7,16 +7,11 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 import { Request } from '../../../../../common/adapters/request/types';
-import { RequestDetailsProps } from '../types';
+import { DetailViewProps } from './types';
 import { RequestCodeViewer } from './req_code_viewer';
 
-export class RequestDetailsResponse extends Component<RequestDetailsProps> {
-  static propTypes = {
-    request: PropTypes.object.isRequired,
-  };
-
+export class RequestDetailsResponse extends Component<DetailViewProps> {
   static shouldShow = (request: Request) =>
     Boolean(RequestDetailsResponse.getResponseJson(request));
 

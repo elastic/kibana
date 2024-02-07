@@ -29,7 +29,7 @@ const RELEASE_BADGE_DESCRIPTION: { [key in Exclude<IntegrationCardReleaseLabel, 
   }),
   preview: i18n.translate('xpack.fleet.epm.releaseBadge.technicalPreviewDescription', {
     defaultMessage:
-      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+      'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
   }),
   rc: i18n.translate('xpack.fleet.epm.releaseBadge.releaseCandidateDescription', {
     defaultMessage: 'This integration is not recommended for use in production environments.',

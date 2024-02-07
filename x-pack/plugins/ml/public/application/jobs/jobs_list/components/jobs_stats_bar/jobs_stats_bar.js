@@ -12,11 +12,9 @@ import PropTypes from 'prop-types';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-function createJobStats(jobsSummaryList, isServerless) {
-  const displayNodeInfo = isServerless === false;
-
+function createJobStats(jobsSummaryList, showNodeInfo) {
   const jobStats = {
-    ...(displayNodeInfo
+    ...(showNodeInfo
       ? {
           activeNodes: {
             label: i18n.translate('xpack.ml.jobsList.statsBar.activeMLNodesLabel', {
@@ -100,20 +98,20 @@ function createJobStats(jobsSummaryList, isServerless) {
     jobStats.failed.show = false;
   }
 
-  if (displayNodeInfo) {
+  if (showNodeInfo) {
     jobStats.activeNodes.value = Object.keys(mlNodes).length;
   }
 
   return jobStats;
 }
 
-export const JobStatsBar = ({ jobsSummaryList, isServerless }) => {
-  const jobStats = createJobStats(jobsSummaryList, isServerless);
+export const JobStatsBar = ({ jobsSummaryList, showNodeInfo }) => {
+  const jobStats = createJobStats(jobsSummaryList, showNodeInfo);
 
   return <StatsBar stats={jobStats} dataTestSub={'mlJobStatsBar'} />;
 };
 
 JobStatsBar.propTypes = {
   jobsSummaryList: PropTypes.array.isRequired,
-  isServerless: PropTypes.bool.isRequired,
+  showNodeInfo: PropTypes.bool.isRequired,
 };

@@ -22,5 +22,6 @@ export type {
   GraphSearchIn,
   GraphSearchOut,
   GraphSearchQuery,
+  GraphCrudTypes,
   Reference,
 } from './types';

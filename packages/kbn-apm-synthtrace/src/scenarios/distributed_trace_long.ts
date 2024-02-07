@@ -12,12 +12,13 @@ import { apm, ApmFields, DistributedTrace } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const ratePerMinute = 1;
       const traceDuration = 1100;
       const rootTransactionName = `${ratePerMinute}rpm / ${traceDuration}ms`;
@@ -122,7 +123,7 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         }).getTransaction();
       });
 
-      return traces;
+      return withClient(apmEsClient, traces);
     },
   };
 };

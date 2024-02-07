@@ -131,9 +131,7 @@ export const copyColumnNameToClipboard = ({
   columnDisplayName: string;
   toastNotifications: ToastsStart;
 }): string | null => {
-  const nameFormattedResult = convertNameToString(columnDisplayName);
-  const textToCopy = nameFormattedResult.formattedString;
-  const copied = copyToClipboard(textToCopy);
+  const copied = copyToClipboard(columnDisplayName);
 
   if (!copied) {
     toastNotifications.addWarning({
@@ -147,16 +145,9 @@ export const copyColumnNameToClipboard = ({
     defaultMessage: 'Copied to clipboard',
   });
 
-  if (nameFormattedResult.withFormula) {
-    toastNotifications.addWarning({
-      title: toastTitle,
-      text: WARNING_FOR_FORMULAS,
-    });
-  } else {
-    toastNotifications.addInfo({
-      title: toastTitle,
-    });
-  }
+  toastNotifications.addInfo({
+    title: toastTitle,
+  });
 
-  return textToCopy;
+  return columnDisplayName;
 };

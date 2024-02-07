@@ -261,11 +261,13 @@ export const push = async (
 
     if (shouldMarkAsClosed) {
       await userActionService.creator.createUserAction({
-        type: UserActionTypes.status,
-        payload: { status: CaseStatuses.closed },
-        user,
-        caseId,
-        owner: myCase.attributes.owner,
+        userAction: {
+          type: UserActionTypes.status,
+          payload: { status: CaseStatuses.closed },
+          user,
+          caseId,
+          owner: myCase.attributes.owner,
+        },
         refresh: false,
       });
 
@@ -275,11 +277,13 @@ export const push = async (
     }
 
     await userActionService.creator.createUserAction({
-      type: UserActionTypes.pushed,
-      payload: { externalService },
-      user,
-      caseId,
-      owner: myCase.attributes.owner,
+      userAction: {
+        type: UserActionTypes.pushed,
+        payload: { externalService },
+        user,
+        caseId,
+        owner: myCase.attributes.owner,
+      },
     });
 
     /* End of update case with push information */

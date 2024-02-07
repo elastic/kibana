@@ -50,6 +50,8 @@ describe('headless webgl arm mac workaround', () => {
     // if you're updating this, then you're likely updating chromium
     // please double-check that the --use-angle flag is still needed for arm macs
     // instead of --use-angle you may need --enable-gpu
-    expect(getChromiumPackage().binaryChecksum).toBe('4cc4ee072b23e4a65e714ff543eea21b'); // just putting this here so that someone updating the chromium version will see this comment
+    expect(getChromiumPackage().binaryChecksum).toBe(
+      '2b5c892e3125eecd31b651f4632cbafabee3a31c02728dcddafee8d462ab075d'
+    ); // just putting this here so that someone updating the chromium version will see this comment
   });
 });

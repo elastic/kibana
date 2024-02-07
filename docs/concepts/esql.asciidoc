@@ -1,0 +1,40 @@
+[[esql]]
+=== {esql}
+
+preview::["Do not use {esql} on production environments. This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features."]
+
+The Elasticsearch Query Language, {esql}, has been created to make exploring your data faster and easier using the **Discover** application. From version 8.11 you can try this new feature, which is enabled by default. 
+
+[role="screenshot"]
+image:images/esql-data-view-menu.png[An image of the Discover UI where users can access the {esql} feature, width=30%]
+
+This new piped language allows you to chain together multiple commands to query your data. Based on the query, Lens suggestions in Discover create a visualization of the query results.
+
+{esql} comes with its own dedicated {esql} Compute Engine for greater efficiency. From one query you can search, aggregate, calculate and perform data transformations without leaving **Discover**. Write your query directly in **Discover** or use the **Dev Tools** with the {ref}/esql-rest.html[{esql} API]. 
+
+{esql} also features in-app help, so you can get started faster and don't have to leave the application to check syntax. 
+
+[role="screenshot"]
+image:images/esql-in-app-help.png[An image of the Discover UI where users can browse the in-app help]
+
+For more detailed information about the {esql} language, refer to {ref}/esql-language.html[Learning {esql}].
+
+[float]
+[[esql-observability]]
+==== {observability}
+
+{esql} makes it much easier to analyze metrics, logs and traces from a single query. Find performance issues fast by defining fields on the fly, enriching data with lookups, and using simultaneous query processing. Combining {esql} with {ml} and AiOps can improve detection accuracy and use aggregated value thresholds.   
+
+[float]
+[[esql-security]]
+==== Security 
+
+Use {esql} to retrieve important information for investigation by using lookups. Enrich data and create new fields on the go to gain valuable insight for faster decision-making and actions. For example, perform a lookup on an IP address to identify its geographical location, its association with known malicious entities, or whether it belongs to a known cloud service provider all from one search bar. {esql} ensures more accurate alerts by incorporating aggregated values in detection rules.
+
+[float]
+[[esql-whats-next]]
+==== What's next?
+
+Full documentation for this language is available in the {es} documentation, refer to {ref}/esql.html[{esql}].
+
+Alternatively, a short tutorial is available in the **Discover** section <<try-esql, Try {esql}L>>.

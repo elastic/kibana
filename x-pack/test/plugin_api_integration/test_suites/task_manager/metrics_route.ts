@@ -9,12 +9,14 @@ import expect from '@kbn/expect';
 import url from 'url';
 import supertest from 'supertest';
 import { NodeMetrics } from '@kbn/task-manager-plugin/server/routes/metrics';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const config = getService('config');
   const retry = getService('retry');
   const request = supertest(url.format(config.get('servers.kibana')));
+  const es = getService('es');
 
   const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -28,13 +30,15 @@ export default function ({ getService }: FtrProviderContext) {
 
   function getMetrics(
     reset: boolean = false,
-    callback: (metrics: NodeMetrics) => boolean
+    callback?: (metrics: NodeMetrics) => boolean
   ): Promise<NodeMetrics> {
     return retry.try(async () => {
       const metrics = await getMetricsRequest(reset);
 
-      if (metrics.metrics && callback(metrics)) {
-        return metrics;
+      if (metrics.metrics) {
+        if ((callback && callback(metrics)) || !callback) {
+          return metrics;
+        }
       }
 
       await delay(500);
@@ -142,7 +146,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('task run test', () => {
+    describe('task run', () => {
       let ruleId: string | null = null;
       before(async () => {
         // create a rule that fires actions
@@ -192,7 +196,9 @@ export default function ({ getService }: FtrProviderContext) {
             (metrics) =>
               metrics?.metrics?.task_run?.value.by_type.alerting?.total === 1 &&
               metrics?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === 1 &&
-              metrics?.metrics?.task_run?.value.by_type.alerting?.success === 1
+              metrics?.metrics?.task_run?.value.by_type.alerting?.success === 1 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.user_errors === 0 &&
+              metrics?.metrics?.task_run?.value.by_type.alerting?.framework_errors === 0
           )
         ).metrics;
         expect(initialMetrics).not.to.be(null);
@@ -213,7 +219,9 @@ export default function ({ getService }: FtrProviderContext) {
               (m) =>
                 m?.metrics?.task_run?.value.by_type.alerting?.total === i + 2 &&
                 m?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === i + 2 &&
-                m?.metrics?.task_run?.value.by_type.alerting?.success === i + 2
+                m?.metrics?.task_run?.value.by_type.alerting?.success === i + 2 &&
+                m?.metrics?.task_run?.value.by_type.alerting?.user_errors === 0 &&
+                m?.metrics?.task_run?.value.by_type.alerting?.framework_errors === 0
             )
           ).metrics;
 
@@ -231,6 +239,89 @@ export default function ({ getService }: FtrProviderContext) {
             metrics?.metrics?.task_run?.value.by_type.alerting?.not_timed_out === 0 &&
             metrics?.metrics?.task_run?.value.by_type.alerting?.success === 0
         );
+      });
+
+      it('should increment task run framework_error counter', async () => {
+        // modify the rule to get it fire a decryption error
+        await es.updateByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          body: {
+            script: {
+              lang: 'painless',
+              source: 'ctx._source.alert.params.foo = "bar"',
+            },
+            query: { ids: { values: [`alert:${ruleId}`] } },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+
+        // run the rule and expect counters to increment
+        await request
+          .post('/api/sample_tasks/run_soon')
+          .set('kbn-xsrf', 'xxx')
+          .send({ task: { id: ruleId } })
+          .expect(200);
+
+        const metrics = (
+          await getMetrics(true, (m) => m?.metrics?.task_run?.value.overall.framework_errors! === 1)
+        ).metrics;
+
+        const total = metrics?.task_run?.value.overall.total || 0;
+        const success = metrics?.task_run?.value.overall.success || 0;
+
+        expect(total - success).to.be(1);
+      });
+
+      it('should increment task run user_errors counter', async () => {
+        // modify the rule to get it fire a validation error
+        await es.updateByQuery({
+          index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+          body: {
+            script: {
+              lang: 'painless',
+              source: 'ctx._source.alert.params.foo = "bar"',
+            },
+            query: { ids: { values: [`alert:${ruleId}`] } },
+          },
+          refresh: true,
+          conflicts: 'proceed',
+        });
+
+        // update apiKey to fix decryption error
+        await request
+          .post(`/api/alerts/alert/${ruleId}/_update_api_key`)
+          .set('kbn-xsrf', 'xxx')
+          .expect(204);
+
+        // run the rule and expect counters to increment
+        await request
+          .post('/api/sample_tasks/run_soon')
+          .set('kbn-xsrf', 'xxx')
+          .send({ task: { id: ruleId } })
+          .expect(200);
+
+        const metrics = (
+          await getMetrics(true, (m) => m?.metrics?.task_run?.value.overall.user_errors! === 1)
+        ).metrics;
+
+        const total = metrics?.task_run?.value.overall.total || 0;
+        const success = metrics?.task_run?.value.overall.success || 0;
+
+        expect(total - success).to.be(1);
+      });
+    });
+
+    describe('task overdue', () => {
+      it('histograms should exist', async () => {
+        const metrics = (await getMetrics(false)).metrics;
+        expect(metrics).not.to.be(null);
+        expect(metrics?.task_overdue).not.to.be(null);
+        expect(metrics?.task_overdue?.value).not.to.be(null);
+        expect(metrics?.task_overdue?.value.overall).not.to.be(null);
+        expect(metrics?.task_overdue?.value.overall.overdue_by).not.to.be(null);
+        expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.counts)).to.be(true);
+        expect(Array.isArray(metrics?.task_overdue?.value.overall.overdue_by.values)).to.be(true);
       });
     });
   });

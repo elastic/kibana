@@ -10,6 +10,7 @@ import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
+  DiffableEsqlFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
   DiffableSavedQueryFields,
@@ -24,6 +25,7 @@ export type CommonFieldsDiff = FieldsDiff<DiffableCommonFields>;
 export type CustomQueryFieldsDiff = FieldsDiff<DiffableCustomQueryFields>;
 export type SavedQueryFieldsDiff = FieldsDiff<DiffableSavedQueryFields>;
 export type EqlFieldsDiff = FieldsDiff<DiffableEqlFields>;
+export type EsqlFieldsDiff = FieldsDiff<DiffableEsqlFields>;
 export type ThreatMatchFieldsDiff = FieldsDiff<DiffableThreatMatchFields>;
 export type ThresholdFieldsDiff = FieldsDiff<DiffableThresholdFields>;
 export type MachineLearningFieldsDiff = FieldsDiff<DiffableMachineLearningFields>;
@@ -45,6 +47,7 @@ export type RuleFieldsDiff = CommonFieldsDiff &
     | CustomQueryFieldsDiff
     | SavedQueryFieldsDiff
     | EqlFieldsDiff
+    | EsqlFieldsDiff
     | ThreatMatchFieldsDiff
     | ThresholdFieldsDiff
     | MachineLearningFieldsDiff

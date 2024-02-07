@@ -17,11 +17,14 @@ describe('gatherInfo', () => {
       '/proc/self/cgroup': `0:controller:/path
       1:controller2,controller3:/otherpath`,
     });
-    const { data } = await gatherInfo();
-    expect(data).toEqual({
-      controller: '/path',
-      controller2: '/otherpath',
-      controller3: '/otherpath',
+    const result = await gatherInfo();
+    expect(result).toEqual({
+      v2: false,
+      data: {
+        controller: '/path',
+        controller2: '/otherpath',
+        controller3: '/otherpath',
+      },
     });
   });
 
@@ -30,7 +33,7 @@ describe('gatherInfo', () => {
       '/proc/self/cgroup': `0:controller:/path
       1:controller2,controller3:/otherpath`,
     });
-    await expect(gatherInfo()).resolves.toMatchObject({ v2: false });
+    expect(await gatherInfo()).toMatchObject({ v2: false });
     mockFs({
       '/proc/self/cgroup': `
 
@@ -38,7 +41,7 @@ describe('gatherInfo', () => {
 
 `,
     });
-    await expect(gatherInfo()).resolves.toMatchObject({ v2: true });
+    expect(await gatherInfo()).toMatchObject({ v2: true });
   });
 
   test('missing cgroup file', async () => {

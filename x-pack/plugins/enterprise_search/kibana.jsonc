@@ -20,10 +20,10 @@
       "logsShared",
       "cloud",
       "esUiShared",
-      "guidedOnboarding",
       "lens",
       "embeddable",
-      "share"
+      "share",
+      "console"
     ],
     "optionalPlugins": [
       "customIntegrations",
@@ -31,11 +31,11 @@
       "home",
       "ml",
       "spaces",
-      "usageCollection"
+      "usageCollection",
+      "guidedOnboarding",
     ],
     "requiredBundles": [
-      "kibanaReact",
-      "cloudChat"
+      "kibanaReact"
     ]
   }
 }

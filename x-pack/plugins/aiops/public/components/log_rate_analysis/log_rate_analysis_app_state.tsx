@@ -41,7 +41,7 @@ export interface LogRateAnalysisAppStateProps {
   /** Option to make main histogram sticky */
   stickyHistogram?: boolean;
   /** Optional flag to indicate whether kibana is running in serverless */
-  isServerless?: boolean;
+  showFrozenDataTierChoice?: boolean;
 }
 
 export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
@@ -49,7 +49,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   savedSearch,
   appDependencies,
   stickyHistogram,
-  isServerless = false,
+  showFrozenDataTierChoice = true,
 }) => {
   if (!dataView) return null;
 
@@ -62,7 +62,7 @@ export const LogRateAnalysisAppState: FC<LogRateAnalysisAppStateProps> = ({
   const datePickerDeps: DatePickerDependencies = {
     ...pick(appDependencies, ['data', 'http', 'notifications', 'theme', 'uiSettings', 'i18n']),
     uiSettingsKeys: UI_SETTINGS,
-    isServerless,
+    showFrozenDataTierChoice,
   };
 
   return (

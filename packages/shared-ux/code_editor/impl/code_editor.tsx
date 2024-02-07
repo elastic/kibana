@@ -7,8 +7,9 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
-import { useResizeDetector } from 'react-resize-detector';
-import ReactMonacoEditor from 'react-monaco-editor';
+import ReactMonacoEditor, {
+  type MonacoEditorProps as ReactMonacoEditorProps,
+} from 'react-monaco-editor';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -25,23 +26,20 @@ import {
 import { monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import './register_languages';
 import { remeasureFonts } from './remeasure_fonts';
 
 import { PlaceholderWidget } from './placeholder_widget';
 import {
-  codeEditorControlsStyles,
-  codeEditorControlsWithinFullScreenStyles,
-  codeEditorFullScreenStyles,
-  codeEditorKeyboardHintStyles,
-  codeEditorStyles,
+  styles,
   DARK_THEME,
   LIGHT_THEME,
   DARK_THEME_TRANSPARENT,
   LIGHT_THEME_TRANSPARENT,
 } from './editor.styles';
 
-export interface Props {
+export interface CodeEditorProps {
   /** Width of editor. Defaults to 100%. */
   width?: string | number;
 
@@ -60,37 +58,44 @@ export interface Props {
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
   options?: monaco.editor.IStandaloneEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html
    */
   suggestionProvider?: monaco.languages.CompletionItemProvider;
 
   /**
    * Signature provider for function parameter info
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html
    */
   signatureProvider?: monaco.languages.SignatureHelpProvider;
 
   /**
    * Hover provider for hover documentation
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html
    */
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
    */
   languageConfiguration?: monaco.languages.LanguageConfiguration;
+
+  /**
+   * CodeAction provider for code actions on markers feedback
+   * Documentation for the provider can be found here:
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CodeActionProvider.html
+   */
+  codeActions?: monaco.languages.CodeActionProvider;
 
   /**
    * Function called before the editor is mounted in the view
@@ -130,14 +135,27 @@ export interface Props {
 
   isCopyable?: boolean;
   allowFullScreen?: boolean;
+  /**
+   * Alternate text to display, when an attempt is made to edit read only content. (Defaults to "Cannot edit in read-only editor")
+   */
+  readOnlyMessage?: string;
+
+  /**
+   * Enables the editor to grow vertically to fit its content.
+   * This option overrides the `height` option.
+   */
+  fitToContent?: {
+    minLines?: number;
+    maxLines?: number;
+  };
 }
 
-export const CodeEditor: React.FC<Props> = ({
+export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
   onChange,
   width,
-  height = '100px',
+  height,
   options,
   overrideEditorWillMount,
   editorDidMount,
@@ -149,11 +167,16 @@ export const CodeEditor: React.FC<Props> = ({
   hoverProvider,
   placeholder,
   languageConfiguration,
+  codeActions,
   'aria-label': ariaLabel = i18n.translate('sharedUXPackages.codeEditor.ariaLabel', {
     defaultMessage: 'Code Editor',
   }),
   isCopyable = false,
   allowFullScreen = false,
+  readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
+    defaultMessage: 'Cannot edit in read-only editor',
+  }),
+  fitToContent,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -175,35 +198,18 @@ export const CodeEditor: React.FC<Props> = ({
 
   const isReadOnly = options?.readOnly ?? false;
 
-  const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
   const textboxMutationObserver = useRef<MutationObserver | null>(null);
 
   const [isHintActive, setIsHintActive] = useState(true);
-  const defaultStyles = codeEditorStyles();
-  const hintStyles = codeEditorKeyboardHintStyles(euiTheme.levels);
-
-  const promptClasses = useMemo(() => {
-    return isHintActive ? [defaultStyles, hintStyles] : [defaultStyles];
-  }, [isHintActive, defaultStyles, hintStyles]);
-
-  const _updateDimensions = useCallback(() => {
-    _editor.current?.layout();
-  }, []);
-
-  useResizeDetector({
-    handleWidth: true,
-    handleHeight: true,
-    onResize: _updateDimensions,
-    refreshMode: 'debounce',
-  });
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
-    _editor.current?.focus();
-  }, []);
+    _editor?.focus();
+  }, [_editor]);
 
   const stopEditing = useCallback(() => {
     setIsHintActive(true);
@@ -269,14 +275,12 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.startEditingReadOnly"
                   defaultMessage="Press {key} to start interacting with the code."
                   values={{ key: enterKey }}
                 />
               ) : (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.startEditing"
                   defaultMessage="Press {key} to start editing."
                   values={{ key: enterKey }}
@@ -286,14 +290,12 @@ export const CodeEditor: React.FC<Props> = ({
             <p>
               {isReadOnly ? (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.stopEditingReadOnly"
                   defaultMessage="Press {key} to stop interacting with the code."
                   values={{ key: escapeKey }}
                 />
               ) : (
                 <FormattedMessage
-                  css={defaultStyles}
                   id="sharedUXPackages.codeEditor.stopEditing"
                   defaultMessage="Press {key} to stop editing."
                   values={{ key: escapeKey }}
@@ -304,7 +306,13 @@ export const CodeEditor: React.FC<Props> = ({
         }
       >
         <div
-          css={promptClasses}
+          css={[
+            styles.keyboardHint(euiTheme),
+            !isHintActive &&
+              css`
+                display: none;
+              `,
+          ]}
           id={htmlIdGenerator('codeEditor')()}
           ref={editorHint}
           tabIndex={0}
@@ -312,22 +320,14 @@ export const CodeEditor: React.FC<Props> = ({
           onClick={startEditing}
           onKeyDown={onKeyDownHint}
           aria-label={ariaLabel}
-          data-test-subj={isHintActive ? 'codeEditorHint' : 'codeEditor'}
+          data-test-subj={`codeEditorHint codeEditorHint--${isHintActive ? 'active' : 'inactive'}`}
         />
       </EuiToolTip>
     );
-  }, [
-    onKeyDownHint,
-    startEditing,
-    ariaLabel,
-    isReadOnly,
-    promptClasses,
-    defaultStyles,
-    isHintActive,
-  ]);
+  }, [isHintActive, isReadOnly, euiTheme, startEditing, onKeyDownHint, ariaLabel]);
 
-  const _editorWillMount = useCallback(
-    (__monaco: unknown) => {
+  const _editorWillMount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillMount']>>(
+    (__monaco) => {
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
@@ -355,8 +355,13 @@ export const CodeEditor: React.FC<Props> = ({
         if (languageConfiguration) {
           monaco.languages.setLanguageConfiguration(languageId, languageConfiguration);
         }
+
+        if (codeActions) {
+          monaco.languages.registerCodeActionProvider(languageId, codeActions);
+        }
       });
 
+      // Register themes
       monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
       monaco.editor.defineTheme(
         'euiColorsTransparent',
@@ -371,23 +376,22 @@ export const CodeEditor: React.FC<Props> = ({
       suggestionProvider,
       signatureProvider,
       hoverProvider,
+      codeActions,
       languageConfiguration,
     ]
   );
 
-  const _editorDidMount = useCallback(
-    (editor: monaco.editor.IStandaloneCodeEditor, __monaco: unknown) => {
+  const _editorDidMount = useCallback<NonNullable<ReactMonacoEditorProps['editorDidMount']>>(
+    (editor, __monaco) => {
       if (__monaco !== monaco) {
         throw new Error('react-monaco-editor is using a different version of monaco');
       }
 
       remeasureFonts();
 
-      _editor.current = editor;
-
       const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
       if (textbox) {
-        // Make sure the textarea is not directly accesible with TAB
+        // Make sure the textarea is not directly accessible with TAB
         textbox.tabIndex = -1;
 
         // The Monaco editor seems to override the tabindex and set it back to "0"
@@ -402,6 +406,13 @@ export const CodeEditor: React.FC<Props> = ({
 
       editor.onKeyDown(onKeydownMonaco);
       editor.onDidBlurEditorText(onBlurMonaco);
+
+      const messageContribution = editor.getContribution('editor.contrib.messageController');
+      editor.onDidAttemptReadOnlyEdit(() => {
+        // @ts-expect-error the show message API does exist and is documented here
+        // https://github.com/microsoft/vscode/commit/052f02175f4752c36024c18cfbca4e13403e10c3
+        messageContribution?.showMessage(readOnlyMessage, editor.getPosition());
+      });
 
       // "widget" is not part of the TS interface but does exist
       // @ts-expect-errors
@@ -420,8 +431,17 @@ export const CodeEditor: React.FC<Props> = ({
       }
 
       editorDidMount?.(editor);
+      setEditor(editor);
     },
-    [editorDidMount, onBlurMonaco, onKeydownMonaco]
+    [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
+  );
+
+  const _editorWillUnmount = useCallback<NonNullable<ReactMonacoEditorProps['editorWillUnmount']>>(
+    (editor) => {
+      const model = editor.getModel();
+      model?.dispose();
+    },
+    []
   );
 
   useEffect(() => {
@@ -431,37 +451,50 @@ export const CodeEditor: React.FC<Props> = ({
   }, []);
 
   useEffect(() => {
-    if (placeholder && !value && _editor.current) {
+    if (placeholder && !value && _editor) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, _editor.current);
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor);
     }
 
     return () => {
       _placeholderWidget.current?.dispose();
       _placeholderWidget.current = null;
     };
-  }, [placeholder, value]);
+  }, [placeholder, value, euiTheme, _editor]);
+
+  useFitToContent({ editor: _editor, fitToContent, isFullScreen });
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
-  const controlStyles = useMemo(() => {
-    const copyableStyles = [defaultStyles, codeEditorControlsStyles(euiTheme.size, euiTheme.base)];
-    return allowFullScreen || isCopyable ? copyableStyles && defaultStyles : defaultStyles;
-  }, [allowFullScreen, isCopyable, defaultStyles, euiTheme]);
-
-  const theme = useMemo(() => {
-    // register theme for dark or light
+  useEffect(() => {
+    // Register themes when 'useDarkTheme' changes
     monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
-    return options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
-  }, [useDarkTheme, transparentBackground, options]);
+    monaco.editor.defineTheme(
+      'euiColorsTransparent',
+      useDarkTheme ? DARK_THEME_TRANSPARENT : LIGHT_THEME_TRANSPARENT
+    );
+  }, [useDarkTheme]);
+
+  const theme = options?.theme ?? (transparentBackground ? 'euiColorsTransparent' : 'euiColors');
 
   return (
-    <div css={codeEditorStyles()} onKeyDown={onKeyDown}>
+    <div
+      css={styles.container}
+      onKeyDown={onKeyDown}
+      data-test-subj="kibanaCodeEditor"
+      className="kibanaCodeEditor"
+    >
       {renderPrompt()}
 
       <FullScreenDisplay>
         {allowFullScreen || isCopyable ? (
-          <div css={controlStyles}>
+          <div
+            css={
+              isFullScreen
+                ? [styles.controls.base(euiTheme), styles.controls.fullscreen(euiTheme)]
+                : styles.controls.base(euiTheme)
+            }
+          >
             <EuiFlexGroup gutterSize="xs">
               <EuiFlexItem>
                 <CopyButton />
@@ -478,10 +511,10 @@ export const CodeEditor: React.FC<Props> = ({
           value={value}
           onChange={onChange}
           width={isFullScreen ? '100vw' : width}
-          // previously defaulted to height which defaulted to 100% but this makes it unviewable
-          height={isFullScreen ? '100vh' : height}
+          height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
+          editorWillUnmount={_editorWillUnmount}
           options={{
             padding: allowFullScreen || isCopyable ? { top: 24 } : {},
             renderLineHighlight: 'none',
@@ -503,6 +536,8 @@ export const CodeEditor: React.FC<Props> = ({
             fontFamily: 'Roboto Mono',
             fontSize: isFullScreen ? 16 : 12,
             lineHeight: isFullScreen ? 24 : 21,
+            // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+            'bracketPairColorization.enabled': false,
             ...options,
           }}
         />
@@ -539,7 +574,6 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
       >
         {([fullscreenCollapse, fullscreenExpand]: string[]) => (
           <EuiButtonIcon
-            css={[codeEditorStyles(), codeEditorFullScreenStyles]}
             onClick={toggleFullScreen}
             iconType={isFullScreen ? 'fullScreenExit' : 'fullScreen'}
             color="text"
@@ -551,8 +585,6 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
     );
   };
 
-  const { euiTheme } = useEuiTheme();
-
   const FullScreenDisplay = useMemo(
     () =>
       ({ children }: { children: Array<JSX.Element | null> | JSX.Element }) => {
@@ -561,20 +593,12 @@ const useFullScreen = ({ allowFullScreen }: { allowFullScreen?: boolean }) => {
         return (
           <EuiOverlayMask>
             <EuiFocusTrap clickOutsideDisables={true}>
-              <div
-                css={[
-                  codeEditorStyles(),
-                  codeEditorFullScreenStyles(),
-                  codeEditorControlsWithinFullScreenStyles(euiTheme.size.l),
-                ]}
-              >
-                {children}
-              </div>
+              <div css={styles.fullscreenContainer}>{children}</div>
             </EuiFocusTrap>
           </EuiOverlayMask>
         );
       },
-    [isFullScreen, euiTheme]
+    [isFullScreen]
   );
 
   return {
@@ -593,7 +617,7 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
     if (!showCopyButton) return null;
 
     return (
-      <div css={codeEditorStyles()} className="euiCodeBlock__copyButton">
+      <div className="euiCodeBlock__copyButton">
         <EuiI18n token="euiCodeBlock.copyButton" default="Copy">
           {(copyButton: string) => (
             <EuiCopy textToCopy={value}>
@@ -614,4 +638,41 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
   };
 
   return { showCopyButton, CopyButton };
+};
+
+const useFitToContent = ({
+  editor,
+  fitToContent,
+  isFullScreen,
+}: {
+  editor: monaco.editor.IStandaloneCodeEditor | null;
+  isFullScreen: boolean;
+  fitToContent?: { minLines?: number; maxLines?: number };
+}) => {
+  const isFitToContent = !!fitToContent;
+  const minLines = fitToContent?.minLines;
+  const maxLines = fitToContent?.maxLines;
+  useEffect(() => {
+    if (!editor) return;
+    if (isFullScreen) return;
+    if (!isFitToContent) return;
+
+    const updateHeight = () => {
+      const contentHeight = editor.getContentHeight();
+      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+      const minHeight = (minLines ?? 1) * lineHeight;
+      let maxHeight = maxLines ? maxLines * lineHeight : contentHeight;
+      maxHeight = Math.max(minHeight, maxHeight);
+      editor.layout({
+        height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
+        width: editor.getLayoutInfo().width,
+      });
+    };
+    updateHeight();
+    const disposable = editor.onDidContentSizeChange(updateHeight);
+    return () => {
+      disposable.dispose();
+      editor.layout(); // reset the layout that was controlled by the fitToContent
+    };
+  }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
 };

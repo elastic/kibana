@@ -42,7 +42,7 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-panw.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/paloalto.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/paloalto.svg'),
     artifacts: {
       dashboards: [
         {
@@ -58,7 +58,7 @@ export function panwLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/panw_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/panw_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

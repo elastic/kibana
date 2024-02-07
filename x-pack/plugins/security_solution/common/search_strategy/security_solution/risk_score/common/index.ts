@@ -7,7 +7,12 @@
 
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
-import { RiskScoreEntity, getRiskScoreLatestIndex } from '../../../../risk_engine';
+import {
+  RiskScoreEntity,
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../entity_analytics/risk_engine';
+export { RiskQueries } from '../../../../api/search_strategy';
 
 /**
  * Make sure this aligns with the index in step 6, 9 in
@@ -16,21 +21,25 @@ import { RiskScoreEntity, getRiskScoreLatestIndex } from '../../../../risk_engin
 export const getHostRiskIndex = (
   spaceId: string,
   onlyLatest: boolean = true,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleAvailable
-    ? getRiskScoreLatestIndex(spaceId)
-    : `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  if (isNewRiskScoreModuleInstalled) {
+    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+  } else {
+    return `${RISKY_HOSTS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  }
 };
 
 export const getUserRiskIndex = (
   spaceId: string,
   onlyLatest: boolean = true,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): string => {
-  return isNewRiskScoreModuleAvailable
-    ? getRiskScoreLatestIndex(spaceId)
-    : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  if (isNewRiskScoreModuleInstalled) {
+    return onlyLatest ? getRiskScoreLatestIndex(spaceId) : getRiskScoreTimeSeriesIndex(spaceId);
+  } else {
+    return `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
+  }
 };
 
 export const buildHostNamesFilter = (hostNames: string[]) => {
@@ -49,11 +58,5 @@ export const buildEntityNameFilter = (
     ? { terms: { 'host.name': entityNames } }
     : { terms: { 'user.name': entityNames } };
 };
-
-export enum RiskQueries {
-  hostsRiskScore = 'hostsRiskScore',
-  usersRiskScore = 'usersRiskScore',
-  kpiRiskScore = 'kpiRiskScore',
-}
 
 export { RiskScoreEntity };

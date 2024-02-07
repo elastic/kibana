@@ -16,7 +16,7 @@ import type { ECSMapping } from '@kbn/osquery-io-ts-types';
 import { usePack } from '../../packs/use_pack';
 import { QueryPackSelectable } from '../../live_queries/form/query_pack_selectable';
 import { useKibana } from '../../common/lib/kibana';
-import { LiveQueryQueryField } from '../../live_queries/form/live_query_query_field';
+import LiveQueryQueryField from '../../live_queries/form/live_query_query_field';
 import { PackFieldWrapper } from './pack_field_wrapper';
 
 interface OsqueryResponseActionsValues {
@@ -24,23 +24,27 @@ interface OsqueryResponseActionsValues {
   id?: string;
   ecsMapping?: ECSMapping;
   query?: string;
+  timeout: number;
   packId?: string;
   queries?: Array<{
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
+    timeout?: number;
   }>;
 }
 
 interface OsqueryResponseActionsParamsFormFields {
   savedQueryId: string | null;
   ecs_mapping: ECSMapping;
+  timeout: number;
   query: string;
   packId?: string[];
   queries: Array<{
     id: string;
     ecs_mapping: ECSMapping;
     query: string;
+    timeout?: number;
   }>;
   queryType: 'query' | 'pack';
 }
@@ -115,6 +119,7 @@ const OsqueryResponseActionParamsFormComponent = ({
           : {
               savedQueryId: formData.savedQueryId,
               query: formData.query,
+              timeout: formData.timeout,
               ecsMapping: formData.ecs_mapping,
             }
       );

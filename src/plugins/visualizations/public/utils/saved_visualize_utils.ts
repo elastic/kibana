@@ -73,7 +73,7 @@ export function mapHitSource(
     references: SavedObjectReference[];
     url: string;
     savedObjectType?: string;
-    editUrl?: string;
+    editor?: { editUrl?: string };
     updatedAt?: string;
     type?: BaseVisType;
     icon?: BaseVisType['icon'];
@@ -108,7 +108,7 @@ export function mapHitSource(
   newAttributes.icon = newAttributes.type?.icon;
   newAttributes.image = newAttributes.type?.image;
   newAttributes.typeTitle = newAttributes.type?.title;
-  newAttributes.editUrl = `/edit/${id}`;
+  newAttributes.editor = { editUrl: `/edit/${id}` };
   newAttributes.readOnly = Boolean(visTypes.get(typeName as string)?.disableEdit);
 
   return newAttributes;
@@ -168,7 +168,6 @@ export async function findListItems(
       return acc;
     }, acc);
   }, {} as { [visType: string]: VisualizationsAppExtension });
-
   const searchOption = (field: string, ...defaults: string[]) =>
     _(extensions).map(field).concat(defaults).compact().flatten().uniq().value() as string[];
 
@@ -228,6 +227,7 @@ export async function getSavedVisualization(
     getEsType: () => SAVED_VIS_TYPE,
     getDisplayName: () => SAVED_VIS_TYPE,
     searchSource: opts.searchSource ? services.search.searchSource.createEmpty() : undefined,
+    managed: false,
   } as VisSavedObject;
   const defaultsProps = getDefaults(opts);
 
@@ -256,6 +256,7 @@ export async function getSavedVisualization(
 
   Object.assign(savedObject, attributes);
   savedObject.lastSavedTitle = savedObject.title;
+  savedObject.managed = Boolean(resp.managed);
 
   savedObject.sharingSavedObjectProps = {
     aliasTargetId,

@@ -13,6 +13,7 @@ describe('[Observability onboarding] Landing page', () => {
   describe('Entry point', () => {
     it('when clicking on the logs card the user is navigated to the observability onboarding page', () => {
       cy.getByTestSubj('guideButtonRedirect').click();
+      cy.getByTestSubj('guide-filter-observability').click();
       cy.getByTestSubj('onboarding--observability--logs').click();
 
       cy.url().should('include', '/app/observabilityOnboarding');
@@ -29,6 +30,6 @@ describe('[Observability onboarding] Landing page', () => {
 
   it('when user navigates to observability onboarding landing page is showed', () => {
     cy.visitKibana('/app/observabilityOnboarding');
-    cy.contains('Get started with Observability');
+    cy.contains('Collect and analyze logs');
   });
 });

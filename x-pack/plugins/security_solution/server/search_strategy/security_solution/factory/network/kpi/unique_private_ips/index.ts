@@ -11,7 +11,6 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   NetworkKpiQueries,
   NetworkKpiUniquePrivateIpsStrategyResponse,
-  NetworkKpiUniquePrivateIpsRequestOptions,
 } from '../../../../../../../common/search_strategy/security_solution/network';
 import { inspectStringifyObject } from '../../../../../../utils/build_query';
 import type { SecuritySolutionFactory } from '../../../types';
@@ -21,10 +20,9 @@ import { buildUniquePrivateIpsQuery } from './query.network_kpi_unique_private_i
 export const networkKpiUniquePrivateIps: SecuritySolutionFactory<NetworkKpiQueries.uniquePrivateIps> =
   {
     // @ts-expect-error auto_date_histogram.buckets is incompatible
-    buildDsl: (options: NetworkKpiUniquePrivateIpsRequestOptions) =>
-      buildUniquePrivateIpsQuery(options),
+    buildDsl: (options) => buildUniquePrivateIpsQuery(options),
     parse: async (
-      options: NetworkKpiUniquePrivateIpsRequestOptions,
+      options,
       response: IEsSearchResponse<unknown>
     ): Promise<NetworkKpiUniquePrivateIpsStrategyResponse> => {
       const inspect = {

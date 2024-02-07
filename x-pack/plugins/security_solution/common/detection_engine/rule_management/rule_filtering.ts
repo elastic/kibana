@@ -6,7 +6,8 @@
  */
 
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
-import { RuleExecutionStatus } from '../../api/detection_engine';
+import type { RuleExecutionStatus } from '../../api/detection_engine';
+import { RuleExecutionStatusEnum } from '../../api/detection_engine';
 import { prepareKQLStringParam } from '../../utils/kql';
 import {
   ENABLED_FIELD,
@@ -75,11 +76,11 @@ export function convertRulesFilterToKQL({
     kql.push(`NOT ${convertRuleTypesToKQL(excludeRuleTypes)}`);
   }
 
-  if (ruleExecutionStatus === RuleExecutionStatus.succeeded) {
+  if (ruleExecutionStatus === RuleExecutionStatusEnum.succeeded) {
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "succeeded"`);
-  } else if (ruleExecutionStatus === RuleExecutionStatus['partial failure']) {
+  } else if (ruleExecutionStatus === RuleExecutionStatusEnum['partial failure']) {
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "warning"`);
-  } else if (ruleExecutionStatus === RuleExecutionStatus.failed) {
+  } else if (ruleExecutionStatus === RuleExecutionStatusEnum.failed) {
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "failed"`);
   }
 

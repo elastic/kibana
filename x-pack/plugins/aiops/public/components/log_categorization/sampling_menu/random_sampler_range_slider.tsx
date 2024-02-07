@@ -92,6 +92,7 @@ export const RandomSamplerRangeSlider = ({
           data-test-subj="dvRandomSamplerProbabilityRange"
           append={
             <EuiButton
+              data-test-subj="aiopsRandomSamplerRangeSliderApplyButton"
               disabled={isInvalidSamplingProbabilityInput}
               onClick={() => {
                 if (setSamplingProbability && isDefined(samplingProbabilityInput)) {

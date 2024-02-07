@@ -9,7 +9,8 @@ import { either } from 'fp-ts/Either';
 import { metricsExplorerViewRT } from '../../../metrics_explorer_views';
 
 export const METRICS_EXPLORER_VIEW_URL = '/api/infra/metrics_explorer_views';
-export const METRICS_EXPLORER_VIEW_URL_ENTITY = `${METRICS_EXPLORER_VIEW_URL}/{metricsExplorerViewId}`;
+export const METRICS_EXPLORER_VIEW_URL_ENTITY =
+  `${METRICS_EXPLORER_VIEW_URL}/{metricsExplorerViewId}` as const;
 export const getMetricsExplorerViewUrl = (metricsExplorerViewId?: string) =>
   [METRICS_EXPLORER_VIEW_URL, metricsExplorerViewId].filter(Boolean).join('/');
 

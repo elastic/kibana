@@ -23,19 +23,18 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
-import type { DiscoverSetup } from '@kbn/discover-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
 import { ObservabilityOnboardingPluginLocators } from './locators';
+import { ConfigSchema } from '.';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
 
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
-  discover: DiscoverSetup;
   observability: ObservabilityPublicSetup;
   share: SharePluginSetup;
 }
@@ -44,6 +43,14 @@ export interface ObservabilityOnboardingPluginStartDeps {
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+}
+
+export interface ObservabilityOnboardingPluginContextValue {
+  core: CoreStart;
+  plugins: ObservabilityOnboardingPluginSetupDeps;
+  data: DataPublicPluginStart;
+  observability: ObservabilityPublicStart;
+  config: ConfigSchema;
 }
 
 export class ObservabilityOnboardingPlugin

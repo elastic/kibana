@@ -13,6 +13,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -91,6 +92,7 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
     !!error;
 
   if (displaySetupScreen) {
+    const isButtonDisabled = postSetupLoading || data?.has_required_role === false;
     return (
       <ProfilingAppPageTemplate
         tabs={[]}
@@ -152,44 +154,54 @@ export function CheckSetup({ children }: { children: React.ReactElement }) {
                 event.preventDefault();
               },
               button: (
-                <EuiButton
-                  data-test-subj="profilingCheckSetupButton"
-                  disabled={postSetupLoading}
-                  onClick={(event) => {
-                    event.preventDefault();
-
-                    setPostSetupLoading(true);
-
-                    postSetupResources({ http })
-                      .then(() => refresh())
-                      .catch((err) => {
-                        const message = err?.body?.message ?? err.message ?? String(err);
-
-                        notifications.toasts.addError(err, {
-                          title: i18n.translate(
-                            'xpack.profiling.checkSetup.setupFailureToastTitle',
-                            {
-                              defaultMessage: 'Failed to complete setup',
-                            }
-                          ),
-                          toastMessage: message,
-                        });
-                      })
-                      .finally(() => {
-                        setPostSetupLoading(false);
-                      });
-                  }}
-                  fill
-                  isLoading={postSetupLoading}
+                <EuiToolTip
+                  content={
+                    data?.has_required_role === false
+                      ? i18n.translate('xpack.profiling.checkSetup.tooltip', {
+                          defaultMessage: 'You must be logged in as a superuser',
+                        })
+                      : ''
+                  }
                 >
-                  {!postSetupLoading
-                    ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
-                        defaultMessage: 'Set up Universal Profiling',
-                      })
-                    : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
-                        defaultMessage: 'Setting up Universal Profiling...',
-                      })}
-                </EuiButton>
+                  <EuiButton
+                    data-test-subj="profilingCheckSetupButton"
+                    disabled={isButtonDisabled}
+                    onClick={(event) => {
+                      event.preventDefault();
+
+                      setPostSetupLoading(true);
+
+                      postSetupResources({ http })
+                        .then(() => refresh())
+                        .catch((err) => {
+                          const message = err?.body?.message ?? err.message ?? String(err);
+
+                          notifications.toasts.addError(err, {
+                            title: i18n.translate(
+                              'xpack.profiling.checkSetup.setupFailureToastTitle',
+                              {
+                                defaultMessage: 'Failed to complete setup',
+                              }
+                            ),
+                            toastMessage: message,
+                          });
+                        })
+                        .finally(() => {
+                          setPostSetupLoading(false);
+                        });
+                    }}
+                    fill
+                    isLoading={postSetupLoading}
+                  >
+                    {!postSetupLoading
+                      ? i18n.translate('xpack.profiling.noDataConfig.action.buttonLabel', {
+                          defaultMessage: 'Set up Universal Profiling',
+                        })
+                      : i18n.translate('xpack.profiling.noDataConfig.action.buttonLoadingLabel', {
+                          defaultMessage: 'Setting up Universal Profiling...',
+                        })}
+                  </EuiButton>
+                </EuiToolTip>
               ),
             },
           },

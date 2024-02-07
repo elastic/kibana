@@ -228,19 +228,19 @@ describe('<FollowerIndicesList />', () => {
 
     describe('table row action menu', () => {
       test('should open a context menu when clicking on the button of each row', async () => {
-        expect(component.find('.euiContextMenuPanel').length).toBe(0);
+        expect(component.find('div.euiContextMenuPanel').length).toBe(0);
 
         await actions.openTableRowContextMenuAt(0);
 
-        expect(component.find('.euiContextMenuPanel').length).toBe(1);
+        expect(component.find('div.euiContextMenuPanel').length).toBe(1);
       });
 
       test('should have the "pause", "edit" and "unfollow" options in the row context menu', async () => {
         await actions.openTableRowContextMenuAt(0);
 
         const buttonLabels = component
-          .find('.euiContextMenuPanel')
-          .find('.euiContextMenuItem')
+          .find('div.euiContextMenuPanel')
+          .find('button.euiContextMenuItem')
           .map((button) => button.text());
 
         expect(buttonLabels).toEqual([
@@ -255,8 +255,8 @@ describe('<FollowerIndicesList />', () => {
         await actions.openTableRowContextMenuAt(1);
 
         const buttonLabels = component
-          .find('.euiContextMenuPanel')
-          .find('.euiContextMenuItem')
+          .find('div.euiContextMenuPanel')
+          .find('button.euiContextMenuItem')
           .map((button) => button.text());
 
         expect(buttonLabels).toEqual([
@@ -309,7 +309,7 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/100951
+    // FLAKY: https://github.com/elastic/kibana/issues/142774
     describe.skip('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
@@ -372,7 +372,8 @@ describe('<FollowerIndicesList />', () => {
         );
       });
 
-      test('should have a section to render the follower index shards stats', async () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/100951
+      test.skip('should have a section to render the follower index shards stats', async () => {
         await actions.clickFollowerIndexAt(0);
         expect(exists('followerIndexDetail.shardsStatsSection')).toBe(true);
 

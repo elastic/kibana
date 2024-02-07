@@ -33,6 +33,9 @@ export const EMPTY_RESPONSE: RuleRegistrySearchResponse = {
 
 export const RULE_SEARCH_STRATEGY_NAME = 'privateRuleRegistryAlertsSearchStrategy';
 
+// these are deprecated types should never show up in any alert table
+const EXCLUDED_RULE_TYPE_IDS = ['siem.notifications'];
+
 export const ruleRegistrySearchStrategyProvider = (
   data: PluginStart,
   alerting: AlertingStart,
@@ -72,29 +75,29 @@ export const ruleRegistrySearchStrategyProvider = (
           alerting.getAlertingAuthorizationWithRequest(deps.request),
         ]);
         let authzFilter;
-
-        if (!siemRequest) {
+        const fIds = new Set(featureIds);
+        if (!siemRequest && featureIds.length > 0) {
           authzFilter = (await getAuthzFilter(
             authorization,
-            ReadOperations.Find
+            ReadOperations.Find,
+            fIds
           )) as estypes.QueryDslQueryContainer;
         }
 
         const authorizedRuleTypes =
           featureIds.length > 0
-            ? await authorization.getAuthorizedRuleTypes(
-                AlertingAuthorizationEntity.Alert,
-                new Set(featureIds)
-              )
+            ? await authorization.getAuthorizedRuleTypes(AlertingAuthorizationEntity.Alert, fIds)
             : [];
+
         return { space, authzFilter, authorizedRuleTypes };
       };
       return from(getAsync(request.featureIds)).pipe(
         mergeMap(({ space, authzFilter, authorizedRuleTypes }) => {
-          const indices = alerting.getAlertIndicesAlias(
-            authorizedRuleTypes.map((art: { id: any }) => art.id),
-            space?.id
+          const allRuleTypes = authorizedRuleTypes.map((art: { id: string }) => art.id);
+          const ruleTypes = (allRuleTypes ?? []).filter(
+            (ruleTypeId: string) => !EXCLUDED_RULE_TYPE_IDS.includes(ruleTypeId)
           );
+          const indices = alerting.getAlertIndicesAlias(ruleTypes, space?.id);
           if (indices.length === 0) {
             return of(EMPTY_RESPONSE);
           }

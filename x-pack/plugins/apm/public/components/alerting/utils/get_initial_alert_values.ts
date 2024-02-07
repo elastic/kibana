@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import {
-  ApmRuleType,
-  RULE_TYPES_CONFIG,
-} from '../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { RULE_TYPES_CONFIG } from '../../../../common/rules/apm_rule_types';
 
 export function getInitialAlertValues(
   ruleType: ApmRuleType | null,

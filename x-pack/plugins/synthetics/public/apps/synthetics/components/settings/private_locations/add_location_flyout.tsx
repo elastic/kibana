@@ -26,6 +26,8 @@ import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { LocationForm } from './location_form';
 import { ManageEmptyState } from './manage_empty_state';
 
+export type NewLocation = Omit<PrivateLocation, 'id'>;
+
 export const AddLocationFlyout = ({
   onSubmit,
   setIsOpen,
@@ -33,7 +35,7 @@ export const AddLocationFlyout = ({
   isLoading,
 }: {
   isLoading: boolean;
-  onSubmit: (val: PrivateLocation) => void;
+  onSubmit: (val: NewLocation) => void;
   setIsOpen: (val: boolean) => void;
   privateLocations: PrivateLocation[];
 }) => {
@@ -44,12 +46,10 @@ export const AddLocationFlyout = ({
     defaultValues: {
       label: '',
       agentPolicyId: '',
-      id: '',
       geo: {
         lat: 0,
         lon: 0,
       },
-      concurrentMonitors: 1,
     },
   });
 

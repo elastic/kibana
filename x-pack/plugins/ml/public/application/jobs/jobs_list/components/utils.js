@@ -16,7 +16,6 @@ import {
 import { getApplication, getToastNotifications } from '../../../util/dependency_cache';
 import { ml } from '../../../services/ml_api_service';
 import { stringMatch } from '../../../util/string_utils';
-import { getDataViewNames } from '../../../util/index_utils';
 import { JOB_STATE, DATAFEED_STATE } from '../../../../../common/constants/states';
 import { JOB_ACTION } from '../../../../../common/constants/job_actions';
 import { parseInterval } from '../../../../../common/util/parse_interval';
@@ -24,6 +23,7 @@ import { mlCalendarService } from '../../../services/calendar_service';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { PLUGIN_ID } from '../../../../../common/constants/app';
+import { CREATED_BY_LABEL } from '../../../../../common/constants/new_job';
 
 export function loadFullJob(jobId) {
   return new Promise((resolve, reject) => {
@@ -185,17 +185,19 @@ function showResults(resp, action) {
   }
 
   const toastNotifications = getToastNotifications();
-  toastNotifications.addSuccess(
-    i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
-      defaultMessage:
-        '{successesJobsCount, plural, one{{successJob}} other{# jobs}} {actionTextPT} successfully',
-      values: {
-        successesJobsCount: successes.length,
-        successJob: successes[0],
-        actionTextPT,
-      },
-    })
-  );
+  if (successes.length > 0) {
+    toastNotifications.addSuccess(
+      i18n.translate('xpack.ml.jobsList.actionExecuteSuccessfullyNotificationMessage', {
+        defaultMessage:
+          '{successesJobsCount, plural, one{{successJob}} other{# jobs}} {actionTextPT} successfully',
+        values: {
+          successesJobsCount: successes.length,
+          successJob: successes[0],
+          actionTextPT,
+        },
+      })
+    );
+  }
 
   if (failures.length > 0) {
     failures.forEach((f) => {
@@ -221,26 +223,12 @@ export async function cloneJob(jobId) {
       loadFullJob(jobId, false),
     ]);
 
-    const dataViewNames = await getDataViewNames();
-    const dataViewTitle = datafeed.indices.join(',');
-    const jobIndicesAvailable = dataViewNames.includes(dataViewTitle);
-
-    if (jobIndicesAvailable === false) {
-      const warningText = i18n.translate(
-        'xpack.ml.jobsList.managementActions.noSourceDataViewForClone',
-        {
-          defaultMessage:
-            'Unable to clone the anomaly detection job {jobId}. No data view exists for index {dataViewTitle}.',
-          values: { jobId, dataViewTitle },
-        }
-      );
-      getToastNotificationService().displayDangerToast(warningText, {
-        'data-test-subj': 'mlCloneJobNoDataViewExistsWarningToast',
-      });
-      return;
-    }
-
-    if (cloneableJob !== undefined && originalJob?.custom_settings?.created_by !== undefined) {
+    const createdBy = originalJob?.custom_settings?.created_by;
+    if (
+      cloneableJob !== undefined &&
+      createdBy !== undefined &&
+      createdBy !== CREATED_BY_LABEL.ADVANCED
+    ) {
       // if the job is from a wizards, i.e. contains a created_by property
       // use tempJobCloningObjects to temporarily store the job
       mlJobService.tempJobCloningObjects.createdBy = originalJob?.custom_settings?.created_by;
@@ -338,10 +326,10 @@ export function resetJobs(jobIds, deleteUserAnnotations, finish = () => {}) {
     });
 }
 
-export function deleteJobs(jobs, deleteUserAnnotations, finish = () => {}) {
+export function deleteJobs(jobs, deleteUserAnnotations, deleteAlertingRules, finish = () => {}) {
   const jobIds = jobs.map((j) => j.id);
   mlJobService
-    .deleteJobs(jobIds, deleteUserAnnotations)
+    .deleteJobs(jobIds, deleteUserAnnotations, deleteAlertingRules)
     .then((resp) => {
       showResults(resp, JOB_STATE.DELETED);
       finish();

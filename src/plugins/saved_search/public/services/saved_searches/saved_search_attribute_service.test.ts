@@ -190,6 +190,7 @@ describe('getSavedSearchAttributeService', () => {
           "hideChart": false,
           "id": "saved-object-id",
           "isTextBasedQuery": false,
+          "managed": false,
           "references": Array [
             Object {
               "id": "1",
@@ -200,6 +201,7 @@ describe('getSavedSearchAttributeService', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "searchSource": Object {
             "create": [MockFunction],
             "createChild": [MockFunction],

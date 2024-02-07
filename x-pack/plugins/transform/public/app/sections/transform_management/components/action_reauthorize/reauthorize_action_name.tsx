@@ -49,7 +49,6 @@ export const ReauthorizeActionName: FC<ReauthorizeActionNameProps> = ({
 }) => {
   const { canStartStopTransform } = useTransformCapabilities();
 
-  // Disable start for batch transforms which have completed.
   const someNeedsReauthorization = items.some(needsReauthorization);
 
   const actionIsDisabled = isReauthorizeActionDisabled(

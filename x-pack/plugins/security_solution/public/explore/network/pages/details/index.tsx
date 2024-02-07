@@ -103,7 +103,8 @@ const NetworkDetailsComponent: React.FC = () => {
     dispatch(setNetworkDetailsTablesActivePageToZero());
   }, [detailName, dispatch]);
 
-  const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+  const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+    useSourcererDataView();
 
   const ip = decodeIpv6(detailName);
   const networkDetailsFilter = useMemo(() => getNetworkDetailsPageFilter(ip), [ip]);
@@ -164,7 +165,7 @@ const NetworkDetailsComponent: React.FC = () => {
       {indicesExist ? (
         <>
           <FiltersGlobal>
-            <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+            <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
           </FiltersGlobal>
 
           <SecuritySolutionPageWrapper>

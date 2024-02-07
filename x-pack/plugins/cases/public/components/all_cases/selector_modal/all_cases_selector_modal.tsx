@@ -16,12 +16,13 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
-import type { CaseUI, CaseStatusWithAllStatus } from '../../../../common/ui/types';
+import type { CaseStatuses } from '../../../../common/types/domain';
+import type { CaseUI } from '../../../../common/ui/types';
 import * as i18n from '../../../common/translations';
 import { AllCasesList } from '../all_cases_list';
 
 export interface AllCasesSelectorModalProps {
-  hiddenStatuses?: CaseStatusWithAllStatus[];
+  hiddenStatuses?: CaseStatuses[];
   onRowClick?: (theCase?: CaseUI) => void;
   onClose?: (theCase?: CaseUI, isCreateCase?: boolean) => void;
   onCreateCaseClicked?: () => void;

@@ -16,7 +16,7 @@ import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_dete
 import { useFetchDetectionRulesByTags } from '../common/api/use_fetch_detection_rules_by_tags';
 import { RuleResponse } from '../common/types';
 import { useKibana } from '../common/hooks/use_kibana';
-import { showSuccessToast } from './take_action';
+import { showCreateDetectionRuleSuccessToast } from './take_action';
 import { DETECTION_ENGINE_ALERTS_KEY, DETECTION_ENGINE_RULES_KEY } from '../common/constants';
 
 const RULES_PAGE_PATH = '/rules/management';
@@ -61,14 +61,19 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
     setIsCreateRuleLoading(true);
     const ruleResponse = await createRuleFn(http);
     setIsCreateRuleLoading(false);
-    showSuccessToast(notifications, http, ruleResponse);
+    showCreateDetectionRuleSuccessToast(notifications, http, ruleResponse);
     // Triggering a refetch of rules and alerts to update the UI
     queryClient.invalidateQueries([DETECTION_ENGINE_RULES_KEY]);
     queryClient.invalidateQueries([DETECTION_ENGINE_ALERTS_KEY]);
   }, [createRuleFn, http, notifications, queryClient]);
 
   return (
-    <EuiSkeletonText lines={1} size="m" isLoading={ruleIsLoading || alertsIsLoading}>
+    <EuiSkeletonText
+      data-test-subj="csp:detection-rule-counter-loading"
+      lines={1}
+      size="m"
+      isLoading={ruleIsLoading || alertsIsLoading}
+    >
       {rulesData?.total === 0 ? (
         <>
           <EuiText size="s">
@@ -78,11 +83,17 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
                   id="xpack.csp.findingsFlyout.alerts.creatingRule"
                   defaultMessage="Creating detection rule"
                 />{' '}
-                <EuiLoadingSpinner size="s" />
+                <EuiLoadingSpinner
+                  size="s"
+                  data-test-subj="csp:findings-flyout-detection-rule-counter-loading"
+                />
               </>
             ) : (
               <>
-                <EuiLink onClick={createDetectionRuleOnClick}>
+                <EuiLink
+                  onClick={createDetectionRuleOnClick}
+                  data-test-subj="csp:findings-flyout-create-detection-rule-link"
+                >
                   <FormattedMessage
                     id="xpack.csp.findingsFlyout.alerts.createRuleAction"
                     defaultMessage="Create a detection rule"
@@ -98,7 +109,7 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
         </>
       ) : (
         <>
-          <EuiLink onClick={alertsPageNavigation}>
+          <EuiLink onClick={alertsPageNavigation} data-test-subj="csp:findings-flyout-alert-count">
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.alertCount"
               defaultMessage="{alertCount, plural, one {# alert} other {# alerts}}"
@@ -109,7 +120,10 @@ export const DetectionRuleCounter = ({ tags, createRuleFn }: DetectionRuleCounte
             id="xpack.csp.findingsFlyout.alerts.detectedBy"
             defaultMessage="detected by"
           />{' '}
-          <EuiLink onClick={rulePageNavigation}>
+          <EuiLink
+            onClick={rulePageNavigation}
+            data-test-subj="csp:findings-flyout-detection-rule-count"
+          >
             <FormattedMessage
               id="xpack.csp.findingsFlyout.alerts.detectionRuleCount"
               defaultMessage="{ruleCount, plural, one {# detection rule} other {# detection rules}}"

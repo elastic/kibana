@@ -14,12 +14,15 @@ import {
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef } from 'react';
 import type { Node } from 'unist';
+import { ChatActionClickHandler } from '../chat/types';
+import { EsqlCodeBlock } from './esql_code_block';
 
 interface Props {
   content: string;
   loading: boolean;
+  onActionClick: ChatActionClickHandler;
 }
 
 const ANIMATION_TIME = 1;
@@ -86,13 +89,37 @@ const loadingCursorPlugin = () => {
   };
 };
 
-export function MessageText({ loading, content }: Props) {
+const esqlLanguagePlugin = () => {
+  const visitor = (node: Node, parent?: Parent) => {
+    if ('children' in node) {
+      const nodeAsParent = node as Parent;
+      nodeAsParent.children.forEach((child) => {
+        visitor(child, nodeAsParent);
+      });
+    }
+
+    if (node.type === 'code' && node.lang === 'esql') {
+      node.type = 'esql';
+    }
+  };
+
+  return (tree: Node) => {
+    visitor(tree);
+  };
+};
+
+export function MessageText({ loading, content, onActionClick }: Props) {
   const containerClassName = css`
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   `;
+
+  const onActionClickRef = useRef(onActionClick);
+
+  onActionClickRef.current = onActionClick;
 
   const { parsingPluginList, processingPluginList } = useMemo(() => {
     const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
+
     const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
 
     const { components } = processingPlugins[1][1];
@@ -100,6 +127,18 @@ export function MessageText({ loading, content }: Props) {
     processingPlugins[1][1].components = {
       ...components,
       cursor: Cursor,
+      esql: (props) => {
+        return (
+          <>
+            <EsqlCodeBlock
+              value={props.value}
+              actionsDisabled={loading}
+              onActionClick={onActionClickRef.current}
+            />
+            <EuiSpacer size="m" />
+          </>
+        );
+      },
       table: (props) => (
         <>
           <div className="euiBasicTable">
@@ -137,10 +176,10 @@ export function MessageText({ loading, content }: Props) {
     };
 
     return {
-      parsingPluginList: [loadingCursorPlugin, ...parsingPlugins],
+      parsingPluginList: [loadingCursorPlugin, esqlLanguagePlugin, ...parsingPlugins],
       processingPluginList: processingPlugins,
     };
-  }, []);
+  }, [loading]);
 
   return (
     <EuiText size="s" className={containerClassName}>

@@ -10,7 +10,7 @@ import { useLocation } from 'react-router-dom';
 import type { LinkDescriptor } from '@kbn/observability-shared-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import rison from '@kbn/rison';
-import type { InventoryItemType } from '../../../common/inventory_models/types';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import type { AssetDetailsUrlState, RouteState } from '../../components/asset_details/types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import {
@@ -25,7 +25,7 @@ export interface MetricDetailsQueryParams {
 }
 
 export type AssetDetailsQueryParams = MetricDetailsQueryParams &
-  Omit<AssetDetailsUrlState, 'dateRange'>;
+  Omit<AssetDetailsUrlState, 'dateRange' | 'autoRefresh'>;
 
 type SearchParams<T extends InventoryItemType> = T extends 'host'
   ? AssetDetailsQueryParams

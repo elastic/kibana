@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiExpression, EuiPopover, EuiFlexGroup, EuiFlexItem, EuiSelect } from '@elastic/eui';
 import { EuiPopoverTitle, EuiButtonIcon } from '@elastic/eui';
-import { InventoryItemType } from '../../../../common/inventory_models/types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 interface WhenExpressionProps {
   value: InventoryItemType;

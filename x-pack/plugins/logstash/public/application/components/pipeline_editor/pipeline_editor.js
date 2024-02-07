@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { isEmpty } from 'lodash';
 import { TOOLTIPS } from '../../../../common/constants/tooltips';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -22,7 +22,7 @@ import {
   EuiFieldText,
   EuiForm,
   EuiFormRow,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiSelect,
   EuiSpacer,
   EuiPageHeader,
@@ -266,7 +266,7 @@ class PipelineEditorUi extends React.Component {
     const { intl } = this.props;
 
     return (
-      <EuiPageContentBody
+      <EuiPageSection
         style={{ width: '100%' }}
         restrictWidth
         data-test-subj={`pipelineEdit pipelineEdit-${this.state.pipeline.id}`}
@@ -480,7 +480,7 @@ class PipelineEditorUi extends React.Component {
             confirmDeletePipeline={this.deletePipeline}
           />
         )}
-      </EuiPageContentBody>
+      </EuiPageSection>
     );
   }
 }

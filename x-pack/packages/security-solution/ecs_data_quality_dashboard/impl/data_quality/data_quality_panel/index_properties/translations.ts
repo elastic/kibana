@@ -276,6 +276,22 @@ export const CUSTOM_CALLOUT = ({ fieldCount, version }: { fieldCount: number; ve
       '{fieldCount, plural, =1 {This field is not} other {These fields are not}} defined by the Elastic Common Schema (ECS), version {version}.',
   });
 
+export const SAME_FAMILY_CALLOUT = ({
+  fieldCount,
+  version,
+}: {
+  fieldCount: number;
+  version: string;
+}) =>
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sameFamilyCallout',
+    {
+      values: { fieldCount, version },
+      defaultMessage:
+        "{fieldCount, plural, =1 {This field is} other {These fields are}} defined by the Elastic Common Schema (ECS), version {version}, but {fieldCount, plural, =1 {its mapping type doesn't} other {their mapping types don't}} exactly match.",
+    }
+  );
+
 export const CUSTOM_CALLOUT_TITLE = (fieldCount: number) =>
   i18n.translate(
     'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.customCalloutTitle',
@@ -283,6 +299,16 @@ export const CUSTOM_CALLOUT_TITLE = (fieldCount: number) =>
       values: { fieldCount },
       defaultMessage:
         '{fieldCount} Custom {fieldCount, plural, =1 {field mapping} other {field mappings}}',
+    }
+  );
+
+export const SAME_FAMILY_CALLOUT_TITLE = (fieldCount: number) =>
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sameFamilyCalloutTitle',
+    {
+      values: { fieldCount },
+      defaultMessage:
+        '{fieldCount} Same family {fieldCount, plural, =1 {field mapping} other {field mappings}}',
     }
   );
 
@@ -307,13 +333,7 @@ export const INCOMPATIBLE_FIELDS = i18n.translate(
   }
 );
 
-export const INCOMPATIBLE_CALLOUT = ({
-  fieldCount,
-  version,
-}: {
-  fieldCount: number;
-  version: string;
-}) =>
+export const INCOMPATIBLE_CALLOUT = (version: string) =>
   i18n.translate(
     'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout',
     {
@@ -323,34 +343,27 @@ export const INCOMPATIBLE_CALLOUT = ({
     }
   );
 
-export const INCOMPATIBLE_FIELDS_WITH = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout.incompatibleFieldsWithLabel',
+export const FIELDS_WITH_MAPPINGS_SAME_FAMILY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout.fieldsWithMappingsSameFamilyLabel',
   {
     defaultMessage:
-      'Incompatible fields with mappings in the same family have exactly the same search behavior but may have different space usage or performance characteristics.',
+      'Fields with mappings in the same family have exactly the same search behavior as the type specified by ECS, but may have different space usage or performance characteristics.',
   }
 );
 
-export const WHEN_AN_INCOMPATIBLE_FIELD = i18n.translate(
-  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout.whenAnIncompatibleFieldLabel',
+export const WHEN_A_FIELD_IS_INCOMPATIBLE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCallout.whenAFieldIsIncompatibleLabel',
   {
-    defaultMessage: 'When an incompatible field is not in the same family:',
+    defaultMessage: 'When a field is incompatible:',
   }
 );
 
-export const INCOMPATIBLE_CALLOUT_TITLE = ({
-  fieldCount,
-  fieldsInSameFamily,
-}: {
-  fieldCount: number;
-  fieldsInSameFamily: number;
-}) =>
+export const INCOMPATIBLE_CALLOUT_TITLE = (fieldCount: number) =>
   i18n.translate(
     'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.incompatibleCalloutTitle',
     {
-      values: { fieldCount, fieldsInSameFamily },
-      defaultMessage:
-        '{fieldCount} incompatible {fieldCount, plural, =1 {field} other {fields}}, {fieldsInSameFamily} {fieldsInSameFamily, plural, =1 {field} other {fields}} with {fieldsInSameFamily, plural, =1 {a mapping} other {mappings}} in the same family',
+      values: { fieldCount },
+      defaultMessage: '{fieldCount} incompatible {fieldCount, plural, =1 {field} other {fields}}',
     }
   );
 
@@ -391,6 +404,21 @@ export const OTHER_APP_CAPABILITIES_WORK_PROPERLY = i18n.translate(
   }
 );
 
+export const SAME_FAMILY_EMPTY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sameFamilyEmptyContent',
+  {
+    defaultMessage:
+      'All of the field mappings and document values in this index are compliant with the Elastic Common Schema (ECS).',
+  }
+);
+
+export const SAME_FAMILY_EMPTY_TITLE = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sameFamilyEmptyTitle',
+  {
+    defaultMessage: 'All field mappings and values are ECS compliant',
+  }
+);
+
 export const PAGES_DISPLAY_EVENTS = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.pagesDisplayEventsMessage',
   {
@@ -425,6 +453,13 @@ export const ECS_IS_A_PERMISSIVE_SCHEMA = i18n.translate(
   {
     defaultMessage:
       'ECS is a permissive schema. If your events have additional data that cannot be mapped to ECS, you can simply add them to your events, using custom field names.',
+  }
+);
+
+export const SAME_FAMILY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.indexProperties.sameFamilyTab',
+  {
+    defaultMessage: 'Same family',
   }
 );
 

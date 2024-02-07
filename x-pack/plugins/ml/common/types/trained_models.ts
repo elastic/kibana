@@ -11,6 +11,7 @@ import type {
   FeatureImportanceBaseline,
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
+import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -97,6 +98,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
    * Associated pipelines. Extends response from the ES endpoint.
    */
   pipelines?: Record<string, PipelineDefinition> | null;
+  origin_job_exists?: boolean;
 
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
@@ -110,6 +112,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   tags: string[];
   version: string;
   inference_config?: Record<string, any>;
+  indices?: Array<Record<IndexName, IndicesIndexState | null>>;
 };
 
 export interface PipelineDefinition {
@@ -200,8 +203,8 @@ export interface AllocatedModel {
     number_of_pending_requests: number;
     start_time: number;
     throughput_last_minute: number;
-    number_of_allocations: number;
-    threads_per_allocation: number;
+    number_of_allocations?: number;
+    threads_per_allocation?: number;
     error_count?: number;
   };
 }

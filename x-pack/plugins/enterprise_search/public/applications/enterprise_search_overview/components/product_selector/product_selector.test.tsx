@@ -17,7 +17,6 @@ import { SetupGuideCta } from '../setup_guide';
 import { TrialCallout } from '../trial_callout';
 
 import { ElasticsearchProductCard } from './elasticsearch_product_card';
-import { EnterpriseSearchProductCard } from './enterprise_search_product_card';
 
 import { ProductSelector } from '.';
 
@@ -27,7 +26,6 @@ describe('ProductSelector', () => {
     const wrapper = shallow(<ProductSelector />);
 
     expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-    expect(wrapper.find(EnterpriseSearchProductCard)).toHaveLength(1);
     expect(wrapper.find(SetupGuideCta)).toHaveLength(1);
   });
 
@@ -64,7 +62,13 @@ describe('ProductSelector', () => {
       const wrapper = shallow(<ProductSelector />);
 
       expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
-      expect(wrapper.find(EnterpriseSearchProductCard)).toHaveLength(1);
+      expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
+    });
+
+    it('does not render EnterpriseSearch card without access', () => {
+      const wrapper = shallow(<ProductSelector />);
+
+      expect(wrapper.find(ElasticsearchProductCard)).toHaveLength(1);
       expect(wrapper.find(SetupGuideCta)).toHaveLength(0);
     });
   });

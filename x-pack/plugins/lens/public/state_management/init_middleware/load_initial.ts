@@ -25,10 +25,15 @@ export const getPersisted = async ({
   history,
 }: {
   initialInput: LensEmbeddableInput;
-  lensServices: LensAppServices;
+  lensServices: Pick<LensAppServices, 'attributeService' | 'notifications' | 'spaces' | 'http'>;
   history?: History<unknown>;
 }): Promise<
-  { doc: Document; sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'> } | undefined
+  | {
+      doc: Document;
+      sharingSavedObjectProps: Omit<SharingSavedObjectProps, 'sourceId'>;
+      managed: boolean;
+    }
+  | undefined
 > => {
   const { notifications, spaces, attributeService } = lensServices;
   let doc: Document;
@@ -44,6 +49,7 @@ export const getPersisted = async ({
         sharingSavedObjectProps: {
           outcome: 'exactMatch',
         },
+        managed: false,
       };
     }
     const { metaInfo, attributes } = result;
@@ -74,6 +80,7 @@ export const getPersisted = async ({
         aliasTargetId: sharingSavedObjectProps?.aliasTargetId,
         outcome: sharingSavedObjectProps?.outcome,
       },
+      managed: Boolean(metaInfo?.managed),
     };
   } catch (e) {
     notifications.toasts.addDanger(
@@ -91,10 +98,12 @@ export function loadInitial(
     redirectCallback,
     initialInput,
     history,
+    inlineEditing,
   }: {
     redirectCallback?: (savedObjectId?: string) => void;
     initialInput?: LensEmbeddableInput;
     history?: History<unknown>;
+    inlineEditing?: boolean;
   },
   autoApplyDisabled: boolean
 ) {
@@ -271,7 +280,7 @@ export function loadInitial(
     .then(
       (persisted) => {
         if (persisted) {
-          const { doc, sharingSavedObjectProps } = persisted;
+          const { doc, sharingSavedObjectProps, managed } = persisted;
           if (attributeService.inputIsRefType(initialInput)) {
             lensServices.chrome.recentlyAccessed.add(
               getFullPath(initialInput.savedObjectId),
@@ -291,9 +300,13 @@ export function loadInitial(
             {}
           );
 
-          const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
-          // Don't overwrite any pinned filters
-          data.query.filterManager.setAppFilters(filters);
+          // when the embeddable is initialized from the dashboard we don't want to inject the filters
+          // as this will replace the parent application filters (such as a dashboard)
+          if (!Boolean(inlineEditing)) {
+            const filters = data.query.filterManager.inject(doc.state.filters, doc.references);
+            // Don't overwrite any pinned filters
+            data.query.filterManager.setAppFilters(filters);
+          }
 
           const docVisualizationState = {
             activeId: doc.visualizationType,
@@ -335,7 +348,9 @@ export function loadInitial(
                       !(initialInput as LensByReferenceInput)?.savedObjectId &&
                       currentSessionId
                         ? currentSessionId
-                        : data.search.session.start(),
+                        : !inlineEditing
+                        ? data.search.session.start()
+                        : undefined,
                     persistedDoc: doc,
                     activeDatasourceId: getInitialDatasourceId(datasourceMap, doc),
                     visualization: {
@@ -355,6 +370,7 @@ export function loadInitial(
                     ),
                     isLoading: false,
                     annotationGroups,
+                    managed,
                   })
                 );
 

@@ -24,7 +24,7 @@ export const TopValuesPreview: FC<TopValuesPreviewProps> = ({ config, isNumeric 
 
   const data: OrdinalDataItem[] = topValues.map((d) => ({
     ...d,
-    key: d.key.toString(),
+    key: d.key?.toString(),
   }));
   const chartData: ChartData = {
     cardinality,

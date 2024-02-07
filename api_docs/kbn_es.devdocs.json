@@ -626,7 +626,7 @@
         "tags": [],
         "label": "getDockerFileMountPath",
         "description": [
-          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ESS container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
+          "\nRemoves REPO_ROOT from hostPath. Keep the rest to avoid filename collisions.\nReturns the path where a file will be mounted inside the ES or ES serverless container.\n/root/kibana/package/foo/bar.json => /usr/share/elasticsearch/files/package/foo/bar.json"
         ],
         "signature": [
           "(hostPath: string) => string"
@@ -646,6 +646,88 @@
               "string"
             ],
             "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.maybeCreateDockerNetwork",
+        "type": "Function",
+        "tags": [],
+        "label": "maybeCreateDockerNetwork",
+        "description": [
+          "\nSetup elastic Docker network if needed"
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.maybeCreateDockerNetwork.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.readRolesFromResource",
+        "type": "Function",
+        "tags": [],
+        "label": "readRolesFromResource",
+        "description": [],
+        "signature": [
+          "(resourcePath: string) => string[]"
+        ],
+        "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.readRolesFromResource.$1",
+            "type": "string",
+            "tags": [],
+            "label": "resourcePath",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-es/src/utils/read_roles_from_resource.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -686,6 +768,55 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.verifyDockerInstalled",
+        "type": "Function",
+        "tags": [],
+        "label": "verifyDockerInstalled",
+        "description": [
+          "\nVerify that Docker is installed locally"
+        ],
+        "signature": [
+          "(log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          ") => Promise<void>"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/es",
+            "id": "def-common.verifyDockerInstalled.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-es/src/utils/docker.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [],
@@ -699,7 +830,7 @@
         "label": "ArtifactLicense",
         "description": [],
         "signature": [
-          "\"basic\" | \"trial\" | \"oss\""
+          "\"basic\" | \"trial\""
         ],
         "path": "packages/kbn-es/src/artifact.ts",
         "deprecated": false,
@@ -716,7 +847,7 @@
         "signature": [
           "\"elastic_serverless\""
         ],
-        "path": "packages/kbn-es/src/utils/ess_file_realm.ts",
+        "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -731,7 +862,49 @@
         "signature": [
           "\"changeme\""
         ],
-        "path": "packages/kbn-es/src/utils/ess_file_realm.ts",
+        "path": "packages/kbn-es/src/utils/serverless_file_realm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.SERVERLESS_NODES",
+        "type": "Array",
+        "tags": [],
+        "label": "SERVERLESS_NODES",
+        "description": [],
+        "signature": [
+          "Omit<ServerlessEsNodeArgs, \"image\">[]"
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.SERVERLESS_ROLES_ROOT_PATH",
+        "type": "string",
+        "tags": [],
+        "label": "SERVERLESS_ROLES_ROOT_PATH",
+        "description": [],
+        "path": "packages/kbn-es/src/paths.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/es",
+        "id": "def-common.ServerlessProjectType",
+        "type": "Type",
+        "tags": [],
+        "label": "ServerlessProjectType",
+        "description": [],
+        "signature": [
+          "\"security\" | \"es\" | \"oblt\""
+        ],
+        "path": "packages/kbn-es/src/utils/docker.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

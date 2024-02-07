@@ -11,6 +11,7 @@ import { Readable } from 'stream';
 import { apm, ApmFields, generateLongId, generateShortId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
@@ -32,7 +33,7 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 
 const scenario: Scenario<ApmFields> = async () => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const producerInternalOnlyInstance = apm
 
         .service({ name: 'producer-internal-only', environment: ENVIRONMENT, agentName: 'go' })
@@ -111,8 +112,9 @@ const scenario: Scenario<ApmFields> = async () => {
             );
         });
 
-      return Readable.from(
-        Array.from(producerInternalOnlyEvents).concat(Array.from(consumerEvents))
+      return withClient(
+        apmEsClient,
+        Readable.from(Array.from(producerInternalOnlyEvents).concat(Array.from(consumerEvents)))
       );
     },
   };

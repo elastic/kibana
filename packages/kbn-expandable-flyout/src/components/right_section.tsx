@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RIGHT_SECTION } from './test_ids';
+import { RIGHT_SECTION_TEST_ID } from './test_ids';
 
 interface RightSectionProps {
   /**
@@ -29,13 +29,13 @@ export const RightSection: React.FC<RightSectionProps> = ({
   width,
 }: RightSectionProps) => {
   const style = useMemo<React.CSSProperties>(
-    () => ({ height: '100%', width: `${width * 100}%`, overflowY: 'scroll' }),
+    () => ({ height: '100%', width: `${width}px` }),
     [width]
   );
 
   return (
-    <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION}>
-      <EuiFlexGroup direction="column">{component}</EuiFlexGroup>
+    <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION_TEST_ID}>
+      {component}
     </EuiFlexItem>
   );
 };

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { cleanKibana, resetRulesTableState, deleteAlertsAndRules } from '../../../../tasks/common';
-import { login, visitSecurityDetectionRulesPage } from '../../../../tasks/login';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { resetRulesTableState } from '../../../../tasks/common';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
   expectRulesWithExecutionStatus,
   filterByExecutionStatus,
@@ -28,26 +30,16 @@ import {
 import { disableAutoRefresh } from '../../../../tasks/alerts_detection_rules';
 import { getNewRule } from '../../../../objects/rule';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-// Flaky in serverless tests
-describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Rules table: filtering', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     // Make sure persisted rules table state is cleared
     resetRulesTableState();
     deleteAlertsAndRules();
-    cy.task('esArchiverResetKibana');
   });
 
-  // TODO: https://github.com/elastic/kibana/issues/161540
-  describe.skip('Last response filter', () => {
-    // Flaky in serverless tests
-    // @brokenInServerless tag is not working so a skip was needed
-    it('Filters rules by last response', { tags: ['@brokenInServerless'] }, function () {
+  describe('Last response filter', () => {
+    it('Filters rules by last response', function () {
       deleteIndex('test_index');
 
       createIndex('test_index', {
@@ -89,7 +81,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServe
 
       waitForRulesToFinishExecution(['successful_rule', 'warning_rule', 'failed_rule'], new Date());
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       // Initial table state - before filtering by status
@@ -140,7 +132,7 @@ describe('Rules table: filtering', { tags: ['@ess', '@serverless', '@skipInServe
     });
 
     it('filter by different tags', () => {
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
 
       expectManagementTableRules(['Rule 1', 'Rule 2', 'Rule 3']);
 

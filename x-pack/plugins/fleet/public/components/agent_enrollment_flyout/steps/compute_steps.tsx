@@ -13,8 +13,10 @@ import { safeDump } from 'js-yaml';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 
 import type { FullAgentPolicy } from '../../../../common/types/models/agent_policy';
-
+import { API_VERSIONS } from '../../../../common/constants';
 import { fullAgentPolicyToYaml, agentPolicyRouteService } from '../../../services';
+
+import { getGcpIntegrationDetailsFromAgentPolicy } from '../../cloud_security_posture/services';
 
 import { StandaloneInstructions, ManualInstructions } from '../../enrollment_instructions';
 
@@ -29,6 +31,12 @@ import type { InstructionProps } from '../types';
 import { usePollingAgentCount } from '../confirm_agent_enrollment';
 
 import {
+  InstallCloudFormationManagedAgentStep,
+  InstallGoogleCloudShellManagedAgentStep,
+  InstallAzureArmTemplateManagedAgentStep,
+} from '../../cloud_security_posture';
+
+import {
   InstallationModeSelectionStep,
   AgentEnrollmentKeySelectionStep,
   AgentPolicySelectionStep,
@@ -36,8 +44,6 @@ import {
   ConfigureStandaloneAgentStep,
   AgentEnrollmentConfirmationStep,
   InstallManagedAgentStep,
-  InstallCloudFormationManagedAgentStep,
-  InstallGoogleCloudShellManagedAgentStep,
   IncomingDataConfirmationStep,
 } from '.';
 
@@ -68,10 +74,12 @@ export const StandaloneSteps: React.FunctionComponent<InstructionProps> = ({
         ? core.http.basePath.prepend(
             `${agentPolicyRouteService.getInfoFullDownloadPath(
               selectedPolicy?.id
-            )}?kubernetes=true&standalone=true`
+            )}?kubernetes=true&standalone=true&apiVersion=${API_VERSIONS.public.v1}`
           )
         : core.http.basePath.prepend(
-            `${agentPolicyRouteService.getInfoFullDownloadPath(selectedPolicy?.id)}?standalone=true`
+            `${agentPolicyRouteService.getInfoFullDownloadPath(
+              selectedPolicy?.id
+            )}?standalone=true&apiVersion=${API_VERSIONS.public.v1}`
           );
   }
 
@@ -220,11 +228,19 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
 
   const agentVersion = useAgentVersion();
 
+  const { gcpProjectId, gcpOrganizationId, gcpAccountType } =
+    getGcpIntegrationDetailsFromAgentPolicy(selectedPolicy);
+
+  const fleetServerHost = fleetServerHosts?.[0];
+
   const installManagedCommands = ManualInstructions({
     apiKey: enrollToken,
     fleetServerHosts,
     fleetProxy,
     agentVersion: agentVersion || '',
+    gcpProjectId,
+    gcpOrganizationId,
+    gcpAccountType,
   });
 
   const instructionsSteps = useMemo(() => {
@@ -260,6 +276,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           enrollToken,
           cloudSecurityIntegration,
+          fleetServerHost,
         })
       );
     } else if (cloudSecurityIntegration?.cloudShellUrl) {
@@ -269,6 +286,17 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           cloudShellUrl: cloudSecurityIntegration.cloudShellUrl,
           cloudShellCommand: installManagedCommands.googleCloudShell,
+          projectId: gcpProjectId,
+        })
+      );
+    } else if (cloudSecurityIntegration?.isAzureArmTemplate) {
+      steps.push(
+        InstallAzureArmTemplateManagedAgentStep({
+          selectedApiKeyId,
+          apiKeyData,
+          enrollToken,
+          cloudSecurityIntegration,
+          agentPolicy,
         })
       );
     } else {
@@ -279,7 +307,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           selectedApiKeyId,
           isK8s,
           cloudSecurityIntegration,
-          fleetServerHost: fleetServerHosts?.[0],
+          fleetServerHost,
           enrollToken,
         })
       );
@@ -292,6 +320,7 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
           onClickViewAgents,
           troubleshootLink: link,
           agentCount: enrolledAgentIds.length,
+          isLongEnrollment: cloudSecurityIntegration !== undefined,
         })
       );
     }
@@ -324,12 +353,13 @@ export const ManagedSteps: React.FunctionComponent<InstructionProps> = ({
     enrollToken,
     installManagedCommands,
     isK8s,
-    fleetServerHosts,
+    fleetServerHost,
     onClickViewAgents,
     link,
     enrolledAgentIds,
     agentDataConfirmed,
     installedPackagePolicy,
+    gcpProjectId,
   ]);
 
   if (!agentVersion) {

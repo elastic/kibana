@@ -4,43 +4,35 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import React, { useEffect, useRef, useState } from 'react';
+import ReactDOM from 'react-dom';
+import { v4 } from 'uuid';
 import { css } from '@emotion/css';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
+import usePrevious from 'react-use/lib/usePrevious';
 import { ChatBody } from '../../components/chat/chat_body';
 import { ConversationList } from '../../components/chat/conversation_list';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { useConfirmModal } from '../../hooks/use_confirm_modal';
-import { useConversation } from '../../hooks/use_conversation';
 import { useCurrentUser } from '../../hooks/use_current_user';
+import { useForceUpdate } from '../../hooks/use_force_update';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
-import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeBase } from '../../hooks/use_knowledge_base';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 import { useObservabilityAIAssistantParams } from '../../hooks/use_observability_ai_assistant_params';
 import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
-import { getConnectorsManagementHref } from '../../utils/get_connectors_management_href';
-import { getModelsManagementHref } from '../../utils/get_models_management_href';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
+import { ChatInlineEditingContent } from '../../components/chat/chat_inline_edit';
 
 const containerClassName = css`
   max-width: 100%;
 `;
 
-const chatBodyContainerClassNameWithError = css`
-  align-self: center;
-`;
-
-const conversationListContainerName = css`
-  min-width: 250px;
-  width: 250px;
-  border-right: solid 1px ${euiThemeVars.euiColorLightShade};
-`;
+const SECOND_SLOT_CONTAINER_WIDTH = 400;
 
 export function ConversationView() {
+  const { euiTheme } = useEuiTheme();
+
   const currentUser = useCurrentUser();
 
   const service = useObservabilityAIAssistant();
@@ -53,24 +45,6 @@ export function ConversationView() {
 
   const { path } = useObservabilityAIAssistantParams('/conversations/*');
 
-  const {
-    services: { http, notifications },
-  } = useKibana();
-
-  const { element: confirmDeleteElement, confirm: confirmDeleteFunction } = useConfirmModal({
-    title: i18n.translate('xpack.observabilityAiAssistant.confirmDeleteConversationTitle', {
-      defaultMessage: 'Delete this conversation?',
-    }),
-    children: i18n.translate('xpack.observabilityAiAssistant.confirmDeleteConversationContent', {
-      defaultMessage: 'This action cannot be undone.',
-    }),
-    confirmButtonText: i18n.translate('xpack.observabilityAiAssistant.confirmDeleteButtonText', {
-      defaultMessage: 'Delete conversation',
-    }),
-  });
-
-  const [isUpdatingList, setIsUpdatingList] = useState(false);
-
   const chatService = useAbortableAsync(
     ({ signal }) => {
       return service.start({ signal });
@@ -80,12 +54,27 @@ export function ConversationView() {
 
   const conversationId = 'conversationId' in path ? path.conversationId : undefined;
 
-  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
-    useConversation({
-      conversationId,
-      chatService: chatService.value,
-      connectorId: connectors.selectedConnector,
-    });
+  // Regenerate the key only when the id changes, except after
+  // creating the conversation. Ideally this happens by adding
+  // state to the current route, but I'm not keen on adding
+  // the concept of state to the router, due to a mismatch
+  // between router.link() and router.push(). So, this is a
+  // pretty gross workaround for persisting a key under some
+  // conditions.
+  const chatBodyKeyRef = useRef(v4());
+  const keepPreviousKeyRef = useRef(false);
+  const prevConversationId = usePrevious(conversationId);
+
+  const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
+  const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
+
+  if (conversationId !== prevConversationId && keepPreviousKeyRef.current === false) {
+    chatBodyKeyRef.current = v4();
+  }
+
+  keepPreviousKeyRef.current = false;
+
+  const forceUpdate = useForceUpdate();
 
   const conversations = useAbortableAsync(
     ({ signal }) => {
@@ -96,167 +85,135 @@ export function ConversationView() {
     [service]
   );
 
-  const displayedConversations = useMemo(() => {
-    return [
-      ...(!conversationId ? [{ id: '', label: EMPTY_CONVERSATION_TITLE }] : []),
-      ...(conversations.value?.conversations ?? []).map((conv) => ({
-        id: conv.conversation.id,
-        label: conv.conversation.title,
-        href: observabilityAIAssistantRouter.link('/conversations/{conversationId}', {
-          path: {
-            conversationId: conv.conversation.id,
-          },
-        }),
-      })),
-    ];
-  }, [conversations.value?.conversations, conversationId, observabilityAIAssistantRouter]);
-
-  function navigateToConversation(nextConversationId?: string) {
-    observabilityAIAssistantRouter.push(
-      nextConversationId ? '/conversations/{conversationId}' : '/conversations/new',
-      {
-        path: { conversationId: nextConversationId },
+  function navigateToConversation(nextConversationId?: string, usePrevConversationKey?: boolean) {
+    if (nextConversationId) {
+      observabilityAIAssistantRouter.push('/conversations/{conversationId}', {
+        path: {
+          conversationId: nextConversationId,
+        },
         query: {},
-      }
-    );
+      });
+    } else {
+      observabilityAIAssistantRouter.push('/conversations/new', { path: {}, query: {} });
+    }
   }
 
   function handleRefreshConversations() {
     conversations.refresh();
   }
 
+  const handleConversationUpdate = (conversation: { conversation: { id: string } }) => {
+    if (!conversationId) {
+      keepPreviousKeyRef.current = true;
+      navigateToConversation(conversation.conversation.id);
+    }
+    handleRefreshConversations();
+  };
+
+  useEffect(() => {
+    return () => {
+      setIsSecondSlotVisible(false);
+      if (secondSlotContainer) {
+        ReactDOM.unmountComponentAtNode(secondSlotContainer);
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const conversationListContainerName = css`
+    min-width: 250px;
+    width: 250px;
+    border-right: solid 1px ${euiThemeVars.euiColorLightShade};
+  `;
+
+  const sidebarContainerClass = css`
+    display: flex;
+    position: absolute;
+    z-index: 1;
+    top: 56px;
+    right: 0;
+    height: calc(100% - 56px);
+    background-color: ${euiTheme.colors.lightestShade};
+    width: ${isSecondSlotVisible ? SECOND_SLOT_CONTAINER_WIDTH : 0}px;
+    border-top: solid 1px ${euiThemeVars.euiColorLightShade};
+    border-left: solid 1px ${euiThemeVars.euiColorLightShade};
+
+    .euiFlyoutHeader {
+      padding: ${euiTheme.size.m};
+    }
+
+    .euiFlyoutFooter {
+      padding: ${euiTheme.size.m};
+      padding-top: ${euiTheme.size.l};
+      padding-bottom: ${euiTheme.size.l};
+    }
+  `;
+
   return (
     <>
-      {confirmDeleteElement}
       <EuiFlexGroup direction="row" className={containerClassName} gutterSize="none">
         <EuiFlexItem grow={false} className={conversationListContainerName}>
           <ConversationList
             selected={conversationId ?? ''}
-            loading={conversations.loading || isUpdatingList}
-            error={conversations.error}
-            conversations={displayedConversations}
             onClickNewChat={() => {
-              observabilityAIAssistantRouter.push('/conversations/new', {
-                path: {},
-                query: {},
-              });
+              if (conversationId) {
+                observabilityAIAssistantRouter.push('/conversations/new', {
+                  path: {},
+                  query: {},
+                });
+              } else {
+                // clear the chat
+                chatBodyKeyRef.current = v4();
+                forceUpdate();
+              }
+            }}
+            onClickChat={(id) => {
+              navigateToConversation(id, false);
             }}
             onClickDeleteConversation={(id) => {
-              confirmDeleteFunction()
-                .then(async (confirmed) => {
-                  if (!confirmed) {
-                    return;
-                  }
-
-                  setIsUpdatingList(true);
-
-                  await service.callApi(
-                    'DELETE /internal/observability_ai_assistant/conversation/{conversationId}',
-                    {
-                      params: {
-                        path: {
-                          conversationId: id,
-                        },
-                      },
-                      signal: null,
-                    }
-                  );
-
-                  const isCurrentConversation = id === conversationId;
-                  const hasOtherConversations = conversations.value?.conversations.find(
-                    (conv) => 'id' in conv.conversation && conv.conversation.id !== id
-                  );
-
-                  if (isCurrentConversation) {
-                    navigateToConversation(
-                      hasOtherConversations
-                        ? conversations.value!.conversations[0].conversation.id
-                        : undefined
-                    );
-                  }
-
-                  conversations.refresh();
-                })
-                .catch((error) => {
-                  notifications.toasts.addError(error, {
-                    title: i18n.translate(
-                      'xpack.observabilityAiAssistant.failedToDeleteConversation',
-                      {
-                        defaultMessage: 'Could not delete conversation',
-                      }
-                    ),
-                  });
-                })
-                .finally(() => {
-                  setIsUpdatingList(false);
-                });
+              if (conversationId === id) {
+                navigateToConversation(undefined, false);
+              }
             }}
           />
           <EuiSpacer size="s" />
         </EuiFlexItem>
-        <EuiFlexItem
-          grow
-          className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
-        >
-          {conversation.error ? (
-            <EuiCallOut
-              color="danger"
-              title={i18n.translate(
-                'xpack.observabilityAiAssistant.couldNotFindConversationTitle',
-                {
-                  defaultMessage: 'Conversation not found',
-                }
-              )}
-              iconType="warning"
-            >
-              {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
-                defaultMessage:
-                  'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
-                values: { conversationId },
-              })}
-            </EuiCallOut>
-          ) : null}
-          {!chatService.value ? (
-            <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiSpacer size="xl" />
-                <EuiLoadingSpinner size="l" />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          ) : null}
-          {conversation.value && chatService.value && !conversation.error ? (
-            <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
-              <ChatBody
-                loading={conversation.loading}
-                currentUser={currentUser}
-                connectors={connectors}
-                connectorsManagementHref={getConnectorsManagementHref(http)}
-                modelsManagementHref={getModelsManagementHref(http)}
-                conversationId={conversationId}
-                knowledgeBase={knowledgeBase}
-                messages={displayedMessages}
-                title={conversation.value.conversation.title}
-                startedFrom="conversationView"
-                onChatUpdate={(messages) => {
-                  setDisplayedMessages(messages);
-                }}
-                onChatComplete={(messages) => {
-                  save(messages, handleRefreshConversations)
-                    .then((nextConversation) => {
-                      conversations.refresh();
-                      if (!conversationId && nextConversation?.conversation?.id) {
-                        navigateToConversation(nextConversation.conversation.id);
-                      }
-                    })
-                    .catch((e) => {});
-                }}
-                onSaveTitle={(title) => {
-                  saveTitle(title, handleRefreshConversations);
-                }}
+
+        {!chatService.value ? (
+          <EuiFlexGroup direction="column" alignItems="center" gutterSize="l">
+            <EuiFlexItem grow={false}>
+              <EuiSpacer size="xl" />
+              <EuiLoadingSpinner size="l" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : null}
+
+        {chatService.value && (
+          <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
+            <ChatBody
+              key={chatBodyKeyRef.current}
+              currentUser={currentUser}
+              connectors={connectors}
+              initialConversationId={conversationId}
+              knowledgeBase={knowledgeBase}
+              showLinkToConversationsApp={false}
+              startedFrom="conversationView"
+              onConversationUpdate={handleConversationUpdate}
+              chatFlyoutSecondSlotHandler={{
+                container: secondSlotContainer,
+                setVisibility: setIsSecondSlotVisible,
+              }}
+            />
+
+            <div className={sidebarContainerClass}>
+              <ChatInlineEditingContent
+                setContainer={setSecondSlotContainer}
+                visible={isSecondSlotVisible}
+                style={{ width: '100%' }}
               />
-            </ObservabilityAIAssistantChatServiceProvider>
-          ) : null}
-        </EuiFlexItem>
+            </div>
+          </ObservabilityAIAssistantChatServiceProvider>
+        )}
       </EuiFlexGroup>
     </>
   );

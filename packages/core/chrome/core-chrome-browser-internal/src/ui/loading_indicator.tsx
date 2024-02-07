@@ -19,6 +19,8 @@ export interface LoadingIndicatorProps {
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
   showAsBar?: boolean;
   customLogo?: string;
+  maxAmount?: number;
+  valueAmount?: string | number;
 }
 
 export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { visible: boolean }> {
@@ -61,8 +63,6 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
     const testSubj = this.state.visible
       ? 'globalLoadingIndicator'
       : 'globalLoadingIndicator-hidden';
-
-    const ariaHidden = !this.state.visible;
 
     const ariaLabel = i18n.translate('core.ui.loadingIndicatorAriaLabel', {
       defaultMessage: 'Loading content',
@@ -107,8 +107,8 @@ export class LoadingIndicator extends React.Component<LoadingIndicatorProps, { v
       <EuiProgress
         className={className}
         data-test-subj={testSubj}
-        aria-hidden={ariaHidden}
-        aria-label={ariaLabel}
+        max={this.props.maxAmount}
+        value={this.props.valueAmount}
         position="fixed"
         color="accent"
         size="xs"

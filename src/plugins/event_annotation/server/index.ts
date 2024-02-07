@@ -6,5 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EventAnnotationServerPlugin } from './plugin';
-export const plugin = () => new EventAnnotationServerPlugin();
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
+
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { EventAnnotationServerPlugin } = await import('./plugin');
+  return new EventAnnotationServerPlugin(initializerContext);
+};

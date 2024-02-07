@@ -7,10 +7,7 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
 import type { HostsKpiHistogramData } from '../common';
-
-export type HostsKpiHostsRequestOptions = RequestBasicOptions;
 
 export interface HostsKpiHostsStrategyResponse extends IEsSearchResponse {
   hosts: Maybe<number>;

@@ -42,13 +42,16 @@ import type {
 import type { AuthorizeObject } from '@kbn/core-saved-objects-server/src/extensions/security';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type { EcsEvent } from '@kbn/ecs';
+import type {
+  Actions,
+  AuditLogger,
+  CheckPrivilegesResponse,
+  CheckSavedObjectsPrivileges,
+} from '@kbn/security-plugin-types-server';
 
 import { isAuthorizedInAllSpaces } from './authorization_utils';
 import { ALL_SPACES_ID, UNKNOWN_SPACE } from '../../common/constants';
-import type { AuditLogger } from '../audit';
 import { savedObjectEvent } from '../audit';
-import type { Actions, CheckSavedObjectsPrivileges } from '../authorization';
-import type { CheckPrivilegesResponse } from '../authorization/types';
 
 interface Params {
   actions: Actions;

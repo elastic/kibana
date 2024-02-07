@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import type { RuleAction } from '@kbn/alerting-plugin/common';
-
-export type RuleAlertAction = Omit<RuleAction, 'actionTypeId' | 'alertsFilter'> & {
-  action_type_id: string;
-  alerts_filter?: RuleAction['alertsFilter'];
-};
-
 /**
  * Defines the search types you can have from Elasticsearch within a
  * doc._source. It uses recursive types of "| SearchTypes[]" to designate

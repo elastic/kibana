@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types';
+import type { CspSetupStatus } from '@kbn/cloud-security-posture-plugin/common/types_old';
 import { setupFleetAndAgents } from '../../../../fleet_api_integration/apis/agents/services';
 import { generateAgent } from '../../../../fleet_api_integration/helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -31,17 +31,20 @@ export default function (providerContext: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
         const getPkRes = await supertest
           .get(`/api/fleet/epm/packages/fleet_server`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
         const pkgVersion = getPkRes.body.item.version;
         await supertest
           .post(`/api/fleet/epm/packages/fleet_server/${pkgVersion}`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({ force: true })
           .expect(200);
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({
             name: 'Test policy a1',
@@ -52,6 +55,7 @@ export default function (providerContext: FtrProviderContext) {
 
         await supertest
           .post(`/api/fleet/fleet_server_hosts`)
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .set('kbn-xsrf', 'xxxx')
           .send({
             id: 'test-default-a1',

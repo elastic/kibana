@@ -7,17 +7,53 @@
 
 import { i18n } from '@kbn/i18n';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import { EuiBreadcrumb } from '@elastic/eui';
 
 type SetBreadcrumbs = ManagementAppMountParams['setBreadcrumbs'];
 
+export enum IndexManagementBreadcrumb {
+  home = 'home',
+  /**
+   * Indices tab
+   */
+  indices = 'indices',
+  /**
+   * Index details page
+   */
+  indexDetailsOverview = 'indexDetailsOverview',
+  indexDetailsMappings = 'indexDetailsMappings',
+  indexDetailsSettings = 'indexDetailsSettings',
+  indexDetailsStats = 'indexDetailsStats',
+  /**
+   * Data streams tab
+   */
+  dataStreams = 'dataStreams',
+  /**
+   * Index templates tab
+   */
+  templates = 'templates',
+  templateCreate = 'templateCreate',
+  templateEdit = 'templateEdit',
+  templateClone = 'templateClone',
+  /**
+   * Component templates tab
+   */
+  componentTemplates = 'componentTemplates',
+  componentTemplateCreate = 'componentTemplateCreate',
+  componentTemplateEdit = 'componentTemplateEdit',
+  componentTemplateClone = 'componentTemplateClone',
+  /**
+   * Enrich policies tab
+   */
+  enrichPolicies = 'enrichPolicies',
+  enrichPoliciesCreate = 'enrichPoliciesCreate',
+}
+
 class BreadcrumbService {
   private breadcrumbs: {
-    [key: string]: Array<{
-      text: string;
-      href?: string;
-    }>;
+    [key in IndexManagementBreadcrumb]?: EuiBreadcrumb[];
   } = {
-    home: [],
+    home: [] as EuiBreadcrumb[],
   };
   private setBreadcrumbsHandler?: SetBreadcrumbs;
 
@@ -30,6 +66,62 @@ class BreadcrumbService {
           defaultMessage: 'Index Management',
         }),
         href: `/`,
+      },
+    ];
+
+    this.breadcrumbs.indices = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indicesLabel', {
+          defaultMessage: 'Indices',
+        }),
+        href: `/indices`,
+      },
+    ];
+
+    const indexDetailsBreadcrumb = {
+      text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsLabel', {
+        defaultMessage: 'Index details',
+      }),
+    };
+
+    this.breadcrumbs.indexDetailsOverview = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsOverviewLabel', {
+          defaultMessage: 'Overview',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.indexDetailsMappings = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsMappingsLabel', {
+          defaultMessage: 'Mappings',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.indexDetailsSettings = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsSettingsLabel', {
+          defaultMessage: 'Settings',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.indexDetailsStats = [
+      ...this.breadcrumbs.indices,
+      indexDetailsBreadcrumb,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indexDetailsStatsLabel', {
+          defaultMessage: 'Stats',
+        }),
       },
     ];
 
@@ -69,16 +161,89 @@ class BreadcrumbService {
         }),
       },
     ];
+
+    this.breadcrumbs.dataStreams = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.dataStreamsLabel', {
+          defaultMessage: 'Data streams',
+        }),
+        href: `/data_streams`,
+      },
+    ];
+
+    this.breadcrumbs.componentTemplates = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.componentTemplatesLabel', {
+          defaultMessage: 'Component templates',
+        }),
+        href: `/component_templates`,
+      },
+    ];
+
+    this.breadcrumbs.componentTemplateCreate = [
+      ...this.breadcrumbs.componentTemplates,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.createComponentTemplateLabel', {
+          defaultMessage: 'Create component templates',
+        }),
+      },
+    ];
+
+    this.breadcrumbs.componentTemplateEdit = [
+      ...this.breadcrumbs.componentTemplates,
+      {
+        text: i18n.translate(
+          'xpack.idxMgmt.componentTemplate.breadcrumb.editComponentTemplateLabel',
+          {
+            defaultMessage: 'Edit component template',
+          }
+        ),
+      },
+    ];
+
+    this.breadcrumbs.componentTemplateClone = [
+      ...this.breadcrumbs.componentTemplates,
+      {
+        text: i18n.translate(
+          'xpack.idxMgmt.componentTemplate.breadcrumb.cloneComponentTemplateLabel',
+          {
+            defaultMessage: 'Clone component template',
+          }
+        ),
+      },
+    ];
+
+    this.breadcrumbs.enrichPolicies = [
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyLabel', {
+          defaultMessage: 'Enrich policies',
+        }),
+        href: `/enrich_policies`,
+      },
+    ];
+
+    this.breadcrumbs.enrichPoliciesCreate = [
+      ...this.breadcrumbs.enrichPolicies,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.enrichPolicyCreateLabel', {
+          defaultMessage: 'Create enrich policy',
+        }),
+        href: `/enrich_policies/create`,
+      },
+    ];
   }
 
-  public setBreadcrumbs(type: string): void {
+  public setBreadcrumbs(type: IndexManagementBreadcrumb): void {
     if (!this.setBreadcrumbsHandler) {
       throw new Error(`BreadcrumbService#setup() must be called first!`);
     }
 
     const newBreadcrumbs = this.breadcrumbs[type]
-      ? [...this.breadcrumbs[type]]
-      : [...this.breadcrumbs.home];
+      ? [...this.breadcrumbs[type]!]
+      : [...this.breadcrumbs.home!];
 
     // Pop off last breadcrumb
     const lastBreadcrumb = newBreadcrumbs.pop() as {

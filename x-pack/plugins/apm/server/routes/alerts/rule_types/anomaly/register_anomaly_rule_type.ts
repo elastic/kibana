@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
-import { KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import datemath from '@kbn/datemath';
 import type { ESSearchResponse } from '@kbn/es-types';
 import {
@@ -15,22 +15,19 @@ import {
   observabilityPaths,
   ProcessorEvent,
 } from '@kbn/observability-plugin/common';
-import { termQuery } from '@kbn/observability-plugin/server';
+import { termQuery, termsQuery } from '@kbn/observability-plugin/server';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
   ALERT_REASON,
   ALERT_SEVERITY,
+  ApmRuleType,
 } from '@kbn/rule-data-utils';
 import { createLifecycleRuleTypeFactory } from '@kbn/rule-registry-plugin/server';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
-import {
-  ApmMlDetectorType,
-  getApmMlDetectorIndex,
-} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
@@ -43,7 +40,7 @@ import {
 } from '../../../../../common/environment_filter_values';
 import {
   ANOMALY_ALERT_SEVERITY_TYPES,
-  ApmRuleType,
+  APM_SERVER_FEATURE_ID,
   formatAnomalyReason,
   RULE_TYPES_CONFIG,
 } from '../../../../../common/rules/apm_rule_types';
@@ -57,6 +54,10 @@ import {
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
+import {
+  getAnomalyDetectorIndex,
+  getAnomalyDetectorType,
+} from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -81,6 +82,12 @@ export function registerAnomalyRuleType({
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: anomalyParamsSchema },
+      schemas: {
+        params: {
+          type: 'config-schema',
+          schema: anomalyParamsSchema,
+        },
+      },
       actionVariables: {
         context: [
           apmActionVariables.alertDetailsUrl,
@@ -93,10 +100,17 @@ export function registerAnomalyRuleType({
           apmActionVariables.viewInAppUrl,
         ],
       },
-      producer: 'apm',
+      category: DEFAULT_APP_CATEGORIES.observability.id,
+      producer: APM_SERVER_FEATURE_ID,
       minimumLicenseRequired: 'basic',
       isExportable: true,
-      executor: async ({ params, services, spaceId, startedAt }) => {
+      executor: async ({
+        params,
+        services,
+        spaceId,
+        startedAt,
+        getTimeRange,
+      }) => {
         if (!ml) {
           return { state: {} };
         }
@@ -142,13 +156,17 @@ export function registerAnomalyRuleType({
           return { state: {} };
         }
 
-        // start time must be at least 30, does like this to support rules created before this change where default was 15
-        const startTime = Math.min(
-          datemath.parse('now-30m')!.valueOf(),
-          datemath
-            .parse(`now-${ruleParams.windowSize}${ruleParams.windowUnit}`)
-            ?.valueOf() || 0
-        );
+        // Lookback window must be at least 30m to support rules created before this change where default was 15m
+        const minimumWindow = '30m';
+        const requestedWindow = `${ruleParams.windowSize}${ruleParams.windowUnit}`;
+
+        const window =
+          datemath.parse(`now-${minimumWindow}`)!.valueOf() <
+          datemath.parse(`now-${requestedWindow}`)!.valueOf()
+            ? minimumWindow
+            : requestedWindow;
+
+        const { dateStart } = getTimeRange(window);
 
         const jobIds = mlJobs.map((job) => job.jobId);
         const anomalySearchParams = {
@@ -164,8 +182,7 @@ export function registerAnomalyRuleType({
                   {
                     range: {
                       timestamp: {
-                        gte: startTime,
-                        format: 'epoch_millis',
+                        gte: dateStart,
                       },
                     },
                   },
@@ -177,9 +194,11 @@ export function registerAnomalyRuleType({
                   ...termQuery('by_field_value', ruleParams.transactionType, {
                     queryEmptyString: false,
                   }),
-                  ...termQuery(
+                  ...termsQuery(
                     'detector_index',
-                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                    ...(ruleParams.anomalyDetectorTypes?.map((type) =>
+                      getAnomalyDetectorIndex(type)
+                    ) ?? [])
                   ),
                 ] as QueryDslQueryContainer[],
               },
@@ -191,6 +210,7 @@ export function registerAnomalyRuleType({
                     { field: 'partition_field_value' },
                     { field: 'by_field_value' },
                     { field: 'job_id' },
+                    { field: 'detector_index' },
                   ],
                   size: 1000,
                   order: { 'latest_score.record_score': 'desc' as const },
@@ -205,6 +225,7 @@ export function registerAnomalyRuleType({
                         { field: 'job_id' },
                         { field: 'timestamp' },
                         { field: 'bucket_span' },
+                        { field: 'detector_index' },
                       ] as const),
                       sort: {
                         timestamp: 'desc' as const,
@@ -239,8 +260,12 @@ export function registerAnomalyRuleType({
                 transactionType: latest.by_field_value as string,
                 environment: job.environment,
                 score: latest.record_score as number,
+                detectorType: getAnomalyDetectorType(
+                  latest.detector_index as number
+                ),
                 timestamp: Date.parse(latest.timestamp as string),
                 bucketSpan: latest.bucket_span as number,
+                bucketKey: bucket.key,
               };
             })
             .filter((anomaly) =>
@@ -253,8 +278,10 @@ export function registerAnomalyRuleType({
             environment,
             transactionType,
             score,
+            detectorType,
             timestamp,
             bucketSpan,
+            bucketKey,
           } = anomaly;
 
           const eventSourceFields = await getServiceGroupFieldsForAnomaly({
@@ -270,21 +297,15 @@ export function registerAnomalyRuleType({
 
           const severityLevel = getSeverity(score);
           const reasonMessage = formatAnomalyReason({
-            measured: score,
+            anomalyScore: score,
             serviceName,
             severityLevel,
             windowSize: params.windowSize,
             windowUnit: params.windowUnit,
+            detectorType,
           });
 
-          const alertId = [
-            ApmRuleType.Anomaly,
-            serviceName,
-            environment,
-            transactionType,
-          ]
-            .filter((name) => name)
-            .join('_');
+          const alertId = bucketKey.join('_');
 
           const alert = services.alertWithLifecycle({
             id: alertId,

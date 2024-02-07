@@ -9,13 +9,13 @@ import { cloneDeep } from 'lodash';
 import { firstValueFrom, Observable } from 'rxjs';
 import type { CapabilitiesSwitcher, CoreSetup, Logger } from '@kbn/core/server';
 import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { MlFeatures } from '../../../common/constants/app';
 import { isFullLicense, isMinimumLicense, isMlEnabled } from '../../../common/license';
 import {
   type MlCapabilities,
   basicLicenseMlCapabilities,
   featureCapabilities,
 } from '../../../common/types/capabilities';
-import type { MlFeatures } from '../../types';
 
 export const setupCapabilitiesSwitcher = (
   coreSetup: CoreSetup,
@@ -23,7 +23,9 @@ export const setupCapabilitiesSwitcher = (
   enabledFeatures: MlFeatures,
   logger: Logger
 ) => {
-  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures));
+  coreSetup.capabilities.registerSwitcher(getSwitcher(license$, logger, enabledFeatures), {
+    capabilityPath: 'ml.*',
+  });
 };
 
 function getSwitcher(

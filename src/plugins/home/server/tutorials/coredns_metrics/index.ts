@@ -38,7 +38,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-coredns.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/coredns.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/coredns.svg'),
     artifacts: {
       application: {
         label: i18n.translate('home.tutorials.corednsMetrics.artifacts.application.label', {
@@ -52,7 +52,7 @@ export function corednsMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/coredns_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/coredns_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

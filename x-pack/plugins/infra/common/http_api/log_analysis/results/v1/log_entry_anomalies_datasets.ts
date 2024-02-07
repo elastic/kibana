@@ -14,6 +14,7 @@ import {
   timeRangeRT,
   routeTimingMetadataRT,
 } from '../../../shared';
+import { idFormatByJobTypeRT } from '../../id_formats/v1/id_formats';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH =
   '/api/infra/log_analysis/results/log_entry_anomalies_datasets';
@@ -26,6 +27,7 @@ export const getLogEntryAnomaliesDatasetsRequestPayloadRT = rt.type({
   data: rt.type({
     // log view
     logView: persistedLogViewReferenceRT,
+    idFormats: idFormatByJobTypeRT,
     // the time range to fetch the anomalies datasets from
     timeRange: timeRangeRT,
   }),

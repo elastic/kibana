@@ -9,7 +9,9 @@ import type {
   ClusterPutComponentTemplateRequest,
   IndicesPutIndexTemplateRequest,
   IngestPutPipelineRequest,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+  IngestPipeline,
+  Metadata,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { getSLOMappingsTemplate } from '../../assets/component_templates/slo_mappings_template';
 import { getSLOSettingsTemplate } from '../../assets/component_templates/slo_settings_template';
@@ -23,36 +25,28 @@ import {
   SLO_INDEX_TEMPLATE_PATTERN,
   SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
   SLO_INGEST_PIPELINE_NAME,
-  SLO_RESOURCES_VERSION,
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_NAME,
   SLO_SUMMARY_INDEX_TEMPLATE_PATTERN,
-  SLO_SUMMARY_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_TEMP_INDEX_NAME,
-} from '../../assets/constants';
+} from '../../../common/slo/constants';
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../../assets/index_templates/slo_summary_index_templates';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
-import { getSLOSummaryPipelineTemplate } from '../../assets/ingest_templates/slo_summary_pipeline_template';
 import { retryTransientEsErrors } from '../../utils/retry';
 
 export interface ResourceInstaller {
   ensureCommonResourcesInstalled(): Promise<void>;
 }
 
+type IngestPipelineWithMetadata = IngestPipeline & { _meta?: Metadata };
+
 export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
-    const alreadyInstalled = await this.areResourcesAlreadyInstalled();
-
-    if (alreadyInstalled) {
-      this.logger.info('SLO resources already installed - skipping');
-      return;
-    }
-
     try {
       this.logger.info('Installing SLO shared resources');
       await Promise.all([
@@ -95,100 +89,53 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
       );
-
-      await this.createOrUpdateIngestPipelineTemplate(
-        getSLOSummaryPipelineTemplate(SLO_SUMMARY_INGEST_PIPELINE_NAME)
-      );
     } catch (err) {
       this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
     }
   }
 
-  private async areResourcesAlreadyInstalled(): Promise<boolean> {
-    let indexTemplateExists = false;
-    try {
-      const { index_templates: indexTemplates } = await this.execute(() =>
-        this.esClient.indices.getIndexTemplate({
-          name: SLO_INDEX_TEMPLATE_NAME,
-        })
-      );
-
-      const sloIndexTemplate = indexTemplates.find(
-        (template) => template.name === SLO_INDEX_TEMPLATE_NAME
-      );
-      indexTemplateExists =
-        !!sloIndexTemplate &&
-        sloIndexTemplate.index_template._meta?.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    let summaryIndexTemplateExists = false;
-    try {
-      const { index_templates: indexTemplates } = await this.execute(() =>
-        this.esClient.indices.getIndexTemplate({
-          name: SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-        })
-      );
-      const sloSummaryIndexTemplate = indexTemplates.find(
-        (template) => template.name === SLO_SUMMARY_INDEX_TEMPLATE_NAME
-      );
-      summaryIndexTemplateExists =
-        !!sloSummaryIndexTemplate &&
-        sloSummaryIndexTemplate.index_template._meta?.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    let ingestPipelineExists = false;
-    try {
-      const pipeline = await this.execute(() =>
-        this.esClient.ingest.getPipeline({ id: SLO_INGEST_PIPELINE_NAME })
-      );
-
-      ingestPipelineExists =
-        // @ts-ignore _meta is not defined on the type
-        pipeline && pipeline[SLO_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    let summaryIngestPipelineExists = false;
-    try {
-      const pipeline = await this.execute(() =>
-        this.esClient.ingest.getPipeline({ id: SLO_SUMMARY_INGEST_PIPELINE_NAME })
-      );
-
-      summaryIngestPipelineExists =
-        pipeline &&
-        // @ts-ignore _meta is not defined on the type
-        pipeline[SLO_SUMMARY_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    return (
-      indexTemplateExists &&
-      summaryIndexTemplateExists &&
-      ingestPipelineExists &&
-      summaryIngestPipelineExists
-    );
-  }
-
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {
-    this.logger.info(`Installing SLO component template [${template.name}]`);
-    return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
+    const currentVersion = await fetchComponentTemplateVersion(
+      template.name,
+      this.logger,
+      this.esClient
+    );
+    if (template._meta?.version && currentVersion === template._meta.version) {
+      this.logger.info(`SLO component template found with version [${template._meta.version}]`);
+    } else {
+      this.logger.info(`Installing SLO component template [${template.name}]`);
+      return this.execute(() => this.esClient.cluster.putComponentTemplate(template));
+    }
   }
 
   private async createOrUpdateIndexTemplate(template: IndicesPutIndexTemplateRequest) {
-    this.logger.info(`Installing SLO index template [${template.name}]`);
-    return this.execute(() => this.esClient.indices.putIndexTemplate(template));
+    const currentVersion = await fetchIndexTemplateVersion(
+      template.name,
+      this.logger,
+      this.esClient
+    );
+
+    if (template._meta?.version && currentVersion === template._meta.version) {
+      this.logger.info(`SLO index template found with version [${template._meta.version}]`);
+    } else {
+      this.logger.info(`Installing SLO index template [${template.name}]`);
+      return this.execute(() => this.esClient.indices.putIndexTemplate(template));
+    }
   }
 
   private async createOrUpdateIngestPipelineTemplate(template: IngestPutPipelineRequest) {
-    this.logger.info(`Installing SLO ingest pipeline [${template.id}]`);
-    return this.execute(() => this.esClient.ingest.putPipeline(template));
+    const currentVersion = await fetchIngestPipelineVersion(
+      template.id,
+      this.logger,
+      this.esClient
+    );
+    if (template._meta?.version && currentVersion === template._meta.version) {
+      this.logger.info(`SLO ingest pipeline found with version [${template._meta.version}]`);
+    } else {
+      this.logger.info(`Installing SLO ingest pipeline [${template.id}]`);
+      return this.execute(() => this.esClient.ingest.putPipeline(template));
+    }
   }
 
   private async createIndex(indexName: string) {
@@ -204,4 +151,69 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   private async execute<T>(esCall: () => Promise<T>): Promise<T> {
     return await retryTransientEsErrors(esCall, { logger: this.logger });
   }
+}
+
+async function fetchComponentTemplateVersion(
+  name: string,
+  logger: Logger,
+  esClient: ElasticsearchClient
+) {
+  const getTemplateRes = await retryTransientEsErrors(
+    () =>
+      esClient.cluster.getComponentTemplate(
+        {
+          name,
+        },
+        {
+          ignore: [404],
+        }
+      ),
+    { logger }
+  );
+
+  return getTemplateRes?.component_templates?.[0]?.component_template?._meta?.version || null;
+}
+
+async function fetchIndexTemplateVersion(
+  name: string,
+  logger: Logger,
+  esClient: ElasticsearchClient
+) {
+  const getTemplateRes = await retryTransientEsErrors(
+    () =>
+      esClient.indices.getIndexTemplate(
+        {
+          name,
+        },
+        {
+          ignore: [404],
+        }
+      ),
+    { logger }
+  );
+
+  return getTemplateRes?.index_templates?.[0]?.index_template?._meta?.version || null;
+}
+
+async function fetchIngestPipelineVersion(
+  id: string,
+  logger: Logger,
+  esClient: ElasticsearchClient
+) {
+  const getPipelineRes = await retryTransientEsErrors<
+    Record<string, IngestPipelineWithMetadata | undefined>
+  >(
+    () =>
+      esClient.ingest.getPipeline(
+        {
+          id,
+        },
+        {
+          ignore: [404],
+        }
+      ),
+    { logger }
+  );
+
+  return getPipelineRes?.[id]?._meta?.version || null;
 }

@@ -6,7 +6,9 @@
  */
 
 import { renderRuleStats } from './rule_stats';
-import { render, screen } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
+import { LocatorPublic } from '@kbn/share-plugin/common';
+import { RulesParams } from '../../../locators/rules';
 
 const RULES_PAGE_LINK = '/app/observability/alerts/rules';
 const STAT_CLASS = 'euiStat';
@@ -14,6 +16,14 @@ const STAT_TITLE_PRIMARY_SELECTOR = '[class*="euiStat__title-primary"]';
 const STAT_BUTTON_CLASS = 'euiButtonEmpty';
 
 describe('Rule stats', () => {
+  const mockedLocator = {
+    navigate: jest.fn(),
+  } as any as LocatorPublic<RulesParams>;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   test('renders all rule stats', async () => {
     const stats = renderRuleStats(
       {
@@ -58,14 +68,17 @@ describe('Rule stats', () => {
         snoozed: 0,
       },
       RULES_PAGE_LINK,
-      false
+      false,
+      mockedLocator
     );
     const { container } = render(stats[4]);
-    expect(screen.getByText('Disabled').closest('a')).toHaveAttribute(
-      'href',
-      `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!(disabled))`
-    );
 
+    fireEvent.click(screen.getByText('Disabled'));
+
+    expect(mockedLocator.navigate).toHaveBeenCalledWith(
+      { status: ['disabled'] },
+      { replace: false }
+    );
     expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
   });
 
@@ -115,14 +128,18 @@ describe('Rule stats', () => {
         snoozed: 1,
       },
       RULES_PAGE_LINK,
-      false
+      false,
+      mockedLocator
     );
     const { container } = render(stats[3]);
-    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
-    expect(screen.getByText('Snoozed').closest('a')).toHaveAttribute(
-      'href',
-      `${RULES_PAGE_LINK}?_a=(lastResponse:!(),status:!(snoozed))`
+
+    fireEvent.click(screen.getByText('Snoozed'));
+
+    expect(mockedLocator.navigate).toHaveBeenCalledWith(
+      { status: ['snoozed'] },
+      { replace: false }
     );
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
   });
 
   test('snoozed stat count is link-colored, when there are snoozed rules', async () => {
@@ -171,14 +188,18 @@ describe('Rule stats', () => {
         snoozed: 0,
       },
       RULES_PAGE_LINK,
-      false
+      false,
+      mockedLocator
     );
     const { container } = render(stats[2]);
-    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
-    expect(screen.getByText('Errors').closest('a')).toHaveAttribute(
-      'href',
-      `${RULES_PAGE_LINK}?_a=(lastResponse:!(error),status:!())`
+
+    fireEvent.click(screen.getByText('Errors'));
+
+    expect(mockedLocator.navigate).toHaveBeenCalledWith(
+      { lastResponse: ['failed'] },
+      { replace: false }
     );
+    expect(container.getElementsByClassName(STAT_BUTTON_CLASS).length).toBe(1);
   });
 
   test('errors stat count is link-colored, when there are error rules', () => {

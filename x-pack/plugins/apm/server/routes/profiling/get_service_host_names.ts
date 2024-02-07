@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery } from '@kbn/observability-plugin/server';
 import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { HOST_HOSTNAME, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { RollupInterval } from '../../../common/rollup';
@@ -17,12 +17,10 @@ export async function getServiceHostNames({
   start,
   end,
   environment,
-  kuery,
   documentType,
   rollupInterval,
 }: {
   environment: string;
-  kuery: string;
   serviceName: string;
   start: number;
   end: number;
@@ -43,7 +41,6 @@ export async function getServiceHostNames({
             { term: { [SERVICE_NAME]: serviceName } },
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
-            ...kqlQuery(kuery),
           ],
         },
       },

@@ -17,8 +17,7 @@ import {
 export const EDIT_ANOMALY_CHARTS_PANEL_ACTION = 'editAnomalyChartsPanelAction';
 
 export function createEditAnomalyChartsPanelAction(
-  getStartServices: MlCoreSetup['getStartServices'],
-  isServerless: boolean
+  getStartServices: MlCoreSetup['getStartServices']
 ): UiActionsActionDefinition<EditAnomalyChartsPanelContext> {
   return {
     id: 'edit-anomaly-charts',
@@ -44,7 +43,6 @@ export function createEditAnomalyChartsPanelAction(
 
         const result = await resolveEmbeddableAnomalyChartsUserInput(
           coreStart,
-          isServerless,
           embeddable.getInput()
         );
         embeddable.updateInput(result);

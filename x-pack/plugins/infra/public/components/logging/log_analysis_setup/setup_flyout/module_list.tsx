@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
+import { logEntryCategoriesJobType, logEntryRateJobType } from '../../../../../common/log_analysis';
 import { useLogAnalysisCapabilitiesContext } from '../../../../containers/logs/log_analysis';
 import {
   logEntryCategoriesModule,
@@ -40,7 +41,7 @@ export const LogAnalysisModuleList: React.FC<{
       <EuiFlexGroup>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
-            jobId={logEntryRateJobIds['log-entry-rate']}
+            jobId={logEntryRateJobIds[logEntryRateJobType]}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryRateModule.moduleDescription}
             moduleName={logEntryRateModule.moduleName}
@@ -50,7 +51,7 @@ export const LogAnalysisModuleList: React.FC<{
         </EuiFlexItem>
         <EuiFlexItem>
           <LogAnalysisModuleListCard
-            jobId={logEntryCategoriesJobIds['log-entry-categories-count']}
+            jobId={logEntryCategoriesJobIds[logEntryCategoriesJobType]}
             hasSetupCapabilities={hasLogAnalysisSetupCapabilities}
             moduleDescription={logEntryCategoriesModule.moduleDescription}
             moduleName={logEntryCategoriesModule.moduleName}

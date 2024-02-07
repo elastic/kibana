@@ -21,11 +21,12 @@ import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import type { ContentTemplateProps } from '../types';
 
 export const Flyout = ({
-  header: { tabs = [], links = [] },
+  tabs = [],
+  links = [],
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { asset, assetType, loading } = useAssetDetailsRenderPropsContext();
+  const { asset, loading } = useAssetDetailsRenderPropsContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   const { activeTabId } = useTabSwitcherContext();
   const {
@@ -35,7 +36,7 @@ export const Flyout = ({
   useEffectOnce(() => {
     telemetry.reportAssetDetailsFlyoutViewed({
       componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType,
+      assetType: asset.type,
       tabId: activeTabId,
     });
   });
@@ -50,7 +51,7 @@ export const Flyout = ({
       onClose={handleOnClose}
       ownFocus={false}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
-      data-asset-type={assetType}
+      data-asset-type={asset.type}
     >
       {loading ? (
         <InfraLoadingPanel

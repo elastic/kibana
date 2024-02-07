@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 
-import { API_VERSIONS, INTERNAL_API_ACCESS } from '../../../common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 
 import type { FleetAuthz } from '../../../common';
 
@@ -47,6 +47,7 @@ import {
   ReauthorizeTransformRequestSchema,
   GetDataStreamsRequestSchema,
   CreateCustomIntegrationRequestSchema,
+  GetInputsRequestSchema,
 } from '../../types';
 
 import {
@@ -54,7 +55,6 @@ import {
   getListHandler,
   getInstalledListHandler,
   getLimitedListHandler,
-  getFileHandler,
   getInfoHandler,
   getBulkAssetsHandler,
   installPackageFromRegistryHandler,
@@ -67,7 +67,9 @@ import {
   reauthorizeTransformsHandler,
   getDataStreamsHandler,
   createCustomIntegrationHandler,
+  getInputsHandler,
 } from './handlers';
+import { getFileHandler } from './file_handler';
 
 const MAX_FILE_SIZE_BYTES = 104857600; // 100MB
 
@@ -143,6 +145,19 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: { request: GetStatsRequestSchema },
       },
       getStatsHandler
+    );
+
+  router.versioned
+    .get({
+      path: EPM_API_ROUTES.INPUTS_PATTERN,
+      fleetAuthz: READ_PACKAGE_INFO_AUTHZ,
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetInputsRequestSchema },
+      },
+      getInputsHandler
     );
 
   router.versioned
@@ -346,11 +361,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { upgradePackages: true, writePackageSettings: true },
       },
-      access: INTERNAL_API_ACCESS,
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: { request: UpdatePackageRequestSchemaDeprecated },
       },
       async (context, request, response) => {
@@ -400,11 +414,10 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       fleetAuthz: {
         integrations: { removePackages: true },
       },
-      access: INTERNAL_API_ACCESS,
     })
     .addVersion(
       {
-        version: API_VERSIONS.internal.v1,
+        version: API_VERSIONS.public.v1,
         validate: { request: DeletePackageRequestSchemaDeprecated },
       },
       async (context, request, response) => {

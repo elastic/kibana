@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { Filter, FilterStateStore, Query } from '@kbn/es-query';
+import { type Filter, FilterStateStore, type Query } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
@@ -33,7 +33,7 @@ import {
 import { useStorage } from '@kbn/ml-local-storage';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { SEARCH_QUERY_LANGUAGE, type SearchQueryLanguage } from '@kbn/ml-query-utils';
 import { kbnTypeToSupportedType } from '../../../common/util/field_types_utils';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import {
@@ -64,9 +64,9 @@ import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
 import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
-import { GetAdditionalLinks } from '../../../common/components/results_links';
+import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
+import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
@@ -115,7 +115,6 @@ export const getDefaultDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  samplerShardSize: 5000,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,

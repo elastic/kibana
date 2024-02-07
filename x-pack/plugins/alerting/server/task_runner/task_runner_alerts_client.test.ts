@@ -68,6 +68,35 @@ import { AlertsService } from '../alerts_service';
 import { ReplaySubject } from 'rxjs';
 import { IAlertsClient } from '../alerts_client/types';
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
+import {
+  TIMESTAMP,
+  EVENT_ACTION,
+  EVENT_KIND,
+  ALERT_ACTION_GROUP,
+  ALERT_DURATION,
+  ALERT_FLAPPING,
+  ALERT_FLAPPING_HISTORY,
+  ALERT_INSTANCE_ID,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_UUID,
+  ALERT_START,
+  ALERT_STATUS,
+  ALERT_TIME_RANGE,
+  ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
+  SPACE_IDS,
+  TAGS,
+  VERSION,
+} from '@kbn/rule-data-utils';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -273,6 +302,7 @@ describe('Task Runner', () => {
           ruleType: ruleTypeWithAlerts,
           namespace: 'default',
           rule: {
+            alertDelay: 0,
             consumer: 'bar',
             executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
             id: '1',
@@ -395,19 +425,43 @@ describe('Task Runner', () => {
         expect(call.services.alertsClient?.setAlertData).toBeTruthy();
         expect(call.services.scopedClusterClient).toBeTruthy();
         expect(call.services).toBeTruthy();
-        expect(logger.debug).toHaveBeenCalledTimes(6);
-        expect(logger.debug).nthCalledWith(1, `Initializing resources for AlertsService`);
-        expect(logger.debug).nthCalledWith(2, 'executing rule test:1 at 1970-01-01T00:00:00.000Z');
+        expect(logger.debug).toHaveBeenCalledTimes(useDataStreamForAlerts ? 9 : 10);
+
+        let debugCall = 1;
+        expect(logger.debug).nthCalledWith(debugCall++, `Initializing resources for AlertsService`);
         expect(logger.debug).nthCalledWith(
-          3,
+          debugCall++,
+          'executing rule test:1 at 1970-01-01T00:00:00.000Z'
+        );
+
+        if (!useDataStreamForAlerts) {
+          expect(logger.debug).nthCalledWith(
+            debugCall++,
+            'Installing ILM policy .alerts-ilm-policy'
+          );
+        }
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-framework-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-legacy-alert-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
+          'Installing component template .alerts-ecs-mappings'
+        );
+        expect(logger.debug).nthCalledWith(
+          debugCall++,
           'deprecated ruleRunStatus for test:1: {"lastExecutionDate":"1970-01-01T00:00:00.000Z","status":"ok"}'
         );
         expect(logger.debug).nthCalledWith(
-          4,
+          debugCall++,
           'ruleRunStatus for test:1: {"outcome":"succeeded","outcomeOrder":0,"outcomeMsg":null,"warning":null,"alertsCount":{"active":0,"new":0,"recovered":0,"ignored":0}}'
         );
         expect(logger.debug).nthCalledWith(
-          5,
+          debugCall++,
           'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
         expect(
@@ -483,7 +537,7 @@ describe('Task Runner', () => {
 
         expect(clusterClient.bulk).toHaveBeenCalledWith({
           index: '.alerts-test.alerts-default',
-          refresh: 'wait_for',
+          refresh: true,
           require_alias: !useDataStreamForAlerts,
           body: [
             {
@@ -494,53 +548,35 @@ describe('Task Runner', () => {
             },
             // new alert doc
             {
-              '@timestamp': DATE_1970,
-              event: {
-                action: 'open',
-                kind: 'signal',
-              },
-              kibana: {
-                alert: {
-                  action_group: 'default',
-                  duration: {
-                    us: '0',
-                  },
-                  flapping: false,
-                  flapping_history: [true],
-                  instance: {
-                    id: '1',
-                  },
-                  maintenance_window_ids: [],
-                  rule: {
-                    category: 'My test rule',
-                    consumer: 'bar',
-                    execution: {
-                      uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                    },
-                    name: 'rule-name',
-                    parameters: {
-                      bar: true,
-                    },
-                    producer: 'alerts',
-                    revision: 0,
-                    rule_type_id: 'test',
-                    tags: ['rule-', '-tags'],
-                    uuid: '1',
-                  },
-                  start: DATE_1970,
-                  status: 'active',
-                  time_range: {
-                    gte: DATE_1970,
-                  },
-                  uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-                  workflow_status: 'open',
-                },
-                space_ids: ['default'],
-                version: '8.8.0',
-              },
+              [TIMESTAMP]: DATE_1970,
               numericField: 27,
               textField: 'foo',
-              tags: ['rule-', '-tags'],
+              [EVENT_ACTION]: 'open',
+              [EVENT_KIND]: 'signal',
+              [ALERT_ACTION_GROUP]: 'default',
+              [ALERT_DURATION]: 0,
+              [ALERT_FLAPPING]: false,
+              [ALERT_FLAPPING_HISTORY]: [true],
+              [ALERT_INSTANCE_ID]: '1',
+              [ALERT_MAINTENANCE_WINDOW_IDS]: [],
+              [ALERT_RULE_CATEGORY]: 'My test rule',
+              [ALERT_RULE_CONSUMER]: 'bar',
+              [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              [ALERT_RULE_NAME]: 'rule-name',
+              [ALERT_RULE_PARAMETERS]: { bar: true },
+              [ALERT_RULE_PRODUCER]: 'alerts',
+              [ALERT_RULE_REVISION]: 0,
+              [ALERT_RULE_TYPE_ID]: 'test',
+              [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+              [ALERT_RULE_UUID]: '1',
+              [ALERT_START]: DATE_1970,
+              [ALERT_STATUS]: 'active',
+              [ALERT_TIME_RANGE]: { gte: DATE_1970 },
+              [ALERT_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+              [ALERT_WORKFLOW_STATUS]: 'open',
+              [SPACE_IDS]: ['default'],
+              [VERSION]: '8.8.0',
+              [TAGS]: ['rule-', '-tags'],
             },
           ],
         });
@@ -756,25 +792,32 @@ describe('Task Runner', () => {
         maxAlerts: 1000,
         recoveredAlertsFromState: {},
         ruleLabel: "test:1: 'rule-name'",
+        startedAt: new Date(DATE_1970),
       });
       expect(alertsClientNotToUse.initializeExecution).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.checkLimitUsage).toHaveBeenCalled();
       expect(alertsClientNotToUse.checkLimitUsage).not.toHaveBeenCalled();
 
-      expect(alertsClientToUse.processAndLogAlerts).toHaveBeenCalledWith({
-        eventLogger: alertingEventLogger,
-        ruleRunMetricsStore,
-        shouldLogAlerts: true,
+      expect(alertsClientToUse.processAlerts).toHaveBeenCalledWith({
+        notifyOnActionGroupChange: false,
+        alertDelay: 0,
         flappingSettings: {
           enabled: true,
           lookBackWindow: 20,
           statusChangeThreshold: 4,
         },
-        notifyOnActionGroupChange: false,
         maintenanceWindowIds: [],
       });
-      expect(alertsClientNotToUse.processAndLogAlerts).not.toHaveBeenCalled();
+
+      expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({
+        eventLogger: alertingEventLogger,
+        ruleRunMetricsStore,
+        shouldLogAlerts: true,
+      });
+
+      expect(alertsClientNotToUse.processAlerts).not.toHaveBeenCalled();
+      expect(alertsClientNotToUse.logAlerts).not.toHaveBeenCalled();
 
       expect(alertsClientToUse.persistAlerts).toHaveBeenCalled();
       expect(alertsClientNotToUse.persistAlerts).not.toHaveBeenCalled();

@@ -7,7 +7,7 @@
 
 import type { SecurityAppStore } from '../../../common/store/types';
 import { TimelineId } from '../../../../common/types';
-import { addProvider } from '../../../timelines/store/timeline/actions';
+import { addProvider } from '../../../timelines/store/actions';
 import { createAddToTimelineCellActionFactory } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';

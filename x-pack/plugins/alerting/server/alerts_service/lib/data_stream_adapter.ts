@@ -79,7 +79,7 @@ class AliasImplementation implements DataStreamAdapter {
 
 async function createDataStream(opts: CreateConcreteWriteIndexOpts): Promise<void> {
   const { logger, esClient, indexPatterns, totalFieldsLimit } = opts;
-  logger.info(`Creating data stream - ${indexPatterns.alias}`);
+  logger.debug(`Creating data stream - ${indexPatterns.alias}`);
 
   // check if data stream exists
   let dataStreamExists = false;
@@ -126,7 +126,7 @@ async function createDataStream(opts: CreateConcreteWriteIndexOpts): Promise<voi
 
 async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<void> {
   const { logger, esClient, indexPatterns, totalFieldsLimit } = opts;
-  logger.info(`Creating concrete write index - ${indexPatterns.name}`);
+  logger.debug(`Creating concrete write index - ${indexPatterns.name}`);
 
   // check if a concrete write index already exists
   let concreteIndices: ConcreteIndexInfo[] = [];
@@ -168,7 +168,13 @@ async function createAliasStream(opts: CreateConcreteWriteIndexOpts): Promise<vo
   let concreteWriteIndicesExist = false;
   // if a concrete write index already exists, update the underlying mapping
   if (concreteIndices.length > 0) {
-    await updateIndexMappings({ logger, esClient, totalFieldsLimit, concreteIndices });
+    await updateIndexMappings({
+      logger,
+      esClient,
+      totalFieldsLimit,
+      concreteIndices,
+      validIndexPrefixes: indexPatterns.validPrefixes,
+    });
 
     const concreteIndicesExist = concreteIndices.some(
       (index) => index.alias === indexPatterns.alias

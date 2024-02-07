@@ -48,7 +48,7 @@ export const FilterQueryContextProvider: FC<{ timeRange?: TimeRange }> = ({
   const [resultFilters, setResultFilter] = useState<Filter[]>(filterManager.getFilters());
   const [resultQuery, setResultQuery] = useState<Query | AggregateQuery>(queryString.getQuery());
 
-  const timeRangeUpdates = useTimeRangeUpdates(true);
+  const timeRangeUpdates = useTimeRangeUpdates(false);
 
   useEffect(() => {
     const sub = filterManager.getUpdates$().subscribe(() => {

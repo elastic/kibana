@@ -22,7 +22,7 @@ export class ElasticsearchEmbeddings extends Embeddings {
   /**
    * TODO: Use inference API if not re-indexing to create embedding vectors, e.g.
    *
-   * POST _ml/trained_models/.elser_model_1/_infer
+   * POST _ml/trained_models/.elser_model_2/_infer
    * {
    *   "docs":[{"text_field": "The fool doth think he is wise, but the wise man knows himself to be a fool."}]
    * }

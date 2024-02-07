@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import { monaco } from '@kbn/monaco';
-import { MARGIN_BOTTOM, MAX_LINES_CLASSIC_TABLE } from './source';
+import { MARGIN_BOTTOM, MAX_LINES_CLASSIC_TABLE, MIN_HEIGHT } from './source';
 
 export function getHeight(editor: monaco.editor.IStandaloneCodeEditor, useDocExplorer: boolean) {
   const editorElement = editor?.getDomNode();
@@ -28,5 +28,5 @@ export function getHeight(editor: monaco.editor.IStandaloneCodeEditor, useDocExp
       lineCount > MAX_LINES_CLASSIC_TABLE ? MAX_LINES_CLASSIC_TABLE : lineCount;
     result = editor.getTopForLineNumber(displayedLineCount + 1) + lineHeight;
   }
-  return result > 0 ? result : 0;
+  return Math.max(result, MIN_HEIGHT);
 }

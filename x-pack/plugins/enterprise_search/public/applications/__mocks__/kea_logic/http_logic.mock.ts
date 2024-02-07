@@ -8,8 +8,8 @@
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
 export const mockHttpValues = {
-  http: httpServiceMock.createSetupContract(),
   errorConnectingMessage: '',
+  http: httpServiceMock.createSetupContract(),
   readOnlyMode: false,
 };
 

@@ -26,7 +26,7 @@ export const useDataViewExists = (items: TransformListRow[]) => {
         return false;
       }
       const config = items[0].config;
-      const indexName = Array.isArray(config.dest.index) ? config.dest.index[0] : config.dest.index;
+      const indexName = config.dest.index;
 
       if (indexName === undefined) {
         return false;

@@ -6,12 +6,12 @@
  */
 
 import { escapeKuery } from '@kbn/es-query';
-import { isSignificantTerm, type SignificantTerm } from '@kbn/ml-agg-utils';
+import { isSignificantItem, type SignificantItem } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem } from './types';
 
-export const getTableItemAsKQL = (tableItem: GroupTableItem | SignificantTerm) => {
-  if (isSignificantTerm(tableItem)) {
+export const getTableItemAsKQL = (tableItem: GroupTableItem | SignificantItem) => {
+  if (isSignificantItem(tableItem)) {
     return `${escapeKuery(tableItem.fieldName)}:${escapeKuery(String(tableItem.fieldValue))}`;
   }
 

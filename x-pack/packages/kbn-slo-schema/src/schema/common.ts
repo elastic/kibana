@@ -43,6 +43,23 @@ const summarySchema = t.type({
   errorBudget: errorBudgetSchema,
 });
 
+const groupSummarySchema = t.type({
+  total: t.number,
+  worst: t.type({
+    sliValue: t.number,
+    status: t.string,
+    slo: t.type({
+      id: t.string,
+      instanceId: t.string,
+      name: t.string,
+    }),
+  }),
+  violated: t.number,
+  healthy: t.number,
+  degrading: t.number,
+  noData: t.number,
+});
+
 const historicalSummarySchema = t.intersection([
   t.type({
     date: dateType,
@@ -50,10 +67,19 @@ const historicalSummarySchema = t.intersection([
   summarySchema,
 ]);
 
-const previewDataSchema = t.type({
-  date: dateType,
-  sliValue: t.number,
-});
+const previewDataSchema = t.intersection([
+  t.type({
+    date: dateType,
+    sliValue: t.number,
+  }),
+  t.partial({
+    events: t.type({
+      good: t.number,
+      bad: t.number,
+      total: t.number,
+    }),
+  }),
+]);
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 
@@ -67,4 +93,5 @@ export {
   previewDataSchema,
   statusSchema,
   summarySchema,
+  groupSummarySchema,
 };

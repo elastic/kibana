@@ -71,6 +71,10 @@ function parseLegacyKibanaPlatformPlugin(manifestPath) {
       optionalPlugins: isValidDepsDeclaration(manifest.optionalPlugins, 'optionalPlugins'),
       requiredBundles: isValidDepsDeclaration(manifest.requiredBundles, 'requiredBundles'),
       extraPublicDirs: isValidDepsDeclaration(manifest.extraPublicDirs, 'extraPublicDirs'),
+      runtimePluginDependencies: isValidDepsDeclaration(
+        manifest.runtimePluginDependencies,
+        'runtimePluginDependencies'
+      ),
     },
   };
 }

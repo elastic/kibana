@@ -71,7 +71,21 @@
     "@kbn/aiops-utils",
     "@kbn/lens-embeddable-utils",
     "@kbn/metrics-data-access-plugin",
-    "@kbn/expressions-plugin"
+    "@kbn/expressions-plugin",
+    "@kbn/chart-icons",
+    "@kbn/cloud-plugin",
+    "@kbn/custom-icons",
+    "@kbn/profiling-utils",
+    "@kbn/profiling-data-access-plugin",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/observability-get-padded-alert-time-range-util",
+    "@kbn/apm-data-access-plugin",
+    "@kbn/ebt-tools",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-components-field-row",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/securitysolution-io-ts-utils"
   ],
   "exclude": ["target/**/*"]
 }

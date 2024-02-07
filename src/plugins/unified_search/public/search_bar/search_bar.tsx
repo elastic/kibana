@@ -68,7 +68,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dateRangeTo?: string;
   // Query bar - should be in SearchBarInjectedDeps
   query?: QT | Query;
-  // Show when user has privileges to save
+  // Show when user has privileges to save. See `canShowSavedQuery(...)` lib.
   showSaveQuery?: boolean;
   savedQuery?: SavedQuery;
   onQueryChange?: (payload: { dateRange: TimeRange; query?: QT | Query }) => void;
@@ -86,6 +86,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  onCancel?: () => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
@@ -105,6 +106,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   dataViewPickerComponentProps?: DataViewPickerProps;
   textBasedLanguageModeErrors?: Error[];
   textBasedLanguageModeWarning?: string;
+  hideTextBasedRunQueryLabel?: boolean;
   onTextBasedSavedAndExit?: ({ onSave }: OnSaveTextLanguageQueryProps) => void;
   showSubmitButton?: boolean;
   submitButtonStyle?: QueryBarTopRowProps['submitButtonStyle'];
@@ -119,6 +121,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isDisabled?: boolean;
 
   submitOnBlur?: boolean;
+
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -523,6 +527,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             : undefined
         }
         suggestionsAbstraction={this.props.suggestionsAbstraction}
+        renderQueryInputAppend={this.props.renderQueryInputAppend}
       />
     ) : undefined;
 
@@ -578,6 +583,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isDisabled={this.props.isDisabled}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
+          onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}
           customSubmitButton={
@@ -599,6 +605,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           dataViewPickerComponentProps={this.props.dataViewPickerComponentProps}
           textBasedLanguageModeErrors={this.props.textBasedLanguageModeErrors}
           textBasedLanguageModeWarning={this.props.textBasedLanguageModeWarning}
+          hideTextBasedRunQueryLabel={this.props.hideTextBasedRunQueryLabel}
           onTextBasedSavedAndExit={this.props.onTextBasedSavedAndExit}
           showDatePickerAsBadge={this.shouldShowDatePickerAsBadge()}
           filterBar={filterBar}
@@ -608,6 +615,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onTextLangQueryChange={this.onTextLangQueryChange}
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
+          renderQueryInputAppend={this.props.renderQueryInputAppend}
         />
       </div>
     );

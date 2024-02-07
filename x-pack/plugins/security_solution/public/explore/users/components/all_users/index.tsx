@@ -8,7 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 
-import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiText } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import { UserDetailsLink } from '../../../../common/components/links';
 import {
@@ -27,9 +27,9 @@ import { usersActions, usersModel, usersSelectors } from '../../store';
 import type { User } from '../../../../../common/search_strategy/security_solution/users/all';
 import type { SortUsersField } from '../../../../../common/search_strategy/security_solution/users/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
-import { RiskScore } from '../../../components/risk_score/severity/common';
+import { RiskScoreLevel } from '../../../../entity_analytics/components/severity/common';
 import { useMlCapabilities } from '../../../../common/components/ml/hooks/use_ml_capabilities';
-import { VIEW_USERS_BY_SEVERITY } from '../user_risk_score_table/translations';
+import { VIEW_USERS_BY_SEVERITY } from '../../../../entity_analytics/components/user_risk_score_table/translations';
 import { SecurityPageName } from '../../../../app/types';
 import { UsersTableType } from '../../store/model';
 import { useNavigateTo } from '../../../../common/lib/kibana';
@@ -116,20 +116,14 @@ const getUsersColumns = (
   if (showRiskColumn) {
     columns.push({
       field: 'risk',
-      name: (
-        <EuiToolTip content={i18n.USER_RISK_TOOLTIP}>
-          <>
-            {i18n.USER_RISK} <EuiIcon color="subdued" type="iInCircle" className="eui-alignTop" />
-          </>
-        </EuiToolTip>
-      ),
+      name: i18n.USER_RISK,
       truncateText: false,
       mobileOptions: { show: true },
       sortable: false,
       render: (riskScore: RiskSeverity) => {
         if (riskScore != null) {
           return (
-            <RiskScore
+            <RiskScoreLevel
               toolTipContent={
                 <EuiLink onClick={() => dispatchSeverityUpdate(riskScore)}>
                   <EuiText size="xs">{VIEW_USERS_BY_SEVERITY(riskScore.toLowerCase())}</EuiText>

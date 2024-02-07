@@ -21,10 +21,12 @@ const capabilities = deepFreeze({
 
 export const createStartContractMock = (): jest.Mocked<ApplicationStart> => {
   const currentAppId$ = new Subject<string | undefined>();
+  const currentLocation$ = new Subject<string>();
 
   return {
     applications$: new BehaviorSubject<Map<string, PublicAppInfo>>(new Map()),
     currentAppId$: currentAppId$.asObservable(),
+    currentLocation$: currentLocation$.asObservable(),
     capabilities,
     navigateToApp: jest.fn(),
     navigateToUrl: jest.fn(),

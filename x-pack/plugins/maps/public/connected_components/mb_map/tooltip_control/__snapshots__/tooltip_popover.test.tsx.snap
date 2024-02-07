@@ -22,6 +22,7 @@ exports[`TooltipPopover render should render tooltip popover 1`] = `
   ownFocus={true}
   panelPaddingSize="m"
   repositionOnScroll={true}
+  repositionToCrossAxis={true}
   style={
     Object {
       "pointerEvents": "none",
@@ -82,6 +83,7 @@ exports[`TooltipPopover render should render tooltip popover with custom tooltip
   ownFocus={true}
   panelPaddingSize="m"
   repositionOnScroll={true}
+  repositionToCrossAxis={true}
   style={
     Object {
       "pointerEvents": "none",

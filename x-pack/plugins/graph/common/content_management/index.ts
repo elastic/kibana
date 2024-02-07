@@ -26,6 +26,7 @@ export type {
   GraphSearchIn,
   GraphSearchOut,
   GraphSearchQuery,
+  GraphCrudTypes,
 } from './latest';
 
 export * as GraphV1 from './v1';

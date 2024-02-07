@@ -13,7 +13,6 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import type {
   AuthenticationHit,
   AuthenticationsEdges,
-  UserAuthenticationsRequestOptions,
   UserAuthenticationsStrategyResponse,
 } from '../../../../../../common/search_strategy';
 import type { UsersQueries } from '../../../../../../common/search_strategy/security_solution/users';
@@ -25,7 +24,7 @@ import { buildQuery as buildAuthenticationQuery } from './dsl/query.dsl';
 import { formatAuthenticationData, getHits } from './helpers';
 
 export const authentications: SecuritySolutionFactory<UsersQueries.authentications> = {
-  buildDsl: (options: UserAuthenticationsRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -33,7 +32,7 @@ export const authentications: SecuritySolutionFactory<UsersQueries.authenticatio
     return buildAuthenticationQuery(options);
   },
   parse: async (
-    options: UserAuthenticationsRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<UserAuthenticationsStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;

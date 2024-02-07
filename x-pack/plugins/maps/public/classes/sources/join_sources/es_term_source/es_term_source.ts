@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { Query } from '@kbn/es-query';
 import { ISearchSource } from '@kbn/data-plugin/public';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
@@ -36,6 +37,7 @@ import type { IESAggSource, ESAggsSourceSyncMeta } from '../../es_agg_source';
 import { IField } from '../../../fields/field';
 import { mergeExecutionContext } from '../../execution_context_utils';
 import { isTermSourceComplete } from './is_term_source_complete';
+import { getJoinMetricsRequestName } from '../i18n_utils';
 
 const TERMS_AGG_NAME = 'join';
 const TERMS_BUCKET_KEYS_TO_IGNORE = ['key', 'doc_count'];
@@ -125,15 +127,17 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       : super.getAggLabel(aggType, fieldLabel);
   }
 
-  async getPropertiesMap(
+  async getJoinMetrics(
     requestMeta: VectorSourceRequestMeta,
-    leftSourceName: string,
-    leftFieldName: string,
+    layerName: string,
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters
-  ): Promise<PropertiesMap> {
+  ) {
     if (!this.hasCompleteConfig()) {
-      return new Map<string, BucketProperties>();
+      return {
+        joinMetrics: new Map<string, BucketProperties>(),
+        warnings: [],
+      };
     }
 
     const indexPattern = await this.getIndexPattern();
@@ -150,31 +154,28 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       },
     });
 
+    const warnings: SearchResponseWarning[] = [];
     const rawEsData = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.termSource.requestName', {
-        defaultMessage: '{leftSourceName} term join request',
-        values: { leftSourceName },
-      }),
+      requestName: getJoinMetricsRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.termSource.requestDescription', {
-        defaultMessage: 'Get metrics from data view: {dataViewName}, term field: {termFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          termFieldName: this._termField.getName(),
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_term_source:terms' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);
-    return extractPropertiesMap(rawEsData, countPropertyName);
+    return {
+      joinMetrics: extractPropertiesMap(rawEsData, countPropertyName),
+      warnings,
+    };
   }
 
   isFilterByMapBounds(): boolean {

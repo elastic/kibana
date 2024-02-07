@@ -12,6 +12,9 @@
           },
           "host": {
             "properties": {
+              "domain": {
+                "type": "keyword"
+              },
               "name": {
                 "type": "keyword"
               },

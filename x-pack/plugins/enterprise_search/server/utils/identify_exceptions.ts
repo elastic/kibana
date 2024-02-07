@@ -11,6 +11,10 @@ export interface ElasticsearchResponseError {
   meta?: {
     body?: {
       error?: {
+        caused_by?: {
+          reason?: string;
+          type?: string;
+        };
         type: string;
       };
     };
@@ -52,3 +56,14 @@ export const isMissingAliasException = (error: ElasticsearchResponseError) =>
   error.meta?.statusCode === 404 &&
   typeof error.meta?.body?.error === 'string' &&
   MISSING_ALIAS_ERROR.test(error.meta?.body?.error);
+
+export const isAccessControlDisabledException = (error: Error) => {
+  return error.message === ErrorCode.ACCESS_CONTROL_DISABLED;
+};
+
+export const isExpensiveQueriesNotAllowedException = (error: ElasticsearchResponseError) => {
+  return (
+    error.meta?.statusCode === 400 &&
+    error.meta?.body?.error?.caused_by?.reason?.includes('search.allow_expensive_queries')
+  );
+};

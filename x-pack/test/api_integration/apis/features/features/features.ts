@@ -110,6 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
             'observabilityAIAssistant',
             'observabilityCases',
             'savedObjectsManagement',
+            'savedQueryManagement',
             'savedObjectsTagging',
             'ml',
             'apm',

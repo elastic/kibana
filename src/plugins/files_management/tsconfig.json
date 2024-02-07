@@ -15,6 +15,7 @@
     "@kbn/i18n-react",
     "@kbn/shared-ux-file-image",
     "@kbn/shared-ux-router",
+    "@kbn/content-management-table-list-view-common",
   ],
   "exclude": [
     "target/**/*",

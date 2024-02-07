@@ -13,12 +13,12 @@ export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/ecommerce_tsvb_gauge_only_dashboard'],
 })
 
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
+    await kibanaPage.waitForListViewTable();
   })
 
   .step('Go to Ecommerce Dashboard with TSVB Gauge only', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[eCommerce]-TSVB-Gauge-Only-Dashboard'));
-    await kibanaPage.waitForVisualizations(1);
+    await kibanaPage.waitForVisualizations({ count: 1 });
   });

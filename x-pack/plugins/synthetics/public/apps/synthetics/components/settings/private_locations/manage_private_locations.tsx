@@ -9,14 +9,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
 import { PrivateLocationsTable } from './locations_table';
 import { ManageEmptyState } from './manage_empty_state';
-import { AddLocationFlyout } from './add_location_flyout';
+import { AddLocationFlyout, NewLocation } from './add_location_flyout';
 import { usePrivateLocationsAPI } from './hooks/use_locations_api';
 import {
   getAgentPoliciesAction,
   selectAddingNewPrivateLocation,
   setAddingNewPrivateLocation,
 } from '../../../state/private_locations';
-import { PrivateLocation } from '../../../../../../common/runtime_types';
 import { getServiceLocations } from '../../../state';
 
 export const ManagePrivateLocations = () => {
@@ -40,7 +39,7 @@ export const ManagePrivateLocations = () => {
     dispatch(getServiceLocations());
   }, [dispatch]);
 
-  const handleSubmit = (formData: PrivateLocation) => {
+  const handleSubmit = (formData: NewLocation) => {
     onSubmit(formData);
   };
 

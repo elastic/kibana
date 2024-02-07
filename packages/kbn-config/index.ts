@@ -30,4 +30,4 @@ export { isConfigPath, hasConfigPathIntersection } from './src/config';
 export { ObjectToConfigAdapter } from './src/object_to_config_adapter';
 export type { CliArgs, RawPackageInfo, EnvOptions } from './src/env';
 export { Env } from './src/env';
-export type { EnvironmentMode, PackageInfo } from './src/types';
+export type { EnvironmentMode, PackageInfo, BuildFlavor } from './src/types';

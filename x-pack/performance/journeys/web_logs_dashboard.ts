@@ -13,12 +13,12 @@ export const journey = new Journey({
   kbnArchives: ['x-pack/performance/kbn_archives/logs_no_map_dashboard'],
 })
 
-  .step('Go to Dashboards Page', async ({ page, kbnUrl }) => {
+  .step('Go to Dashboards Page', async ({ page, kbnUrl, kibanaPage }) => {
     await page.goto(kbnUrl.get(`/app/dashboards`));
-    await page.waitForSelector('#dashboardListingHeading');
+    await kibanaPage.waitForListViewTable();
   })
 
   .step('Go to Web Logs Dashboard', async ({ page, kibanaPage }) => {
     await page.click(subj('dashboardListingTitleLink-[Logs]-Web-Traffic'));
-    await kibanaPage.waitForVisualizations(11);
+    await kibanaPage.waitForVisualizations({ count: 11 });
   });

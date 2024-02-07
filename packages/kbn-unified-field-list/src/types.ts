@@ -8,7 +8,7 @@
 
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { EuiButtonIconProps, EuiButtonProps } from '@elastic/eui';
-import type { FieldTypeKnown } from '@kbn/discover-utils/types';
+import type { FieldTypeKnown, FieldBase } from '@kbn/field-utils/types';
 
 export interface BucketedAggregation<KeyType = string> {
   buckets: Array<{
@@ -48,15 +48,7 @@ export enum ExistenceFetchStatus {
   unknown = 'unknown',
 }
 
-export interface FieldListItem {
-  name: DataViewField['name'];
-  type?: DataViewField['type'];
-  displayName?: DataViewField['displayName'];
-  count?: DataViewField['count'];
-  timeSeriesMetric?: DataViewField['timeSeriesMetric'];
-  esTypes?: DataViewField['esTypes'];
-  scripted?: DataViewField['scripted'];
-}
+export type FieldListItem = FieldBase;
 
 export enum FieldsGroupNames {
   SpecialFields = 'SpecialFields',

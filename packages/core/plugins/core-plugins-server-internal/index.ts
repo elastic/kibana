@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-export { PluginsService, PluginWrapper, config, isNewPlatformPlugin } from './src';
+export { PluginsService, PluginWrapper, config } from './src';
 export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
   DiscoveredPlugins,
   PluginDependencies,
 } from './src';

@@ -75,6 +75,18 @@ describe('isLayerLoading', () => {
   });
 
   describe('joins', () => {
+    test('should return false when layer is not visible', () => {
+      const layer = new GeoJsonVectorLayer({
+        customIcons: [],
+        joins: [mockJoin],
+        layerDescriptor: {
+          visible: false,
+        } as unknown as VectorLayerDescriptor,
+        source: {} as unknown as IVectorSource,
+      });
+      expect(layer.isLayerLoading(1)).toBe(false);
+    });
+
     describe('source data loaded with no features', () => {
       test('should return false when join loading has not started', () => {
         const layer = new GeoJsonVectorLayer({

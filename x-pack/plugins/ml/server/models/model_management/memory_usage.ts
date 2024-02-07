@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import numeral from '@elastic/numeral';
 import { pick } from 'lodash';
 import { isDefined } from '@kbn/ml-is-defined';
+import type { MlFeatures } from '../../../common/constants/app';
 import type {
   MemoryUsageInfo,
   TrainedModelStatsResponse,
@@ -22,7 +23,6 @@ import type {
   NodeDeploymentStatsResponse,
   NodesOverviewResponse,
 } from '../../../common/types/trained_models';
-import type { MlFeatures } from '../../types';
 
 // @ts-expect-error numeral missing value
 const AD_EXTRA_MEMORY = numeral('10MB').value();

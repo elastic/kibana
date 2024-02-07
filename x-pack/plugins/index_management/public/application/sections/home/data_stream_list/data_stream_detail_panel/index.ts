@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { DataStreamDetailPanel } from './data_stream_detail_panel';
+export { DataStreamDetailPanel, ConditionalWrap } from './data_stream_detail_panel';

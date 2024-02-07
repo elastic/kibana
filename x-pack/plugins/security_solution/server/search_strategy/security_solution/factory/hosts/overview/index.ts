@@ -11,7 +11,6 @@ import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type {
   HostsOverviewStrategyResponse,
   HostsQueries,
-  HostOverviewRequestOptions,
   OverviewHostHit,
 } from '../../../../../../common/search_strategy/security_solution/hosts';
 import { inspectStringifyObject } from '../../../../../utils/build_query';
@@ -19,9 +18,9 @@ import type { SecuritySolutionFactory } from '../../types';
 import { buildOverviewHostQuery } from './query.overview_host.dsl';
 
 export const hostOverview: SecuritySolutionFactory<HostsQueries.overview> = {
-  buildDsl: (options: HostOverviewRequestOptions) => buildOverviewHostQuery(options),
+  buildDsl: (options) => buildOverviewHostQuery(options),
   parse: async (
-    options: HostOverviewRequestOptions,
+    options,
     response: IEsSearchResponse<OverviewHostHit>
   ): Promise<HostsOverviewStrategyResponse> => {
     // @ts-expect-error specify aggregations type explicitly

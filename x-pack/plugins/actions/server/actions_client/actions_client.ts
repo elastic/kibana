@@ -11,7 +11,7 @@ import url from 'url';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { i18n } from '@kbn/i18n';
-import { omitBy, isUndefined, compact } from 'lodash';
+import { omitBy, isUndefined, compact, uniq } from 'lodash';
 import {
   IScopedClusterClient,
   SavedObjectsClientContract,
@@ -24,8 +24,9 @@ import { AuditLogger } from '@kbn/security-plugin/server';
 import { RunNowResult } from '@kbn/task-manager-plugin/server';
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { KueryNode } from '@kbn/es-query';
-import { FindConnectorResult } from '../application/connector/types';
+import { ConnectorWithExtraFindData } from '../application/connector/types';
 import { ConnectorType } from '../application/connector/types';
+import { get } from '../application/connector/methods/get';
 import { getAll } from '../application/connector/methods/get_all';
 import { listTypes } from '../application/connector/methods/list_types';
 import {
@@ -396,7 +397,7 @@ export class ActionsClient {
   }
 
   /**
-   * Get an action
+   * Get a connector
    */
   public async get({
     id,
@@ -405,79 +406,15 @@ export class ActionsClient {
     id: string;
     throwIfSystemAction?: boolean;
   }): Promise<ActionResult> {
-    try {
-      await this.context.authorization.ensureAuthorized({ operation: 'get' });
-    } catch (error) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-          error,
-        })
-      );
-      throw error;
-    }
-
-    const foundInMemoryConnector = this.context.inMemoryConnectors.find(
-      (connector) => connector.id === id
-    );
-
-    /**
-     * Getting system connector is not allowed
-     * if throwIfSystemAction is set to true.
-     * Default behavior is to throw
-     */
-    if (
-      foundInMemoryConnector !== undefined &&
-      foundInMemoryConnector.isSystemAction &&
-      throwIfSystemAction
-    ) {
-      throw Boom.notFound(`Connector ${id} not found`);
-    }
-
-    if (foundInMemoryConnector !== undefined) {
-      this.context.auditLogger?.log(
-        connectorAuditEvent({
-          action: ConnectorAuditAction.GET,
-          savedObject: { type: 'action', id },
-        })
-      );
-
-      return {
-        id,
-        actionTypeId: foundInMemoryConnector.actionTypeId,
-        name: foundInMemoryConnector.name,
-        isPreconfigured: foundInMemoryConnector.isPreconfigured,
-        isSystemAction: foundInMemoryConnector.isSystemAction,
-        isDeprecated: isConnectorDeprecated(foundInMemoryConnector),
-      };
-    }
-
-    const result = await this.context.unsecuredSavedObjectsClient.get<RawAction>('action', id);
-
-    this.context.auditLogger?.log(
-      connectorAuditEvent({
-        action: ConnectorAuditAction.GET,
-        savedObject: { type: 'action', id },
-      })
-    );
-
-    return {
-      id,
-      actionTypeId: result.attributes.actionTypeId,
-      isMissingSecrets: result.attributes.isMissingSecrets,
-      name: result.attributes.name,
-      config: result.attributes.config,
-      isPreconfigured: false,
-      isSystemAction: false,
-      isDeprecated: isConnectorDeprecated(result.attributes),
-    };
+    return get({ context: this.context, id, throwIfSystemAction });
   }
 
   /**
    * Get all connectors with in-memory connectors
    */
-  public async getAll({ includeSystemActions = false } = {}): Promise<FindConnectorResult[]> {
+  public async getAll({ includeSystemActions = false } = {}): Promise<
+    ConnectorWithExtraFindData[]
+  > {
     return getAll({ context: this.context, includeSystemActions });
   }
 
@@ -744,14 +681,39 @@ export class ActionsClient {
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
+    const log = this.context.logger;
+
     if (
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
       const additionalPrivileges = this.getSystemActionKibanaPrivileges(actionId, params);
+      let actionTypeId: string | undefined;
+
+      try {
+        if (this.isPreconfigured(actionId)) {
+          const connector = this.context.inMemoryConnectors.find(
+            (inMemoryConnector) => inMemoryConnector.id === actionId
+          );
+
+          actionTypeId = connector?.actionTypeId;
+        } else {
+          // TODO: Optimize so we don't do another get on top of getAuthorizationModeBySource and within the actionExecutor.execute
+          const { attributes } = await this.context.unsecuredSavedObjectsClient.get<RawAction>(
+            'action',
+            actionId
+          );
+
+          actionTypeId = attributes.actionTypeId;
+        }
+      } catch (err) {
+        log.debug(`Failed to retrieve actionTypeId for action [${actionId}]`, err);
+      }
+
       await this.context.authorization.ensureAuthorized({
         operation: 'execute',
         additionalPrivileges,
+        actionTypeId,
       });
     } else {
       trackLegacyRBACExemption('execute', this.context.usageCounter);
@@ -786,6 +748,11 @@ export class ActionsClient {
        * inside the ActionExecutor at execution time
        */
       await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+      await Promise.all(
+        uniq(options.map((o) => o.actionTypeId)).map((actionTypeId) =>
+          this.context.authorization.ensureAuthorized({ operation: 'execute', actionTypeId })
+        )
+      );
     }
     if (authModes[AuthorizationMode.Legacy] > 0) {
       trackLegacyRBACExemption(
@@ -803,7 +770,10 @@ export class ActionsClient {
       (await getAuthorizationModeBySource(this.context.unsecuredSavedObjectsClient, source)) ===
       AuthorizationMode.RBAC
     ) {
-      await this.context.authorization.ensureAuthorized({ operation: 'execute' });
+      await this.context.authorization.ensureAuthorized({
+        operation: 'execute',
+        actionTypeId: options.actionTypeId,
+      });
     } else {
       trackLegacyRBACExemption('ephemeralEnqueuedExecution', this.context.usageCounter);
     }

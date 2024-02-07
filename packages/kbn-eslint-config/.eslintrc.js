@@ -8,6 +8,7 @@ module.exports = {
     '@kbn/eslint-plugin-eslint',
     '@kbn/eslint-plugin-imports',
     '@kbn/eslint-plugin-telemetry',
+    '@kbn/eslint-plugin-i18n',
     'prettier',
   ],
 

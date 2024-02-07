@@ -12,12 +12,13 @@ import { useDispatch } from 'react-redux';
 import { Subscription } from 'rxjs';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type {
   Inspect,
   PaginationInputPaginated,
   TimelineEdges,
-  TimelineEventsAllRequestOptions,
+  TimelineEqlRequestOptionsInput,
+  TimelineEventsAllOptionsInput,
   TimelineEventsAllStrategyResponse,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
@@ -58,7 +59,7 @@ type TimelineEventsSearchHandler = (onNextResponse?: OnNextResponseHandler) => v
 
 type LoadPage = (newActivePage: number) => void;
 
-type TimelineRequest<T extends KueryFilterQueryKind> = TimelineEventsAllRequestOptions;
+type TimelineRequest = TimelineEventsAllOptionsInput | TimelineEqlRequestOptionsInput;
 
 type TimelineResponse<T extends KueryFilterQueryKind> = TimelineEventsAllStrategyResponse;
 
@@ -161,11 +162,9 @@ export const useTimelineEventsHandler = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(true);
   const [activePage, setActivePage] = useState(0);
-  const [timelineRequest, setTimelineRequest] = useState<TimelineRequest<typeof language> | null>(
-    null
-  );
+  const [timelineRequest, setTimelineRequest] = useState<TimelineRequest | null>(null);
   const [prevFilterStatus, setFilterStatus] = useState(filterStatus);
-  const prevTimelineRequest = useRef<TimelineRequest<typeof language> | null>(null);
+  const prevTimelineRequest = useRef<TimelineRequest | null>(null);
 
   const clearSignalsState = useCallback(() => {
     if (id != null && detectionsTimelineIds.some((timelineId) => timelineId === id)) {
@@ -220,7 +219,7 @@ export const useTimelineEventsHandler = ({
   });
 
   const timelineSearch = useCallback(
-    (request: TimelineRequest<typeof language> | null, onNextHandler?: OnNextResponseHandler) => {
+    (request: TimelineRequest | null, onNextHandler?: OnNextResponseHandler) => {
       if (request == null || skip) {
         return;
       }
@@ -233,7 +232,7 @@ export const useTimelineEventsHandler = ({
           startTracking();
           const abortSignal = abortCtrl.current.signal;
           searchSubscription$.current = data.search
-            .search<TimelineRequest<typeof language>, TimelineResponse<typeof language>>(
+            .search<TimelineRequest, TimelineResponse<typeof language>>(
               { ...request, entityType },
               {
                 strategy:
@@ -247,7 +246,7 @@ export const useTimelineEventsHandler = ({
             )
             .subscribe({
               next: (response) => {
-                if (isCompleteResponse(response)) {
+                if (!isRunningResponse(response)) {
                   setTimelineResponse((prevResponse) => {
                     const newTimelineResponse = {
                       ...prevResponse,
@@ -296,12 +295,12 @@ export const useTimelineEventsHandler = ({
       const prevSearchParameters = {
         defaultIndex: prevRequest?.defaultIndex ?? [],
         filterQuery: prevRequest?.filterQuery ?? '',
-        querySize: prevRequest?.pagination.querySize ?? 0,
+        querySize: prevRequest?.pagination?.querySize ?? 0,
         sort: prevRequest?.sort ?? initSortDefault,
         timerange: prevRequest?.timerange ?? {},
-        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as RunTimeMappings,
+        runtimeMappings: (prevRequest?.runtimeMappings ?? {}) as unknown as RunTimeMappings,
         filterStatus: prevRequest?.filterStatus,
-      };
+      } as const;
 
       const currentSearchParameters = {
         defaultIndex: indexNames,
@@ -315,7 +314,7 @@ export const useTimelineEventsHandler = ({
           to: endDate,
         },
         filterStatus,
-      };
+      } as const;
 
       const newActivePage = deepEqual(prevSearchParameters, currentSearchParameters)
         ? activePage
@@ -333,7 +332,7 @@ export const useTimelineEventsHandler = ({
           activePage: newActivePage,
           querySize: limit,
         },
-        language,
+        language: language as TimelineRequest['language'],
         runtimeMappings,
         sort,
         timerange: {
@@ -348,7 +347,7 @@ export const useTimelineEventsHandler = ({
         setActivePage(newActivePage);
       }
       if (!deepEqual(prevRequest, currentRequest)) {
-        return currentRequest;
+        return currentRequest as TimelineRequest;
       }
       return prevRequest;
     });

@@ -6,10 +6,11 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
+import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/slo/constants';
 import { SLOId, Status, Summary } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { getElastichsearchQueryOrThrow } from './transform_generators';
@@ -30,13 +31,6 @@ interface EsSummaryDocument {
   isTempDoc: boolean;
 }
 
-export interface Paginated<T> {
-  total: number;
-  page: number;
-  perPage: number;
-  results: T[];
-}
-
 export interface SLOSummary {
   id: SLOId;
   instanceId: string;
@@ -49,36 +43,50 @@ export interface Sort {
   direction: 'asc' | 'desc';
 }
 
-export interface Pagination {
-  page: number;
-  perPage: number;
-}
-
 export interface SummarySearchClient {
-  search(kqlQuery: string, sort: Sort, pagination: Pagination): Promise<Paginated<SLOSummary>>;
+  search(
+    kqlQuery: string,
+    filters: string,
+    sort: Sort,
+    pagination: Pagination
+  ): Promise<Paginated<SLOSummary>>;
 }
 
 export class DefaultSummarySearchClient implements SummarySearchClient {
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private spaceId: string
+  ) {}
 
   async search(
     kqlQuery: string,
+    filters: string,
     sort: Sort,
     pagination: Pagination
   ): Promise<Paginated<SLOSummary>> {
+    let parsedFilters: any = {};
+
     try {
-      const { count: total } = await this.esClient.count({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        query: getElastichsearchQueryOrThrow(kqlQuery),
-      });
+      parsedFilters = JSON.parse(filters);
+    } catch (e) {
+      this.logger.error(`Failed to parse filters: ${e.message}`);
+    }
 
-      if (total === 0) {
-        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
-      }
-
+    try {
       const summarySearch = await this.esClient.search<EsSummaryDocument>({
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        query: getElastichsearchQueryOrThrow(kqlQuery),
+        track_total_hits: true,
+        query: {
+          bool: {
+            filter: [
+              { term: { spaceId: this.spaceId } },
+              getElastichsearchQueryOrThrow(kqlQuery),
+              ...(parsedFilters.filter ?? []),
+            ],
+            must_not: [...(parsedFilters.must_not ?? [])],
+          },
+        },
         sort: {
           // non-temp first, then temp documents
           isTempDoc: {
@@ -91,6 +99,11 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
         from: (pagination.page - 1) * pagination.perPage,
         size: pagination.perPage * 2, // twice as much as we return, in case they are all duplicate temp/non-temp summary
       });
+
+      const total = (summarySearch.hits.total as SearchTotalHits).value ?? 0;
+      if (total === 0) {
+        return { total: 0, perPage: pagination.perPage, page: pagination.page, results: [] };
+      }
 
       const [tempSummaryDocuments, summaryDocuments] = _.partition(
         summarySearch.hits.hits,

@@ -26,6 +26,11 @@ export const removeAllArtifacts = () => {
   }
 };
 
+export const removeAllArtifactsPromise = () =>
+  Cypress.Promise.all(ENDPOINT_ARTIFACT_LIST_IDS.map(removeExceptionsListPromise)).then(
+    (result) => result.filter(Boolean).length
+  );
+
 export const removeExceptionsList = (listId: string) => {
   request({
     method: 'DELETE',
@@ -33,6 +38,19 @@ export const removeExceptionsList = (listId: string) => {
     failOnStatusCode: false,
   }).then(({ status }) => {
     expect(status).to.be.oneOf([200, 404]); // should either be success or not found
+  });
+};
+
+const removeExceptionsListPromise = (listId: string) => {
+  return new Cypress.Promise((resolve) => {
+    request({
+      method: 'DELETE',
+      url: `${EXCEPTION_LIST_URL}?list_id=${listId}&namespace_type=agnostic`,
+      failOnStatusCode: false,
+    }).then(({ status }) => {
+      expect(status).to.be.oneOf([200, 404]); // should either be success or not found
+      resolve(status === 200);
+    });
   });
 };
 

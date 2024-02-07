@@ -40,11 +40,23 @@ export const createTags = async ({ getService }: FtrProviderContext) => {
 
 export const deleteTags = async ({ getService }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
-  await kibanaServer.importExport.unload(
-    'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/default_space.json'
-  );
-  await kibanaServer.importExport.unload(
-    'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/rbac_tags/space_1.json',
-    { space: 'space_1' }
-  );
+  while (true) {
+    const defaultTags = await kibanaServer.savedObjects.find({ type: 'tag', space: 'default' });
+    const spaceTags = await kibanaServer.savedObjects.find({ type: 'tag', space: 'space_1' });
+    if (defaultTags.saved_objects.length === 0 && spaceTags.saved_objects.length === 0) {
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+      break;
+    }
+    if (defaultTags.saved_objects.length !== 0) {
+      await kibanaServer.savedObjects.bulkDelete({
+        objects: defaultTags.saved_objects.map(({ type, id }) => ({ type, id })),
+      });
+    }
+    if (spaceTags.saved_objects.length !== 0) {
+      await kibanaServer.savedObjects.bulkDelete({
+        objects: spaceTags.saved_objects.map(({ type, id }) => ({ type, id })),
+        space: 'space_1',
+      });
+    }
+  }
 };

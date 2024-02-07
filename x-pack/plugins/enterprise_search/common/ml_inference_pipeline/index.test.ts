@@ -6,7 +6,7 @@
  */
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
-import { BUILT_IN_MODEL_TAG } from '@kbn/ml-trained-models-utils';
+import { BUILT_IN_MODEL_TAG, TRAINED_MODEL_TYPE } from '@kbn/ml-trained-models-utils';
 
 import { MlInferencePipeline, TrainedModelState } from '../types/pipelines';
 
@@ -14,6 +14,7 @@ import {
   generateMlInferencePipelineBody,
   getMlModelTypesForModelConfig,
   parseMlInferenceParametersFromPipeline,
+  parseModelState,
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '.';
@@ -265,8 +266,12 @@ describe('parseMlInferenceParametersFromPipeline', () => {
 });
 
 describe('parseModelStateFromStats', () => {
-  it('returns not deployed for undefined stats', () => {
-    expect(parseModelStateFromStats()).toEqual(TrainedModelState.NotDeployed);
+  it('returns Started for the lang_ident model', () => {
+    expect(
+      parseModelStateFromStats({
+        model_type: TRAINED_MODEL_TYPE.LANG_IDENT,
+      })
+    ).toEqual(TrainedModelState.Started);
   });
   it('returns Started', () => {
     expect(
@@ -312,6 +317,28 @@ describe('parseModelStateFromStats', () => {
         },
       } as unknown as MlTrainedModelStats)
     ).toEqual(TrainedModelState.NotDeployed);
+  });
+});
+
+describe('parseModelState', () => {
+  it('returns Started', () => {
+    expect(parseModelState('started')).toEqual(TrainedModelState.Started);
+    expect(parseModelState('fully_allocated')).toEqual(TrainedModelState.Started);
+  });
+  it('returns Starting', () => {
+    expect(parseModelState('starting')).toEqual(TrainedModelState.Starting);
+    expect(parseModelState('downloading')).toEqual(TrainedModelState.Starting);
+    expect(parseModelState('downloaded')).toEqual(TrainedModelState.Starting);
+  });
+  it('returns Stopping', () => {
+    expect(parseModelState('stopping')).toEqual(TrainedModelState.Stopping);
+  });
+  it('returns Failed', () => {
+    expect(parseModelState('failed')).toEqual(TrainedModelState.Failed);
+  });
+  it('returns NotDeployed for an unknown state', () => {
+    expect(parseModelState(undefined)).toEqual(TrainedModelState.NotDeployed);
+    expect(parseModelState('other_state')).toEqual(TrainedModelState.NotDeployed);
   });
 });
 

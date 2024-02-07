@@ -21,267 +21,29 @@
     "functions": [
       {
         "parentPluginId": "@kbn/profiling-utils",
-        "id": "def-common.createBaseFlameGraph",
+        "id": "def-common.convertTonsToKgs",
         "type": "Function",
         "tags": [],
-        "label": "createBaseFlameGraph",
-        "description": [
-          "\ncreateBaseFlameGraph encapsulates the tree representation into a serialized form."
-        ],
+        "label": "convertTonsToKgs",
+        "description": [],
         "signature": [
-          "(tree: ",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.CalleeTree",
-            "text": "CalleeTree"
-          },
-          ", samplingRate: number, totalSeconds: number) => ",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.BaseFlameGraph",
-            "text": "BaseFlameGraph"
-          }
+          "(value: number) => number"
         ],
-        "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+        "path": "packages/kbn-profiling-utils/common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createBaseFlameGraph.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "tree",
-            "description": [
-              "CalleeTree"
-            ],
-            "signature": [
-              {
-                "pluginId": "@kbn/profiling-utils",
-                "scope": "common",
-                "docId": "kibKbnProfilingUtilsPluginApi",
-                "section": "def-common.CalleeTree",
-                "text": "CalleeTree"
-              }
-            ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createBaseFlameGraph.$2",
+            "id": "def-common.convertTonsToKgs.$1",
             "type": "number",
             "tags": [],
-            "label": "samplingRate",
-            "description": [
-              "number"
-            ],
+            "label": "value",
+            "description": [],
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createBaseFlameGraph.$3",
-            "type": "number",
-            "tags": [],
-            "label": "totalSeconds",
-            "description": [
-              "number"
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [
-          "BaseFlameGraph"
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/profiling-utils",
-        "id": "def-common.createCalleeTree",
-        "type": "Function",
-        "tags": [],
-        "label": "createCalleeTree",
-        "description": [
-          "\nCreate a callee tree"
-        ],
-        "signature": [
-          "(events: Map<string, number>, stackTraces: Map<string, ",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.StackTrace",
-            "text": "StackTrace"
-          },
-          ">, stackFrames: Map<string, ",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.StackFrame",
-            "text": "StackFrame"
-          },
-          ">, executables: Map<string, ",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.Executable",
-            "text": "Executable"
-          },
-          ">, totalFrames: number, samplingRate: number) => ",
-          {
-            "pluginId": "@kbn/profiling-utils",
-            "scope": "common",
-            "docId": "kibKbnProfilingUtilsPluginApi",
-            "section": "def-common.CalleeTree",
-            "text": "CalleeTree"
-          }
-        ],
-        "path": "packages/kbn-profiling-utils/common/callee.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createCalleeTree.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "events",
-            "description": [
-              "Map<StackTraceID, number>"
-            ],
-            "signature": [
-              "Map<string, number>"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createCalleeTree.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "stackTraces",
-            "description": [
-              "Map<StackTraceID, StackTrace>"
-            ],
-            "signature": [
-              "Map<string, ",
-              {
-                "pluginId": "@kbn/profiling-utils",
-                "scope": "common",
-                "docId": "kibKbnProfilingUtilsPluginApi",
-                "section": "def-common.StackTrace",
-                "text": "StackTrace"
-              },
-              ">"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createCalleeTree.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "stackFrames",
-            "description": [
-              "Map<StackFrameID, StackFrame>"
-            ],
-            "signature": [
-              "Map<string, ",
-              {
-                "pluginId": "@kbn/profiling-utils",
-                "scope": "common",
-                "docId": "kibKbnProfilingUtilsPluginApi",
-                "section": "def-common.StackFrame",
-                "text": "StackFrame"
-              },
-              ">"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createCalleeTree.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "executables",
-            "description": [
-              "Map<FileID, Executable>"
-            ],
-            "signature": [
-              "Map<string, ",
-              {
-                "pluginId": "@kbn/profiling-utils",
-                "scope": "common",
-                "docId": "kibKbnProfilingUtilsPluginApi",
-                "section": "def-common.Executable",
-                "text": "Executable"
-              },
-              ">"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createCalleeTree.$5",
-            "type": "number",
-            "tags": [],
-            "label": "totalFrames",
-            "description": [
-              "number"
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.createCalleeTree.$6",
-            "type": "number",
-            "tags": [],
-            "label": "samplingRate",
-            "description": [
-              "number"
-            ],
-            "signature": [
-              "number"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "path": "packages/kbn-profiling-utils/common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -517,6 +279,181 @@
         "returnComment": [
           "StackFrameMetadata"
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.createTopNFunctions",
+        "type": "Function",
+        "tags": [],
+        "label": "createTopNFunctions",
+        "description": [],
+        "signature": [
+          "({\n  endIndex,\n  events,\n  executables,\n  samplingRate,\n  stackFrames,\n  stackTraces,\n  startIndex,\n}: { endIndex: number; events: Map<string, number>; executables: Map<string, ",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.Executable",
+            "text": "Executable"
+          },
+          ">; samplingRate: number; stackFrames: Map<string, ",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.StackFrame",
+            "text": "StackFrame"
+          },
+          ">; stackTraces: Map<string, ",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.StackTrace",
+            "text": "StackTrace"
+          },
+          ">; startIndex: number; }) => ",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctions",
+            "text": "TopNFunctions"
+          }
+        ],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.createTopNFunctions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  endIndex,\n  events,\n  executables,\n  samplingRate,\n  stackFrames,\n  stackTraces,\n  startIndex,\n}",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.endIndex",
+                "type": "number",
+                "tags": [],
+                "label": "endIndex",
+                "description": [],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.events",
+                "type": "Object",
+                "tags": [],
+                "label": "events",
+                "description": [],
+                "signature": [
+                  "Map<string, number>"
+                ],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.executables",
+                "type": "Object",
+                "tags": [],
+                "label": "executables",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "@kbn/profiling-utils",
+                    "scope": "common",
+                    "docId": "kibKbnProfilingUtilsPluginApi",
+                    "section": "def-common.Executable",
+                    "text": "Executable"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.samplingRate",
+                "type": "number",
+                "tags": [],
+                "label": "samplingRate",
+                "description": [],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.stackFrames",
+                "type": "Object",
+                "tags": [],
+                "label": "stackFrames",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "@kbn/profiling-utils",
+                    "scope": "common",
+                    "docId": "kibKbnProfilingUtilsPluginApi",
+                    "section": "def-common.StackFrame",
+                    "text": "StackFrame"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.stackTraces",
+                "type": "Object",
+                "tags": [],
+                "label": "stackTraces",
+                "description": [],
+                "signature": [
+                  "Map<string, ",
+                  {
+                    "pluginId": "@kbn/profiling-utils",
+                    "scope": "common",
+                    "docId": "kibKbnProfilingUtilsPluginApi",
+                    "section": "def-common.StackTrace",
+                    "text": "StackTrace"
+                  },
+                  ">"
+                ],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/profiling-utils",
+                "id": "def-common.createTopNFunctions.$1.startIndex",
+                "type": "number",
+                "tags": [],
+                "label": "startIndex",
+                "description": [],
+                "path": "packages/kbn-profiling-utils/common/functions.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1250,225 +1187,93 @@
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/profiling-utils",
-        "id": "def-common.CalleeTree",
-        "type": "Interface",
-        "tags": [],
-        "label": "CalleeTree",
-        "description": [
-          "\nCallee tree"
-        ],
-        "path": "packages/kbn-profiling-utils/common/callee.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+          },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.Size",
+            "id": "def-common.BaseFlameGraph.TotalSamples",
             "type": "number",
             "tags": [],
-            "label": "Size",
-            "description": [
-              "size"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "label": "TotalSamples",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.Edges",
-            "type": "Array",
+            "id": "def-common.BaseFlameGraph.TotalCPU",
+            "type": "number",
             "tags": [],
-            "label": "Edges",
-            "description": [
-              "edges"
-            ],
-            "signature": [
-              "Map<string, number>[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "label": "TotalCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.FileID",
-            "type": "Array",
+            "id": "def-common.BaseFlameGraph.SelfCPU",
+            "type": "number",
             "tags": [],
-            "label": "FileID",
-            "description": [
-              "file ids"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "label": "SelfCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.FrameType",
+            "id": "def-common.BaseFlameGraph.AnnualCO2TonsExclusive",
             "type": "Array",
             "tags": [],
-            "label": "FrameType",
-            "description": [
-              "frame types"
-            ],
+            "label": "AnnualCO2TonsExclusive",
+            "description": [],
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.Inline",
+            "id": "def-common.BaseFlameGraph.AnnualCO2TonsInclusive",
             "type": "Array",
             "tags": [],
-            "label": "Inline",
-            "description": [
-              "inlines"
-            ],
-            "signature": [
-              "boolean[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.ExeFilename",
-            "type": "Array",
-            "tags": [],
-            "label": "ExeFilename",
-            "description": [
-              "executable file names"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.AddressOrLine",
-            "type": "Array",
-            "tags": [],
-            "label": "AddressOrLine",
-            "description": [
-              "address or lines"
-            ],
+            "label": "AnnualCO2TonsInclusive",
+            "description": [],
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.FunctionName",
+            "id": "def-common.BaseFlameGraph.AnnualCostsUSDInclusive",
             "type": "Array",
             "tags": [],
-            "label": "FunctionName",
-            "description": [
-              "function names"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.FunctionOffset",
-            "type": "Array",
-            "tags": [],
-            "label": "FunctionOffset",
-            "description": [
-              "function offsets"
-            ],
+            "label": "AnnualCostsUSDInclusive",
+            "description": [],
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.SourceFilename",
+            "id": "def-common.BaseFlameGraph.AnnualCostsUSDExclusive",
             "type": "Array",
             "tags": [],
-            "label": "SourceFilename",
-            "description": [
-              "source file names"
-            ],
-            "signature": [
-              "string[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.SourceLine",
-            "type": "Array",
-            "tags": [],
-            "label": "SourceLine",
-            "description": [
-              "source lines"
-            ],
+            "label": "AnnualCostsUSDExclusive",
+            "description": [],
             "signature": [
               "number[]"
             ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.CountInclusive",
-            "type": "Array",
-            "tags": [],
-            "label": "CountInclusive",
-            "description": [
-              "total cpu"
-            ],
-            "signature": [
-              "number[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.CalleeTree.CountExclusive",
-            "type": "Array",
-            "tags": [],
-            "label": "CountExclusive",
-            "description": [
-              "self cpu"
-            ],
-            "signature": [
-              "number[]"
-            ],
-            "path": "packages/kbn-profiling-utils/common/callee.ts",
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1622,14 +1427,15 @@
             "section": "def-common.ElasticFlameGraph",
             "text": "ElasticFlameGraph"
           },
-          " extends ",
+          " extends Omit<",
           {
             "pluginId": "@kbn/profiling-utils",
             "scope": "common",
             "docId": "kibKbnProfilingUtilsPluginApi",
             "section": "def-common.BaseFlameGraph",
             "text": "BaseFlameGraph"
-          }
+          },
+          ", \"AnnualCO2TonsExclusive\" | \"AnnualCO2TonsInclusive\" | \"SelfAnnualCO2Tons\" | \"TotalAnnualCO2Tons\" | \"AnnualCostsUSDInclusive\" | \"AnnualCostsUSDExclusive\">"
         ],
         "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
         "deprecated": false,
@@ -1666,6 +1472,62 @@
             "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ElasticFlameGraph.SelfAnnualCO2KgsItems",
+            "type": "Array",
+            "tags": [],
+            "label": "SelfAnnualCO2KgsItems",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ElasticFlameGraph.TotalAnnualCO2KgsItems",
+            "type": "Array",
+            "tags": [],
+            "label": "TotalAnnualCO2KgsItems",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ElasticFlameGraph.SelfAnnualCostsUSDItems",
+            "type": "Array",
+            "tags": [],
+            "label": "SelfAnnualCostsUSDItems",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ElasticFlameGraph.TotalAnnualCostsUSDItems",
+            "type": "Array",
+            "tags": [],
+            "label": "TotalAnnualCostsUSDItems",
+            "description": [],
+            "signature": [
+              "number[]"
+            ],
+            "path": "packages/kbn-profiling-utils/common/flamegraph.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1693,6 +1555,67 @@
               "file name"
             ],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.ProfilingStatus",
+        "type": "Interface",
+        "tags": [],
+        "label": "ProfilingStatus",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.has_setup",
+            "type": "boolean",
+            "tags": [],
+            "label": "has_setup",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.has_data",
+            "type": "boolean",
+            "tags": [],
+            "label": "has_data",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.pre_8_9_1_data",
+            "type": "boolean",
+            "tags": [],
+            "label": "pre_8_9_1_data",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.ProfilingStatus.unauthorized",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "unauthorized",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-profiling-utils/common/profiling_status.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1950,19 +1873,6 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourceID",
-            "type": "string",
-            "tags": [],
-            "label": "SourceID",
-            "description": [
-              "should this be StackFrame.SourceID?"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.StackFrameMetadata.SourceFilename",
             "type": "string",
             "tags": [],
@@ -1989,90 +1899,12 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.FunctionSourceLine",
-            "type": "number",
-            "tags": [],
-            "label": "FunctionSourceLine",
-            "description": [
-              "auto-generated - see createStackFrameMetadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.StackFrameMetadata.ExeFileName",
             "type": "string",
             "tags": [],
             "label": "ExeFileName",
             "description": [
               "Executable.FileName"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.CommitHash",
-            "type": "string",
-            "tags": [],
-            "label": "CommitHash",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourceCodeURL",
-            "type": "string",
-            "tags": [],
-            "label": "SourceCodeURL",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourcePackageHash",
-            "type": "string",
-            "tags": [],
-            "label": "SourcePackageHash",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourcePackageURL",
-            "type": "string",
-            "tags": [],
-            "label": "SourcePackageURL",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SamplingRate",
-            "type": "number",
-            "tags": [],
-            "label": "SamplingRate",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
             ],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
@@ -2154,6 +1986,39 @@
             "signature": [
               "number[]"
             ],
+            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.StackTrace.selfAnnualCO2Kgs",
+            "type": "number",
+            "tags": [],
+            "label": "selfAnnualCO2Kgs",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.StackTrace.selfAnnualCostUSD",
+            "type": "number",
+            "tags": [],
+            "label": "selfAnnualCostUSD",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.StackTrace.Count",
+            "type": "number",
+            "tags": [],
+            "label": "Count",
+            "description": [],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -2266,6 +2131,100 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.TopNFunctions",
+        "type": "Interface",
+        "tags": [],
+        "label": "TopNFunctions",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.TotalCount",
+            "type": "number",
+            "tags": [],
+            "label": "TotalCount",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.TopN",
+            "type": "Array",
+            "tags": [],
+            "label": "TopN",
+            "description": [],
+            "signature": [
+              "TopNFunction[]"
+            ],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.SamplingRate",
+            "type": "number",
+            "tags": [],
+            "label": "SamplingRate",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.selfCPU",
+            "type": "number",
+            "tags": [],
+            "label": "selfCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.totalCPU",
+            "type": "number",
+            "tags": [],
+            "label": "totalCPU",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.totalAnnualCO2Kgs",
+            "type": "number",
+            "tags": [],
+            "label": "totalAnnualCO2Kgs",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.TopNFunctions.totalAnnualCostUSD",
+            "type": "number",
+            "tags": [],
+            "label": "totalAnnualCostUSD",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/functions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
@@ -2321,6 +2280,30 @@
           "\nStacktraces options"
         ],
         "path": "packages/kbn-profiling-utils/common/stack_traces.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.TopNComparisonFunctionSortField",
+        "type": "Enum",
+        "tags": [],
+        "label": "TopNComparisonFunctionSortField",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.TopNFunctionSortField",
+        "type": "Enum",
+        "tags": [],
+        "label": "TopNFunctionSortField",
+        "description": [],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2600,8 +2583,213 @@
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.emptyStackTrace.selfAnnualCO2Kgs",
+            "type": "number",
+            "tags": [],
+            "label": "selfAnnualCO2Kgs",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.emptyStackTrace.selfAnnualCostUSD",
+            "type": "number",
+            "tags": [],
+            "label": "selfAnnualCostUSD",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/profiling-utils",
+            "id": "def-common.emptyStackTrace.Count",
+            "type": "number",
+            "tags": [],
+            "label": "Count",
+            "description": [],
+            "path": "packages/kbn-profiling-utils/common/profiling.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.topNComparisonFunctionSortFieldRt",
+        "type": "Object",
+        "tags": [],
+        "label": "topNComparisonFunctionSortFieldRt",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonRank>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonFrame>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonSamples>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonSelfCPU>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonTotalCPU>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNComparisonFunctionSortField",
+            "text": "TopNComparisonFunctionSortField"
+          },
+          ".ComparisonDiff>]>"
+        ],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/profiling-utils",
+        "id": "def-common.topNFunctionSortFieldRt",
+        "type": "Object",
+        "tags": [],
+        "label": "topNFunctionSortFieldRt",
+        "description": [],
+        "signature": [
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".Rank>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".Frame>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".Samples>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".SelfCPU>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".TotalCPU>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".Diff>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".AnnualizedCo2>, ",
+          "LiteralC",
+          "<",
+          {
+            "pluginId": "@kbn/profiling-utils",
+            "scope": "common",
+            "docId": "kibKbnProfilingUtilsPluginApi",
+            "section": "def-common.TopNFunctionSortField",
+            "text": "TopNFunctionSortField"
+          },
+          ".AnnualizedDollarCost>]>"
+        ],
+        "path": "packages/kbn-profiling-utils/common/functions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ]

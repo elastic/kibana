@@ -29,6 +29,7 @@ export interface ContactCardEmbeddableOutput extends EmbeddableOutput {
 
 export interface ContactCardEmbeddableOptions {
   execAction: UiActionsStart['executeTriggerActions'];
+  outputOverrides?: Partial<ContactCardEmbeddableOutput>;
 }
 
 function getFullName(input: ContactCardEmbeddableInput) {
@@ -56,6 +57,7 @@ export class ContactCardEmbeddable extends Embeddable<
         fullName: getFullName(initialInput),
         originalLastName: initialInput.lastName,
         defaultTitle: `Hello ${getFullName(initialInput)}`,
+        ...options.outputOverrides,
       },
       parent
     );

@@ -23,6 +23,10 @@ export const ANOMALY_SCORE_DETAILS = 'Anomaly score';
 
 export const CUSTOM_QUERY_DETAILS = 'Custom query';
 
+export const EQL_QUERY_DETAILS = 'EQL query';
+
+export const ESQL_QUERY_DETAILS = 'ES|QL query';
+
 export const SAVED_QUERY_NAME_DETAILS = 'Saved query name';
 
 export const SAVED_QUERY_DETAILS = /^Saved query$/;
@@ -124,6 +128,8 @@ export const SUPPRESS_BY_DETAILS = 'Suppress alerts by';
 
 export const SUPPRESS_FOR_DETAILS = 'Suppress alerts for';
 
+export const SUPPRESS_MISSING_FIELD = 'If a suppression field is missing';
+
 export const TIMELINE_FIELD = (field: string) => {
   return `[data-test-subj="formatted-field-${field}"]`;
 };
@@ -142,7 +148,8 @@ export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
 
-export const BACK_TO_RULES_TABLE = '[data-test-subj="breadcrumb"][title="Detection rules (SIEM)"]';
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
+  '[data-test-subj="alertSuppressionInsufficientLicensingIcon"]';
 
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';

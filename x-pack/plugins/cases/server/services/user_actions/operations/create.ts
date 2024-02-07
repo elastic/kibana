@@ -9,6 +9,8 @@ import type { SavedObject, SavedObjectsBulkResponse } from '@kbn/core/server';
 import { get, isEmpty } from 'lodash';
 import type {
   CaseAssignees,
+  CaseCustomField,
+  CaseCustomFields,
   CaseUserProfile,
   UserActionAction,
   UserActionType,
@@ -28,7 +30,6 @@ import type {
   BulkCreateBulkUpdateCaseUserActions,
   CommonUserActionArgs,
   CreatePayloadFunction,
-  CreateUserActionClient,
   CreateUserActionES,
   GetUserActionItemByDifference,
   PostCaseUserActionArgs,
@@ -36,8 +37,10 @@ import type {
   TypedUserActionDiffedItems,
   UserActionEvent,
   UserActionsDict,
+  CreateUserActionArgs,
+  BulkCreateUserActionArgs,
 } from '../types';
-import { isAssigneesArray, isStringArray } from '../type_guards';
+import { isAssigneesArray, isCustomFieldsArray, isStringArray } from '../type_guards';
 import type { IndexRefresh } from '../../types';
 import { UserActionAuditLogger } from '../audit_logger';
 
@@ -120,6 +123,12 @@ export class UserActionPersister {
       isStringArray(newValue)
     ) {
       return this.buildTagsUserActions({ ...params, originalValue, newValue });
+    } else if (
+      field === UserActionTypes.customFields &&
+      isCustomFieldsArray(originalValue) &&
+      isCustomFieldsArray(newValue)
+    ) {
+      return this.buildCustomFieldsUserActions({ ...params, originalValue, newValue });
     } else if (isUserActionType(field) && newValue !== undefined) {
       const userActionBuilder = this.builderFactory.getBuilder(UserActionTypes[field]);
       const fieldUserAction = userActionBuilder?.build({
@@ -152,6 +161,42 @@ export class UserActionPersister {
     });
 
     return this.buildAddDeleteUserActions(params, createPayload, UserActionTypes.tags);
+  }
+
+  private buildCustomFieldsUserActions(params: TypedUserActionDiffedItems<CaseCustomField>) {
+    const createPayload: CreatePayloadFunction<
+      CaseCustomField,
+      typeof UserActionTypes.customFields
+    > = (items: CaseCustomFields) => ({ customFields: items });
+
+    const { originalValue: originalCustomFields, newValue: newCustomFields } = params;
+
+    const originalCustomFieldsKeys = new Set(
+      originalCustomFields.map((customField) => customField.key)
+    );
+
+    const compareValues = arraysDifference(originalCustomFields, newCustomFields);
+
+    const updatedCustomFieldsUsersActions = compareValues?.addedItems
+      .filter((customField) => {
+        if (customField.value != null) {
+          return true;
+        }
+
+        return originalCustomFieldsKeys.has(customField.key);
+      })
+      .map((customField) =>
+        this.buildUserAction({
+          commonArgs: params,
+          actionType: UserActionTypes.customFields,
+          action: UserActionActions.update,
+          createPayload,
+          modifiedItems: [customField],
+        })
+      )
+      .filter((userAction): userAction is UserActionEvent => userAction != null);
+
+    return [...(updatedCustomFieldsUsersActions ? updatedCustomFieldsUsersActions : [])];
   }
 
   private buildAddDeleteUserActions<Item, ActionType extends UserActionType>(
@@ -331,21 +376,16 @@ export class UserActionPersister {
   }
 
   public async createUserAction<T extends keyof BuilderParameters>({
-    action,
-    type,
-    caseId,
-    user,
-    owner,
-    payload,
-    connectorId,
-    attachmentId,
+    userAction,
     refresh,
-  }: CreateUserActionClient<T>): Promise<void> {
+  }: CreateUserActionArgs<T>): Promise<void> {
+    const { action, type, caseId, user, owner, payload, connectorId, attachmentId } = userAction;
+
     try {
       this.context.log.debug(`Attempting to create a user action of type: ${type}`);
       const userActionBuilder = this.builderFactory.getBuilder<T>(type);
 
-      const userAction = userActionBuilder?.build({
+      const userActionPayload = userActionBuilder?.build({
         action,
         caseId,
         user,
@@ -355,11 +395,50 @@ export class UserActionPersister {
         payload,
       });
 
-      if (userAction) {
-        await this.createAndLog({ userAction, refresh });
+      if (userActionPayload) {
+        await this.createAndLog({ userAction: userActionPayload, refresh });
       }
     } catch (error) {
       this.context.log.error(`Error on creating user action of type: ${type}. Error: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreateUserAction<T extends keyof BuilderParameters>({
+    userActions,
+    refresh,
+  }: BulkCreateUserActionArgs<T>): Promise<void> {
+    try {
+      this.context.log.debug(`Attempting to bulk create a user actions`);
+
+      if (userActions.length <= 0) {
+        return;
+      }
+
+      const userActionsPayload = userActions
+        .map(({ action, type, caseId, user, owner, payload, connectorId, attachmentId }) => {
+          const userActionBuilder = this.builderFactory.getBuilder<T>(type);
+          const userAction = userActionBuilder?.build({
+            action,
+            caseId,
+            user,
+            owner,
+            connectorId,
+            attachmentId,
+            payload,
+          });
+
+          if (userAction == null) {
+            return null;
+          }
+
+          return userAction;
+        })
+        .filter(Boolean) as UserActionEvent[];
+
+      await this.bulkCreateAndLog({ userActions: userActionsPayload, refresh });
+    } catch (error) {
+      this.context.log.error(`Error on bulk creating user actions. Error: ${error}`);
       throw error;
     }
   }

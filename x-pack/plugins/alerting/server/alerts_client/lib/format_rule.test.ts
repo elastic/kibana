@@ -7,6 +7,19 @@
 import { formatRule } from './format_rule';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RecoveredActionGroup } from '../../types';
+import {
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_EXECUTION_UUID,
+  ALERT_RULE_NAME,
+  ALERT_RULE_PARAMETERS,
+  ALERT_RULE_PRODUCER,
+  ALERT_RULE_REVISION,
+  ALERT_RULE_TAGS,
+  ALERT_RULE_TYPE_ID,
+  ALERT_RULE_UUID,
+  SPACE_IDS,
+} from '@kbn/rule-data-utils';
 
 const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   id: 'test.rule-type',
@@ -17,6 +30,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -29,6 +43,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
     mappings: { fieldMap: { field: { type: 'keyword', required: false } } },
     shouldWrite: true,
   },
+  validLegacyConsumers: [],
 };
 
 describe('formatRule', () => {
@@ -46,31 +61,22 @@ describe('formatRule', () => {
           revision: 0,
           spaceId: 'default',
           tags: ['rule-', '-tags'],
+          alertDelay: 0,
         },
         ruleType,
       })
     ).toEqual({
-      kibana: {
-        alert: {
-          rule: {
-            category: 'My test rule',
-            consumer: 'bar',
-            execution: {
-              uuid: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-            },
-            name: 'rule-name',
-            parameters: {
-              bar: true,
-            },
-            producer: 'alerts',
-            revision: 0,
-            rule_type_id: 'test.rule-type',
-            tags: ['rule-', '-tags'],
-            uuid: '1',
-          },
-        },
-        space_ids: ['default'],
-      },
+      [ALERT_RULE_CATEGORY]: 'My test rule',
+      [ALERT_RULE_CONSUMER]: 'bar',
+      [ALERT_RULE_EXECUTION_UUID]: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+      [ALERT_RULE_NAME]: 'rule-name',
+      [ALERT_RULE_PARAMETERS]: { bar: true },
+      [ALERT_RULE_PRODUCER]: 'alerts',
+      [ALERT_RULE_REVISION]: 0,
+      [ALERT_RULE_TYPE_ID]: 'test.rule-type',
+      [ALERT_RULE_TAGS]: ['rule-', '-tags'],
+      [ALERT_RULE_UUID]: '1',
+      [SPACE_IDS]: ['default'],
     });
   });
 });

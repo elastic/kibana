@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -38,12 +38,21 @@ export const CSP_MOMENT_FORMAT = 'MMMM D, YYYY @ HH:mm:ss.SSS';
 export const MAX_FINDINGS_TO_LOAD = 500;
 export const DEFAULT_VISIBLE_ROWS_PER_PAGE = 25;
 
+export const LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY = 'cloudPosture:dataTable:pageSize';
+export const LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY = 'cloudPosture:dataTable:columns';
 export const LOCAL_STORAGE_PAGE_SIZE_FINDINGS_KEY = 'cloudPosture:findings:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pageSize';
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
+export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
+  'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
+
+export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
+export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
+
+export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
@@ -61,6 +70,7 @@ export interface CloudPostureIntegrationProps {
     icon?: string;
     tooltip?: string;
     isBeta?: boolean;
+    testId?: string;
   }>;
 }
 
@@ -83,6 +93,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS AWS',
         }),
         icon: 'logoAWS',
+        testId: 'cisAwsTestId',
       },
       {
         type: CLOUDBEAT_GCP,
@@ -93,7 +104,7 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
           defaultMessage: 'CIS GCP',
         }),
         icon: googleCloudLogo,
-        isBeta: true,
+        testId: 'cisGcpTestId',
       },
       {
         type: CLOUDBEAT_AZURE,
@@ -103,11 +114,8 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: true,
         icon: 'logoAzure',
-        tooltip: i18n.translate('xpack.csp.cspmIntegration.azureOption.tooltipContent', {
-          defaultMessage: 'Coming soon',
-        }),
+        testId: 'cisAzureTestId',
       },
     ],
   },
@@ -220,3 +228,5 @@ export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
 export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
 export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
+
+export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;

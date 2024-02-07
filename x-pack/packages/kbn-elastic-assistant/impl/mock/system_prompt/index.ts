@@ -31,3 +31,9 @@ export const defaultSystemPrompt: Prompt = {
   isDefault: true,
   isNewConversationDefault: true,
 };
+
+export const mockSystemPrompts: Prompt[] = [
+  mockSystemPrompt,
+  mockSuperheroSystemPrompt,
+  defaultSystemPrompt,
+];

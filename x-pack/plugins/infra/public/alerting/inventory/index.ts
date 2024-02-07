@@ -66,5 +66,6 @@ export function createInventoryMetricRuleType(): ObservabilityRuleTypeModel<Inve
     defaultRecoveryMessage: inventoryDefaultRecoveryMessage,
     requiresAppContext: false,
     format: formatReason,
+    priority: 20,
   };
 }

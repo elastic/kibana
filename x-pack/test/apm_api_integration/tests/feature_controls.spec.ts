@@ -117,7 +117,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
       expectResponse: expect200,
     },
     {
-      req: { url: `/internal/apm/services/foo/transaction_types?start=${start}&end=${end}` },
+      req: {
+        url: `/internal/apm/services/foo/transaction_types?start=${start}&end=${end}&documentType=transactionMetric&rollupInterval=1m`,
+      },
       expectForbidden: expect403,
       expectResponse: expect200,
     },
@@ -184,7 +186,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     },
     {
       req: {
-        url: `/internal/apm/services/foo/metadata/details?start=${start}&end=${end}`,
+        url: `/internal/apm/services/foo/metadata/details?start=${start}&end=${end}&environment=dev`,
       },
       expectForbidden: expect403,
       expectResponse: expect200,

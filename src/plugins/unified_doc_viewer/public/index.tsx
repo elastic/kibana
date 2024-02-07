@@ -34,6 +34,6 @@ export const UnifiedDocViewer = withSuspense<DocViewRenderProps>(
   </EuiDelayRender>
 );
 
-export { useEsDocSearch, useUnifiedDocViewerServices } from './hooks';
+export { useEsDocSearch } from './hooks';
 
 export const plugin = () => new UnifiedDocViewerPublicPlugin();

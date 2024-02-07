@@ -163,7 +163,7 @@ export const eventCategory: EnrichedFieldMetadata = {
   indexInvalidValues: [],
   hasEcsMetadata: true,
   isEcsCompliant: true,
-  isInSameFamily: true, // `keyword` and `keyword` are in the same family
+  isInSameFamily: false,
 };
 
 export const eventCategoryWithUnallowedValues: EnrichedFieldMetadata = {

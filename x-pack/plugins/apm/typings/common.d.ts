@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import '@kbn/infra-plugin/types/eui';
 import './apm_rum_react';
 
 // Allow unknown properties in an object

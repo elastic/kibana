@@ -9,8 +9,9 @@ import { TOP_N_CONTAINER } from '../../../screens/network/flows';
 import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../screens/search_bar';
 import { DATA_PROVIDERS } from '../../../screens/timeline';
 
-import { login, visit } from '../../../tasks/login';
-import { NETWORK_URL } from '../../../urls/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { networkUrl } from '../../../urls/navigation';
 import {
   clickOnAddToTimeline,
   clickOnCopyValue,
@@ -41,7 +42,7 @@ describe.skip('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
 
   beforeEach(() => {
     login();
-    visit(NETWORK_URL, { onBeforeLoad: onBeforeLoadCallback });
+    visit(networkUrl('flows'), { visitOptions: { onBeforeLoad: onBeforeLoadCallback } });
     openHoverActions();
     mouseoverOnToOverflowItem();
   });

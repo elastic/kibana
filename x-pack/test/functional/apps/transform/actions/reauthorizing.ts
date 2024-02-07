@@ -138,7 +138,7 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       for (const testData of testDataList) {
         await transform.api.createTransform(testData.originalConfig.id, testData.originalConfig, {
@@ -157,12 +157,12 @@ export default function ({ getService }: FtrProviderContext) {
       await transform.securityCommon.clearAllTransformApiKeys();
 
       for (const testData of testDataList) {
-        await transform.testResources.deleteIndexPatternByTitle(testData.originalConfig.dest.index);
+        await transform.testResources.deleteDataViewByTitle(testData.originalConfig.dest.index);
         await transform.api.deleteIndices(testData.originalConfig.dest.index);
       }
 
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     for (const testData of testDataList) {
@@ -211,7 +211,7 @@ export default function ({ getService }: FtrProviderContext) {
             await transform.table.assertTransformRowActionMissing(transformId, 'Reauthorize');
           } else {
             await transform.testExecution.logTestStep('should show disabled action menu button');
-            await transform.table.assertTransformRowActionsButtonEnabled(transformId, false);
+            await transform.table.assertTransformRowActionsEnabled(transformId, false);
           }
           await transform.table.clearSearchString(testDataList.length);
         });

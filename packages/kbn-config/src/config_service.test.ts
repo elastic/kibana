@@ -131,6 +131,23 @@ test("does not push new configs when reloading if config at path hasn't changed"
   expect(valuesReceived).toEqual(['value']);
 });
 
+test("does push new configs when reloading when config at path hasn't changed if ignoreUnchanged is false", async () => {
+  const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
+  const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });
+
+  const configService = new ConfigService(rawConfigProvider, defaultEnv, logger);
+  await configService.setSchema('key', schema.string());
+
+  const valuesReceived: any[] = [];
+  configService.atPath('key', { ignoreUnchanged: false }).subscribe((value) => {
+    valuesReceived.push(value);
+  });
+
+  rawConfig$.next({ key: 'value' });
+
+  expect(valuesReceived).toEqual(['value', 'value']);
+});
+
 test('pushes new config when reloading and config at path has changed', async () => {
   const rawConfig$ = new BehaviorSubject<Record<string, any>>({ key: 'value' });
   const rawConfigProvider = createRawConfigServiceMock({ rawConfig$ });

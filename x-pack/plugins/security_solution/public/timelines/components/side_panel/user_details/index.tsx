@@ -6,13 +6,9 @@
  */
 
 import React from 'react';
-import { EuiFlyoutBody, EuiSpacer, EuiButtonIcon } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { UserDetailsFlyout } from './user_details_flyout';
 import { UserDetailsSidePanel } from './user_details_side_panel';
 import type { UserDetailsProps } from './types';
-import { UserDetailsContent } from '../new_user_detail/user_details_content';
-import * as i18n from './translations';
 
 const UserDetailsPanelComponent = ({
   contextID,
@@ -21,40 +17,7 @@ const UserDetailsPanelComponent = ({
   handleOnClose,
   isFlyoutView,
   isDraggable,
-  isNewUserDetailsFlyoutEnable,
 }: UserDetailsProps) => {
-  if (isNewUserDetailsFlyoutEnable) {
-    return isFlyoutView ? (
-      <EuiFlyoutBody>
-        <UserDetailsContent
-          userName={userName}
-          contextID={contextID}
-          scopeId={scopeId}
-          isDraggable={isDraggable}
-        />
-      </EuiFlyoutBody>
-    ) : (
-      <div className="eui-yScroll">
-        <EuiSpacer size="m" />
-        <EuiButtonIcon
-          iconType="cross"
-          aria-label={i18n.CLOSE_BUTTON}
-          onClick={handleOnClose}
-          css={css`
-            float: right;
-          `}
-        />
-
-        <UserDetailsContent
-          userName={userName}
-          contextID={contextID}
-          scopeId={scopeId}
-          isDraggable={isDraggable}
-        />
-      </div>
-    );
-  }
-
   return isFlyoutView ? (
     <UserDetailsFlyout userName={userName} contextID={contextID} scopeId={scopeId} />
   ) : (

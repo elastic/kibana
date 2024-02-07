@@ -15,10 +15,10 @@
     "target/**/*"
   ],
   "kbn_references": [
-    "@kbn/i18n", 
-    "@kbn/visualization-ui-components", 
-    "@kbn/ui-theme", 
-    "@kbn/chart-icons", 
+    "@kbn/i18n",
+    "@kbn/visualization-ui-components",
+    "@kbn/ui-theme",
+    "@kbn/chart-icons",
     "@kbn/unified-field-list",
     "@kbn/data-views-plugin",
     "@kbn/data-plugin",
@@ -28,5 +28,6 @@
     "@kbn/i18n-react",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/field-utils"
   ]
 }

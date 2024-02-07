@@ -16,17 +16,16 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { ExitFullScreenButton } from '@kbn/shared-ux-button-exit-full-screen';
 
 import { DashboardGrid } from '../grid';
-import { pluginServices } from '../../../services/plugin_services';
 import { useDashboardContainer } from '../../embeddable/dashboard_container';
 import { DashboardEmptyScreen } from '../empty_screen/dashboard_empty_screen';
 
-export const useDebouncedWidthObserver = (wait = 250) => {
+export const useDebouncedWidthObserver = (skipDebounce = false, wait = 100) => {
   const [width, setWidth] = useState<number>(0);
   const onWidthChange = useMemo(() => debounce(setWidth, wait), [wait]);
   const { ref } = useResizeObserver<HTMLDivElement>({
     onResize: (dimensions) => {
       if (dimensions.width) {
-        if (width === 0) setWidth(dimensions.width);
+        if (width === 0 || skipDebounce) setWidth(dimensions.width);
         if (dimensions.width !== width) onWidthChange(dimensions.width);
       }
     },
@@ -35,9 +34,6 @@ export const useDebouncedWidthObserver = (wait = 250) => {
 };
 
 export const DashboardViewportComponent = () => {
-  const {
-    settings: { isProjectEnabledInLabs },
-  } = pluginServices.getServices();
   const controlsRoot = useRef(null);
 
   const dashboard = useDashboardContainer();
@@ -52,16 +48,16 @@ export const DashboardViewportComponent = () => {
 
   const panelCount = Object.keys(dashboard.select((state) => state.explicitInput.panels)).length;
   const controlCount = Object.keys(
-    dashboard.select((state) => state.explicitInput.controlGroupInput?.panels) ?? {}
+    controlGroup?.select((state) => state.explicitInput.panels) ?? {}
   ).length;
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
   const description = dashboard.select((state) => state.explicitInput.description);
+  const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
   const expandedPanelId = dashboard.select((state) => state.componentState.expandedPanelId);
-  const controlsEnabled = isProjectEnabledInLabs('labs:dashboard:dashboardControls');
 
-  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver();
+  const { ref: resizeRef, width: viewportWidth } = useDebouncedWidthObserver(!!focusedPanelId);
 
   const classes = classNames({
     dshDashboardViewport: true,
@@ -70,7 +66,7 @@ export const DashboardViewportComponent = () => {
 
   return (
     <div className={'dshDashboardViewportWrapper'}>
-      {controlsEnabled && controlGroup && viewMode !== ViewMode.PRINT ? (
+      {controlGroup && viewMode !== ViewMode.PRINT ? (
         <div
           className={controlCount > 0 ? 'dshDashboardViewport-controls' : ''}
           ref={controlsRoot}
@@ -85,7 +81,9 @@ export const DashboardViewportComponent = () => {
         data-description={description}
         data-shared-items-count={panelCount}
       >
-        <DashboardGrid viewportWidth={viewportWidth} />
+        {/* Wait for `viewportWidth` to actually be set before rendering the dashboard grid - 
+            otherwise, there is a race condition where the panels can end up being squashed */}
+        {viewportWidth !== 0 && <DashboardGrid viewportWidth={viewportWidth} />}
       </div>
     </div>
   );

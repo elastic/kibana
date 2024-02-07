@@ -8,8 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
+import {
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+} from '@kbn/rule-data-utils';
+import { ES_QUERY_ID } from '@kbn/rule-data-utils';
 import { metricsDataSourceSavedObjectName } from '@kbn/metrics-data-access-plugin/server';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { LOG_DOCUMENT_COUNT_RULE_TYPE_ID } from '../common/alerting/logs/log_threshold/types';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
@@ -21,7 +25,9 @@ import { infraSourceConfigurationSavedObjectName } from './lib/sources/saved_obj
 const metricRuleTypes = [
   METRIC_THRESHOLD_ALERT_TYPE_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
+  ES_QUERY_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
 ];
 
 export const METRICS_FEATURE = {
@@ -83,7 +89,12 @@ export const METRICS_FEATURE = {
   },
 };
 
-const logsRuleTypes = [LOG_DOCUMENT_COUNT_RULE_TYPE_ID, OBSERVABILITY_THRESHOLD_RULE_TYPE_ID];
+const logsRuleTypes = [
+  LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
+  ES_QUERY_ID,
+  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+  ML_ANOMALY_DETECTION_RULE_TYPE_ID,
+];
 
 export const LOGS_FEATURE = {
   id: LOGS_FEATURE_ID,

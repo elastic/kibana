@@ -124,13 +124,15 @@ export async function deleteComment(
     const attachmentRequestAttributes = decodeOrThrow(AttachmentRequestRt)(attachment.attributes);
 
     await userActionService.creator.createUserAction({
-      type: UserActionTypes.comment,
-      action: UserActionActions.delete,
-      caseId: id,
-      attachmentId: attachmentID,
-      payload: { attachment: attachmentRequestAttributes },
-      user,
-      owner: attachment.attributes.owner,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.delete,
+        caseId: id,
+        attachmentId: attachmentID,
+        payload: { attachment: attachmentRequestAttributes },
+        user,
+        owner: attachment.attributes.owner,
+      },
     });
 
     await handleAlerts({ alertsService, attachments: [attachment.attributes], caseId: id });

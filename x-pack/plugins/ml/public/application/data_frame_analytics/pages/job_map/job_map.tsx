@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useEffect, useState } from 'react';
+import React, { FC, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
@@ -150,6 +150,10 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
   const { ref, width, height } = useRefDimensions();
 
   const refreshCallback = () => fetchAndSetElementsWrapper({ analyticsId, modelId });
+  const hasMissingJobNode = useMemo(
+    () => elements.map(({ data }) => data.type).includes(JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING),
+    [elements]
+  );
 
   const h = defaultHeight ?? height;
   return (
@@ -157,7 +161,7 @@ export const JobMap: FC<Props> = ({ defaultHeight, analyticsId, modelId, forceRe
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="none" justifyContent="spaceBetween">
         <EuiFlexItem>
-          <JobMapLegend theme={euiTheme} />
+          <JobMapLegend theme={euiTheme} hasMissingJobNode={hasMissingJobNode} />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty

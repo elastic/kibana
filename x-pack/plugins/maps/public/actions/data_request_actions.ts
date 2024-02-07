@@ -38,13 +38,14 @@ import {
   LAYER_DATA_LOAD_ERROR,
   LAYER_DATA_LOAD_STARTED,
   SET_GOTO,
-  SET_LAYER_ERROR_STATUS,
+  SET_JOINS,
   SET_LAYER_STYLE_META,
   UPDATE_LAYER_PROP,
   UPDATE_SOURCE_DATA_REQUEST,
 } from './map_action_constants';
+import { InnerJoin } from '../classes/joins/inner_join';
 import { ILayer } from '../classes/layers/layer';
-import { IVectorLayer } from '../classes/layers/vector_layer';
+import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { DataRequestMeta, MapExtent, DataFilters } from '../../common/descriptor_types';
 import { DataRequestAbortError } from '../classes/util/data_request';
 import { scaleBounds } from '../../common/elasticsearch_util';
@@ -61,8 +62,8 @@ export type DataRequestContext = {
     data: object,
     resultsMeta?: DataRequestMeta
   ): void;
-  onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
-  onJoinError(errorMessage: string): void;
+  onLoadError(dataId: string, requestToken: symbol, error: Error): void;
+  setJoinError(joinIndex: number, errorMessage?: string): void;
   updateSourceData(newData: object): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
   registerCancelCallback(requestToken: symbol, callback: () => void): void;
@@ -131,10 +132,11 @@ function getDataRequestContext(
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) =>
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
-    onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
-      dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
-    onJoinError: (errorMessage: string) =>
-      dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage)),
+    onLoadError: (dataId: string, requestToken: symbol, error: Error) =>
+      dispatch(onDataLoadError(layerId, dataId, requestToken, error)),
+    setJoinError: (joinIndex: number, errorMessage?: string) => {
+      dispatch(setJoinError(layerId, joinIndex, errorMessage));
+    },
     updateSourceData: (newData: object) => {
       dispatch(updateSourceDataRequest(layerId, newData));
     },
@@ -173,7 +175,7 @@ function syncDataForAllJoinLayers() {
   ) => {
     const syncPromises = getLayerList(getState())
       .filter((layer) => {
-        return 'hasJoins' in layer ? (layer as IVectorLayer).hasJoins() : false;
+        return hasVectorLayerMethod(layer, 'hasJoins') ? layer.hasJoins() : false;
       })
       .map((layer) => {
         return dispatch(syncDataForLayer(layer, false));
@@ -223,15 +225,6 @@ export function syncDataForLayerId(layerId: string | null, isForceRefresh: boole
     if (layer) {
       dispatch(syncDataForLayer(layer, isForceRefresh));
     }
-  };
-}
-
-export function setLayerDataLoadErrorStatus(layerId: string, errorMessage: string | null) {
-  return {
-    type: SET_LAYER_ERROR_STATUS,
-    isInErrorState: errorMessage !== null,
-    layerId,
-    errorMessage,
   };
 }
 
@@ -315,21 +308,11 @@ function endDataLoad(
       requestToken,
     });
 
-    // Clear any data-load errors when there is a succesful data return.
-    // Co this on end-data-load iso at start-data-load to avoid blipping the error status between true/false.
-    // This avoids jitter in the warning icon of the TOC when the requests continues to return errors.
-    dispatch(setLayerDataLoadErrorStatus(layerId, null));
-
     dispatch(updateStyleMeta(layerId));
   };
 }
 
-function onDataLoadError(
-  layerId: string,
-  dataId: string,
-  requestToken: symbol,
-  errorMessage: string
-) {
+function onDataLoadError(layerId: string, dataId: string, requestToken: symbol, error: Error) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -341,7 +324,7 @@ function onDataLoadError(
       eventHandlers.onDataLoadError({
         layerId,
         dataId,
-        errorMessage,
+        errorMessage: error.message,
       });
     }
 
@@ -349,10 +332,9 @@ function onDataLoadError(
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
       dataId,
+      error,
       requestToken,
     });
-
-    dispatch(setLayerDataLoadErrorStatus(layerId, errorMessage));
   };
 }
 
@@ -450,5 +432,32 @@ function setGotoWithBounds(bounds: MapExtent) {
   return {
     type: SET_GOTO,
     bounds,
+  };
+}
+
+function setJoinError(layerId: string, joinIndex: number, error?: string) {
+  return (dispatch: Dispatch, getState: () => MapStoreState) => {
+    const layer = getLayerById(layerId, getState());
+    if (!layer || !hasVectorLayerMethod(layer, 'getJoins')) {
+      return;
+    }
+
+    const joins = layer.getJoins().map((join: InnerJoin) => {
+      return join.toDescriptor();
+    });
+
+    if (!error && !joins[joinIndex].error) {
+      return;
+    }
+
+    dispatch({
+      type: SET_JOINS,
+      layerId,
+      joins: [
+        ...joins.slice(0, joinIndex),
+        { ...joins[joinIndex], error },
+        ...joins.slice(joinIndex + 1),
+      ],
+    });
   };
 }

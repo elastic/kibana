@@ -42,5 +42,6 @@
       "job_id": "url_scanning"
     }
   ],
-  "kibana": {}
+  "kibana": {},
+  "tags": []
 }

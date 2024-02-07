@@ -18,6 +18,8 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import { EuiCallOut } from '@elastic/eui';
+import { EuiCode } from '@elastic/eui';
 import { useSourceContext } from '../../../../../../containers/metrics_source';
 import { useMetricK8sModuleContext } from '../../../../../../containers/ml/modules/metrics_k8s/module';
 import { useMetricHostsModuleContext } from '../../../../../../containers/ml/modules/metrics_hosts/module';
@@ -191,6 +193,12 @@ export const JobSetupScreen = (props: Props) => {
               defaultMessage="Something went wrong creating the necessary ML jobs."
             />
             <EuiSpacer />
+            {setupStatus.reasons.map((errorMessage, i) => (
+              <EuiCallOut key={i} color="danger" iconType="warning" title={errorCalloutTitle}>
+                <EuiCode transparentBackground>{errorMessage}</EuiCode>
+              </EuiCallOut>
+            ))}
+            <EuiSpacer />
             <EuiButton data-test-subj="infraJobSetupScreenTryAgainButton" fill onClick={createJobs}>
               <FormattedMessage
                 id="xpack.infra.ml.steps.setupProcess.tryAgainButton"
@@ -358,3 +366,7 @@ export const JobSetupScreen = (props: Props) => {
     </>
   );
 };
+
+const errorCalloutTitle = i18n.translate('xpack.infra.ml.steps.setupProcess.errorCalloutTitle', {
+  defaultMessage: 'An error occurred',
+});

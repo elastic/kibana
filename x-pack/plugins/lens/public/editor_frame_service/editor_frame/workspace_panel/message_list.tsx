@@ -68,6 +68,7 @@ export const MessageList = ({
 
   const onButtonClick = () => setIsPopoverOpen((isOpen) => !isOpen);
   const closePopover = () => setIsPopoverOpen(false);
+
   return (
     <EuiPopover
       panelPaddingSize="none"
@@ -112,18 +113,26 @@ export const MessageList = ({
             className="lnsWorkspaceWarningList__item"
             data-test-subj={`lens-message-list-${message.severity}`}
           >
-            <EuiFlexGroup gutterSize="s" responsive={false}>
-              <EuiFlexItem grow={false}>
-                {message.severity === 'error' ? (
-                  <EuiIcon type="error" color="danger" />
-                ) : (
-                  <EuiIcon type="alert" color="warning" />
-                )}
-              </EuiFlexItem>
-              <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
-                <EuiText size="s">{message.longMessage}</EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            {typeof message.longMessage === 'function' ? (
+              message.longMessage(closePopover)
+            ) : (
+              <EuiFlexGroup
+                gutterSize="s"
+                responsive={false}
+                className="lnsWorkspaceWarningList__textItem"
+              >
+                <EuiFlexItem grow={false}>
+                  {message.severity === 'error' ? (
+                    <EuiIcon type="error" color="danger" />
+                  ) : (
+                    <EuiIcon type="alert" color="warning" />
+                  )}
+                </EuiFlexItem>
+                <EuiFlexItem grow={1} className="lnsWorkspaceWarningList__description">
+                  <EuiText size="s">{message.longMessage}</EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            )}
           </li>
         ))}
       </ul>

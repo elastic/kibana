@@ -131,6 +131,7 @@ export const RenderRuleName: React.FC<RenderRuleNameProps> = ({
           href={href}
           data-test-subj="goToRuleDetails"
           target="_blank"
+          external={false}
         >
           {children ?? content}
         </LinkAnchor>

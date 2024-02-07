@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider, QueryClientProviderProps } from '@tanstack/react-query';
 import { of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -27,7 +27,9 @@ export interface AppMockRenderer {
   AppWrapper: React.FC<{ children: React.ReactElement }>;
 }
 
-export const createAppMockRenderer = (): AppMockRenderer => {
+export const createAppMockRenderer = (
+  queryClientContext?: QueryClientProviderProps['context']
+): AppMockRenderer => {
   const services = createStartServicesMock();
   const theme$ = of({ darkMode: false });
 
@@ -52,7 +54,9 @@ export const createAppMockRenderer = (): AppMockRenderer => {
     <I18nProvider>
       <KibanaContextProvider services={services}>
         <KibanaThemeProvider theme$={theme$}>
-          <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+          <QueryClientProvider client={queryClient} context={queryClientContext}>
+            {children}
+          </QueryClientProvider>
         </KibanaThemeProvider>
       </KibanaContextProvider>
     </I18nProvider>

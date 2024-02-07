@@ -17,10 +17,6 @@
     height: 100%;
   }
 
-  &__pageBodyContentBody {
-    height: 100%;
-  }
-
   &__pageContentBodyContent {
     height: 100%;
   }
@@ -31,7 +27,7 @@
 }
 
 // adding dev tool top bar to the body offset
-$bodyOffset: $euiHeaderHeightCompensation;
+$bodyOffset: $euiSize * 3;
 
 .appRoot {
   @include kibanaFullBodyHeight($bodyOffset);

@@ -33,3 +33,4 @@ export { dedot } from './src/lib/utils/dedot';
 export { generateLongId, generateShortId } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
 export type { ESDocumentWithOperation, SynthtraceESAction, SynthtraceGenerator } from './src/types';
+export { log, type LogDocument } from './src/lib/logs';

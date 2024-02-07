@@ -39,7 +39,6 @@ const StyledEuiDescriptionList = styled(EuiDescriptionList)`
     `${theme.eui.euiSizeS} ${theme.eui.euiSizeS} 0 ${theme.eui.euiSizeS}`};
   .descriptionList__title,
   .descriptionList__description {
-    border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
     margin-top: 0;
     align-items: center;
     display: flex;
@@ -74,13 +73,13 @@ export function KeyValueFilterList({
       buttonContent={<AccordionButtonContent icon={icon} title={title} />}
       buttonClassName="buttonContentContainer"
     >
-      <StyledEuiDescriptionList type="column">
+      <StyledEuiDescriptionList type="column" columnWidths={['20%', '80%']}>
         {nonEmptyKeyValueList.map(({ key, value, isFilterable }) => {
           return (
             <Fragment key={key}>
               <EuiDescriptionListTitle
                 className="descriptionList__title"
-                style={{ width: '20%', height: '40px' }}
+                style={{ height: '40px' }}
               >
                 <EuiText size="s" style={{ fontWeight: 'bold' }}>
                   {key}
@@ -88,7 +87,7 @@ export function KeyValueFilterList({
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription
                 className="descriptionList__description"
-                style={{ width: '80%', height: '40px' }}
+                style={{ height: '40px' }}
               >
                 <EuiFlexGroup
                   alignItems="baseline"

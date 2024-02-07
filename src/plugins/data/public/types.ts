@@ -12,7 +12,10 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { Setup as InspectorSetup } from '@kbn/inspector-plugin/public';
+import {
+  Setup as InspectorSetup,
+  Start as InspectorStartContract,
+} from '@kbn/inspector-plugin/public';
 import { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { ManagementSetup } from '@kbn/management-plugin/public';
@@ -41,6 +44,7 @@ export interface DataStartDependencies {
   uiActions: UiActionsStart;
   fieldFormats: FieldFormatsStart;
   dataViews: DataViewsPublicPluginStart;
+  inspector: InspectorStartContract;
   screenshotMode: ScreenshotModePluginStart;
   share: SharePluginStart;
 }

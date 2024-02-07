@@ -11,7 +11,7 @@ import {
   DiscoverStateContainer,
   createSearchSessionRestorationDataProvider,
 } from './discover_state';
-import { createBrowserHistory, History } from 'history';
+import { createBrowserHistory, createMemoryHistory, History } from 'history';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
 import {
@@ -19,19 +19,26 @@ import {
   savedSearchMock,
   savedSearchMockWithTimeField,
   savedSearchMockWithTimeFieldNew,
+  savedSearchMockWithESQL,
 } from '../../../__mocks__/saved_search';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverAppStateContainer } from './discover_app_state_container';
+import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import { waitFor } from '@testing-library/react';
-import { FetchStatus } from '../../types';
+import { DiscoverCustomizationContext, FetchStatus } from '../../types';
 import { dataViewAdHoc, dataViewComplexMock } from '../../../__mocks__/data_view_complex';
 import { copySavedSearch } from './discover_saved_search_container';
+import { createKbnUrlStateStorage, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
 const startSync = (appState: DiscoverAppStateContainer) => {
   const { start, stop } = appState.syncState();
   start();
   return stop;
+};
+
+const customizationContext: DiscoverCustomizationContext = {
+  displayMode: 'standalone',
+  showLogsExplorerTabs: false,
 };
 
 async function getState(
@@ -51,6 +58,7 @@ async function getState(
   const nextState = getDiscoverStateContainer({
     services: discoverServiceMock,
     history: nextHistory,
+    customizationContext,
   });
   nextState.appState.isEmptyURL = jest.fn(() => isEmptyUrl ?? true);
   jest.spyOn(nextState.dataState, 'fetch');
@@ -87,9 +95,10 @@ describe('Test discover state', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
+      customizationContext,
     });
     state.savedSearchState.set(savedSearchMock);
-    await state.appState.update({}, true);
+    state.appState.update({}, true);
     stopSync = startSync(state.appState);
   });
   afterEach(() => {
@@ -137,10 +146,75 @@ describe('Test discover state', () => {
   test('pauseAutoRefreshInterval sets refreshInterval.pause to true', async () => {
     history.push('/#?_g=(refreshInterval:(pause:!f,value:5000))');
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!f,value:5000))');
-    await state.actions.setDataView(dataViewMock);
+    // TODO: state.actions.setDataView should be async because it calls pauseAutoRefreshInterval which is async.
+    // I found this bug while removing unnecessary awaits, but it will need to be fixed in a follow up PR.
+    state.actions.setDataView(dataViewMock);
+    await new Promise(process.nextTick);
     expect(getCurrentUrl()).toBe('/#?_g=(refreshInterval:(pause:!t,value:5000))');
   });
 });
+
+describe('Test discover state with overridden state storage', () => {
+  let stopSync = () => {};
+  let history: History;
+  let stateStorage: IKbnUrlStateStorage;
+  let state: DiscoverStateContainer;
+
+  beforeEach(async () => {
+    jest.useFakeTimers();
+    history = createMemoryHistory({
+      initialEntries: [
+        {
+          pathname: '/',
+          hash: `?_a=()`,
+        },
+      ],
+    });
+    stateStorage = createKbnUrlStateStorage({
+      history,
+      useHash: false,
+      useHashQuery: true,
+    });
+    state = getDiscoverStateContainer({
+      services: discoverServiceMock,
+      history,
+      customizationContext,
+      stateStorageContainer: stateStorage,
+    });
+    state.savedSearchState.set(savedSearchMock);
+    state.appState.update({}, true);
+    stopSync = startSync(state.appState);
+  });
+
+  afterEach(() => {
+    stopSync();
+    stopSync = () => {};
+    jest.useRealTimers();
+  });
+
+  test('setting app state and syncing to URL', async () => {
+    state.appState.update({ index: 'modified' });
+
+    await jest.runAllTimersAsync();
+
+    expect(history.createHref(history.location)).toMatchInlineSnapshot(
+      `"/#?_a=(columns:!(default_column),index:modified,interval:auto,sort:!())"`
+    );
+  });
+
+  test('changing URL to be propagated to appState', async () => {
+    history.push('/#?_a=(index:modified)');
+
+    await jest.runAllTimersAsync();
+
+    expect(state.appState.getState()).toMatchInlineSnapshot(`
+      Object {
+        "index": "modified",
+      }
+    `);
+  });
+});
+
 describe('Test discover initial state sort handling', () => {
   test('Non-empty sort in URL should not be overwritten by saved search sort', async () => {
     const savedSearch = {
@@ -190,6 +264,7 @@ describe('Test createSearchSessionRestorationDataProvider', () => {
   const discoverStateContainer = getDiscoverStateContainer({
     services: discoverServiceMock,
     history,
+    customizationContext,
   });
   discoverStateContainer.appState.update({
     index: savedSearchMock.searchSource.getField('index')!.id,
@@ -360,10 +435,16 @@ describe('Test discover state actions', () => {
     const { searchSource, ...savedSearch } = state.savedSearchState.getState();
     expect(savedSearch).toMatchInlineSnapshot(`
       Object {
+        "breakdownField": undefined,
         "columns": Array [
           "default_column",
         ],
+        "hideAggregatedPreview": undefined,
+        "hideChart": undefined,
         "refreshInterval": undefined,
+        "rowHeight": undefined,
+        "rowsPerPage": undefined,
+        "sampleSize": undefined,
         "sort": Array [],
         "timeRange": undefined,
         "usesAdHocDataView": false,
@@ -570,6 +651,20 @@ describe('Test discover state actions', () => {
     expect(state.internalState.getState().adHocDataViews[0].id).toBe(adHocDataViewId);
   });
 
+  test('loadSavedSearch with ES|QL, data view index is not overwritten by URL ', async () => {
+    const savedSearchMockWithESQLCopy = copySavedSearch(savedSearchMockWithESQL);
+    const persistedDataViewId = savedSearchMockWithESQLCopy?.searchSource.getField('index')!.id;
+    const url = "/#?_a=(index:'the-data-view-id')&_g=()";
+    const { state } = await getState(url, {
+      savedSearch: savedSearchMockWithESQLCopy,
+      isEmptyUrl: false,
+    });
+    const nextSavedSearch = await state.actions.loadSavedSearch({
+      savedSearchId: savedSearchMockWithESQL.id,
+    });
+    expect(persistedDataViewId).toBe(nextSavedSearch?.searchSource.getField('index')!.id);
+  });
+
   test('onChangeDataView', async () => {
     const { state, getCurrentUrl } = await getState('/', { savedSearch: savedSearchMock });
     const { actions, savedSearchState, dataState, appState } = state;
@@ -655,9 +750,9 @@ describe('Test discover state actions', () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     const unsubscribe = state.actions.initializeAndSync();
     await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
-    await state.savedSearchState.update({ nextState: { hideChart: true } });
+    state.savedSearchState.update({ nextState: { hideChart: true } });
     expect(state.savedSearchState.getState().hideChart).toBe(true);
-    await state.actions.onOpenSavedSearch(savedSearchMock.id!);
+    state.actions.onOpenSavedSearch(savedSearchMock.id!);
     expect(state.savedSearchState.getState().hideChart).toBe(undefined);
     unsubscribe();
   });
@@ -698,7 +793,7 @@ describe('Test discover state actions', () => {
     await state.actions.onChangeDataView(dataViewComplexMock.id!);
     await new Promise(process.nextTick);
     expect(getCurrentUrl()).toMatchInlineSnapshot(
-      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(default_column),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
+      `"/#?_g=(refreshInterval:(pause:!t,value:1000),time:(from:now-15d,to:now))&_a=(columns:!(),index:data-view-with-various-field-types-id,interval:auto,sort:!(!(data,desc)))"`
     );
     await waitFor(() => {
       expect(state.dataState.fetch).toHaveBeenCalledTimes(1);
@@ -750,16 +845,21 @@ describe('Test discover state with embedded mode', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      mode: 'embedded',
+      customizationContext: {
+        ...customizationContext,
+        displayMode: 'embedded',
+      },
     });
     state.savedSearchState.set(savedSearchMock);
-    await state.appState.update({}, true);
+    state.appState.update({}, true);
     stopSync = startSync(state.appState);
   });
+
   afterEach(() => {
     stopSync();
     stopSync = () => {};
   });
+
   test('setting app state and syncing to URL', async () => {
     state.appState.update({ index: 'modified' });
     await new Promise(process.nextTick);

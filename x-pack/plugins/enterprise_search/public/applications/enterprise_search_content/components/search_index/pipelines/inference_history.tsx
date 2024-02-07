@@ -51,12 +51,12 @@ export const InferenceHistory: React.FC = () => {
         hasBorder
         iconType="compute"
         title={
-          <h2>
+          <h3>
             {i18n.translate(
               'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.title',
               { defaultMessage: 'Historical inference processors' }
             )}
-          </h2>
+          </h3>
         }
         subtitle={i18n.translate(
           'xpack.enterpriseSearch.content.indices.pipelines.tabs.inferenceHistory.subtitle',

@@ -5,49 +5,17 @@
  * 2.0.
  */
 
-import type { Role } from '@kbn/security-plugin/common';
-
-import { getT1Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t1_analyst';
-import { getT2Analyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/t2_analyst';
-import { getHunter } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/hunter';
-import { getThreatIntelligenceAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/threat_intelligence_analyst';
-import { getDetectionsEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/detections_engineer';
-import { getSocManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/soc_manager';
-import { getPlatformEngineer } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/platform_engineer';
-import { getEndpointOperationsAnalyst } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_operations_analyst';
-import { getEndpointSecurityPolicyManager } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/endpoint_security_policy_manager';
-import { getWithResponseActionsRole } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/with_response_actions_role';
-import { getWithArtifactReadPrivilegesRole } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users/with_artifact_read_privileges_role';
+import {
+  EndpointSecurityRoleNames,
+  ENDPOINT_SECURITY_ROLE_NAMES,
+  getAllEndpointSecurityRoles,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 
 import { FtrProviderContext } from '../ftr_provider_context';
 
-export enum ROLE {
-  t1_analyst = 't1Analyst',
-  t2_analyst = 't2Analyst',
-  analyst_hunter = 'hunter',
-  threat_intelligence_analyst = 'threatIntelligenceAnalyst',
-  detections_engineer = 'detectionsEngineer',
-  soc_manager = 'socManager',
-  platform_engineer = 'platformEngineer',
-  endpoint_operations_analyst = 'endpointOperationsAnalyst',
-  endpoint_security_policy_manager = 'endpointSecurityPolicyManager',
-  response_actions_role = 'executeResponseActions',
-  artifact_read_role = 'artifactReadRole',
-}
+export const ROLE = ENDPOINT_SECURITY_ROLE_NAMES;
 
-const rolesMapping: { [key in ROLE]: Omit<Role, 'name'> } = {
-  t1Analyst: getT1Analyst(),
-  t2Analyst: getT2Analyst(),
-  hunter: getHunter(),
-  threatIntelligenceAnalyst: getThreatIntelligenceAnalyst(),
-  detectionsEngineer: getDetectionsEngineer(),
-  socManager: getSocManager(),
-  platformEngineer: getPlatformEngineer(),
-  endpointOperationsAnalyst: getEndpointOperationsAnalyst(),
-  endpointSecurityPolicyManager: getEndpointSecurityPolicyManager(),
-  executeResponseActions: getWithResponseActionsRole(),
-  artifactReadRole: getWithArtifactReadPrivilegesRole(),
-};
+const rolesMapping = getAllEndpointSecurityRoles();
 
 export function RolesUsersProvider({ getService }: FtrProviderContext) {
   const security = getService('security');
@@ -76,7 +44,7 @@ export function RolesUsersProvider({ getService }: FtrProviderContext) {
      * @param options
      */
     async createRole(options: {
-      predefinedRole?: ROLE;
+      predefinedRole?: EndpointSecurityRoleNames;
       extraPrivileges?: string[];
       customRole?: { roleName: string; extraPrivileges: string[] };
     }): Promise<void> {

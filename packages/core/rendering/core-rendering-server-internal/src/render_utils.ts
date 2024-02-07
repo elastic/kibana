@@ -22,35 +22,36 @@ export const getSettingValue = <T>(
   return convert(value);
 };
 
+export const getBundlesHref = (baseHref: string, buildNr: string): string =>
+  `${baseHref}/${buildNr}/bundles`;
+
 export const getStylesheetPaths = ({
   themeVersion,
   darkMode,
-  basePath,
+  baseHref,
   buildNum,
 }: {
   themeVersion: UiSharedDepsNpm.ThemeVersion;
   darkMode: boolean;
   buildNum: number;
-  basePath: string;
+  baseHref: string;
 }) => {
-  const regularBundlePath = `${basePath}/${buildNum}/bundles`;
+  const bundlesHref = getBundlesHref(baseHref, String(buildNum));
   return [
     ...(darkMode
       ? [
-          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
+          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
             themeVersion
           )}`,
-          `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_dark.min.css`,
-          `${basePath}/ui/legacy_dark_theme.min.css`,
+          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+          `${baseHref}/ui/legacy_dark_theme.min.css`,
         ]
       : [
-          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
+          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
             themeVersion
           )}`,
-          `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/node_modules/@kbn/ui-framework/dist/kui_light.min.css`,
-          `${basePath}/ui/legacy_light_theme.min.css`,
+          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+          `${baseHref}/ui/legacy_light_theme.min.css`,
         ]),
   ];
 };

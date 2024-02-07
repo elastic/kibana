@@ -2009,7 +2009,7 @@
             "label": "request",
             "description": [],
             "signature": [
-              "<R>({ url, data, method, responseSchema, headers, ...config }: ",
+              "<R>({ url, data, method, responseSchema, headers, timeout, ...config }: ",
               "SubActionRequestParams",
               "<R>) => Promise<",
               "AxiosResponse",
@@ -2024,7 +2024,7 @@
                 "id": "def-server.SubActionConnector.request.$1",
                 "type": "CompoundType",
                 "tags": [],
-                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    ...config\n  }",
+                "label": "{\n    url,\n    data,\n    method = 'get',\n    responseSchema,\n    headers,\n    timeout,\n    ...config\n  }",
                 "description": [],
                 "signature": [
                   "SubActionRequestParams",
@@ -2845,30 +2845,48 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       },
       {
         "parentPluginId": "actions",
-        "id": "def-server.FindConnectorResult",
+        "id": "def-server.ConnectorWithExtraFindData",
         "type": "Interface",
         "tags": [],
-        "label": "FindConnectorResult",
+        "label": "ConnectorWithExtraFindData",
         "description": [],
         "signature": [
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           " extends ",
-          "Connector",
-          "<",
-          "ActionTypeConfig",
-          ">"
+          "Connector"
         ],
         "path": "x-pack/plugins/actions/server/application/connector/types/connector.ts",
         "deprecated": false,
@@ -2876,7 +2894,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-server.FindConnectorResult.referencedByCount",
+            "id": "def-server.ConnectorWithExtraFindData.referencedByCount",
             "type": "number",
             "tags": [],
             "label": "referencedByCount",
@@ -2904,14 +2922,7 @@
             "text": "InMemoryConnector"
           },
           "<Config, Secrets> extends ",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<Config>"
+          "Connector"
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
@@ -3156,8 +3167,7 @@
         "label": "ActionResult",
         "description": [],
         "signature": [
-          "Connector",
-          "<Config>"
+          "Connector"
         ],
         "path": "x-pack/plugins/actions/server/types.ts",
         "deprecated": false,
@@ -3190,56 +3200,24 @@
           "{ create: ({ action: { actionTypeId, name, config, secrets }, options, }: ",
           "CreateOptions",
           ") => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; update: ({ id, action }: ",
+          "Connector",
+          ">; update: ({ id, action }: ",
           "UpdateOptions",
           ") => Promise<",
+          "Connector",
+          ">; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
+          "Connector",
+          ">; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
           {
             "pluginId": "actions",
             "scope": "server",
             "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; get: ({ id, throwIfSystemAction, }: { id: string; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">>; getAll: ({ includeSystemActions }?: { includeSystemActions?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.FindConnectorResult",
-            "text": "FindConnectorResult"
+            "section": "def-server.ConnectorWithExtraFindData",
+            "text": "ConnectorWithExtraFindData"
           },
           "[]>; getBulk: ({ ids, throwIfSystemAction, }: { ids: string[]; throwIfSystemAction?: boolean | undefined; }) => Promise<",
-          {
-            "pluginId": "actions",
-            "scope": "server",
-            "docId": "kibActionsPluginApi",
-            "section": "def-server.ActionResult",
-            "text": "ActionResult"
-          },
-          "<",
-          "ActionTypeConfig",
-          ">[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
+          "Connector",
+          "[]>; getOAuthAccessToken: ({ type, options }: Readonly<{} & { type: \"jwt\" | \"client\"; options: Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; jwtKeyId: string; userIdentifierValue: string; }>; secrets: Readonly<{ privateKeyPassword?: string | undefined; } & { clientSecret: string; privateKey: string; }>; }> | Readonly<{} & { tokenUrl: string; config: Readonly<{} & { clientId: string; tenantId: string; }>; secrets: Readonly<{} & { clientSecret: string; }>; scope: string; }>; }>, configurationUtilities: ",
           "ActionsConfigurationUtilities",
           ") => Promise<{ accessToken: string | null; }>; delete: ({ id }: { id: string; }) => Promise<{}>; execute: ({ actionId, params, source, relatedSavedObjects, }: Omit<",
           "ExecuteOptions",
@@ -4617,6 +4595,27 @@
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionTypeExecutorResult.errorSource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "errorSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "common",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-common.TaskErrorSource",
+                "text": "TaskErrorSource"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5213,15 +5212,15 @@
         "signature": [
           "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T[K]> : T[K]; }"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5258,6 +5257,51 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_EXCHANGE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_EXCHANGE_URL",
+        "description": [],
+        "signature": [
+          "\"https://login.microsoftonline.com\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
+        "description": [],
+        "signature": [
+          "\"https://graph.microsoft.com/.default\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_GRAPH_API_URL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_GRAPH_API_URL",
+        "description": [],
+        "signature": [
+          "\"https://graph.microsoft.com/v1.0\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.ExecutionLogSortFields",
         "type": "Type",
         "tags": [],
@@ -5273,13 +5317,28 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GeneralConnectorFeatureId",
+        "id": "def-common.GenerativeAIForObservabilityConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GeneralConnectorFeatureId",
+        "label": "GenerativeAIForObservabilityConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"general\""
+          "\"generativeAIForObservability\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "GenerativeAIForSecurityConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"generativeAIForSecurity\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5326,15 +5385,15 @@
         "signature": [
           "(requested: ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T>) => T"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5349,15 +5408,15 @@
             "signature": [
               "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
               {
-                "pluginId": "actions",
+                "pluginId": "@kbn/actions-types",
                 "scope": "common",
-                "docId": "kibActionsPluginApi",
+                "docId": "kibKbnActionsTypesPluginApi",
                 "section": "def-common.AsApiContract",
                 "text": "AsApiContract"
               },
               "<T[K]> : T[K]; }"
             ],
-            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5374,23 +5433,23 @@
         "signature": [
           "(responded: T) => T extends (infer Item)[] ? ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<Item>[] : ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T>"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5405,7 +5464,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5613,10 +5672,10 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GeneralFeature",
+        "id": "def-common.GenerativeAIForObservabilityFeature",
         "type": "Object",
         "tags": [],
-        "label": "GeneralFeature",
+        "label": "GenerativeAIForObservabilityFeature",
         "description": [],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5624,7 +5683,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.id",
+            "id": "def-common.GenerativeAIForObservabilityFeature.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -5635,7 +5694,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.name",
+            "id": "def-common.GenerativeAIForObservabilityFeature.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -5646,7 +5705,54 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GeneralFeature.compatibility",
+            "id": "def-common.GenerativeAIForObservabilityFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerativeAIForSecurityFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

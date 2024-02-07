@@ -38,6 +38,7 @@ export interface TreeOptions {
   nodes: NodeID[];
   indexPatterns: string[];
   includeHits?: boolean;
+  shouldExcludeColdAndFrozenTiers?: boolean;
 }
 
 export type TreeResponse = Promise<
@@ -53,6 +54,7 @@ export type TreeResponse = Promise<
  */
 export class Fetcher {
   private alertsClient?: AlertsClient;
+
   constructor(private readonly client: IScopedClusterClient, alertsClient?: AlertsClient) {
     this.alertsClient = alertsClient;
   }
@@ -168,6 +170,7 @@ export class Fetcher {
       indexPatterns: options.indexPatterns,
       timeRange: options.timeRange,
       isInternalRequest,
+      shouldExcludeColdAndFrozenTiers: !!options.shouldExcludeColdAndFrozenTiers,
     });
 
     let nodes = options.nodes;
@@ -218,6 +221,7 @@ export class Fetcher {
       indexPatterns: options.indexPatterns,
       timeRange: options.timeRange,
       isInternalRequest,
+      shouldExcludeColdAndFrozenTiers: !!options.shouldExcludeColdAndFrozenTiers,
     });
 
     let nodes: NodeID[] = options.nodes;

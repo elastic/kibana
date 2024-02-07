@@ -40,10 +40,10 @@ $mlAnnotationRectDefaultFillOpacity: .05;
 }
 
 .mlAnnotationRect-isBlur {
-  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity / 2;
+  stroke-opacity: calc($mlAnnotationRectDefaultStrokeOpacity / 2);
   transition: stroke-opacity $euiAnimSpeedFast;
 
-  fill-opacity: $mlAnnotationRectDefaultFillOpacity / 2;
+  fill-opacity: calc($mlAnnotationRectDefaultFillOpacity / 2);
   transition: fill-opacity $euiAnimSpeedFast;
 }
 
@@ -95,9 +95,9 @@ $mlAnnotationRectDefaultFillOpacity: .05;
 }
 
 .mlContextAnnotationRect-isBlur {
-  stroke-opacity: $mlAnnotationRectDefaultStrokeOpacity / 2;
+  stroke-opacity: calc($mlAnnotationRectDefaultStrokeOpacity / 2);
   transition: stroke-opacity $euiAnimSpeedFast;
 
-  fill-opacity: $mlAnnotationRectDefaultFillOpacity / 2;
+  fill-opacity: calc($mlAnnotationRectDefaultFillOpacity / 2);
   transition: fill-opacity $euiAnimSpeedFast;
 }

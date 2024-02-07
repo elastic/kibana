@@ -116,7 +116,11 @@ export const createKbnUrlStateStorage = (
           unlisten();
         };
       }).pipe(
-        map(() => getStateFromKbnUrl<State>(key, undefined, { getFromHashQuery: useHashQuery })),
+        map(() =>
+          getStateFromKbnUrl<State>(key, history?.createHref(history.location), {
+            getFromHashQuery: useHashQuery,
+          })
+        ),
         catchError((error) => {
           if (onGetErrorThrottled) onGetErrorThrottled(error);
           return of(null);

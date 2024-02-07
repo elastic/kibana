@@ -63,6 +63,7 @@ const ResultTabsComponent: React.FC<ResultTabsProps> = ({
         'data-test-subj': 'osquery-status-tab',
         content: (
           <ActionResultsSummary
+            startDate={startDate}
             actionId={actionId}
             agentIds={agentIds}
             expirationDate={endDate}

@@ -12,12 +12,21 @@ import {
   TemplateListItem,
   TemplateType,
 } from '../types';
+import { deserializeESLifecycle } from './data_stream_serialization';
 
 const hasEntries = (data: object = {}) => Object.entries(data).length > 0;
 
 export function serializeTemplate(templateDeserialized: TemplateDeserialized): TemplateSerialized {
-  const { version, priority, indexPatterns, template, composedOf, dataStream, _meta } =
-    templateDeserialized;
+  const {
+    version,
+    priority,
+    indexPatterns,
+    template,
+    composedOf,
+    dataStream,
+    _meta,
+    allowAutoCreate,
+  } = templateDeserialized;
 
   return {
     version,
@@ -26,6 +35,7 @@ export function serializeTemplate(templateDeserialized: TemplateDeserialized): T
     index_patterns: indexPatterns,
     data_stream: dataStream,
     composed_of: composedOf,
+    allow_auto_create: allowAutoCreate,
     _meta,
   };
 }
@@ -43,6 +53,8 @@ export function deserializeTemplate(
     _meta,
     composed_of: composedOf,
     data_stream: dataStream,
+    deprecated,
+    allow_auto_create: allowAutoCreate,
   } = templateEs;
   const { settings } = template;
 
@@ -59,12 +71,15 @@ export function deserializeTemplate(
     name,
     version,
     priority,
+    ...(template.lifecycle ? { lifecycle: deserializeESLifecycle(template.lifecycle) } : {}),
     indexPatterns: indexPatterns.sort(),
     template,
     ilmPolicy: settings?.index?.lifecycle,
-    composedOf,
+    composedOf: composedOf ?? [],
     dataStream,
+    allowAutoCreate,
     _meta,
+    deprecated,
     _kbnMeta: {
       type,
       hasDatastream: Boolean(dataStream),

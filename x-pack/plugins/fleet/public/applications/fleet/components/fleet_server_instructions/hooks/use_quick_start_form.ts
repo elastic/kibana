@@ -15,8 +15,9 @@ import type { NewAgentPolicy } from '../../../types';
 
 import type { FleetServerHost } from '../../../types';
 
+import { useServiceToken } from '../../../hooks/use_service_token';
+
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
-import { useServiceToken } from './use_service_token';
 import { useFleetServerHost } from './use_fleet_server_host';
 
 const QUICK_START_FLEET_SERVER_POLICY_FIELDS: NewAgentPolicy = {
@@ -63,10 +64,9 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
     fleetServerHosts,
     fleetServerHost,
     isFleetServerHostSubmitted,
-    saveFleetServerHost,
+    handleSubmitForm,
     error: fleetServerError,
     setFleetServerHost,
-    validate,
     inputs,
   } = useFleetServerHost();
 
@@ -83,19 +83,17 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
 
   const submit = useCallback(async () => {
     try {
-      if ((!fleetServerHost && validate()) || fleetServerHost) {
+      if (!fleetServerHost || fleetServerHost) {
         setStatus('loading');
 
-        const newFleetServerHost = {
-          name: inputs.nameInput.value,
-          host_urls: inputs.hostUrlsInput.value,
-          is_default: inputs.isDefaultInput.value,
-          is_preconfigured: false,
-        };
-
         if (!fleetServerHost) {
-          const res = await saveFleetServerHost(newFleetServerHost);
-          setFleetServerHost(res);
+          const res = await handleSubmitForm();
+          if (res) {
+            setFleetServerHost(res);
+          } else {
+            setStatus('initial');
+            return;
+          }
         }
 
         await generateServiceToken();
@@ -130,13 +128,9 @@ export const useQuickStartCreateForm = (): QuickStartCreateForm => {
       setError(err.message);
     }
   }, [
-    validate,
     fleetServerHost,
-    inputs.nameInput.value,
-    inputs.hostUrlsInput.value,
-    inputs.isDefaultInput.value,
+    handleSubmitForm,
     setFleetServerHost,
-    saveFleetServerHost,
     generateServiceToken,
     setFleetServerPolicyId,
     notifications.toasts,

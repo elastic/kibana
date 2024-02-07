@@ -1,0 +1,97 @@
+summary: Retrieves information about an Observability case including its alerts and comments.
+value: 
+  {
+  "description": "An Observability case description.",
+  "owner": "observability",
+  "settings": {
+    "syncAlerts": false
+  },
+  "tags": [
+    "observability",
+    "tag 1"
+  ],
+  "title": "Observability case title 1",
+  "category": null,
+  "customFields": [],
+  "assignees": [
+    {
+      "uid": "u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0"
+    }
+  ],
+  "connector": {
+    "id": "none",
+    "type": ".none",
+    "fields": null,
+    "name": "none"
+  },
+  "severity": "low",
+  "status": "in-progress",
+  "duration": null,
+  "closed_at": null,
+  "closed_by": null,
+  "created_at": "2023-11-06T19:29:04.086Z",
+  "created_by": {
+    "username": "elastic",
+    "full_name": null,
+    "email": null
+  },
+  "updated_at": "2023-11-06T19:47:55.662Z",
+  "updated_by": {
+    "username": "elastic",
+    "full_name": null,
+    "email": null,
+    "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+  },
+  "external_service": null,
+  "id": "c3ff7550-def1-4e90-b6bc-c9969a4a09b1",
+  "version": "WzI0NywyXQ==",
+  "totalComment": 1,
+  "totalAlerts": 1,
+  "comments": [
+    {
+      "alertId": [
+        "a6e12ac4-7bce-457b-84f6-d7ce8deb8446"
+      ],
+      "index": [
+        ".internal.alerts-observability.logs.alerts-default-000001"
+      ],
+      "type": "alert",
+      "rule": {
+        "id": "03e4eb87-62ca-4e5d-9570-3d7625e9669d",
+        "name": "Observability rule"
+      },
+      "owner": "observability",
+      "created_at": "2023-11-06T19:29:38.424Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic",
+        "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+      },
+      "pushed_at": null,
+      "pushed_by": null,
+      "updated_at": null,
+      "updated_by": null,
+      "id": "59d438d0-79a9-4864-8d4b-e63adacebf6e",
+      "version": "WzY3LDJd"
+    },
+    {
+      "comment": "The first comment.",
+      "type": "user",
+      "owner": "observability",
+      "created_at": "2023-11-06T19:29:57.812Z",
+      "created_by": {
+        "email": null,
+        "full_name": null,
+        "username": "elastic",
+        "profile_uid": "u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0"
+      },
+      "pushed_at": null,
+      "pushed_by": null,
+      "updated_at": null,
+      "updated_by": null,
+      "id": "d99342d3-3aa3-4b80-90ec-a702607604f5",
+      "version": "WzcyLDJd"
+    }
+  ]
+}

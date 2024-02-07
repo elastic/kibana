@@ -19,10 +19,23 @@ export interface ReportEntityRiskFilteredParams extends EntityParam {
   selectedSeverity: RiskSeverity;
 }
 
+export interface ReportToggleRiskSummaryClickedParams extends EntityParam {
+  action: 'show' | 'hide';
+}
+
+export type ReportRiskInputsExpandedFlyoutOpenedParams = EntityParam;
+
+export interface ReportAddRiskInputToTimelineClickedParams {
+  quantity: number;
+}
+
 export type ReportEntityAnalyticsTelemetryEventParams =
   | ReportEntityDetailsClickedParams
   | ReportEntityAlertsClickedParams
-  | ReportEntityRiskFilteredParams;
+  | ReportEntityRiskFilteredParams
+  | ReportToggleRiskSummaryClickedParams
+  | ReportRiskInputsExpandedFlyoutOpenedParams
+  | ReportAddRiskInputToTimelineClickedParams;
 
 export type EntityAnalyticsTelemetryEvent =
   | {
@@ -36,4 +49,16 @@ export type EntityAnalyticsTelemetryEvent =
   | {
       eventType: TelemetryEventTypes.EntityRiskFiltered;
       schema: RootSchema<ReportEntityRiskFilteredParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.AddRiskInputToTimelineClicked;
+      schema: RootSchema<ReportAddRiskInputToTimelineClickedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.ToggleRiskSummaryClicked;
+      schema: RootSchema<ReportToggleRiskSummaryClickedParams>;
+    }
+  | {
+      eventType: TelemetryEventTypes.RiskInputsExpandedFlyoutOpened;
+      schema: RootSchema<ReportRiskInputsExpandedFlyoutOpenedParams>;
     };

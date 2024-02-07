@@ -7,5 +7,6 @@
  */
 
 export { Fallback } from './src/fallback';
-export { withSuspense } from './src/with_suspense';
 export { getClosestLink, hasActiveModifierKey } from './src/utils';
+export { withSuspense, type WithSuspenseExtendedDeps } from './src/with_suspense';
+export { dynamic, type DynamicOptions } from './src/dynamic';

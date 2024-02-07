@@ -879,21 +879,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.LABS_DASHBOARD_CONTROLS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "LABS_DASHBOARD_CONTROLS_ID",
-        "description": [],
-        "signature": [
-          "\"labs:dashboard:dashboardControls\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.LABS_DASHBOARD_DEFER_BELOW_FOLD_ID",
         "type": "string",
         "tags": [],
@@ -1149,6 +1134,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_CONTINUOUS_ROLLUPS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableContinuousRollups\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_APM_ENABLE_CRITICAL_PATH_ID",
         "type": "string",
         "tags": [],
@@ -1156,6 +1156,51 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableCriticalPath\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_PROFILING_INTEGRATION_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableProfilingIntegration\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_SERVICE_METRICS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableServiceMetrics\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_APM_ENABLE_TABLE_SEARCH_BAR",
+        "description": [],
+        "signature": [
+          "\"observability:apmEnableTableSearchBar\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1261,6 +1306,21 @@
         "description": [],
         "signature": [
           "\"observability:enableComparisonByDefault\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureHostsCustomDashboards\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,
@@ -1449,6 +1509,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY",
+        "description": [],
+        "signature": [
+          "\"securitySolution:alertTags\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_DEFAULT_ANOMALY_SCORE_ID",
         "type": "string",
         "tags": [],
@@ -1509,6 +1584,23 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout"
+        ],
+        "signature": [
+          "\"securitySolution:enableExpandableFlyout\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_ENABLE_GROUPED_NAV_ID",
         "type": "string",
         "tags": [],
@@ -1531,6 +1623,23 @@
         "description": [],
         "signature": [
           "\"securitySolution:enableNewsFeed\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer"
+        ],
+        "signature": [
+          "\"securitySolution:excludeColdAndFrozenTiersInAnalyzer\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

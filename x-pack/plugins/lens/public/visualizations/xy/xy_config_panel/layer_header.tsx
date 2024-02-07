@@ -15,8 +15,10 @@ import {
   EuiPopoverTitle,
   useEuiTheme,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -35,8 +37,8 @@ import {
 import { ChangeIndexPattern, StaticHeader } from '../../../shared_components';
 import { updateLayer } from '.';
 import {
+  getAnnotationLayerTitle,
   isAnnotationsLayer,
-  isByReferenceAnnotationsLayer,
   isDataLayer,
   isReferenceLayer,
 } from '../visualization_helpers';
@@ -52,7 +54,7 @@ export function LayerHeader(props: VisualizationLayerWidgetProps<State>) {
   if (isAnnotationsLayer(layer)) {
     return (
       <AnnotationsLayerHeader
-        title={isByReferenceAnnotationsLayer(layer) ? layer.__lastSaved.title : undefined}
+        title={getAnnotationLayerTitle(layer)}
         hasUnsavedChanges={annotationLayerHasUnsavedChanges(layer)}
       />
     );
@@ -168,7 +170,6 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
 
   return (
     <EuiPopover
-      panelClassName="lnsChangeIndexPatternPopover"
       button={
         <DataLayerHeaderTrigger
           onClick={() => setPopoverIsOpen(!isPopoverOpen)}
@@ -186,7 +187,11 @@ function DataLayerHeader(props: VisualizationLayerWidgetProps<State>) {
           defaultMessage: 'Layer visualization type',
         })}
       </EuiPopoverTitle>
-      <div>
+      <div
+        css={css`
+          width: 320px;
+        `}
+      >
         <EuiSelectable<{
           key?: string;
           label: string;
@@ -231,18 +236,22 @@ const DataLayerHeaderTrigger = function ({
   return (
     <ToolbarButton
       data-test-subj="lns_layer_settings"
-      title={currentVisType.fullLabel || currentVisType.label}
+      aria-label={currentVisType.fullLabel || currentVisType.label}
       onClick={onClick}
       fullWidth
       size="s"
-      textProps={{ style: { lineHeight: '100%' } }}
-    >
-      <>
-        <EuiIcon type={currentVisType.icon} />
-        <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
-          {currentVisType.fullLabel || currentVisType.label}
-        </EuiText>
-      </>
-    </ToolbarButton>
+      label={
+        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={currentVisType.icon} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
+              {currentVisType.fullLabel || currentVisType.label}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
+    />
   );
 };

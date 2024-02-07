@@ -102,6 +102,23 @@ export const INDICES = i18n.translate(
   }
 );
 
+export const SAME_FAMILY = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.statLabels.sameFamilyLabel',
+  {
+    defaultMessage: 'Same family',
+  }
+);
+
+export const SAME_FAMILY_PATTERN_TOOL_TIP = (pattern: string) =>
+  i18n.translate(
+    'securitySolutionPackages.ecsDataQualityDashboard.statLabels.sameFamilyPatternToolTip',
+    {
+      values: { pattern },
+      defaultMessage:
+        'The total count of fields in the same family as the type specified by ECS, in indices matching the {pattern} pattern',
+    }
+  );
+
 export const SIZE = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.statLabels.sizeLabel',
   {
@@ -163,6 +180,14 @@ export const TOTAL_INDICES_TOOL_TIP = i18n.translate(
   'securitySolutionPackages.ecsDataQualityDashboard.statLabels.totalIndicesToolTip',
   {
     defaultMessage: 'The total count of all indices',
+  }
+);
+
+export const TOTAL_SAME_FAMILY_TOOL_TIP = i18n.translate(
+  'securitySolutionPackages.ecsDataQualityDashboard.statLabels.totalSameFamilyToolTip',
+  {
+    defaultMessage:
+      'The total count of fields in the same family as the ECS type, in all indices that were checked',
   }
 );
 

@@ -20,6 +20,8 @@ import {
 import { createCreateCustomIntegrationStateMachine } from '../create/state_machine';
 import { IIntegrationsClient } from '../services/integrations_client';
 import { CustomIntegrationsNotificationChannel } from './notifications';
+import { executeFieldsPipeline, normalizeDatasetNames } from '../create/pipelines/fields';
+import { CreateInitialState } from '../create/types';
 
 export const createPureCustomIntegrationsStateMachine = (
   initialContext: DefaultCustomIntegrationsContext = DEFAULT_CONTEXT
@@ -95,22 +97,32 @@ export const createCustomIntegrationsStateMachine = ({
   return createPureCustomIntegrationsStateMachine(initialContext).withConfig({
     services: {
       createCustomIntegration: (context) => {
+        const getInitialContextForCreate = (initialCreateState: CreateInitialState) => {
+          const baseAndOptions = {
+            ...DEFAULT_CREATE_CONTEXT,
+            ...(initialCreateState ? initialCreateState : {}),
+            options: {
+              ...DEFAULT_CREATE_CONTEXT.options,
+              ...(initialCreateState?.options ? initialCreateState.options : {}),
+            },
+          };
+          const fields = initialCreateState.fields
+            ? executeFieldsPipeline(baseAndOptions, {
+                type: 'UPDATE_FIELDS',
+                fields: normalizeDatasetNames(initialCreateState.fields),
+              })[0]
+            : {};
+          return {
+            ...baseAndOptions,
+            ...fields,
+          };
+        };
+
         return createCreateCustomIntegrationStateMachine({
           integrationsClient,
           initialContext:
-            initialState.mode === 'create'
-              ? {
-                  ...DEFAULT_CREATE_CONTEXT,
-                  ...(initialState?.context ? initialState?.context : {}),
-                  options: {
-                    ...DEFAULT_CREATE_CONTEXT.options,
-                    ...(initialState?.context?.options ? initialState.context.options : {}),
-                  },
-                  fields: {
-                    ...DEFAULT_CREATE_CONTEXT.fields,
-                    ...(initialState?.context?.fields ? initialState.context.fields : {}),
-                  },
-                }
+            initialState.mode === 'create' && initialState.context
+              ? getInitialContextForCreate(initialState.context)
               : DEFAULT_CREATE_CONTEXT,
         });
       },

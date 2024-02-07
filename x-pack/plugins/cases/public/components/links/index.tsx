@@ -66,7 +66,6 @@ export const CaseDetailsLink = React.memo(CaseDetailsLinkComponent);
 CaseDetailsLink.displayName = 'CaseDetailsLink';
 
 export interface ConfigureCaseButtonProps {
-  isDisabled: boolean;
   label: string;
   msgTooltip: JSX.Element;
   showToolTip: boolean;
@@ -76,7 +75,6 @@ export interface ConfigureCaseButtonProps {
 // TODO: Fix this manually. Issue #123375
 // eslint-disable-next-line react/display-name
 const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
-  isDisabled,
   label,
   msgTooltip,
   showToolTip,
@@ -98,14 +96,14 @@ const ConfigureCaseButtonComponent: React.FC<ConfigureCaseButtonProps> = ({
         onClick={navigateToConfigureCasesClick}
         href={getConfigureCasesUrl()}
         iconType="controlsHorizontal"
-        isDisabled={isDisabled}
+        isDisabled={false}
         aria-label={label}
         data-test-subj="configure-case-button"
       >
         {label}
       </LinkButton>
     ),
-    [label, isDisabled, navigateToConfigureCasesClick, getConfigureCasesUrl]
+    [label, navigateToConfigureCasesClick, getConfigureCasesUrl]
   );
 
   return showToolTip ? (

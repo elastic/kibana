@@ -18,7 +18,7 @@ import {
 import * as i18n from './translations';
 
 describe('helpers', () => {
-  beforeEach(() => jest.resetAllMocks());
+  beforeEach(() => jest.clearAllMocks());
 
   describe('getButtonProperties', () => {
     test('it returns the expected properties when alertViewSelection is Trend', () => {

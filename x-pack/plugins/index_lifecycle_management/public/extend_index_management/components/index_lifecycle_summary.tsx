@@ -5,263 +5,258 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { FunctionComponent } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
-  EuiCallOut,
   EuiCodeBlock,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiDescriptionList,
-  EuiDescriptionListTitle,
-  EuiDescriptionListDescription,
-  EuiSpacer,
-  EuiTitle,
   EuiLink,
-  EuiPopover,
-  EuiPopoverTitle,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiPanel,
+  EuiText,
+  EuiSpacer,
+  EuiDescriptionList,
+  EuiBadgeProps,
+  EuiBadge,
+  EuiCode,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { ApplicationStart } from '@kbn/core/public';
+import { Index } from '@kbn/index-management-plugin/common';
+import { IndexDetailsTab } from '@kbn/index-management-plugin/common/constants';
+import { IlmExplainLifecycleLifecycleExplainManaged } from '@elastic/elasticsearch/lib/api/types';
+import { Phase } from '../../../common/types';
 import { getPolicyEditPath } from '../../application/services/navigation';
-import { Index, IndexLifecyclePolicy } from '../../../common/types';
 
-const getHeaders = (): Array<[keyof IndexLifecyclePolicy, string]> => {
-  return [
-    [
-      'policy',
-      i18n.translate(
-        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.lifecyclePolicyHeader',
-        {
-          defaultMessage: 'Lifecycle policy',
-        }
-      ),
-    ],
-    [
-      'phase',
-      i18n.translate(
-        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentPhaseHeader',
-        {
-          defaultMessage: 'Current phase',
-        }
-      ),
-    ],
-    [
-      'action',
-      i18n.translate(
-        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionHeader',
-        {
-          defaultMessage: 'Current action',
-        }
-      ),
-    ],
-    [
-      'action_time_millis',
-      i18n.translate(
-        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeHeader',
-        {
-          defaultMessage: 'Current action time',
-        }
-      ),
-    ],
-    [
-      'failed_step',
-      i18n.translate(
-        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.failedStepHeader',
-        {
-          defaultMessage: 'Failed step',
-        }
-      ),
-    ],
-  ];
+const phaseToBadgeMapping: Record<Phase, { color: EuiBadgeProps['color']; label: string }> = {
+  hot: {
+    color: euiThemeVars.euiColorVis9,
+    label: 'Hot',
+  },
+  warm: {
+    color: euiThemeVars.euiColorVis5,
+    label: 'Warm',
+  },
+  cold: {
+    color: euiThemeVars.euiColorVis1,
+    label: 'Cold',
+  },
+  frozen: {
+    color: euiThemeVars.euiColorVis4,
+    label: 'Frozen',
+  },
+  delete: {
+    color: 'default',
+    label: 'Delete',
+  },
 };
 
 interface Props {
   index: Index;
   getUrlForApp: ApplicationStart['getUrlForApp'];
 }
-interface State {
-  showStackPopover: boolean;
-  showPhaseExecutionPopover: boolean;
-}
 
-export class IndexLifecycleSummary extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = {
-      showStackPopover: false,
-      showPhaseExecutionPopover: false,
-    };
-  }
-  toggleStackPopover = () => {
-    this.setState({ showStackPopover: !this.state.showStackPopover });
+export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlForApp }) => {
+  const { ilm: ilmData } = index;
+  // only ILM managed indices render the ILM tab
+  const ilm = ilmData as IlmExplainLifecycleLifecycleExplainManaged;
+
+  // if ilm.phase is an unexpected value, then display a default badge
+  const phaseBadgeConfig = phaseToBadgeMapping[ilm.phase as Phase] ?? {
+    color: 'default',
+    label: ilm.phase,
   };
-  closeStackPopover = () => {
-    this.setState({ showStackPopover: false });
-  };
-  togglePhaseExecutionPopover = () => {
-    this.setState({ showPhaseExecutionPopover: !this.state.showPhaseExecutionPopover });
-  };
-  closePhaseExecutionPopover = () => {
-    this.setState({ showPhaseExecutionPopover: false });
-  };
-  renderPhaseExecutionPopoverButton(ilm: IndexLifecyclePolicy) {
-    const button = (
-      <EuiLink onClick={this.togglePhaseExecutionPopover}>
-        <FormattedMessage
-          defaultMessage="Show definition"
-          id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionButton"
-        />
-      </EuiLink>
-    );
-    return (
-      <Fragment key="phaseDefinition">
-        <EuiDescriptionListTitle key="phaseDefinition_title">
-          <strong>
-            <FormattedMessage
-              defaultMessage="Phase definition"
-              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.showPhaseDefinitionDescriptionTitle"
-            />
-          </strong>
-        </EuiDescriptionListTitle>
-        <EuiDescriptionListDescription key="phaseDefinition_desc">
-          <EuiPopover
-            key="phaseExecutionPopover"
-            id="phaseExecutionPopover"
-            button={button}
-            isOpen={this.state.showPhaseExecutionPopover}
-            closePopover={this.closePhaseExecutionPopover}
-          >
-            <EuiPopoverTitle>
-              <FormattedMessage
-                defaultMessage="Phase definition"
-                id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
-              />
-            </EuiPopoverTitle>
-            <EuiCodeBlock language="json">
-              {JSON.stringify(ilm.phase_execution, null, 2)}
-            </EuiCodeBlock>
-          </EuiPopover>
-        </EuiDescriptionListDescription>
-      </Fragment>
-    );
-  }
-  buildRows() {
-    const {
-      index: { ilm },
-    } = this.props;
-    const headers = getHeaders();
-    const rows: {
-      left: JSX.Element[];
-      right: JSX.Element[];
-    } = {
-      left: [],
-      right: [],
-    };
-    headers.forEach(([fieldName, label], arrayIndex) => {
-      const value: any = ilm[fieldName];
-      let content;
-      if (fieldName === 'action_time_millis') {
-        content = moment(value).format('YYYY-MM-DD HH:mm:ss');
-      } else if (fieldName === 'policy') {
-        content = (
-          <EuiLink
-            href={this.props.getUrlForApp('management', {
-              path: `data/index_lifecycle_management/${getPolicyEditPath(value)}`,
-            })}
-          >
-            {value}
-          </EuiLink>
-        );
-      } else {
-        content = value;
-      }
-      content = content || '-';
-      const cell = (
-        <Fragment key={String(arrayIndex)}>
-          <EuiDescriptionListTitle key={fieldName}>
-            <strong>{label}</strong>
-          </EuiDescriptionListTitle>
-          <EuiDescriptionListDescription key={fieldName + '_desc'}>
-            {content}
-          </EuiDescriptionListDescription>
-        </Fragment>
-      );
-      if (arrayIndex % 2 === 0) {
-        rows.left.push(cell);
-      } else {
-        rows.right.push(cell);
-      }
+  const lifecycleProperties = [
+    {
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.policyNameTitle',
+        {
+          defaultMessage: 'Policy name',
+        }
+      ),
+      description: ilm.policy,
+    },
+    {
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentPhaseTitle',
+        {
+          defaultMessage: 'Current phase',
+        }
+      ),
+      description: <EuiBadge color={phaseBadgeConfig.color}>{phaseBadgeConfig.label}</EuiBadge>,
+    },
+  ];
+  if (ilm.action) {
+    lifecycleProperties.push({
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTitle',
+        {
+          defaultMessage: 'Current action',
+        }
+      ),
+      description: <EuiCode>{ilm.action}</EuiCode>,
     });
-    if (ilm.phase_execution) {
-      rows.right.push(this.renderPhaseExecutionPopoverButton(ilm));
-    }
-    return rows;
   }
+  if (ilm.action_time_millis) {
+    lifecycleProperties.push({
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentActionTimeTitle',
+        {
+          defaultMessage: 'Current action time',
+        }
+      ),
+      description: moment(ilm.action_time_millis).format('YYYY-MM-DD HH:mm:ss'),
+    });
+  }
+  if (ilm.step) {
+    lifecycleProperties.push({
+      title: i18n.translate(
+        'xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.headers.currentStepTitle',
+        {
+          defaultMessage: 'Current step',
+        }
+      ),
+      description: <EuiCode>{ilm.step}</EuiCode>,
+    });
+  }
+  return (
+    <>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem
+          grow={1}
+          css={css`
+            min-width: 400px;
+          `}
+        >
+          <EuiPanel hasBorder={true} grow={false} data-test-subj="policyPropertiesPanel">
+            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs">
+                  <h3>
+                    <FormattedMessage
+                      defaultMessage="Lifecycle policy"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.policyCardTitle"
+                    />
+                  </h3>
+                </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  color="primary"
+                  href={getUrlForApp('management', {
+                    path: `data/index_lifecycle_management/${getPolicyEditPath(ilm.policy)}`,
+                  })}
+                  target="_blank"
+                >
+                  <FormattedMessage
+                    defaultMessage="Edit policy in ILM"
+                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.ilmLinkLabel"
+                  />
+                </EuiLink>
+              </EuiFlexItem>
+            </EuiFlexGroup>
 
-  render() {
-    const {
-      index: { ilm },
-    } = this.props;
-    if (!ilm.managed) {
-      return null;
-    }
-    const { left, right } = this.buildRows();
-    return (
-      <>
-        <EuiTitle size="s">
-          <h3>
-            <FormattedMessage
-              defaultMessage="Index lifecycle management"
-              id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryTitle"
+            <EuiSpacer />
+            <EuiDescriptionList
+              rowGutterSize="m"
+              type="responsiveColumn"
+              columnWidths={[1, 1]}
+              listItems={lifecycleProperties}
             />
-          </h3>
-        </EuiTitle>
-        {ilm.step_info && ilm.step_info.type ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              color="danger"
-              title={
-                <FormattedMessage
-                  defaultMessage="Index lifecycle error"
-                  id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.summaryErrorMessage"
-                />
-              }
-              iconType="cross"
-            >
-              {ilm.step_info.type}: {ilm.step_info.reason}
-            </EuiCallOut>
-          </>
-        ) : null}
-        {ilm.step_info && ilm.step_info!.message ? (
-          <>
-            <EuiSpacer size="s" />
-            <EuiCallOut
-              color="primary"
-              title={
-                <FormattedMessage
-                  defaultMessage="Action status"
-                  id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.actionStatusTitle"
-                />
-              }
-            >
-              {ilm.step_info!.message}
-            </EuiCallOut>
-          </>
-        ) : null}
-        <EuiSpacer size="m" />
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiDescriptionList type="column">{left}</EuiDescriptionList>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiDescriptionList type="column">{right}</EuiDescriptionList>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </>
-    );
-  }
-}
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={3}
+          css={css`
+            min-width: 600px;
+          `}
+        >
+          {ilm.step_info && ilm.step === 'ERROR' && (
+            // there is an error
+            <>
+              <EuiPanel
+                color="danger"
+                hasBorder={true}
+                grow={false}
+                data-test-subj="policyErrorPanel"
+              >
+                <EuiText size="xs">
+                  <h3>
+                    <FormattedMessage
+                      defaultMessage="Lifecycle error"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
+                    />
+                  </h3>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="json" isCopyable>
+                    {JSON.stringify(
+                      { failed_step: ilm.failed_step, step_info: ilm.step_info },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+          {ilm.step_info && ilm.step !== 'ERROR' && (
+            // ILM is waiting for the step to complete
+            <>
+              <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
+                <EuiText size="xs">
+                  <h3>
+                    <FormattedMessage
+                      defaultMessage="Current step info"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
+                    />
+                  </h3>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="json" isCopyable>
+                    {JSON.stringify(ilm.step_info, null, 2)}
+                  </EuiCodeBlock>
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+          {ilm.phase_execution && (
+            <EuiPanel hasBorder={true} grow={false} data-test-subj="phaseDefinitionPanel">
+              <EuiText size="xs">
+                <h3>
+                  <FormattedMessage
+                    defaultMessage="Current phase definition"
+                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.phaseDefinitionTitle"
+                  />
+                </h3>
+              </EuiText>
+              <EuiSpacer />
+              <EuiCodeBlock language="json" isCopyable>
+                {JSON.stringify(ilm.phase_execution, null, 2)}
+              </EuiCodeBlock>
+            </EuiPanel>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </>
+  );
+};
+
+export const indexLifecycleTab: IndexDetailsTab = {
+  id: 'ilm',
+  name: (
+    <FormattedMessage
+      defaultMessage="Index lifecycle"
+      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.tabHeaderLabel"
+    />
+  ),
+  order: 50,
+  renderTabContent: IndexLifecycleSummary,
+  shouldRenderTab: ({ index }) => {
+    return !!index.ilm && index.ilm.managed;
+  },
+};

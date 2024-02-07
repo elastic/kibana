@@ -15,7 +15,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_farequote',
+  indexName: 'ft_farequote',
   queryEntityFieldNames: ['airline'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
@@ -38,7 +38,8 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const browser = getService('browser');
 
-  describe('custom urls', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/164224
+  describe.skip('custom urls', function () {
     const dfaJobId = `fq_regression_${Date.now()}`;
     const generateDestinationIndex = (analyticsId: string) => `user-${analyticsId}`;
     let testDashboardId: string | null = null;
@@ -70,7 +71,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
       await ml.api.createAndRunDFAJob(dfaJobConfig);
@@ -79,7 +80,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       await ml.api.deleteIndices('user-farequote_small');
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     describe('run custom urls', function () {

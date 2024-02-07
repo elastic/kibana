@@ -6,17 +6,17 @@
  */
 
 import { groupBy, keyBy, memoize, partition } from 'lodash';
-import { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { KibanaRequest, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { MlJob } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { isDefined } from '@kbn/ml-is-defined';
-import { MlClient } from '../ml_client';
-import { JobSelection } from '../../routes/schemas/alerting_schema';
-import { datafeedsProvider, DatafeedsService } from '../../models/job_service/datafeeds';
+import type { MlClient } from '../ml_client';
+import type { JobSelection } from '../../routes/schemas/alerting_schema';
+import { datafeedsProvider, type DatafeedsService } from '../../models/job_service/datafeeds';
 import { ALL_JOBS_SELECTION, HEALTH_CHECK_NAMES } from '../../../common/constants/alerts';
-import { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
-import { GetGuards } from '../../shared_services/shared_services';
-import {
+import type { DatafeedStats } from '../../../common/types/anomaly_detection_jobs';
+import type { GetGuards } from '../../shared_services/shared_services';
+import type {
   AnomalyDetectionJobsHealthAlertContext,
   DelayedDataResponse,
   JobsErrorsResponse,
@@ -28,12 +28,12 @@ import {
   getResultJobsHealthRuleConfig,
   resolveLookbackInterval,
 } from '../../../common/util/alerts';
-import { AnnotationService } from '../../models/annotation_service/annotation';
+import type { AnnotationService } from '../../models/annotation_service/annotation';
 import { annotationServiceProvider } from '../../models/annotation_service';
 import { parseInterval } from '../../../common/util/parse_interval';
 import {
   jobAuditMessagesProvider,
-  JobAuditMessagesService,
+  type JobAuditMessagesService,
 } from '../../models/job_audit_messages/job_audit_messages';
 import type { FieldFormatsRegistryProvider } from '../../../common/types/kibana';
 

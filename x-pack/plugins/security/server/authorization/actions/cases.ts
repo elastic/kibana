@@ -7,7 +7,9 @@
 
 import { isString } from 'lodash';
 
-export class CasesActions {
+import type { CasesActions as CasesActionsType } from '@kbn/security-plugin-types-server';
+
+export class CasesActions implements CasesActionsType {
   private readonly prefix: string;
 
   constructor() {

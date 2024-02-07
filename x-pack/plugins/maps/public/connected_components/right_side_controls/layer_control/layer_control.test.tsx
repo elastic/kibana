@@ -71,6 +71,9 @@ describe('LayerControl', () => {
               hasErrors: () => {
                 return false;
               },
+              hasWarnings: () => {
+                return false;
+              },
               isLayerLoading: () => {
                 return true;
               },
@@ -85,6 +88,9 @@ describe('LayerControl', () => {
       const mockLayerThatHasError = {
         hasErrors: () => {
           return true;
+        },
+        hasWarnings: () => {
+          return false;
         },
         isLayerLoading: () => {
           return false;

@@ -9,7 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IEventLogClient, IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { MAX_EXECUTION_EVENTS_DISPLAYED } from '@kbn/securitysolution-rules';
 
-import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
@@ -17,10 +16,11 @@ import type {
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
 import {
   LogLevel,
-  logLevelFromString,
+  LogLevelEnum,
   RuleExecutionEventType,
-  ruleExecutionEventTypeFromString,
+  RuleExecutionEventTypeEnum,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import { prepareKQLStringParam } from '../../../../../../../common/utils/kql';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { invariant } from '../../../../../../../common/utils/invariant';
@@ -38,11 +38,11 @@ import {
 } from './aggregations/execution_results';
 import type { ExecutionUuidAggResult } from './aggregations/execution_results/types';
 
-import * as f from '../../event_log/event_log_fields';
 import {
   RULE_EXECUTION_LOG_PROVIDER,
   RULE_SAVED_OBJECT_TYPE,
 } from '../../event_log/event_log_constants';
+import * as f from '../../event_log/event_log_fields';
 
 export interface IEventLogReader {
   getExecutionEvents(args: GetExecutionEventsArgs): Promise<GetRuleExecutionEventsResponse>;
@@ -211,25 +211,27 @@ const normalizeEventSequence = (event: RawEvent): number => {
 const normalizeLogLevel = (event: RawEvent): LogLevel => {
   const value = event.log?.level;
   if (!value) {
-    return LogLevel.debug;
+    return LogLevelEnum.debug;
   }
 
-  return logLevelFromString(value) ?? LogLevel.trace;
+  const result = LogLevel.safeParse(value);
+  return result.success ? result.data : LogLevelEnum.trace;
 };
 
 const normalizeEventType = (event: RawEvent): RuleExecutionEventType => {
   const value = event.event?.action;
   invariant(value, 'Required "event.action" field is not found');
 
-  return ruleExecutionEventTypeFromString(value) ?? RuleExecutionEventType.message;
+  const result = RuleExecutionEventType.safeParse(value);
+  return result.success ? result.data : RuleExecutionEventTypeEnum.message;
 };
 
 const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): string => {
-  if (type === RuleExecutionEventType.message) {
+  if (type === RuleExecutionEventTypeEnum.message) {
     return event.message || '';
   }
 
-  if (type === RuleExecutionEventType['status-change']) {
+  if (type === RuleExecutionEventTypeEnum['status-change']) {
     invariant(
       event.kibana?.alert?.rule?.execution?.status,
       'Required "kibana.alert.rule.execution.status" field is not found'
@@ -241,7 +243,7 @@ const normalizeEventMessage = (event: RawEvent, type: RuleExecutionEventType): s
     return `Rule changed status to "${status}". ${message}`;
   }
 
-  if (type === RuleExecutionEventType['execution-metrics']) {
+  if (type === RuleExecutionEventTypeEnum['execution-metrics']) {
     invariant(
       event.kibana?.alert?.rule?.execution?.metrics,
       'Required "kibana.alert.rule.execution.metrics" field is not found'

@@ -6,47 +6,24 @@
  * Side Public License, v 1.
  */
 
+import React, { useEffect, useMemo, useState } from 'react';
 import useAsync from 'react-use/lib/useAsync';
-import React, { useEffect, useState } from 'react';
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiIconTip,
-  EuiSwitch,
-  Direction,
-  EuiRadioGroup,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import { css } from '@emotion/react';
+import { Direction, EuiFormRow, EuiLoadingSpinner, EuiRadioGroup, EuiSwitch } from '@elastic/eui';
 
-import { pluginServices } from '../../services';
-import {
-  OptionsListSortBy,
-  getCompatibleSortingTypes,
-  OPTIONS_LIST_DEFAULT_SORT,
-} from '../../../common/options_list/suggestions_sorting';
-import { OptionsListStrings } from './options_list_strings';
 import { ControlEditorProps, OptionsListEmbeddableInput } from '../..';
 import {
+  getCompatibleSearchTechniques,
   OptionsListSearchTechnique,
-  OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE,
-} from '../../../common/options_list/types';
-
-const TooltipText = ({ label, tooltip }: { label: string; tooltip: string }) => (
-  <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-    <EuiFlexItem
-      grow={false}
-      css={css`
-        margin-top: 0px !important;
-      `}
-    >
-      <EuiIconTip content={tooltip} position="right" />
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
+} from '../../../common/options_list/suggestions_searching';
+import {
+  getCompatibleSortingTypes,
+  OptionsListSortBy,
+  OPTIONS_LIST_DEFAULT_SORT,
+} from '../../../common/options_list/suggestions_sorting';
+import { pluginServices } from '../../services';
+import { OptionsListStrings } from './options_list_strings';
+import { ControlSettingTooltipLabel } from '../../components/control_setting_tooltip_label';
 
 const selectionOptions = [
   {
@@ -61,11 +38,11 @@ const selectionOptions = [
   },
 ];
 
-const searchOptions = [
+const allSearchOptions = [
   {
     id: 'prefix',
     label: (
-      <TooltipText
+      <ControlSettingTooltipLabel
         label={OptionsListStrings.editor.searchTypes.prefix.getLabel()}
         tooltip={OptionsListStrings.editor.searchTypes.prefix.getTooltip()}
       />
@@ -75,12 +52,22 @@ const searchOptions = [
   {
     id: 'wildcard',
     label: (
-      <TooltipText
+      <ControlSettingTooltipLabel
         label={OptionsListStrings.editor.searchTypes.wildcard.getLabel()}
         tooltip={OptionsListStrings.editor.searchTypes.wildcard.getTooltip()}
       />
     ),
     'data-test-subj': 'optionsListControl__wildcardSearchOptionAdditionalSetting',
+  },
+  {
+    id: 'exact',
+    label: (
+      <ControlSettingTooltipLabel
+        label={OptionsListStrings.editor.searchTypes.exact.getLabel()}
+        tooltip={OptionsListStrings.editor.searchTypes.exact.getTooltip()}
+      />
+    ),
+    'data-test-subj': 'optionsListControl__exactSearchOptionAdditionalSetting',
   },
 ];
 
@@ -117,6 +104,17 @@ export const OptionsListEditorOptions = ({
       return optionsListService.getAllowExpensiveQueries();
     }, []);
 
+  const compatibleSearchTechniques = useMemo(
+    () => getCompatibleSearchTechniques(fieldType),
+    [fieldType]
+  );
+
+  const searchOptions = useMemo(() => {
+    return allSearchOptions.filter((searchOption) => {
+      return compatibleSearchTechniques.includes(searchOption.id as OptionsListSearchTechnique);
+    });
+  }, [compatibleSearchTechniques]);
+
   useEffect(() => {
     // when field type changes, ensure that the selected sort type is still valid
     if (!getCompatibleSortingTypes(fieldType).includes(state.sortBy)) {
@@ -128,6 +126,21 @@ export const OptionsListEditorOptions = ({
       }));
     }
   }, [fieldType, onChange, state.sortBy]);
+
+  useEffect(() => {
+    // when field type changes, ensure that the selected search technique is still valid;
+    // if the selected search technique **isn't** valid, reset to the default
+    const searchTechnique =
+      initialInput?.searchTechnique &&
+      compatibleSearchTechniques.includes(initialInput.searchTechnique)
+        ? initialInput.searchTechnique
+        : compatibleSearchTechniques[0];
+    onChange({ searchTechnique });
+    setState((s) => ({
+      ...s,
+      searchTechnique,
+    }));
+  }, [compatibleSearchTechniques, onChange, initialInput]);
 
   return (
     <>
@@ -151,14 +164,14 @@ export const OptionsListEditorOptions = ({
         </EuiFormRow>
       ) : (
         allowExpensiveQueries &&
-        fieldType !== 'ip' && (
+        compatibleSearchTechniques.length > 1 && (
           <EuiFormRow
             label={OptionsListStrings.editor.getSearchOptionsTitle()}
             data-test-subj="optionsListControl__searchOptionsRadioGroup"
           >
             <EuiRadioGroup
               options={searchOptions}
-              idSelected={state.searchTechnique ?? OPTIONS_LIST_DEFAULT_SEARCH_TECHNIQUE}
+              idSelected={state.searchTechnique}
               onChange={(id) => {
                 const searchTechnique = id as OptionsListSearchTechnique;
                 onChange({ searchTechnique });
@@ -171,7 +184,7 @@ export const OptionsListEditorOptions = ({
       <EuiFormRow label={OptionsListStrings.editor.getAdditionalSettingsTitle()}>
         <EuiSwitch
           label={
-            <TooltipText
+            <ControlSettingTooltipLabel
               label={OptionsListStrings.editor.getRunPastTimeoutTitle()}
               tooltip={OptionsListStrings.editor.getRunPastTimeoutTooltip()}
             />

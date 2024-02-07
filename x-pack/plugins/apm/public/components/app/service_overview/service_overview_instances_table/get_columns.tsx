@@ -14,7 +14,6 @@ import { i18n } from '@kbn/i18n';
 import React, { ReactNode } from 'react';
 import { ActionMenu } from '@kbn/observability-shared-plugin/public';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
-import { isJavaAgentName } from '../../../../../common/agent_name';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import {
   getServiceNodeName,
@@ -27,7 +26,6 @@ import {
 } from '../../../../../common/utils/formatters';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { MetricOverviewLink } from '../../../shared/links/apm/metric_overview_link';
-import { ServiceNodeMetricOverviewLink } from '../../../shared/links/apm/service_node_metric_overview_link';
 import { ListMetric } from '../../../shared/list_metric';
 import { getLatencyColumnLabel } from '../../../shared/transactions_table/get_latency_column_label';
 import { TruncateWithTooltip } from '../../../shared/truncate_with_tooltip';
@@ -47,7 +45,6 @@ type ServiceInstanceDetailedStatistics =
 export function getColumns({
   serviceName,
   kuery,
-  agentName,
   latencyAggregationType,
   detailedStatsLoading,
   detailedStatsData,
@@ -61,7 +58,6 @@ export function getColumns({
 }: {
   serviceName: string;
   kuery: string;
-  agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
   detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
@@ -87,14 +83,7 @@ export function getColumns({
           serviceNodeName === SERVICE_NODE_NAME_MISSING;
         const text = getServiceNodeName(serviceNodeName);
 
-        const link = isJavaAgentName(agentName) ? (
-          <ServiceNodeMetricOverviewLink
-            serviceName={serviceName}
-            serviceNodeName={item.serviceNodeName}
-          >
-            {text}
-          </ServiceNodeMetricOverviewLink>
-        ) : (
+        const link = (
           <MetricOverviewLink
             serviceName={serviceName}
             mergeQuery={(query) => ({
@@ -223,6 +212,7 @@ export function getColumns({
         { defaultMessage: 'CPU usage (avg.)' }
       ),
       align: RIGHT_ALIGNMENT,
+      sortable: true,
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
@@ -250,7 +240,6 @@ export function getColumns({
           />
         );
       },
-      sortable: true,
     },
     {
       field: 'memoryUsage',
@@ -259,6 +248,7 @@ export function getColumns({
         { defaultMessage: 'Memory usage (avg.)' }
       ),
       align: RIGHT_ALIGNMENT,
+      sortable: true,
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;
@@ -286,7 +276,6 @@ export function getColumns({
           />
         );
       },
-      sortable: true,
     },
     {
       width: '40px',
@@ -301,7 +290,10 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonIcon
-                aria-label="Edit"
+                aria-label={i18n.translate(
+                  'xpack.apm.getColumns.euiButtonIcon.editLabel',
+                  { defaultMessage: 'Edit' }
+                )}
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
                 onClick={() =>

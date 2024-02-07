@@ -6,7 +6,7 @@
  */
 
 import { ruleExecutionEventMock } from '../../model/execution_event.mock';
-import type { GetRuleExecutionEventsResponse } from './get_rule_execution_events_route';
+import type { GetRuleExecutionEventsResponse } from './get_rule_execution_events_route.gen';
 
 const getSomeResponse = (): GetRuleExecutionEventsResponse => {
   const events = ruleExecutionEventMock.getSomeEvents();

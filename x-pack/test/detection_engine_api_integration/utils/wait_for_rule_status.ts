@@ -8,7 +8,10 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { RuleExecutionStatus } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+import {
+  RuleExecutionStatus,
+  RuleExecutionStatusEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { waitFor } from './wait_for';
 import { routeWithNamespace } from './route_with_namespace';
 
@@ -70,10 +73,10 @@ export const waitForRuleStatus = async (
 };
 
 export const waitForRuleSuccess = (params: WaitForRuleStatusParams): Promise<void> =>
-  waitForRuleStatus(RuleExecutionStatus.succeeded, params);
+  waitForRuleStatus(RuleExecutionStatusEnum.succeeded, params);
 
 export const waitForRulePartialFailure = (params: WaitForRuleStatusParams): Promise<void> =>
-  waitForRuleStatus(RuleExecutionStatus['partial failure'], params);
+  waitForRuleStatus(RuleExecutionStatusEnum['partial failure'], params);
 
 export const waitForRuleFailure = (params: WaitForRuleStatusParams): Promise<void> =>
-  waitForRuleStatus(RuleExecutionStatus.failed, params);
+  waitForRuleStatus(RuleExecutionStatusEnum.failed, params);

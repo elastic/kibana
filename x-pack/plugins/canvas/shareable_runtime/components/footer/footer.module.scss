@@ -5,10 +5,6 @@
   position: absolute;
 }
 
-.bar {
-  composes: euiBottomBar from global;
-}
-
 :global .kbnCanvas :local .bar {
   transition: bottom .25s;
   padding: $euiSizeM;

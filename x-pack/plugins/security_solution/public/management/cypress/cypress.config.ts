@@ -8,26 +8,10 @@
 import { defineCypressConfig } from '@kbn/cypress-config';
 import { getCypressBaseConfig } from './cypress_base.config';
 
-import { dataLoaders } from './support/data_loaders';
-
-export default defineCypressConfig({
-  ...getCypressBaseConfig(),
-
-  env: {
-    ...getCypressBaseConfig().env,
-
-    grepTags: '@ess',
-  },
-
-  e2e: {
-    ...getCypressBaseConfig().e2e,
-
-    specPattern: 'public/management/cypress/e2e/mocked_data/',
-    setupNodeEvents: (on, config) => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@cypress/grep/src/plugin')(config);
-
-      return dataLoaders(on, config);
+export default defineCypressConfig(
+  getCypressBaseConfig({
+    env: {
+      grepTags: '@ess',
     },
-  },
-});
+  })
+);

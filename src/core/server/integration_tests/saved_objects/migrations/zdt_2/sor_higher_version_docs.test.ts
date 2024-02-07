@@ -8,57 +8,49 @@
 
 import { pick, range } from 'lodash';
 import Path from 'path';
-import fs from 'fs/promises';
-import { type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import '../jest_matchers';
 import { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
-import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { getKibanaMigratorTestKit, startElasticsearch } from '../kibana_migrator_test_kit';
-import { delay, createType } from '../test_utils';
-import { getBaseMigratorParams } from '../fixtures/zdt_base.fixtures';
+import { createType } from '../test_utils';
 import { SavedObjectsBulkCreateObject } from '@kbn/core-saved-objects-api-server';
+import { createModelVersionTestBed } from '@kbn/core-test-helpers-model-versions';
 
 export const logFilePath = Path.join(__dirname, 'sor_higher.test.log');
 
+const modelVersionTestBed = createModelVersionTestBed();
+
 describe('Higher version doc conversion', () => {
-  let esServer: TestElasticsearchUtils['es'];
   let repositoryV1: ISavedObjectsRepository;
   let repositoryV2: ISavedObjectsRepository;
 
-  const getTestType = ({ includeVersion2 }: { includeVersion2: boolean }) => {
-    const modelVersions: SavedObjectsModelVersionMap = {
-      1: {
-        changes: [],
-        schemas: {
-          forwardCompatibility: (attrs: any) => {
-            return pick(attrs, 'text', 'bool');
-          },
-        },
-      },
-    };
-
-    if (includeVersion2) {
-      modelVersions[2] = {
-        changes: [
-          {
-            type: 'data_backfill',
-            backfillFn: (document) => {
-              return { attributes: { newField: 'someValue' } };
-            },
-          },
-        ],
-        schemas: {
-          forwardCompatibility: (attrs: any) => {
-            return pick(attrs, 'text', 'bool', 'newField');
-          },
-        },
-      };
-    }
-
+  const getTestType = () => {
     return createType({
       name: 'test-type',
       switchToModelVersionAt: '8.0.0',
-      modelVersions,
+      modelVersions: {
+        1: {
+          changes: [],
+          schemas: {
+            forwardCompatibility: (attrs: any) => {
+              return pick(attrs, 'text', 'bool');
+            },
+          },
+        },
+        2: {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: (document) => {
+                return { attributes: { newField: 'someValue' } };
+              },
+            },
+          ],
+          schemas: {
+            forwardCompatibility: (attrs: any) => {
+              return pick(attrs, 'text', 'bool', 'newField');
+            },
+          },
+        },
+      },
       mappings: {
         dynamic: false,
         properties: {
@@ -69,58 +61,34 @@ describe('Higher version doc conversion', () => {
     });
   };
 
-  const createBaseline = async () => {
-    const testTypeV1 = getTestType({ includeVersion2: false });
-    const testTypeV2 = getTestType({ includeVersion2: true });
-
-    const {
-      runMigrations,
-      savedObjectsRepository: savedObjectsRepositoryV1,
-      client,
-    } = await getKibanaMigratorTestKit({
-      ...getBaseMigratorParams(),
-      logFilePath,
-      types: [testTypeV1],
-    });
-    await runMigrations();
-
-    const sampleAObjs = range(5).map<SavedObjectsBulkCreateObject>((number) => ({
-      id: `doc-${number}`,
-      type: 'test-type',
-      attributes: {
-        text: `a_${number}`,
-        bool: true,
-      },
-    }));
-
-    await savedObjectsRepositoryV1.bulkCreate(sampleAObjs, { refresh: 'wait_for' });
-
-    const { runMigrations: runMigrationsAgain, savedObjectsRepository: savedObjectsRepositoryV2 } =
-      await getKibanaMigratorTestKit({
-        ...getBaseMigratorParams(),
-        logFilePath,
-        types: [testTypeV2],
-      });
-    await runMigrationsAgain();
-
-    // returns the repository for v1
-    return { savedObjectsRepositoryV1, savedObjectsRepositoryV2, client };
-  };
-
   beforeAll(async () => {
-    await fs.unlink(logFilePath).catch(() => {});
-    esServer = await startElasticsearch();
+    await modelVersionTestBed.startES();
 
-    const { savedObjectsRepositoryV1: sorV1, savedObjectsRepositoryV2: sorV2 } =
-      await createBaseline();
+    const testkit = await modelVersionTestBed.prepareTestKit({
+      logFilePath,
+      savedObjectDefinitions: [
+        {
+          definition: getTestType(),
+          modelVersionBefore: 1,
+          modelVersionAfter: 2,
+        },
+      ],
+      objectsToCreateBetween: range(5).map<SavedObjectsBulkCreateObject>((number) => ({
+        id: `doc-${number}`,
+        type: 'test-type',
+        attributes: {
+          text: `a_${number}`,
+          bool: true,
+        },
+      })),
+    });
 
-    repositoryV1 = sorV1;
-    repositoryV2 = sorV2;
+    repositoryV1 = testkit.repositoryBefore;
+    repositoryV2 = testkit.repositoryAfter;
   });
 
   afterAll(async () => {
-    await esServer?.stop();
-    await delay(10);
+    await modelVersionTestBed.stopES();
   });
 
   describe('#get', () => {

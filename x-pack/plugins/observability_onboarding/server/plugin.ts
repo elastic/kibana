@@ -46,7 +46,10 @@ export class ObservabilityOnboardingPlugin
   }
 
   public setup(
-    core: CoreSetup<ObservabilityOnboardingPluginStartDependencies>,
+    core: CoreSetup<
+      ObservabilityOnboardingPluginStartDependencies,
+      ObservabilityOnboardingPluginStart
+    >,
     plugins: ObservabilityOnboardingPluginSetupDependencies
   ) {
     this.logger.debug('observability_onboarding: Setup');

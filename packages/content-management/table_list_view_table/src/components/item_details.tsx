@@ -9,10 +9,12 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiText, EuiLink, EuiSpacer, EuiHighlight } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import type { Tag } from '../types';
 import { useServices } from '../services';
-import type { UserContentCommonSchema, TableListViewTableProps } from '../table_list_view_table';
+import type { TableListViewTableProps } from '../table_list_view_table';
+
 import { TagBadge } from './tag_badge';
 
 type InheritedProps<T extends UserContentCommonSchema> = Pick<
@@ -57,7 +59,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   );
 
   const onClickTitleHandler = useMemo(() => {
-    if (!onClickTitle) {
+    if (!onClickTitle || getDetailViewLink?.(item)) {
       return undefined;
     }
 
@@ -65,7 +67,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       e.preventDefault();
       onClickTitle(item);
     }) as React.MouseEventHandler<HTMLAnchorElement>;
-  }, [item, onClickTitle]);
+  }, [item, onClickTitle, getDetailViewLink]);
 
   const renderTitle = useCallback(() => {
     const href = getDetailViewLink ? getDetailViewLink(item) : undefined;
@@ -79,7 +81,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
         {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
         <EuiLink
-          href={getDetailViewLink ? getDetailViewLink(item) : undefined}
+          href={getDetailViewLink?.(item)}
           onClick={onClickTitleHandler}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >

@@ -136,6 +136,7 @@ const theme = {
 export const initializeOsqueryEditor = () => {
   let disposable: IDisposable | null = null;
   if (monaco) {
+    monaco?.editor.defineTheme('osquery', theme);
     disposable = monaco.languages.onLanguage('sql', () => {
       monaco.languages.setMonarchTokensProvider('sql', {
         ignoreCase: true,
@@ -175,7 +176,6 @@ export const initializeOsqueryEditor = () => {
           ],
         },
       });
-      monaco?.editor.defineTheme('osquery', theme);
       monaco?.languages.registerCompletionItemProvider('sql', {
         triggerCharacters: ['.'],
         provideCompletionItems: (model: monaco.editor.ITextModel, position: monaco.Position) => {

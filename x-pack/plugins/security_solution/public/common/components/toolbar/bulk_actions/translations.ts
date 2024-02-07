@@ -211,3 +211,31 @@ export const ALERT_TAGS_CONTEXT_MENU_ITEM_TOOLTIP_INFO = i18n.translate(
     defaultMessage: 'Change alert tag options in Kibana Advanced Settings.',
   }
 );
+
+export const UPDATE_ALERT_ASSIGNEES_SUCCESS_TOAST = (totalAlerts: number) =>
+  i18n.translate('xpack.securitySolution.bulkActions.updateAlertAssigneesSuccessToastMessage', {
+    values: { totalAlerts },
+    defaultMessage:
+      'Successfully updated assignees for {totalAlerts} {totalAlerts, plural, =1 {alert} other {alerts}}.',
+  });
+
+export const UPDATE_ALERT_ASSIGNEES_FAILURE = i18n.translate(
+  'xpack.securitySolution.bulkActions.updateAlertAssigneesFailedToastMessage',
+  {
+    defaultMessage: 'Failed to update alert assignees.',
+  }
+);
+
+export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.alertAssigneesContextMenuItemTitle',
+  {
+    defaultMessage: 'Assign alert',
+  }
+);
+
+export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
+  'xpack.securitySolution.bulkActions.removeAlertAssignessContextMenuTitle',
+  {
+    defaultMessage: 'Unassign alert',
+  }
+);

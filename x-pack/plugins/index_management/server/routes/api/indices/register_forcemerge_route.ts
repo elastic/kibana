@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { RouteDependencies } from '../../../types';
 import { addBasePath } from '..';
+import { executeAsyncByChunks } from './helpers';
 
 const bodySchema = schema.object({
   indices: schema.arrayOf(schema.string()),
@@ -36,7 +37,8 @@ export function registerForcemergeRoute({ router, lib: { handleEsError } }: Rout
       }
 
       try {
-        await client.asCurrentUser.indices.forcemerge(params);
+        await executeAsyncByChunks(params, client, 'forcemerge');
+
         return response.ok();
       } catch (error) {
         return handleEsError({ error, response });

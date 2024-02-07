@@ -5,24 +5,23 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
-import { RouteComponentProps } from 'react-router-dom';
+import React, { FunctionComponent, useEffect } from 'react';
 import { EuiButton, EuiPageTemplate, EuiSpacer, EuiText } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useLoadIndexSettings } from '../../../../services';
+import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { DetailsPageSettingsContent } from './details_page_settings_content';
 
-export const DetailsPageSettings: FunctionComponent<
-  RouteComponentProps<{ indexName: string }> & { isIndexOpen: boolean }
-> = ({
-  match: {
-    params: { indexName },
-  },
-  isIndexOpen,
-}) => {
+export const DetailsPageSettings: FunctionComponent<{
+  indexName: string;
+}> = ({ indexName }) => {
   const { isLoading, data, error, resendRequest } = useLoadIndexSettings(indexName);
+
+  useEffect(() => {
+    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexDetailsSettings);
+  }, []);
 
   if (isLoading) {
     return (
@@ -53,10 +52,9 @@ export const DetailsPageSettings: FunctionComponent<
             <EuiText color="subdued">
               <FormattedMessage
                 id="xpack.idxMgmt.indexDetails.settings.errorDescription"
-                defaultMessage="There was an error loading settings for index {indexName}: {error}"
+                defaultMessage="We encountered an error loading settings for index {indexName}. Make sure that the index name in the URL is correct and try again."
                 values={{
                   indexName,
-                  error: error?.error,
                 }}
               />
             </EuiText>
@@ -80,7 +78,6 @@ export const DetailsPageSettings: FunctionComponent<
   }
   return (
     <DetailsPageSettingsContent
-      isIndexOpen={isIndexOpen}
       data={data}
       indexName={indexName}
       reloadIndexSettings={resendRequest}

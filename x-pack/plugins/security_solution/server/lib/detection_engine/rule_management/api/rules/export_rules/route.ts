@@ -14,7 +14,7 @@ import {
   ExportRulesRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
 
-import { buildRouteValidation } from '../../../../../../utils/build_validation/route_validation';
+import { buildRouteValidationWithZod } from '../../../../../../utils/build_validation/route_validation';
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import type { ConfigType } from '../../../../../../config';
 import { getNonPackagedRulesCount } from '../../../logic/search/get_existing_prepackaged_rules';
@@ -40,8 +40,8 @@ export const exportRulesRoute = (
         version: '2023-10-31',
         validate: {
           request: {
-            query: buildRouteValidation(ExportRulesRequestQuery),
-            body: buildRouteValidation(ExportRulesRequestBody),
+            query: buildRouteValidationWithZod(ExportRulesRequestQuery),
+            body: buildRouteValidationWithZod(ExportRulesRequestBody),
           },
         },
       },
@@ -51,11 +51,7 @@ export const exportRulesRoute = (
         const exceptionsClient = (await context.lists)?.getExceptionListClient();
         const actionsClient = (await context.actions)?.getActionsClient();
 
-        const {
-          getExporter,
-          getClient,
-          client: savedObjectsClient,
-        } = (await context.core).savedObjects;
+        const { getExporter, getClient } = (await context.core).savedObjects;
 
         const client = getClient({ includedHiddenTypes: ['action'] });
         const actionsExporter = getExporter(client);
@@ -83,9 +79,7 @@ export const exportRulesRoute = (
               ? await getExportByObjectIds(
                   rulesClient,
                   exceptionsClient,
-                  savedObjectsClient,
-                  request.body.objects,
-                  logger,
+                  request.body.objects.map((obj) => obj.rule_id),
                   actionsExporter,
                   request,
                   actionsClient
@@ -93,8 +87,6 @@ export const exportRulesRoute = (
               : await getExportAll(
                   rulesClient,
                   exceptionsClient,
-                  savedObjectsClient,
-                  logger,
                   actionsExporter,
                   request,
                   actionsClient

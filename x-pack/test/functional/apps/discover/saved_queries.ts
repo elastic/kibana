@@ -50,6 +50,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Navigate to Discover & create a saved query
         await PageObjects.common.navigateToApp('discover');
         await queryBar.setQuery('response:200');
+        await queryBar.submitQuery();
         await savedQueryManagementComponent.saveNewQuery(savedQueryName, '', true, false);
         await savedQueryManagementComponent.savedQueryExistOrFail(savedQueryName);
         await savedQueryManagementComponent.closeSavedQueryManagementComponent();
@@ -70,6 +71,29 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Refresh to ensure the object is actually deleted
         await browser.refresh();
         await savedQueryManagementComponent.savedQueryMissingOrFail(savedQueryName);
+      });
+
+      it('updates a saved query', async () => {
+        const name = `${savedQueryName}-update`;
+
+        // Navigate to Discover & create a saved query
+        await PageObjects.common.navigateToApp('discover');
+        await queryBar.setQuery('response:200');
+        await queryBar.submitQuery();
+        await savedQueryManagementComponent.saveNewQuery(name, '', true, false);
+        await savedQueryManagementComponent.savedQueryExistOrFail(name);
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+
+        // Update the saved query
+        await queryBar.setQuery('response:404');
+        await queryBar.submitQuery();
+        await savedQueryManagementComponent.updateCurrentlyLoadedQuery('', true, false);
+
+        // Navigate to Discover ensure updated query exists
+        await PageObjects.common.navigateToApp('discover');
+        await savedQueryManagementComponent.savedQueryExistOrFail(name);
+        await savedQueryManagementComponent.closeSavedQueryManagementComponent();
+        await savedQueryManagementComponent.deleteSavedQuery(name);
       });
     });
   });

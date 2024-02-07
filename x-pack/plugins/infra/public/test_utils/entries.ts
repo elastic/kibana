@@ -18,14 +18,16 @@ export function generateFakeEntries(
   const timestampStep = Math.floor((endTimestamp - startTimestamp) / count);
   for (let i = 0; i < count; i++) {
     const timestamp = i === count - 1 ? endTimestamp : startTimestamp + timestampStep * i;
+    const date = new Date(timestamp).toISOString();
+
     entries.push({
       id: `entry-${i}`,
       index: 'logs-fake',
       context: {},
-      cursor: { time: timestamp, tiebreaker: i },
+      cursor: { time: date, tiebreaker: i },
       columns: columns.map((column) => {
         if ('timestampColumn' in column) {
-          return { columnId: column.timestampColumn.id, timestamp };
+          return { columnId: column.timestampColumn.id, time: date };
         } else if ('messageColumn' in column) {
           return {
             columnId: column.messageColumn.id,

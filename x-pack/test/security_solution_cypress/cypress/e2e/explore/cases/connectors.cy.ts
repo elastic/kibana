@@ -10,13 +10,14 @@ import { getServiceNowConnector, getServiceNowITSMHealthResponse } from '../../.
 import { SERVICE_NOW_MAPPING } from '../../../screens/configure_cases';
 
 import { goToEditExternalConnection } from '../../../tasks/all_cases';
-import { cleanKibana, deleteCases, deleteConnectors } from '../../../tasks/common';
+import { deleteAllCasesItems, deleteConnectors } from '../../../tasks/api_calls/common';
 import {
   addServiceNowConnector,
   openAddNewConnectorOption,
   verifyNewConnectorSelected,
 } from '../../../tasks/configure_cases';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import { CASES_URL } from '../../../urls/navigation';
 
@@ -34,6 +35,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
     error: null,
     updated_at: null,
     updated_by: null,
+    customFields: [],
     mappings: [
       { source: 'title', target: 'short_description', action_type: 'overwrite' },
       { source: 'description', target: 'description', action_type: 'overwrite' },
@@ -46,13 +48,9 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
 
   const snConnector = getServiceNowConnector();
 
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
-    deleteCases();
+    deleteAllCasesItems();
     cy.intercept('GET', `${snConnector.URL}/api/x_elas2_inc_int/elastic_api/health*`, {
       statusCode: 200,
       body: getServiceNowITSMHealthResponse(),
@@ -92,7 +90,7 @@ describe('Cases connectors', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Configures a new connector', () => {
-    visitWithoutDateRange(CASES_URL);
+    visit(CASES_URL);
     goToEditExternalConnection();
     openAddNewConnectorOption();
     addServiceNowConnector(snConnector);

@@ -14,6 +14,7 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { spacesManagerMock } from '@kbn/spaces-plugin/public/spaces_manager/mocks';
 import { getUiApi } from '@kbn/spaces-plugin/public/ui_api';
@@ -23,8 +24,8 @@ import { EditRolePage } from './edit_role_page';
 import { SimplePrivilegeSection } from './privileges/kibana/simple_privilege_section';
 import { SpaceAwarePrivilegeSection } from './privileges/kibana/space_aware_privilege_section';
 import { TransformErrorSection } from './privileges/kibana/transform_error_section';
+import type { Role } from '../../../../common';
 import { licenseMock } from '../../../../common/licensing/index.mock';
-import type { Role } from '../../../../common/model';
 import { userAPIClientMock } from '../../users/index.mock';
 import { createRawKibanaPrivileges } from '../__fixtures__/kibana_privileges';
 import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } from '../index.mock';
@@ -181,6 +182,9 @@ function getProps({
     }
     if (path === '/internal/security/_check_role_mapping_features') {
       return { canUseRemoteIndices };
+    }
+    if (path === REMOTE_CLUSTERS_PATH) {
+      return [];
     }
   });
 

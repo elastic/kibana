@@ -6,7 +6,7 @@
  */
 
 import { IRouter } from '@kbn/core/server';
-import { ConnectorResponseV1 } from '../../../../common/routes/connector/response';
+import { AllConnectorsResponseV1 } from '../../../../common/routes/connector/response';
 import { transformGetAllConnectorsResponseV1 } from './transforms';
 import { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';
@@ -27,7 +27,7 @@ export const getAllConnectorsRoute = (
         const actionsClient = (await context.actions).getActionsClient();
         const result = await actionsClient.getAll();
 
-        const responseBody: ConnectorResponseV1[] = transformGetAllConnectorsResponseV1(result);
+        const responseBody: AllConnectorsResponseV1[] = transformGetAllConnectorsResponseV1(result);
         return res.ok({ body: responseBody });
       })
     )

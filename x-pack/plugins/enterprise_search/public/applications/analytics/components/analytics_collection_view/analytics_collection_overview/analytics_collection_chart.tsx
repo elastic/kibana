@@ -62,7 +62,6 @@ export const AnalyticsCollectionChart: React.FC<
   const { uiSettings, charts: chartSettings } = useValues(KibanaLogic);
   const fromDateParsed = DateMath.parse(timeRange.from);
   const toDataParsed = DateMath.parse(timeRange.to);
-  const chartTheme = chartSettings.theme.useChartsTheme();
   const baseChartTheme = chartSettings.theme.useChartsBaseTheme();
   const charts = useMemo(
     () => [
@@ -127,7 +126,6 @@ export const AnalyticsCollectionChart: React.FC<
   ) : (
     <Chart size={['100%', CHART_HEIGHT]}>
       <Settings
-        theme={chartTheme}
         baseTheme={baseChartTheme}
         showLegend={false}
         onElementClick={(elements) => {
@@ -145,6 +143,7 @@ export const AnalyticsCollectionChart: React.FC<
           }
         }}
         onElementOut={() => setHoverChart(null)}
+        locale={i18n.getLocale()}
       />
 
       {charts.map(({ data: chartData, id, name, chartColor }) => (

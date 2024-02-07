@@ -15,7 +15,7 @@ import {
   getStoredRowHeight,
   updateStoredRowHeight,
 } from '../utils/row_heights';
-import { ROWS_HEIGHT_OPTIONS } from '../constants';
+import { defaultRowLineHeight, ROWS_HEIGHT_OPTIONS } from '../constants';
 
 interface UseRowHeightProps {
   rowHeightState?: number;
@@ -23,6 +23,7 @@ interface UseRowHeightProps {
   storage: Storage;
   configRowHeight?: number;
   consumer: string;
+  rowLineHeight?: string;
 }
 
 /**
@@ -33,6 +34,8 @@ const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): number => {
     return ROWS_HEIGHT_OPTIONS.auto;
   } else if (typeof rowHeight === 'object' && rowHeight.lineCount) {
     return rowHeight.lineCount; // custom
+  } else if (typeof rowHeight === 'number') {
+    return rowHeight;
   }
 
   return ROWS_HEIGHT_OPTIONS.single;
@@ -57,6 +60,7 @@ export const useRowHeightsOptions = ({
   storage,
   configRowHeight = ROWS_HEIGHT_OPTIONS.default,
   consumer,
+  rowLineHeight = defaultRowLineHeight,
 }: UseRowHeightProps) => {
   return useMemo((): EuiDataGridRowHeightsOptions => {
     const rowHeightFromLS = getStoredRowHeight(storage, consumer);
@@ -79,8 +83,12 @@ export const useRowHeightsOptions = ({
 
     return {
       defaultHeight,
-      lineHeight: '1.6em',
+      lineHeight: rowLineHeight,
       onChange: ({ defaultHeight: newRowHeight }: EuiDataGridRowHeightsOptions) => {
+        if (newRowHeight === defaultHeight && typeof rowHeightState === 'undefined') {
+          // ignore, no changes required
+          return;
+        }
         const newSerializedRowHeight = serializeRowHeight(
           // pressing "Reset to default" triggers onChange with the same value
           newRowHeight === defaultHeight ? configRowHeight : newRowHeight
@@ -89,5 +97,5 @@ export const useRowHeightsOptions = ({
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
     };
-  }, [storage, consumer, rowHeightState, configRowHeight, onUpdateRowHeight]);
+  }, [storage, consumer, rowHeightState, rowLineHeight, configRowHeight, onUpdateRowHeight]);
 };

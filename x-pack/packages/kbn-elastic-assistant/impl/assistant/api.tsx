@@ -8,26 +8,56 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
+import {
+  getFormattedMessageContent,
+  getOptionalRequestParams,
+  hasParsableResponse,
+} from './helpers';
 
 export interface FetchConnectorExecuteAction {
-  assistantLangChain: boolean;
+  isEnabledRAGAlerts: boolean;
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  isEnabledKnowledgeBase: boolean;
+  assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
+  size?: number;
+}
+
+export interface FetchConnectorExecuteResponse {
+  response: string | ReadableStreamDefaultReader<Uint8Array>;
+  isError: boolean;
+  isStream: boolean;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export const fetchConnectorExecuteAction = async ({
-  assistantLangChain,
+  isEnabledRAGAlerts,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  isEnabledKnowledgeBase,
+  assistantStreamingEnabled,
   http,
   messages,
+  onNewReplacements,
+  replacements,
   apiConfig,
   signal,
-}: FetchConnectorExecuteAction): Promise<string> => {
+  size,
+}: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
     content: msg.content,
@@ -43,47 +73,147 @@ export const fetchConnectorExecuteAction = async ({
           temperature: 0.2,
         }
       : {
+          // Azure OpenAI and Bedrock invokeAI both expect this body format
           messages: outboundMessages,
         };
 
-  const requestBody = {
-    params: {
-      subActionParams: {
-        body: JSON.stringify(body),
-      },
-      subAction: 'test',
-    },
-  };
+  // TODO: Remove in part 3 of streaming work for security solution
+  // tracked here: https://github.com/elastic/security-team/issues/7363
+  // In part 3 I will make enhancements to langchain to introduce streaming
+  // Once implemented, invokeAI can be removed
+  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
+  const optionalRequestParams = getOptionalRequestParams({
+    isEnabledRAGAlerts,
+    alertsIndexPattern,
+    allow,
+    allowReplacement,
+    replacements,
+    size,
+  });
+
+  const requestBody = isStream
+    ? {
+        params: {
+          subActionParams: body,
+          subAction: 'invokeStream',
+        },
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+        ...optionalRequestParams,
+      }
+    : {
+        params: {
+          subActionParams: body,
+          subAction: 'invokeAI',
+        },
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+        ...optionalRequestParams,
+      };
 
   try {
-    const path = assistantLangChain
-      ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
-      : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
+    if (isStream) {
+      const response = await http.fetch(
+        `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+          signal,
+          asResponse: isStream,
+          rawResponse: isStream,
+        }
+      );
 
-    // TODO: Find return type for this API
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const response = await http.fetch<any>(path, {
+      const reader = response?.response?.body?.getReader();
+
+      if (!reader) {
+        return {
+          response: `${API_ERROR}\n\nCould not get reader from response`,
+          isError: true,
+          isStream: false,
+        };
+      }
+      return {
+        response: reader,
+        isStream: true,
+        isError: false,
+      };
+    }
+
+    // TODO: Remove in part 3 of streaming work for security solution
+    // tracked here: https://github.com/elastic/security-team/issues/7363
+    // This is a temporary code to support the non-streaming API
+    const response = await http.fetch<{
+      connector_id: string;
+      status: string;
+      data: string;
+      replacements?: Record<string, string>;
+      service_message?: string;
+      trace_data?: {
+        transaction_id: string;
+        trace_id: string;
+      };
+    }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
       signal,
     });
 
-    const data = response.data;
-    if (response.status !== 'ok') {
-      return API_ERROR;
+    if (response.status !== 'ok' || !response.data) {
+      if (response.service_message) {
+        return {
+          response: `${API_ERROR}\n\n${response.service_message}`,
+          isError: true,
+          isStream: false,
+        };
+      }
+      return {
+        response: API_ERROR,
+        isError: true,
+        isStream: false,
+      };
     }
 
-    if (data.choices && data.choices.length > 0 && data.choices[0].message.content) {
-      const result = data.choices[0].message.content.trim();
-      return result;
-    } else {
-      return API_ERROR;
-    }
+    // Only add traceData if it exists in the response
+    const traceData =
+      response.trace_data?.trace_id != null && response.trace_data?.transaction_id != null
+        ? {
+            traceId: response.trace_data?.trace_id,
+            transactionId: response.trace_data?.transaction_id,
+          }
+        : undefined;
+
+    onNewReplacements(response.replacements ?? {});
+
+    return {
+      response: hasParsableResponse({
+        isEnabledRAGAlerts,
+        isEnabledKnowledgeBase,
+      })
+        ? getFormattedMessageContent(response.data)
+        : response.data,
+      isError: false,
+      isStream: false,
+      traceData,
+    };
   } catch (error) {
-    return API_ERROR;
+    const getReader = error?.response?.body?.getReader;
+    const reader =
+      isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
+
+    if (!reader) {
+      return {
+        response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+        isError: true,
+        isStream: false,
+      };
+    }
+    return {
+      response: reader,
+      isStream: true,
+      isError: true,
+    };
   }
 };
 

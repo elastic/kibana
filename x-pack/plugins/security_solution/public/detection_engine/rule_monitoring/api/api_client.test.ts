@@ -12,11 +12,12 @@ import type {
   GetRuleExecutionResultsResponse,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 import {
-  LogLevel,
-  RuleExecutionEventType,
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
 } from '../../../../common/api/detection_engine/rule_monitoring';
 
 import { api } from './api_client';
+import type { FetchRuleExecutionEventsArgs } from './api_client_interface';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -74,7 +75,7 @@ describe('Rule Monitoring API Client', () => {
 
     const ISO_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
 
-    it.each([
+    it.each<[string, Omit<FetchRuleExecutionEventsArgs, 'ruleId'>, Record<string, unknown>]>([
       [
         'search term filter',
         { searchTerm: 'something to search' },
@@ -82,12 +83,12 @@ describe('Rule Monitoring API Client', () => {
       ],
       [
         'event types filter',
-        { eventTypes: [RuleExecutionEventType.message] },
+        { eventTypes: [RuleExecutionEventTypeEnum.message] },
         { event_types: 'message' },
       ],
       [
         'log level filter',
-        { logLevels: [LogLevel.warn, LogLevel.error] },
+        { logLevels: [LogLevelEnum.warn, LogLevelEnum.error] },
         { log_levels: 'warn,error' },
       ],
       [

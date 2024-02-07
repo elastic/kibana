@@ -54,6 +54,7 @@ export const sampleAttributeCoreWebVital = {
                 sourceField: 'user_agent.os.name',
               },
               'y-axis-column-1': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -67,6 +68,7 @@ export const sampleAttributeCoreWebVital = {
                 sourceField: RECORDS_FIELD,
               },
               'y-axis-column-2': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
@@ -79,11 +81,12 @@ export const sampleAttributeCoreWebVital = {
                 sourceField: RECORDS_FIELD,
               },
               'y-axis-column-layer0-0': {
+                customLabel: true,
                 dataType: 'number',
                 filter: {
                   language: 'kuery',
                   query:
-                    'transaction.type: page-load and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
+                    'transaction.type: (page-load or page-exit) and processor.event: transaction and transaction.marks.agent.largestContentfulPaint < 2500',
                 },
                 isBucketed: false,
                 label: 'Good',
@@ -101,7 +104,7 @@ export const sampleAttributeCoreWebVital = {
     query: {
       language: 'kuery',
       query:
-        'transaction.type: page-load and processor.event: transaction and transaction.type: "page-load"',
+        'transaction.type: (page-load or page-exit) and processor.event: transaction and transaction.type: ("page-load" or "page-exit")',
     },
     visualization: {
       axisTitlesVisibilitySettings: {

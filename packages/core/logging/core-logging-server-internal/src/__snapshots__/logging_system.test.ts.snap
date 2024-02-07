@@ -25,6 +25,7 @@ Object {
   "message": "buffered trace message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
 }
 `;
@@ -42,6 +43,7 @@ Object {
   "message": "buffered info message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
   "some": "value",
 }
@@ -60,6 +62,7 @@ Object {
   "message": "buffered fatal message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
 }
 `;
@@ -77,6 +80,7 @@ Object {
   "message": "buffered info message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
   "some": "value",
 }
@@ -95,6 +99,7 @@ Object {
   "message": "some new info message",
   "process": Object {
     "pid": Any<Number>,
+    "uptime": 10,
   },
 }
 `;

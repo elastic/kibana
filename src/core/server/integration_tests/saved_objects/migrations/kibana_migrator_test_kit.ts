@@ -12,7 +12,7 @@ import { SemVer } from 'semver';
 
 import { defaultsDeep } from 'lodash';
 import { BehaviorSubject, firstValueFrom, map } from 'rxjs';
-import { ConfigService, Env } from '@kbn/config';
+import { ConfigService, Env, BuildFlavor } from '@kbn/config';
 import { getEnvOptions } from '@kbn/config-mocks';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { KibanaMigrator } from '@kbn/core-saved-objects-migration-server-internal';
@@ -50,6 +50,7 @@ import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { NodeRoles } from '@kbn/core-node-server';
 import { baselineDocuments, baselineTypes } from './kibana_migrator_test_kit.fixtures';
 import { delay } from './test_utils';
+import type { ElasticsearchClientWrapperFactory } from './elasticsearch_client_wrapper';
 
 export const defaultLogFilePath = Path.join(__dirname, 'kibana_migrator_test_kit.log');
 
@@ -76,6 +77,7 @@ export interface KibanaMigratorTestKitParams {
   types?: Array<SavedObjectsType<any>>;
   defaultIndexTypesMap?: IndexTypesMap;
   logFilePath?: string;
+  clientWrapperFactory?: ElasticsearchClientWrapperFactory;
 }
 
 export interface KibanaMigratorTestKit {
@@ -134,6 +136,7 @@ export const getKibanaMigratorTestKit = async ({
   types = [],
   logFilePath = defaultLogFilePath,
   nodeRoles = defaultNodeRoles,
+  clientWrapperFactory,
 }: KibanaMigratorTestKitParams = {}): Promise<KibanaMigratorTestKit> => {
   let hasRun = false;
   const loggingSystem = new LoggingSystem();
@@ -145,7 +148,8 @@ export const getKibanaMigratorTestKit = async ({
   const loggingConf = await firstValueFrom(configService.atPath<LoggingConfigType>('logging'));
   loggingSystem.upgrade(loggingConf);
 
-  const client = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const rawClient = await getElasticsearchClient(configService, loggerFactory, kibanaVersion);
+  const client = clientWrapperFactory ? clientWrapperFactory(rawClient) : rawClient;
 
   const typeRegistry = new SavedObjectTypeRegistry();
 
@@ -274,6 +278,7 @@ interface GetMigratorParams {
   loggerFactory: LoggerFactory;
   kibanaVersion: string;
   kibanaBranch: string;
+  buildFlavor?: BuildFlavor;
   nodeRoles: NodeRoles;
 }
 
@@ -286,6 +291,7 @@ const getMigrator = async ({
   loggerFactory,
   kibanaVersion,
   kibanaBranch,
+  buildFlavor = 'traditional',
   nodeRoles,
 }: GetMigratorParams) => {
   const savedObjectsConf = await firstValueFrom(
@@ -297,8 +303,8 @@ const getMigrator = async ({
   const soConfig = new SavedObjectConfig(savedObjectsConf, savedObjectsMigrationConf);
 
   const docLinks: DocLinksServiceStart = {
-    ...getDocLinksMeta({ kibanaBranch }),
-    links: getDocLinks({ kibanaBranch }),
+    ...getDocLinksMeta({ kibanaBranch, buildFlavor }),
+    links: getDocLinks({ kibanaBranch, buildFlavor }),
   };
 
   const esCapabilities = await getCapabilitiesFromClient(client);

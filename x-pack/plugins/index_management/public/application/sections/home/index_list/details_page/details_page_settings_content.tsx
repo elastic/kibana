@@ -24,55 +24,71 @@ import { css } from '@emotion/react';
 import _ from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
+import { monaco as monacoEditor } from '@kbn/monaco';
 import { IndexSettingsResponse } from '../../../../../../common';
 import { Error } from '../../../../../shared_imports';
 import { documentationService, updateIndexSettings } from '../../../../services';
 import { notificationService } from '../../../../services/notification';
 import { flattenObject } from '../../../../lib/flatten_object';
-import { readOnlySettings, settingsToDisplay } from '../../../../lib/edit_settings';
+import {
+  readOnlySettings,
+  defaultsToDisplay,
+  limitedEditableSettings,
+} from '../../../../lib/edit_settings';
+import { AppDependencies, useAppContext } from '../../../../app_context';
 
-const getEditableSettings = (
-  data: Props['data'],
-  isIndexOpen: boolean
-): { originalSettings: Record<string, any>; settingsString: string } => {
+const getEditableSettings = ({
+  data,
+  editableIndexSettings,
+}: {
+  data: Props['data'];
+  editableIndexSettings: AppDependencies['config']['editableIndexSettings'];
+}): { originalSettings: Record<string, any>; settingsString: string } => {
   const { defaults, settings } = data;
   // settings user has actually set
   const flattenedSettings = flattenObject(settings);
   // settings with their defaults
   const flattenedDefaults = flattenObject(defaults);
-  const filteredDefaults = _.pick(flattenedDefaults, settingsToDisplay);
-  const newSettings = { ...filteredDefaults, ...flattenedSettings };
-  // store these to be used as autocomplete values later
-  readOnlySettings.forEach((e) => delete newSettings[e]);
-  // can't change codec on open index
-  if (isIndexOpen) {
-    delete newSettings['index.codec'];
+  const filteredDefaults = _.pick(flattenedDefaults, defaultsToDisplay);
+
+  let newSettings = { ...filteredDefaults, ...flattenedSettings };
+  if (editableIndexSettings === 'limited') {
+    // only pick limited settings
+    newSettings = _.pick(newSettings, limitedEditableSettings);
+  } else {
+    // remove read only settings
+    readOnlySettings.forEach((e) => delete newSettings[e]);
   }
+
   const settingsString = JSON.stringify(newSettings, null, 2);
   return { originalSettings: newSettings, settingsString };
 };
 
 interface Props {
-  isIndexOpen: boolean;
   data: IndexSettingsResponse;
   indexName: string;
   reloadIndexSettings: () => void;
 }
 
 export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
-  isIndexOpen,
   data,
   indexName,
   reloadIndexSettings,
 }) => {
   const [isEditMode, setIsEditMode] = useState(false);
+  const {
+    config: { editableIndexSettings },
+  } = useAppContext();
   const onEditModeChange = (event: EuiSwitchEvent) => {
     setUpdateError(null);
     setIsEditMode(event.target.checked);
   };
 
-  const { originalSettings, settingsString } = getEditableSettings(data, isIndexOpen);
+  const { originalSettings, settingsString } = getEditableSettings({
+    data,
+    editableIndexSettings,
+  });
   const [editableSettings, setEditableSettings] = useState(settingsString);
   const [isLoading, setIsLoading] = useState(false);
   const [updateError, setUpdateError] = useState<Error | null>(null);
@@ -128,6 +144,14 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
       });
     }
   }, [originalSettings, editableSettings, indexName, reloadIndexSettings]);
+  const settingsSchemaProperties = {} as Record<string, unknown>;
+  Object.keys(originalSettings).forEach(
+    // allow any type of value
+    (setting) =>
+      (settingsSchemaProperties[setting] = {
+        type: ['null', 'boolean', 'object', 'array', 'number', 'string'],
+      })
+  );
   return (
     // using "rowReverse" to keep the card on the left side to be on top of the code block on smaller screens
     <EuiFlexGroup
@@ -153,7 +177,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                 <b>
                   <FormattedMessage
                     id="xpack.idxMgmt.indexDetails.settings.docsCardTitle"
-                    defaultMessage="Index settings"
+                    defaultMessage="Edit index settings"
                   />
                 </b>
               </EuiText>
@@ -183,7 +207,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
               >
                 <FormattedMessage
                   id="xpack.idxMgmt.indexDetails.settings.saveButtonLabel"
-                  defaultMessage="Save"
+                  defaultMessage="Save changes"
                 />
               </EuiButton>
             </EuiFlexItem>
@@ -208,16 +232,13 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
                 title={i18n.translate(
                   'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
                   {
-                    defaultMessage: 'Unable to save the settings',
+                    defaultMessage: 'Unable to save settings',
                   }
                 )}
                 color="danger"
                 iconType="error"
               >
-                <p>
-                  {updateError.error}
-                  {updateError.message && <span>: {updateError.message}</span>}
-                </p>
+                {updateError.message && <p>{updateError.message}</p>}
               </EuiCallOut>
             </>
           )}
@@ -230,12 +251,11 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           >
             <FormattedMessage
               id="xpack.idxMgmt.indexDetails.settings.docsCardLink"
-              defaultMessage="Settings reference"
+              defaultMessage="Learn more about settings"
             />
           </EuiLink>
         </EuiPanel>
       </EuiFlexItem>
-
       <EuiFlexItem
         grow={3}
         css={css`
@@ -246,6 +266,21 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
           {isEditMode ? (
             <CodeEditor
               languageId="json"
+              editorDidMount={(editor) => {
+                monacoEditor.languages.json.jsonDefaults.setDiagnosticsOptions({
+                  validate: true,
+                  schemas: [
+                    {
+                      uri: editor.getModel()?.uri.toString() ?? '',
+                      fileMatch: ['*'],
+                      schema: {
+                        type: 'object',
+                        properties: settingsSchemaProperties,
+                      },
+                    },
+                  ],
+                });
+              }}
               value={editableSettings}
               data-test-subj="indexDetailsSettingsEditor"
               options={{

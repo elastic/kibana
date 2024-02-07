@@ -7,6 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 
+import { isTransformListRowWithStats } from '../../../../common/transform_list';
 import { sortTransformsToReauthorize } from './sort_transforms_to_reauthorize';
 import { needsReauthorization } from '../../../../common/reauthorization_utils';
 import { useReauthorizeTransforms } from '../../../../hooks/use_reauthorize_transform';
@@ -54,6 +55,7 @@ export const useReauthorizeAction = (forceDisable: boolean, transformNodes: numb
       ),
       available: (item: TransformListRow) => needsReauthorization(item),
       enabled: (item: TransformListRow) =>
+        isTransformListRowWithStats(item) &&
         !isReauthorizeActionDisabled([item], canStartStopTransform, transformNodes),
       description: reauthorizeActionNameText,
       icon: 'alert',

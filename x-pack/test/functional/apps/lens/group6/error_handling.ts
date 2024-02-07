@@ -142,7 +142,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const errorMessages = await Promise.all(failureElements.map((el) => el.getVisibleText()));
 
       expect(errorMessages).to.eql([
-        'Bad Request',
+        'Visualization type not found.',
         'The visualization type lnsUNKNOWN could not be resolved.',
         'Could not find datasource for the visualization',
       ]);

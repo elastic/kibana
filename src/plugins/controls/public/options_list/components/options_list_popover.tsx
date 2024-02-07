@@ -9,7 +9,6 @@
 import { isEmpty } from 'lodash';
 import React, { useState } from 'react';
 
-import { OptionsListStrings } from './options_list_strings';
 import { useOptionsList } from '../embeddable/options_list_embeddable';
 import { OptionsListPopoverFooter } from './options_list_popover_footer';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
@@ -17,14 +16,12 @@ import { OptionsListPopoverSuggestions } from './options_list_popover_suggestion
 import { OptionsListPopoverInvalidSelections } from './options_list_popover_invalid_selections';
 
 export interface OptionsListPopoverProps {
-  width: number;
   isLoading: boolean;
   loadMoreSuggestions: (cardinality: number) => void;
   updateSearchString: (newSearchString: string) => void;
 }
 
 export const OptionsListPopover = ({
-  width,
   isLoading,
   updateSearchString,
   loadMoreSuggestions,
@@ -36,43 +33,38 @@ export const OptionsListPopover = ({
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
 
   const id = optionsList.select((state) => state.explicitInput.id);
-  const fieldName = optionsList.select((state) => state.explicitInput.fieldName);
   const hideExclude = optionsList.select((state) => state.explicitInput.hideExclude);
   const hideActionBar = optionsList.select((state) => state.explicitInput.hideActionBar);
 
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
   return (
-    <>
+    <div
+      id={`control-popover-${id}`}
+      className={'optionsList__popover'}
+      data-test-subj={`optionsList-control-popover`}
+    >
+      {field?.type !== 'boolean' && !hideActionBar && (
+        <OptionsListPopoverActionBar
+          showOnlySelected={showOnlySelected}
+          updateSearchString={updateSearchString}
+          setShowOnlySelected={setShowOnlySelected}
+        />
+      )}
       <div
-        id={`control-popover-${id}`}
-        className={'optionsList__popover'}
-        style={{ width, minWidth: 300 }}
-        data-test-subj={`optionsList-control-popover`}
-        aria-label={OptionsListStrings.popover.getAriaLabel(fieldName)}
+        data-test-subj={`optionsList-control-available-options`}
+        data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
+        style={{ width: '100%', height: '100%' }}
       >
-        {field?.type !== 'boolean' && !hideActionBar && (
-          <OptionsListPopoverActionBar
-            showOnlySelected={showOnlySelected}
-            updateSearchString={updateSearchString}
-            setShowOnlySelected={setShowOnlySelected}
-          />
+        <OptionsListPopoverSuggestions
+          loadMoreSuggestions={loadMoreSuggestions}
+          showOnlySelected={showOnlySelected}
+        />
+        {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
+          <OptionsListPopoverInvalidSelections />
         )}
-        <div
-          data-test-subj={`optionsList-control-available-options`}
-          data-option-count={isLoading ? 0 : Object.keys(availableOptions ?? {}).length}
-          style={{ width: '100%', height: '100%' }}
-        >
-          <OptionsListPopoverSuggestions
-            loadMoreSuggestions={loadMoreSuggestions}
-            showOnlySelected={showOnlySelected}
-          />
-          {!showOnlySelected && invalidSelections && !isEmpty(invalidSelections) && (
-            <OptionsListPopoverInvalidSelections />
-          )}
-        </div>
-        {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />}
       </div>
-    </>
+      {!hideExclude && <OptionsListPopoverFooter isLoading={isLoading} />}
+    </div>
   );
 };

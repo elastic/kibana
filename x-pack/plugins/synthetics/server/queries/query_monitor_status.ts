@@ -9,7 +9,7 @@ import pMap from 'p-map';
 import times from 'lodash/times';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { cloneDeep, intersection } from 'lodash';
-import { SUMMARY_FILTER } from '../../common/constants/client_defaults';
+import { FINAL_SUMMARY_FILTER } from '../../common/constants/client_defaults';
 import {
   OverviewPendingStatusMetaData,
   OverviewPing,
@@ -69,7 +69,7 @@ export async function queryMonitorStatus(
           query: {
             bool: {
               filter: [
-                SUMMARY_FILTER,
+                FINAL_SUMMARY_FILTER,
                 {
                   range: {
                     '@timestamp': {

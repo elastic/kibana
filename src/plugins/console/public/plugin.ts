@@ -7,13 +7,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 
+import { renderEmbeddableConsole } from './application/containers/embeddable';
 import {
   AppSetupUIPluginDependencies,
+  AppStartUIPluginDependencies,
   ClientConfigType,
   ConsolePluginSetup,
+  ConsolePluginStart,
   ConsoleUILocatorParams,
+  EmbeddableConsoleProps,
+  EmbeddableConsoleDependencies,
 } from './types';
 import { AutocompleteInfo, setAutocompleteInfo } from './services';
 
@@ -97,5 +102,27 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
     return {};
   }
 
-  public start() {}
+  public start(core: CoreStart, deps: AppStartUIPluginDependencies): ConsolePluginStart {
+    const {
+      ui: { enabled: isConsoleUiEnabled, embeddedEnabled: isEmbeddedConsoleEnabled },
+    } = this.ctx.config.get<ClientConfigType>();
+
+    const consoleStart: ConsolePluginStart = {};
+    const embeddedConsoleAvailable =
+      isConsoleUiEnabled &&
+      isEmbeddedConsoleEnabled &&
+      core.application.capabilities?.dev_tools?.show === true;
+
+    if (embeddedConsoleAvailable) {
+      consoleStart.renderEmbeddableConsole = (props?: EmbeddableConsoleProps) => {
+        const consoleDeps: EmbeddableConsoleDependencies = {
+          core,
+          usageCollection: deps.usageCollection,
+        };
+        return renderEmbeddableConsole(props, consoleDeps);
+      };
+    }
+
+    return consoleStart;
+  }
 }

@@ -14,7 +14,7 @@ import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 export interface Props {
   rules: Array<Rule<SloRule>> | undefined;
-  onClick: () => void;
+  onClick?: () => void;
 }
 
 export function SloRulesBadge({ rules, onClick }: Props) {
@@ -28,7 +28,7 @@ export function SloRulesBadge({ rules, onClick }: Props) {
       display="block"
     >
       <span onClick={onClick} onKeyDown={onClick}>
-        <EuiBadge isDisabled color="default" iconType="alert" css={{ cursor: 'pointer' }} />
+        <EuiBadge color="text" iconType="alert" css={{ cursor: 'pointer' }} />
       </span>
     </EuiToolTip>
   );

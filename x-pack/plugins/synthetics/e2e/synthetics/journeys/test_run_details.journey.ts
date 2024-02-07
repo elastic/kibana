@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { journey, step, before, after } from '@elastic/synthetics';
+import { journey, step, before, after, expect } from '@elastic/synthetics';
 import { recordVideo } from '../../helpers/record_video';
 import { byTestId } from '../../helpers/utils';
 import { syntheticsAppPageProvider } from '../page_objects/synthetics_app';
@@ -50,6 +50,14 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
     await syntheticsApp.navigateToOverview(true);
   });
 
+  step('verified overview card contents', async () => {
+    await page.waitForSelector('text=https://www.google.com');
+    const cardItem = await page.getByTestId('https://www.google.com-metric-item');
+    expect(await cardItem.textContent()).toBe(
+      'https://www.google.comNorth America - US CentralDuration155 ms'
+    );
+  });
+
   step('Monitor is as up in summary page', async () => {
     await page.hover('text=https://www.google.com');
     await page.click('[aria-label="Open actions menu"]');
@@ -60,7 +68,13 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
 
   step('Go to test run page', async () => {
     await page.click(byTestId('superDatePickerToggleQuickMenuButton'));
-    await page.click('text=Last 1 year');
+    await page.getByTestId('superDatePickerQuickMenu').getByLabel('Time value').fill('10');
+    await page
+      .getByTestId('superDatePickerQuickMenu')
+      .getByLabel('Time unit')
+      .selectOption('Years');
+    await page.getByTestId('superDatePickerQuickMenu').getByText('Apply').click();
+    await page.mouse.wheel(0, 1000);
     await page.click(byTestId('row-ab240846-8d22-11ed-8fac-52bb19a2321e'));
 
     await page.waitForSelector('text=Test run details');

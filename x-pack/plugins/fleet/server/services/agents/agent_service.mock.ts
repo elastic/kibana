@@ -12,6 +12,7 @@ const createClientMock = (): jest.Mocked<AgentClient> => ({
   getAgentStatusById: jest.fn(),
   getAgentStatusForAgentPolicy: jest.fn(),
   listAgents: jest.fn(),
+  getLatestAgentAvailableVersion: jest.fn(),
 });
 
 const createServiceMock = (): jest.Mocked<AgentService> => ({

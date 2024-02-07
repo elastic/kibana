@@ -13,7 +13,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { type DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { StartServicesAccessor } from '@kbn/core-lifecycle-browser';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
+import {
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+  EmbeddableChangePointType,
+} from '../../common/constants';
 import type { AiopsPluginStart, AiopsPluginStartDeps } from '../types';
 import {
   EmbeddableChangePointChart,
@@ -27,8 +30,6 @@ export interface EmbeddableChangePointChartStartServices {
 export type EmbeddableChangePointChartType = typeof EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
 
 export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefinition {
-  public readonly type = EMBEDDABLE_CHANGE_POINT_CHART_TYPE;
-
   public readonly grouping = [
     {
       id: 'ml',
@@ -41,6 +42,8 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
   ];
 
   constructor(
+    public readonly type: EmbeddableChangePointType,
+    private readonly name: string,
     private readonly getStartServices: StartServicesAccessor<AiopsPluginStartDeps, AiopsPluginStart>
   ) {}
 
@@ -49,9 +52,7 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
   };
 
   getDisplayName() {
-    return i18n.translate('xpack.aiops.embeddableChangePointChartDisplayName', {
-      defaultMessage: 'Change point detection',
-    });
+    return this.name;
   }
 
   canCreateNew() {
@@ -71,10 +72,13 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
 
   async create(input: EmbeddableChangePointChartInput, parent?: IContainer) {
     try {
-      const [{ i18n: i18nService, theme, http, uiSettings, notifications }, { lens, data }] =
-        await this.getStartServices();
+      const [
+        { i18n: i18nService, theme, http, uiSettings, notifications },
+        { lens, data, usageCollection, fieldFormats },
+      ] = await this.getStartServices();
 
       return new EmbeddableChangePointChart(
+        this.type,
         {
           theme,
           http,
@@ -83,6 +87,8 @@ export class EmbeddableChangePointChartFactory implements EmbeddableFactoryDefin
           data,
           notifications,
           lens,
+          usageCollection,
+          fieldFormats,
         },
         input,
         parent

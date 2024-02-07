@@ -29,9 +29,9 @@ import { IInspectorInfo } from '@kbn/data-plugin/common';
 import {
   DataPublicPluginStart,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
 } from '@kbn/data-plugin/public';
-import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -209,7 +209,7 @@ export const SearchExamplesApp = ({
       })
       .subscribe({
         next: (res) => {
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             setResponse(res);
             const aggResult: number | undefined = res.rawResponse.aggregations
@@ -389,7 +389,7 @@ export const SearchExamplesApp = ({
       .subscribe({
         next: (res) => {
           setResponse(res);
-          if (isCompleteResponse(res)) {
+          if (!isRunningResponse(res)) {
             setIsLoading(false);
             notifications.toasts.addSuccess({
               title: 'Query result',

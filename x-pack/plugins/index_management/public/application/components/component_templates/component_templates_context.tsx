@@ -15,8 +15,7 @@ import {
   CoreStart,
   ExecutionContextStart,
 } from '@kbn/core/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { getApi, getUseRequest, getSendRequest, getDocumentation, getBreadcrumbs } from './lib';
+import { getApi, getUseRequest, getSendRequest, getDocumentation } from './lib';
 
 const ComponentTemplatesContext = createContext<Context | undefined>(undefined);
 
@@ -26,7 +25,6 @@ interface Props {
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   docLinks: DocLinksStart;
   toasts: NotificationsSetup['toasts'];
-  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
   getUrlForApp: CoreStart['application']['getUrlForApp'];
   executionContext: ExecutionContextStart;
   overlays: CoreStart['overlays'];
@@ -37,7 +35,6 @@ interface Context {
   apiBasePath: string;
   api: ReturnType<typeof getApi>;
   documentation: ReturnType<typeof getDocumentation>;
-  breadcrumbs: ReturnType<typeof getBreadcrumbs>;
   trackMetric: (type: UiCounterMetricType, eventName: string) => void;
   toasts: NotificationsSetup['toasts'];
   overlays: CoreStart['overlays'];
@@ -59,7 +56,6 @@ export const ComponentTemplatesProvider = ({
     trackMetric,
     docLinks,
     toasts,
-    setBreadcrumbs,
     getUrlForApp,
     executionContext,
   } = value;
@@ -69,7 +65,6 @@ export const ComponentTemplatesProvider = ({
 
   const api = getApi(useRequest, sendRequest, apiBasePath, trackMetric);
   const documentation = getDocumentation(docLinks);
-  const breadcrumbs = getBreadcrumbs(setBreadcrumbs);
 
   return (
     <ComponentTemplatesContext.Provider
@@ -81,7 +76,6 @@ export const ComponentTemplatesProvider = ({
         toasts,
         httpClient,
         apiBasePath,
-        breadcrumbs,
         getUrlForApp,
         executionContext,
       }}

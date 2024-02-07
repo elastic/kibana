@@ -23,6 +23,7 @@ import { euiLightVars as euiVars } from '@kbn/ui-theme';
 
 import {
   getPreviousAgentStatusForOfflineAgents,
+  isAgentInFailedUpgradeState,
   isStuckInUpdating,
 } from '../../../../../../common/services/agent_status';
 
@@ -152,12 +153,19 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
             <p>{lastCheckinText}</p>
             <p>{lastCheckInMessageText}</p>
             {isStuckInUpdating(agent) ? (
-              <p>
+              isAgentInFailedUpgradeState(agent) ? (
                 <FormattedMessage
-                  id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
-                  defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                  id="xpack.fleet.agentHealth.failedUpgradeTooltipText"
+                  defaultMessage="Agent upgrade failed. Consider restarting the upgrade."
                 />
-              </p>
+              ) : (
+                <p>
+                  <FormattedMessage
+                    id="xpack.fleet.agentHealth.restartUpgradeTooltipText"
+                    defaultMessage="Agent may be stuck updating. Consider restarting the upgrade."
+                  />
+                </p>
+              )
             ) : null}
           </>
         }
@@ -183,17 +191,27 @@ export const AgentHealth: React.FunctionComponent<Props> = ({ agent, fromDetails
             size="m"
             color="warning"
             title={
-              <FormattedMessage
-                id="xpack.fleet.agentHealth.stuckUpdatingTitle"
-                defaultMessage="Agent may be stuck updating."
-              />
+              isAgentInFailedUpgradeState(agent) ? (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.failedUpgradeTitle"
+                  defaultMessage="Agent upgrade is stuck in failed state."
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.agentHealth.stuckUpdatingTitle"
+                  defaultMessage="Agent may be stuck updating."
+                />
+              )
             }
           >
             <p>
               <FormattedMessage
                 id="xpack.fleet.agentHealth.stuckUpdatingText"
-                defaultMessage="Agent has been updating for a while, and may be stuck. Consider restarting the upgrade. {learnMore}"
+                defaultMessage="{stuckMessage} Consider restarting the upgrade. {learnMore}"
                 values={{
+                  stuckMessage: isAgentInFailedUpgradeState(agent)
+                    ? 'Agent upgrade failed.'
+                    : 'Agent has been updating for a while, and may be stuck.',
                   learnMore: (
                     <div>
                       <EuiLink href={docLinks.links.fleet.upgradeElasticAgent} target="_blank">

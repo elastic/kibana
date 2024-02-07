@@ -25,6 +25,13 @@ export const dashboardReadonlyBadge = {
     }),
 };
 
+export const dashboardManagedBadge = {
+  getTooltip: () =>
+    i18n.translate('dashboard.badge.managed.tooltip', {
+      defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',
+    }),
+};
+
 /**
  * @param title {string} the current title of the dashboard
  * @param viewMode {DashboardViewMode} the current mode. If in editing state, prepends 'Editing ' to the title.
@@ -141,7 +148,7 @@ export const shareModalStrings = {
 */
 export const getDashboardBreadcrumb = () =>
   i18n.translate('dashboard.dashboardAppBreadcrumbsTitle', {
-    defaultMessage: 'Dashboard',
+    defaultMessage: 'Dashboards',
   });
 
 export const topNavStrings = {

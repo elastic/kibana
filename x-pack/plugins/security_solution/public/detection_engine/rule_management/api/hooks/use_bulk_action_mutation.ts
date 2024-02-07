@@ -7,7 +7,7 @@
 import type { UseMutationOptions } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import type { IHttpFetchError } from '@kbn/core/public';
-import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionErrorResponse, BulkActionResponse, PerformBulkActionProps } from '../api';
 import { performBulkAction } from '../api';
 import { DETECTION_ENGINE_RULES_BULK_ACTION } from '../../../../../common/constants';
@@ -59,8 +59,8 @@ export const useBulkActionMutation = (
         response?.attributes?.results?.updated ?? error?.body?.attributes?.results?.updated;
 
       switch (actionType) {
-        case BulkActionType.enable:
-        case BulkActionType.disable: {
+        case BulkActionTypeEnum.enable:
+        case BulkActionTypeEnum.disable: {
           invalidateFetchRuleByIdQuery();
           invalidateFetchCoverageOverviewQuery();
           if (updatedRules) {
@@ -72,7 +72,7 @@ export const useBulkActionMutation = (
           }
           break;
         }
-        case BulkActionType.delete:
+        case BulkActionTypeEnum.delete:
           invalidateFindRulesQuery();
           invalidateFetchRuleByIdQuery();
           invalidateFetchRuleManagementFilters();
@@ -81,12 +81,12 @@ export const useBulkActionMutation = (
           invalidateFetchPrebuiltRulesUpgradeReviewQuery();
           invalidateFetchCoverageOverviewQuery();
           break;
-        case BulkActionType.duplicate:
+        case BulkActionTypeEnum.duplicate:
           invalidateFindRulesQuery();
           invalidateFetchRuleManagementFilters();
           invalidateFetchCoverageOverviewQuery();
           break;
-        case BulkActionType.edit:
+        case BulkActionTypeEnum.edit:
           if (updatedRules) {
             // We have a list of updated rules, no need to invalidate all
             updateRulesCache(updatedRules);

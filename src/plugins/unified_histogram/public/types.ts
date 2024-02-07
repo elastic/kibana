@@ -9,11 +9,11 @@
 import type { IUiSettingsClient, Capabilities } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { LensPublicStart } from '@kbn/lens-plugin/public';
+import type { LensEmbeddableOutput, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
-import type { Subject } from 'rxjs';
+import type { Observable, Subject } from 'rxjs';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -65,6 +65,10 @@ export interface UnifiedHistogramChartLoadEvent {
    * Inspector adapters for the request
    */
   adapters: UnifiedHistogramAdapters;
+  /**
+   * Observable of the lens embeddable output
+   */
+  embeddableOutput$?: Observable<LensEmbeddableOutput>;
 }
 
 /**

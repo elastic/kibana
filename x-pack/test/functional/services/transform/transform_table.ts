@@ -6,6 +6,9 @@
  */
 
 import expect from '@kbn/expect';
+import { asyncForEach } from '@kbn/std';
+
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -19,10 +22,11 @@ type TransformRowActionName =
   | 'Stop'
   | 'Reauthorize';
 
-export function TransformTableProvider({ getService }: FtrProviderContext) {
+export function TransformTableProvider({ getPageObject, getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const commonPage = getPageObject('common');
   const browser = getService('browser');
   const ml = getService('ml');
 
@@ -89,20 +93,47 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await this.waitForRefreshButtonLoaded();
       await testSubjects.click('~transformRefreshTransformListButton');
       await this.waitForRefreshButtonLoaded();
-      await this.waitForTransformsToLoad();
+      await this.waitForTransformsTableToLoad();
     }
 
-    public async waitForTransformsToLoad() {
+    public async waitForTransformsTableToStartLoading() {
+      await testSubjects.existOrFail(`~transformListTable`, { timeout: 60 * 1000 });
+
+      // After invoking an action that caused the table to start loading, the loading
+      // should start quickly after the table exists. Sometimes it is even so quick that
+      // the loading is already done when we try to check for it, so we're not failing
+      // in that case and just move on.
+      await testSubjects.exists(`transformListTable loading`, { timeout: 3 * 1000 });
+    }
+
+    public async waitForTransformsTableToLoad() {
       await testSubjects.existOrFail('~transformListTable', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('transformListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
-      await this.waitForTransformsToLoad();
+    async getSearchInput(): Promise<WebElementWrapper> {
       const tableListContainer = await testSubjects.find('transformListTableContainer');
-      const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
+      return await tableListContainer.findByClassName('euiFieldSearch');
+    }
+
+    public async assertSearchInputValue(expectedSearchValue: string) {
+      const searchBarInput = await this.getSearchInput();
+      const actualSearchValue = await searchBarInput.getAttribute('value');
+      expect(actualSearchValue).to.eql(
+        expectedSearchValue,
+        `Search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
+      );
+    }
+
+    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await this.waitForTransformsTableToLoad();
+      const searchBarInput = await this.getSearchInput();
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+      await commonPage.pressEnterKey();
+      await this.assertSearchInputValue(filter);
+      await this.waitForTransformsTableToStartLoading();
+      await this.waitForTransformsTableToLoad();
 
       const rows = await this.parseTransformTable();
       const filteredRows = rows.filter((row) => row.id === filter);
@@ -113,7 +144,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async clearSearchString(expectedRowCount: number = 1) {
-      await this.waitForTransformsToLoad();
+      await this.waitForTransformsTableToLoad();
       const tableListContainer = await testSubjects.find('transformListTableContainer');
       const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
       await searchBarInput.clearValueWithKeyboard();
@@ -396,19 +427,23 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
-    public async assertTransformRowActionsButtonEnabled(
-      transformId: string,
-      expectedValue: boolean
-    ) {
-      const isEnabled = await testSubjects.isEnabled(
-        this.rowSelector(transformId, 'euiCollapsedItemActionsButton')
+    public async assertTransformRowActionsEnabled(transformId: string, expectedValue: boolean) {
+      await this.ensureTransformActionsMenuOpen(transformId);
+
+      // Check whether all menu actions are disabled
+      let allDisabled = true;
+      const actions = await find.allByCssSelector('.euiBasicTable__collapsedAction');
+      await asyncForEach(actions, async (action) => {
+        if (await action.isEnabled()) {
+          allDisabled = false;
+        }
+      });
+      expect(allDisabled).to.eql(
+        !expectedValue,
+        `Expected all transform row actions to '${expectedValue ? 'not' : ''}' be disabled.`
       );
-      expect(isEnabled).to.eql(
-        expectedValue,
-        `Expected transform row actions button to be '${
-          expectedValue ? 'enabled' : 'disabled'
-        }' (got '${isEnabled ? 'enabled' : 'disabled'}')`
-      );
+
+      await this.ensureTransformActionsMenuClosed();
     }
 
     public async assertTransformRowActions(transformId: string, isTransformRunning = false) {

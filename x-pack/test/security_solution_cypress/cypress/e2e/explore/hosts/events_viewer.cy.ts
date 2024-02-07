@@ -22,7 +22,8 @@ import {
   closeFieldsBrowser,
   filterFieldsBrowser,
 } from '../../../tasks/fields_browser';
-import { login, visit } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import { openEvents } from '../../../tasks/hosts/main';
 import {
   addsHostGeoCityNameToHeader,
@@ -32,8 +33,9 @@ import {
 } from '../../../tasks/hosts/events';
 import { kqlSearch } from '../../../tasks/security_header';
 
-import { HOSTS_URL } from '../../../urls/navigation';
+import { hostsUrl } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
+import { DATA_GRID_EMPTY_STATE } from '../../../screens/events_viewer';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
@@ -45,19 +47,19 @@ const defaultHeadersInDefaultEcsCategory = [
   { id: 'destination.ip' },
 ];
 
-describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Events Viewer', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat_big' });
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_big');
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   context('Fields rendering', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -82,7 +84,7 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events viewer fields behaviour', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       openEventsViewerFieldsBrowser();
     });
@@ -110,19 +112,17 @@ describe('Events Viewer', { tags: ['@ess', '@brokenInServerless'] }, () => {
   context('Events behavior', () => {
     beforeEach(() => {
       login();
-      visit(HOSTS_URL);
+      visitWithTimeRange(hostsUrl('allHosts'));
       openEvents();
       waitsForEventsToBeLoaded();
     });
 
     it('filters the events by applying filter criteria from the search bar at the top of the page', () => {
       const filterInput = 'aa7ca589f1b8220002f2fc61c64cfbf1'; // this will never match real data
-      cy.get(SERVER_SIDE_EVENT_COUNT)
-        .invoke('text')
-        .then((initialNumberOfEvents) => {
-          kqlSearch(`${filterInput}{enter}`);
-          cy.get(SERVER_SIDE_EVENT_COUNT).should('not.have.text', initialNumberOfEvents);
-        });
+      cy.get(SERVER_SIDE_EVENT_COUNT).should('exist');
+      kqlSearch(`${filterInput}{enter}`);
+      cy.get(SERVER_SIDE_EVENT_COUNT).should('not.exist');
+      cy.get(DATA_GRID_EMPTY_STATE).should('exist');
     });
   });
 });

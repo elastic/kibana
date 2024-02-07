@@ -9,14 +9,9 @@ import React, { useState } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';
-import {
-  ObservabilityAIAssistantActionMenuItem,
-  useObservabilityAIAssistantOptional,
-} from '@kbn/observability-ai-assistant-plugin/public';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EmbedAction } from '../../header/embed_action';
-import { ObservabilityAppServices } from '../../../../../application/types';
 import { AddToCaseAction } from '../../header/add_to_case_action';
+import { useKibana } from '../../hooks/use_kibana';
 
 export function ExpViewActionMenuContent({
   timeRange,
@@ -25,15 +20,15 @@ export function ExpViewActionMenuContent({
   timeRange?: { from: string; to: string };
   lensAttributes: TypedLensByValueInput['attributes'] | null;
 }) {
-  const kServices = useKibana<ObservabilityAppServices>().services;
-
-  const { lens, isDev } = kServices;
+  const {
+    lens,
+    isDev,
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibana().services;
 
   const [isSaveOpen, setIsSaveOpen] = useState(false);
 
   const LensSaveModalComponent = lens.SaveModalComponent;
-
-  const service = useObservabilityAIAssistantOptional();
 
   return (
     <>
@@ -99,7 +94,7 @@ export function ExpViewActionMenuContent({
             })}
           </EuiButton>
         </EuiFlexItem>
-        {service?.isEnabled() ? (
+        {ObservabilityAIAssistantActionMenuItem ? (
           <EuiFlexItem>
             <ObservabilityAIAssistantActionMenuItem />
           </EuiFlexItem>

@@ -17,6 +17,7 @@ import { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import { CoreUsageDataStart } from '@kbn/core-usage-data-server';
 import { CustomBrandingStart } from '@kbn/core-custom-branding-server';
+import { PluginsServiceStart } from '@kbn/core-plugins-contracts-server';
 
 /**
  * Context passed to the plugins `start` method.
@@ -46,4 +47,6 @@ export interface CoreStart {
   uiSettings: UiSettingsServiceStart;
   /** @internal {@link CoreUsageDataStart} */
   coreUsageData: CoreUsageDataStart;
+  /** {@link PluginsServiceStart} */
+  plugins: PluginsServiceStart;
 }

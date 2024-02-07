@@ -116,7 +116,9 @@ it(`#setup returns exposed services`, () => {
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockLicense);
 
   expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
-  expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function));
+  expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function), {
+    capabilityPath: '*',
+  });
 });
 
 describe('#start', () => {

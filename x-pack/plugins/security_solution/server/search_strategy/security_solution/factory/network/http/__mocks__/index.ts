@@ -6,13 +6,14 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkHttpRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type {
+import type { SortField } from '../../../../../../../common/search_strategy';
+import {
+  Direction,
+  NetworkQueries,
   NetworkDnsFields,
-  NetworkHttpRequestOptions,
-  SortField,
 } from '../../../../../../../common/search_strategy';
-import { Direction, NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkHttpRequestOptions = {
   defaultIndex: [
@@ -28,7 +29,10 @@ export const mockOptions: NetworkHttpRequestOptions = {
   factoryQueryType: NetworkQueries.http,
   filterQuery: '{"bool":{"must":[],"filter":[{"match_all":{}}],"should":[],"must_not":[]}}',
   pagination: { activePage: 0, cursorStart: 0, fakePossibleCount: 50, querySize: 10 },
-  sort: { direction: Direction.desc } as SortField<NetworkDnsFields>,
+  sort: {
+    direction: Direction.desc,
+    field: NetworkDnsFields.dnsName,
+  } as SortField<NetworkDnsFields>,
   timerange: { interval: '12h', from: '2020-09-13T09:00:43.249Z', to: '2020-09-14T09:00:43.249Z' },
 } as NetworkHttpRequestOptions;
 

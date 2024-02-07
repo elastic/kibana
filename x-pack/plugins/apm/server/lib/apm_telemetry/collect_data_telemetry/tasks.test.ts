@@ -12,6 +12,7 @@ import {
   SERVICE_NAME,
   SERVICE_ENVIRONMENT,
 } from '../../../../common/es_fields/apm';
+import { IndicesStatsResponse } from '../telemetry_client';
 
 describe('data telemetry collection tasks', () => {
   const indices = {
@@ -157,6 +158,66 @@ describe('data telemetry collection tasks', () => {
             expected_metric_document_count: 1250,
             transaction_count: 5000,
             ratio: 0.25,
+          },
+        },
+      });
+    });
+  });
+
+  describe('global_labels', () => {
+    const task = tasks.find((t) => t.name === 'global_labels');
+
+    it('returns count of global labels when present', async () => {
+      const fieldCaps = jest.fn().mockResolvedValue({
+        indices: [
+          '.ds-metrics-apm.service_destination.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.service_summary.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.service_transaction.1m-default-2023.09.26-000005',
+          '.ds-metrics-apm.transaction.1m-default-2023.09.26-000005',
+        ],
+        fields: {
+          'labels.telemetry_auto_version': {
+            keyword: {
+              type: 'keyword',
+              metadata_field: false,
+              searchable: true,
+              aggregatable: true,
+            },
+          },
+          labels: {
+            object: {
+              type: 'object',
+              metadata_field: false,
+              searchable: false,
+              aggregatable: false,
+            },
+          },
+        },
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+      ).toEqual({
+        counts: {
+          global_labels: {
+            '1d': 1,
+          },
+        },
+      });
+    });
+
+    it('returns 0 count of global labels when not present', async () => {
+      const fieldCaps = jest.fn().mockResolvedValue({
+        indices: [],
+        fields: {},
+      });
+
+      expect(
+        await task?.executor({ indices, telemetryClient: { fieldCaps } } as any)
+      ).toEqual({
+        counts: {
+          global_labels: {
+            '1d': 0,
           },
         },
       });
@@ -376,74 +437,223 @@ describe('data telemetry collection tasks', () => {
     const task = tasks.find((t) => t.name === 'indices_stats');
 
     it('returns a map of index stats', async () => {
-      const indicesStats = jest.fn().mockResolvedValue({
-        _all: { total: { docs: { count: 1 }, store: { size_in_bytes: 1 } } },
-        _shards: { total: 1 },
-      });
-
-      const statsResponse = {
-        shards: {
-          total: 1,
+      const indicesStatsResponse: IndicesStatsResponse = {
+        _shards: {
+          total: 2,
         },
-        all: {
+        _all: {
           total: {
+            store: {
+              size_in_bytes: 100,
+            },
+            docs: {
+              count: 2,
+            },
+          },
+          primaries: {
             docs: {
               count: 1,
             },
             store: {
-              size_in_bytes: 1,
+              size_in_bytes: 50,
+              total_data_set_size_in_bytes: 50,
             },
           },
         },
       };
 
+      const searchResponse = {
+        aggregations: {
+          metricsets: {
+            buckets: [
+              {
+                key: 'service_transaction',
+                doc_count: 3240,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'transaction',
+                doc_count: 3240,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 1080,
+                      metrics_value_count: {
+                        value: 6,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'service_destination',
+                doc_count: 1620,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '10m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                    {
+                      key: '1m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 540,
+                      metrics_value_count: {
+                        value: 3,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'service_summary',
+                doc_count: 30,
+                rollup_interval: {
+                  buckets: [
+                    {
+                      key: '1m',
+                      doc_count: 12,
+                      metrics_value_count: {
+                        value: 12,
+                      },
+                    },
+                    {
+                      key: '10m',
+                      doc_count: 9,
+                      metrics_value_count: {
+                        value: 9,
+                      },
+                    },
+                    {
+                      key: '60m',
+                      doc_count: 9,
+                      metrics_value_count: {
+                        value: 9,
+                      },
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'span_breakdown',
+                doc_count: 12,
+                rollup_interval: {
+                  buckets: [],
+                },
+              },
+              {
+                key: 'app',
+                doc_count: 6,
+                rollup_interval: {
+                  buckets: [],
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
+      const search = jest.fn().mockResolvedValue(searchResponse);
+
       expect(
         await task?.executor({
           indices,
-          telemetryClient: { indicesStats },
-        } as any)
-      ).toEqual({
-        indices: {
-          ...statsResponse,
-          metric: statsResponse,
-          traces: statsResponse,
-        },
-      });
-    });
-
-    describe('with no results', () => {
-      it('returns zero values', async () => {
-        const indicesStats = jest.fn().mockResolvedValue({});
-
-        const statsResponse = {
-          shards: {
-            total: 0,
+          telemetryClient: {
+            indicesStats,
+            search,
           },
-          all: {
-            total: {
-              docs: {
-                count: 0,
-              },
-              store: {
-                size_in_bytes: 0,
-              },
+        } as any)
+      ).toMatchSnapshot();
+    });
+    it('with no results', async () => {
+      const indicesStatsResponse: IndicesStatsResponse = {
+        _shards: {
+          total: 0,
+        },
+        _all: {
+          total: {
+            store: {
+              size_in_bytes: 0,
+            },
+            docs: {
+              count: 0,
             },
           },
-        };
-
-        expect(
-          await task?.executor({
-            indices,
-            telemetryClient: { indicesStats },
-          } as any)
-        ).toEqual({
-          indices: {
-            ...statsResponse,
-            metric: statsResponse,
-            traces: statsResponse,
+          primaries: {
+            docs: {
+              count: 0,
+            },
+            store: {
+              size_in_bytes: 0,
+              total_data_set_size_in_bytes: 0,
+            },
           },
-        });
-      });
+        },
+      };
+
+      const searchResponse = {};
+
+      const indicesStats = jest.fn().mockResolvedValue(indicesStatsResponse);
+      const search = jest.fn().mockResolvedValue(searchResponse);
+
+      expect(
+        await task?.executor({
+          indices,
+          telemetryClient: {
+            indicesStats,
+            search,
+          },
+        } as any)
+      ).toMatchSnapshot();
     });
   });
 
@@ -585,6 +795,58 @@ describe('data telemetry collection tasks', () => {
       ).toEqual({
         service_groups: {
           kuery_fields: ['service.environment', 'agent.name'],
+          total: 2,
+        },
+      });
+    });
+  });
+
+  describe('custom dashboards', () => {
+    const task = tasks.find((t) => t.name === 'custom_dashboards');
+    const savedObjectsClient = savedObjectsClientMock.create();
+
+    it('returns custom dashboards stats from all spaces', async () => {
+      savedObjectsClient.find.mockResolvedValueOnce({
+        page: 1,
+        per_page: 500,
+        total: 2,
+        saved_objects: [
+          {
+            type: 'apm-custom-dashboards',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['default'],
+            attributes: {
+              dashboardSavedObjectId: 'foo-id',
+              serviceEnvironmentFilterEnabled: true,
+              serviceNameFilterEnabled: true,
+              kuery: 'service.name: frontend and service.environment: prod',
+            },
+            references: [],
+            score: 1,
+          },
+          {
+            type: 'apm-custom-dashboards',
+            id: '0b6157f0-44bd-11ed-bdb7-bffab551cd4d',
+            namespaces: ['space-1'],
+            attributes: {
+              dashboardSavedObjectId: 'bar-id',
+              serviceEnvironmentFilterEnabled: true,
+              serviceNameFilterEnabled: true,
+              kuery: 'service.name: frontend',
+            },
+            references: [],
+            score: 0,
+          },
+        ],
+      });
+
+      expect(
+        await task?.executor({
+          savedObjectsClient,
+        } as any)
+      ).toEqual({
+        custom_dashboards: {
+          kuery_fields: ['service.name', 'service.environment'],
           total: 2,
         },
       });

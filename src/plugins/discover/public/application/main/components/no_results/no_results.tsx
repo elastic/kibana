@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
-import { SearchResponseWarnings } from '@kbn/search-response-warnings';
+import { SearchResponseWarningsEmptyPrompt } from '@kbn/search-response-warnings';
 import { NoResultsSuggestions } from './no_results_suggestions';
 import type { DiscoverStateContainer } from '../../services/discover_state';
 import { useDataState } from '../../hooks/use_data_state';
@@ -37,13 +37,7 @@ export function DiscoverNoResults({
   const interceptedWarnings = useDataState(documents$).interceptedWarnings;
 
   if (interceptedWarnings?.length) {
-    return (
-      <SearchResponseWarnings
-        variant="empty_prompt"
-        interceptedWarnings={interceptedWarnings}
-        data-test-subj="dscNoResultsInterceptedWarningsCallout"
-      />
-    );
+    return <SearchResponseWarningsEmptyPrompt warnings={interceptedWarnings} />;
   }
 
   return (

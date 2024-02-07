@@ -11,7 +11,13 @@ import { schema, TypeOf, offeringBasedSchema } from '@kbn/config-schema';
 export const configSchema = schema.object({
   analyticsNoDataPageFlavor: offeringBasedSchema({
     serverless: schema.oneOf(
-      [schema.oneOf([schema.literal('kibana'), schema.literal('serverless_search')])],
+      [
+        schema.oneOf([
+          schema.literal('kibana'),
+          schema.literal('serverless_search'),
+          schema.literal('serverless_observability'),
+        ]),
+      ],
       { defaultValue: 'kibana' as const }
     ),
   }),

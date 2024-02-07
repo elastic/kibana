@@ -22,6 +22,7 @@ interface UpdateIndexMappingsOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   totalFieldsLimit: number;
+  validIndexPrefixes?: string[];
   concreteIndices: ConcreteIndexInfo[];
 }
 
@@ -107,22 +108,42 @@ export const updateIndexMappings = async ({
   esClient,
   totalFieldsLimit,
   concreteIndices,
+  validIndexPrefixes,
 }: UpdateIndexMappingsOpts) => {
+  let validConcreteIndices = [];
+  if (validIndexPrefixes) {
+    for (const cIdx of concreteIndices) {
+      if (!validIndexPrefixes?.some((prefix: string) => cIdx.index.startsWith(prefix))) {
+        logger.warn(
+          `Found unexpected concrete index name "${
+            cIdx.index
+          }" while expecting index with one of the following prefixes: [${validIndexPrefixes.join(
+            ','
+          )}] Not updating mappings or settings for this index.`
+        );
+      } else {
+        validConcreteIndices.push(cIdx);
+      }
+    }
+  } else {
+    validConcreteIndices = concreteIndices;
+  }
+
   logger.debug(
-    `Updating underlying mappings for ${concreteIndices.length} indices / data streams.`
+    `Updating underlying mappings for ${validConcreteIndices.length} indices / data streams.`
   );
 
   // Update total field limit setting of found indices
   // Other index setting changes are not updated at this time
   await Promise.all(
-    concreteIndices.map((index) =>
+    validConcreteIndices.map((index) =>
       updateTotalFieldLimitSetting({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );
 
   // Update mappings of the found indices.
   await Promise.all(
-    concreteIndices.map((index) =>
+    validConcreteIndices.map((index) =>
       updateUnderlyingMapping({ logger, esClient, totalFieldsLimit, concreteIndexInfo: index })
     )
   );

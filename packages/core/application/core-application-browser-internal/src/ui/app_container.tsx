@@ -22,6 +22,7 @@ import {
   type AppUnmount,
   type ScopedHistory,
 } from '@kbn/core-application-browser';
+import { ThrowIfError } from '@kbn/shared-ux-error-boundary';
 import type { Mounter } from '../types';
 import { AppNotFound } from './app_not_found_screen';
 
@@ -51,6 +52,7 @@ export const AppContainer: FC<Props> = ({
   theme$,
   showPlainSpinner,
 }: Props) => {
+  const [error, setError] = useState<Error | null>(null);
   const [showSpinner, setShowSpinner] = useState(true);
   const [appNotFound, setAppNotFound] = useState(false);
   const elementRef = useRef<HTMLDivElement>(null);
@@ -87,14 +89,14 @@ export const AppContainer: FC<Props> = ({
             setHeaderActionMenu: (menuMount) => setAppActionMenu(appId, menuMount),
           })) || null;
       } catch (e) {
-        // TODO: add error UI
+        setError(e);
         // eslint-disable-next-line no-console
         console.error(e);
       } finally {
         if (elementRef.current) {
           setShowSpinner(false);
-          setIsMounting(false);
         }
+        setIsMounting(false);
       }
     };
 
@@ -115,6 +117,7 @@ export const AppContainer: FC<Props> = ({
 
   return (
     <Fragment>
+      <ThrowIfError error={error} />
       {appNotFound && <AppNotFound />}
       {showSpinner && !appNotFound && (
         <AppLoadingPlaceholder showPlainSpinner={Boolean(showPlainSpinner)} />

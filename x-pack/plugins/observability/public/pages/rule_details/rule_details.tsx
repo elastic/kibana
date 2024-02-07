@@ -17,6 +17,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { PageTitle } from './components/page_title';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -39,7 +40,6 @@ import {
 } from '../../utils/alert_summary_widget';
 import type { AlertStatus } from '../../../common/typings';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
-import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
@@ -50,7 +50,7 @@ export function RuleDetailsPage() {
   const {
     application: { capabilities, navigateToUrl },
     charts: {
-      theme: { useChartsBaseTheme, useChartsTheme },
+      theme: { useChartsBaseTheme },
     },
     http: { basePath },
     share: {
@@ -70,7 +70,6 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
 
-  const theme = useChartsTheme();
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
@@ -85,6 +84,7 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       href: basePath.prepend(paths.observability.alerts),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       href: basePath.prepend(paths.observability.rules),
@@ -103,7 +103,7 @@ export function RuleDetailsPage() {
 
     return urlTabId && [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB].includes(urlTabId)
       ? (urlTabId as TabId)
-      : RULE_DETAILS_EXECUTION_TAB;
+      : RULE_DETAILS_ALERTS_TAB;
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
@@ -233,7 +233,7 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={{ theme, baseTheme }}
+            chartProps={{ baseTheme }}
             featureIds={featureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}

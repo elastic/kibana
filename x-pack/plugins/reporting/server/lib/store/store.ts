@@ -7,13 +7,17 @@
 
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+import type {
+  ExecutionError,
+  ReportDocument,
+  ReportOutput,
+  ReportSource,
+} from '@kbn/reporting-common/types';
 import moment from 'moment';
-import type { IReport, Report, ReportDocument } from '.';
+import type { Report } from '.';
 import { SavedReport } from '.';
-import { statuses } from '..';
 import type { ReportingCore } from '../..';
-import { ILM_POLICY_NAME, REPORTING_SYSTEM_INDEX } from '../../../common/constants';
-import type { JobStatus, ReportOutput, ReportSource } from '../../../common/types';
 import type { ReportTaskParams } from '../tasks';
 import { IlmPolicyManager } from './ilm_policy_manager';
 import { indexTimestamp } from './index_timestamp';
@@ -36,10 +40,11 @@ export type ReportProcessingFields = Required<{
   process_expiration: Report['process_expiration'];
 }>;
 
-export type ReportFailedFields = Required<{
-  completed_at: Report['completed_at'];
+export interface ReportFailedFields {
   output: ReportOutput | null;
-}>;
+  completed_at?: Report['completed_at'];
+  error?: ExecutionError | unknown;
+}
 
 export type ReportCompletedFields = Required<{
   completed_at: Report['completed_at'];
@@ -53,7 +58,7 @@ export interface ReportRecordTimeout {
   _id: string;
   _index: string;
   _source: {
-    status: JobStatus;
+    status: JOB_STATUS;
     process_expiration?: string;
   };
 }
@@ -65,6 +70,20 @@ const sourceDoc = (doc: Partial<ReportSource>): Partial<ReportSource> => {
   return {
     ...doc,
     migration_version: MIGRATION_VERSION,
+  };
+};
+
+const esDoc = (
+  report: SavedReport,
+  doc: Partial<ReportSource>
+): Parameters<ElasticsearchClient['update']>[0] => {
+  return {
+    id: report._id,
+    index: report._index,
+    if_seq_no: report._seq_no,
+    if_primary_term: report._primary_term,
+    refresh: false,
+    body: { doc },
   };
 };
 
@@ -86,7 +105,6 @@ export class ReportingStore {
   private readonly indexPrefix: string; // config setting of index prefix in system index name
   private readonly indexInterval: string; // config setting of index prefix: how often to poll for pending work
   private client?: ElasticsearchClient;
-  private ilmPolicyManager?: IlmPolicyManager;
   config: ReportingCore['config'];
 
   constructor(private reportingCore: ReportingCore, private logger: Logger) {
@@ -107,7 +125,7 @@ export class ReportingStore {
 
   private async getIlmPolicyManager() {
     const client = await this.getClient();
-    return (this.ilmPolicyManager = IlmPolicyManager.create({ client }));
+    return IlmPolicyManager.create({ client });
   }
 
   private async createIndex(indexName: string) {
@@ -166,7 +184,7 @@ export class ReportingStore {
         ...sourceDoc({
           process_expiration: new Date(0).toISOString(),
           attempts: 0,
-          status: statuses.JOB_STATUS_PENDING,
+          status: JOB_STATUS.PENDING,
         }),
       },
     };
@@ -263,6 +281,7 @@ export class ReportingStore {
         meta: document._source?.meta,
         metrics: document._source?.metrics,
         payload: document._source?.payload,
+        error: document._source?.error,
         process_expiration: document._source?.process_expiration,
         status: document._source?.status,
         timeout: document._source?.timeout,
@@ -273,7 +292,7 @@ export class ReportingStore {
           `[id: ${taskJson.id}] [index: ${taskJson.index}]`
       );
       this.logger.error(err);
-      this.reportingCore.getEventLogger({ _id: taskJson.id } as IReport).logError(err);
+      this.reportingCore.getEventLogger({ _id: taskJson.id }).logError(err);
       throw err;
     }
   }
@@ -284,20 +303,13 @@ export class ReportingStore {
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...processingInfo,
-      status: statuses.JOB_STATUS_PROCESSING,
+      status: JOB_STATUS.PROCESSING,
     });
 
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to processing! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -323,20 +335,35 @@ export class ReportingStore {
   ): Promise<UpdateResponse<ReportDocument>> {
     const doc = sourceDoc({
       ...failedInfo,
-      status: statuses.JOB_STATUS_FAILED,
+      status: JOB_STATUS.FAILED,
     });
 
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
+    } catch (err) {
+      this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
+      throw err;
+    }
+
+    this.reportingCore.getEventLogger(report).logReportFailure();
+
+    return body;
+  }
+
+  public async setReportError(
+    report: SavedReport,
+    errorInfo: Pick<ReportFailedFields, 'error' | 'output'>
+  ): Promise<UpdateResponse<ReportDocument>> {
+    const doc = sourceDoc({
+      ...errorInfo,
+    });
+
+    let body: UpdateResponse<ReportDocument>;
+    try {
+      const client = await this.getClient();
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to failed! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -354,8 +381,8 @@ export class ReportingStore {
     const { output } = completedInfo;
     const status =
       output && output.warnings && output.warnings.length > 0
-        ? statuses.JOB_STATUS_WARNINGS
-        : statuses.JOB_STATUS_COMPLETED;
+        ? JOB_STATUS.WARNINGS
+        : JOB_STATUS.COMPLETED;
     const doc = sourceDoc({
       ...completedInfo,
       status,
@@ -364,14 +391,7 @@ export class ReportingStore {
     let body: UpdateResponse<ReportDocument>;
     try {
       const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
+      body = await client.update<unknown, unknown, ReportDocument>(esDoc(report, doc));
     } catch (err) {
       this.logError(`Error in updating status to complete! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
       throw err;
@@ -380,70 +400,6 @@ export class ReportingStore {
     this.reportingCore.getEventLogger(report).logReportSaved();
 
     return body;
-  }
-
-  public async prepareReportForRetry(report: SavedReport): Promise<UpdateResponse<ReportDocument>> {
-    const doc = sourceDoc({
-      status: statuses.JOB_STATUS_PENDING,
-      process_expiration: null,
-    });
-
-    let body: UpdateResponse<ReportDocument>;
-    try {
-      const client = await this.getClient();
-      body = await client.update<unknown, unknown, ReportDocument>({
-        id: report._id,
-        index: report._index,
-        if_seq_no: report._seq_no,
-        if_primary_term: report._primary_term,
-        refresh: false,
-        body: { doc },
-      });
-    } catch (err) {
-      this.logError(`Error in clearing expiration and status for retry! Report: ${jobDebugMessage(report)}`, err, report); // prettier-ignore
-      throw err;
-    }
-
-    return body;
-  }
-
-  /*
-   * A report needs to be rescheduled when:
-   *   1. An older version of Kibana created jobs with ESQueue, and they have
-   *   not yet started running.
-   *   2. The report process_expiration field is overdue, which happens if the
-   *   report runs too long or Kibana restarts during execution
-   */
-  public async findStaleReportJob(): Promise<ReportRecordTimeout> {
-    const client = await this.getClient();
-
-    const expiredFilter = {
-      bool: {
-        must: [
-          { range: { process_expiration: { lt: `now` } } },
-          { terms: { status: [statuses.JOB_STATUS_PROCESSING] } },
-        ],
-      },
-    };
-    const oldVersionFilter = {
-      bool: {
-        must: [{ terms: { status: [statuses.JOB_STATUS_PENDING] } }],
-        must_not: [{ exists: { field: 'migration_version' } }],
-      },
-    };
-
-    const body = await client.search<ReportRecordTimeout['_source']>({
-      size: 1,
-      index: this.indexPrefix + '-*',
-      seq_no_primary_term: true,
-      _source_excludes: ['output'],
-      body: {
-        sort: { created_at: { order: 'asc' as const } }, // find the oldest first
-        query: { bool: { filter: { bool: { should: [expiredFilter, oldVersionFilter] } } } },
-      },
-    });
-
-    return body.hits?.hits[0] as ReportRecordTimeout;
   }
 
   public getReportingIndexPattern(): string {

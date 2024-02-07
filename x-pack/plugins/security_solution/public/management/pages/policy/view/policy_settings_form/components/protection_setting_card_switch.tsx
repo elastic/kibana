@@ -22,6 +22,7 @@ import type { LinuxPolicyProtection, MacPolicyProtection, PolicyProtection } fro
 
 export interface ProtectionSettingCardSwitchProps extends PolicyFormComponentCommonProps {
   protection: PolicyProtection;
+  selected: boolean;
   protectionLabel?: string;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   additionalOnSwitchChange?: ({
@@ -44,12 +45,12 @@ export const ProtectionSettingCardSwitch = React.memo(
     onChange,
     policy,
     mode,
+    selected,
     'data-test-subj': dataTestSubj,
   }: ProtectionSettingCardSwitchProps) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isEditMode = mode === 'edit';
-    const selected = (policy && policy.windows[protection].mode) !== ProtectionModes.off;
 
     const switchLabel = useMemo(() => {
       return i18n.translate('xpack.securitySolution.endpoint.policy.details.protectionsEnabled', {

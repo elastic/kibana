@@ -61,6 +61,7 @@ export const DonutChart = ({ height, down, up }: DonutChartProps) => {
           <Settings
             theme={[themeOverrides, chartTheme.theme ?? {}]}
             baseTheme={chartTheme.baseTheme}
+            locale={i18n.getLocale()}
           />
           <Partition
             id="spec_1"

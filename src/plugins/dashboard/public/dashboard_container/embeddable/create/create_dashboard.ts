@@ -5,30 +5,50 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { Subject } from 'rxjs';
-import { cloneDeep, identity, pickBy } from 'lodash';
-
 import {
   ControlGroupInput,
   CONTROL_GROUP_TYPE,
   getDefaultControlGroupInput,
+  getDefaultControlGroupPersistableInput,
 } from '@kbn/controls-plugin/common';
-import { TimeRange } from '@kbn/es-query';
-import { isErrorEmbeddable, ViewMode } from '@kbn/embeddable-plugin/public';
-import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
-import { type ControlGroupContainer, ControlGroupOutput } from '@kbn/controls-plugin/public';
+import {
+  ControlGroupContainerFactory,
+  ControlGroupOutput,
+  type ControlGroupContainer,
+} from '@kbn/controls-plugin/public';
 import { GlobalQueryStateFromUrl, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
-
-import { DashboardContainerInput } from '../../../../common';
-import { DashboardContainer } from '../dashboard_container';
+import {
+  EmbeddableFactory,
+  isErrorEmbeddable,
+  reactEmbeddableRegistryHasKey,
+  ViewMode,
+} from '@kbn/embeddable-plugin/public';
+import { TimeRange } from '@kbn/es-query';
+import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { cloneDeep, identity, omit, pickBy } from 'lodash';
+import { Subject } from 'rxjs';
+import { v4 } from 'uuid';
+import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
+import {
+  DEFAULT_DASHBOARD_INPUT,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+  GLOBAL_STATE_STORAGE_KEY,
+} from '../../../dashboard_constants';
+import {
+  LoadDashboardReturn,
+  SavedDashboardInput,
+} from '../../../services/dashboard_content_management/types';
 import { pluginServices } from '../../../services/plugin_services';
+import { panelPlacementStrategies } from '../../component/panel_placement/place_new_panel_strategies';
+import { startDiffingDashboardState } from '../../state/diffing/dashboard_diffing_integration';
+import { DashboardPublicState } from '../../types';
+import { DashboardContainer } from '../dashboard_container';
 import { DashboardCreationOptions } from '../dashboard_container_factory';
-import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
-import { LoadDashboardReturn } from '../../../services/dashboard_content_management/types';
-import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
-import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../../../dashboard_constants';
 import { startSyncingDashboardControlGroup } from './controls/dashboard_control_group_integration';
+import { startSyncingDashboardDataViews } from './data_views/sync_dashboard_data_views';
 import { startDashboardSearchSessionIntegration } from './search_sessions/start_dashboard_search_session_integration';
+import { syncUnifiedSearchState } from './unified_search/sync_dashboard_unified_search_state';
 
 /**
  * Builds a new Dashboard from scratch.
@@ -59,18 +79,14 @@ export const createDashboard = async (
   // Lazy load required systems and Dashboard saved object.
   // --------------------------------------------------------------------------------------
   const reduxEmbeddablePackagePromise = lazyLoadReduxToolsPackage();
-  const defaultDataViewAssignmentPromise = dataViews.getDefaultDataView();
+  const defaultDataViewExistsPromise = dataViews.defaultDataViewExists();
   const dashboardSavedObjectPromise = loadDashboardState({ id: savedObjectId });
 
-  const [reduxEmbeddablePackage, savedObjectResult, defaultDataView] = await Promise.all([
+  const [reduxEmbeddablePackage, savedObjectResult] = await Promise.all([
     reduxEmbeddablePackagePromise,
     dashboardSavedObjectPromise,
-    defaultDataViewAssignmentPromise,
+    defaultDataViewExistsPromise /* the result is not used, but the side effect of setting the default data view is needed. */,
   ]);
-
-  if (!defaultDataView) {
-    throw new Error('Dashboard requires at least one data view before it can be initialized.');
-  }
 
   // --------------------------------------------------------------------------------------
   // Initialize Dashboard integrations
@@ -84,19 +100,38 @@ export const createDashboard = async (
   const { input, searchSessionId } = initializeResult;
 
   // --------------------------------------------------------------------------------------
-  // Build and return the dashboard container.
+  // Build the dashboard container.
   // --------------------------------------------------------------------------------------
+  const initialComponentState: DashboardPublicState = {
+    lastSavedInput: omit(savedObjectResult?.dashboardInput, 'controlGroupInput') ?? {
+      ...DEFAULT_DASHBOARD_INPUT,
+      id: input.id,
+    },
+    hasRunClientsideMigrations: savedObjectResult.anyMigrationRun,
+    isEmbeddedExternally: creationOptions?.isEmbeddedExternally,
+    animatePanelTransforms: false, // set panel transforms to false initially to avoid panels animating on initial render.
+    hasUnsavedChanges: false, // if there is initial unsaved changes, the initial diff will catch them.
+    managed: savedObjectResult.managed,
+    lastSavedId: savedObjectId,
+  };
+
   const dashboardContainer = new DashboardContainer(
     input,
     reduxEmbeddablePackage,
     searchSessionId,
-    savedObjectResult?.dashboardInput,
-    savedObjectResult.anyMigrationRun,
     dashboardCreationStartTime,
     undefined,
     creationOptions,
-    savedObjectId
+    initialComponentState
   );
+
+  // --------------------------------------------------------------------------------------
+  // Start the diffing integration after all other integrations are set up.
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((container) => {
+    startDiffingDashboardState.bind(container)(creationOptions);
+  });
+
   dashboardContainerReady$.next(dashboardContainer);
   return dashboardContainer;
 };
@@ -116,8 +151,9 @@ export const initializeDashboard = async ({
   controlGroup?: ControlGroupContainer;
 }) => {
   const {
-    dashboardSessionStorage,
+    dashboardBackup,
     embeddable: { getEmbeddableFactory },
+    dashboardCapabilities: { showWriteControls },
     data: {
       query: queryService,
       search: { session },
@@ -151,27 +187,54 @@ export const initializeDashboard = async ({
   }
 
   // --------------------------------------------------------------------------------------
-  // Gather input from session storage if integration is used.
+  // Gather input from session storage and local storage if integration is used.
   // --------------------------------------------------------------------------------------
-  const sessionStorageInput = ((): Partial<DashboardContainerInput> | undefined => {
+  const sessionStorageInput = ((): Partial<SavedDashboardInput> | undefined => {
     if (!useSessionStorageIntegration) return;
-    return dashboardSessionStorage.getState(loadDashboardReturn.dashboardId);
+    return dashboardBackup.getState(loadDashboardReturn.dashboardId);
   })();
 
   // --------------------------------------------------------------------------------------
   // Combine input from saved object, session storage, & passed input to create initial input.
   // --------------------------------------------------------------------------------------
-  const overrideInput = getInitialInput?.();
-  const initialInput: DashboardContainerInput = cloneDeep({
-    ...DEFAULT_DASHBOARD_INPUT,
-    ...(loadDashboardReturn?.dashboardInput ?? {}),
-    ...sessionStorageInput,
-    ...overrideInput,
-  });
+  const initialViewMode = (() => {
+    if (loadDashboardReturn.managed || !showWriteControls) return ViewMode.VIEW;
+    if (
+      loadDashboardReturn.newDashboardCreated ||
+      dashboardBackup.dashboardHasUnsavedEdits(loadDashboardReturn.dashboardId)
+    ) {
+      return ViewMode.EDIT;
+    }
 
-  initialInput.executionContext = {
+    return dashboardBackup.getViewMode();
+  })();
+
+  const overrideInput = getInitialInput?.();
+  const initialDashboardInput: DashboardContainerInput = omit(
+    cloneDeep({
+      ...DEFAULT_DASHBOARD_INPUT,
+      ...(loadDashboardReturn?.dashboardInput ?? {}),
+      ...sessionStorageInput,
+
+      ...(initialViewMode ? { viewMode: initialViewMode } : {}),
+      ...overrideInput,
+    }),
+    'controlGroupInput'
+  );
+  const initialControlGroupInput: ControlGroupInput | {} = {
+    ...(loadDashboardReturn?.dashboardInput?.controlGroupInput ?? {}),
+    ...(sessionStorageInput?.controlGroupInput ?? {}),
+    ...(overrideInput?.controlGroupInput ?? {}),
+  };
+
+  // Back up any view mode passed in explicitly.
+  if (overrideInput?.viewMode) {
+    dashboardBackup.storeViewMode(overrideInput?.viewMode);
+  }
+
+  initialDashboardInput.executionContext = {
     type: 'dashboard',
-    description: initialInput.title,
+    description: initialDashboardInput.title,
   };
 
   // --------------------------------------------------------------------------------------
@@ -184,7 +247,7 @@ export const initializeDashboard = async ({
       timeRestore,
       timeRange: savedTimeRange,
       refreshInterval: savedRefreshInterval,
-    } = initialInput;
+    } = initialDashboardInput;
     const { kbnUrlStateStorage } = unifiedSearchSettings;
 
     // apply filters and query to the query service
@@ -206,7 +269,7 @@ export const initializeDashboard = async ({
       // otherwise fall back to the time range from the timefilterService.
       return timefilterService.getTime();
     })();
-    initialInput.timeRange = initialTimeRange;
+    initialDashboardInput.timeRange = initialTimeRange;
     if (timeRestore) {
       if (savedTimeRange) timefilterService.setTime(savedTimeRange);
       if (savedRefreshInterval) timefilterService.setRefreshInterval(savedRefreshInterval);
@@ -238,13 +301,13 @@ export const initializeDashboard = async ({
       container.setHighlightPanelId(id);
     };
 
-    initialInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
+    initialDashboardInput.viewMode = ViewMode.EDIT; // view mode must always be edit to recieve an embeddable.
     if (
       incomingEmbeddable.embeddableId &&
-      Boolean(initialInput.panels[incomingEmbeddable.embeddableId])
+      Boolean(initialDashboardInput.panels[incomingEmbeddable.embeddableId])
     ) {
       // this embeddable already exists, we will update the explicit input.
-      const panelToUpdate = initialInput.panels[incomingEmbeddable.embeddableId];
+      const panelToUpdate = initialDashboardInput.panels[incomingEmbeddable.embeddableId];
       const sameType = panelToUpdate.type === incomingEmbeddable.type;
 
       panelToUpdate.type = incomingEmbeddable.type;
@@ -262,13 +325,49 @@ export const initializeDashboard = async ({
         scrolltoIncomingEmbeddable(container, incomingEmbeddable.embeddableId as string)
       );
     } else {
-      // otherwise this incoming embeddable is brand new and can be added via the default method after the dashboard container is created.
+      // otherwise this incoming embeddable is brand new and can be added after the dashboard container is created.
+
       untilDashboardReady().then(async (container) => {
-        const embeddable = await container.addNewEmbeddable(
-          incomingEmbeddable.type,
-          incomingEmbeddable.input
-        );
-        scrolltoIncomingEmbeddable(container, embeddable.id);
+        const createdEmbeddable = await (async () => {
+          // if there is no width or height we can add the panel using the default behaviour.
+          if (!incomingEmbeddable.size) {
+            return await container.addNewEmbeddable(
+              incomingEmbeddable.type,
+              incomingEmbeddable.input
+            );
+          }
+
+          // if the incoming embeddable has an explicit width or height we add the panel to the grid directly.
+          const { width, height } = incomingEmbeddable.size;
+          const currentPanels = container.getInput().panels;
+          const embeddableId = incomingEmbeddable.embeddableId ?? v4();
+          const { findTopLeftMostOpenSpace } = panelPlacementStrategies;
+          const { newPanelPlacement } = findTopLeftMostOpenSpace({
+            width: width ?? DEFAULT_PANEL_WIDTH,
+            height: height ?? DEFAULT_PANEL_HEIGHT,
+            currentPanels,
+          });
+          const newPanelState: DashboardPanelState = {
+            explicitInput: { ...incomingEmbeddable.input, id: embeddableId },
+            type: incomingEmbeddable.type,
+            gridData: {
+              ...newPanelPlacement,
+              i: embeddableId,
+            },
+          };
+          container.updateInput({
+            panels: {
+              ...container.getInput().panels,
+              [newPanelState.explicitInput.id]: newPanelState,
+            },
+          });
+          if (reactEmbeddableRegistryHasKey(incomingEmbeddable.type)) {
+            return { id: embeddableId };
+          }
+
+          return await container.untilEmbeddableLoaded(embeddableId);
+        })();
+        scrolltoIncomingEmbeddable(container, createdEmbeddable.id);
       });
     }
   }
@@ -308,21 +407,32 @@ export const initializeDashboard = async ({
       ControlGroupInput,
       ControlGroupOutput,
       ControlGroupContainer
-    >(CONTROL_GROUP_TYPE);
-    const { filters, query, timeRange, viewMode, controlGroupInput, id } = initialInput;
+    >(CONTROL_GROUP_TYPE) as EmbeddableFactory<
+      ControlGroupInput,
+      ControlGroupOutput,
+      ControlGroupContainer
+    > & {
+      create: ControlGroupContainerFactory['create'];
+    };
+    const { filters, query, timeRange, viewMode, id } = initialDashboardInput;
     const fullControlGroupInput = {
       id: `control_group_${id ?? 'new_dashboard'}`,
       ...getDefaultControlGroupInput(),
-      ...pickBy(controlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
+      ...pickBy(initialControlGroupInput, identity), // undefined keys in initialInput should not overwrite defaults
       timeRange,
       viewMode,
       filters,
       query,
     };
+
     if (controlGroup) {
       controlGroup.updateInputAndReinitialize(fullControlGroupInput);
     } else {
-      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput);
+      const newControlGroup = await controlsGroupFactory?.create(fullControlGroupInput, this, {
+        lastSavedInput:
+          loadDashboardReturn?.dashboardInput?.controlGroupInput ??
+          getDefaultControlGroupPersistableInput(),
+      });
       if (!newControlGroup || isErrorEmbeddable(newControlGroup)) {
         throw new Error('Error in control group startup');
       }
@@ -352,5 +462,5 @@ export const initializeDashboard = async ({
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
 
-  return { input: initialInput, searchSessionId: initialSearchSessionId };
+  return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };

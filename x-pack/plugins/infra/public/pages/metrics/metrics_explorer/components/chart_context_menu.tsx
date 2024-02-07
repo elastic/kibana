@@ -17,6 +17,7 @@ import {
 import DateMath from '@kbn/datemath';
 import { Capabilities } from '@kbn/core/public';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsSourceConfigurationProperties } from '../../../../../common/metrics_sources';
 import { AlertFlyout } from '../../../../alerting/metric_threshold/components/alert_flyout';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -27,7 +28,6 @@ import {
 } from '../hooks/use_metrics_explorer_options';
 import { createTSVBLink } from './helpers/create_tsvb_link';
 import { useNodeDetailsRedirect } from '../../../link_to';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { HOST_FIELD, POD_FIELD, CONTAINER_FIELD } from '../../../../../common/constants';
 
 export interface Props {

@@ -9,19 +9,23 @@ import { isEmpty } from 'lodash';
 
 import { HttpSetup } from '@kbn/core/public';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { usePluginContext } from './use_plugin_context';
 
-import { ObservabilityRuleTypeRegistry } from '..';
 import { useDataFetcher } from './use_data_fetcher';
 import { parseAlert } from '../pages/alerts/helpers/parse_alert';
 import type { TopAlert } from '../typings/alerts';
 
 interface AlertDetailParams {
   id: string;
-  ruleType: ObservabilityRuleTypeRegistry;
 }
 
-export const useFetchAlertDetail = (id: string): [boolean, TopAlert | null] => {
+export interface AlertData {
+  formatted: TopAlert;
+  raw: EcsFieldsResponse;
+}
+
+export const useFetchAlertDetail = (id: string): [boolean, AlertData | null] => {
   const { observabilityRuleTypeRegistry } = usePluginContext();
   const params = useMemo(
     () => ({ id, ruleType: observabilityRuleTypeRegistry }),
@@ -33,35 +37,37 @@ export const useFetchAlertDetail = (id: string): [boolean, TopAlert | null] => {
     []
   );
 
-  const { loading, data: alert } = useDataFetcher<AlertDetailParams, TopAlert | null>({
+  const { loading, data: rawAlert } = useDataFetcher<AlertDetailParams, EcsFieldsResponse | null>({
     paramsForApiCall: params,
     initialDataState: null,
     executeApiCall: fetchAlert,
     shouldExecuteApiCall,
   });
 
-  return [loading, alert];
+  const data = rawAlert
+    ? {
+        formatted: parseAlert(observabilityRuleTypeRegistry)(rawAlert),
+        raw: rawAlert,
+      }
+    : null;
+
+  return [loading, data];
 };
 
 const fetchAlert = async (
-  params: AlertDetailParams,
+  { id }: AlertDetailParams,
   abortController: AbortController,
   http: HttpSetup
-): Promise<TopAlert | null> => {
-  const { id, ruleType } = params;
-  try {
-    const response = await http.get<Record<string, unknown>>(BASE_RAC_ALERTS_API_PATH, {
+) => {
+  return http
+    .get<EcsFieldsResponse>(BASE_RAC_ALERTS_API_PATH, {
       query: {
         id,
       },
       signal: abortController.signal,
+    })
+    .catch(() => {
+      // ignore error for retrieving alert
+      return null;
     });
-    if (response !== undefined) {
-      return parseAlert(ruleType)(response);
-    }
-  } catch (error) {
-    // ignore error for retrieving alert
-  }
-
-  return null;
 };

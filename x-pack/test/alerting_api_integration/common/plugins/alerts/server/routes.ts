@@ -26,6 +26,7 @@ import {
 import { SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import { queryOptionsSchema } from '@kbn/event-log-plugin/server/event_log_client';
 import { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { FixtureStartDeps } from './plugin';
 import { retryIfConflicts } from './lib/retry_if_conflicts';
 
@@ -84,13 +85,13 @@ export function defineRoutes(
       }
 
       const encryptedSavedObjectsWithAlerts = await encryptedSavedObjects.getClient({
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
         // Exclude the security and spaces wrappers to get around the safeguards those have in place to prevent
         // us from doing what we want to do - brute force replace the ApiKey
         excludedExtensions: [SECURITY_EXTENSION_ID, SPACES_EXTENSION_ID],
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
 
       let namespace: string | undefined;
@@ -120,12 +121,12 @@ export function defineRoutes(
         `/api/alerts_fixture/${id}/replace_api_key`,
         async () => {
           return await savedObjectsWithAlerts.update<RawRule>(
-            'alert',
+            RULE_SAVED_OBJECT_TYPE,
             id,
             {
               ...(
                 await encryptedSavedObjectsWithAlerts.getDecryptedAsInternalUser<RawRule>(
-                  'alert',
+                  RULE_SAVED_OBJECT_TYPE,
                   id,
                   {
                     namespace,
@@ -182,7 +183,7 @@ export function defineRoutes(
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithAlerts = await savedObjects.getScopedClient(req, {
-        includedHiddenTypes: ['alert'],
+        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
       const savedAlert = await savedObjectsWithAlerts.get<RawRule>(type, id);
       const result = await retryIfConflicts(
@@ -223,7 +224,7 @@ export function defineRoutes(
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
-        includedHiddenTypes: ['task', 'alert'],
+        includedHiddenTypes: ['task', RULE_SAVED_OBJECT_TYPE],
       });
       const result = await retryIfConflicts(
         logger,
@@ -260,9 +261,9 @@ export function defineRoutes(
 
       const [{ savedObjects }] = await core.getStartServices();
       const savedObjectsWithTasksAndAlerts = await savedObjects.getScopedClient(req, {
-        includedHiddenTypes: ['task', 'alert'],
+        includedHiddenTypes: ['task', RULE_SAVED_OBJECT_TYPE],
       });
-      const alert = await savedObjectsWithTasksAndAlerts.get<RawRule>('alert', id);
+      const alert = await savedObjectsWithTasksAndAlerts.get<RawRule>(RULE_SAVED_OBJECT_TYPE, id);
       const result = await retryIfConflicts(
         logger,
         `/api/alerts_fixture/{id}/reset_task_status`,
@@ -422,9 +423,9 @@ export function defineRoutes(
           attributes: { apiKey, apiKeyOwner },
         }: SavedObject<RawRule> = await encryptedSavedObjects
           .getClient({
-            includedHiddenTypes: ['alert'],
+            includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
           })
-          .getDecryptedAsInternalUser('alert', id, {
+          .getDecryptedAsInternalUser(RULE_SAVED_OBJECT_TYPE, id, {
             namespace,
           });
 

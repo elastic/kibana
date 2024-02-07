@@ -1,0 +1,19 @@
+{
+  "extends": "../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": ["common/**/*", "public/**/*", "server/**/*"],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/home-plugin",
+    "@kbn/kibana-react-plugin",
+    "@kbn/management-plugin",
+    "@kbn/i18n",
+    "@kbn/i18n-react",
+    "@kbn/core-chrome-browser",
+    "@kbn/typed-react-router-config",
+    "@kbn/serverless"
+  ],
+  "exclude": ["target/**/*"]
+}

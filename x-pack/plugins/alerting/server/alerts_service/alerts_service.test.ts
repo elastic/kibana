@@ -53,7 +53,7 @@ interface EsError extends Error {
 }
 
 const GetAliasResponse = {
-  real_index: {
+  '.internal.alerts-test.alerts-default-000001': {
     aliases: {
       alias_1: {
         is_hidden: true,
@@ -196,6 +196,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   isExportable: true,
   recoveryActionGroup: RecoveredActionGroup,
   executor: jest.fn(),
+  category: 'test',
   producer: 'alerts',
   cancelAlertsOnRuleTimeout: true,
   ruleTaskTimeout: '5m',
@@ -203,6 +204,7 @@ const ruleType: jest.Mocked<UntypedNormalizedRuleType> = {
   validate: {
     params: { validate: (params) => params },
   },
+  validLegacyConsumers: [],
 };
 
 const ruleTypeWithAlertDefinition: jest.Mocked<UntypedNormalizedRuleType> = {
@@ -898,6 +900,18 @@ describe('Alerts Service', () => {
           );
         });
 
+        test('should allow same context with different "shouldWrite" option', async () => {
+          alertsService.register(TestRegistrationContext);
+          alertsService.register({
+            ...TestRegistrationContext,
+            shouldWrite: false,
+          });
+
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Resources for context "test" have already been registered.`
+          );
+        });
+
         test('should not update index template if simulating template throws error', async () => {
           clusterClient.indices.simulateTemplate.mockRejectedValueOnce(new Error('fail'));
 
@@ -1461,6 +1475,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1481,6 +1496,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1514,6 +1530,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1562,6 +1579,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1596,6 +1614,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1660,6 +1679,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             }),
             alertsService.createAlertsClient({
@@ -1677,6 +1697,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             }),
           ]);
@@ -1711,6 +1732,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1767,6 +1789,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1787,6 +1810,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1851,6 +1875,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             });
           };
@@ -1878,6 +1903,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1947,6 +1973,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             });
           };
@@ -2012,6 +2039,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2077,6 +2105,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2140,6 +2169,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2356,10 +2386,10 @@ describe('Alerts Service', () => {
             dataStreamAdapter,
           });
 
-          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          await retryUntil('debug logger called', async () => logger.debug.mock.calls.length > 0);
 
-          expect(logger.error).toHaveBeenCalledWith(
-            new Error(`Server is stopping; must stop all async operations`)
+          expect(logger.debug).toHaveBeenCalledWith(
+            `Server is stopping; must stop all async operations`
           );
         });
       });

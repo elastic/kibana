@@ -11,6 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { capitalize, isEmpty, isEqual, sortBy } from 'lodash';
 import { KueryNode } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import React, {
   lazy,
   useEffect,
@@ -38,7 +40,11 @@ import {
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import { ruleDetailsRoute as commonRuleDetailsRoute } from '@kbn/rule-data-utils';
+import {
+  RuleCreationValidConsumer,
+  ruleDetailsRoute as commonRuleDetailsRoute,
+  STACK_ALERTS_FEATURE_ID,
+} from '@kbn/rule-data-utils';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import {
   Rule,
@@ -48,7 +54,6 @@ import {
   Pagination,
   Percentiles,
   SnoozeSchedule,
-  RulesListFilters,
   UpdateFiltersProps,
   BulkEditActions,
   UpdateRulesToBulkEditProps,
@@ -90,6 +95,7 @@ import { useLoadRuleAggregationsQuery } from '../../../hooks/use_load_rule_aggre
 import { useLoadRuleTypesQuery } from '../../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../../hooks/use_load_rules_query';
 import { useLoadConfigQuery } from '../../../hooks/use_load_config_query';
+import { ToastWithCircuitBreakerContent } from '../../../components/toast_with_circuit_breaker_content';
 
 import {
   getConfirmDeletionButtonText,
@@ -100,6 +106,7 @@ import {
 import { useBulkOperationToast } from '../../../hooks/use_bulk_operation_toast';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { useRulesListUiState as useUiState } from '../../../hooks/use_rules_list_ui_state';
+import { useRulesListFilterStore } from './hooks/use_rules_list_filter_store';
 
 // Directly lazy import the flyouts because the suspendedComponentWithProps component
 // cause a visual hitch due to the loading spinner
@@ -107,6 +114,7 @@ const RuleAdd = lazy(() => import('../../rule_form/rule_add'));
 const RuleEdit = lazy(() => import('../../rule_form/rule_edit'));
 
 export interface RulesListProps {
+  filterConsumers?: string[];
   filteredRuleTypes?: string[];
   lastResponseFilter?: string[];
   lastRunOutcomeFilter?: string[];
@@ -129,6 +137,7 @@ export interface RulesListProps {
   onTypeFilterChange?: (type: string[]) => void;
   onRefresh?: (refresh: Date) => void;
   setHeaderActions?: (components?: React.ReactNode[]) => void;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 
 export const percentileFields = {
@@ -146,6 +155,7 @@ const initialPercentileOptions = Object.values(Percentiles).map((percentile) => 
 const EMPTY_ARRAY: string[] = [];
 
 export const RulesList = ({
+  filterConsumers,
   filteredRuleTypes = EMPTY_ARRAY,
   lastResponseFilter,
   lastRunOutcomeFilter,
@@ -168,6 +178,7 @@ export const RulesList = ({
   onTypeFilterChange,
   onRefresh,
   setHeaderActions,
+  initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
@@ -179,22 +190,11 @@ export const RulesList = ({
     notifications: { toasts },
     ruleTypeRegistry,
   } = kibanaServices;
+
   const canExecuteActions = hasExecuteActionsCapability(capabilities);
   const [isPerformingAction, setIsPerformingAction] = useState<boolean>(false);
   const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
   const [inputText, setInputText] = useState<string>(searchFilter);
-
-  const [filters, setFilters] = useState<RulesListFilters>({
-    actionTypes: [],
-    ruleExecutionStatuses: lastResponseFilter || [],
-    ruleLastRunOutcomes: lastRunOutcomeFilter || [],
-    ruleParams: ruleParamFilter || {},
-    ruleStatuses: statusFilter || [],
-    searchText: searchFilter || '',
-    tags: [],
-    types: typeFilter || [],
-    kueryNode: undefined,
-  });
 
   const [ruleFlyoutVisible, setRuleFlyoutVisibility] = useState<boolean>(false);
   const [editFlyoutVisible, setEditFlyoutVisibility] = useState<boolean>(false);
@@ -241,11 +241,23 @@ export const RulesList = ({
     ruleTypesState,
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     isSuccess: isLoadRuleTypesSuccess,
   } = useLoadRuleTypesQuery({ filteredRuleTypes });
   // Fetch action types
   const { actionTypes } = useLoadActionTypesQuery();
+
+  const { filters, setFiltersStore, numberOfFiltersStore, resetFiltersStore } =
+    useRulesListFilterStore({
+      lastResponseFilter,
+      lastRunOutcomeFilter,
+      rulesListKey,
+      ruleParamFilter,
+      statusFilter,
+      searchFilter,
+      typeFilter,
+    });
 
   const rulesTypesFilter = isEmpty(filters.types)
     ? authorizedRuleTypes.map((art) => art.id)
@@ -263,6 +275,7 @@ export const RulesList = ({
 
   // Fetch rules
   const { rulesState, loadRules, hasData, lastUpdate } = useLoadRulesQuery({
+    filterConsumers,
     filters: computedFilter,
     hasDefaultRuleTypesFiltersOn,
     page,
@@ -275,12 +288,14 @@ export const RulesList = ({
   // Fetch status aggregation
   const { loadRuleAggregations, rulesStatusesTotal, rulesLastRunOutcomesTotal } =
     useLoadRuleAggregationsQuery({
+      filterConsumers,
       filters: computedFilter,
       enabled: canLoadRules,
       refresh,
     });
 
   const { showSpinner, showRulesList, showNoAuthPrompt, showCreateFirstRulePrompt } = useUiState({
+    authorizedToReadAnyRules,
     authorizedToCreateAnyRules,
     filters,
     hasDefaultRuleTypesFiltersOn,
@@ -391,14 +406,10 @@ export const RulesList = ({
 
   const updateFilters = useCallback(
     (updateFiltersProps: UpdateFiltersProps) => {
-      const { filter, value } = updateFiltersProps;
-      setFilters((prev) => ({
-        ...prev,
-        [filter]: value,
-      }));
+      setFiltersStore(updateFiltersProps);
       handleUpdateFiltersEffect(updateFiltersProps);
     },
-    [setFilters, handleUpdateFiltersEffect]
+    [setFiltersStore, handleUpdateFiltersEffect]
   );
 
   const handleClearRuleParamFilter = () => updateFilters({ filter: 'ruleParams', value: {} });
@@ -544,15 +555,15 @@ export const RulesList = ({
   };
 
   const onDisableRule = useCallback(
-    async (rule: RuleTableItem) => {
-      await bulkDisableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem) => {
+      return bulkDisableRules({ http, ids: [rule.id] });
     },
     [bulkDisableRules]
   );
 
   const onEnableRule = useCallback(
-    async (rule: RuleTableItem) => {
-      await bulkEnableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem) => {
+      return bulkEnableRules({ http, ids: [rule.id] });
     },
     [bulkEnableRules]
   );
@@ -669,7 +680,23 @@ export const RulesList = ({
       : await bulkEnableRules({ http, ids: selectedIds });
 
     setIsEnablingRules(false);
-    showToast({ action: 'ENABLE', errors, total });
+
+    const circuitBreakerError = errors.find(
+      (error) => !!parseRuleCircuitBreakerErrorMessage(error.message).details
+    );
+
+    if (circuitBreakerError) {
+      const parsedError = parseRuleCircuitBreakerErrorMessage(circuitBreakerError.message);
+      toasts.addDanger({
+        title: parsedError.summary,
+        text: toMountPoint(
+          <ToastWithCircuitBreakerContent>{parsedError.details}</ToastWithCircuitBreakerContent>
+        ),
+      });
+    } else {
+      showToast({ action: 'ENABLE', errors, total });
+    }
+
     await refreshRules();
     onClearSelection();
   };
@@ -724,7 +751,7 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-      <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={filterConsumers} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}
@@ -951,6 +978,8 @@ export const RulesList = ({
               rulesListKey={rulesListKey}
               config={config}
               visibleColumns={visibleColumns}
+              numberOfFilters={numberOfFiltersStore}
+              resetFilters={resetFiltersStore}
             />
             {manageLicenseModalOpts && (
               <ManageLicenseModal
@@ -979,6 +1008,7 @@ export const RulesList = ({
               ruleTypeRegistry={ruleTypeRegistry}
               ruleTypeIndex={ruleTypesState.data}
               onSave={refreshRules}
+              initialSelectedConsumer={initialSelectedConsumer}
             />
           </Suspense>
         )}

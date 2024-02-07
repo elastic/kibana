@@ -33,7 +33,11 @@ import {
 import { EuiContextMenuProps } from '@elastic/eui/src/components/context_menu/context_menu';
 import { isDefined } from '@kbn/ml-is-defined';
 import { MaxSeriesControl } from './max_series_control';
-import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../../common/constants';
+import {
+  ChangePointDetectionViewType,
+  CHANGE_POINT_DETECTION_VIEW_TYPE,
+  EMBEDDABLE_CHANGE_POINT_CHART_TYPE,
+} from '../../../common/constants';
 import { useCasesModal } from '../../hooks/use_cases_modal';
 import { type EmbeddableChangePointChartInput } from '../../embeddable/embeddable_change_point_chart';
 import { useDataSource } from '../../hooks/use_data_source';
@@ -51,6 +55,7 @@ import {
 } from './change_point_detection_context';
 import { useChangePointResults } from './use_change_point_agg_request';
 import { useSplitFieldCardinality } from './use_split_field_cardinality';
+import { ViewTypeSelector } from './view_type_selector';
 
 const selectControlCss = { width: '350px' };
 
@@ -191,10 +196,17 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [dashboardAttachment, setDashboardAttachment] = useState<{
     applyTimeRange: boolean;
     maxSeriesToPlot: number;
+    viewType: ChangePointDetectionViewType;
   }>({
     applyTimeRange: false,
     maxSeriesToPlot: 6,
+    viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS,
   });
+
+  const [caseAttachment, setCaseAttachment] = useState<{
+    viewType: ChangePointDetectionViewType;
+  }>({ viewType: CHANGE_POINT_DETECTION_VIEW_TYPE.CHARTS });
+
   const [dashboardAttachmentReady, setDashboardAttachmentReady] = useState<boolean>(false);
 
   const {
@@ -236,6 +248,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         }),
                   icon: 'plusInCircle',
                   panel: 'attachMainPanel',
+                  'data-test-subj': 'aiopsChangePointDetectionAttachButton',
                 },
               ]
             : []),
@@ -248,6 +261,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             disabled: removeDisabled,
           },
         ],
+        'data=test-subj': 'aiopsChangePointDetectionContextMenuPanel',
       },
       {
         id: 'attachMainPanel',
@@ -269,6 +283,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     defaultMessage: 'To dashboard',
                   }),
                   panel: 'attachToDashboardPanel',
+                  'data-test-subj': 'aiopsChangePointDetectionAttachToDashboardButton',
                 },
               ]
             : []),
@@ -281,7 +296,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                   disabled: caseAttachmentButtonDisabled,
                   ...(caseAttachmentButtonDisabled
                     ? {
-                        toolTipPosition: 'left' as const,
+                        toolTipProps: { position: 'left' as const },
                         toolTipContent: i18n.translate(
                           'xpack.aiops.changePointDetection.attachToCaseTooltipContent',
                           {
@@ -290,24 +305,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         ),
                       }
                     : {}),
-                  onClick: () => {
-                    openCasesModalCallback({
-                      timeRange,
-                      fn: fieldConfig.fn,
-                      metricField: fieldConfig.metricField,
-                      dataViewId: dataView.id,
-                      ...(fieldConfig.splitField
-                        ? {
-                            splitField: fieldConfig.splitField,
-                            partitions: selectedPartitions,
-                          }
-                        : {}),
-                    });
-                  },
+                  'data-test-subj': 'aiopsChangePointDetectionAttachToCaseButton',
+                  panel: 'attachToCasePanel',
                 },
               ]
             : []),
         ],
+        'data-test-subj': 'aiopsChangePointDetectionAttachChartPanel',
       },
       {
         id: 'attachToDashboardPanel',
@@ -318,7 +322,18 @@ const FieldPanel: FC<FieldPanelProps> = ({
         content: (
           <EuiPanel paddingSize={'s'}>
             <EuiSpacer size={'s'} />
-            <EuiForm>
+            <EuiForm data-test-subj="aiopsChangePointDetectionDashboardAttachmentForm">
+              <ViewTypeSelector
+                value={dashboardAttachment.viewType}
+                onChange={(v) => {
+                  setDashboardAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      viewType: v,
+                    };
+                  });
+                }}
+              />
               <EuiFormRow fullWidth>
                 <EuiSwitch
                   label={i18n.translate('xpack.aiops.changePointDetection.applyTimeRangeLabel', {
@@ -334,6 +349,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     })
                   }
                   compressed
+                  data-test-subj="aiopsChangePointDetectionAttachToDashboardApplyTimeRangeSwitch"
                 />
               </EuiFormRow>
               {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
@@ -356,10 +372,67 @@ const FieldPanel: FC<FieldPanelProps> = ({
               <EuiSpacer size={'m'} />
 
               <EuiButton
+                data-test-subj="aiopsChangePointDetectionSubmitDashboardAttachButton"
                 fill
                 type={'submit'}
                 fullWidth
-                onClick={setDashboardAttachmentReady.bind(null, true)}
+                onClick={() => {
+                  setIsActionMenuOpen(false);
+                  setDashboardAttachmentReady(true);
+                }}
+                disabled={!isDashboardFormValid}
+              >
+                <FormattedMessage
+                  id="xpack.aiops.changePointDetection.submitDashboardAttachButtonLabel"
+                  defaultMessage="Attach"
+                />
+              </EuiButton>
+            </EuiForm>
+          </EuiPanel>
+        ),
+      },
+      {
+        id: 'attachToCasePanel',
+        title: i18n.translate('xpack.aiops.changePointDetection.attachToCaseTitle', {
+          defaultMessage: 'Attach to case',
+        }),
+        size: 's',
+        content: (
+          <EuiPanel paddingSize={'s'}>
+            <EuiSpacer size={'s'} />
+            <EuiForm data-test-subj="aiopsChangePointDetectionCasedAttachmentForm">
+              <ViewTypeSelector
+                value={caseAttachment.viewType}
+                onChange={(v) => {
+                  setCaseAttachment((prevState) => {
+                    return {
+                      ...prevState,
+                      viewType: v,
+                    };
+                  });
+                }}
+              />
+              <EuiButton
+                data-test-subj="aiopsChangePointDetectionSubmitCaseAttachButton"
+                fill
+                type={'submit'}
+                fullWidth
+                onClick={() => {
+                  setIsActionMenuOpen(false);
+                  openCasesModalCallback({
+                    timeRange,
+                    viewType: caseAttachment.viewType,
+                    fn: fieldConfig.fn,
+                    metricField: fieldConfig.metricField,
+                    dataViewId: dataView.id,
+                    ...(fieldConfig.splitField
+                      ? {
+                          splitField: fieldConfig.splitField,
+                          partitions: selectedPartitions,
+                        }
+                      : {}),
+                  });
+                }}
                 disabled={!isDashboardFormValid}
               >
                 <FormattedMessage
@@ -376,9 +449,11 @@ const FieldPanel: FC<FieldPanelProps> = ({
     canCreateCase,
     canEditDashboards,
     canUpdateCase,
+    caseAttachment.viewType,
     caseAttachmentButtonDisabled,
     dashboardAttachment.applyTimeRange,
     dashboardAttachment.maxSeriesToPlot,
+    dashboardAttachment.viewType,
     dataView.id,
     fieldConfig.fn,
     fieldConfig.metricField,
@@ -398,6 +473,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
       const embeddableInput: Partial<EmbeddableChangePointChartInput> = {
         title: newTitle,
         description: newDescription,
+        viewType: dashboardAttachment.viewType,
         dataViewId: dataView.id,
         metricField: fieldConfig.metricField,
         splitField: fieldConfig.splitField,
@@ -421,12 +497,13 @@ const FieldPanel: FC<FieldPanelProps> = ({
     },
     [
       embeddable,
+      dashboardAttachment.viewType,
+      dashboardAttachment.applyTimeRange,
+      dashboardAttachment.maxSeriesToPlot,
       dataView.id,
       fieldConfig.metricField,
       fieldConfig.splitField,
       fieldConfig.fn,
-      dashboardAttachment.applyTimeRange,
-      dashboardAttachment.maxSeriesToPlot,
       timeRange,
       selectedChangePoints,
       panelIndex,
@@ -441,6 +518,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
           <EuiFlexGroup alignItems={'center'} gutterSize={'s'}>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                data-test-subj="aiopsChangePointDetectionExpandConfigButton"
                 iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
                 onClick={setIsExpanded.bind(null, (prevState) => !prevState)}
                 aria-label={i18n.translate('xpack.aiops.changePointDetection.expandConfigLabel', {
@@ -480,6 +558,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                 id={`panelContextMenu_${panelIndex}`}
                 button={
                   <EuiButtonIcon
+                    data-test-subj="aiopsChangePointDetectionContextMenuButton"
                     aria-label={i18n.translate(
                       'xpack.aiops.changePointDetection.configActionsLabel',
                       {

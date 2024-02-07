@@ -5,41 +5,51 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
-import { transformError } from '@kbn/securitysolution-es-utils';
+import type { IRouter, Logger } from '@kbn/core/server';
 
-import { GET_ILM_EXPLAIN } from '../../common/constants';
+import { GET_ILM_EXPLAIN, INTERNAL_API_VERSION } from '../../common/constants';
 import { fetchILMExplain } from '../lib';
 import { buildResponse } from '../lib/build_response';
 import { buildRouteValidation } from '../schemas/common';
 import { GetILMExplainParams } from '../schemas/get_ilm_explain';
+import { API_DEFAULT_ERROR_MESSAGE } from '../translations';
 
-export const getILMExplainRoute = (router: IRouter) => {
-  router.get(
-    {
+export const getILMExplainRoute = (router: IRouter, logger: Logger) => {
+  router.versioned
+    .get({
       path: GET_ILM_EXPLAIN,
-      validate: { params: buildRouteValidation(GetILMExplainParams) },
-    },
-    async (context, request, response) => {
-      const resp = buildResponse(response);
+      access: 'internal',
+      options: { tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            params: buildRouteValidation(GetILMExplainParams),
+          },
+        },
+      },
+      async (context, request, response) => {
+        const resp = buildResponse(response);
 
-      try {
-        const { client } = (await context.core).elasticsearch;
-        const decodedIndexName = decodeURIComponent(request.params.pattern);
+        try {
+          const { client } = (await context.core).elasticsearch;
+          const decodedIndexName = decodeURIComponent(request.params.pattern);
 
-        const ilmExplain = await fetchILMExplain(client, decodedIndexName);
+          const ilmExplain = await fetchILMExplain(client, decodedIndexName);
 
-        return response.ok({
-          body: ilmExplain.indices,
-        });
-      } catch (err) {
-        const error = transformError(err);
+          return response.ok({
+            body: ilmExplain.indices,
+          });
+        } catch (err) {
+          logger.error(JSON.stringify(err));
 
-        return resp.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return resp.error({
+            body: err.message ?? API_DEFAULT_ERROR_MESSAGE,
+            statusCode: err.statusCode ?? 500,
+          });
+        }
       }
-    }
-  );
+    );
 };

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { assertUnreachable } from '../../../../../../common/utility_types';
-import type { SortField, NetworkDnsRequestOptions } from '../../../../../../common/search_strategy';
+import type { NetworkDnsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { Direction, NetworkDnsFields } from '../../../../../../common/search_strategy';
 import { createQueryFilterClauses } from '../../../../../utils/build_query';
 
@@ -19,20 +18,20 @@ type QueryOrder =
   | { dns_bytes_in: { order: Direction } }
   | { dns_bytes_out: { order: Direction } };
 
-const getQueryOrder = (sort: SortField<NetworkDnsFields>): QueryOrder => {
-  switch (sort.field) {
-    case NetworkDnsFields.queryCount:
-      return { _count: { order: sort.direction } };
-    case NetworkDnsFields.dnsName:
-      return { _key: { order: sort.direction } };
-    case NetworkDnsFields.uniqueDomains:
-      return { unique_domains: { order: sort.direction } };
-    case NetworkDnsFields.dnsBytesIn:
-      return { dns_bytes_in: { order: sort.direction } };
-    case NetworkDnsFields.dnsBytesOut:
-      return { dns_bytes_out: { order: sort.direction } };
+const getQueryOrder = (sort: NetworkDnsRequestOptions['sort']): QueryOrder => {
+  if (sort.field === NetworkDnsFields.queryCount) {
+    return { _count: { order: sort.direction } };
+  } else if (sort.field === NetworkDnsFields.dnsName) {
+    return { _key: { order: sort.direction } };
+  } else if (sort.field === NetworkDnsFields.uniqueDomains) {
+    return { unique_domains: { order: sort.direction } };
+  } else if (sort.field === NetworkDnsFields.dnsBytesIn) {
+    return { dns_bytes_in: { order: sort.direction } };
+  } else if (sort.field === NetworkDnsFields.dnsBytesOut) {
+    return { dns_bytes_out: { order: sort.direction } };
+  } else {
+    throw new Error(`Invalid NetworkDnsQuery sort field: ${JSON.stringify(sort)}`);
   }
-  assertUnreachable(sort.field);
 };
 
 const getCountAgg = () => ({

@@ -12,4 +12,6 @@ export const endpointFieldsRequestSchema = z.object({
   onlyCheckIfIndicesExist: z.boolean(),
 });
 
+export type EndpointFieldsRequestSchemaInput = z.input<typeof endpointFieldsRequestSchema>;
+
 export type EndpointFieldsRequestSchema = z.infer<typeof endpointFieldsRequestSchema>;

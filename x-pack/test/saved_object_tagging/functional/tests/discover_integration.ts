@@ -142,6 +142,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           },
           {
             submit: true,
+            clearWithKeyboard: true,
           }
         );
         expect(await tagModal.isOpened()).to.be(false);

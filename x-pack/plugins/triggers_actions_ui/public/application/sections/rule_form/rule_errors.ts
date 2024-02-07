@@ -27,6 +27,7 @@ export function validateBaseProperties(
   const errors = {
     name: new Array<string>(),
     'schedule.interval': new Array<string>(),
+    consumer: new Array<string>(),
     ruleTypeId: new Array<string>(),
     actionConnectors: new Array<string>(),
   };
@@ -35,6 +36,13 @@ export function validateBaseProperties(
     errors.name.push(
       i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredNameText', {
         defaultMessage: 'Name is required.',
+      })
+    );
+  }
+  if (ruleObject.consumer === null) {
+    errors.consumer.push(
+      i18n.translate('xpack.triggersActionsUI.sections.ruleForm.error.requiredConsumerText', {
+        defaultMessage: 'Scope is required.',
       })
     );
   }

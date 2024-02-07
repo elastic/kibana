@@ -8,7 +8,6 @@
 import React from 'react';
 import { ComponentMeta } from '@storybook/react';
 import { LIGHT_THEME } from '@elastic/charts';
-import { EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
 import { Comparator } from '../../../../common/alerting/metrics';
 import { Props, Threshold as Component } from './threshold';
 
@@ -30,7 +29,7 @@ export default {
 } as ComponentMeta<typeof Component>;
 
 const defaultProps: Props = {
-  chartProps: { theme: EUI_CHARTS_THEME_LIGHT.theme, baseTheme: LIGHT_THEME },
+  chartProps: { baseTheme: LIGHT_THEME },
   comparator: Comparator.GT,
   id: 'componentId',
   threshold: 90,

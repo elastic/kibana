@@ -39,7 +39,7 @@ describe('eql', () => {
       {},
       {
         search: {
-          search: jest.fn((params: any) => of({ rawResponse: { body: params } })),
+          search: jest.fn((params: any) => of({ rawResponse: params })),
         },
         indexPatterns: {
           get: jest.fn(),

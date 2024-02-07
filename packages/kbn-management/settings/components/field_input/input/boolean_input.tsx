@@ -28,14 +28,14 @@ export const BooleanInput = ({
   field,
   unsavedChange,
   isSavingEnabled,
-  onChange: onChangeProp,
+  onInputChange,
 }: BooleanInputProps) => {
+  const onUpdate = useUpdate({ onInputChange, field });
+
   const onChange: EuiSwitchProps['onChange'] = (event) => {
     const inputValue = event.target.checked;
     onUpdate({ type: field.type, unsavedValue: inputValue });
   };
-
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;

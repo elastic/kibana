@@ -16,11 +16,11 @@ import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
 import {
   RULES_BULK_EDIT_ACTIONS_INFO,
   RULES_BULK_EDIT_ACTIONS_WARNING,
-  ADD_RULE_ACTIONS_MENU_ITEM,
+  BULK_ACTIONS_BTN,
 } from '../../../../../screens/rules_bulk_actions';
 import { actionFormSelector } from '../../../../../screens/common/rule_actions';
 
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
 import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
@@ -47,9 +47,9 @@ import {
   submitBulkEditForm,
   checkOverwriteRuleActionsCheckbox,
   openBulkEditRuleActionsForm,
-  openBulkActionsMenu,
 } from '../../../../../tasks/rules_bulk_actions';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
 import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
@@ -64,7 +64,6 @@ import {
 } from '../../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,
-  excessivelyInstallAllPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
 } from '../../../../../tasks/api_calls/prebuilt_rules';
 
@@ -73,17 +72,14 @@ const ruleNameToAssert = 'Custom rule name with actions';
 const expectedExistingSlackMessage = 'Existing slack action';
 const expectedSlackMessage = 'Slack action test message';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Detection rules, bulk edit of rule actions',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       deleteAlertsAndRules();
       deleteConnectors();
-      cy.task('esArchiverResetKibana');
 
       createSlackConnector().then(({ body }) => {
         const actions: RuleActionArray = [
@@ -144,13 +140,13 @@ describe(
         rule_id: 'rule_2',
       });
 
-      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
+      createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
     });
 
     context('Restricted action privileges', () => {
       it("User with no privileges can't add rule actions", () => {
-        login(ROLES.hunter_no_actions);
-        visitSecurityDetectionRulesPage(ROLES.hunter_no_actions);
+        login(ROLES.t1_analyst);
+        visitRulesManagementTable();
 
         expectManagementTableRules([
           ruleNameToAssert,
@@ -165,18 +161,14 @@ describe(
         ]);
         waitForCallOutToBeShown(MISSING_PRIVILEGES_CALLOUT, 'primary');
 
-        selectAllRules();
-
-        openBulkActionsMenu();
-
-        cy.get(ADD_RULE_ACTIONS_MENU_ITEM).should('be.disabled');
+        cy.get(BULK_ACTIONS_BTN).should('not.exist');
       });
     });
 
     context('All actions privileges', () => {
       beforeEach(() => {
         login();
-        visitSecurityDetectionRulesPage();
+        visitRulesManagementTable();
         disableAutoRefresh();
 
         expectManagementTableRules([
@@ -197,8 +189,6 @@ describe(
           throttle: 1,
           throttleUnit: 'd',
         };
-
-        excessivelyInstallAllPrebuiltRules();
 
         getRulesManagementTableRows().then((rows) => {
           // select both custom and prebuilt rules
@@ -228,8 +218,6 @@ describe(
       });
 
       it('Overwrite rule actions in rules', () => {
-        excessivelyInstallAllPrebuiltRules();
-
         getRulesManagementTableRows().then((rows) => {
           // select both custom and prebuilt rules
           selectAllRules();

@@ -123,8 +123,8 @@ describe('static_value', () => {
               value: '23',
             },
           },
-          createMockedIndexPattern(),
-          layer.columns
+          layer.columns,
+          createMockedIndexPattern()
         )
       ).toBe('Static value: 23');
     });
@@ -142,8 +142,8 @@ describe('static_value', () => {
               value: '',
             },
           },
-          createMockedIndexPattern(),
-          layer.columns
+          layer.columns,
+          createMockedIndexPattern()
         )
       ).toBe('Static value');
     });

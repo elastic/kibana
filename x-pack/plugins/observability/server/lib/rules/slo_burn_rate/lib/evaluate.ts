@@ -9,7 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { get } from 'lodash';
 import { Duration, SLO, toDurationUnit } from '../../../../domain/models';
 import { BurnRateRuleParams } from '../types';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../assets/constants';
+import { SLO_DESTINATION_INDEX_PATTERN } from '../../../../../common/slo/constants';
 import {
   buildQuery,
   EvaluationAfterKey,

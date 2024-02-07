@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { podSnapshotMetricTypes } from '../../../../../../common/inventory_models/pod';
+import { podSnapshotMetricTypes } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAndGroupByToolbarItems } from './metrics_and_groupby_toolbar_items';
 import type { ToolbarProps } from './types';
 

@@ -46,7 +46,12 @@ async function ftrConfig({ readConfigFile }: FtrConfigProviderContext) {
       const result = await cypressTestRunner(ftrProviderContext);
 
       // set exit code explicitly if at least one Cypress test fails
-      if (result && (result.status === 'failed' || result.totalFailed > 0)) {
+      if (
+        result &&
+        ((result as CypressCommandLine.CypressFailedRunResult)?.status ===
+          'failed' ||
+          (result as CypressCommandLine.CypressRunResult)?.totalFailed)
+      ) {
         process.exitCode = 1;
       }
     },

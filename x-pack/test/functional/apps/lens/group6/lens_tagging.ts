@@ -83,6 +83,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         },
         {
           submit: true,
+          clearWithKeyboard: true,
         }
       );
 

@@ -6,7 +6,7 @@
  */
 
 import { mockCases } from '../../../../mocks';
-import { getByText } from '@testing-library/dom';
+import { getByText } from '@testing-library/react';
 import { assigneesTemplateRenderer } from './renderer';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
 

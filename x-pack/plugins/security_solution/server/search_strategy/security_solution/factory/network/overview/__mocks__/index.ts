@@ -6,8 +6,8 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
+import type { NetworkOverviewRequestOptions } from '../../../../../../../common/api/search_strategy';
 
-import type { NetworkOverviewRequestOptions } from '../../../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../../../common/search_strategy';
 
 export const mockOptions: NetworkOverviewRequestOptions = {

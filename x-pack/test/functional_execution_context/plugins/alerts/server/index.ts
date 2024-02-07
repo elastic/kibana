@@ -8,4 +8,4 @@
 import './ensure_apm_started';
 import { FixturePlugin } from './plugin';
 
-export const plugin = () => new FixturePlugin();
+export const plugin = async () => new FixturePlugin();

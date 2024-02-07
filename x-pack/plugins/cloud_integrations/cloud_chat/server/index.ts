@@ -6,10 +6,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/server';
-import { CloudChatPlugin } from './plugin';
 
 export { config } from './config';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { CloudChatPlugin } = await import('./plugin');
   return new CloudChatPlugin(initializerContext);
 }

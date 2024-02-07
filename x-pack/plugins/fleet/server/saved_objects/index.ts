@@ -25,10 +25,14 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
+
 import {
   migratePackagePolicyEvictionsFromV8110,
   migratePackagePolicyToV8110,
 } from './migrations/security_solution/to_v8_11_0';
+
+import { migrateCspPackagePolicyToV8110 } from './migrations/cloud_security_posture';
 
 import { migrateOutputEvictionsFromV8100, migrateOutputToV8100 } from './migrations/to_v8_10_0';
 
@@ -73,6 +77,11 @@ import {
 } from './migrations/security_solution';
 import { migratePackagePolicyToV880 } from './migrations/to_v8_8_0';
 import { migrateAgentPolicyToV890 } from './migrations/to_v8_9_0';
+import {
+  migratePackagePolicyToV81102,
+  migratePackagePolicyEvictionsFromV81102,
+} from './migrations/security_solution/to_v8_11_0_2';
+import { settingsV1 } from './model_versions/v1';
 
 /*
  * Saved object types and mappings
@@ -96,12 +105,16 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         has_seen_add_data_notice: { type: 'boolean', index: false },
         prerelease_integrations_enabled: { type: 'boolean' },
         secret_storage_requirements_met: { type: 'boolean' },
+        output_secret_storage_requirements_met: { type: 'boolean' },
       },
     },
     migrations: {
       '7.10.0': migrateSettingsToV7100,
       '7.13.0': migrateSettingsToV7130,
       '8.6.0': migrateSettingsToV860,
+    },
+    modelVersions: {
+      1: settingsV1,
     },
   },
   [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
@@ -141,6 +154,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         },
         is_protected: { type: 'boolean' },
         overrides: { type: 'flattened', index: false },
+        keep_monitoring_alive: { type: 'boolean' },
       },
     },
     migrations: {
@@ -169,9 +183,11 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         hosts: { type: 'keyword' },
         ca_sha256: { type: 'keyword', index: false },
         ca_trusted_fingerprint: { type: 'keyword', index: false },
+        service_token: { type: 'keyword', index: false },
         config: { type: 'flattened' },
         config_yaml: { type: 'text' },
         is_preconfigured: { type: 'boolean', index: false },
+        is_internal: { type: 'boolean', index: false },
         ssl: { type: 'binary' },
         proxy_id: { type: 'keyword' },
         shipper: {
@@ -240,6 +256,38 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         broker_buffer_size: { type: 'integer' },
         required_acks: { type: 'integer' },
         channel_buffer_size: { type: 'integer' },
+        secrets: {
+          dynamic: false,
+          properties: {
+            password: {
+              dynamic: false,
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
+            ssl: {
+              dynamic: false,
+              properties: {
+                key: {
+                  dynamic: false,
+                  properties: {
+                    id: { type: 'keyword' },
+                  },
+                },
+              },
+            },
+            service_token: {
+              dynamic: false,
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
+          },
+        },
+        preset: {
+          type: 'keyword',
+          index: false,
+        },
       },
     },
     modelVersions: {
@@ -261,6 +309,58 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
         schemas: {
           forwardCompatibility: migrateOutputEvictionsFromV8100,
         },
+      },
+      '2': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              service_token: { type: 'keyword', index: false },
+            },
+          },
+        ],
+      },
+      '3': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              secrets: {
+                properties: {
+                  service_token: {
+                    dynamic: false,
+                    properties: {
+                      id: { type: 'keyword' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        ],
+      },
+      '4': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              preset: {
+                type: 'keyword',
+                index: false,
+              },
+            },
+          },
+        ],
+      },
+      '5': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
       },
     },
     migrations: {
@@ -335,6 +435,33 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           forwardCompatibility: migratePackagePolicyEvictionsFromV8110,
         },
       },
+      '3': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migratePackagePolicyToV81102,
+          },
+        ],
+        schemas: {
+          forwardCompatibility: migratePackagePolicyEvictionsFromV81102,
+        },
+      },
+      '4': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migrateCspPackagePolicyToV8110,
+          },
+        ],
+      },
+      '5': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migrateSyntheticsPackagePolicyToV8120,
+          },
+        ],
+      },
     },
     migrations: {
       '7.10.0': migratePackagePolicyToV7100,
@@ -382,6 +509,7 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             deferred: { type: 'boolean' },
           },
         },
+        latest_install_failed_attempts: { type: 'object', enabled: false },
         installed_kibana: {
           dynamic: false,
           properties: {},
@@ -410,6 +538,18 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
             },
           },
         },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              latest_install_failed_attempts: { type: 'object', enabled: false },
+            },
+          },
+        ],
       },
     },
     migrations: {
@@ -486,9 +626,22 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
       properties: {
         name: { type: 'keyword' },
         is_default: { type: 'boolean' },
+        is_internal: { type: 'boolean', index: false },
         host_urls: { type: 'keyword', index: false },
         is_preconfigured: { type: 'boolean' },
         proxy_id: { type: 'keyword' },
+      },
+    },
+    modelVersions: {
+      '1': {
+        changes: [
+          {
+            type: 'mappings_addition',
+            addedMappings: {
+              is_internal: { type: 'boolean', index: false },
+            },
+          },
+        ],
       },
     },
   },
@@ -570,6 +723,7 @@ export function registerEncryptedSavedObjects(
       'ca_trusted_fingerprint',
       'config',
       'config_yaml',
+      'is_internal',
       'is_preconfigured',
       'proxy_id',
       'version',
@@ -590,6 +744,8 @@ export function registerEncryptedSavedObjects(
       'timeout',
       'broker_timeout',
       'required_acks',
+      'preset',
+      'secrets',
     ]),
   });
   // Encrypted saved objects

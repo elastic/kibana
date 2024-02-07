@@ -34,7 +34,3 @@ post:
           application/json:
             schema:
               $ref: '../components/schemas/400_response.yaml'
-  servers:
-     - url: https://localhost:5601
-servers:
-      - url: https://localhost:5601

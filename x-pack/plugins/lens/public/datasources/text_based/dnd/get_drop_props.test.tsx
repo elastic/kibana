@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { DatasourceDimensionDropHandlerProps } from '../../../types';
 import { getDropProps } from './get_drop_props';
 import {
@@ -17,16 +17,18 @@ import {
   numericDraggedField,
 } from './mocks';
 import { TextBasedPrivateState } from '../types';
+import { addColumnsToCache } from '../fieldlist_cache';
 
 const defaultProps = {
   state: {
     layers: {
       first: {
         columns: [column1, column2, column3],
-        allColumns: [...fieldList, column1, column2, column3],
+        query: {
+          esql: 'from foo',
+        },
       },
     },
-    fieldList,
   },
   source: numericDraggedColumn,
   target: {
@@ -42,7 +44,19 @@ const defaultProps = {
     },
   },
 } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
-
+const allColumns = [...fieldList, column1, column2, column3].map((f) => {
+  return {
+    id: f.columnId,
+    name: f.fieldName,
+    meta: f?.meta,
+  };
+}) as DatatableColumn[];
+addColumnsToCache(
+  {
+    esql: 'from foo',
+  },
+  allColumns
+);
 describe('Text-based: getDropProps', () => {
   it('should return undefined if source and target belong to different layers', () => {
     const props = {
@@ -73,6 +87,21 @@ describe('Text-based: getDropProps', () => {
       },
     } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
     expect(getDropProps(props)).toBeUndefined();
+  });
+  it('should not return undefined if source is a non-numeric field, target is a metric dimension but datatable doesnt have numeric fields', () => {
+    const props = {
+      ...defaultProps,
+      state: {
+        ...defaultProps.state,
+        layers: {
+          first: {
+            columns: [column1, column2, column3],
+          },
+        },
+      },
+      source: notNumericDraggedField,
+    } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
+    expect(getDropProps(props)).toEqual({ dropTypes: ['field_replace'], nextLabel: 'category' });
   });
   it('should return reorder if source and target are operations from the same group', () => {
     const props = {

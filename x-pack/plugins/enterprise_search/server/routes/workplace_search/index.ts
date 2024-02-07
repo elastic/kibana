@@ -8,6 +8,7 @@
 import { RouteDependencies } from '../../plugin';
 
 import { registerApiKeysRoutes } from './api_keys';
+import { registerGatedFormRoute } from './gated_form';
 import { registerGroupsRoutes } from './groups';
 import { registerOAuthRoutes } from './oauth';
 import { registerOverviewRoute } from './overview';
@@ -25,4 +26,5 @@ export const registerWorkplaceSearchRoutes = (dependencies: RouteDependencies) =
   registerSourcesRoutes(dependencies);
   registerSettingsRoutes(dependencies);
   registerSecurityRoutes(dependencies);
+  registerGatedFormRoute(dependencies);
 };

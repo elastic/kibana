@@ -99,10 +99,10 @@ files.forEach((file) => {
             .literal as ts.StringLiteral;
 
           // replace absolute paths with relative paths
-          return ts.updateImportTypeNode(
+          return ts.factory.updateImportTypeNode(
             node,
-            ts.createLiteralTypeNode(
-              ts.createStringLiteral(
+            ts.factory.createLiteralTypeNode(
+              ts.factory.createStringLiteral(
                 `./${Path.relative(
                   Path.dirname(file.getFilePath()),
                   literal.text

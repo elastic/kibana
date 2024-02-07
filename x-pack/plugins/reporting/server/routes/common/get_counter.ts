@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { API_USAGE_COUNTER_TYPE, API_USAGE_ERROR_TYPE } from '@kbn/reporting-common';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import { API_USAGE_COUNTER_TYPE, API_USAGE_ERROR_TYPE } from '../../../common/constants';
 
 export type Counters = ReturnType<typeof getCounters>;
 

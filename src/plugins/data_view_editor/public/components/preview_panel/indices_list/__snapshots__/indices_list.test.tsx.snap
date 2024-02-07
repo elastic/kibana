@@ -63,8 +63,9 @@ exports[`IndicesList should change pages 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -155,8 +156,9 @@ exports[`IndicesList should change per page 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -271,8 +273,9 @@ exports[`IndicesList should highlight fully when an exact match 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -378,8 +381,9 @@ exports[`IndicesList should highlight the query in the matches 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -478,8 +482,9 @@ exports[`IndicesList should render normally 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem
@@ -642,8 +647,9 @@ exports[`IndicesList updating props should render all new indices 1`] = `
         isOpen={false}
         ownFocus={true}
         panelPaddingSize="none"
+        repositionToCrossAxis={true}
       >
-        <EuiContextMenuPanel
+        <EuiContextMenuPanelClass
           items={
             Array [
               <EuiContextMenuItem

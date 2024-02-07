@@ -31,7 +31,7 @@ const createPlugin = async () => {
   const pluginInitializerContext = coreMock.createPluginInitializerContext();
   const coreSetup = coreMock.createSetup();
   const coreStart = coreMock.createStart();
-  const plugin = pluginInitializer(pluginInitializerContext);
+  const plugin = await pluginInitializer(pluginInitializerContext);
   const setup = await plugin.setup(coreSetup, {});
 
   return {

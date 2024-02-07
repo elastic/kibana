@@ -7,13 +7,13 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import { RouteContext, SyntheticsRestApiRouteFactory } from '../types';
 import { ProjectMonitor } from '../../../common/runtime_types';
 
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { ProjectMonitorFormatter } from '../../synthetics_service/project_monitor/project_monitor_formatter';
 
-const MAX_PAYLOAD_SIZE = 1048576 * 20; // 20MiB
+const MAX_PAYLOAD_SIZE = 1048576 * 50; // 20MiB
 
 export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
@@ -31,7 +31,6 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       maxBytes: MAX_PAYLOAD_SIZE,
     },
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, server } = routeContext;
     const { projectName } = request.params;
@@ -50,6 +49,12 @@ export const addSyntheticsProjectMonitorRoute: SyntheticsRestApiRouteFactory = (
       const { id: spaceId } = (await server.spaces?.spacesService.getActiveSpace(request)) ?? {
         id: DEFAULT_SPACE_ID,
       };
+
+      const permissionError = await validatePermissions(routeContext, monitors);
+
+      if (permissionError) {
+        return response.forbidden({ body: { message: permissionError } });
+      }
 
       const encryptedSavedObjectsClient = server.encryptedSavedObjects.getClient();
 
@@ -84,3 +89,33 @@ export const REQUEST_TOO_LARGE = i18n.translate('xpack.synthetics.server.project
   defaultMessage:
     'Delete request payload is too large. Please send a max of 250 monitors to delete per request',
 });
+
+export const validatePermissions = async (
+  { server, response, request }: RouteContext,
+  projectMonitors: ProjectMonitor[]
+) => {
+  const hasPublicLocations = projectMonitors.some(({ locations }) => (locations ?? []).length > 0);
+  if (!hasPublicLocations) {
+    return;
+  }
+
+  const elasticManagedLocationsEnabled =
+    Boolean(
+      (
+        await server.coreStart?.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'uptime.*',
+        })
+      ).uptime.elasticManagedLocationsEnabled
+    ) ?? true;
+  if (!elasticManagedLocationsEnabled) {
+    return ELASTIC_MANAGED_LOCATIONS_DISABLED;
+  }
+};
+
+export const ELASTIC_MANAGED_LOCATIONS_DISABLED = i18n.translate(
+  'xpack.synthetics.noAccess.publicLocations',
+  {
+    defaultMessage:
+      "You don't have permission to use Elastic managed global locations. Please contact your Kibana administrator.",
+  }
+);

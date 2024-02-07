@@ -11,9 +11,9 @@ import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { LazyAlertDropdownWrapper } from '../../alerting/log_threshold';
 import { HelpCenterContent } from '../../components/help_center_content';
+import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
 import { HeaderActionMenuContext } from '../../utils/header_action_menu_provider';
 import { RedirectWithQueryParams } from '../../utils/redirect_with_query_params';
@@ -26,11 +26,15 @@ import { StateMachinePlayground } from '../../observability_logs/xstate_helpers'
 import { NotFoundPage } from '../404';
 
 export const LogsPageContent: React.FunctionComponent = () => {
-  const enableDeveloperRoutes = isDevMode();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
 
-  const kibana = useKibana();
+  const {
+    application: { getUrlForApp },
+    observabilityAIAssistant: { ObservabilityAIAssistantActionMenuItem },
+  } = useKibanaContextForPlugin().services;
+
+  const enableDeveloperRoutes = isDevMode();
 
   useReadOnlyBadge(!uiCapabilities?.logs?.save);
 
@@ -76,13 +80,15 @@ export const LogsPageContent: React.FunctionComponent = () => {
             </EuiHeaderLink>
             <LazyAlertDropdownWrapper />
             <EuiHeaderLink
-              href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
+              href={getUrlForApp('/integrations/browse')}
               color="primary"
               iconType="indexOpen"
             >
               {ADD_DATA_LABEL}
             </EuiHeaderLink>
-            <ObservabilityAIAssistantActionMenuItem />
+            {ObservabilityAIAssistantActionMenuItem ? (
+              <ObservabilityAIAssistantActionMenuItem />
+            ) : null}
           </EuiHeaderLinks>
         </HeaderMenuPortal>
       )}

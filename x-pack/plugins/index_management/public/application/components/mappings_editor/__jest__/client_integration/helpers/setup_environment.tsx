@@ -8,7 +8,6 @@
 import React, { ComponentType, MemoExoticComponent } from 'react';
 import SemVer from 'semver/classes/semver';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
 import { GlobalFlyout } from '@kbn/es-ui-shared-plugin/public';
 import { docLinksServiceMock, uiSettingsServiceMock } from '@kbn/core/public/mocks';
 import { MAJOR_VERSION } from '../../../../../../../common';
@@ -48,8 +47,8 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
-jest.mock('@kbn/kibana-react-plugin/public', () => {
-  const original = jest.requireActual('@kbn/kibana-react-plugin/public');
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
 
   const CodeEditorMock = (props: any) => (
     <input

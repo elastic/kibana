@@ -20,6 +20,7 @@ import {
   CoreStart,
   DEFAULT_APP_CATEGORIES,
   Plugin,
+  PluginInitializerContext,
 } from '@kbn/core/public';
 import {
   DataPublicPluginSetup,
@@ -82,7 +83,7 @@ async function getDataStartPlugin(core: CoreSetup) {
 }
 
 export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
-  constructor() {}
+  constructor(private readonly initContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: ApmPluginSetupDeps) {
     const pluginSetupDeps = plugins;
@@ -169,6 +170,8 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
       )
     );
 
+    const isDev = this.initContext.env.mode.dev;
+
     core.application.register({
       id: 'ux',
       title: 'User Experience',
@@ -202,6 +205,7 @@ export class UxPlugin implements Plugin<UxPluginSetup, UxPluginStart> {
         ]);
 
         return renderApp({
+          isDev,
           core: coreStart,
           deps: pluginSetupDeps,
           appMountParameters,

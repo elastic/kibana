@@ -5,13 +5,17 @@
  * 2.0.
  */
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
 
-export function InfraSourceConfigurationFormProvider({ getService }: FtrProviderContext) {
+export function InfraSourceConfigurationFormProvider({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const common = getPageObject('common');
 
   return {
     /**
@@ -94,7 +98,7 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
       const movementDifference = destinationIndex - sourceIndex;
       await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
       for (let i = 0; i < Math.abs(movementDifference); i++) {
-        await new Promise((res) => setTimeout(res, KEY_PRESS_DELAY_MS));
+        await common.sleep(KEY_PRESS_DELAY_MS);
         if (movementDifference > 0) {
           await moveLogColumnHandle.pressKeys(browser.keys.ARROW_DOWN);
         } else {
@@ -102,7 +106,27 @@ export function InfraSourceConfigurationFormProvider({ getService }: FtrProvider
         }
       }
       await moveLogColumnHandle.pressKeys(browser.keys.SPACE);
-      await new Promise((res) => setTimeout(res, KEY_PRESS_DELAY_MS));
+      await common.sleep(KEY_PRESS_DELAY_MS);
+    },
+
+    /**
+     * Infra Metrics bottom actions bar
+     */
+    async getSaveButton(): Promise<WebElementWrapper> {
+      return await testSubjects.find('infraBottomBarActionsButton');
+    },
+
+    async saveInfraSettings() {
+      await (await this.getSaveButton()).click();
+
+      await retry.try(async () => {
+        const element = await this.getSaveButton();
+        return !(await element.isDisplayed());
+      });
+    },
+
+    async discardInfraSettingsChanges() {
+      await (await testSubjects.find('infraBottomBarActionsDiscardChangesButton')).click();
     },
 
     /**

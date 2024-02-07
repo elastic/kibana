@@ -1379,10 +1379,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "share",
-      "id": "def-public.SharePluginSetup",
+      "id": "def-public.SharePublicSetup",
       "type": "Type",
       "tags": [],
-      "label": "SharePluginSetup",
+      "label": "SharePublicSetup",
       "description": [],
       "signature": [
         "{ register: (shareMenuProvider: ",
@@ -1429,10 +1429,10 @@
     },
     "start": {
       "parentPluginId": "share",
-      "id": "def-public.SharePluginStart",
+      "id": "def-public.SharePublicStart",
       "type": "Type",
       "tags": [],
-      "label": "SharePluginStart",
+      "label": "SharePublicStart",
       "description": [],
       "signature": [
         "{ toggleShareContextMenu: (options: ",
@@ -1510,10 +1510,10 @@
     "objects": [],
     "setup": {
       "parentPluginId": "share",
-      "id": "def-server.SharePluginSetup",
+      "id": "def-server.SharePublicSetup",
       "type": "Interface",
       "tags": [],
-      "label": "SharePluginSetup",
+      "label": "SharePublicSetup",
       "description": [],
       "path": "src/plugins/share/server/plugin.ts",
       "deprecated": false,
@@ -1521,7 +1521,7 @@
       "children": [
         {
           "parentPluginId": "share",
-          "id": "def-server.SharePluginSetup.url",
+          "id": "def-server.SharePublicSetup.url",
           "type": "Object",
           "tags": [],
           "label": "url",
@@ -1544,10 +1544,10 @@
     },
     "start": {
       "parentPluginId": "share",
-      "id": "def-server.SharePluginStart",
+      "id": "def-server.SharePublicStart",
       "type": "Interface",
       "tags": [],
-      "label": "SharePluginStart",
+      "label": "SharePublicStart",
       "description": [],
       "path": "src/plugins/share/server/plugin.ts",
       "deprecated": false,
@@ -1555,7 +1555,7 @@
       "children": [
         {
           "parentPluginId": "share",
-          "id": "def-server.SharePluginStart.url",
+          "id": "def-server.SharePublicStart.url",
           "type": "Object",
           "tags": [],
           "label": "url",

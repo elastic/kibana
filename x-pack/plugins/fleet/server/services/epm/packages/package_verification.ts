@@ -57,7 +57,9 @@ export async function _readGpgKey(): Promise<openpgp.Key | undefined> {
   }
   let key;
   try {
-    key = await openpgp.readKey({ armoredKey: buffer.toString() });
+    key = await openpgp.readKey({
+      armoredKey: buffer.toString(),
+    });
   } catch (e) {
     logger.warn(`Unable to parse GPG key from '${gpgKeyPath}': ${e}`);
   }
@@ -128,6 +130,13 @@ async function _verifyPackageSignature({
     verificationKeys: verificationKey,
     signature,
     message,
+    config: {
+      // See https://github.com/openpgpjs/openpgpjs/blob/d6145ac73eebcf66bdeb0873aa60fc49361e1aeb/src/message.js#L800-L809
+      // Essentially, since the sha1 key was reformmated to sha256 as part of https://github.com/elastic/elasticsearch/issues/85876,
+      // there's an error around the creation timestamp for the key/signature. Passing this config allows the verification to succeed
+      // despite the key being reformatted.
+      allowInsecureVerificationWithReformattedKeys: true,
+    },
   });
 
   const signatureVerificationResult = verificationResult.signatures[0];

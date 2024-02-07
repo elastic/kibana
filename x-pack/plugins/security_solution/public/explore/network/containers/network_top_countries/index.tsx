@@ -8,6 +8,7 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 
+import type { NetworkTopCountriesRequestOptionsInput } from '../../../../../common/api/search_strategy';
 import type { ESTermQuery } from '../../../../../common/typed_json';
 import type { inputsModel } from '../../../../common/store';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -18,7 +19,6 @@ import { networkSelectors } from '../../store';
 import type {
   FlowTargetSourceDest,
   NetworkTopCountriesEdges,
-  NetworkTopCountriesRequestOptions,
   PageInfoPaginated,
 } from '../../../../../common/search_strategy';
 import { NetworkQueries } from '../../../../../common/search_strategy';
@@ -68,7 +68,7 @@ export const useNetworkTopCountries = ({
   );
 
   const [networkTopCountriesRequest, setNetworkTopCountriesRequest] =
-    useState<NetworkTopCountriesRequestOptions | null>(null);
+    useState<NetworkTopCountriesRequestOptionsInput | null>(null);
 
   const wrappedLoadMore = useCallback(
     (newActivePage: number) => {
@@ -135,7 +135,7 @@ export const useNetworkTopCountries = ({
 
   useEffect(() => {
     setNetworkTopCountriesRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: NetworkTopCountriesRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: NetworkQueries.topCountries,

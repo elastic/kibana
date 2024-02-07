@@ -628,9 +628,9 @@
         "description": [],
         "signature": [
           {
-            "pluginId": "@kbn/content-management-table-list-view-table",
+            "pluginId": "@kbn/content-management-table-list-view-common",
             "scope": "common",
-            "docId": "kibKbnContentManagementTableListViewTablePluginApi",
+            "docId": "kibKbnContentManagementTableListViewCommonPluginApi",
             "section": "def-common.UserContentCommonSchema",
             "text": "UserContentCommonSchema"
           },

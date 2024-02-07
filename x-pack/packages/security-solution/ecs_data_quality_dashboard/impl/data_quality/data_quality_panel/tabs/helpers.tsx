@@ -24,20 +24,22 @@ import { AllTab } from './all_tab';
 import { CustomTab } from './custom_tab';
 import { getCustomColor } from './custom_tab/helpers';
 import { EcsCompliantTab } from './ecs_compliant_tab';
+import { getSizeInBytes } from '../../helpers';
 import { IncompatibleTab } from './incompatible_tab';
-import { getIncompatibleColor } from './incompatible_tab/helpers';
+import { getIncompatibleColor, getSameFamilyColor } from './incompatible_tab/helpers';
 import {
   ALL_TAB_ID,
   ECS_COMPLIANT_TAB_ID,
   INCOMPATIBLE_TAB_ID,
+  SAME_FAMILY_TAB_ID,
   SUMMARY_TAB_ID,
 } from '../index_properties/helpers';
 import { getMarkdownComment } from '../index_properties/markdown/helpers';
-import { getFillColor } from './summary_tab/helpers';
 import * as i18n from '../index_properties/translations';
+import { SameFamilyTab } from './same_family_tab';
 import { SummaryTab } from './summary_tab';
+import { getFillColor } from './summary_tab/helpers';
 import type { EnrichedFieldMetadata, IlmPhase, PartitionedFieldMetadata } from '../../types';
-import { getSizeInBytes } from '../../helpers';
 
 export const getMissingTimestampComment = (): string =>
   getMarkdownComment({
@@ -156,6 +158,26 @@ export const getTabs = ({
     ),
     id: INCOMPATIBLE_TAB_ID,
     name: i18n.INCOMPATIBLE_FIELDS,
+  },
+  {
+    append: (
+      <EuiBadge color={getSameFamilyColor()}>{partitionedFieldMetadata.sameFamily.length}</EuiBadge>
+    ),
+    content: (
+      <SameFamilyTab
+        addSuccessToast={addSuccessToast}
+        docsCount={docsCount}
+        formatBytes={formatBytes}
+        formatNumber={formatNumber}
+        ilmPhase={ilmPhase}
+        indexName={indexName}
+        partitionedFieldMetadata={partitionedFieldMetadata}
+        patternDocsCount={patternDocsCount}
+        sizeInBytes={getSizeInBytes({ indexName, stats })}
+      />
+    ),
+    id: SAME_FAMILY_TAB_ID,
+    name: i18n.SAME_FAMILY,
   },
   {
     append: (

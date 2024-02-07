@@ -6,7 +6,7 @@
     "id": "notifications",
     "server": true,
     "browser": false,
-    "requiredPlugins": [
+    "optionalPlugins": [
       "actions",
       "licensing"
     ]

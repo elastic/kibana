@@ -7,9 +7,9 @@
 import { MetricDatum, MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import {
-  EuiIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIcon,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
@@ -17,9 +17,9 @@ import { useTheme } from '@kbn/observability-shared-plugin/public';
 import { NOT_AVAILABLE_LABEL } from '../../../../../../common/i18n';
 import { useAnyOfApmParams } from '../../../../../hooks/use_apm_params';
 import {
-  useFetcher,
   FETCH_STATUS,
   isPending,
+  useFetcher,
 } from '../../../../../hooks/use_fetcher';
 import { MetricItem } from './metric_item';
 import { usePreviousPeriodLabel } from '../../../../../hooks/use_previous_period_text';
@@ -110,25 +110,30 @@ export function MobileStats({
         defaultMessage: 'Crash rate',
       }),
       icon: getIcon('bug'),
-      value: data?.currentPeriod?.crashRate?.value ?? NOT_AVAILABLE_LABEL,
+      value: data?.currentPeriod?.crashRate?.value ?? NaN,
       valueFormatter: (value: number) =>
-        valueFormatter(Number((value * 100).toPrecision(2)), '%'),
-      trend: data?.currentPeriod?.crashRate?.timeseries,
+        Number.isNaN(value)
+          ? NOT_AVAILABLE_LABEL
+          : valueFormatter(Number((value * 100).toPrecision(2)), '%'),
+      trend: data?.currentPeriod?.crashRate?.timeseries ?? [],
       extra: getComparisonValueFormatter(data?.previousPeriod.crashRate?.value),
       trendShape: MetricTrendShape.Area,
     },
     {
-      color: euiTheme.eui.euiColorDisabled,
+      color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.metrics.load.time', {
-        defaultMessage: 'Slowest App load time',
-      }),
-      subtitle: i18n.translate('xpack.apm.mobile.coming.soon', {
-        defaultMessage: 'Coming Soon',
+        defaultMessage: 'Average app load time',
       }),
       icon: getIcon('visGauge'),
-      value: 'N/A',
-      valueFormatter: (value: number) => valueFormatter(value, 's'),
-      trend: [],
+      value: data?.currentPeriod?.launchTimes?.value ?? NaN,
+      valueFormatter: (value: number) =>
+        Number.isNaN(value)
+          ? NOT_AVAILABLE_LABEL
+          : valueFormatter(Number(value.toFixed(1)), 'ms'),
+      trend: data?.currentPeriod?.launchTimes?.timeseries ?? [],
+      extra: getComparisonValueFormatter(
+        data?.previousPeriod.launchTimes?.value?.toFixed(1)
+      ),
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -137,9 +142,10 @@ export function MobileStats({
         defaultMessage: 'Sessions',
       }),
       icon: getIcon('timeslider'),
-      value: data?.currentPeriod?.sessions?.value ?? NOT_AVAILABLE_LABEL,
-      valueFormatter: (value: number) => valueFormatter(value),
-      trend: data?.currentPeriod?.sessions?.timeseries,
+      value: data?.currentPeriod?.sessions?.value ?? NaN,
+      valueFormatter: (value: number) =>
+        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),
+      trend: data?.currentPeriod?.sessions?.timeseries ?? [],
       extra: getComparisonValueFormatter(data?.previousPeriod.sessions?.value),
       trendShape: MetricTrendShape.Area,
     },
@@ -149,16 +155,17 @@ export function MobileStats({
         defaultMessage: 'HTTP requests',
       }),
       icon: getIcon('kubernetesPod'),
-      value: data?.currentPeriod?.requests?.value ?? NOT_AVAILABLE_LABEL,
       extra: getComparisonValueFormatter(data?.previousPeriod.requests?.value),
-      valueFormatter: (value: number) => valueFormatter(value),
-      trend: data?.currentPeriod?.requests?.timeseries,
+      value: data?.currentPeriod?.requests?.value ?? NaN,
+      valueFormatter: (value: number) =>
+        Number.isNaN(value) ? NOT_AVAILABLE_LABEL : valueFormatter(value),
+      trend: data?.currentPeriod?.requests?.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
   ];
 
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup gutterSize="s">
       {metrics.map((metric, key) => (
         <EuiFlexItem key={key}>
           <MetricItem id={key} data={[metric]} isLoading={loadingStats} />

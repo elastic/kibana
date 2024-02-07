@@ -39,5 +39,24 @@ export const getAgentPoliciesAsInternalUser = async (server: SyntheticsServerSet
     agents: agentPolicy.agents ?? 0,
     status: agentPolicy.status,
     description: agentPolicy.description,
+    namespace: agentPolicy.namespace,
   }));
+};
+
+export const getAgentPolicyAsInternalUser = async (server: SyntheticsServerSetup, id: string) => {
+  const soClient = server.coreStart.savedObjects.createInternalRepository();
+
+  const agentPolicy = await server.fleet?.agentPolicyService.get(soClient, id);
+  if (!agentPolicy) {
+    return null;
+  }
+
+  return {
+    id: agentPolicy.id,
+    name: agentPolicy.name,
+    agents: agentPolicy.agents ?? 0,
+    status: agentPolicy.status,
+    description: agentPolicy.description,
+    namespace: agentPolicy.namespace,
+  };
 };

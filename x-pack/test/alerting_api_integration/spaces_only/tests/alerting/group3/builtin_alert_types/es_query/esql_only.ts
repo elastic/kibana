@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
@@ -21,6 +22,7 @@ import {
   RULE_INTERVAL_MILLIS,
   RULE_INTERVAL_SECONDS,
   RULE_TYPE_ID,
+  SourceField,
 } from './common';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 
@@ -36,6 +38,12 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     removeAllAADDocs,
     getAllAADDocs,
   } = getRuleServices(getService);
+
+  const sourceFields = [
+    { label: 'host.hostname', searchPath: 'host.hostname.keyword' },
+    { label: 'host.id', searchPath: 'host.id' },
+    { label: 'host.name', searchPath: 'host.name' },
+  ];
 
   describe('rule', async () => {
     let endDate: string;
@@ -71,18 +79,19 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createEsDocumentsInGroups(ES_GROUPS_TO_WRITE, endDate);
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-        size: 100,
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c < 0',
+        sourceFields,
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c > -1',
-        size: 100,
+        esqlQuery:
+          'from .kibana-alerting-test-data | stats c = count(date) by host.hostname, host.name, host.id | where c > -1',
+        sourceFields,
       });
 
       const docs = await waitForDocs(2);
-      const messagePattern =
-        /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
 
       for (let i = 0; i < docs.length; i++) {
         const doc = docs[i];
@@ -97,12 +106,17 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
       const aadDocs = await getAllAADDocs(1);
 
-      const alertDoc = aadDocs.body.hits.hits[0]._source.kibana.alert;
-      expect(alertDoc.reason).to.match(messagePattern);
-      expect(alertDoc.title).to.be("rule 'always fire' matched query");
-      expect(alertDoc.evaluation.conditions).to.be('Query matched documents');
-      expect(alertDoc.evaluation.value).greaterThan(0);
-      expect(alertDoc.url).to.contain('/s/space1/app/');
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      expect(alertDoc['kibana.alert.evaluation.threshold']).to.eql(0);
+      const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+      expect(value).greaterThan(0);
+      expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      expect(alertDoc['host.name']).to.eql(['host-1']);
+      expect(alertDoc['host.hostname']).to.eql(['host-1']);
+      expect(alertDoc['host.id']).to.eql(['1']);
     });
 
     it('runs correctly: use epoch millis - threshold on hit count < >', async () => {
@@ -113,13 +127,13 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'never fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
-        size: 100,
+
         timeField: 'date_epoch_millis',
       });
       await createRule({
         name: 'always fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c > -1',
-        size: 100,
+
         timeField: 'date_epoch_millis',
       });
 
@@ -131,8 +145,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -142,7 +155,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'always fire',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 1',
-        size: 100,
       });
 
       const docs = await waitForDocs(1);
@@ -153,8 +165,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
+        const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
@@ -166,7 +177,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await createRule({
         name: 'fire then recovers',
         esqlQuery: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 1',
-        size: 100,
+
         notifyWhen: 'onActionGroupChange',
         timeWindowSize: RULE_INTERVAL_SECONDS,
       });
@@ -184,7 +195,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(activeTitle).to.be(`rule 'fire then recovers' matched query`);
       expect(activeValue).to.be('1');
       expect(activeMessage).to.match(
-        /rule 'fire then recovers' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+        /Document count is \d+ in the last 4s. Alert when greater than 0./
       );
       await createEsDocumentsInGroups(1, endDate);
       docs = await waitForDocs(2);
@@ -198,7 +209,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       expect(recoveredName).to.be('fire then recovers');
       expect(recoveredTitle).to.be(`rule 'fire then recovers' recovered`);
       expect(recoveredMessage).to.match(
-        /rule 'fire then recovers' is recovered:\n\n- Value: \d+\n- Conditions Met: Query did NOT match documents over 4s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/
+        /Document count is \d+ in the last 4s. Alert when greater than 0./
       );
     });
 
@@ -212,14 +223,18 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       );
       await createRule({
         name: 'never fire',
-        esqlQuery: 'from test-data-stream | stats c = count(@timestamp) | where c < 0',
-        size: 100,
+        esqlQuery:
+          'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c < 0',
+        sourceFields,
       });
       await createRule({
         name: 'always fire',
-        esqlQuery: 'from test-data-stream | stats c = count(@timestamp) | where c > -1',
-        size: 100,
+        esqlQuery:
+          'from test-data-stream | stats c = count(@timestamp) by host.hostname, host.name, host.id | where c > -1',
+        sourceFields,
       });
+
+      const messagePattern = /Document count is \d+ in the last 20s. Alert when greater than 0./;
 
       const docs = await waitForDocs(2);
       for (let i = 0; i < docs.length; i++) {
@@ -229,11 +244,138 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
         expect(name).to.be('always fire');
         expect(title).to.be(`rule 'always fire' matched query`);
-        const messagePattern =
-          /rule 'always fire' is active:\n\n- Value: \d+\n- Conditions Met: Query matched documents over 20s\n- Timestamp: \d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}.\d{3}Z\n- Link:/;
         expect(message).to.match(messagePattern);
         expect(hits).not.to.be.empty();
       }
+
+      const aadDocs = await getAllAADDocs(1);
+
+      const alertDoc = aadDocs.body.hits.hits[0]._source;
+      expect(alertDoc[ALERT_REASON]).to.match(messagePattern);
+      expect(alertDoc['kibana.alert.title']).to.be("rule 'always fire' matched query");
+      expect(alertDoc['kibana.alert.evaluation.conditions']).to.be('Query matched documents');
+      const value = parseInt(alertDoc['kibana.alert.evaluation.value'], 10);
+      expect(value).greaterThan(0);
+      expect(alertDoc[ALERT_URL]).to.contain('/s/space1/app/');
+      expect(alertDoc['host.name']).to.eql(['host-1']);
+      expect(alertDoc['host.hostname']).to.eql(['host-1']);
+      expect(alertDoc['host.id']).to.eql(['1']);
+    });
+
+    it('throws an error if the thresholdComparator is not >', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '<',
+            threshold: [0],
+            searchType: 'esqlQuery',
+            timeField: 'date',
+            esqlQuery: {
+              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+            },
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be(
+        'params invalid: [thresholdComparator]: is required to be greater than'
+      );
+    });
+
+    it('throws an error if the threshold is not [0]', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [100],
+            searchType: 'esqlQuery',
+            timeField: 'date',
+            esqlQuery: {
+              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+            },
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be('params invalid: [threshold]: is required to be 0');
+    });
+
+    it('throws an error if the timeField is undefined', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [0],
+            searchType: 'esqlQuery',
+            esqlQuery: {
+              esql: 'from .kibana-alerting-test-data | stats c = count(date) | where c < 0',
+            },
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be('params invalid: [timeField]: is required');
+    });
+
+    it('throws an error if the esqlQuery is undefined', async () => {
+      const { body } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'test',
+          consumer: 'alerts',
+          enabled: true,
+          rule_type_id: RULE_TYPE_ID,
+          schedule: { interval: `${RULE_INTERVAL_SECONDS}s` },
+          actions: [],
+          notify_when: 'onActiveAlert',
+          params: {
+            size: 100,
+            timeWindowSize: RULE_INTERVAL_SECONDS * 5,
+            timeWindowUnit: 's',
+            thresholdComparator: '>',
+            threshold: [0],
+            searchType: 'esqlQuery',
+            timeField: 'date',
+          },
+        })
+        .expect(400);
+      expect(body.message).to.be(
+        'params invalid: [esqlQuery.esql]: expected value of type [string] but got [undefined]'
+      );
     });
 
     async function waitForDocs(count: number): Promise<any[]> {
@@ -246,7 +388,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     interface CreateRuleParams {
       name: string;
-      size: number;
       esqlQuery: string;
       timeWindowSize?: number;
       timeField?: string;
@@ -256,6 +397,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       groupBy?: string;
       termField?: string;
       termSize?: number;
+      sourceFields?: SourceField[];
     }
 
     async function createRule(params: CreateRuleParams): Promise<string> {
@@ -314,7 +456,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
           actions: [action, recoveryAction],
           notify_when: params.notifyWhen || 'onActiveAlert',
           params: {
-            size: params.size,
+            size: 100,
             timeWindowSize: params.timeWindowSize || RULE_INTERVAL_SECONDS * 5,
             timeWindowUnit: 's',
             thresholdComparator: '>',
@@ -327,6 +469,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             termSize: params.termSize,
             timeField: params.timeField || 'date',
             esqlQuery: { esql: params.esqlQuery },
+            sourceFields: params.sourceFields,
           },
         })
         .expect(200);

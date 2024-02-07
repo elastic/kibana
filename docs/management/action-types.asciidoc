@@ -7,6 +7,14 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
+a| <<bedrock-action-type,{bedrock}>>
+
+| Send a request to {bedrock}.
+
+a| <<d3security-action-type,D3 Security>>
+
+| Send a request to D3 Security.
+
 a| <<email-action-type,Email>>
 
 | Send email from your server.
@@ -27,6 +35,10 @@ a| <<teams-action-type,Microsoft Teams>>
 
 | Send a message to a Microsoft Teams channel.
 
+a| <<openai-action-type,OpenAI>>
+
+| Send a request to OpenAI.
+
 a| <<opsgenie-action-type,{opsgenie}>>
 
 | Create or close an alert in {opsgenie}.
@@ -34,6 +46,10 @@ a| <<opsgenie-action-type,{opsgenie}>>
 a| <<pagerduty-action-type,PagerDuty>>
 
 | Send an event in PagerDuty.
+
+a| <<sentinelone-action-type,SentinelOne>>
+
+| Send a request to SentinelOne.
 
 a| <<server-log-action-type,ServerLog>>
 
@@ -63,6 +79,10 @@ a| <<tines-action-type,Tines>>
 
 | Send events to a Tines Story.
 
+a| <<torq-action-type,Torq>>
+
+| Trigger a Torq workflow.
+
 a| <<webhook-action-type, {webhook}>>
 
 | Send a request to a web service.
@@ -74,18 +94,6 @@ a| <<cases-webhook-action-type,{webhook-cm}>>
 a| <<xmatters-action-type,xMatters>>
 
 | Send actionable alerts to on-call xMatters resources.
-
-a| <<torq-action-type,Torq>>
-
-| Trigger a Torq workflow.
-
-a| <<gen-ai-action-type,Generative AI>>
-
-| Send a request to OpenAI.
-
-a| <<d3security-action-type,D3 Security>>
-
-| Send a request to D3 Security.
 
 |===
 

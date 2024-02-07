@@ -6,18 +6,19 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { EuiEmptyPrompt } from '@elastic/eui';
+
 export const ProfileLoadingPlaceholder = () => {
   return (
-    <div className="prfDevTool__main__emptyTreePlaceholder">
-      <EuiText color="subdued">
+    <EuiEmptyPrompt
+      title={
         <h1>
           {i18n.translate('xpack.searchProfiler.profilingLoaderText', {
             defaultMessage: 'Loading query profiles...',
           })}
         </h1>
-      </EuiText>
-    </div>
+      }
+    />
   );
 };

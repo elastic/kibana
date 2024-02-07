@@ -21,7 +21,7 @@ import { isFieldDefaultValue } from '@kbn/management-settings-utilities';
 /**
  * Props for a {@link InputResetLink} component.
  */
-export interface InputResetLinkProps<T extends SettingType> {
+export interface InputResetLinkProps<T extends SettingType = SettingType> {
   /** The {@link FieldDefinition} corresponding the setting. */
   field: Pick<
     FieldDefinition<T>,

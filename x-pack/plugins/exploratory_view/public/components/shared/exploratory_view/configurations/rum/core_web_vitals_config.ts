@@ -15,11 +15,11 @@ import {
   ReportTypes,
   USE_BREAK_DOWN_COLUMN,
 } from '../constants';
-import { buildPhraseFilter } from '../utils';
+import { buildPhraseFilter, buildPhrasesFilter } from '../utils';
 import {
   CLIENT_GEO_COUNTRY_NAME,
   CLS_FIELD,
-  FID_FIELD,
+  INP_FIELD,
   LCP_FIELD,
   PROCESSOR_EVENT,
   SERVICE_NAME,
@@ -32,8 +32,9 @@ import {
   USER_AGENT_OS_VERSION,
   URL_FULL,
   SERVICE_ENVIRONMENT,
+  FID_FIELD,
 } from '../constants/elasticsearch_fieldnames';
-import { CLS_LABEL, FID_LABEL, LCP_LABEL } from '../constants/labels';
+import { CLS_LABEL, FID_LABEL, INP_LABEL, LCP_LABEL } from '../constants/labels';
 
 export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig {
   const statusPallete = euiPaletteForStatus(3);
@@ -87,7 +88,7 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
       URL_FULL,
     ],
     baseFilters: [
-      ...buildPhraseFilter(TRANSACTION_TYPE, 'page-load', dataView),
+      ...buildPhrasesFilter(TRANSACTION_TYPE, ['page-load', 'page-exit'], dataView),
       ...buildPhraseFilter(PROCESSOR_EVENT, 'transaction', dataView),
     ],
     labels: { ...FieldLabels, [SERVICE_NAME]: 'Web Application' },
@@ -113,21 +114,21 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
         ],
       },
       {
-        label: FID_LABEL,
-        id: FID_FIELD,
+        label: INP_LABEL,
+        id: INP_FIELD,
         columnType: FILTER_RECORDS,
         columnFilters: [
           {
             language: 'kuery',
-            query: `${FID_FIELD} < 100`,
+            query: `${INP_FIELD} < 200`,
           },
           {
             language: 'kuery',
-            query: `${FID_FIELD} > 100 and ${FID_FIELD} < 300`,
+            query: `${INP_FIELD} > 200 and ${INP_FIELD} < 500`,
           },
           {
             language: 'kuery',
-            query: `${FID_FIELD} > 300`,
+            query: `${INP_FIELD} > 500`,
           },
         ],
       },
@@ -150,12 +151,31 @@ export function getCoreWebVitalsConfig({ dataView }: ConfigProps): SeriesConfig 
           },
         ],
       },
+      {
+        label: FID_LABEL,
+        id: FID_FIELD,
+        columnType: FILTER_RECORDS,
+        columnFilters: [
+          {
+            language: 'kuery',
+            query: `${FID_FIELD} < 100`,
+          },
+          {
+            language: 'kuery',
+            query: `${FID_FIELD} > 100 and ${FID_FIELD} < 300`,
+          },
+          {
+            language: 'kuery',
+            query: `${FID_FIELD} > 300`,
+          },
+        ],
+      },
     ],
     yConfig: [
       { color: statusPallete[0], forAccessor: 'y-axis-column' },
       { color: statusPallete[1], forAccessor: 'y-axis-column-1' },
       { color: statusPallete[2], forAccessor: 'y-axis-column-2' },
     ],
-    query: { query: 'transaction.type: "page-load"', language: 'kuery' },
+    query: { query: 'transaction.type: ("page-load" or "page-exit")', language: 'kuery' },
   };
 }

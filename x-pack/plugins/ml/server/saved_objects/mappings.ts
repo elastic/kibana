@@ -114,5 +114,13 @@ export const mlModule: SavedObjectsTypeMappingDefinition = {
     datafeeds: {
       type: 'object',
     },
+    tags: {
+      type: 'text',
+      fields: {
+        keyword: {
+          type: 'keyword',
+        },
+      },
+    },
   },
 };

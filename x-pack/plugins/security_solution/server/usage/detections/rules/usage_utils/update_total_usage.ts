@@ -47,5 +47,8 @@ export const updateTotalUsage = ({
     notifications_disabled: notificationDisabled
       ? updatedUsage[totalType].notifications_disabled + 1
       : updatedUsage[totalType].notifications_disabled,
+    legacy_investigation_fields: detectionRuleMetric.has_legacy_investigation_field
+      ? updatedUsage[totalType].legacy_investigation_fields + 1
+      : updatedUsage[totalType].legacy_investigation_fields,
   };
 };

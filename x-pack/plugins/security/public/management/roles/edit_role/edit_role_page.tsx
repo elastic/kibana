@@ -37,7 +37,9 @@ import type { KibanaFeature } from '@kbn/features-plugin/common';
 import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import { reactRouterNavigate, useDarkMode } from '@kbn/kibana-react-plugin/public';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -46,13 +48,13 @@ import { ElasticsearchPrivileges, KibanaPrivilegesRegion } from './privileges';
 import { ReservedRoleBadge } from './reserved_role_badge';
 import type { RoleValidationResult } from './validate_role';
 import { RoleValidator } from './validate_role';
-import type { SecurityLicense } from '../../../../common/licensing';
 import type {
   BuiltinESPrivileges,
   RawKibanaPrivileges,
   Role,
   RoleIndexPrivilege,
-} from '../../../../common/model';
+  SecurityLicense,
+} from '../../../../common';
 import {
   isRoleDeprecated as checkIfRoleDeprecated,
   isRoleReadOnly as checkIfRoleReadOnly,
@@ -86,6 +88,10 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+}
+
+function useRemoteClusters(http: HttpStart) {
+  return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
 }
 
 function useFeatureCheck(http: HttpStart) {
@@ -298,6 +304,8 @@ export const EditRolePage: FunctionComponent<Props> = ({
   history,
   spacesApiUi,
 }) => {
+  const isDarkMode = useDarkMode();
+
   if (!dataViews) {
     // The dataViews plugin is technically marked as an optional dependency because we don't need to pull it in for Anonymous pages (such
     // as the login page). That said, it _is_ required for this page to function correctly, so we throw an error here if it's not available.
@@ -320,6 +328,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
   const featureCheckState = useFeatureCheck(http);
+  const remoteClustersState = useRemoteClusters(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,
@@ -471,10 +480,12 @@ export const EditRolePage: FunctionComponent<Props> = ({
           runAsUsers={runAsUsers}
           validator={validator}
           indexPatterns={indexPatternsTitles}
+          remoteClusters={remoteClustersState.value}
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}
           canUseRemoteIndices={featureCheckState.value?.canUseRemoteIndices}
+          isDarkMode={isDarkMode}
         />
       </div>
     );

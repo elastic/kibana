@@ -28,6 +28,7 @@ import {
   validatePointsRadiusForChartType,
   validateLinesVisibilityForChartType,
   validateAxes,
+  validateMinBarHeight,
 } from './validate';
 import { logDatatable } from '../utils';
 
@@ -52,6 +53,7 @@ const createDataLayer = (args: XYArgs, table: Datatable): DataLayerConfigResult 
     layerType: LayerTypes.DATA,
     table: normalizedTable,
     showLines: args.showLines,
+    colorMapping: args.colorMapping,
     ...accessors,
   };
 };
@@ -110,6 +112,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
   validateFillOpacity(args.fillOpacity, hasArea);
   validateAddTimeMarker(dataLayers, args.addTimeMarker);
   validateMinTimeBarInterval(dataLayers, hasBar, args.minTimeBarInterval);
+  validateMinBarHeight(args.minBarHeight);
 
   validateValueLabels(args.valueLabels, hasBar);
   validateMarkSizeRatioWithAccessor(args.markSizeRatio, dataLayers[0].markSizeAccessor);
@@ -126,6 +129,7 @@ export const xyVisFn: XyVisFn['fn'] = async (data, args, handlers) => {
       args: {
         ...restArgs,
         layers,
+        minBarHeight: args.minBarHeight ?? 1,
         markSizeRatio:
           dataLayers[0].markSizeAccessor && !args.markSizeRatio ? 10 : args.markSizeRatio,
         ariaLabel:

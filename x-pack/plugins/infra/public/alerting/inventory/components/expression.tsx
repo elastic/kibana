@@ -32,6 +32,19 @@ import { debounce, omit } from 'lodash';
 import React, { ChangeEvent, useCallback, useEffect, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';
 import {
+  findInventoryModel,
+  awsEC2SnapshotMetricTypes,
+  awsRDSSnapshotMetricTypes,
+  awsS3SnapshotMetricTypes,
+  awsSQSSnapshotMetricTypes,
+  containerSnapshotMetricTypes,
+  hostSnapshotMetricTypes,
+  podSnapshotMetricTypes,
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeRT,
+} from '@kbn/metrics-data-access-plugin/common';
+import {
   Comparator,
   FilterQuery,
   InventoryMetricConditions,
@@ -41,19 +54,6 @@ import {
   SnapshotCustomMetricInput,
   SnapshotCustomMetricInputRT,
 } from '../../../../common/http_api/snapshot_api';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import { awsEC2SnapshotMetricTypes } from '../../../../common/inventory_models/aws_ec2';
-import { awsRDSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_rds';
-import { awsS3SnapshotMetricTypes } from '../../../../common/inventory_models/aws_s3';
-import { awsSQSSnapshotMetricTypes } from '../../../../common/inventory_models/aws_sqs';
-import { containerSnapshotMetricTypes } from '../../../../common/inventory_models/container';
-import { hostSnapshotMetricTypes } from '../../../../common/inventory_models/host';
-import { podSnapshotMetricTypes } from '../../../../common/inventory_models/pod';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeRT,
-} from '../../../../common/inventory_models/types';
 import { toMetricOpt } from '../../../../common/snapshot_metric_i18n';
 import {
   DerivedIndexPattern,
