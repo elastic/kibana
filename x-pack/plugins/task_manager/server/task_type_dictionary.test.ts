@@ -50,9 +50,10 @@ const getMockTaskDefinitions = (opts: Opts) => {
 
 describe('taskTypeDictionary', () => {
   let definitions: TaskTypeDictionary;
+  const logger = mockLogger();
 
   beforeEach(() => {
-    definitions = new TaskTypeDictionary(mockLogger());
+    definitions = new TaskTypeDictionary(logger);
   });
 
   describe('sanitizeTaskDefinitions', () => {
@@ -169,6 +170,33 @@ describe('taskTypeDictionary', () => {
         `"Invalid timeout \\"1.5h\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
       );
     });
+
+    it('throws a validation exception for invalid priority on task definition', () => {
+      const runsanitize = () => {
+        const taskDefinitions: TaskDefinitionRegistry = {
+          some_kind_of_task: {
+            title: 'Test XYZ',
+            priority: 23,
+            description: `Actually this won't work`,
+            createTaskRunner() {
+              return {
+                async run() {
+                  return {
+                    state: {},
+                  };
+                },
+              };
+            },
+          },
+        };
+
+        return sanitizeTaskDefinitions(taskDefinitions);
+      };
+
+      expect(runsanitize).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid priority \\"23\\". Priority must be one of Low => 1,Normal => 50"`
+      );
+    });
   });
 
   describe('registerTaskDefinitions', () => {
@@ -188,18 +216,37 @@ describe('taskTypeDictionary', () => {
         foo: {
           title: 'foo',
           maxConcurrency: 2,
-          priority: TaskPriority.High,
+          priority: TaskPriority.Low,
           createTaskRunner: jest.fn(),
         },
       });
       expect(definitions.get('foo')).toEqual({
         createTaskRunner: expect.any(Function),
         maxConcurrency: 2,
-        priority: 100,
+        priority: 1,
         timeout: '5m',
         title: 'foo',
         type: 'foo',
       });
+    });
+
+    it('does not register task with invalid priority schema', () => {
+      definitions.registerTaskDefinitions({
+        foo: {
+          title: 'foo',
+          maxConcurrency: 2,
+          priority: 23,
+          createTaskRunner: jest.fn(),
+        },
+      });
+      expect(logger.error).toHaveBeenCalledWith(
+        `Could not sanitize task definitions: Invalid priority \"23\". Priority must be one of Low => 1,Normal => 50`
+      );
+      expect(() => {
+        definitions.get('foo');
+      }).toThrowErrorMatchingInlineSnapshot(
+        `"Unsupported task type \\"foo\\". Supported types are "`
+      );
     });
 
     it('throws error when registering duplicate task type', () => {

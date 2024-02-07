@@ -6,6 +6,7 @@
  */
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
+import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
@@ -13,7 +14,6 @@ import { DecoratedError } from './task_running';
 export enum TaskPriority {
   Low = 1,
   Normal = 50,
-  High = 100,
 }
 
 /*
@@ -188,9 +188,15 @@ export const taskDefinitionSchema = schema.object(
     indirectParamsSchema: schema.maybe(schema.any()),
   },
   {
-    validate({ timeout }) {
+    validate({ timeout, priority }) {
       if (!isInterval(timeout) || isErr(tryAsResult(() => parseIntervalAsMillisecond(timeout)))) {
         return `Invalid timeout "${timeout}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`;
+      }
+
+      if (priority && (!isNumber(priority) || !(priority in TaskPriority))) {
+        return `Invalid priority "${priority}". Priority must be one of ${Object.keys(TaskPriority)
+          .filter((key) => isNaN(Number(key)))
+          .map((key) => `${key} => ${TaskPriority[key as keyof typeof TaskPriority]}`)}`;
       }
     },
   }
