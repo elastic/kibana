@@ -104,7 +104,7 @@ function DocumentationContent({
           </EuiFlexItem>
           {linkToDocumentation && (
             <EuiFlexItem grow={false}>
-              <EuiLink external href={linkToDocumentation}>
+              <EuiLink external href={linkToDocumentation} target="_blank">
                 {i18n.translate('languageDocumentationPopover.documentationLinkLabel', {
                   defaultMessage: 'View full documentation',
                 })}
