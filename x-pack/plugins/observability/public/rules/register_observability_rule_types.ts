@@ -14,8 +14,8 @@ import {
   ALERT_START,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { MetricExpression } from '../components/custom_threshold/types';
 import type { CustomThresholdExpressionMetric } from '../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
@@ -88,7 +88,7 @@ const getDataViewId = (searchConfiguration?: SerializedSearchSourceFields) =>
 export const registerObservabilityRuleTypes = async (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  logsExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>
+  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>
 ) => {
   observabilityRuleTypeRegistry.register({
     id: SLO_BURN_RATE_RULE_TYPE_ID,

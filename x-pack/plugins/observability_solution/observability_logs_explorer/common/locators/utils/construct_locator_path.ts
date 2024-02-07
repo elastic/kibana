@@ -18,6 +18,11 @@ import {
 } from '@kbn/logs-explorer-plugin/common';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
+  CONTENT_FIELD,
+  CONTENT_FIELD_CONFIGURATION,
+  RESOURCE_FIELD_CONFIGURATION,
+} from '@kbn/logs-explorer-plugin/common/constants';
+import {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   logsExplorerUrlSchemaV1,
 } from '../../url_schema';
@@ -46,7 +51,14 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
       query,
       refreshInterval,
       time: timeRange,
-      columns: columns?.map((field) => ({ field })),
+      columns: columns?.map((column) => {
+        if (column.type === 'smart-field') {
+          return column.name === CONTENT_FIELD
+            ? CONTENT_FIELD_CONFIGURATION
+            : RESOURCE_FIELD_CONFIGURATION;
+        }
+        return column;
+      }),
       controls: getControlsPageStateFromFilterControlsParams(filterControls ?? {}),
     })
   );

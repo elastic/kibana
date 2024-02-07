@@ -21,7 +21,7 @@ export class LogsExplorerLocatorDefinition implements LocatorDefinition<LogsExpl
   constructor(protected readonly deps: LogsExplorerLocatorDependencies) {}
 
   public readonly getLocation = (params: LogsExplorerLocatorParams) => {
-    const { dataset } = params;
+    const { dataset, columns } = params;
     const dataViewSpec: DataViewSpec | undefined = dataset
       ? {
           id: dataset,
@@ -29,8 +29,13 @@ export class LogsExplorerLocatorDefinition implements LocatorDefinition<LogsExpl
         }
       : undefined;
 
+    const discoverStyleColumns = columns?.map((column) => {
+      return column.type === 'document-field' ? column.field : column.name;
+    });
+
     return this.deps.discoverAppLocator?.getLocation({
       ...params,
+      columns: discoverStyleColumns,
       dataViewId: dataset,
       dataViewSpec,
     })!;
