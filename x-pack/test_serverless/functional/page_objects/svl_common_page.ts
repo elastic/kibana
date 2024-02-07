@@ -29,35 +29,39 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     async loginWithRole(role: string) {
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getSessionCookieForRole(role);
+      const bootstrapUrl = deployment.getHostPort() + '/bootstrap.js';
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,
         async () => {
-          log.debug(`Delete all the cookies in the current browser context`);
-          await browser.deleteAllCookies();
-          // adding sleep to settle down logout
-          await pageObjects.common.sleep(2000);
-          // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
           log.debug(`Navigate to /bootstrap.js`);
-          await browser.get(deployment.getHostPort() + '/bootstrap.js', false);
-          log.debug(`Wait for bootstrap page to be loaded`);
-          await find.byCssSelector('body > pre', 5000);
-          let alert = await browser.getAlert();
+          await browser.get(bootstrapUrl);
+          // accept alert if it pops up
+          const alert = await browser.getAlert();
           if (alert) {
-            log.debug(`Closing alert after loading /bootstrap.js`);
+            log.debug(`Closing alert in browser`);
             await alert.accept();
           }
+          log.debug(`Wait for bootstrap page to be loaded`);
+          await find.byCssSelector('body > pre', 5000);
+          log.debug(`Delete all the cookies in the current browser context`);
+          await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
+            await browser.deleteAllCookies();
+            await pageObjects.common.sleep(1000);
+            const cookies = await browser.getCookies();
+            return cookies.length === 0;
+          });
+          await pageObjects.common.sleep(700);
+          // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
+          log.debug(`Navigate to /bootstrap.js again`);
+          await browser.get(bootstrapUrl);
+          await find.byCssSelector('body > pre', 5000);
           log.debug(`Set the new cookie in the current browser context`);
           await browser.setCookie('sid', sidCookie);
-          await pageObjects.common.sleep(1000);
+          await pageObjects.common.sleep(700);
           // Cookie should be already set in the browsing context, navigating to the Home page
           log.debug(`Navigate to base url`);
           await browser.get(deployment.getHostPort(), false);
-          alert = await browser.getAlert();
-          if (alert) {
-            log.debug(`Closing alert after loading base url`);
-            await alert.accept();
-          }
           // Verifying that we are logged in
           if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
             log.debug('userMenuButton found, login passed');
@@ -106,8 +110,55 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       });
     },
 
+    async forceLogout() {
+      log.debug('SvlCommonPage.forceLogout');
+      if (await find.existsByDisplayedByCssSelector('.login-form', 100)) {
+        log.debug('Already on the login page, not forcing anything');
+        return;
+      }
+
+      log.debug(`Navigate to /bootstrap.js`);
+      await browser.get(deployment.getHostPort() + '/bootstrap.js');
+      // accept alert if it pops up
+      const alert = await browser.getAlert();
+      if (alert) {
+        log.debug(`Closing alert in browser`);
+        await alert.accept();
+      }
+
+      log.debug(`Wait for bootstrap page to be loaded`);
+      await find.byCssSelector('body > pre', 5000);
+      log.debug(`Delete all the cookies in the current browser context`);
+      await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
+        await browser.deleteAllCookies();
+        await pageObjects.common.sleep(1000);
+        const cookies = await browser.getCookies();
+        return cookies.length === 0;
+      });
+
+      log.debug(`Navigating to ${deployment.getHostPort()}/logout to force the logout`);
+      await browser.get(deployment.getHostPort() + '/logout');
+
+      // After logging out, the user can be redirected to various locations depending on the context. By default, we
+      // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
+      // we should simply wait until the user is redirected *elsewhere*.
+      // Timeout has been doubled here in attempt to quiet the flakiness
+      await retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
+        const urlBefore = await browser.getCurrentUrl();
+        delay(1000);
+        const urlAfter = await browser.getCurrentUrl();
+        log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
+        return urlAfter === urlBefore;
+      });
+
+      const currentUrl = await browser.getCurrentUrl();
+
+      // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
+      return currentUrl.includes('/login') || currentUrl.includes('/projects');
+    },
+
     async login() {
-      await pageObjects.security.forceLogout({ waitForLoginPage: false });
+      await this.forceLogout();
 
       // adding sleep to settle down logout
       await pageObjects.common.sleep(2500);
@@ -160,11 +211,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
         }
       );
       log.debug('Logged in successfully');
-    },
-
-    async forceLogout() {
-      await pageObjects.security.forceLogout({ waitForLoginPage: false });
-      log.debug('Logged out successfully');
     },
 
     async assertProjectHeaderExists() {
