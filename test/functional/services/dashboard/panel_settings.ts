@@ -65,8 +65,8 @@ export function DashboardCustomizePanelProvider({ getService, getPageObject }: F
         }
       });
 
-      await retry.waitFor('superDatePickerToggleQuickMenuButton', async () => {
-        return await testSubjects.exists('superDatePickerToggleQuickMenuButton');
+      await retry.waitFor('superDatePickerToggleQuickMenuButton to be present', async () => {
+        return Boolean(await this.findDatePickerQuickMenuButton());
       });
     }
 
