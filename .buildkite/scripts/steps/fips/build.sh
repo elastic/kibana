@@ -32,4 +32,4 @@ docker logout docker.elastic.co
 
 # Moving to `target/` first will keep `buildkite-agent` from including directories in the artifact name
 cd "$KIBANA_DIR/target"
-buildkite-agent artifact upload "./*.tar.gz;./*.zip;./*.deb;./*.rpm"
+buildkite-agent artifact upload "./*docker-image*.tar.gz"
