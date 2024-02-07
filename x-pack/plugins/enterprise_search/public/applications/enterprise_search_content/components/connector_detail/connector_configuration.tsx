@@ -46,13 +46,13 @@ import {
   CONNECTORS,
   getConnectorTemplate,
 } from '../search_index/connector/constants';
-import { NativeConnectorConfiguration } from '../search_index/connector/native_connector_configuration/native_connector_configuration';
 import { IndexNameLogic } from '../search_index/index_name_logic';
 import { IndexViewLogic } from '../search_index/index_view_logic';
 
 import { AttachIndexBox } from './attach_index_box';
 import { ConnectorDetailTabId } from './connector_detail';
 import { ConnectorViewLogic } from './connector_view_logic';
+import { NativeConnectorConfiguration } from './native_connector_configuration';
 
 export const ConnectorConfiguration: React.FC = () => {
   const { data: apiKeyData } = useValues(GenerateConnectorApiKeyApiLogic);
