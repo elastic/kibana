@@ -26,6 +26,8 @@ export const DEFAULT_OUTPUT: NewOutput = {
   hosts: [''],
 };
 
+export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
+
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 
 /**
