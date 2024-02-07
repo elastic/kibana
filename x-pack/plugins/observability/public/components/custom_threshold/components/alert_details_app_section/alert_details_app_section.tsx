@@ -73,7 +73,7 @@ const equationResultText = i18n.translate('xpack.observability.customThreshold.a
   defaultMessage: 'Equation result for ',
 });
 
-const generateChartTitle = (criterion: MetricExpression) => {
+const generateChartTitleAndTooltip = (criterion: MetricExpression) => {
   const metricNameResolver: Record<string, string> = {};
 
   criterion.metrics.forEach(
@@ -133,7 +133,7 @@ export default function AlertDetailsAppSection({
   const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
 
   ruleParams.criteria.forEach((criterion) => {
-    chartTitleAndTooltip.push(generateChartTitle(criterion));
+    chartTitleAndTooltip.push(generateChartTitleAndTooltip(criterion));
   });
 
   const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
