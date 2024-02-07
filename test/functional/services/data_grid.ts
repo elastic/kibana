@@ -15,6 +15,7 @@ export interface TabbedGridData {
   columns: string[];
   rows: string[][];
 }
+
 interface SelectOptions {
   isAnchorRow?: boolean;
   rowIndex?: number;
@@ -274,7 +275,7 @@ export class DataGridService extends FtrService {
       const cellText = await cell.getVisibleText();
       textArr.push(cellText.trim());
     }
-    return Promise.resolve(textArr);
+    return textArr;
   }
 
   public async getControlColumnHeaderFields(): Promise<string[]> {
@@ -287,7 +288,7 @@ export class DataGridService extends FtrService {
       const cellText = await cell.getVisibleText();
       textArr.push(cellText.trim());
     }
-    return Promise.resolve(textArr);
+    return textArr;
   }
 
   public async getRowActions(
@@ -408,6 +409,7 @@ export class DataGridService extends FtrService {
     const detailRows = await this.getDetailsRows();
     return detailRows[0];
   }
+
   public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
