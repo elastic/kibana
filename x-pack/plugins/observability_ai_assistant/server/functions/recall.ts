@@ -9,7 +9,7 @@ import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import type { Serializable } from '@kbn/utility-types';
 import dedent from 'dedent';
 import * as t from 'io-ts';
-import { last, omit } from 'lodash';
+import { chunk, last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
@@ -105,15 +105,23 @@ export function registerRecallFunction({
         };
       }
 
-      const relevantDocuments = await scoreSuggestions({
-        suggestions,
-        systemMessage,
-        userMessage,
-        queries,
-        client,
-        connectorId,
-        signal,
-      });
+      const chunks = chunk(suggestions, 1);
+
+      const relevantDocuments = (
+        await Promise.all(
+          chunks.map((suggestionsInChunk) =>
+            scoreSuggestions({
+              suggestions: suggestionsInChunk,
+              systemMessage,
+              userMessage,
+              queries,
+              client,
+              connectorId,
+              signal,
+            })
+          )
+        )
+      ).flat();
 
       resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
       resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
