@@ -255,7 +255,6 @@ export class SecurityPlugin
       elasticsearch: core.elasticsearch,
       config,
       license,
-      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       customBranding: core.customBranding,
     });
 
@@ -283,7 +282,6 @@ export class SecurityPlugin
       loggers: this.initializerContext.logger,
       kibanaIndexName,
       packageVersion: this.initializerContext.env.packageInfo.version,
-      buildNumber: this.initializerContext.env.packageInfo.buildNum,
       getSpacesService: () => spaces?.spacesService,
       features,
       getCurrentUser: (request) => this.getAuthentication().getCurrentUser(request),
