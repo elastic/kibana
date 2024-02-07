@@ -8,8 +8,12 @@
 import { availableControlsPanels, datasetSelectionPlainRT } from '@kbn/logs-explorer-plugin/common';
 import * as rt from 'io-ts';
 
-export const columnRT = rt.intersection([
+const allowedNames = rt.union([rt.literal('content'), rt.literal('resource')]);
+
+// Define the runtime type for DocumentFieldGridColumnOptions
+const documentFieldColumnRT = rt.intersection([
   rt.strict({
+    type: rt.literal('document-field'),
     field: rt.string,
   }),
   rt.exact(
@@ -18,6 +22,22 @@ export const columnRT = rt.intersection([
     })
   ),
 ]);
+
+// Define the runtime type for SmartFieldGridColumnOptions
+const smartFieldColumnRT = rt.intersection([
+  rt.strict({
+    type: rt.literal('smart-field'),
+    name: allowedNames,
+    fallbackFields: rt.array(rt.string),
+  }),
+  rt.exact(
+    rt.partial({
+      width: rt.number,
+    })
+  ),
+]);
+
+export const columnRT = rt.union([documentFieldColumnRT, smartFieldColumnRT]);
 
 export const columnsRT = rt.array(columnRT);
 

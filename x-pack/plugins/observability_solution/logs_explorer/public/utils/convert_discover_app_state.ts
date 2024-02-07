@@ -11,7 +11,9 @@ import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
 import {
+  CONTENT_FIELD,
   CONTENT_FIELD_CONFIGURATION,
+  RESOURCE_FIELD,
   RESOURCE_FIELD_CONFIGURATION,
   SMART_FALLBACK_FIELDS,
 } from '../../common/constants';
@@ -28,9 +30,9 @@ export const getGridColumnDisplayOptionsFromDiscoverAppState = (
 ): GridColumnDisplayOptions[] | undefined =>
   discoverAppState.columns?.map((field) => {
     switch (field) {
-      case 'resource':
+      case RESOURCE_FIELD:
         return RESOURCE_FIELD_CONFIGURATION;
-      case 'content':
+      case CONTENT_FIELD:
         return CONTENT_FIELD_CONFIGURATION;
       default:
         return {
@@ -88,12 +90,7 @@ export const getDiscoverColumnsFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): DiscoverAppState['columns'] =>
   displayOptions.grid.columns.flatMap((column) => {
-    return column.field;
-    // if (column.type === 'document-field') {
-    //   return column.field;
-    // } else {
-    //   return column.name;
-    // }
+    return column.type === 'document-field' ? column.field : column.name;
   });
 
 export const getDiscoverGridFromDisplayOptions = (

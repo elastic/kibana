@@ -19,7 +19,6 @@ export interface DocumentFieldGridColumnOptions {
 
 export interface SmartFieldGridColumnOptions {
   type: 'smart-field';
-  field: 'content' | 'resource';
   name: 'content' | 'resource';
   fallbackFields: string[];
   width?: number;

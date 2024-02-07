@@ -46,7 +46,6 @@ export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
 
 export const RESOURCE_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
   type: 'smart-field',
-  field: RESOURCE_FIELD,
   name: RESOURCE_FIELD,
   fallbackFields: ['host.name', 'service.name'],
   width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
@@ -54,7 +53,6 @@ export const RESOURCE_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
 
 export const CONTENT_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
   type: 'smart-field',
-  field: CONTENT_FIELD,
   name: CONTENT_FIELD,
   fallbackFields: ['message'],
 };
