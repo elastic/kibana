@@ -116,7 +116,7 @@ export async function createChatService({
 
   return {
     analytics,
-    renderFunction: (name, args, response) => {
+    renderFunction: (name, args, response, onActionClick, chatFlyoutSecondSlotHandler) => {
       const fn = renderFunctionRegistry.get(name);
 
       if (!fn) {
@@ -130,7 +130,12 @@ export async function createChatService({
         data: JSON.parse(response.data ?? '{}'),
       };
 
-      return fn?.({ response: parsedResponse, arguments: parsedArguments });
+      return fn?.({
+        response: parsedResponse,
+        arguments: parsedArguments,
+        onActionClick,
+        chatFlyoutSecondSlotHandler,
+      });
     },
     getContexts: () => contextDefinitions,
     getFunctions,
@@ -174,33 +179,41 @@ export async function createChatService({
           });
       });
     },
-    chat({
-      connectorId,
-      messages,
-      function: callFunctions = 'auto',
-      signal,
-    }: {
-      connectorId: string;
-      messages: Message[];
-      function?: 'none' | 'auto';
-      signal: AbortSignal;
-    }) {
+    chat(
+      name: string,
+      {
+        connectorId,
+        messages,
+        function: callFunctions = 'auto',
+        signal,
+      }: {
+        connectorId: string;
+        messages: Message[];
+        function?: 'none' | 'auto';
+        signal: AbortSignal;
+      }
+    ) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
         const contexts = ['core', 'apm'];
 
-        const functions = getFunctions({ contexts });
+        const functions = getFunctions({ contexts }).filter((fn) => {
+          const visibility = fn.visibility ?? FunctionVisibility.All;
+
+          return (
+            visibility === FunctionVisibility.All || visibility === FunctionVisibility.AssistantOnly
+          );
+        });
 
         client('POST /internal/observability_ai_assistant/chat', {
           params: {
             body: {
+              name,
               messages,
               connectorId,
               functions:
                 callFunctions === 'none'
                   ? []
-                  : functions
-                      .filter((fn) => fn.visibility !== FunctionVisibility.User)
-                      .map((fn) => pick(fn, 'name', 'description', 'parameters')),
+                  : functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             },
           },
           signal,

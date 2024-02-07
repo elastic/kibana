@@ -69,20 +69,6 @@ export function RuleDetailsTabs({
 
   const tabs: EuiTabbedContentTab[] = [
     {
-      id: RULE_DETAILS_EXECUTION_TAB,
-      name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
-        defaultMessage: 'Execution history',
-      }),
-      'data-test-subj': 'eventLogListTab',
-      content: (
-        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
-          <EuiFlexItem>
-            {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
-    {
       id: RULE_DETAILS_ALERTS_TAB,
       name: i18n.translate('xpack.observability.ruleDetails.rule.alertsTabText', {
         defaultMessage: 'Alerts',
@@ -115,6 +101,20 @@ export function RuleDetailsTabs({
             </EuiFlexItem>
           </EuiFlexGroup>
         </>
+      ),
+    },
+    {
+      id: RULE_DETAILS_EXECUTION_TAB,
+      name: i18n.translate('xpack.observability.ruleDetails.rule.eventLogTabText', {
+        defaultMessage: 'Execution history',
+      }),
+      'data-test-subj': 'eventLogListTab',
+      content: (
+        <EuiFlexGroup style={{ minHeight: 600 }} direction={'column'}>
+          <EuiFlexItem>
+            {rule && ruleType ? <RuleEventLogList ruleId={rule.id} ruleType={ruleType} /> : null}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
   ];

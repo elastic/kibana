@@ -49,7 +49,7 @@
             "label": "baseKibanaFeature",
             "description": [],
             "signature": [
-              "{ id: string; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
+              "{ id: string; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; category: ",
               {
                 "pluginId": "@kbn/core-application-common",
                 "scope": "common",
@@ -57,7 +57,7 @@
                 "section": "def-common.AppCategory",
                 "text": "AppCategory"
               },
-              "; management?: { [sectionId: string]: readonly string[]; } | undefined; privileges: { all: ",
+              "; description?: string | undefined; management?: { [sectionId: string]: readonly string[]; } | undefined; privileges: { all: ",
               {
                 "pluginId": "features",
                 "scope": "common",
@@ -353,7 +353,7 @@
         "label": "BaseKibanaFeatureConfig",
         "description": [],
         "signature": [
-          "{ id: string; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; description?: string | undefined; category: ",
+          "{ id: string; order?: number | undefined; name: string; alerting?: readonly string[] | undefined; cases?: readonly string[] | undefined; category: ",
           {
             "pluginId": "@kbn/core-application-common",
             "scope": "common",
@@ -361,7 +361,7 @@
             "section": "def-common.AppCategory",
             "text": "AppCategory"
           },
-          "; management?: { [sectionId: string]: readonly string[]; } | undefined; privileges: { all: ",
+          "; description?: string | undefined; management?: { [sectionId: string]: readonly string[]; } | undefined; privileges: { all: ",
           {
             "pluginId": "features",
             "scope": "common",

@@ -77,21 +77,21 @@ describe(
         cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
       });
 
-      cy.getByTestSubj('response-actions-list-type-filter-popoverButton').click();
-      cy.getByTestSubj('type-filter-option').contains('Triggered by rule').click();
+      cy.getByTestSubj('response-actions-list-types-filter-popoverButton').click();
+      cy.getByTestSubj('types-filter-option').contains('Triggered by rule').click();
       cy.getByTestSubj('response-actions-list').within(() => {
         cy.get('tbody .euiTableRow').should('have.lengthOf', 1);
         cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule');
       });
-      cy.getByTestSubj('type-filter-option').contains('Triggered by rule').click();
+      cy.getByTestSubj('types-filter-option').contains('Triggered by rule').click();
       cy.getByTestSubj('response-actions-list').within(() => {
         cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
       });
-      cy.getByTestSubj('type-filter-option').contains('Triggered manually').click();
+      cy.getByTestSubj('types-filter-option').contains('Triggered manually').click();
       cy.getByTestSubj('response-actions-list').within(() => {
         cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength - 1);
       });
-      cy.getByTestSubj('type-filter-option').contains('Triggered by rule').click();
+      cy.getByTestSubj('types-filter-option').contains('Triggered by rule').click();
       cy.getByTestSubj('response-actions-list').within(() => {
         cy.get('tbody .euiTableRow').should('have.lengthOf', maxLength);
         cy.get('tbody .euiTableRow').eq(0).contains('Triggered by rule').click();

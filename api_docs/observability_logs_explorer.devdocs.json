@@ -321,10 +321,10 @@
     "interfaces": [
       {
         "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.ObservabilityLogExplorerLocators",
+        "id": "def-common.ObservabilityLogsExplorerLocators",
         "type": "Interface",
         "tags": [],
-        "label": "ObservabilityLogExplorerLocators",
+        "label": "ObservabilityLogsExplorerLocators",
         "description": [],
         "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/locators/index.ts",
         "deprecated": false,
@@ -332,7 +332,7 @@
         "children": [
           {
             "parentPluginId": "observabilityLogsExplorer",
-            "id": "def-common.ObservabilityLogExplorerLocators.allDatasetsLocator",
+            "id": "def-common.ObservabilityLogsExplorerLocators.allDatasetsLocator",
             "type": "Object",
             "tags": [],
             "label": "allDatasetsLocator",
@@ -361,7 +361,7 @@
           },
           {
             "parentPluginId": "observabilityLogsExplorer",
-            "id": "def-common.ObservabilityLogExplorerLocators.singleDatasetLocator",
+            "id": "def-common.ObservabilityLogsExplorerLocators.singleDatasetLocator",
             "type": "Object",
             "tags": [],
             "label": "singleDatasetLocator",
@@ -396,10 +396,25 @@
     "misc": [
       {
         "parentPluginId": "observabilityLogsExplorer",
-        "id": "def-common.OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
+        "id": "def-common.OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
         "type": "string",
         "tags": [],
-        "label": "OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY",
+        "label": "OBSERVABILITY_DATASET_QUALITY_URL_STATE_KEY",
+        "description": [],
+        "signature": [
+          "\"pageState\""
+        ],
+        "path": "x-pack/plugins/observability_solution/observability_logs_explorer/common/url_schema/common.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityLogsExplorer",
+        "id": "def-common.OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY",
         "description": [],
         "signature": [
           "\"pageState\""
