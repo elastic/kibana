@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
-import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonEmpty,
@@ -19,7 +18,6 @@ import {
 } from '@elastic/eui';
 import { AutoFocusButton } from '../../../../common/components/autofocus_button/autofocus_button';
 import { useTestIdGenerator } from '../../../hooks/use_test_id_generator';
-import type { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
 
 export const ARTIFACT_CONFIRM_LABELS = Object.freeze({
   confirmModalTitle: (itemName: string): string =>
@@ -45,19 +43,21 @@ export const ARTIFACT_CONFIRM_LABELS = Object.freeze({
 });
 
 interface ConfirmArtifactModalProps {
-  apiClient: ExceptionsListApiClient;
-  item: ExceptionListItemSchema;
+  title: string;
+  body: string;
+  confirmButton: string;
+  cancelButton: string;
   onCancel: () => void;
   onSuccess: () => void;
-  labels: typeof ARTIFACT_CONFIRM_LABELS & typeof ARTIFACT_CONFIRM_ACTION_LABELS;
+  // labels: typeof ARTIFACT_CONFIRM_LABELS & typeof ARTIFACT_CONFIRM_ACTION_LABELS;
   'data-test-subj'?: string;
 }
 
 export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
-  ({ apiClient, item, onCancel, onSuccess, 'data-test-subj': dataTestSubj, labels }) => {
+  ({ title, body, 'data-test-subj': dataTestSubj }) => {
     const getTestId = useTestIdGenerator(dataTestSubj);
 
-    const { confirmArtifactItem, isLoading: isDeleting } = useWithArtifactConfirmItem(
+    /* const { confirmArtifactItem, isLoading: isDeleting } = useWithArtifactConfirmItem(
       apiClient,
       item,
       labels
@@ -71,38 +71,32 @@ export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
       if (!isDeleting) {
         onCancel();
       }
-    }, [isDeleting, onCancel]);
+    }, [isDeleting, onCancel]);*/
 
     return (
-      <EuiModal onClose={handleOnCancel} data-test-subj={dataTestSubj}>
+      <EuiModal onClose={} data-test-subj={dataTestSubj}>
         <EuiModalHeader data-test-subj={getTestId('header')}>
-          <EuiModalHeaderTitle>{labels.confirmModalTitle(item.name)}</EuiModalHeaderTitle>
+          <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
         </EuiModalHeader>
 
         <EuiModalBody data-test-subj={getTestId('body')}>
           <EuiText>
-            <p>{labels.confirmModalConfirmInfo}</p>
+            <p>{body}</p>
           </EuiText>
         </EuiModalBody>
 
         <EuiModalFooter>
-          <EuiButtonEmpty
-            onClick={handleOnCancel}
-            isDisabled={isDeleting}
-            data-test-subj={getTestId('cancelButton')}
-          >
-            {labels.confirmModalCancelButtonTitle}
+          <EuiButtonEmpty onClick={handleOnCancel} data-test-subj={getTestId('cancelButton')}>
+            {cancelButton}
           </EuiButtonEmpty>
 
           <AutoFocusButton
             fill
             color="danger"
             onClick={onConfirm}
-            isLoading={isDeleting}
-            isDisabled={isDeleting}
             data-test-subj={getTestId('submitButton')}
           >
-            {labels.confirmModalSubmitButtonTitle}
+            {confirmButton}
           </AutoFocusButton>
         </EuiModalFooter>
       </EuiModal>
