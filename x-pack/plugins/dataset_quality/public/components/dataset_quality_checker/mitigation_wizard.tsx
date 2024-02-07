@@ -7,14 +7,13 @@
 
 import {
   EuiButton,
-  EuiButtonIcon,
+  EuiDescriptionList,
   EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
   EuiLoadingSpinner,
-  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -29,6 +28,7 @@ import {
 } from './mitigation_state_machine_provider';
 import { getDataStreamQualityMitigationActor } from './state_machine';
 import { useDataStreamQualityChecksStateContext } from './state_machine_provider';
+import { StepPanel, Steps } from './step_panel';
 
 export const ConnectedMitigations = React.memo(() => {
   const [checkState] = useActor(useDataStreamQualityChecksStateContext());
@@ -70,6 +70,12 @@ const ConnectedMitigationsContent = React.memo(() => {
 
 const ConnectedMitigationsList = React.memo(() => {
   const [mitigationState, send] = useActor(useDataStreamQualityMitigationStateContext());
+  const {
+    context: {
+      mitigations: causesAndMitigations,
+      parameters: { problem },
+    },
+  } = mitigationState;
 
   const configureMitigation = useCallback(
     (cause: QualityProblemCause, mitigation: Mitigation) => {
@@ -83,41 +89,63 @@ const ConnectedMitigationsList = React.memo(() => {
   );
 
   return (
-    <EuiFlexGroup direction="column">
-      <EuiFlexItem>
-        <EuiPanel hasShadow={false}>
-          <PreJson value={mitigationState.context.parameters.problem} />
-        </EuiPanel>
-      </EuiFlexItem>
-      {mitigationState.context.mitigations.map(({ cause, mitigations }) => {
+    <Steps>
+      <StepPanel title={`Problem ${problem.type}`} color="primary">
+        <PreJson value={problem} />
+      </StepPanel>
+      {causesAndMitigations.map(({ cause, mitigations }) => {
         return (
-          <EuiFlexItem key={cause.type} grow={false}>
-            <EuiPanel hasShadow={false} color="primary">
-              <EuiFlexGroup direction="column">
+          <StepPanel key={cause.type} title={`Cause ${cause.type}`} color="warning">
+            <EuiFlexGroup direction="column" gutterSize="s">
+              {cause.type === 'value-too-large' ? (
                 <EuiFlexItem>
-                  <DetailsPreJson title={`Cause: ${cause.type}`} value={cause} />
+                  <EuiDescriptionList
+                    type="column"
+                    listItems={[
+                      {
+                        title: 'Field',
+                        description: cause.field,
+                      },
+                      {
+                        title: 'Current limit',
+                        description: cause.limit,
+                      },
+                      {
+                        title: 'Values',
+                        description: <PreJson value={cause.values} />,
+                      },
+                    ]}
+                  />
                 </EuiFlexItem>
-                {mitigations.map((mitigation) => (
-                  <EuiFlexItem key={mitigation.type}>
-                    <EuiFlexGroup direction="row">
-                      <EuiFlexItem grow>{mitigation.type}</EuiFlexItem>
-                      <EuiFlexItem>
-                        <EuiButton
-                          color="primary"
-                          onClick={() => configureMitigation(cause, mitigation)}
-                        >
-                          Configure
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
+              ) : null}
+              <EuiFlexItem>
+                <EuiTitle size="xs">
+                  <h2>Available mitigations</h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              {mitigations.map((mitigation) => (
+                <EuiFlexItem key={mitigation.type}>
+                  <EuiFlexGroup direction="row">
+                    <EuiFlexItem grow>{mitigation.type}</EuiFlexItem>
+                    <EuiFlexItem>
+                      <EuiButton
+                        color="primary"
+                        onClick={() => configureMitigation(cause, mitigation)}
+                      >
+                        Configure
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiFlexItem>
+              ))}
+              <EuiFlexItem>
+                <DetailsPreJson title="Cause details" value={cause} />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </StepPanel>
         );
       })}
-    </EuiFlexGroup>
+    </Steps>
   );
 });
 
@@ -172,21 +200,11 @@ const ConfiguringMitigationPanel = React.memo(
     onApplyMitigation: (cause: QualityProblemCause, mitigation: Mitigation) => void;
   }) => {
     return (
-      <EuiPanel hasShadow={false}>
-        <EuiTitle size="s">
-          <div>
-            <EuiButtonIcon
-              iconType="arrowLeft"
-              display="empty"
-              onClick={onGotoPrevious}
-              aria-label="return to previous step"
-            />
-            {`Mitigation ${mitigation.type}`}
-          </div>
-        </EuiTitle>
-        <EuiSpacer />
-        <DetailsPreJson title={`Cause: ${cause.type}`} value={cause} />
-        <EuiSpacer />
+      <StepPanel
+        onGotoPrevious={onGotoPrevious}
+        title={`Mitigation ${mitigation.type}`}
+        color="primary"
+      >
         {mitigation.type === 'mapping-increase-ignore-above' ? (
           <ConfiguringIncreaseIgnoreAboveMitigationForm
             cause={cause}
@@ -194,7 +212,9 @@ const ConfiguringMitigationPanel = React.memo(
             onApplyMitigation={onApplyMitigation}
           />
         ) : null}
-      </EuiPanel>
+        <EuiSpacer />
+        <DetailsPreJson title="Cause details" value={cause} />
+      </StepPanel>
     );
   }
 );
@@ -255,15 +275,11 @@ const ConnectedAppliedMitigationPanel = React.memo(() => {
   }, [send]);
 
   return (
-    <EuiPanel hasShadow={false} color="success">
-      <EuiTitle size="s">
-        <div>Applied mitigation</div>
-      </EuiTitle>
-      <EuiSpacer />
+    <StepPanel title="Applied mitigation" color="success">
       <EuiButton color="success" onClick={finish}>
         Finish
       </EuiButton>
-    </EuiPanel>
+    </StepPanel>
   );
 });
 
