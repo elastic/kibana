@@ -227,40 +227,38 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
               />
             </h3>
           </EuiTitle>
-          <p>
-            <ol>
-              <li>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskInformation.riskCalculationStep1"
-                  defaultMessage="Only scores entities (users and hosts) associated with a detection alert, based on any alerts that have not been closed."
-                />
-              </li>
-              <li>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskInformation.riskCalculationStep2"
-                  defaultMessage="Generates an 'Alert' category score by aggregating alerts by entity idenfifier such that alerts with higher risk contribute more than alerts with lower risk scores."
-                />
-              </li>
-              <li>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskInformation.riskCalculationStep3"
-                  defaultMessage="Verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Context' category."
-                />
-              </li>
-              <li>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskInformation.riskCalculationStep4"
-                  defaultMessage="Produces a single normalized numeric value as the entity risk score"
-                />
-              </li>
-              <li>
-                <FormattedMessage
-                  id="xpack.securitySolution.riskInformation.riskCalculationStep5"
-                  defaultMessage="Maps the entity risk label based on the normalized risk score"
-                />
-              </li>
-            </ol>
-          </p>
+          <ol>
+            <li>
+              <FormattedMessage
+                id="xpack.securitySolution.riskInformation.riskCalculationStep1"
+                defaultMessage="Only scores entities (users and hosts) associated with a detection alert, based on any alerts that have not been closed."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.securitySolution.riskInformation.riskCalculationStep2"
+                defaultMessage="Generates an 'Alert' category score by aggregating alerts by entity idenfifier such that alerts with higher risk contribute more than alerts with lower risk scores."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.securitySolution.riskInformation.riskCalculationStep3"
+                defaultMessage="Verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Context' category."
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.securitySolution.riskInformation.riskCalculationStep4"
+                defaultMessage="Produces a single normalized numeric value as the entity risk score"
+              />
+            </li>
+            <li>
+              <FormattedMessage
+                id="xpack.securitySolution.riskInformation.riskCalculationStep5"
+                defaultMessage="Maps the entity risk label based on the normalized risk score"
+              />
+            </li>
+          </ol>
         </EuiText>
         <EuiSpacer />
         <EuiTitle size="s">
