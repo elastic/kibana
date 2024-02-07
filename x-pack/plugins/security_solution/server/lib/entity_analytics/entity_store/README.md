@@ -1,4 +1,4 @@
-# Entity Store Transforms & Kibana Task Implemenetation Prototype
+# Entity Store Transforms & Kibana Task Implementation Prototype
 
 > Note this code is designed to be thrown away is is by no means production ready! 
 
@@ -9,7 +9,7 @@ Some key limitations to start with:
 - only extracts host entities
 - very limited field set, only host name, first seen, last seen, an IP history and asset criticality are currently stored
 
-The transform takes log data and uses a scropted metric aggregation to create "composites" these are 1 minute snapshots of an entity, with all IPs seen during that time, here is an example composite document from `.entities.entity-composites.*`
+The transform takes log data and uses a scripted metric aggregation to create "composites" these are 1 minute snapshots of an entity, with all IPs seen during that time, here is an example composite document from `.entities.entity-composites.*`
 
 ```
 {
@@ -85,7 +85,7 @@ brew install openjdk@17
 sudo ln -sfn /opt/homebrew/opt/openjdk@17/libexec/openjdk.jdk /Library/Java/JavaVirtualMachines/openjdk-17.jdk
 ```
 
-### 2 - Run elasticsearch
+#### Step 3 - Run elasticsearch
 
 This makes sure your data stays between runs of elasticsearch
 ```
