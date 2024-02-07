@@ -114,7 +114,7 @@ export const ApiKeyConfig: React.FC<{
                 'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.apiKey.description',
                 {
                   defaultMessage:
-                    'This native connector\'s API key is managed internally by Elasticsearch. There\'s no need to do anything here, but if you need to rollover your API key you can do so by clicking "Generate API key".',
+                    'This native connector\'s API key {apiKeyName} is managed internally by Elasticsearch, and is used for the connector to index documents to the created {indexName} index. There\'s no need to do anything here, but if you need to rollover your API key you can do so by clicking "Generate API key".',
                   values: {
                     apiKeyName: `${indexName}-connector`,
                     indexName,
