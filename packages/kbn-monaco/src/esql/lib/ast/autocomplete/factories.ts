@@ -217,8 +217,8 @@ export const buildOptionDefinition = (
     detail: option.description,
     sortText: 'D',
   };
-  if (option.wrapped) {
-    completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
+  if (option.signature.params.length) {
+    completeItem.insertText = `${option.name} $0`;
     completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
   }
   if (isAssignType) {

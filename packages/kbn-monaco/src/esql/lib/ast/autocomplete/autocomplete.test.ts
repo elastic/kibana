@@ -332,11 +332,13 @@ describe('autocomplete', () => {
     );
     testSuggestions('from ', suggestedIndexes);
     testSuggestions('from a,', suggestedIndexes);
-    testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
+    testSuggestions('from a, b ', ['metadata $0', '|', ',']);
     testSuggestions('from *,', suggestedIndexes);
     testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
     testSuggestions('from a, b [metadata ]', ['_index', '_score'], 20);
+    testSuggestions('from a, b metadata ', ['_index', '_score'], 19);
     testSuggestions('from a, b [metadata _index, ]', ['_score'], 27);
+    testSuggestions('from a, b metadata _index, ', ['_score'], 26);
   });
 
   describe('show', () => {
@@ -542,7 +544,7 @@ describe('autocomplete', () => {
 
   describe('rename', () => {
     testSuggestions('from a | rename ', getFieldNamesByType('any'));
-    testSuggestions('from a | rename stringField ', ['as']);
+    testSuggestions('from a | rename stringField ', ['as $0']);
     testSuggestions('from a | rename stringField as ', ['var0']);
   });
 
@@ -581,7 +583,7 @@ describe('autocomplete', () => {
     ]);
     testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min()', getFieldNamesByType('number'), '(');
-    testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
+    testSuggestions('from a | stats a=min(b) ', ['by $0', '|', ',']);
     testSuggestions('from a | stats a=min(b) by ', [
       ...getFieldNamesByType('any'),
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
@@ -601,7 +603,7 @@ describe('autocomplete', () => {
     // smoke testing with suggestions not at the end of the string
     testSuggestions(
       'from a | stats a = min(b) | sort b',
-      ['by', '|', ','],
+      ['by $0', '|', ','],
       27 /* " " after min(b) */
     );
     testSuggestions(
@@ -656,7 +658,7 @@ describe('autocomplete', () => {
         `from a ${prevCommand}| enrich [ccq.mode:any] `,
         policies.map(({ name, suggestedAs }) => suggestedAs || name)
       );
-      testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy `, ['on $0', 'with $0', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
         'numberField',
@@ -666,7 +668,7 @@ describe('autocomplete', () => {
         'any#Char$Field',
         'kubernetes.something.something',
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with', '|', ',']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with $0', '|', ',']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with `, [
         'var0 =',
         ...getPolicyFields('policy'),
