@@ -90,8 +90,8 @@ const getDataViewId = (searchConfiguration?: SerializedSearchSourceFields) =>
 
 export const registerObservabilityRuleTypes = async (
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>
   uiSettings: IUiSettingsClient,
+  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>
 ) => {
   observabilityRuleTypeRegistry.register({
     id: SLO_BURN_RATE_RULE_TYPE_ID,
