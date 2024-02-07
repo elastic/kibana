@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { v4 } from 'uuid';
 import { css } from '@emotion/css';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFlyout, useEuiTheme } from '@elastic/eui';
+import { ObservabilityAIAssistantMultipaneFlyoutProvider } from '../../context/observability_ai_assistant_multipane_flyout_provider';
 import { useForceUpdate } from '../../hooks/use_force_update';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -111,93 +112,96 @@ export function ChatFlyout({
   };
 
   return isOpen ? (
-    <EuiFlyout
-      closeButtonProps={{
-        css: { marginRight: `${euiTheme.size.s}`, marginTop: `${euiTheme.size.s}` },
-      }}
-      size={getFlyoutWidth({ expanded, isSecondSlotVisible })}
-      paddingSize="m"
-      onClose={() => {
-        onClose();
-        setIsSecondSlotVisible(false);
-        if (secondSlotContainer) {
-          ReactDOM.unmountComponentAtNode(secondSlotContainer);
-        }
+    <ObservabilityAIAssistantMultipaneFlyoutProvider
+      value={{
+        container: secondSlotContainer,
+        setVisibility: setIsSecondSlotVisible,
       }}
     >
-      <EuiFlexGroup gutterSize="none" className={containerClassName}>
-        <EuiFlexItem className={sidebarClass}>
-          <EuiButtonIcon
-            aria-label={i18n.translate(
-              'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.expandConversationListLabel',
-              { defaultMessage: 'Expand conversation list' }
-            )}
-            className={expandButtonClassName}
-            color="text"
-            data-test-subj="observabilityAiAssistantChatFlyoutButton"
-            iconType={expanded ? 'transitionLeftIn' : 'transitionLeftOut'}
-            onClick={() => setExpanded(!expanded)}
-          />
-
-          {expanded ? (
-            <ConversationList
-              selected={conversationId ?? ''}
-              onClickDeleteConversation={handleClickDeleteConversation}
-              onClickChat={handleClickChat}
-              onClickNewChat={handleClickNewChat}
-            />
-          ) : (
+      <EuiFlyout
+        closeButtonProps={{
+          css: { marginRight: `${euiTheme.size.s}`, marginTop: `${euiTheme.size.s}` },
+        }}
+        size={getFlyoutWidth({ expanded, isSecondSlotVisible })}
+        paddingSize="m"
+        onClose={() => {
+          onClose();
+          setIsSecondSlotVisible(false);
+          if (secondSlotContainer) {
+            ReactDOM.unmountComponentAtNode(secondSlotContainer);
+          }
+        }}
+      >
+        <EuiFlexGroup gutterSize="none" className={containerClassName}>
+          <EuiFlexItem className={sidebarClass}>
             <EuiButtonIcon
               aria-label={i18n.translate(
-                'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
-                { defaultMessage: 'New chat' }
+                'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.expandConversationListLabel',
+                { defaultMessage: 'Expand conversation list' }
               )}
-              className={newChatButtonClassName}
-              data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
-              iconType="plusInCircle"
-              onClick={handleClickNewChat}
+              className={expandButtonClassName}
+              color="text"
+              data-test-subj="observabilityAiAssistantChatFlyoutButton"
+              iconType={expanded ? 'transitionLeftIn' : 'transitionLeftOut'}
+              onClick={() => setExpanded(!expanded)}
             />
-          )}
-        </EuiFlexItem>
 
-        <EuiFlexItem className={chatBodyContainerClassName}>
-          <ChatBody
-            key={chatBodyKeyRef.current}
-            connectors={connectors}
-            initialTitle={initialTitle}
-            initialMessages={initialMessages}
-            initialConversationId={conversationId}
-            currentUser={currentUser}
-            knowledgeBase={knowledgeBase}
-            startedFrom={startedFrom}
-            onConversationUpdate={(conversation) => {
-              setConversationId(conversation.conversation.id);
-            }}
-            chatFlyoutSecondSlotHandler={{
-              container: secondSlotContainer,
-              setVisibility: setIsSecondSlotVisible,
-            }}
-            showLinkToConversationsApp
-          />
-        </EuiFlexItem>
+            {expanded ? (
+              <ConversationList
+                selected={conversationId ?? ''}
+                onClickDeleteConversation={handleClickDeleteConversation}
+                onClickChat={handleClickChat}
+                onClickNewChat={handleClickNewChat}
+              />
+            ) : (
+              <EuiButtonIcon
+                aria-label={i18n.translate(
+                  'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
+                  { defaultMessage: 'New chat' }
+                )}
+                className={newChatButtonClassName}
+                data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
+                iconType="plusInCircle"
+                onClick={handleClickNewChat}
+              />
+            )}
+          </EuiFlexItem>
 
-        <EuiFlexItem
-          style={{
-            maxWidth: isSecondSlotVisible ? SIDEBAR_WIDTH : 0,
-            paddingTop: '56px',
-          }}
-        >
-          <ChatInlineEditingContent
-            setContainer={setSecondSlotContainer}
-            visible={isSecondSlotVisible}
+          <EuiFlexItem className={chatBodyContainerClassName}>
+            <ChatBody
+              key={chatBodyKeyRef.current}
+              connectors={connectors}
+              initialTitle={initialTitle}
+              initialMessages={initialMessages}
+              initialConversationId={conversationId}
+              currentUser={currentUser}
+              knowledgeBase={knowledgeBase}
+              startedFrom={startedFrom}
+              onConversationUpdate={(conversation) => {
+                setConversationId(conversation.conversation.id);
+              }}
+              showLinkToConversationsApp
+            />
+          </EuiFlexItem>
+
+          <EuiFlexItem
             style={{
-              borderTop: `solid 1px ${euiTheme.border.color}`,
-              borderLeft: `solid 1px ${euiTheme.border.color}`,
+              maxWidth: isSecondSlotVisible ? SIDEBAR_WIDTH : 0,
+              paddingTop: '56px',
             }}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlyout>
+          >
+            <ChatInlineEditingContent
+              setContainer={setSecondSlotContainer}
+              visible={isSecondSlotVisible}
+              style={{
+                borderTop: `solid 1px ${euiTheme.border.color}`,
+                borderLeft: `solid 1px ${euiTheme.border.color}`,
+              }}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyout>
+    </ObservabilityAIAssistantMultipaneFlyoutProvider>
   ) : null;
 }
 

@@ -35,11 +35,7 @@ import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import {
-  ChatActionClickHandler,
-  ChatActionClickType,
-  type ChatFlyoutSecondSlotHandler,
-} from './types';
+import { ChatActionClickHandler, ChatActionClickType } from './types';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
@@ -101,7 +97,6 @@ export function ChatBody({
   currentUser,
   showLinkToConversationsApp,
   startedFrom,
-  chatFlyoutSecondSlotHandler,
   onConversationUpdate,
 }: {
   initialTitle?: string;
@@ -112,7 +107,6 @@ export function ChatBody({
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   showLinkToConversationsApp: boolean;
   startedFrom?: StartedFrom;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
 }) {
   const license = useLicense();
@@ -357,7 +351,6 @@ export function ChatBody({
                   onStopGenerating={() => {
                     stop();
                   }}
-                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                   onActionClick={handleActionClick}
                 />
               )}

@@ -58,10 +58,6 @@ describe('VisualizeESQL', () => {
         query={'from foo | keep bytes, destination'}
         onActionClick={jest.fn()}
         userOverrides={userOverrides}
-        chatFlyoutSecondSlotHandler={{
-          container: document.createElement('div'),
-          setVisibility: setVisibilitySpy ?? jest.fn(),
-        }}
       />
     );
   }

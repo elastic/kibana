@@ -231,10 +231,6 @@ describe('getTimelineItemsFromConversation', () => {
           },
         ],
         onActionClick: jest.fn(),
-        chatFlyoutSecondSlotHandler: {
-          container: null,
-          setVisibility: jest.fn(),
-        },
       });
     });
 
