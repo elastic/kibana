@@ -47,6 +47,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/spaces-plugin",
     "@kbn/zod-helpers",
+    "@kbn/security-plugin-types-common",
   ],
   "exclude": [
     "target/**/*",
