@@ -101,6 +101,12 @@ export function registerTransactionErrorRateRuleType({
       actionGroups: ruleTypeConfig.actionGroups,
       defaultActionGroupId: ruleTypeConfig.defaultActionGroupId,
       validate: { params: transactionErrorRateParamsSchema },
+      schemas: {
+        params: {
+          type: 'config-schema',
+          schema: transactionErrorRateParamsSchema,
+        },
+      },
       actionVariables: {
         context: transactionErrorRateActionVariables,
       },

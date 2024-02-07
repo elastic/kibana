@@ -642,6 +642,8 @@
       "@kbn/data-view-field-editor-plugin/*": ["src/plugins/data_view_field_editor/*"],
       "@kbn/data-view-management-plugin": ["src/plugins/data_view_management"],
       "@kbn/data-view-management-plugin/*": ["src/plugins/data_view_management/*"],
+      "@kbn/data-view-utils": ["packages/kbn-data-view-utils"],
+      "@kbn/data-view-utils/*": ["packages/kbn-data-view-utils/*"],
       "@kbn/data-views-plugin": ["src/plugins/data_views"],
       "@kbn/data-views-plugin/*": ["src/plugins/data_views/*"],
       "@kbn/data-visualizer-plugin": ["x-pack/plugins/data_visualizer"],
