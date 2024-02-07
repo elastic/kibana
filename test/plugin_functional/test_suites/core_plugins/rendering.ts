@@ -213,6 +213,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
@@ -282,7 +283,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
         'xpack.infra.featureFlags.logsUIEnabled (any)',
         'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
-        'xpack.infra.featureFlags.profilingEnabled (any)',
+        'xpack.infra.featureFlags.profilingEnabled (boolean)',
 
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',

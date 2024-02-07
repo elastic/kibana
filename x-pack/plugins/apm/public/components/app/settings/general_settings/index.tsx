@@ -27,26 +27,39 @@ import {
   useEditableSettings,
   useUiTracker,
 } from '@kbn/observability-shared-plugin/public';
+import { useApmFeatureFlag } from '../../../../hooks/use_apm_feature_flag';
+import { ApmFeatureFlagName } from '../../../../../common/apm_feature_flags';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { BottomBarActions } from '../bottom_bar_actions';
 
-const apmSettingsKeys = [
-  enableComparisonByDefault,
-  defaultApmServiceEnvironment,
-  apmServiceGroupMaxNumberOfServices,
-  enableInspectEsQueries,
-  apmLabsButton,
-  apmAWSLambdaPriceFactor,
-  apmAWSLambdaRequestCostPerMillion,
-  apmEnableServiceMetrics,
-  apmEnableContinuousRollups,
-  enableAgentExplorerView,
-  apmEnableProfilingIntegration,
-];
+function getApmSettingsKeys(isProfilingIntegrationEnabled: boolean) {
+  const keys = [
+    enableComparisonByDefault,
+    defaultApmServiceEnvironment,
+    apmServiceGroupMaxNumberOfServices,
+    enableInspectEsQueries,
+    apmLabsButton,
+    apmAWSLambdaPriceFactor,
+    apmAWSLambdaRequestCostPerMillion,
+    apmEnableServiceMetrics,
+    apmEnableContinuousRollups,
+    enableAgentExplorerView,
+  ];
+
+  if (isProfilingIntegrationEnabled) {
+    keys.push(apmEnableProfilingIntegration);
+  }
+
+  return keys;
+}
 
 export function GeneralSettings() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
+  const isProfilingIntegrationEnabled = useApmFeatureFlag(
+    ApmFeatureFlagName.ProfilingIntegrationAvailable
+  );
+  const apmSettingsKeys = getApmSettingsKeys(isProfilingIntegrationEnabled);
   const {
     handleFieldChange,
     settingsEditableConfig,
