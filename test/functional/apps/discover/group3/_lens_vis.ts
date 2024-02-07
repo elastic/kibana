@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultTimespan =
     'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000 (interval: Auto - 3 hours)';
+  const defaultTimespanESQL = 'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000';
   const defaultTotalCount = '14,004';
 
   async function checkNoVis(totalCount: string) {
@@ -201,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
     });
 
-    it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
+    it('should be able to load a saved search with custom histogram vis, edit vis and revert changes', async () => {
       await PageObjects.discover.loadSavedSearch('testCustomESQLHistogram');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -233,7 +234,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    it('should be able to load a saved search with custom vis, edit query and revert changes', async () => {
+    it('should be able to load a saved search with custom histogram vis, edit query and revert changes', async () => {
       await PageObjects.discover.loadSavedSearch('testCustomESQLHistogram');
 
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -257,10 +258,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Bar vertical stacked');
 
-      await checkESQLHistogramVis(
-        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
-        '100'
-      );
+      await checkESQLHistogramVis(defaultTimespanESQL, '100');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 100');
@@ -270,13 +268,72 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
 
+      await testSubjects.missingOrFail('unsavedChangesBadge');
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
 
-      await checkESQLHistogramVis(
-        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
-        '10'
-      );
+      await checkESQLHistogramVis(defaultTimespanESQL, '10');
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
+    });
+
+    it('should be able to customize ESQL vis and save it', async () => {
+      await PageObjects.discover.selectTextBaseLang();
+
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await checkESQLHistogramVis(defaultTimespanESQL, '5');
+      await PageObjects.discover.chooseLensChart('Donut');
+
+      await PageObjects.discover.saveSearch('testCustomESQLVis');
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+
+      await browser.refresh();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+    });
+
+    it('should be able to load a saved search with custom vis, edit vis and revert changes', async () => {
+      await PageObjects.discover.loadSavedSearch('testCustomESQLVis');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.chooseLensChart('Waffle');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Waffle');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.revertUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+
+      await PageObjects.discover.chooseLensChart('Bar vertical stacked');
+      await changeVisSeriesType('line');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.saveUnsavedChanges();
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Bar vertical stacked');
+      expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
     });
   });
 }
