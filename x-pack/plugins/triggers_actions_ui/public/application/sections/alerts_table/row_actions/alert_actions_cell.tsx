@@ -49,36 +49,9 @@ export function AlertActionsCell(alertActionsProps: AlertActionsProps) {
 
   // TODO re-enable view in app when it works
   const actionsMenuItems = [DefaultRowActions];
-  // const producer = alertActionsProps.alert[ALERT_RULE_PRODUCER]![0] as AlertConsumers;
-  // const producerData = ruleProducersData[producer];
-  // const alertUrl = alertActionsProps.alert[ALERT_URL]?.[0] as string | undefined;
 
   return (
     <>
-      {/* <EuiToolTip*/}
-      {/*  content={*/}
-      {/*    alertUrl*/}
-      {/*      ? i18n.translate('xpack.triggersActionsUI.sections.alertsTable.viewInApp', {*/}
-      {/*          defaultMessage: 'View in {app}',*/}
-      {/*          values: { app: producerData.displayName },*/}
-      {/*        })*/}
-      {/*      : producerData.displayName*/}
-      {/*  }*/}
-      {/* >*/}
-      {/*  <EuiLink*/}
-      {/*    href={alertUrl}*/}
-      {/*    css={css`*/}
-      {/*      display: block;*/}
-      {/*      line-height: 0;*/}
-      {/*      background-color: ${euiThemeVars.euiColorEmptyShade};*/}
-      {/*      border-radius: 50%;*/}
-      {/*      padding: ${euiThemeVars.euiSizeXS};*/}
-      {/*      ${useEuiShadow('xs')}*/}
-      {/*    `}*/}
-      {/*  >*/}
-      {/*    <EuiIcon size="s" type={producerIcons[producer]} />*/}
-      {/*  </EuiLink>*/}
-      {/* </EuiToolTip>*/}
       <EuiFlexItem>
         <EuiPopover
           anchorPosition="downLeft"

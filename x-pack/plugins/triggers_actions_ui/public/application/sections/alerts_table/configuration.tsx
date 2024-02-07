@@ -62,7 +62,8 @@ const columns = [
       defaultMessage: 'Started',
     }),
     id: ALERT_START,
-    initialWidth: 230,
+    initialWidth: 200,
+    schema: 'datetime',
   },
   {
     columnHeaderType: 'not-filtered',
@@ -73,15 +74,15 @@ const columns = [
       }
     ),
     id: ALERT_RULE_CATEGORY,
-    initialWidth: 116,
+    initialWidth: 160,
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleNameColumnDescription', {
-      defaultMessage: 'Rule name',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleColumnDescription', {
+      defaultMessage: 'Rule',
     }),
     id: ALERT_RULE_NAME,
-    initialWidth: 116,
+    initialWidth: 230,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -89,7 +90,7 @@ const columns = [
       defaultMessage: 'Rule tags',
     }),
     id: ALERT_RULE_TAGS,
-    initialWidth: 116,
+    initialWidth: 120,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -100,7 +101,7 @@ const columns = [
       }
     ),
     id: ALERT_EVALUATION_VALUES,
-    initialWidth: 116,
+    initialWidth: 120,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -111,7 +112,7 @@ const columns = [
       }
     ),
     id: ALERT_EVALUATION_THRESHOLD,
-    initialWidth: 116,
+    initialWidth: 120,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -120,6 +121,7 @@ const columns = [
     }),
     id: ALERT_REASON,
     linkField: '*',
+    initialWidth: 260,
   },
   {
     columnHeaderType: 'not-filtered',
