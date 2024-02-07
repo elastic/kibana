@@ -18,23 +18,21 @@ export const updateConnectorServiceType = async (
   connectorId: string,
   serviceType: string
 ) => {
-  const connectorResult = await fetchConnectorById(client, connectorId);
+  const connector = await fetchConnectorById(client, connectorId);
 
-  if (connectorResult?.value) {
+  if (connector) {
     const result = await client.index<ConnectorDocument>({
       document: {
-        ...connectorResult.value,
+        ...connector,
         configuration: {},
         service_type: serviceType,
         status:
-          connectorResult.value.status === ConnectorStatus.CREATED
+          connector.status === ConnectorStatus.CREATED
             ? ConnectorStatus.CREATED
             : ConnectorStatus.NEEDS_CONFIGURATION,
       },
       id: connectorId,
       index: CONNECTORS_INDEX,
-      if_seq_no: connectorResult.seqNo,
-      if_primary_term: connectorResult.primaryTerm,
     });
     return result;
   } else {

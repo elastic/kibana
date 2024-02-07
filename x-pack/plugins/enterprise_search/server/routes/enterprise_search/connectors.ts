@@ -568,7 +568,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       try {
         if (shouldDeleteIndex) {
           const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-          indexNameToDelete = connector?.value.index_name;
+          indexNameToDelete = connector?.index_name;
         }
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
         if (indexNameToDelete) {
