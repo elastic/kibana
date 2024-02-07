@@ -6,6 +6,7 @@ set -euo pipefail
 gsutil -m cp -r gs://elastic-bekitzur-kibana-coverage-live/previous_pointer/previous.txt . || echo "### Previous Pointer NOT FOUND?"
 
 # TODO: Activate after the above is removed
+#.buildkite/scripts/common/activate_service_account.sh gs://elastic-kibana-coverage-live
 #gsutil -m cp -r gs://elastic-kibana-coverage-live/previous_pointer/previous.txt . || echo "### Previous Pointer NOT FOUND?"
 
 if [ -e ./previous.txt ]; then
