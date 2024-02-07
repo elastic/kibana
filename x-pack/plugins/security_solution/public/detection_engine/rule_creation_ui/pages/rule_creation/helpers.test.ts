@@ -12,7 +12,7 @@ import {
   getListMock,
   getEndpointListMock,
 } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import type {
+import {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
@@ -21,6 +21,7 @@ import type {
   ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
+  GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   getTimeTypeValue,
@@ -312,64 +313,132 @@ describe('helpers', () => {
       expect(result).toEqual(expected);
     });
 
-    test('returns query fields if type is eql', () => {
-      const mockStepData: DefineStepRule = {
-        ...mockData,
-        ruleType: 'eql',
-        queryBar: {
-          ...mockData.queryBar,
-          query: {
-            ...mockData.queryBar.query,
-            language: 'eql',
-            query: 'process where process_name == "explorer.exe"',
+    describe('Eql', () => {
+      test('returns query fields if type is eql', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          ruleType: 'eql',
+          queryBar: {
+            ...mockData.queryBar,
+            query: {
+              ...mockData.queryBar.query,
+              language: 'eql',
+              query: 'process where process_name == "explorer.exe"',
+            },
           },
-        },
-      };
-      const result = formatDefineStepData(mockStepData);
+        };
+        const result = formatDefineStepData(mockStepData);
 
-      const expected: DefineStepRuleJson = {
-        filters: mockStepData.queryBar.filters,
-        index: mockStepData.index,
-        language: 'eql',
-        query: 'process where process_name == "explorer.exe"',
-        type: 'eql',
-      };
+        const expected: DefineStepRuleJson = {
+          filters: mockStepData.queryBar.filters,
+          index: mockStepData.index,
+          language: 'eql',
+          query: 'process where process_name == "explorer.exe"',
+          type: 'eql',
+        };
 
-      expect(result).toEqual(expect.objectContaining(expected));
-    });
+        expect(result).toEqual(expect.objectContaining(expected));
+      });
 
-    test('returns option fields if specified for eql type', () => {
-      const mockStepData: DefineStepRule = {
-        ...mockData,
-        ruleType: 'eql',
-        queryBar: {
-          ...mockData.queryBar,
-          query: {
-            ...mockData.queryBar.query,
-            language: 'eql',
-            query: 'process where process_name == "explorer.exe"',
+      test('returns option fields if specified for eql type', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          ruleType: 'eql',
+          queryBar: {
+            ...mockData.queryBar,
+            query: {
+              ...mockData.queryBar.query,
+              language: 'eql',
+              query: 'process where process_name == "explorer.exe"',
+            },
           },
-        },
-        eqlOptions: {
-          timestampField: 'event.created',
-          tiebreakerField: 'process.name',
-          eventCategoryField: 'event.action',
-        },
-      };
-      const result = formatDefineStepData(mockStepData);
+          eqlOptions: {
+            timestampField: 'event.created',
+            tiebreakerField: 'process.name',
+            eventCategoryField: 'event.action',
+          },
+        };
+        const result = formatDefineStepData(mockStepData);
 
-      const expected: DefineStepRuleJson = {
-        filters: mockStepData.queryBar.filters,
-        index: mockStepData.index,
-        language: 'eql',
-        query: 'process where process_name == "explorer.exe"',
-        type: 'eql',
-        timestamp_field: 'event.created',
-        tiebreaker_field: 'process.name',
-        event_category_override: 'event.action',
-      };
+        const expected: DefineStepRuleJson = {
+          filters: mockStepData.queryBar.filters,
+          index: mockStepData.index,
+          language: 'eql',
+          query: 'process where process_name == "explorer.exe"',
+          type: 'eql',
+          timestamp_field: 'event.created',
+          tiebreaker_field: 'process.name',
+          event_category_override: 'event.action',
+        };
 
-      expect(result).toEqual(expect.objectContaining(expected));
+        expect(result).toEqual(expect.objectContaining(expected));
+      });
+      test('should return suppression fields for eql type', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          ruleType: 'eql',
+          queryBar: {
+            ...mockData.queryBar,
+            query: {
+              ...mockData.queryBar.query,
+              language: 'eql',
+              query: 'process where process_name == "explorer.exe"',
+            },
+          },
+          groupByFields: ['event.type'],
+          groupByRadioSelection: GroupByOptions.PerRuleExecution,
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        const expected = {
+          filters: mockStepData.queryBar.filters,
+          index: mockStepData.index,
+          language: 'eql',
+          query: 'process where process_name == "explorer.exe"',
+          type: 'eql',
+          alert_suppression: {
+            group_by: ['event.type'],
+            duration: undefined,
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        expect(result).toEqual(expect.objectContaining(expected));
+      });
+
+      test('should return suppression fields with duration PerTimePeriod for eql type', () => {
+        const mockStepData: DefineStepRule = {
+          ...mockData,
+          ruleType: 'eql',
+          queryBar: {
+            ...mockData.queryBar,
+            query: {
+              ...mockData.queryBar.query,
+              language: 'eql',
+              query: 'process where process_name == "explorer.exe"',
+            },
+          },
+          groupByFields: ['event.type'],
+          groupByRadioSelection: GroupByOptions.PerTimePeriod,
+          groupByDuration: { value: 10, unit: 'm' },
+        };
+        const result = formatDefineStepData(mockStepData);
+
+        const expected = {
+          filters: mockStepData.queryBar.filters,
+          index: mockStepData.index,
+          language: 'eql',
+          query: 'process where process_name == "explorer.exe"',
+          type: 'eql',
+          alert_suppression: {
+            group_by: ['event.type'],
+            duration: { value: 10, unit: 'm' },
+            missing_fields_strategy: 'suppress',
+          },
+        };
+
+        expect(result).toEqual(expect.objectContaining(expected));
+      });
     });
 
     test('returns expected indicator matching rule type if all fields are filled out', () => {

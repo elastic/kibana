@@ -154,6 +154,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   alertSuppressionForIndicatorMatchRuleEnabled: false,
 
+  /**
+   * Enables alerts suppression for Eql rules
+   */
+  alertSuppressionForEqlRuleEnabled: false,
+
   /*
    * Enables experimental Entity Analytics Asset Criticality feature
    */

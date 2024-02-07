@@ -16,13 +16,17 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
   const isThreatMatchRuleFFEnabled = useIsExperimentalFeatureEnabled(
     'alertSuppressionForIndicatorMatchRuleEnabled'
   );
+  const isEQLRuleFFEnabled = useIsExperimentalFeatureEnabled('alertSuppressionForEqlRuleEnabled');
 
   const isSuppressionEnabledForRuleType = useCallback(() => {
     if (!ruleType) return false;
 
     // Remove this condition when the Feature Flag for enabling Suppression in the Indicator Match rule is removed.
     if (ruleType === 'threat_match')
-      return isSuppressibleAlertRule(ruleType) && isThreatMatchRuleFFEnabled;
+      return isThreatMatchRuleFFEnabled && isSuppressibleAlertRule(ruleType);
+
+    // Remove this condition when the Feature Flag for enabling Suppression in the EQL rule is removed.
+    if (ruleType === 'eql') return isEQLRuleFFEnabled && isSuppressibleAlertRule(ruleType);
 
     return isSuppressibleAlertRule(ruleType);
   }, [ruleType, isThreatMatchRuleFFEnabled]);

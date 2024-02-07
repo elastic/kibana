@@ -44,4 +44,5 @@ export const SUPPRESSIBLE_ALERT_RULES: Type[] = [
   'saved_query',
   'query',
   'threat_match',
+  'eql',
 ];

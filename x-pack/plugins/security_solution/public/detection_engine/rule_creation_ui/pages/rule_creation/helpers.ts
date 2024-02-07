@@ -481,6 +481,7 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         timestamp_field: ruleFields.eqlOptions?.timestampField,
         event_category_override: ruleFields.eqlOptions?.eventCategoryField,
         tiebreaker_field: ruleFields.eqlOptions?.tiebreakerField,
+        ...alertSuppressionFields,
       }
     : isNewTermsFields(ruleFields)
     ? {
