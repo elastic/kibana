@@ -11,7 +11,8 @@ import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
 import { BehaviorSubject, Subject, Subscription } from 'rxjs';
-
+import { map, distinctUntilChanged } from 'rxjs/operators';
+import deepEqual from 'fast-deep-equal';
 import type { ControlGroupContainer } from '@kbn/controls-plugin/public';
 import type { KibanaExecutionContext, OverlayRef } from '@kbn/core/public';
 import { RefreshInterval } from '@kbn/data-plugin/public';
@@ -19,6 +20,10 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
+  DefaultEmbeddableApi,
+  PanelNotFoundError,
+  ReactEmbeddableParentContext,
+  reactEmbeddableRegistryHasKey,
   ViewMode,
   type EmbeddableFactory,
   type EmbeddableInput,
@@ -43,7 +48,7 @@ import { placePanel } from '../component/panel_placement';
 import { DashboardViewport } from '../component/viewport/dashboard_viewport';
 import { DashboardExternallyAccessibleApi } from '../external_api/dashboard_api';
 import { dashboardContainerReducers } from '../state/dashboard_container_reducers';
-import { startDiffingDashboardState } from '../state/diffing/dashboard_diffing_integration';
+import { getDiffingMiddleware } from '../state/diffing/dashboard_diffing_integration';
 import {
   DashboardPublicState,
   DashboardReduxState,
@@ -65,7 +70,6 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
-import { SavedDashboardInput } from '../../services/dashboard_content_management/types';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -108,14 +112,12 @@ export class DashboardContainer
   public getState: DashboardReduxEmbeddableTools['getState'];
   public dispatch: DashboardReduxEmbeddableTools['dispatch'];
   public onStateChange: DashboardReduxEmbeddableTools['onStateChange'];
+  public anyReducerRun: Subject<null> = new Subject();
 
   public integrationSubscriptions: Subscription = new Subscription();
   public publishingSubscription: Subscription = new Subscription();
   public diffingSubscription: Subscription = new Subscription();
   public controlGroup?: ControlGroupContainer;
-
-  public hasUnsavedChanges: BehaviorSubject<boolean>;
-  public backupUnsavedChanges: BehaviorSubject<Partial<SavedDashboardInput> | undefined>;
 
   public searchSessionId?: string;
   public locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
@@ -139,6 +141,10 @@ export class DashboardContainer
   private theme$;
   private chrome;
   private customBranding;
+
+  // new embeddable framework
+  public reactEmbeddableChildren: BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }> =
+    new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({});
 
   constructor(
     initialInput: DashboardContainerInput,
@@ -177,11 +183,7 @@ export class DashboardContainer
     this.dashboardCreationStartTime = dashboardCreationStartTime;
 
     // start diffing dashboard state
-    this.hasUnsavedChanges = new BehaviorSubject(false);
-    this.backupUnsavedChanges = new BehaviorSubject<Partial<DashboardContainerInput> | undefined>(
-      undefined
-    );
-    const diffingMiddleware = startDiffingDashboardState.bind(this)(creationOptions);
+    const diffingMiddleware = getDiffingMiddleware.bind(this)();
 
     // build redux embeddable tools
     const reduxTools = reduxToolsPackage.createReduxEmbeddableTools<
@@ -214,6 +216,7 @@ export class DashboardContainer
         this.expandedPanelId.next(this.getExpandedPanelId());
       })
     );
+    this.startAuditingReactEmbeddableChildren();
   }
 
   public getAppContext() {
@@ -278,7 +281,9 @@ export class DashboardContainer
         >
           <KibanaThemeProvider theme$={this.theme$}>
             <DashboardContainerContext.Provider value={this}>
-              <DashboardViewport />
+              <ReactEmbeddableParentContext.Provider value={{ parentApi: this }}>
+                <DashboardViewport />
+              </ReactEmbeddableParentContext.Provider>
             </DashboardContainerContext.Provider>
           </KibanaThemeProvider>
         </ExitFullScreenButtonKibanaProvider>
@@ -391,7 +396,21 @@ export class DashboardContainer
     return newId;
   }
 
-  public getDashboardPanelFromId = (panelId: string) => this.getInput().panels[panelId];
+  public getDashboardPanelFromId = async (panelId: string) => {
+    const panel = this.getInput().panels[panelId];
+    if (reactEmbeddableRegistryHasKey(panel.type)) {
+      const child = this.reactEmbeddableChildren.value[panelId];
+      if (!child) throw new PanelNotFoundError();
+      const serialized = await child.serializeState();
+      return {
+        type: panel.type,
+        explicitInput: { ...panel.explicitInput, ...serialized.rawState },
+        gridData: panel.gridData,
+        version: serialized.version,
+      };
+    }
+    return panel;
+  };
 
   public expandPanel = (panelId?: string) => {
     this.setExpandedPanelId(panelId);
@@ -435,6 +454,7 @@ export class DashboardContainer
       if (timeRange) timeFilterService.setTime(timeRange);
       if (refreshInterval) timeFilterService.setRefreshInterval(refreshInterval);
     }
+    this.resetAllReactEmbeddables();
   }
 
   public navigateToDashboard = async (
@@ -537,14 +557,20 @@ export class DashboardContainer
 
   public async getPanelTitles(): Promise<string[]> {
     const titles: string[] = [];
-    const ids: string[] = Object.keys(this.getInput().panels);
-    for (const panelId of ids) {
-      await this.untilEmbeddableLoaded(panelId);
-      const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(panelId);
-      const title = child.getTitle();
-      if (title) {
-        titles.push(title);
-      }
+    for (const [id, panel] of Object.entries(this.getInput().panels)) {
+      const title = await (async () => {
+        if (reactEmbeddableRegistryHasKey(panel.type)) {
+          return (
+            this.reactEmbeddableChildren.value[id]?.panelTitle?.value ??
+            this.reactEmbeddableChildren.value[id]?.defaultPanelTitle?.value
+          );
+        }
+        await this.untilEmbeddableLoaded(id);
+        const child: IEmbeddable<EmbeddableInput, EmbeddableOutput> = this.getChild(id);
+        if (!child) return undefined;
+        return child.getTitle();
+      })();
+      if (title) titles.push(title);
     }
     return titles;
   }
@@ -589,4 +615,83 @@ export class DashboardContainer
   public setFocusedPanelId = (id: string | undefined) => {
     this.dispatch.setFocusedPanelId(id);
   };
+
+  // ------------------------------------------------------------------------------------------------------
+  // React Embeddable system
+  // ------------------------------------------------------------------------------------------------------
+  public registerPanelApi = <ApiType extends unknown = unknown>(id: string, api: ApiType) => {
+    this.reactEmbeddableChildren.next({
+      ...this.reactEmbeddableChildren.value,
+      [id]: api as DefaultEmbeddableApi,
+    });
+  };
+
+  public getLastSavedStateForChild = (childId: string) => {
+    const {
+      componentState: {
+        lastSavedInput: { panels },
+      },
+    } = this.getState();
+    const panel: DashboardPanelState | undefined = panels[childId];
+
+    // TODO Embeddable refactor. References here
+    return { rawState: panel?.explicitInput, version: panel?.version, references: [] };
+  };
+
+  public removePanel(id: string) {
+    const type = this.getInput().panels[id]?.type;
+    this.removeEmbeddable(id);
+    if (reactEmbeddableRegistryHasKey(type)) {
+      const { [id]: childToRemove, ...otherChildren } = this.reactEmbeddableChildren.value;
+      this.reactEmbeddableChildren.next(otherChildren);
+    }
+  }
+
+  public startAuditingReactEmbeddableChildren = () => {
+    const auditChildren = () => {
+      const currentChildren = this.reactEmbeddableChildren.value;
+      let panelsChanged = false;
+      for (const panelId of Object.keys(currentChildren)) {
+        if (!this.getInput().panels[panelId]) {
+          delete currentChildren[panelId];
+          panelsChanged = true;
+        }
+      }
+      if (panelsChanged) this.reactEmbeddableChildren.next(currentChildren);
+    };
+
+    // audit children when panels change
+    this.publishingSubscription.add(
+      this.getInput$()
+        .pipe(
+          map(() => Object.keys(this.getInput().panels)),
+          distinctUntilChanged(deepEqual)
+        )
+        .subscribe(() => auditChildren())
+    );
+    auditChildren();
+  };
+
+  public resetAllReactEmbeddables = () => {
+    let resetChangedPanelCount = false;
+    const currentChildren = this.reactEmbeddableChildren.value;
+    for (const panelId of Object.keys(currentChildren)) {
+      if (this.getInput().panels[panelId]) {
+        currentChildren[panelId].resetUnsavedChanges();
+      } else {
+        // if reset resulted in panel removal, we need to update the list of children
+        delete currentChildren[panelId];
+        resetChangedPanelCount = true;
+      }
+    }
+    if (resetChangedPanelCount) this.reactEmbeddableChildren.next(currentChildren);
+  };
+
+  public getFilters() {
+    return this.getInput().filters;
+  }
+
+  public getQuery(): Query | undefined {
+    return this.getInput().query;
+  }
 }

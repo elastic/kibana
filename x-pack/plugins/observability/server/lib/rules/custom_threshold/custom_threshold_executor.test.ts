@@ -1249,7 +1249,7 @@ describe('The custom threshold alert type', () => {
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
         filter: mockQuery,
-        logExplorerLocator: undefined,
+        logsExplorerLocator: undefined,
         metrics: customThresholdCountCriterion.metrics,
         startedAt: expect.stringMatching(ISO_DATE_REGEX),
       });

@@ -42,7 +42,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
-import { PreviewChart } from './components/preview_chart/preview_chart';
+import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -467,6 +467,7 @@ export default function Expressions(props: Props) {
                   searchConfiguration={ruleParams.searchConfiguration}
                   groupBy={ruleParams.groupBy}
                   error={(errors[idx] as IErrorObject) || emptyError}
+                  timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
                 />
               </ExpressionRow>
             </div>
