@@ -109,6 +109,7 @@ describe('sidebar reducer', function () {
             meta: {
               type: 'number',
             },
+            isNull: true,
           },
           {
             id: '2',
@@ -127,12 +128,14 @@ describe('sidebar reducer', function () {
           name: 'text1',
           type: 'number',
           aggregatable: false,
+          isNull: true,
           searchable: false,
         }),
         new DataViewField({
           name: 'text2',
           type: 'keyword',
           aggregatable: false,
+          isNull: false,
           searchable: false,
         }),
       ],
