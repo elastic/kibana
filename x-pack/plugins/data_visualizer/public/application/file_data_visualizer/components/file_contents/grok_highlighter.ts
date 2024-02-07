@@ -11,7 +11,7 @@ import type { ImportFactoryOptions } from '@kbn/file-upload-plugin/public/import
 import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
 import type { TestGrokPatternResponse } from '../../../../../common/types/test_grok_pattern';
 
-const LINE_LIMIT = 5;
+export const LINE_LIMIT = 5;
 
 type HighlightedLine = Array<{
   word: string;
