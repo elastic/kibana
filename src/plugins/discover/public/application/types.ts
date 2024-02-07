@@ -29,7 +29,7 @@ export interface DiscoverCustomizationContext {
   /**
    * Whether or not to show the Log Explorer tabs
    */
-  showLogExplorerTabs: boolean;
+  showLogsExplorerTabs: boolean;
 }
 
 export interface RecordsFetchResponse {

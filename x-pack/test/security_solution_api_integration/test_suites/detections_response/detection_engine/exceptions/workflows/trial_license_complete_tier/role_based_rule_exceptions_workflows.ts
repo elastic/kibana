@@ -803,7 +803,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for a query rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
             const rule: QueryRuleCreateProps = {
               name: 'Simple Rule Query',
@@ -835,7 +835,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for a threat match rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: ThreatMatchRuleCreateProps = {
               description: 'Detecting root and admin users',
@@ -883,7 +883,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for a threshold rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: ThresholdRuleCreateProps = {
               description: 'Detecting root and admin users',
@@ -920,7 +920,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           it('generates no alerts when a value list exception is added for an EQL rule', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['zeek-sensor-amsterdam'], valueListId);
             const rule: EqlRuleCreateProps = {
               ...getEqlRuleForAlertTesting(['auditbeat-*']),
@@ -944,7 +944,7 @@ export default ({ getService }: FtrProviderContext) => {
             expect(alertsOpen.hits.hits.length).toEqual(0);
           });
           it('should Not allow deleting value list when there are references and ignoreReferences is false', async () => {
-            const valueListId = 'value-list-id';
+            const valueListId = 'value-list-id.txt';
             await importFile(supertest, log, 'keyword', ['suricata-sensor-amsterdam'], valueListId);
             const rule: QueryRuleCreateProps = {
               ...getSimpleRule(),
