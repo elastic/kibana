@@ -11,8 +11,12 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { useIsolateHostPanelContext } from './context';
 import { PanelHeader } from './header';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
+import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 
+jest.mock('../../../common/utils/sentinelone_alert_check');
 jest.mock('./context');
+
+const mockIsAlertFromSentinelOneEvent = isAlertFromSentinelOneEvent as jest.Mock;
 
 const renderPanelHeader = () =>
   render(
@@ -39,4 +43,19 @@ describe('<PanelHeader />', () => {
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Release host');
   });
+
+  it.each(['isolateHost', 'unisolateHost'])(
+    'should display beta badge on %s host message for SentinelOne alerts',
+    (action) => {
+      (useIsolateHostPanelContext as jest.Mock).mockReturnValue({
+        isolateAction: action,
+      });
+      mockIsAlertFromSentinelOneEvent.mockReturnValue(true);
+
+      const { getByTestId } = renderPanelHeader();
+
+      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Beta');
+    }
+  );
 });
