@@ -34,9 +34,10 @@ export const getMarkdownRenderer =
           <Markdown
             className="canvasMarkdown"
             style={fontStyle as CSSProperties}
-            markdown={config.content}
             openLinksInNewTab={config.openLinksInNewTab}
-          />
+          >
+            {config.content}
+          </Markdown>
         </KibanaThemeProvider>,
         domNode,
         () => handlers.done()

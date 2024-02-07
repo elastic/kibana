@@ -82,11 +82,9 @@ export const PresentationPanelError = ({
       body={
         searchErrorDisplay?.body ?? (
           <EuiText size="s">
-            <Markdown
-              markdown={error.message}
-              openLinksInNewTab={true}
-              data-test-subj="errorMessageMarkdown"
-            />
+            <Markdown openLinksInNewTab={true} data-test-subj="errorMessageMarkdown">
+              {error.message}
+            </Markdown>
           </EuiText>
         )
       }

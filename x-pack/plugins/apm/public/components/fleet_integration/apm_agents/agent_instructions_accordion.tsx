@@ -77,10 +77,11 @@ function InstructionsContent({ markdown }: { markdown: string }) {
   return (
     <Markdown
       className="euiText"
-      markdown={markdown}
       openLinksInNewTab={true}
       whiteListedRules={['backticks', 'emphasis', 'link', 'list']}
-    />
+    >
+      {markdown}
+    </Markdown>
   );
 }
 

@@ -45,11 +45,9 @@ export const ControlError = ({ error }: ControlErrorProps) => {
         className="errorEmbeddableCompact__popover"
         closePopover={() => setPopoverOpen(false)}
       >
-        <Markdown
-          markdown={errorMessage}
-          openLinksInNewTab={true}
-          data-test-subj="errorMessageMarkdown"
-        />
+        <Markdown openLinksInNewTab={true} data-test-subj="errorMessageMarkdown">
+          {errorMessage}
+        </Markdown>
       </EuiPopover>
     </I18nProvider>
   );

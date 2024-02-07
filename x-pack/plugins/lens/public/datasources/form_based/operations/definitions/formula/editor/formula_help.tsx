@@ -43,7 +43,7 @@ function createNewSection(
           <>
             <h3>{getFunctionSignatureLabel(key, operationDefinitionMap, false)}</h3>
 
-            {fnDescription ? <Markdown markdown={fnDescription} /> : null}
+            {fnDescription ? <Markdown>{fnDescription}</Markdown> : null}
           </>
         ),
       };
@@ -85,7 +85,7 @@ export function getDocumentationSections({
     items: formulasSections.common.items.map(
       ({ label, description }: { label: string; description: string }) => ({
         label,
-        description: <Markdown markdown={description} />,
+        description: <Markdown>{description}</Markdown>,
       })
     ),
   });
@@ -154,7 +154,7 @@ export function getDocumentationSections({
 
   const sections = {
     groups: helpGroups,
-    initialSection: <Markdown markdown={formulasSections.howTo} />,
+    initialSection: <Markdown>{formulasSections.howTo}</Markdown>,
   };
 
   return sections;

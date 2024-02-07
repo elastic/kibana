@@ -79,9 +79,10 @@ function MarkdownVisualization(props) {
                 {!markdownError && (
                   <Markdown
                     onRender={initialRender}
-                    markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
-                  />
+                  >
+                    {markdownSource}
+                  </Markdown>
                 )}
               </div>
             </div>
