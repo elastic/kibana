@@ -39,30 +39,32 @@ export const importRuleActionConnectors = async ({
   overwrite,
 }: ImportRuleActionConnectorsParams): Promise<ImportRuleActionConnectorsResult> => {
   try {
-    const preconfiguredActionConnectors = await fetchPreconfiguredActionConnectors(actionsClient);
-    const preconfiguredActionConnectorIds = new Set(preconfiguredActionConnectors.map((c) => c.id));
-    const actionConnectorRules = getActionConnectorRules(rules);
-    const actionsIds: string[] = Object.keys(actionConnectorRules).filter(
-      (id) => !preconfiguredActionConnectorIds.has(id)
+    const connectorIdToRuleIdsMap = getActionConnectorRules(rules);
+    const referencedConnectorIds = await filterOutPreconfiguredConnectors(
+      actionsClient,
+      Object.keys(connectorIdToRuleIdsMap)
     );
 
-    if (!actionsIds.length) {
+    if (!referencedConnectorIds.length) {
       return NO_ACTION_RESULT;
     }
 
     if (overwrite && !actionConnectors.length) {
-      return handleActionsHaveNoConnectors(actionsIds, actionConnectorRules);
+      return handleActionsHaveNoConnectors(referencedConnectorIds, connectorIdToRuleIdsMap);
     }
 
     let actionConnectorsToImport: SavedObject[] = actionConnectors;
 
     if (!overwrite) {
-      const newIdsToAdd = await filterExistingActionConnectors(actionsClient, actionsIds);
+      const newIdsToAdd = await filterExistingActionConnectors(
+        actionsClient,
+        referencedConnectorIds
+      );
 
       const foundMissingConnectors = checkIfActionsHaveMissingConnectors(
         actionConnectors,
         newIdsToAdd,
-        actionConnectorRules
+        connectorIdToRuleIdsMap
       );
       if (foundMissingConnectors) return foundMissingConnectors;
       // filter out existing connectors
@@ -106,4 +108,18 @@ async function fetchPreconfiguredActionConnectors(
   const knownConnectors = await actionsClient.getAll();
 
   return knownConnectors.filter((c) => c.isPreconfigured);
+}
+
+async function filterOutPreconfiguredConnectors(
+  actionsClient: ActionsClient,
+  connectorsIds: string[]
+): Promise<string[]> {
+  if (connectorsIds.length === 0) {
+    return [];
+  }
+
+  const preconfiguredActionConnectors = await fetchPreconfiguredActionConnectors(actionsClient);
+  const preconfiguredActionConnectorIds = new Set(preconfiguredActionConnectors.map((c) => c.id));
+
+  return connectorsIds.filter((id) => !preconfiguredActionConnectorIds.has(id));
 }
