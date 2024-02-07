@@ -15,10 +15,10 @@ export interface IExternalReferenceMetaDataProps {
   };
 }
 
-export type ExternalReferenceTargetsType = Array<{
+type ExternalReferenceTargetsType = Array<{
   endpointId: string;
   hostname: string;
   agentType: ResponseActionAgentType;
 }>;
-export type ExternalReferenceCommentType = string;
-export type ExternalReferenceCommandType = string;
+type ExternalReferenceCommentType = string;
+type ExternalReferenceCommandType = string;

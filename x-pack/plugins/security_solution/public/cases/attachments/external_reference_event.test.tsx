@@ -29,6 +29,7 @@ describe('AttachmentContentEvent', () => {
   const defaultProps = {
     externalReferenceMetadata: {
       command: 'isolate',
+      comment: 'test comment',
       targets: [
         {
           endpointId: 'endpoint-1',

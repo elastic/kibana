@@ -10,10 +10,22 @@ import { render } from '@testing-library/react';
 import AttachmentContentChildren from './external_reference_children';
 
 describe('AttachmentContentChildren', () => {
+  const defaultProps = {
+    command: 'isolate',
+    comment: 'Test comment',
+    targets: [
+      {
+        endpointId: 'endpoint-1',
+        hostname: 'host-1',
+        agentType: 'endpoint' as const,
+      },
+    ],
+  };
+
   it('renders markdown content when comment exists', () => {
     const props = {
       externalReferenceMetadata: {
-        comment: 'Test comment',
+        ...defaultProps,
       },
     };
     const { getByText } = render(<AttachmentContentChildren {...props} />);
@@ -23,8 +35,8 @@ describe('AttachmentContentChildren', () => {
   it('does not render when comment is empty', () => {
     const props = {
       externalReferenceMetadata: {
+        ...defaultProps,
         comment: '',
-        command: 'isolate',
       },
     };
     const { container } = render(<AttachmentContentChildren {...props} />);
@@ -34,8 +46,8 @@ describe('AttachmentContentChildren', () => {
   it('does not render when comment is only whitespace', () => {
     const props = {
       externalReferenceMetadata: {
+        ...defaultProps,
         comment: '   ',
-        command: 'isolate',
       },
     };
 

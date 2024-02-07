@@ -10,19 +10,12 @@ import { useNavigation } from '@kbn/security-solution-navigation/src/navigation'
 import React, { useCallback, useMemo } from 'react';
 
 import { ISOLATED_HOST, RELEASED_HOST, OTHER_ENDPOINTS } from '../pages/translations';
-import type { ExternalReferenceCommandType, ExternalReferenceTargetsType } from './types';
+import type { IExternalReferenceMetaDataProps } from './types';
 import { getEndpointDetailsPath } from '../../management/common/routing';
 
-const AttachmentContentEvent = (props: {
-  externalReferenceMetadata: {
-    command: ExternalReferenceCommandType;
-    targets: ExternalReferenceTargetsType;
-  };
-}) => {
-  const {
-    externalReferenceMetadata: { command, targets },
-  } = props;
-
+const AttachmentContentEvent = ({
+  externalReferenceMetadata: { command, targets },
+}: IExternalReferenceMetaDataProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
   const endpointDetailsHref = getAppUrl({

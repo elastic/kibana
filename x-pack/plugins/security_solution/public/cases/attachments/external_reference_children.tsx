@@ -9,7 +9,7 @@ import React from 'react';
 
 import styled from 'styled-components';
 import { EuiMarkdownFormat } from '@elastic/eui';
-import type { ExternalReferenceCommentType } from './types';
+import type { IExternalReferenceMetaDataProps } from './types';
 
 export const ContentWrapper = styled.div`
   padding: ${({ theme }) => `${theme.eui?.euiSizeM} ${theme.eui?.euiSizeL}`};
@@ -19,15 +19,9 @@ export const ContentWrapper = styled.div`
   -webkit-box-orient: vertical;
 `;
 
-const AttachmentContentChildren = (props: {
-  externalReferenceMetadata: {
-    comment: ExternalReferenceCommentType;
-  };
-}) => {
-  const {
-    externalReferenceMetadata: { comment },
-  } = props;
-
+const AttachmentContentChildren = ({
+  externalReferenceMetadata: { comment },
+}: IExternalReferenceMetaDataProps) => {
   return comment.trim().length > 0 ? (
     <ContentWrapper>
       <EuiMarkdownFormat grow={true}>{comment}</EuiMarkdownFormat>
