@@ -10,6 +10,19 @@ import { Either } from 'fp-ts/Either';
 import { i18n } from '@kbn/i18n';
 import { ConfigKey } from '../constants/monitor_management';
 
+export const TimeoutString = new t.Type<string, string, unknown>(
+  'TimeoutString',
+  t.string.is,
+  (input, context): Either<t.Errors, string> => {
+    if (typeof input === 'string' && input.trim() !== '' && !isNaN(Number(input))) {
+      return t.success(input);
+    } else {
+      return t.failure(input, context);
+    }
+  },
+  t.identity
+);
+
 export const getNonEmptyStringCodec = (fieldName: string) => {
   return new t.Type<string, string, unknown>(
     'NonEmptyString',

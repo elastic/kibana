@@ -26,7 +26,7 @@ import {
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
-import { getNonEmptyStringCodec, InlineScriptString } from '../common';
+import { getNonEmptyStringCodec, InlineScriptString, TimeoutString } from '../common';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -71,7 +71,7 @@ export const CommonFieldsCodec = t.intersection([
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
-    [ConfigKey.TIMEOUT]: t.union([t.string, t.null, t.number]),
+    [ConfigKey.TIMEOUT]: t.union([TimeoutString, t.null, t.number]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_HASH]: t.string,

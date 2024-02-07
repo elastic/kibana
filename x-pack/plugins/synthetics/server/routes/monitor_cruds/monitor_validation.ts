@@ -170,7 +170,6 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
 
 export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
   const monitorType = monitor.type as MonitorTypeEnum;
-
   const decodedType = MonitorTypeCodec.decode(monitorType);
 
   if (isLeft(decodedType)) {
@@ -188,7 +187,7 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     id: _id,
     retest_on_failure: _retestOnFailure,
     url: rawUrl,
-    ssl: rawSSL,
+    ssl: _rawSSL,
     host: rawHost,
     inline_script: inlineScript,
     custom_heartbeat_id: _customHeartbeatId,
@@ -196,6 +195,13 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     playwright_options: rawPlaywrightOptions,
     ...rawConfig
   } = flattenedConfig;
+  if (Object.keys(flattenedConfig).some((key) => key.startsWith('ssl.'))) {
+    rawConfig[ConfigKey.METADATA] = {
+      is_tls_enabled: true,
+      ...((flattenedConfig[ConfigKey.METADATA] as any) ?? {}),
+    };
+  }
+
   if (rawUrl) {
     // since api accept url key as well
     rawConfig[ConfigKey.URLS] = rawUrl;

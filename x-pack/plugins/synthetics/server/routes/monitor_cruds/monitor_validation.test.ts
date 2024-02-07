@@ -61,7 +61,7 @@ describe('validateMonitor', () => {
       [ConfigKey.TAGS]: testTags,
       [ConfigKey.SCHEDULE]: testSchedule,
       [ConfigKey.APM_SERVICE_NAME]: '',
-      [ConfigKey.TIMEOUT]: '3m',
+      [ConfigKey.TIMEOUT]: '30',
       [ConfigKey.LOCATIONS]: [
         {
           id: 'eu-west-1',
@@ -242,6 +242,18 @@ describe('validateMonitor', () => {
         reason: 'Monitor schedule is invalid',
         details:
           'Invalid schedule 4 minutes supplied to monitor configuration. Supported schedule values in minutes are 1, 3, 5, 10, 15, 20, 30, 60, 120, 240',
+      });
+    });
+
+    it(`when timeout is not valid`, () => {
+      const result = validateMonitor({
+        ...testICMPFields,
+        timeout: '3m',
+      } as unknown as MonitorFields);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type icmp',
+        details: 'Invalid value "3m" supplied to "timeout"',
       });
     });
 
@@ -681,6 +693,7 @@ describe('normalizeAPIConfig', () => {
       },
     });
   });
+
   it('playwright_options key mapping validation', function () {
     expect(normalizeAPIConfig({ type: 'browser', playwright_options: '{}' } as any)).toEqual({
       formattedConfig: {
@@ -736,6 +749,52 @@ describe('normalizeAPIConfig', () => {
       },
     });
   });
+
+  it('ssl key normalization', function () {
+    expect(
+      normalizeAPIConfig({
+        type: 'http',
+        ssl: {
+          key: '',
+          certificate: '',
+          verification_mode: 'full',
+          supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        __ui: {
+          is_tls_enabled: true,
+        },
+        type: 'http',
+        'ssl.certificate': '',
+        'ssl.key': '',
+        'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        'ssl.verification_mode': 'full',
+      },
+    });
+    expect(
+      normalizeAPIConfig({
+        type: 'http',
+        __ui: { is_tls_enabled: false },
+        ssl: {
+          key: '',
+          certificate: '',
+          verification_mode: 'full',
+          supported_protocols: ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        },
+      } as any)
+    ).toEqual({
+      formattedConfig: {
+        __ui: { is_tls_enabled: false },
+        type: 'http',
+        'ssl.certificate': '',
+        'ssl.key': '',
+        'ssl.supported_protocols': ['TLSv1.1', 'TLSv1.2', 'TLSv1.3'],
+        'ssl.verification_mode': 'full',
+      },
+    });
+  });
 });
 
 function getJsonPayload() {
@@ -752,7 +811,7 @@ function getJsonPayload() {
     '    "unit": "m"' +
     '  },' +
     '  "service.name": "",' +
-    '  "timeout": "3m",' +
+    '  "timeout": "30",' +
     '  "__ui": {' +
     '    "is_tls_enabled": false,' +
     '    "script_source": {' +

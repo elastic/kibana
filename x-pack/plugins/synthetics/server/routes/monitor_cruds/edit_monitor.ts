@@ -55,6 +55,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     const { request, response, spaceId, server } = routeContext;
     const { logger } = server;
     const monitor = request.body as SyntheticsMonitor;
+    const reqQuery = request.query as { ui?: boolean };
     const { monitorId } = request.params;
 
     if (!monitor || typeof monitor !== 'object' || isEmpty(monitor) || Array.isArray(monitor)) {
@@ -65,15 +66,7 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
       });
     }
     if (monitor.origin && monitor.origin !== 'ui') {
-      return response.badRequest({
-        body: {
-          message: invalidOriginError(monitor.origin),
-          attributes: {
-            details: invalidOriginError(monitor.origin),
-            payload: monitor,
-          },
-        },
-      });
+      return response.badRequest(getInvalidOriginError(monitor));
     }
 
     const editMonitorAPI = new AddEditMonitorAPI(routeContext);
@@ -92,6 +85,10 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
        * on the monitor list table. We do not decrypt monitors in bulk for the monitor list table */
       const previousMonitor = await getDecryptedMonitor(server, monitorId, spaceId);
       const normalizedPreviousMonitor = normalizeSecrets(previousMonitor).attributes;
+
+      if (normalizedPreviousMonitor.origin !== 'ui' && !reqQuery.ui) {
+        return response.badRequest(getInvalidOriginError(monitor));
+      }
 
       let editedMonitor = mergeSourceMonitor(normalizedPreviousMonitor, monitor);
 
@@ -320,4 +317,16 @@ export const validatePermissions = async (
   if (!elasticManagedLocationsEnabled) {
     return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
+};
+
+const getInvalidOriginError = (monitor: SyntheticsMonitor) => {
+  return {
+    body: {
+      message: invalidOriginError(monitor.origin!),
+      attributes: {
+        details: invalidOriginError(monitor.origin!),
+        payload: monitor,
+      },
+    },
+  };
 };
