@@ -7,14 +7,14 @@
 
 import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { LoadWhenInViewProps } from './load_when_in_view';
+import type { TagsListProps } from './tags_list';
 
-const LoadWhenInViewLazy = lazy(() => import('./load_when_in_view'));
+const TagsListLazy = lazy(() => import('./tags_list'));
 
-export function LoadWhenInView(props: LoadWhenInViewProps) {
+export function TagsList(props: TagsListProps) {
   return (
     <Suspense fallback={<EuiLoadingSpinner />}>
-      <LoadWhenInViewLazy {...props} />
+      <TagsListLazy {...props} />
     </Suspense>
   );
 }

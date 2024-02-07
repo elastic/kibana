@@ -35,6 +35,7 @@ export {
 } from './components/section/section';
 export type { SectionLinkProps } from './components/section/section';
 export { LoadWhenInView } from './components/load_when_in_view/get_load_when_in_view_lazy';
+export { TagsList } from './components/tags_list/tags_list_lazy';
 
 export { TechnicalPreviewBadge } from './components/technical_preview_badge/technical_preview_badge';
 
@@ -95,4 +96,4 @@ export {
 export { ProfilingEmptyState } from './components/profiling/profiling_empty_state';
 export { FeatureFeedbackButton } from './components/feature_feedback_button/feature_feedback_button';
 export { BottomBarActions } from './components/bottom_bar_actions/bottom_bar_actions';
-export { FieldValueSelection, FieldValueSuggestions, TagsList } from './components';
+export { FieldValueSelection, FieldValueSuggestions } from './components';
