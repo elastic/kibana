@@ -878,6 +878,7 @@ module.exports = {
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
+        // '@kbn/eslint/no_unsafe_console': ['warn', { allow: ['error'] }],
         'react/function-component-definition': [
           'warn',
           {
