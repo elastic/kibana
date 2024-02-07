@@ -156,6 +156,7 @@ describe('ScheduleNotificationResponseActions', () => {
           command: 'isolate',
           comment: 'test isolate comment',
           endpoint_ids: ['agent-id-1'],
+          agent_type: 'endpoint',
           hosts: {
             'agent-id-1': {
               id: 'agent-id-1',
@@ -192,6 +193,7 @@ describe('ScheduleNotificationResponseActions', () => {
         endpointActionMock.getActionCreateService().createActionFromAlert
       ).toHaveBeenCalledWith(
         {
+          agent_type: 'endpoint',
           alert_ids: ['alert-id-1'],
           command: 'kill-process',
           comment: 'test process comment',
