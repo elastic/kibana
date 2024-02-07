@@ -16,7 +16,7 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type { ListPluginSetup } from '@kbn/lists-plugin/server';
 import type { ILicense } from '@kbn/licensing-plugin/server';
-import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
+import { FLEET_ENDPOINT_PACKAGE, NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 
 import { i18n } from '@kbn/i18n';
 import { endpointPackagePoliciesStatsSearchStrategyProvider } from './search_strategy/endpoint_package_policies_stats';
@@ -115,6 +115,7 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
+import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './fleet_integration';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -636,6 +637,24 @@ export class Plugin implements ISecuritySolutionPlugin {
         }
       }
     );
+    
+    if (registerIngestCallback) {
+      registerIngestCallback(
+        'packagePolicyCreate',
+        async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
+          await getCriblPackagePolicyPostCreateOrUpdateCallback(core.elasticsearch.client.asInternalUser, packagePolicy, this.logger);
+          return packagePolicy;
+        }
+      );
+  
+      registerIngestCallback(
+        'packagePolicyUpdate',
+        async (packagePolicy: UpdatePackagePolicy): Promise<UpdatePackagePolicy> => {
+          await getCriblPackagePolicyPostCreateOrUpdateCallback(core.elasticsearch.client.asInternalUser, packagePolicy, this.logger);
+          return packagePolicy;
+        }
+      );
+    }
 
     return {};
   }
