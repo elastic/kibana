@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { first } from 'rxjs/operators';
 import React, { FC, useState } from 'react';
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { EuiButtonIcon } from '@elastic/eui';
 import { Observable, Subscription } from 'rxjs';
 import { useTimeSlider } from '../embeddable/time_slider_embeddable';
 import { useControlGroupContainer } from '../../control_group/embeddable/control_group_container';
