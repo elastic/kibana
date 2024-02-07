@@ -573,6 +573,30 @@ describe('Response actions history', () => {
       );
     });
 
+    it('should contain agent type info in each expanded row', async () => {
+      mockedContext.setExperimentalFlag({ responseActionsSentinelOneV1Enabled: true });
+      render();
+      const { getAllByTestId } = renderResult;
+
+      const expandButtons = getAllByTestId(`${testPrefix}-expand-button`);
+      expandButtons.map((button) => userEvent.click(button));
+      const trays = getAllByTestId(`${testPrefix}-details-tray`);
+      expect(trays).toBeTruthy();
+      expect(Array.from(trays[0].querySelectorAll('dt')).map((title) => title.textContent)).toEqual(
+        [
+          'Command placed',
+          'Execution started on',
+          'Execution completed',
+          'Input',
+          'Parameters',
+          'Comment',
+          'Hostname',
+          'Agent type',
+          'Output:',
+        ]
+      );
+    });
+
     it('should refresh data when autoRefresh is toggled on', async () => {
       const listHookResponse = getBaseMockedActionList();
       useGetEndpointActionListMock.mockReturnValue(listHookResponse);
