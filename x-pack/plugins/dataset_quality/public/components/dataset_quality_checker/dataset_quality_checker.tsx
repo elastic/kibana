@@ -7,10 +7,13 @@
 
 import {
   EuiButton,
+  EuiDescriptionList,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiSpacer,
+  EuiTitle,
   htmlIdGenerator,
 } from '@elastic/eui';
 import { useActor } from '@xstate/react';
@@ -28,6 +31,7 @@ import {
   DataStreamQualityChecksStateProvider,
   useDataStreamQualityChecksStateContext,
 } from './state_machine_provider';
+import { StepPanel, Steps } from './step_panel';
 
 export interface DataStreamQualityCheckerProps {
   dataStream: string;
@@ -105,18 +109,22 @@ const ConnectedPlannedChecksList = () => {
   const checks = state.context.plan?.checks ?? [];
 
   return (
-    <EuiFlexGroup direction="column">
+    <Steps>
       {checks.map((check) => (
-        <EuiFlexItem key={`${check.check_id}-${check.data_stream}`} grow={false}>
-          <EuiPanel>
-            <PreJson value={check} />
-          </EuiPanel>
-        </EuiFlexItem>
+        <StepPanel
+          key={`${check.check_id}-${check.data_stream}`}
+          title={`Planned check ${check.check_id}`}
+          color="primary"
+        >
+          <CheckPlanStepFields check={check} />
+          <EuiSpacer />
+          <DetailsPreJson title="check details" value={check} />
+        </StepPanel>
       ))}
       <EuiFlexItem grow={false}>
         <EuiButton onClick={performChecks}>Run checks</EuiButton>
       </EuiFlexItem>
-    </EuiFlexGroup>
+    </Steps>
   );
 };
 
@@ -136,28 +144,30 @@ const ConnectedCheckProgressList = () => {
   );
 
   return (
-    <EuiFlexGroup direction="column">
-      {checkProgress.map((check) => (
-        <EuiFlexItem key={`${check.check.check_id}-${check.check.data_stream}`} grow={false}>
-          {check.progress === 'pending' ? (
-            <CheckListPendingItem check={check.check} />
-          ) : (
-            <CheckListFinishedItem
-              check={check.check}
-              execution={check.execution}
-              onMitigateProblem={mitigateProblem}
-            />
-          )}
-        </EuiFlexItem>
-      ))}
-    </EuiFlexGroup>
+    <Steps>
+      {checkProgress.map((check) =>
+        check.progress === 'pending' ? (
+          <CheckListPendingItem
+            key={`${check.check.check_id}-${check.check.data_stream}`}
+            check={check.check}
+          />
+        ) : (
+          <CheckListFinishedItem
+            key={`${check.check.check_id}-${check.check.data_stream}`}
+            check={check.check}
+            execution={check.execution}
+            onMitigateProblem={mitigateProblem}
+          />
+        )
+      )}
+    </Steps>
   );
 };
 
 const CheckListPendingItem = ({ check }: { check: CheckPlanStep }) => (
-  <EuiPanel>
-    <pre>{JSON.stringify(check, null, 2)}</pre>
-  </EuiPanel>
+  <StepPanel title={`Pending check ${check.check_id}`} color="warning">
+    <CheckPlanStepFields check={check} />
+  </StepPanel>
 );
 
 const CheckListFinishedItem = ({
@@ -171,52 +181,84 @@ const CheckListFinishedItem = ({
 }) => {
   if (execution.result.type === 'skipped') {
     return (
-      <EuiPanel color="warning">
-        <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
-        <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
-      </EuiPanel>
+      <StepPanel title={`Skipped check ${check.check_id}`} color="warning">
+        <CheckPlanStepFields check={check} />
+        <DetailsPreJson title={`Check details`} value={check} />
+        <DetailsPreJson title={`Result details`} value={execution} />
+      </StepPanel>
     );
   } else if (execution.result.type === 'passed') {
     return (
-      <EuiPanel color="success">
-        <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
-        <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
-      </EuiPanel>
+      <StepPanel title={`Passed check ${check.check_id}`} color="success">
+        <CheckPlanStepFields check={check} />
+        <DetailsPreJson title={`Check details`} value={check} />
+        <DetailsPreJson title={`Result details`} value={execution} />
+      </StepPanel>
     );
   } else if (execution.result.type === 'failed') {
     return (
-      <EuiPanel color="danger">
+      <StepPanel title={`Failed check ${check.check_id}`} color="danger">
+        <CheckPlanStepFields check={check} />
+        <EuiSpacer />
+        <EuiTitle size="xs">
+          <h2>Reasons</h2>
+        </EuiTitle>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          {execution.result.reasons.map((problem, problemIndex) => {
+            return (
+              <EuiFlexItem key={problemIndex}>
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiFlexGroup direction="row" alignItems="center">
+                    <EuiFlexItem>
+                      {problem.type === 'ignored-field'
+                        ? `Ignored field ${problem.field_name} in ${problem.document_count} documents `
+                        : problem.type}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiButton color="primary" onClick={() => onMitigateProblem(check, problem)}>
+                        Fix this problem
+                      </EuiButton>
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </EuiPanel>
+              </EuiFlexItem>
+            );
+          })}
+        </EuiFlexGroup>
+        <EuiSpacer />
         <DetailsPreJson title={`Check: ${check.check_id}`} value={check} />
         <DetailsPreJson title={`Result: ${execution.result.type}`} value={execution} />
-        {execution.result.reasons.map((problem, problemIndex) => {
-          return (
-            <EuiPanel key={problemIndex} color="danger" hasShadow={false}>
-              <EuiFlexGroup direction="row">
-                <EuiFlexItem grow>
-                  {problem.type === 'ignored-field'
-                    ? `Ignored field ${problem.field_name} in ${problem.document_count} documents `
-                    : problem.type}
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton color="danger" onClick={() => onMitigateProblem(check, problem)}>
-                    Fix this problem
-                  </EuiButton>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          );
-        })}
-      </EuiPanel>
+      </StepPanel>
     );
   }
 
   return (
-    <EuiPanel color="accent">
+    <StepPanel color="accent">
       <PreJson value={check} />
       <PreJson value={execution} />
-    </EuiPanel>
+    </StepPanel>
   );
 };
+
+const CheckPlanStepFields = React.memo(({ check }: { check: CheckPlanStep }) => (
+  <EuiDescriptionList
+    type="column"
+    listItems={[
+      {
+        title: 'Data stream',
+        description: check.data_stream,
+      },
+      {
+        title: 'Start',
+        description: check.time_range.start,
+      },
+      {
+        title: 'End',
+        description: check.time_range.end,
+      },
+    ]}
+  />
+));
 
 const useRandomId = (prefix: string) => {
   const generateId = useMemo(() => htmlIdGenerator(prefix), [prefix]);
