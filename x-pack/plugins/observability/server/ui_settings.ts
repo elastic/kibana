@@ -41,7 +41,7 @@ import {
   profilingAzureCostDiscountRate,
   enableInfrastructureProfilingIntegration,
   apmEnableTransactionProfiling,
-  enableInfrastructureHostsCustomDashboards,
+  enableInfrastructureAssetCustomDashboards,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -255,17 +255,17 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.boolean(),
   },
-  [enableInfrastructureHostsCustomDashboards]: {
+  [enableInfrastructureAssetCustomDashboards]: {
     category: [observabilityFeatureId],
-    name: i18n.translate('xpack.observability.enableInfrastructureHostsCustomDashboards', {
-      defaultMessage: 'Custom dashboards for Host Details in Infrastructure',
+    name: i18n.translate('xpack.observability.enableInfrastructureAssetCustomDashboards', {
+      defaultMessage: 'Custom dashboards for asset details in Infrastructure',
     }),
     value: false,
     description: i18n.translate(
-      'xpack.observability.enableInfrastructureHostsCustomDashboardsDescription',
+      'xpack.observability.enableInfrastructureAssetCustomDashboardsDescription',
       {
         defaultMessage:
-          '{betaLabel} Enable option to link custom dashboards in the Host Details view.',
+          '{betaLabel} Enable option to link custom dashboards in the asset details view.',
         values: {
           betaLabel: `<em>[${betaLabel}]</em>`,
         },

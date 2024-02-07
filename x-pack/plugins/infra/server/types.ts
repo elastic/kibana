@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, CustomRequestHandlerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CustomRequestHandlerContext,
+  IUiSettingsClient,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { SearchRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { InfraServerPluginStartDeps } from './lib/adapters/framework';
@@ -33,17 +38,13 @@ export interface InfraPluginStart {
 export type MlSystem = ReturnType<MlPluginSetup['mlSystemProvider']>;
 export type MlAnomalyDetectors = ReturnType<MlPluginSetup['anomalyDetectorsProvider']>;
 
-export interface InfraMlRequestHandlerContext {
+export interface InfraRequestHandlerContext {
   mlAnomalyDetectors?: MlAnomalyDetectors;
   mlSystem?: MlSystem;
-}
-
-export interface InfraSpacesRequestHandlerContext {
   spaceId: string;
+  savedObjectsClient: SavedObjectsClientContract;
+  uiSettingsClient: IUiSettingsClient;
 }
-
-export type InfraRequestHandlerContext = InfraMlRequestHandlerContext &
-  InfraSpacesRequestHandlerContext;
 
 /**
  * @internal

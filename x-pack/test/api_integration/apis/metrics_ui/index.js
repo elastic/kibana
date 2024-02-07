@@ -25,5 +25,6 @@ export default function ({ loadTestFile }) {
     loadTestFile(require.resolve('./infra'));
     loadTestFile(require.resolve('./inventory_threshold_alert'));
     loadTestFile(require.resolve('./services'));
+    loadTestFile(require.resolve('./infra_custom_dashboards'));
   });
 }

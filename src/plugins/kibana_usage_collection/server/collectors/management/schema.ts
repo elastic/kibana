@@ -604,7 +604,7 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
-  'observability:enableInfrastructureHostsCustomDashboards': {
+  'observability:enableInfrastructureAssetCustomDashboards': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
