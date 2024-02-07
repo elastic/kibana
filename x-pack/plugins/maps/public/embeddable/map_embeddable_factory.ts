@@ -9,12 +9,32 @@ import { first } from 'rxjs/operators';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableFactoryDefinition, IContainer } from '@kbn/embeddable-plugin/public';
 import { MAP_SAVED_OBJECT_TYPE, APP_ICON, MAP_EMBEDDABLE_NAME } from '../../common/constants';
+import { LATEST_VERSION } from '../../common/content_management';
+import type { MapAttributes as MapAttributesV1 } from '../../common/content_management/v1';
 import { extract, inject } from '../../common/embeddable';
 import { MapByReferenceInput, MapEmbeddableInput } from './types';
 import { getApplication, getMapsCapabilities, getUsageCollection } from '../kibana_services';
+import { MapByValueInput } from '.';
 
 export class MapEmbeddableFactory implements EmbeddableFactoryDefinition {
   type = MAP_SAVED_OBJECT_TYPE;
+  latestVersion = LATEST_VERSION.toString();
+
+  migrations = {
+    // TODO make a common function for client-side and the server-side saved object migrations
+    '2.0.0': (state: Omit<MapByValueInput, 'attributes'> & { attributes: MapAttributesV1 }) => {
+      const { mapStateJSON, layerListJSON, uiStateJSON, ...rest } = state.attributes;
+      return {
+        ...state,
+        attributes: {
+          ...rest,
+          mapState: mapStateJSON ? JSON.parse(mapStateJSON) : undefined,
+          layerList: layerListJSON ? JSON.parse(layerListJSON) : undefined,
+          uiState: uiStateJSON ? JSON.parse(uiStateJSON) : undefined,
+        },
+      };
+    },
+  };
   savedObjectMetaData = {
     name: i18n.translate('xpack.maps.mapSavedObjectLabel', {
       defaultMessage: 'Map',
