@@ -20,7 +20,7 @@ export function registerGetDatasetInfoFunction({
     {
       name: 'get_dataset_info',
       contexts: ['core'],
-      visibility: FunctionVisibility.System,
+      visibility: FunctionVisibility.AssistantOnly,
       description: `Use this function to get information about indices/datasets available and the fields available on them.
 
       providing empty string as index name will retrieve all indices
@@ -115,7 +115,7 @@ export function registerGetDatasetInfoFunction({
       const relevantFields = await Promise.all(
         chunk(fieldNames, 500).map(async (fieldsInChunk) => {
           const chunkResponse$ = (
-            await client.chat({
+            await client.chat('get_relevent_dataset_names', {
               connectorId,
               signal,
               messages: [
