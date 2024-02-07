@@ -13,6 +13,7 @@ import { MlJob } from '@elastic/elasticsearch/lib/api/types';
 import { mlJobService } from '../../../services/job_service';
 import { getFunctionDescription, isMetricDetector } from '../../get_function_description';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
+import { useMlResultsService } from '../../../services/results_service';
 import type { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 const plotByFunctionOptions = [
@@ -53,6 +54,7 @@ export const PlotByFunctionControls = ({
   entityControlsCount: number;
 }) => {
   const toastNotificationService = useToastNotificationService();
+  const mlResultsService = useMlResultsService();
 
   const getFunctionDescriptionToPlot = useCallback(
     async (
@@ -68,11 +70,12 @@ export const PlotByFunctionControls = ({
           selectedJobId: _selectedJobId,
           selectedJob: _selectedJob,
         },
-        toastNotificationService
+        toastNotificationService,
+        mlResultsService
       );
       setFunctionDescription(functionToPlot);
     },
-    [setFunctionDescription, toastNotificationService]
+    [setFunctionDescription, toastNotificationService, mlResultsService]
   );
 
   useEffect(() => {

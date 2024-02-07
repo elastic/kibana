@@ -69,7 +69,6 @@ export const EmbeddableSingleMetricViewerContainer: FC<
   const [chartWidth, setChartWidth] = useState<number>(0);
   const [zoom, setZoom] = useState<AppStateZoom | undefined>();
   const [selectedForecastId, setSelectedForecastId] = useState<string | undefined>();
-  const [functionDescription, setFunctionDescription] = useState<string | undefined>();
   const [detectorIndex, setDetectorIndex] = useState<number>(0);
   const [selectedJob, setSelectedJob] = useState<MlJob | undefined>();
   const [autoZoomDuration, setAutoZoomDuration] = useState<number | undefined>();
@@ -138,7 +137,6 @@ export const EmbeddableSingleMetricViewerContainer: FC<
       switch (action) {
         case APP_STATE_ACTION.SET_DETECTOR_INDEX:
           setDetectorIndex(payload);
-          setFunctionDescription(undefined);
           break;
 
         case APP_STATE_ACTION.SET_FORECAST_ID:
@@ -153,17 +151,13 @@ export const EmbeddableSingleMetricViewerContainer: FC<
         case APP_STATE_ACTION.UNSET_ZOOM:
           setZoom(undefined);
           break;
-
-        case APP_STATE_ACTION.SET_FUNCTION_DESCRIPTION:
-          setFunctionDescription(payload);
-          break;
       }
     },
 
-    [setZoom, setDetectorIndex, setFunctionDescription, setSelectedForecastId]
+    [setZoom, setDetectorIndex, setSelectedForecastId]
   );
 
-  const containerPadding = 20;
+  const containerPadding = 10;
 
   return (
     <EuiResizeObserver onResize={resizeHandler}>
@@ -195,7 +189,7 @@ export const EmbeddableSingleMetricViewerContainer: FC<
               selectedEntities={data.selectedEntities}
               selectedForecastId={selectedForecastId}
               zoom={zoom}
-              functionDescription={functionDescription}
+              functionDescription={data.functionDescription}
               selectedJob={selectedJob}
             />
           )}
