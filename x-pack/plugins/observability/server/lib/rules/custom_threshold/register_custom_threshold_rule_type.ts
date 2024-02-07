@@ -18,7 +18,7 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -76,6 +76,8 @@ export function thresholdRuleType(
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };
+  const allowedAggregators = Object.values(Aggregators);
+  allowedAggregators.splice(Object.values(Aggregators).indexOf(Aggregators.COUNT), 1);
 
   const customCriterion = schema.object({
     ...baseCriterion,
@@ -85,7 +87,7 @@ export function thresholdRuleType(
       schema.oneOf([
         schema.object({
           name: schema.string(),
-          aggType: oneOfLiterals(['avg', 'sum', 'max', 'min', 'cardinality']),
+          aggType: oneOfLiterals(allowedAggregators),
           field: schema.string(),
           filter: schema.never(),
         }),
@@ -105,6 +107,17 @@ export function thresholdRuleType(
     label: schema.maybe(schema.string()),
   });
 
+  const paramsSchema = schema.object(
+    {
+      criteria: schema.arrayOf(customCriterion),
+      groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      alertOnNoData: schema.maybe(schema.boolean()),
+      alertOnGroupDisappear: schema.maybe(schema.boolean()),
+      searchConfiguration: searchConfigurationSchema,
+    },
+    { unknowns: 'allow' }
+  );
+
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
@@ -112,16 +125,13 @@ export function thresholdRuleType(
     }),
     fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(customCriterion),
-          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          alertOnNoData: schema.maybe(schema.boolean()),
-          alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          searchConfiguration: searchConfigurationSchema,
-        },
-        { unknowns: 'allow' }
-      ),
+      params: paramsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema' as const,
+        schema: paramsSchema,
+      },
     },
     defaultActionGroupId: FIRED_ACTION.id,
     actionGroups: [FIRED_ACTION, NO_DATA_ACTION],

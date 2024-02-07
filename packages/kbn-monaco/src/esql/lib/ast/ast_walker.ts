@@ -277,7 +277,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('multiply', ctx);
+    const fn = createFunction('*', ctx);
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -443,7 +443,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
     return [];
   }
   const negate = ctx.NOT();
-  const fnName = `${negate ? 'not_' : ''}is_null`;
+  const fnName = `is${negate ? ' not ' : ' '}null`;
   const fn = createFunction(fnName, ctx);
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {

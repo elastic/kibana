@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
-import { calculateCurrentTimeframe, createBaseFilters } from './metric_query';
+import { calculateCurrentTimeFrame, createBaseFilters } from './metric_query';
 
 export interface MissingGroupsRecord {
   key: string;
@@ -31,8 +31,8 @@ export const checkMissingGroups = async (
   if (missingGroups.length === 0) {
     return missingGroups;
   }
-  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
-  const baseFilters = createBaseFilters(metricParams, currentTimeframe, timeFieldName, filterQuery);
+  const currentTimeFrame = calculateCurrentTimeFrame(metricParams, timeframe);
+  const baseFilters = createBaseFilters(currentTimeFrame, timeFieldName, filterQuery);
   const groupByFields = isString(groupBy) ? [groupBy] : groupBy ? groupBy : [];
 
   const searches = missingGroups.flatMap((group) => {
