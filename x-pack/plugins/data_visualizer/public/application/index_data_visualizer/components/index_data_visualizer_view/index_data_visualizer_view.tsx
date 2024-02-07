@@ -71,7 +71,7 @@ import {
   RANDOM_SAMPLER_OPTION,
   RandomSamplerOption,
 } from '../../constants/random_sampler';
-import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
+import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -244,7 +244,7 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
     });
   };
 
-  const input: DataVisualizerGridInput = useMemo(() => {
+  const input: Required<DataVisualizerGridInput, 'dataView'> = useMemo(() => {
     return {
       dataView: currentDataView,
       savedSearch: currentSavedSearch,

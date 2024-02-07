@@ -7,6 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { DataVisualizerTableState } from '../../../../../common/types';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
@@ -15,7 +16,10 @@ import {
   getDefaultESQLDataVisualizerListState,
   useESQLDataVisualizerData,
 } from '../../hooks/esql/use_data_visualizer_esql_data';
-import { DataVisualizerGridEmbeddableInput, ESQLDataVisualizerIndexBasedAppState } from './types';
+import {
+  ESQLDataVisualizerGridEmbeddableInput,
+  ESQLDataVisualizerIndexBasedAppState,
+} from './types';
 
 const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
@@ -23,7 +27,7 @@ export const ESQLFieldStatsTableWrapper = ({
   input,
   onOutputChange,
 }: {
-  input: DataVisualizerGridEmbeddableInput;
+  input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableInput;
   onOutputChange?: (ouput: any) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =

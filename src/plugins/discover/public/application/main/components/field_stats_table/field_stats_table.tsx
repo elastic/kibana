@@ -45,6 +45,10 @@ export interface NoSamplingOption {
 export type SamplingOption = RandomSamplingOption | NormalSamplingOption | NoSamplingOption;
 
 export interface DataVisualizerGridEmbeddableInput extends EmbeddableInput {
+  /**
+   * Set esql:true to switch table to ES|QL mode
+   */
+  esql?: boolean;
   dataView: DataView;
   savedSearch?: SavedSearch;
   query?: Query | AggregateQuery;

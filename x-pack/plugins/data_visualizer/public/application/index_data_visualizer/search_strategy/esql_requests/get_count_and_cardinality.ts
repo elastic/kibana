@@ -16,10 +16,10 @@ import { getSafeESQLName } from '../requests/esql_utils';
 import { MAX_CONCURRENT_REQUESTS } from '../../constants/index_data_visualizer_viewer';
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
-import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { AggregatableField } from '../../types/esql_data_visualizer';
 import { handleError, HandleErrorCallback } from './handle_error';
+import { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
 
 interface Field extends Column {
   aggregatable?: boolean;

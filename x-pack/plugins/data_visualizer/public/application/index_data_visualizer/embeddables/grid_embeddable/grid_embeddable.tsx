@@ -18,7 +18,6 @@ import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import { isDefined } from '@kbn/ml-is-defined';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
@@ -34,7 +33,11 @@ import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_vi
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
 import { ESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
-import { DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput } from './types';
+import {
+  DataVisualizerGridEmbeddableInput,
+  DataVisualizerGridEmbeddableOutput,
+  ESQLDataVisualizerGridEmbeddableInput,
+} from './types';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
@@ -134,6 +137,18 @@ export const EmbeddableWrapper = ({
   );
 };
 
+function isESQLDataVisualizerEmbeddableInput(
+  input: unknown
+): input is ESQLDataVisualizerGridEmbeddableInput {
+  return isPopulatedObject(input, ['esql']) && input.esql === 'true';
+}
+
+function isDataVisualizerEmbeddableInput(
+  input: unknown
+): input is ESQLDataVisualizerGridEmbeddableInput {
+  return isPopulatedObject(input, ['dataView']);
+}
+
 export const IndexDataVisualizerViewWrapper = (props: {
   id: string;
   embeddableContext: InstanceType<IDataVisualizerGridEmbeddable>;
@@ -143,10 +158,10 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
-  if (input?.esql) {
+  if (isESQLDataVisualizerEmbeddableInput(input)) {
     return <ESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />;
   }
-  if (isPopulatedObject(input, ['dataView'])) {
+  if (isDataVisualizerEmbeddableInput(input)) {
     return (
       <EmbeddableWrapper
         input={input as Required<DataVisualizerGridEmbeddableInput, 'dataView'>}

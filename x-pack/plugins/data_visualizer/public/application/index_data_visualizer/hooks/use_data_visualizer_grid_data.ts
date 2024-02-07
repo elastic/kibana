@@ -44,7 +44,7 @@ import type { OverallStatsSearchStrategyParams } from '../../../../common/types/
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
-import { DataVisualizerGridEmbeddableInput } from '../embeddables/grid_embeddable/types';
+import { DataVisualizerGridInput } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -59,7 +59,7 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
 };
 export const useDataVisualizerGridData = (
   // Data view is required for non-ES|QL queries like kuery or lucene
-  input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>,
+  input: Required<DataVisualizerGridInput, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
