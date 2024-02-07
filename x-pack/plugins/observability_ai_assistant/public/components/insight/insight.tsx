@@ -38,6 +38,10 @@ import { MissingCredentialsCallout } from '../missing_credentials_callout';
 import { InsightBase } from './insight_base';
 import { ActionsMenu } from './actions_menu';
 
+function getLastMessageOfType(messages: Message[], role: MessageRole) {
+  return last(messages.filter((msg) => msg.message.role === role));
+}
+
 function ChatContent({
   title: defaultTitle,
   initialMessages,
@@ -58,9 +62,7 @@ function ChatContent({
     persist: false,
   });
 
-  const lastAssistantResponse = last(
-    messages.filter((message) => message.message.role === MessageRole.Assistant)
-  );
+  const lastAssistantResponse = getLastMessageOfType(messages, MessageRole.Assistant);
 
   useEffect(() => {
     next(initialMessagesRef.current);
@@ -200,7 +202,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
-  const [updatedPrompt, setUpdatedPrompt] = useState('');
+  const [updatedPrompt, setUpdatedPrompt] = useState(false);
 
   const connectors = useGenAIConnectors();
 
@@ -215,11 +217,11 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
 
   const handleSend = (newPrompt: string) => {
     const clonedMessages = cloneDeep(messages);
-    const message = last(clonedMessages.filter((msg) => msg.message.role === MessageRole.User));
-    if (!message) return false;
+    const userMessage = getLastMessageOfType(clonedMessages, MessageRole.User);
+    if (!userMessage) return false;
 
-    message.message.content = newPrompt;
-    setUpdatedPrompt(newPrompt);
+    userMessage.message.content = newPrompt;
+    setUpdatedPrompt(true);
     setInitialMessages(clonedMessages);
     setEditingPrompt(false);
     return true;
@@ -257,7 +259,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
                 <EuiButtonEmpty
                   data-test-subj="observabilityAiAssistantInsightResetDefaultPrompt"
                   onClick={() => {
-                    setUpdatedPrompt('');
+                    setUpdatedPrompt(false);
                     setHasOpened(false);
                     setInsightOpen(false);
                     setInitialMessages(messages);
@@ -288,9 +290,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     children = (
       <PromptEdit
         initialPrompt={
-          updatedPrompt ||
-          last(messages.filter((msg) => msg.message.role === MessageRole.User))?.message.content ||
-          ''
+          getLastMessageOfType(initialMessages, MessageRole.User)?.message.content || ''
         }
         onSend={handleSend}
         onCancel={handleCancel}
