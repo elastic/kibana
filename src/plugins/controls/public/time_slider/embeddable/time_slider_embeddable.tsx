@@ -161,9 +161,24 @@ export class TimeSliderControlEmbeddable
   public selectionsToFilters = async (
     input: Partial<TimeSliderControlEmbeddableInput>
   ): Promise<ControlTimesliceOutput> => {
-    console.log('INPUT', input);
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } = input;
-    return { timeslice: undefined };
+    if (!timesliceStartAsPercentageOfTimeRange || !timesliceEndAsPercentageOfTimeRange) {
+      return { timeslice: undefined };
+    }
+
+    const {
+      componentState: { stepSize, timeRangeBounds },
+    } = this.getState();
+
+    const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
+    const from = timeRangeBounds[FROM_INDEX] + timesliceStartAsPercentageOfTimeRange * timeRange;
+    const to = timeRangeBounds[FROM_INDEX] + timesliceEndAsPercentageOfTimeRange * timeRange;
+    const value = [
+      roundDownToNextStepSizeFactor(from, stepSize),
+      roundUpToNextStepSizeFactor(to, stepSize),
+    ] as TimeSlice;
+
+    return { timeslice: value };
   };
 
   private onInputChange() {
@@ -203,26 +218,14 @@ export class TimeSliderControlEmbeddable
 
   private syncWithTimeRange() {
     this.prevTimeRange = this.getInput().timeRange;
-    const stepSize = this.getState().componentState.stepSize;
-    const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } =
-      this.getState().explicitInput;
 
-    if (
-      timesliceStartAsPercentageOfTimeRange !== undefined &&
-      timesliceEndAsPercentageOfTimeRange !== undefined
-    ) {
-      const timeRangeBounds = this.getState().componentState.timeRangeBounds;
-      const timeRange = timeRangeBounds[TO_INDEX] - timeRangeBounds[FROM_INDEX];
-      const from = timeRangeBounds[FROM_INDEX] + timesliceStartAsPercentageOfTimeRange * timeRange;
-      const to = timeRangeBounds[FROM_INDEX] + timesliceEndAsPercentageOfTimeRange * timeRange;
-      const value = [
-        roundDownToNextStepSizeFactor(from, stepSize),
-        roundUpToNextStepSizeFactor(to, stepSize),
-      ] as TimeSlice;
-      this.dispatch.publishValue({ value });
-      this.dispatch.setValue({ value });
-      this.onRangeChange(value[TO_INDEX] - value[FROM_INDEX]);
-    }
+    this.selectionsToFilters(this.getState().explicitInput).then(({ timeslice }) => {
+      if (timeslice) {
+        this.dispatch.publishValue({ value: timeslice });
+        this.dispatch.setValue({ value: timeslice });
+        this.onRangeChange(timeslice[TO_INDEX] - timeslice[FROM_INDEX]);
+      }
+    });
   }
 
   private timeRangeToBounds(timeRange: TimeRange): [number, number] {

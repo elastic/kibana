@@ -264,10 +264,8 @@ export class ControlGroupContainer extends Container<
       this.updateInput(lastSavedInput);
       if (showApplySelections) {
         /** Calling reset should force the changes to be published */
-        this.recalculateFilters$.pipe(first()).subscribe(() => {
-          const { filters, timeslice } = this.recalculateFilters();
-          this.publishFilters({ filters, timeslice });
-          this.dispatch.setLastSavedFilters({ filters });
+        this.calculateFiltersFromSelections(lastSavedInput.panels).then((filterOutput) => {
+          this.publishFilters(filterOutput);
         });
       }
     }
@@ -409,7 +407,6 @@ export class ControlGroupContainer extends Container<
   };
 
   public publishFilters = ({ filters, timeslice }: ControlGroupFilterOutput) => {
-    // console.log('publishfilters', { filters, timeslice });
     this.updateOutput({
       filters,
       timeslice,

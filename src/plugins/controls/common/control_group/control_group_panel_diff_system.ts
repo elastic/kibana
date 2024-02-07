@@ -113,10 +113,12 @@ export const ControlPanelDiffSystems: {
       }: Partial<TimeSliderControlEmbeddableInput> = newInput.explicitInput;
       return (
         Boolean(isAnchoredA) === Boolean(isAnchoredB) &&
-        Boolean(startA) === Boolean(startB) &&
-        startA === startB &&
-        Boolean(endA) === Boolean(endB) &&
-        endA === endB
+        (compareSelections
+          ? Boolean(startA) === Boolean(startB) &&
+            startA === startB &&
+            Boolean(endA) === Boolean(endB) &&
+            endA === endB
+          : true)
       );
     },
   },
