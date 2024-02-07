@@ -34,14 +34,14 @@ export const INFORMATION_RISK_HEADER = (riskEntity?: RiskScoreEntity) =>
 export const INFORMATION_TIER_HEADER = i18n.translate(
   'xpack.securitySolution.riskInformation.tierColumnHeader',
   {
-    defaultMessage: 'Asset Criticality Tier',
+    defaultMessage: 'Tier',
   }
 );
 
 export const INFORMATION_WEIGHT_HEADER = i18n.translate(
   'xpack.securitySolution.riskInformation.weightColumnHeader',
   {
-    defaultMessage: 'Default Risk Weight',
+    defaultMessage: 'Default risk weight',
   }
 );
 
