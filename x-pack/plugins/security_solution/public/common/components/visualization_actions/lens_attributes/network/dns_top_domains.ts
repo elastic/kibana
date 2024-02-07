@@ -143,6 +143,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                   scale: 'ratio',
                   sourceField: 'dns.question.name',
                   isBucketed: false,
+                  params: { emptyAsNull: true },
                 },
               },
               columnOrder: [

@@ -81,6 +81,7 @@ export const getEventsHistogramLensAttributes: GetLensAttributes = (
                   isBucketed: false,
                   scale: 'ratio',
                   sourceField: '___records___',
+                  params: { emptyAsNull: true },
                 },
                 '34919782-4546-43a5-b668-06ac934d3acd': {
                   label: `Top values of ${stackByField}`,
