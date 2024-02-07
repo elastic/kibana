@@ -43,6 +43,14 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
+          " | undefined, dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
           " | undefined) => Promise<",
           {
             "pluginId": "expressions",
@@ -121,6 +129,28 @@
                 "docId": "kibKbnEsQueryPluginApi",
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.fetchFieldsFromESQL.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
               },
               " | undefined"
             ],

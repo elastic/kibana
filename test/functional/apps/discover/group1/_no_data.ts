@@ -5,6 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import expect from '@kbn/expect';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -14,6 +15,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
+  const dataGrid = getService('dataGrid');
   const PageObjects = getPageObjects(['common', 'discover', 'header', 'timePicker']);
 
   const createDataView = async (dataViewName: string) => {
@@ -53,8 +55,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
       await PageObjects.common.navigateToApp('discover');
 
-      const button = await testSubjects.find('createDataViewButton');
-      button.click();
+      await testSubjects.click('createDataViewButton');
       await retry.waitForWithTimeout('data view editor form to be visible', 15000, async () => {
         return await (await find.byClassName('indexPatternEditor__form')).isDisplayed();
       });
@@ -72,6 +73,24 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return dataViewTitle === `${dataViewToCreate}*`;
         }
       );
+    });
+
+    it('skips to Discover to try ES|QL', async () => {
+      await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
+      await kibanaServer.uiSettings.update({
+        'timepicker:timeDefaults': '{  "from": "2015-09-18T19:37:13.000Z",  "to": "now"}',
+      });
+      await PageObjects.common.navigateToApp('discover');
+
+      await testSubjects.click('tryESQLLink');
+
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.existOrFail('TextBasedLangEditor');
+      await testSubjects.existOrFail('unifiedHistogramChart');
+      const rows = await dataGrid.getDocTableRows();
+      expect(rows.length).to.be.above(0);
     });
   });
 }

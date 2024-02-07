@@ -11,10 +11,11 @@ import { registerSummarizationFunction } from './summarize';
 import { ChatRegistrationFunction } from '../service/types';
 import { registerAlertsFunction } from './alerts';
 import { registerElasticsearchFunction } from './elasticsearch';
-import { registerEsqlFunction } from './esql';
+import { registerQueryFunction } from './query';
 import { registerGetDatasetInfoFunction } from './get_dataset_info';
 import { registerLensFunction } from './lens';
 import { registerKibanaFunction } from './kibana';
+import { registerVisualizeESQLFunction } from './visualize_esql';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
@@ -50,19 +51,22 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         You can use Github-flavored Markdown in your responses. If a function returns an array, consider using a Markdown table to format the response.
 
-        If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than Lens.
+        If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than "query".
 
-        If a function call fails, DO NOT UNDER ANY CIRCUMSTANCES execute it again. Ask the user for guidance and offer them options.
+        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
-        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
-        
-        If the user asks about a query, or ES|QL, always call the "esql" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries or explain anything about the ES|QL query language yourself.
-        Even if the "recall" function was used before that, follow it up with the "esql" function. If a query fails, do not attempt to correct it yourself. Again you should call the "esql" function,
+        If the user wants to visualize data, or run any arbitrary query, always use the "query" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries
+        or explain anything about the ES|QL query language yourself.
+
+        Even if the "recall" function was used before that, follow it up with the "query" function. If a query fails, do not attempt to correct it yourself. Again you should call the "query" function,
         even if it has been called before.
 
-        If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "esql" function, but be explicit about it potentially being incorrect.
+        When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
+        If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
+
+        If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
         `
     );
 
@@ -76,13 +80,14 @@ export const registerFunctions: ChatRegistrationFunction = async ({
       registerSummarizationFunction(registrationParameters);
       registerRecallFunction(registrationParameters);
       registerLensFunction(registrationParameters);
+      registerVisualizeESQLFunction(registrationParameters);
     } else {
       description += `You do not have a working memory. Don't try to recall information via the "recall" function.  If the user expects you to remember the previous conversations, tell them they can set up the knowledge base. A banner is available at the top of the conversation to set this up.`;
     }
 
     registerElasticsearchFunction(registrationParameters);
     registerKibanaFunction(registrationParameters);
-    registerEsqlFunction(registrationParameters);
+    registerQueryFunction(registrationParameters);
     registerAlertsFunction(registrationParameters);
     registerGetDatasetInfoFunction(registrationParameters);
 
