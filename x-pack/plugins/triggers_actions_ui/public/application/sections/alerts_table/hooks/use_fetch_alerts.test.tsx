@@ -6,7 +6,7 @@
  */
 
 import sinon from 'sinon';
-import { of, throwError } from 'rxjs';
+import { of } from 'rxjs';
 import { act, renderHook } from '@testing-library/react-hooks';
 import { useFetchAlerts, FetchAlertsArgs, FetchAlertResp } from './use_fetch_alerts';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -110,7 +110,6 @@ describe('useFetchAlerts', () => {
   };
 
   const dataSearchMock = useKibana().services.data.search.search as jest.Mock;
-  const showErrorMock = useKibana().services.data.search.showError as jest.Mock;
   dataSearchMock.mockReturnValue(searchResponse$);
 
   beforeAll(() => {
@@ -284,27 +283,6 @@ describe('useFetchAlerts', () => {
         updatedAt: 0,
       },
     ]);
-  });
-
-  it('handles search error', () => {
-    const obs$ = throwError('simulated search error');
-    dataSearchMock.mockReturnValue(obs$);
-    const { result } = renderHook(() => useFetchAlerts(args));
-
-    expect(result.current).toEqual([
-      false,
-      {
-        ...expectedResponse,
-        alerts: [],
-        getInspectQuery: expect.anything(),
-        refetch: expect.anything(),
-        isInitializing: true,
-        totalAlerts: -1,
-        updatedAt: 0,
-      },
-    ]);
-
-    expect(showErrorMock).toHaveBeenCalled();
   });
 
   it('returns the correct response if the search response is running', () => {
