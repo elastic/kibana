@@ -29,7 +29,7 @@ export const useAlertSuppression = (ruleType: Type | undefined): UseAlertSuppres
     if (ruleType === 'eql') return isEQLRuleFFEnabled && isSuppressibleAlertRule(ruleType);
 
     return isSuppressibleAlertRule(ruleType);
-  }, [ruleType, isThreatMatchRuleFFEnabled]);
+  }, [ruleType, isEQLRuleFFEnabled, isThreatMatchRuleFFEnabled]);
 
   return {
     isSuppressionEnabled: isSuppressionEnabledForRuleType(),
