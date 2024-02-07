@@ -23,7 +23,7 @@ import type {
 import { ANOMALY_SINGLE_METRIC_VIEWER_EMBEDDABLE_TYPE } from '..';
 import { TimeSeriesExplorerEmbeddableChart } from '../../application/timeseriesexplorer/timeseriesexplorer_embeddable_chart';
 import { APP_STATE_ACTION } from '../../application/timeseriesexplorer/timeseriesexplorer_constants';
-import { useTimeSeriesExplorerService } from '../../application/util/timeseriesexplorer_utils';
+import { useTimeSeriesExplorerService } from '../../application/util/time_series_explorer_service';
 import './_index.scss';
 
 const RESIZE_THROTTLE_TIME_MS = 500;

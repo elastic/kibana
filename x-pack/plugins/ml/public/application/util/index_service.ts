@@ -8,7 +8,7 @@
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
-export function indexUtilsProvider(dataViewsService: DataViewsContract) {
+export function indexServiceFactory(dataViewsService: DataViewsContract) {
   return {
     /**
      * Retrieves the data view ID from the given name.
@@ -51,4 +51,4 @@ export function indexUtilsProvider(dataViewsService: DataViewsContract) {
   };
 }
 
-export type MlIndexUtils = ReturnType<typeof indexUtilsProvider>;
+export type MlIndexUtils = ReturnType<typeof indexServiceFactory>;

@@ -8,7 +8,7 @@
 import { mlFunctionToESAggregation } from '../../../common/util/job_utils';
 import { getDataViewById, getDataViewIdFromName } from '../util/index_utils';
 import { mlJobService } from './job_service';
-import type { MlIndexUtils } from '../util/index_utils_provider';
+import type { MlIndexUtils } from '../util/index_service';
 import type { MlApiServices } from './ml_api_service';
 
 type FormatsByJobId = Record<string, any>;

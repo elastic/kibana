@@ -19,7 +19,9 @@ import {
   isModelPlotEnabled,
 } from '../../../../common/util/job_utils';
 
-export function timeSeriesSearchServiceProvider(
+// Note: This is a duplicated of `timeseries_search_service.ts` updated to move away from dependency cache.
+// The original file will be removed once all references are replaced with references to this file.
+export function timeSeriesSearchServiceFactory(
   mlResultsService: MlResultsService,
   mlApiServices: MlApiServices
 ) {
@@ -182,4 +184,4 @@ export function timeSeriesSearchServiceProvider(
   };
 }
 
-export type MlTimeSeriesSeachService = ReturnType<typeof timeSeriesSearchServiceProvider>;
+export type MlTimeSeriesSeachService = ReturnType<typeof timeSeriesSearchServiceFactory>;

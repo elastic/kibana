@@ -53,7 +53,7 @@ import { isMetricDetector } from '../get_function_description';
 import { TimeseriesexplorerChartDataError } from '../components/timeseriesexplorer_chart_data_error';
 import { TimeseriesExplorerCheckbox } from './timeseriesexplorer_checkbox';
 import { timeBucketsServiceFactory } from '../../util/time_buckets_service';
-import { timeSeriesExplorerServiceFactory } from '../../util/timeseriesexplorer_utils';
+import { timeSeriesExplorerServiceFactory } from '../../util/time_series_explorer_service';
 import { getTimeseriesexplorerDefaultState } from '../timeseriesexplorer_utils';
 
 // Used to indicate the chart is being plotted across

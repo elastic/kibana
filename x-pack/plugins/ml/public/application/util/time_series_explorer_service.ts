@@ -37,7 +37,7 @@ import {
 import type { MlApiServices } from '../services/ml_api_service';
 import { mlResultsServiceProvider, type MlResultsService } from '../services/results_service';
 import { forecastServiceProvider } from '../services/forecast_service_provider';
-import { timeSeriesSearchServiceProvider } from '../timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider';
+import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import { useMlKibana } from '../contexts/kibana';
 
 export function timeSeriesExplorerServiceFactory(
@@ -47,10 +47,7 @@ export function timeSeriesExplorerServiceFactory(
 ) {
   const timeBuckets = timeBucketsServiceFactory(uiSettings);
   const mlForecastService = forecastServiceProvider(mlApiServices);
-  const mlTimeSeriesSearchService = timeSeriesSearchServiceProvider(
-    mlResultsService,
-    mlApiServices
-  );
+  const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(mlResultsService, mlApiServices);
 
   function getAutoZoomDuration(selectedJob: Job) {
     // Calculate the 'auto' zoom duration which shows data at bucket span granularity.

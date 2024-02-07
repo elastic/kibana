@@ -75,20 +75,20 @@ export class SingleMetricViewerEmbeddableFactory
     const [
       [coreStart, pluginsStart],
       { AnomalyDetectorService },
-      { fieldFormatServiceProvider },
-      { indexUtilsProvider },
+      { fieldFormatServiceFactory },
+      { indexServiceFactory },
       { mlApiServicesProvider },
       { mlResultsServiceProvider },
-      { timeSeriesSearchServiceProvider },
+      { timeSeriesSearchServiceFactory },
     ] = await Promise.all([
       await this.getStartServices(),
       await import('../../application/services/anomaly_detector_service'),
-      await import('../../application/services/field_format_service_provider'),
-      await import('../../application/util/index_utils_provider'),
+      await import('../../application/services/field_format_service_factory'),
+      await import('../../application/util/index_service'),
       await import('../../application/services/ml_api_service'),
       await import('../../application/services/results_service'),
       await import(
-        '../../application/timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider'
+        '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
       ),
     ]);
 
@@ -96,12 +96,12 @@ export class SingleMetricViewerEmbeddableFactory
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
-    const mlIndexUtils = indexUtilsProvider(pluginsStart.data.dataViews);
-    const mlTimeSeriesSearchService = timeSeriesSearchServiceProvider(
+    const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
+    const mlTimeSeriesSearchService = timeSeriesSearchServiceFactory(
       mlResultsService,
       mlApiServices
     );
-    const mlFieldFormatService = fieldFormatServiceProvider(mlApiServices, mlIndexUtils);
+    const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
 
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       pluginsStart.data.query.timefilter.timefilter,

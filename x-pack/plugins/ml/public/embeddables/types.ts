@@ -29,7 +29,7 @@ import {
 import { MlResultsService } from '../application/services/results_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlFieldFormatService } from '../application/services/field_format_service';
-import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/timeseries_search_service_provider';
+import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];

@@ -6,10 +6,10 @@
  */
 
 import { type MlFieldFormatService, FieldFormatService } from './field_format_service';
-import type { MlIndexUtils } from '../util/index_utils_provider';
+import type { MlIndexUtils } from '../util/index_service';
 import type { MlApiServices } from './ml_api_service';
 
-export function fieldFormatServiceProvider(
+export function fieldFormatServiceFactory(
   mlApiServices: MlApiServices,
   mlIndexUtils: MlIndexUtils
 ): MlFieldFormatService {
