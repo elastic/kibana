@@ -36,19 +36,6 @@ export function toNavLink(
   });
 }
 
-// function isAppNavLinkHidden(app: PublicAppInfo) {
-//   return app.navLinkStatus === AppNavLinkStatus.default
-//     ? app.status === AppStatus.inaccessible
-//     : app.navLinkStatus === AppNavLinkStatus.hidden;
-// }
-
-// function isDeepNavLinkHidden(deepLink: PublicAppDeepLinkInfo) {
-//   return (
-//     deepLink.navLinkStatus === AppNavLinkStatus.default ||
-//     deepLink.navLinkStatus === AppNavLinkStatus.hidden
-//   );
-// }
-
 /**
  * @param {string} url - a relative or root relative url.  If a relative path is given then the
  * absolute url returned will depend on the current page where this function is called from. For example
