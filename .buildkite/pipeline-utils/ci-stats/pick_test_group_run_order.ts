@@ -251,18 +251,11 @@ export async function pickTestGroupRunOrder() {
     : [];
 
   const jestIntegrationConfigs = LIMIT_CONFIG_TYPE.includes('integration')
-    ? globby.sync(
-        [
-          // TODO: remove, only testing
-          'src/core/server/integration_tests/saved_objects/serverless/migrations/jest.integration.config.js',
-          '!**/__fixtures__/**',
-        ],
-        {
-          cwd: process.cwd(),
-          absolute: false,
-          ignore: DISABLED_JEST_CONFIGS,
-        }
-      )
+    ? globby.sync(['**/jest.integration.config.js', '!**/__fixtures__/**'], {
+        cwd: process.cwd(),
+        absolute: false,
+        ignore: DISABLED_JEST_CONFIGS,
+      })
     : [];
 
   if (!ftrConfigsByQueue.size && !jestUnitConfigs.length && !jestIntegrationConfigs.length) {

@@ -700,19 +700,27 @@ export async function runServerlessEsNode(
   const { stdout: idOutput } = await execa('id', []);
   log.info(`id: ${idOutput}`);
   try {
-    const { stdout: dockerOut } = await execa('docker', [
-      'run',
-      '--rm',
-      '--entrypoint',
-      'sh',
-      image,
-      '-c',
-      '"set +xe; umask; id; cd ~; echo $PWD > hello.txt; ls -la;"',
-    ]);
-    log.info(dockerOut);
+    await execa(
+      'docker',
+      [
+        'run',
+        '--rm',
+        '--entrypoint',
+        'sh',
+        '--volume',
+        `.es:/objectstore:z`,
+        image,
+        '-c',
+        '+e',
+        '-x',
+        '"umask; id; cd $HOME; echo $PWD > hello.txt; ls -la .; ls -la /objectstore > /objectstore/test.txt; cat /objectstore/test.txt"',
+      ],
+      { stdio: 'inherit' }
+    );
   } catch (e) {
     log.error('Error running docker command');
     log.error(e);
+    log.info('Continuing...');
   }
 
   log.info(chalk.bold(`Running serverless ES node: ${name}`));
