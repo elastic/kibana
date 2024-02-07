@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -80,6 +80,20 @@ const TOUR_STEPS = { expandButton: DISCOVER_TOUR_STEP_ANCHOR_IDS.expandDocument 
 const DocTableInfiniteMemoized = React.memo(DocTableInfinite);
 const DiscoverGridMemoized = React.memo(DiscoverGrid);
 
+// search a given object for a given string recursively and using lowercase
+const searchObject = (value: object, search: string): boolean => {
+  if (value === null || value === undefined) {
+    return false;
+  }
+  if (Array.isArray(value)) {
+    return value.some((v) => searchObject(v, search));
+  }
+  if (typeof value === 'object') {
+    return Object.values(value).some((v) => searchObject(v, search));
+  }
+  return String(value).toLowerCase().includes(search.toLowerCase());
+};
+
 // export needs for testing
 export const onResize = (
   colSettings: { columnId: string; width: number },
@@ -109,6 +123,7 @@ function DiscoverDocumentsComponent({
   onFieldEdited?: () => void;
 }) {
   const services = useDiscoverServices();
+  const [search, setSearch] = useState('');
   const documents$ = stateContainer.dataState.data$.documents$;
   const savedSearch = useSavedSearchInitial();
   const { dataViews, capabilities, uiSettings, uiActions } = services;
@@ -155,7 +170,12 @@ function DiscoverDocumentsComponent({
   const isDataViewLoading = !isTextBasedQuery && dataView.id && index !== dataView.id;
   const isEmptyDataResult =
     isTextBasedQuery || !documentState.result || documentState.result.length === 0;
-  const rows = useMemo(() => documentState.result || [], [documentState.result]);
+  const rows = useMemo(() => {
+    if (search && documentState.result) {
+      return documentState.result.filter((obj) => searchObject(obj, search));
+    }
+    return documentState.result || [];
+  }, [search, documentState.result]);
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords({
     isTextBasedQuery,
@@ -311,6 +331,8 @@ function DiscoverDocumentsComponent({
   const renderCustomToolbar = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
+        onSearch: setSearch,
+        search,
         leftSide: viewModeToggle,
         bottomSection: (
           <>
@@ -320,7 +342,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
+    [search, setSearch, viewModeToggle, callouts, gridAnnouncementCallout, loadingIndicator]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {

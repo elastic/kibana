@@ -7,12 +7,23 @@
  */
 import './discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState, ReactElement } from 'react';
-import { EuiPage, EuiPageBody, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiPage,
+  EuiPageBody,
+  EuiPanel,
+  useEuiBackgroundColor,
+  EuiModalHeader,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiFilePicker,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import classNames from 'classnames';
-import { generateFilters } from '@kbn/data-plugin/public';
+import { flattenHit, generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import {
@@ -23,6 +34,7 @@ import {
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';
+import { CodeEditor } from '@kbn/code-editor';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
@@ -68,6 +80,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     serverless,
   } = useDiscoverServices();
   const pageBackgroundColor = useEuiBackgroundColor('plain');
+  const [importModal, showImportModal] = useState(true);
+  const [importText, setImportText] = useState('');
+
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
   const [query, savedQuery, columns, sort] = useAppStateSelector((state) => [
@@ -83,6 +98,25 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const dataState: DataMainMsg = useDataState(main$);
   const savedSearch = useSavedSearchInitial();
+
+  const [files, setFiles] = useState({});
+  const [importConverted, setImportConverted] = useState(undefined);
+
+  const onChangeFile = (files: File[]) => {
+    const reader = new FileReader();
+
+    reader.onload = function (e: ProgressEvent<FileReader>) {
+      // Here, e.target.result contains the file content
+      const fileContent = e.target?.result as string;
+      setImport(fileContent);
+    };
+    Array.from(files).forEach((file) => {
+      reader.readAsText(file);
+    });
+
+    // Read file as text
+    setFiles(files.length > 0 ? Array.from(files) : []);
+  };
 
   const fetchCounter = useRef<number>(0);
 
@@ -187,6 +221,24 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const [sidebarToggleState$] = useState<BehaviorSubject<SidebarToggleState>>(
     () => new BehaviorSubject<SidebarToggleState>({ isCollapsed: false, toggle: () => {} })
+  );
+
+  const setImport = useCallback(
+    (value) => {
+      const values = value.split('\n').map((v) => {
+        try {
+          const json = JSON.parse(v);
+          // flatten the json
+          return { ...flattenHit({ fields: json }) };
+        } catch (e) {
+          return v.trim();
+        }
+      });
+      setImportText(value);
+
+      setImportConverted(values);
+    },
+    [setImportText, setImportConverted]
   );
 
   const panelsToggle: ReactElement<PanelsToggleProps> = useMemo(() => {
@@ -306,6 +358,50 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
             }
             mainPanel={
               <div className="dscPageContent__wrapper">
+                {importModal ? (
+                  <EuiModal onClose={() => showImportModal(false)}>
+                    <EuiModalHeader>Import Data </EuiModalHeader>
+                    <EuiModalBody>
+                      <CodeEditor
+                        height={200}
+                        languageId={'text'}
+                        value={importText}
+                        onChange={(value, event) => {
+                          setImport(value);
+                          // split the value by new line
+                        }}
+                      />
+                      <EuiFilePicker
+                        multiple
+                        initialPromptText="Select or drag and drop multiple files"
+                        onChange={onChangeFile}
+                        display={'default'}
+                        aria-label="Use aria labels when no actual label is in use"
+                      />
+                    </EuiModalBody>
+                    <EuiModalFooter>
+                      <EuiButton
+                        onClick={() => {
+                          stateContainer.dataState.data$.documents$.next({
+                            fetchStatus: FetchStatus.LOADING,
+                          });
+                          stateContainer.dataState.data$.documents$.next({
+                            fetchStatus: FetchStatus.COMPLETE,
+                            result: (importConverted || []).map((v, index) => ({
+                              id: index,
+                              raw: typeof v === 'object' ? v : { message: v },
+                              flattened: typeof v === 'object' ? v : { message: v },
+                            })),
+                          });
+                        }}
+                      >
+                        Import
+                      </EuiButton>
+                    </EuiModalFooter>
+                  </EuiModal>
+                ) : (
+                  <EuiButton onClick={() => showImportModal(true)}>Import</EuiButton>
+                )}
                 {resultState === 'none' ? (
                   <>
                     {React.isValidElement(panelsToggle) ? (

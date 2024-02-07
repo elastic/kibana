@@ -898,7 +898,7 @@ export const UnifiedDataTable = ({
     );
   }
 
-  if (!rowCount) {
+  if (!rowCount && 1 === 0) {
     return (
       <div
         className="euiDataGrid__noResults"

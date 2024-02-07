@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch } from '@elastic/eui';
 import type {
   UnifiedDataTableRenderCustomToolbarProps,
   UnifiedDataTableRenderCustomToolbar,
@@ -17,6 +17,8 @@ import './render_custom_toolbar.scss';
 interface RenderCustomToolbarProps extends UnifiedDataTableRenderCustomToolbarProps {
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  onSearch: (search: string) => void;
+  search?: string;
 }
 
 export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.ReactElement => {
@@ -32,10 +34,23 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
       displayControl,
     },
     gridProps: { additionalControls },
+    onSearch,
+    search,
   } = props;
 
   const buttons = hasRoomForGridControls ? (
     <>
+      <EuiFlexItem grow={false}>
+        <div className="dscGridToolbarControlButton">
+          <EuiFieldSearch
+            compressed={true}
+            placeholder="Search"
+            value={search}
+            isClearable={true}
+            onChange={(value) => onSearch(value.target.value)}
+          />
+        </div>
+      </EuiFlexItem>
       {leftSide && additionalControls && (
         <EuiFlexItem grow={false}>
           <div className="dscGridToolbarControlButton">{additionalControls}</div>
@@ -115,9 +130,13 @@ export const renderCustomToolbar = (props: RenderCustomToolbarProps): React.Reac
 export const getRenderCustomToolbarWithElements = ({
   leftSide,
   bottomSection,
+  onSearch,
+  search,
 }: {
   leftSide?: React.ReactElement;
   bottomSection?: React.ReactElement;
+  onSearch: (search: string) => void;
+  search: string;
 }): UnifiedDataTableRenderCustomToolbar => {
   const reservedSpace = <></>;
   return (props) =>
@@ -125,5 +144,7 @@ export const getRenderCustomToolbarWithElements = ({
       ...props,
       leftSide: leftSide || reservedSpace,
       bottomSection,
+      onSearch,
+      search,
     });
 };
