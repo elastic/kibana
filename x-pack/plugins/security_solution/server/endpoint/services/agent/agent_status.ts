@@ -63,7 +63,7 @@ export const getAgentStatus = async ({
     params: {
       subAction: SUB_ACTION.GET_AGENTS,
       subActionParams: {
-        uuids: agentIds,
+        uuids: agentIds.join(','),
       },
     },
   })) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
