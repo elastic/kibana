@@ -1475,6 +1475,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1495,6 +1496,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1528,6 +1530,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1576,6 +1579,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1610,6 +1614,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1674,6 +1679,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             }),
             alertsService.createAlertsClient({
@@ -1691,6 +1697,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             }),
           ]);
@@ -1725,6 +1732,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1781,6 +1789,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -1801,6 +1810,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1865,6 +1875,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             });
           };
@@ -1892,6 +1903,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
             kibanaVersion: '8.8.0',
           });
@@ -1961,6 +1973,7 @@ describe('Alerts Service', () => {
                 revision: 0,
                 spaceId: 'default',
                 tags: ['rule-', '-tags'],
+                alertDelay: 0,
               },
             });
           };
@@ -2026,6 +2039,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2091,6 +2105,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 
@@ -2154,6 +2169,7 @@ describe('Alerts Service', () => {
               revision: 0,
               spaceId: 'default',
               tags: ['rule-', '-tags'],
+              alertDelay: 0,
             },
           });
 

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiFlexGrid,
   EuiFlexItem,
@@ -13,19 +12,18 @@ import {
   EuiSkeletonText,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
-import { SLOWithSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
-import { ActiveAlerts } from '../../../../hooks/slo/active_alerts';
-import type { UseFetchRulesForSloResponse } from '../../../../hooks/slo/use_fetch_rules_for_slo';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React from 'react';
+import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
+import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloCardItem } from './slo_card_item';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
   loading: boolean;
   error: boolean;
-  activeAlertsBySlo: ActiveAlerts;
-  rulesBySlo?: UseFetchRulesForSloResponse['data'];
 }
 
 const useColumns = () => {
@@ -45,7 +43,14 @@ const useColumns = () => {
   }
 };
 
-export function SloListCardView({ sloList, loading, error, rulesBySlo, activeAlertsBySlo }: Props) {
+export function SloListCardView({ sloList, loading, error }: Props) {
+  const sloIdsAndInstanceIds = sloList.map(
+    (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
+  );
+  const { data: activeAlertsBySlo } = useFetchActiveAlerts({ sloIdsAndInstanceIds });
+  const { data: rulesBySlo } = useFetchRulesForSlo({
+    sloIds: sloIdsAndInstanceIds.map((item) => item[0]),
+  });
   const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
     useFetchHistoricalSummary({
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),

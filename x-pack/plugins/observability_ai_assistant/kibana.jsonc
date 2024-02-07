@@ -20,6 +20,7 @@
       "share",
       "taskManager",
       "triggersActionsUi",
+      "uiActions",
       "dataViews",
       "ml"
     ],
