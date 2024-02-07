@@ -70,8 +70,8 @@ export const fetchConnectors = async (
       }
     : {};
 
-  let hits: Array<Connector> = [];
-  let accumulator: Array<Connector> = [];
+  let hits: Connector[] = [];
+  let accumulator: Connector[] = [];
 
   do {
     const connectorResult = await client.transport.request<ConnectorAPIListConnectorsResponse>({
