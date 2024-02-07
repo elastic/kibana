@@ -28,9 +28,7 @@ import {
 import { useConsoleManager } from '../components/console';
 import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
 import { RESPONDER_PAGE_TITLE } from './translations';
-import {
-  useIsExperimentalFeatureEnabled
-} from "@kbn/security-solution-plugin/public/common/hooks/use_experimental_features";
+import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
