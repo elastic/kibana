@@ -163,7 +163,7 @@ export default ({ getService }: FtrProviderContext): void => {
         ]);
       });
 
-      it('does not throw error when update a non required custom field with a null value', async () => {
+      it('does not throw error when updating an optional custom field with a null value', async () => {
         await createConfiguration(
           supertest,
           getConfigurationRequest({

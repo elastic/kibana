@@ -8,16 +8,13 @@
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import type { CasesSearchRequest } from '../../../common/types/api';
-import { MAX_CUSTOM_FIELDS_PER_CASE, MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
   validateRequiredCustomFields,
   validateSearchCasesCustomFields,
-  validateMaxUserActionsReached,
 } from './validators';
-import { mockCases } from '../../mocks';
-import { createUserActionServiceMock } from '../../services/mocks';
 
 describe('validators', () => {
   describe('validateCustomFieldTypesInRequest', () => {
@@ -693,77 +690,6 @@ describe('validators', () => {
           customFields: customFieldsMax,
         })
       ).toThrowErrorMatchingInlineSnapshot(`"Maximum 10 customFields are allowed."`);
-    });
-  });
-
-  describe('validateMaxUserActionsReached', () => {
-    const userActionService = createUserActionServiceMock();
-
-    beforeEach(() => {
-      jest.clearAllMocks();
-    });
-
-    it('does not throw when user actions did not reach max', async () => {
-      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-        [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE - 1,
-      });
-
-      const userActionsDict = { 'mock-id-1': [1] };
-
-      await expect(
-        validateMaxUserActionsReached({
-          // @ts-expect-error: mock userActionsDict
-          userActionsDict,
-          userActionService,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('throws when user actions reached max', async () => {
-      userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
-        [mockCases[0].id]: MAX_USER_ACTIONS_PER_CASE,
-      });
-
-      const userActionsDict = { [mockCases[0].id]: [1] };
-
-      await expect(
-        validateMaxUserActionsReached({
-          // @ts-expect-error: mock userActionsDict
-          userActionsDict,
-          userActionService,
-        })
-      ).rejects.toThrow(
-        `The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
-      );
-    });
-
-    it('returns when userActionsDict is null', async () => {
-      await expect(
-        validateMaxUserActionsReached({
-          // @ts-expect-error: mock userActionsDict
-          userActionsDict: null,
-          userActionService,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('returns when userActionsDict is undefined', async () => {
-      await expect(
-        validateMaxUserActionsReached({
-          // @ts-expect-error: mock userActionsDict
-          userActionsDict: undefined,
-          userActionService,
-        })
-      ).resolves.not.toThrow();
-    });
-
-    it('returns when userActionsDict is {}', async () => {
-      await expect(
-        validateMaxUserActionsReached({
-          userActionsDict: {},
-          userActionService,
-        })
-      ).resolves.not.toThrow();
     });
   });
 });

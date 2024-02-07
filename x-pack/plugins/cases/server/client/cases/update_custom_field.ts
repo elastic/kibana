@@ -14,6 +14,7 @@ import { CaseRequestCustomFieldsRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { flattenCaseSavedObject } from '../../common/utils';
+import { validateMaxUserActions } from '../../../common/utils/validators';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import type { Case } from '../../../common/types/domain';
 import { CaseRt } from '../../../common/types/domain';
@@ -21,7 +22,6 @@ import { decodeWithExcessOrThrow } from '../../../common/api';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
-  validateMaxUserActionsReached,
 } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 
@@ -131,7 +131,7 @@ export const updateCustomField = async (
       user,
     });
 
-    await validateMaxUserActionsReached({ userActionsDict, userActionService });
+    await validateMaxUserActions({ caseId, userActionService, userActionsToAdd: 1 });
 
     const updatedCase = await caseService.patchCase({
       ...patchCasesPayload,

@@ -32,6 +32,9 @@ describe('Update custom field', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     clientArgs.services.caseService.getCase.mockResolvedValue(theCase);
+    clientArgs.services.userActionService.getMultipleCasesUserActionsTotal.mockResolvedValue({
+      [mockCases[0].id]: 1,
+    });
 
     casesClient.configure.get = jest.fn().mockResolvedValue([
       {
@@ -318,7 +321,7 @@ describe('Update custom field', () => {
           casesClient
         )
       ).rejects.toThrow(
-        `Error: The case with case id ${mockCases[0].id} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        `Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The case with id mock-id-1 has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
     });
   });

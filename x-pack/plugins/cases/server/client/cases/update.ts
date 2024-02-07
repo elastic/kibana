@@ -17,15 +17,19 @@ import type {
 
 import { nodeBuilder } from '@kbn/es-query';
 
-import type { AlertService, CasesService } from '../../services';
+import type { AlertService, CasesService, CaseUserActionService } from '../../services';
 import type { UpdateAlertStatusRequest } from '../alerts/types';
 import type { CasesClient, CasesClientArgs } from '..';
 import type { OwnerEntity } from '../../authorization';
 import type { PatchCasesArgs } from '../../services/cases/types';
-import type { UserActionEvent } from '../../services/user_actions/types';
+import type { UserActionEvent, UserActionsDict } from '../../services/user_actions/types';
 
 import type { CasePatchRequest, CasesPatchRequest } from '../../../common/types/api';
-import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../../common/constants';
+import {
+  CASE_COMMENT_SAVED_OBJECT,
+  CASE_SAVED_OBJECT,
+  MAX_USER_ACTIONS_PER_CASE,
+} from '../../../common/constants';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import {
@@ -56,7 +60,7 @@ import type {
 import { CasesPatchRequestRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 import { CasesRt, CaseStatuses, AttachmentType } from '../../../common/types/domain';
-import { validateCustomFields, validateMaxUserActionsReached } from './validators';
+import { validateCustomFields } from './validators';
 
 /**
  * Throws an error if any of the requests attempt to update the owner of a case.
@@ -68,6 +72,36 @@ function throwIfUpdateOwner(requests: UpdateRequestWithOriginalCase[]) {
     const ids = requestsUpdatingOwner.map(({ updateReq }) => updateReq.id);
     throw Boom.badRequest(`Updating the owner of a case is not allowed ids: [${ids.join(', ')}]`);
   }
+}
+
+/**
+ * Throws an error if any of the requests attempt to create a number of user actions that would put
+ * it's case over the limit.
+ */
+async function throwIfMaxUserActionsReached({
+  userActionsDict,
+  userActionService,
+}: {
+  userActionsDict: UserActionsDict;
+  userActionService: CaseUserActionService;
+}) {
+  if (userActionsDict == null) {
+    return;
+  }
+
+  const currentTotals = await userActionService.getMultipleCasesUserActionsTotal({
+    caseIds: Object.keys(userActionsDict),
+  });
+
+  Object.keys(currentTotals).forEach((caseId) => {
+    const totalToAdd = userActionsDict?.[caseId]?.length ?? 0;
+
+    if (currentTotals[caseId] + totalToAdd > MAX_USER_ACTIONS_PER_CASE) {
+      throw Boom.badRequest(
+        `The case with case id ${caseId} has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+      );
+    }
+  });
 }
 
 async function validateCustomFieldsInRequest({
@@ -384,7 +418,7 @@ export const update = async (
       user,
     });
 
-    await validateMaxUserActionsReached({ userActionsDict, userActionService });
+    await throwIfMaxUserActionsReached({ userActionsDict, userActionService });
     notifyPlatinumUsage(licensingService, casesToUpdate);
 
     const updatedCases = await patchCases({ caseService, patchCasesPayload });
