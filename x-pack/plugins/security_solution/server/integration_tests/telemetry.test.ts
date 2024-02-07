@@ -237,27 +237,23 @@ describe('telemetry tasks', () => {
       config: AxiosRequestConfig<unknown> | undefined;
     }>
   > {
-    return eventually(
-      async () => {
-        const calls = mockedAxiosPost.mock.calls.flatMap(([url, data, config]) => {
-          return (data as string).split('\n').map((body) => {
-            return { url, body, config };
-          });
+    return eventually(async () => {
+      const calls = mockedAxiosPost.mock.calls.flatMap(([url, data, config]) => {
+        return (data as string).split('\n').map((body) => {
+          return { url, body, config };
         });
+      });
 
-        const requests = calls.filter(({ url, body: b }) => {
-          return (
-            b.indexOf(getTelemetryTaskTitle(task)) !== -1 &&
-            url.startsWith(ENDPOINT_STAGING) &&
-            url.endsWith('task-metrics')
-          );
-        });
-        expect(requests.length).toBeGreaterThan(0);
-        return requests;
-      },
-      60 * 1_000,
-      1_000
-    );
+      const requests = calls.filter(({ url, body: b }) => {
+        return (
+          b.indexOf(getTelemetryTaskTitle(task)) !== -1 &&
+          url.startsWith(ENDPOINT_STAGING) &&
+          url.endsWith('task-metrics')
+        );
+      });
+      expect(requests.length).toBeGreaterThan(0);
+      return requests;
+    });
   }
 });
 

@@ -638,9 +638,6 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.updateDefaultQueueConfig({ ...DEFAULT_QUEUE_CONFIG, bufferTimeSpanMillis });
 
-      // wait a while to finish the current buffer time
-      await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
-
       // send data and wait the initial time span
       service.send(ch1, events);
       await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
@@ -686,8 +683,6 @@ describe('AsyncTelemetryEventsSender', () => {
 
       service.updateQueueConfig(channel, detectionAlertsAfter);
 
-      // wait until the current buffer time expires
-      await jest.advanceTimersByTimeAsync(ch1Config.bufferTimeSpanMillis * 1.01);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
       service.send(channel, events);
@@ -778,8 +773,6 @@ describe('AsyncTelemetryEventsSender', () => {
       );
 
       service.updateQueueConfig(ch1, { ...DEFAULT_QUEUE_CONFIG, bufferTimeSpanMillis });
-
-      await jest.advanceTimersByTimeAsync(DEFAULT_QUEUE_CONFIG.bufferTimeSpanMillis * 1.1);
 
       service.send(ch1, events);
 
@@ -1054,9 +1047,6 @@ describe('AsyncTelemetryEventsSender', () => {
 
       serviceV1.updateDefaultQueueConfig({ ...DEFAULT_QUEUE_CONFIG, bufferTimeSpanMillis });
 
-      // wait a while to finish the current buffer time
-      await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
-
       // send data and wait the initial time span
       serviceV1.sendAsync(ch1, events);
       await jest.advanceTimersByTimeAsync(initialTimeSpan * 1.1);
@@ -1111,8 +1101,6 @@ describe('AsyncTelemetryEventsSender', () => {
 
       serviceV1.updateQueueConfig(channel, detectionAlertsAfter);
 
-      // wait until the current buffer time expires
-      await jest.advanceTimersByTimeAsync(detectionAlertsBefore.bufferTimeSpanMillis * 1.01);
       expect(mockedAxiosPost).toHaveBeenCalledTimes(1);
 
       serviceV1.sendAsync(channel, ['a', 'b', 'c']);

@@ -38,6 +38,8 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   private fallbackQueueConfig: QueueConfig | undefined;
   private queues: Map<TelemetryChannel, QueueConfig> | undefined;
 
+  private readonly flush$ = new rx.Subject<void>();
+
   private readonly events$ = new rx.Subject<Event>();
 
   private readonly finished$ = new rx.Subject<void>();
@@ -176,10 +178,14 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
 
   public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
     this.getQueues().set(channel, cloneDeep(config));
+    // flush the queues to get the new configuration asap
+    this.flush$.next();
   }
 
   public updateDefaultQueueConfig(config: QueueConfig): void {
     this.fallbackQueueConfig = cloneDeep(config);
+    // flush the queues to get the new configuration asap
+    this.flush$.next();
   }
 
   // internal methods
@@ -214,8 +220,10 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
         inflightEvents$.next(1);
       }),
 
-      // buffer events for a while
-      rx.bufferWhen<Event>(() => rx.interval(this.getConfigFor(channel).bufferTimeSpanMillis)),
+      // buffer events for a while or after a flush$ event is sent (see updateConfig)
+      rx.bufferWhen<Event>(() =>
+        rx.merge(rx.interval(this.getConfigFor(channel).bufferTimeSpanMillis), this.flush$)
+      ),
 
       // exclude empty buffers
       rx.filter((n: Event[]) => n.length > 0),
