@@ -88,38 +88,49 @@ export class DataViewLazy extends AbstractDataView {
     }: GetFieldsParams // todo implement
   ) {
     const dataViewFields: DataViewField[] = [];
-    if (mapped !== false) {
-      const mappedFields = await this.getMappedFields({ type, fieldName, forceRefresh });
+    // need to know if runtime fields are also mapped
+    if (mapped || runtime) {
+      // if we just need runtime fields, we can ask for the set of runtime fields specifically
+      // to do limit to intersection of requested fields and runtime fields
+      const fieldsToRequest = mapped ? fieldName : Object.keys(this.runtimeFieldMap);
+      const mappedFields = await this.getMappedFields({
+        type,
+        fieldName: fieldsToRequest,
+        forceRefresh,
+      });
       dataViewFields.push(...mappedFields);
     }
     // todo double check which field type is given preference
-    if (scripted !== false) {
+    if (scripted) {
       const scriptedFields = this.getScriptedFieldsInternal({ fieldName });
       dataViewFields.push(...scriptedFields);
     }
 
-    // todo will need to check for mapped field which would override runtime
-    if (runtime !== false) {
-      const runtimeFields = Object.values(this.getRuntimeFieldSpecMap({ fieldName })).map(
-        // todo this set/get thing could be neater. Also happens for mapped. check scripted
-        (field) => {
-          const fld =
-            this.fieldCache.get(field.name) ||
-            this.fieldCache.set(
-              field.name,
-              new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
-            );
-
-          return fld;
-        }
-      );
-
+    // todo add tests for runtime field on mapped field
+    if (runtime) {
+      const runtimeFields = this.getRuntimeFields({ fieldName });
       dataViewFields.push(...runtimeFields);
     }
 
     // might be better to return a map
     return dataViewFields;
   }
+
+  getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
+    Object.values(this.getRuntimeFieldSpecMap({ fieldName })).map((field) => {
+      let cachedField = this.fieldCache.get(field.name);
+      if (cachedField) {
+        cachedField.runtimeField = field.runtimeField;
+        cachedField.spec.type = castEsToKbnFieldTypeName(field.type);
+        cachedField.spec.esTypes = [field.type];
+      } else {
+        cachedField = this.fieldCache.set(
+          field.name,
+          new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
+        );
+      }
+      return cachedField;
+    });
 
   /**
    * Add a runtime field - Appended to existing mapped field or a new field is
@@ -209,14 +220,11 @@ export class DataViewLazy extends AbstractDataView {
    * @param name - Field name to remove
    */
   removeRuntimeField(name: string) {
-    // note will need to remove from existing fields later
-
-    // todo try without async call
-    // const existingField = await this.getFieldByName(name);
     const existingField = this.fieldCache.get(name);
 
+    // todo is there test coverage?
     if (existingField && existingField.isMapped) {
-      // mapped field, remove runtimeField def
+      // mapped field, remove runtimeField definition
       existingField.runtimeField = undefined;
     } else {
       Object.values(this.getFieldsByRuntimeFieldName(name) || {}).forEach((field) => {
@@ -276,6 +284,8 @@ export class DataViewLazy extends AbstractDataView {
     // todo
     if (existingField) {
       existingField.runtimeField = runtimeFieldSpec;
+      existingField.spec.type = castEsToKbnFieldTypeName(fieldType);
+      existingField.spec.esTypes = [fieldType];
     } else {
       // todo is there a fn that does this?
       createdField = this.fieldCache.set(

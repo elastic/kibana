@@ -344,8 +344,9 @@ describe('DataViewLazy', () => {
     });
 
     // todo - mapped fields need to override runtime fields
-    /* I think I'd prefer to skip this as its not where we want to be long term.
-    Might be less work to make it work now
+    // I think I'd prefer to skip this as its not where we want to be long term.
+    // Might be less work to make it work now
+    /*
     test('ignore runtime field mapping if a mapped field exists with the same name', async () => {
       expect(dataViewLazy.getRuntimeMappings()).toEqual({
         runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
