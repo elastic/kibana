@@ -111,7 +111,7 @@ export const FileContents: FC<Props> = ({ data, format, numberOfLines, semiStruc
           </EuiTitle>
         </EuiFlexItem>
         {isSemiStructureTextData ? (
-          <EuiFlexItem grow={false}>
+          <EuiFlexItem grow={false} data-test-subj="dataVisualizerFileContentsHighlightingSwitch">
             <EuiSwitch
               label={i18n.translate('xpack.dataVisualizer.file.fileContents.highlightSwitch', {
                 defaultMessage: 'Grok pattern highlighting',

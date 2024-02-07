@@ -49,11 +49,13 @@ export function MachineLearningDataVisualizerFileBasedProvider(
       await testSubjects.existOrFail('dataVisualizerFileFileContentPanel');
     },
 
-    async assertFileContentTabsExists(exist: boolean) {
-      const tabs = await testSubjects.findAll('dataVisualizerFileContentsTabs');
+    async assertFileContentHighlightingSwitchExists(exist: boolean) {
+      const tabs = await testSubjects.findAll('dataVisualizerFileContentsHighlightingSwitch');
       expect(tabs.length).to.eql(
         exist ? 1 : 0,
-        `Expected file content tabs to ${exist ? 'exist' : 'not exist'}, but found ${tabs.length}`
+        `Expected file content highlighting switch to ${exist ? 'exist' : 'not exist'}, but found ${
+          tabs.length
+        }`
       );
     },
 
