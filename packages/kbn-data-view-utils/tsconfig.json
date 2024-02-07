@@ -14,10 +14,5 @@
   ],
   "exclude": [
     "target/**/*"
-  ],
-  "kbn_references": [
-    "@kbn/data-views-plugin",
-    "@kbn/crypto-browser",
-    "@kbn/data-view-utils",
   ]
 }
