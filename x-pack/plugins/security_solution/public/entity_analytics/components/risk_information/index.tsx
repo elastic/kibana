@@ -263,11 +263,30 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           </p>
         </EuiText>
         <EuiSpacer />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.riskInformation.riskLevelTableTitle"
+              defaultMessage="Risk Levels"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           columns={getRiskLevelTableColumns()}
           items={riskLevelTableItems}
           data-test-subj="risk-level-information-table"
         />
+        <EuiSpacer size="l" />
+        <EuiTitle size="s">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.riskInformation.criticalityLevelTableTitle"
+              defaultMessage="Asset Criticality"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="s" />
         <EuiBasicTable
           columns={getCriticalityLevelTableColumns()}
           items={criticalityLevelTableItems}
