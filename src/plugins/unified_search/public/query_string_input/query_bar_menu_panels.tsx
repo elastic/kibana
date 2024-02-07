@@ -25,6 +25,8 @@ import {
   toggleFilterNegated,
   pinFilter,
   unpinFilter,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
@@ -239,19 +241,14 @@ export function useQueryBarMenuPanels({
 
   useEffect(() => {
     if (savedQuery) {
-      let filtersHaveChanged = filters?.length !== savedQuery.attributes?.filters?.length;
-      if (filters?.length === savedQuery.attributes?.filters?.length) {
-        filtersHaveChanged = Boolean(
-          filters?.some(
-            (filter, index) =>
-              !isEqual(filter.query, savedQuery.attributes?.filters?.[index]?.query)
-          )
-        );
-      }
+      const filtersHaveChanged = Boolean(
+        savedQuery?.attributes.filters &&
+          !compareFilters(filters ?? [], savedQuery.attributes.filters, COMPARE_ALL_OPTIONS)
+      );
 
-      const timeFilterHasChanged =
-        savedQuery?.attributes.timefilter &&
-        !isEqual(timeFilter, savedQuery?.attributes.timefilter);
+      const timeFilterHasChanged = Boolean(
+        savedQuery?.attributes.timefilter && !isEqual(timeFilter, savedQuery?.attributes.timefilter)
+      );
 
       if (
         filtersHaveChanged ||
