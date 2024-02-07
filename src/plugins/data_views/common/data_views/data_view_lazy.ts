@@ -18,6 +18,7 @@ import { AbstractDataView } from './abstract_data_views';
 // import type { TimeBasedDataView } from './data_view';
 import { DataViewField } from '../fields';
 import { DataViewLazyFieldCache, createDataViewFieldCache } from './data_view_lazy_field_cache';
+import { fieldsMatchFieldsRequested } from './data_view_lazy_util';
 
 import type {
   DataViewFieldMap,
@@ -47,12 +48,13 @@ interface GetFieldsParams {
   // rollupIndex?: string;
   // allowNoIndex?: boolean;
   // indexFilter?: QueryDslQueryContainer;
+  // todo
   // includeUnmapped?: boolean;
   fieldName?: string[]; // supports wildcard
-  // includeScriptedFields?: boolean;
   mapped?: boolean;
   scripted?: boolean;
   runtime?: boolean;
+  forceRefresh?: boolean;
 }
 
 export class DataViewLazy extends AbstractDataView {
@@ -76,38 +78,43 @@ export class DataViewLazy extends AbstractDataView {
   fields?: string[];
   */
   async getFields(
-    { mapped = true, scripted = true, runtime = true, type, fieldName = ['*'] }: GetFieldsParams,
-    forceRefresh = false
+    {
+      mapped = true,
+      scripted = true,
+      runtime = true,
+      type,
+      fieldName = ['*'],
+      forceRefresh = false,
+    }: GetFieldsParams // todo implement
   ) {
     const dataViewFields: DataViewField[] = [];
     if (mapped !== false) {
-      const mappedFields = await this.getMappedFields({ type, fieldName });
+      const mappedFields = await this.getMappedFields({ type, fieldName, forceRefresh });
       dataViewFields.push(...mappedFields);
     }
-    // debugger;
     // todo double check which field type is given preference
     if (scripted !== false) {
-      const scriptedFields = this.getScriptedFieldsInternal();
+      const scriptedFields = this.getScriptedFieldsInternal({ fieldName });
       dataViewFields.push(...scriptedFields);
     }
 
-    // will need to check for mapped field which would override runtime
+    // todo will need to check for mapped field which would override runtime
     if (runtime !== false) {
-      const runtimeFields = Object.values(this.getRuntimeFields()).map(
+      const runtimeFields = Object.values(this.getRuntimeFieldSpecMap({ fieldName })).map(
         // todo this set/get thing could be neater. Also happens for mapped. check scripted
-        (field) =>
-          this.fieldCache.get(field.name) ||
-          this.fieldCache.set(
-            field.name,
-            new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
-          )
+        (field) => {
+          const fld =
+            this.fieldCache.get(field.name) ||
+            this.fieldCache.set(
+              field.name,
+              new DataViewField({ ...field, shortDotsEnable: this.shortDotsEnable })
+            );
+
+          return fld;
+        }
       );
 
       dataViewFields.push(...runtimeFields);
-    }
-
-    if (!fieldName.includes('*')) {
-      return dataViewFields.filter((field) => fieldName.includes(field.name));
     }
 
     // might be better to return a map
@@ -270,6 +277,7 @@ export class DataViewLazy extends AbstractDataView {
     if (existingField) {
       existingField.runtimeField = runtimeFieldSpec;
     } else {
+      // todo is there a fn that does this?
       createdField = this.fieldCache.set(
         fieldName,
         new DataViewField({
@@ -301,7 +309,7 @@ export class DataViewLazy extends AbstractDataView {
     return createdField ?? existingField!;
   }
 
-  private getRuntimeFields = () => {
+  private getRuntimeFieldSpecMap = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) => {
     const spec: DataViewFieldMap = {};
 
     const addRuntimeFieldToSpecFields = (
@@ -329,13 +337,20 @@ export class DataViewLazy extends AbstractDataView {
 
     // CREATE RUNTIME FIELDS
     for (const [name, runtimeField] of Object.entries(this.runtimeFieldMap || {})) {
-      // For composite runtime field we add the subFields, **not** the composite
-      if (runtimeField.type === 'composite') {
-        Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
-          addRuntimeFieldToSpecFields(`${name}.${subFieldName}`, subField.type, runtimeField, name);
-        });
-      } else {
-        addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+      if (fieldsMatchFieldsRequested(name, fieldName)) {
+        // For composite runtime field we add the subFields, **not** the composite
+        if (runtimeField.type === 'composite') {
+          Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
+            addRuntimeFieldToSpecFields(
+              `${name}.${subFieldName}`,
+              subField.type,
+              runtimeField,
+              name
+            );
+          });
+        } else {
+          addRuntimeFieldToSpecFields(name, runtimeField.type, runtimeField);
+        }
       }
     }
 
@@ -343,10 +358,15 @@ export class DataViewLazy extends AbstractDataView {
   };
 
   // does this need to be named internal?
-  private getScriptedFieldsInternal(): DataViewField[] {
+  private getScriptedFieldsInternal({
+    fieldName = ['*'],
+  }: Pick<GetFieldsParams, 'fieldName'>): DataViewField[] {
     const dataViewFields: DataViewField[] = [];
+
     this.scriptedFields.forEach((field) => {
-      // how to handle updated field info. This will always keep existing field info
+      if (!fieldsMatchFieldsRequested(field.name, fieldName)) {
+        return;
+      }
       dataViewFields.push(
         this.fieldCache.get(field.name) ||
           this.fieldCache.set(field.name, new DataViewField(field as FieldSpec)) // todo try to remove 'as FieldSpec'
@@ -358,6 +378,7 @@ export class DataViewLazy extends AbstractDataView {
   private async getMappedFields({
     fieldName,
     type,
+    forceRefresh = false,
   }: Omit<GetFieldsParams, 'mapped' | 'scripted' | 'runtime'>) {
     // map spec to class
     // look at refreshFieldsFn
@@ -371,6 +392,7 @@ export class DataViewLazy extends AbstractDataView {
       // indexFilter: getFieldParams.indexFilter,
       // I think this should always be true
       // includeUnmapped: true,
+      forceRefresh,
     });
 
     const dataViewFields: DataViewField[] = [];
@@ -392,7 +414,6 @@ export class DataViewLazy extends AbstractDataView {
         fld.spec.timeSeriesMetric = field.timeSeriesMetric;
         fld.spec.type = field.type;
         fld.spec.isMapped = true;
-        // fld.spec.runtimeField = undefined;
       }
       dataViewFields.push(
         fld ||
@@ -435,9 +456,8 @@ export class DataViewLazy extends AbstractDataView {
   // get computed fields WITHOUT looking at the field list
   // getComputedFields(fields: DataViewField[]) {
   // perhaps this should only work with fields already loaded
-  async getComputedFields({ fieldNames }: { fieldNames: string[] }) {
+  async getComputedFields({ fieldNames = ['*'] }: { fieldNames: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
-    const allFields = fieldNames.indexOf('*') !== -1;
 
     const docvalueFields = (
       await this.getFields({
@@ -456,19 +476,7 @@ export class DataViewLazy extends AbstractDataView {
       };
     });
 
-    this.getScriptedFields().reduce<Record<string, estypes.ScriptField>>((col, field) => {
-      if (allFields || fieldNames.includes(field.name)) {
-        col[field.name] = {
-          script: {
-            source: field.script as string,
-            lang: field.lang,
-          },
-        };
-      }
-      return col;
-    }, {});
-
-    each(this.getScriptedFields(), function (field) {
+    each(this.getScriptedFieldsInternal({ fieldName: fieldNames }), function (field) {
       scriptFields[field.name] = {
         script: {
           source: field.script as string,
@@ -509,7 +517,8 @@ export class DataViewLazy extends AbstractDataView {
 
     const getFieldsAsMap = async () => {
       const fields: DataViewFieldMap = {};
-      (await this.getFields({ fieldName: ['*'] })).forEach((field) => {
+      const fldArray = await this.getFields({ fieldName: ['*'] });
+      fldArray.forEach((field) => {
         fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
       });
       return fields;
@@ -609,11 +618,9 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   async getFieldByName(name: string, forceRefresh = false) {
-    const fieldArray = await this.getFields({ fieldName: [name] }, forceRefresh);
+    const fieldArray = await this.getFields({ fieldName: [name], forceRefresh });
     return fieldArray.length ? fieldArray[0] : undefined;
   }
-
-  // todo RUNTIME FIELD FUNCTIONALITY
 
   /**
    * Set field custom label

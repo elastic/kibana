@@ -111,6 +111,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "@timestamp": Object {
@@ -130,6 +131,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "date",
     },
     "_id": Object {
@@ -149,6 +151,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "_source": Object {
@@ -168,6 +171,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "_source",
     },
     "_type": Object {
@@ -187,6 +191,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "area": Object {
@@ -206,6 +211,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "geo_shape",
     },
     "bytes": Object {
@@ -225,6 +231,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "number",
     },
     "custom_user_field": Object {
@@ -252,6 +259,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "conflict",
     },
     "extension": Object {
@@ -271,6 +279,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "extension.keyword": Object {
@@ -290,6 +299,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": Object {
         "multi": Object {
           "parent": "extension",
@@ -314,6 +324,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "geo_point",
     },
     "geo.src": Object {
@@ -333,6 +344,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "hashed": Object {
@@ -352,6 +364,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "murmur3",
     },
     "ip": Object {
@@ -371,6 +384,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "ip",
     },
     "machine.os": Object {
@@ -390,6 +404,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "machine.os.raw": Object {
@@ -409,6 +424,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "subType": Object {
         "multi": Object {
           "parent": "machine.os",
@@ -433,6 +449,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": false,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "non-sortable": Object {
@@ -452,6 +469,7 @@ Object {
       "readFromDocValues": false,
       "scripted": false,
       "searchable": false,
+      "shortDotsEnable": false,
       "type": "string",
     },
     "phpmemory": Object {
@@ -471,6 +489,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "number",
     },
     "point": Object {
@@ -490,6 +509,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "geo_point",
     },
     "request_body": Object {
@@ -509,6 +529,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "attachment",
     },
     "runtime_field": Object {
@@ -637,6 +658,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "boolean",
     },
     "time": Object {
@@ -656,6 +678,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "date",
     },
     "utc_time": Object {
@@ -675,6 +698,7 @@ Object {
       "readFromDocValues": true,
       "scripted": false,
       "searchable": true,
+      "shortDotsEnable": false,
       "type": "date",
     },
   },

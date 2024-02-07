@@ -197,6 +197,8 @@ describe('DataViewLazy', () => {
 
   describe('add and remove scripted fields', () => {
     test('should append the scripted field', async () => {
+      fieldCapsResponse = [];
+
       // keep a copy of the current scripted field count
       const oldCount = dataViewLazy.getScriptedFields().length;
 
@@ -226,6 +228,7 @@ describe('DataViewLazy', () => {
     });
 
     test('should remove scripted field, by name', async () => {
+      fieldCapsResponse = [];
       const scriptedFields = dataViewLazy.getScriptedFields();
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields)!;
@@ -315,6 +318,7 @@ describe('DataViewLazy', () => {
     });
 
     test('add and remove runtime field to existing field', async () => {
+      fieldCapsResponse = fieldCapsResponse.filter((field) => field.name === '@tags');
       await dataViewLazy.addRuntimeField('@tags', runtimeWithAttrs);
       expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
         '@tags': runtime,
@@ -396,6 +400,7 @@ describe('DataViewLazy', () => {
 
     test('add and remove a custom label from a runtime field', async () => {
       const newField = 'new_field_test';
+      fieldCapsResponse = [];
       dataViewLazy.addRuntimeField(newField, {
         ...runtimeWithAttrs,
         customLabel: 'test1',
@@ -510,6 +515,7 @@ describe('DataViewLazy', () => {
       expect(restoredPattern.id).toEqual(dataViewLazy.id);
       expect(restoredPattern.getIndexPattern()).toEqual(dataViewLazy.getIndexPattern());
       expect(restoredPattern.timeFieldName).toEqual(dataViewLazy.timeFieldName);
+      // todo
       // expect(restoredPattern.fields.length).toEqual(dataViewLazy.fields.length);
     });
 
