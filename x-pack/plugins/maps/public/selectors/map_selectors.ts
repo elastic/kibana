@@ -329,9 +329,17 @@ export const getLayerList = createSelector(
   getChartsPaletteServiceGetColor,
   getCustomIcons,
   (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
-    const layers = layerDescriptorList.map((layerDescriptor) =>
-      createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
-    );
+    const layers = layerDescriptorList
+      .map((layerDescriptor) => {
+          try {
+            return createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor);
+          } catch (error) {
+            // ignore createLayerInstance exception, error surfaced to user in addLayer action
+            return null
+          }
+        }
+      )
+      .filter(Boolean);
 
     const childrenMap = new Map<string, ILayer[]>();
     layers.forEach((layer) => {
@@ -419,9 +427,13 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
-        if (layer.isVisible()) {
-          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+        try {
+          const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+          if (layer.isVisible()) {
+            indexPatternIds.push(...layer.getQueryableIndexPatternIds());
+          }
+        } catch (error) {
+          // ignore createLayerInstance exception, error surfaced to user in addLayer action
         }
       });
     } else {
@@ -449,8 +461,12 @@ export const getMostCommonDataViewId = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
-        incrementCount(layer.getIndexPatternIds());
+        try {
+          const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+          incrementCount(layer.getIndexPatternIds());
+        } catch (error) {
+          // ignore createLayerInstance exception, error surfaced to user in addLayer action
+        }
       });
     } else {
       layerList.forEach((layer) => {
@@ -479,8 +495,12 @@ export const getGeoFieldNames = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get geo field names
-        geoFieldNames.push(...layer.getGeoFieldNames());
+        try {
+          const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get geo field names
+          geoFieldNames.push(...layer.getGeoFieldNames());
+        } catch (error) {
+          // ignore createLayerInstance exception, error surfaced to user in addLayer action
+        }
       });
     } else {
       layerList.forEach((layer) => {
