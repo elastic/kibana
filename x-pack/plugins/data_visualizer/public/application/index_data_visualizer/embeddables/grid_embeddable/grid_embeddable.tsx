@@ -17,11 +17,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import type { Query } from '@kbn/es-query';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
-import type { SamplingOption } from '../../../../../common/types/field_stats';
+import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { DataVisualizerStartDependencies } from '../../../../plugin';
@@ -48,7 +46,7 @@ export const EmbeddableWrapper = ({
   input,
   onOutputChange,
 }: {
-  input: DataVisualizerGridEmbeddableInput;
+  input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>;
   onOutputChange?: (ouput: any) => void;
 }) => {
   const [dataVisualizerListState, setDataVisualizerListState] =
@@ -145,12 +143,15 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
-  if (input && input.dataView) {
-    // @todo: lazy load
-    return input.esql ? (
-      <ESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />
-    ) : (
-      <EmbeddableWrapper input={input} onOutputChange={onOutputChange} />
+  if (input?.esql) {
+    return <ESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />;
+  }
+  if (isPopulatedObject(input, ['dataView'])) {
+    return (
+      <EmbeddableWrapper
+        input={input as Required<DataVisualizerGridEmbeddableInput, 'dataView'>}
+        onOutputChange={onOutputChange}
+      />
     );
   } else {
     return (

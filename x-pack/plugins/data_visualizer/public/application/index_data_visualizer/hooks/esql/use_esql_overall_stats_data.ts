@@ -29,13 +29,13 @@ import {
 } from '../../search_strategy/requests/esql_utils';
 import type { NonAggregatableField } from '../../types/overall_stats';
 import { getESQLSupportedAggs } from '../../utils/get_supported_aggs';
-import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
 import { getESQLOverallStats } from '../../search_strategy/esql_requests/get_count_and_cardinality';
 import type { AggregatableField } from '../../types/esql_data_visualizer';
 import {
   handleError,
   type HandleErrorCallback,
 } from '../../search_strategy/esql_requests/handle_error';
+import { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
 
 export interface Column {
   type: string;

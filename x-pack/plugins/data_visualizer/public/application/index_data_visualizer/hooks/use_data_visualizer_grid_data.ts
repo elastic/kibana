@@ -58,7 +58,8 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   probability: 0,
 };
 export const useDataVisualizerGridData = (
-  input: DataVisualizerGridEmbeddableInput,
+  // Data view is required for non-ES|QL queries like kuery or lucene
+  input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
@@ -569,6 +570,7 @@ export const useDataVisualizerGridData = (
   // Inject custom action column for the index based visualizer
   // Hide the column completely if no access to any of the plugins
   const extendedColumns = useMemo(() => {
+    if (!input.dataView) return undefined;
     const actions = getActions(
       input.dataView,
       services,

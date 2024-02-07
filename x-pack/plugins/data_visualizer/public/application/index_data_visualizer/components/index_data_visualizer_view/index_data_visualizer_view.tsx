@@ -66,12 +66,12 @@ import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/grid_embeddable';
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
   RandomSamplerOption,
 } from '../../constants/random_sampler';
+import { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;

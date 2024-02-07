@@ -4,27 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
-import {
-  FullTimeRangeSelector,
-  mlTimefilterRefresh$,
-  useTimefilter,
-  DatePickerWrapper,
-} from '@kbn/ml-date-picker';
+import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { mlTimefilterRefresh$, useTimefilter } from '@kbn/ml-date-picker';
 import { merge } from 'rxjs';
 import { Comparators } from '@elastic/eui';
-import {
-  useEuiBreakpoint,
-  useIsWithinMaxBreakpoint,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageTemplate,
-  EuiPanel,
-  EuiProgress,
-  EuiSpacer,
-} from '@elastic/eui';
-import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { useUrlState } from '@kbn/ml-url-state';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getFieldType } from '@kbn/field-utils';
@@ -46,14 +30,11 @@ import type {
 import { filterFields } from '../../../common/components/fields_stats_grid/filter_fields';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useESQLFieldStatsData } from './use_esql_field_stats_data';
-import type { NonAggregatableField, OverallStats } from '../../types/overall_stats';
+import type { NonAggregatableField } from '../../types/overall_stats';
 import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
 import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_data';
 import { type AggregatableField } from '../../types/esql_data_visualizer';
-import type { ESQLDefaultLimitSizeOption } from '../../components/search_panel/esql/limit_size';
-import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
-import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../../embeddables/grid_embeddable/constants';
 import { getDefaultPageState } from '../../components/index_data_visualizer_view/index_data_visualizer_esql';
@@ -65,6 +46,8 @@ import type {
 const defaultSearchQuery = {
   match_all: {},
 };
+
+const FALLBACK_ESQL_QUERY: AggregateQuery = { esql: '' };
 const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   mode: 'random_sampling',
   seed: '',
@@ -98,11 +81,11 @@ export const getDefaultESQLDataVisualizerListState = (
 export const useESQLDataVisualizerData = (
   input: ESQLDataVisualizerGridEmbeddableInput,
   dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState,
-  setQuery?: () => void
+  setQuery?: React.Dispatch<React.SetStateAction<AggregateQuery>>
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
-  const { uiSettings, fieldFormats, executionContext, analytics } = services;
+  const { uiSettings, fieldFormats, executionContext } = services;
 
   const parentExecutionContext = useObservable(executionContext?.context$);
 
@@ -127,20 +110,11 @@ export const useESQLDataVisualizerData = (
     autoRefreshSelector: true,
   });
 
-  const {
-    currentSavedSearch,
-    currentDataView,
-    query,
-    currentFilters,
-    visibleFieldNames,
-    fieldsToFetch,
-    samplingOption,
-    indexPattern,
-  } = useMemo(
+  const { currentDataView, query, visibleFieldNames, indexPattern } = useMemo(
     () => ({
       currentSavedSearch: input?.savedSearch,
       currentDataView: input.dataView,
-      query: input?.query,
+      query: input?.query ?? FALLBACK_ESQL_QUERY,
       visibleFieldNames: input?.visibleFieldNames ?? [],
       currentFilters: input?.filters,
       fieldsToFetch: input?.fieldsToFetch,
@@ -154,6 +128,7 @@ export const useESQLDataVisualizerData = (
   const restorableDefaults = useMemo(
     () => getDefaultESQLDataVisualizerListState(dataVisualizerListState),
     // We just need to load the saved preference when the page is first loaded
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
 
@@ -164,114 +139,130 @@ export const useESQLDataVisualizerData = (
   const limitSize = dataVisualizerListState.limitSize ?? restorableDefaults.limitSize;
 
   /** Search strategy **/
-  const fieldStatsRequest = useMemo(() => {
-    // Obtain the interval to use for date histogram aggregations
-    // (such as the document count chart). Aim for 75 bars.
-    const buckets = _timeBuckets;
+  const fieldStatsRequest = useMemo(
+    () => {
+      // Obtain the interval to use for date histogram aggregations
+      // (such as the document count chart). Aim for 75 bars.
+      const buckets = _timeBuckets;
 
-    const tf = timefilter;
+      const tf = timefilter;
 
-    if (!buckets || !tf || (isESQLQuery(query) && query.esql === '')) return;
-    const activeBounds = tf.getActiveBounds();
+      if (!buckets || !tf || (isESQLQuery(query) && query.esql === '')) return;
+      const activeBounds = tf.getActiveBounds();
 
-    let earliest: number | undefined;
-    let latest: number | undefined;
-    if (activeBounds !== undefined && currentDataView?.timeFieldName !== undefined) {
-      earliest = activeBounds.min?.valueOf();
-      latest = activeBounds.max?.valueOf();
-    }
+      let earliest: number | undefined;
+      let latest: number | undefined;
+      if (activeBounds !== undefined && currentDataView?.timeFieldName !== undefined) {
+        earliest = activeBounds.min?.valueOf();
+        latest = activeBounds.max?.valueOf();
+      }
 
-    const bounds = tf.getActiveBounds();
-    const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
-    buckets.setInterval('auto');
+      const bounds = tf.getActiveBounds();
+      const barTarget = uiSettings.get(UI_SETTINGS.HISTOGRAM_BAR_TARGET) ?? DEFAULT_BAR_TARGET;
+      buckets.setInterval('auto');
 
-    if (bounds) {
-      buckets.setBounds(bounds);
-      buckets.setBarTarget(barTarget);
-    }
+      if (bounds) {
+        buckets.setBounds(bounds);
+        buckets.setBarTarget(barTarget);
+      }
 
-    const aggInterval = buckets.getInterval();
+      const aggInterval = buckets.getInterval();
 
-    const filter = currentDataView?.timeFieldName
-      ? ({
-          bool: {
-            must: [],
-            filter: [
-              {
-                range: {
-                  [currentDataView.timeFieldName]: {
-                    format: 'strict_date_optional_time',
-                    gte: timefilter.getTime().from,
-                    lte: timefilter.getTime().to,
+      const filter = currentDataView?.timeFieldName
+        ? ({
+            bool: {
+              must: [],
+              filter: [
+                {
+                  range: {
+                    [currentDataView.timeFieldName]: {
+                      format: 'strict_date_optional_time',
+                      gte: timefilter.getTime().from,
+                      lte: timefilter.getTime().to,
+                    },
                   },
                 },
-              },
-            ],
-            should: [],
-            must_not: [],
-          },
-        } as QueryDslQueryContainer)
-      : undefined;
-    return {
-      earliest,
-      latest,
-      aggInterval,
-      intervalMs: aggInterval?.asMilliseconds(),
-      searchQuery: query,
-      limitSize,
-      sessionId: undefined,
+              ],
+              should: [],
+              must_not: [],
+            },
+          } as QueryDslQueryContainer)
+        : undefined;
+      return {
+        earliest,
+        latest,
+        aggInterval,
+        intervalMs: aggInterval?.asMilliseconds(),
+        searchQuery: query,
+        limitSize,
+        sessionId: undefined,
+        indexPattern,
+        timeFieldName: currentDataView?.timeFieldName,
+        runtimeFieldMap: currentDataView?.getRuntimeMappings(),
+        lastRefresh,
+        filter,
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      _timeBuckets,
+      timefilter,
+      currentDataView?.id,
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+      JSON.stringify(query),
       indexPattern,
-      timeFieldName: currentDataView?.timeFieldName,
-      runtimeFieldMap: currentDataView?.getRuntimeMappings(),
       lastRefresh,
-      filter,
-    };
-  }, [
-    _timeBuckets,
-    timefilter,
-    currentDataView?.id,
-    JSON.stringify(query),
-    indexPattern,
-    lastRefresh,
-    limitSize,
-  ]);
+      limitSize,
+    ]
+  );
 
   useEffect(() => {
     // Force refresh on index pattern change
     setLastRefresh(Date.now());
   }, [setLastRefresh]);
 
-  useEffect(() => {
-    if (globalState?.time !== undefined) {
-      timefilter.setTime({
-        from: globalState.time.from,
-        to: globalState.time.to,
-      });
-    }
-  }, [JSON.stringify(globalState?.time), timefilter]);
+  useEffect(
+    () => {
+      if (globalState?.time !== undefined) {
+        timefilter.setTime({
+          from: globalState.time.from,
+          to: globalState.time.to,
+        });
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(globalState?.time), timefilter]
+  );
 
-  useEffect(() => {
-    const timeUpdateSubscription = merge(
-      timefilter.getTimeUpdate$(),
-      timefilter.getAutoRefreshFetch$(),
-      mlTimefilterRefresh$
-    ).subscribe(() => {
-      setGlobalState({
-        time: timefilter.getTime(),
-        refreshInterval: timefilter.getRefreshInterval(),
+  useEffect(
+    () => {
+      const timeUpdateSubscription = merge(
+        timefilter.getTimeUpdate$(),
+        timefilter.getAutoRefreshFetch$(),
+        mlTimefilterRefresh$
+      ).subscribe(() => {
+        setGlobalState({
+          time: timefilter.getTime(),
+          refreshInterval: timefilter.getRefreshInterval(),
+        });
+        setLastRefresh(Date.now());
       });
-      setLastRefresh(Date.now());
-    });
-    return () => {
-      timeUpdateSubscription.unsubscribe();
-    };
-  }, []);
+      return () => {
+        timeUpdateSubscription.unsubscribe();
+      };
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
 
-  useEffect(() => {
-    if (globalState?.refreshInterval !== undefined) {
-      timefilter.setRefreshInterval(globalState.refreshInterval);
-    }
-  }, [JSON.stringify(globalState?.refreshInterval), timefilter]);
+  useEffect(
+    () => {
+      if (globalState?.refreshInterval !== undefined) {
+        timefilter.setRefreshInterval(globalState.refreshInterval);
+      }
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [JSON.stringify(globalState?.refreshInterval), timefilter]
+  );
 
   const {
     documentCountStats,
@@ -329,6 +320,7 @@ export const useESQLDataVisualizerData = (
 
       setFieldStatFieldsToFetch(pageOfConfigs);
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       dataVisualizerListState.pageIndex,
       dataVisualizerListState.pageSize,
@@ -346,134 +338,140 @@ export const useESQLDataVisualizerData = (
     limitSize: fieldStatsRequest?.limitSize,
   });
 
-  const createMetricCards = useCallback(() => {
-    if (!columns || !overallStats) return;
-    const configs: FieldVisConfig[] = [];
-    const aggregatableExistsFields: AggregatableField[] =
-      overallStats.aggregatableExistsFields || [];
+  const createMetricCards = useCallback(
+    () => {
+      if (!columns || !overallStats) return;
+      const configs: FieldVisConfig[] = [];
+      const aggregatableExistsFields: AggregatableField[] =
+        overallStats.aggregatableExistsFields || [];
 
-    const allMetricFields = columns.filter((f) => {
-      return f.secondaryType === KBN_FIELD_TYPES.NUMBER;
-    });
-
-    const metricExistsFields = allMetricFields.filter((f) => {
-      return aggregatableExistsFields.find((existsF) => {
-        return existsF.fieldName === f.name;
+      const allMetricFields = columns.filter((f) => {
+        return f.secondaryType === KBN_FIELD_TYPES.NUMBER;
       });
-    });
 
-    let _aggregatableFields: AggregatableField[] = overallStats.aggregatableExistsFields;
-    if (allMetricFields.length !== metricExistsFields.length && metricsLoaded === true) {
-      _aggregatableFields = _aggregatableFields.concat(overallStats.aggregatableNotExistsFields);
-    }
-
-    const metricFieldsToShow =
-      metricsLoaded === true && showEmptyFields === true ? allMetricFields : metricExistsFields;
-
-    metricFieldsToShow.forEach((field) => {
-      const fieldData = _aggregatableFields.find((f) => {
-        return f.fieldName === field.name;
+      const metricExistsFields = allMetricFields.filter((f) => {
+        return aggregatableExistsFields.find((existsF) => {
+          return existsF.fieldName === f.name;
+        });
       });
-      if (!fieldData) return;
 
-      const metricConfig: FieldVisConfig = {
-        ...field,
-        ...fieldData,
-        loading: fieldData?.existsInDocs ?? true,
-        fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
-        aggregatable: true,
-        deletable: false,
-        type: getFieldType(field) as SupportedFieldType,
-      };
+      let _aggregatableFields: AggregatableField[] = overallStats.aggregatableExistsFields;
+      if (allMetricFields.length !== metricExistsFields.length && metricsLoaded === true) {
+        _aggregatableFields = _aggregatableFields.concat(overallStats.aggregatableNotExistsFields);
+      }
 
-      configs.push(metricConfig);
-    });
+      const metricFieldsToShow =
+        metricsLoaded === true && showEmptyFields === true ? allMetricFields : metricExistsFields;
 
-    setMetricsStats({
-      totalMetricFieldsCount: allMetricFields.length,
-      visibleMetricsCount: metricFieldsToShow.length,
-    });
-    setMetricConfigs(configs);
-  }, [metricsLoaded, overallStats, showEmptyFields, columns, currentDataView?.id]);
+      metricFieldsToShow.forEach((field) => {
+        const fieldData = _aggregatableFields.find((f) => {
+          return f.fieldName === field.name;
+        });
+        if (!fieldData) return;
 
-  const createNonMetricCards = useCallback(() => {
-    if (!columns || !overallStats) return;
+        const metricConfig: FieldVisConfig = {
+          ...field,
+          ...fieldData,
+          loading: fieldData?.existsInDocs ?? true,
+          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
+          aggregatable: true,
+          deletable: false,
+          type: getFieldType(field) as SupportedFieldType,
+        };
 
-    const allNonMetricFields = columns.filter((f) => {
-      return f.secondaryType !== KBN_FIELD_TYPES.NUMBER;
-    });
-    // Obtain the list of all non-metric fields which appear in documents
-    // (aggregatable or not aggregatable).
-    const populatedNonMetricFields: Column[] = []; // Kibana index pattern non metric fields.
-    let nonMetricFieldData: Array<AggregatableField | NonAggregatableField> = []; // Basic non metric field data loaded from requesting overall stats.
-    const aggregatableExistsFields: AggregatableField[] =
-      overallStats.aggregatableExistsFields || [];
-    const nonAggregatableExistsFields: NonAggregatableField[] =
-      overallStats.nonAggregatableExistsFields || [];
+        configs.push(metricConfig);
+      });
 
-    allNonMetricFields.forEach((f) => {
-      const checkAggregatableField = aggregatableExistsFields.find(
-        (existsField) => existsField.fieldName === f.name
-      );
+      setMetricsStats({
+        totalMetricFieldsCount: allMetricFields.length,
+        visibleMetricsCount: metricFieldsToShow.length,
+      });
+      setMetricConfigs(configs);
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [metricsLoaded, overallStats, showEmptyFields, columns, currentDataView?.id]
+  );
 
-      if (checkAggregatableField !== undefined) {
-        populatedNonMetricFields.push(f);
-        nonMetricFieldData.push(checkAggregatableField);
-      } else {
-        const checkNonAggregatableField = nonAggregatableExistsFields.find(
+  const createNonMetricCards = useCallback(
+    () => {
+      if (!columns || !overallStats) return;
+
+      const allNonMetricFields = columns.filter((f) => {
+        return f.secondaryType !== KBN_FIELD_TYPES.NUMBER;
+      });
+      // Obtain the list of all non-metric fields which appear in documents
+      // (aggregatable or not aggregatable).
+      const populatedNonMetricFields: Column[] = []; // Kibana index pattern non metric fields.
+      let nonMetricFieldData: Array<AggregatableField | NonAggregatableField> = []; // Basic non metric field data loaded from requesting overall stats.
+      const aggregatableExistsFields: AggregatableField[] =
+        overallStats.aggregatableExistsFields || [];
+      const nonAggregatableExistsFields: NonAggregatableField[] =
+        overallStats.nonAggregatableExistsFields || [];
+
+      allNonMetricFields.forEach((f) => {
+        const checkAggregatableField = aggregatableExistsFields.find(
           (existsField) => existsField.fieldName === f.name
         );
 
-        if (checkNonAggregatableField !== undefined) {
+        if (checkAggregatableField !== undefined) {
           populatedNonMetricFields.push(f);
-          nonMetricFieldData.push(checkNonAggregatableField);
+          nonMetricFieldData.push(checkAggregatableField);
+        } else {
+          const checkNonAggregatableField = nonAggregatableExistsFields.find(
+            (existsField) => existsField.fieldName === f.name
+          );
+
+          if (checkNonAggregatableField !== undefined) {
+            populatedNonMetricFields.push(f);
+            nonMetricFieldData.push(checkNonAggregatableField);
+          }
         }
-      }
-    });
+      });
 
-    if (allNonMetricFields.length !== nonMetricFieldData.length && showEmptyFields === true) {
-      // Combine the field data obtained from Elasticsearch into a single array.
-      nonMetricFieldData = nonMetricFieldData.concat(
-        overallStats.aggregatableNotExistsFields,
-        overallStats.nonAggregatableNotExistsFields
-      );
-    }
-
-    const nonMetricFieldsToShow = showEmptyFields ? allNonMetricFields : populatedNonMetricFields;
-
-    const configs: FieldVisConfig[] = [];
-
-    nonMetricFieldsToShow.forEach((field) => {
-      const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.name);
-      const nonMetricConfig: Partial<FieldVisConfig> = {
-        ...(fieldData ? fieldData : {}),
-        secondaryType: getFieldType(field) as SupportedFieldType,
-        loading: fieldData?.existsInDocs ?? true,
-        deletable: false,
-        fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
-      };
-
-      // Map the field type from the Kibana index pattern to the field type
-      // used in the data visualizer.
-      const dataVisualizerType = getFieldType(field) as SupportedFieldType;
-      if (dataVisualizerType !== undefined) {
-        nonMetricConfig.type = dataVisualizerType;
-      } else {
-        // Add a flag to indicate that this is one of the 'other' Kibana
-        // field types that do not yet have a specific card type.
-        nonMetricConfig.type = field.type as SupportedFieldType;
-        nonMetricConfig.isUnsupportedType = true;
+      if (allNonMetricFields.length !== nonMetricFieldData.length && showEmptyFields === true) {
+        // Combine the field data obtained from Elasticsearch into a single array.
+        nonMetricFieldData = nonMetricFieldData.concat(
+          overallStats.aggregatableNotExistsFields,
+          overallStats.nonAggregatableNotExistsFields
+        );
       }
 
-      if (field.name !== nonMetricConfig.fieldName) {
-        nonMetricConfig.displayName = field.name;
-      }
+      const nonMetricFieldsToShow = showEmptyFields ? allNonMetricFields : populatedNonMetricFields;
 
-      configs.push(nonMetricConfig as FieldVisConfig);
-    });
+      const configs: FieldVisConfig[] = [];
 
-    setNonMetricConfigs(configs);
-  }, [columns, nonMetricsLoaded, overallStats, showEmptyFields]);
+      nonMetricFieldsToShow.forEach((field) => {
+        const fieldData = nonMetricFieldData.find((f) => f.fieldName === field.name);
+        const nonMetricConfig: Partial<FieldVisConfig> = {
+          ...(fieldData ? fieldData : {}),
+          secondaryType: getFieldType(field) as SupportedFieldType,
+          loading: fieldData?.existsInDocs ?? true,
+          deletable: false,
+          fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
+        };
+
+        // Map the field type from the Kibana index pattern to the field type
+        // used in the data visualizer.
+        const dataVisualizerType = getFieldType(field) as SupportedFieldType;
+        if (dataVisualizerType !== undefined) {
+          nonMetricConfig.type = dataVisualizerType;
+        } else {
+          // Add a flag to indicate that this is one of the 'other' Kibana
+          // field types that do not yet have a specific card type.
+          nonMetricConfig.type = field.type as SupportedFieldType;
+          nonMetricConfig.isUnsupportedType = true;
+        }
+
+        if (field.name !== nonMetricConfig.fieldName) {
+          nonMetricConfig.displayName = field.name;
+        }
+
+        configs.push(nonMetricConfig as FieldVisConfig);
+      });
+
+      setNonMetricConfigs(configs);
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [columns, nonMetricsLoaded, overallStats, showEmptyFields]
+  );
 
   const fieldsCountStats: TotalFieldsStats | undefined = useMemo(() => {
     if (!overallStats) return;
@@ -497,42 +495,48 @@ export const useESQLDataVisualizerData = (
     return { visibleFieldsCount: _visibleFieldsCount, totalFieldsCount: _totalFieldsCount };
   }, [overallStats, showEmptyFields]);
 
-  useEffect(() => {
-    createMetricCards();
-    createNonMetricCards();
-  }, [overallStats, showEmptyFields]);
+  useEffect(
+    () => {
+      createMetricCards();
+      createNonMetricCards();
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [overallStats, showEmptyFields]
+  );
 
-  const configs = useMemo(() => {
-    let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
+  const configs = useMemo(
+    () => {
+      let combinedConfigs = [...nonMetricConfigs, ...metricConfigs];
 
-    combinedConfigs = filterFields(
-      combinedConfigs,
+      combinedConfigs = filterFields(
+        combinedConfigs,
+        visibleFieldNames,
+        visibleFieldTypes
+      ).filteredFields;
+
+      if (fieldStatsProgress.loaded === 100 && fieldStats) {
+        combinedConfigs = combinedConfigs.map((c) => {
+          const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
+          return loadedFullStats
+            ? {
+                ...c,
+                loading: false,
+                stats: { ...c.stats, ...loadedFullStats },
+              }
+            : c;
+        });
+      }
+      return combinedConfigs;
+    }, // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      nonMetricConfigs,
+      metricConfigs,
+      visibleFieldTypes,
       visibleFieldNames,
-      visibleFieldTypes
-    ).filteredFields;
-
-    if (fieldStatsProgress.loaded === 100 && fieldStats) {
-      combinedConfigs = combinedConfigs.map((c) => {
-        const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
-        return loadedFullStats
-          ? {
-              ...c,
-              loading: false,
-              stats: { ...c.stats, ...loadedFullStats },
-            }
-          : c;
-      });
-    }
-    return combinedConfigs;
-  }, [
-    nonMetricConfigs,
-    metricConfigs,
-    visibleFieldTypes,
-    visibleFieldNames,
-    fieldStatsProgress.loaded,
-    dataVisualizerListState.pageIndex,
-    dataVisualizerListState.pageSize,
-  ]);
+      fieldStatsProgress.loaded,
+      dataVisualizerListState.pageIndex,
+      dataVisualizerListState.pageSize,
+    ]
+  );
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -573,12 +577,13 @@ export const useESQLDataVisualizerData = (
     setFieldStatFieldsToFetch(undefined);
     setMetricConfigs(defaults.metricConfigs);
     setNonMetricConfigs(defaults.nonMetricConfigs);
-    if (q) {
+    if (q && setQuery) {
       setQuery(q);
     }
   };
 
   return {
+    totalCount,
     progress: combinedProgress,
     overallStatsProgress,
     configs,
@@ -586,7 +591,9 @@ export const useESQLDataVisualizerData = (
     // searchQueryLanguage,
     // searchString,
     // searchQuery,
-    // extendedColumns,
+    // Column with action to lens, data view editor, etc
+    // set to nothing for now
+    extendedColumns: undefined,
     documentCountStats,
     metricsStats,
     overallStats,
@@ -596,5 +603,9 @@ export const useESQLDataVisualizerData = (
     cancelOverallStatsRequest,
     cancelFieldStatsRequest,
     onQueryUpdate,
+    limitSize,
+    showEmptyFields,
+    fieldsCountStats,
+    setFieldStatFieldsToFetch,
   };
 };

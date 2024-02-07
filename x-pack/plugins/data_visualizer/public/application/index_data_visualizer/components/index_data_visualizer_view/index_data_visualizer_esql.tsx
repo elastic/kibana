@@ -69,6 +69,7 @@ import {
 } from '../../hooks/esql/use_data_visualizer_esql_data';
 import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 import { OverallStats } from '../../types/overall_stats';
+import { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 const defaults = getDefaultPageState();
 
@@ -111,7 +112,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const { data, fieldFormats, uiSettings } = services;
   const euiTheme = useCurrentEuiTheme();
 
-  const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
+  const [query, setQuery] = useState<ESQLQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
   const toggleShowEmptyFields = () => {
@@ -166,17 +167,6 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   //   }
   // };
 
-  useEffect(
-    function resetFieldStatsFieldToFetch() {
-      // If query returns 0 document, no need to do more work here
-      if (totalCount === undefined || totalCount === 0) {
-        setFieldStatFieldsToFetch(undefined);
-        return;
-      }
-    },
-    [totalCount]
-  );
-
   const indexPattern = useMemo(() => {
     let indexPatternFromQuery = '';
     if ('sql' in query) {
@@ -221,22 +211,18 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [indexPattern, data.dataViews, currentDataView]
   );
 
-  const input: DataVisualizerGridInput = useMemo(() => {
+  const input: DataVisualizerGridInput<ESQLQuery> = useMemo(() => {
     return {
       dataView: currentDataView,
-      savedSearch: currentSavedSearch,
-      sessionId: currentSessionId,
-      visibleFieldNames,
+      query,
+      savedSearch: undefined,
+      sessionId: undefined,
+      visibleFieldNames: undefined,
       allowEditDataView: true,
-      id: 'index_data_visualizer',
+      id: 'esql_data_visualizer',
+      indexPattern,
     };
-  }, [
-    currentDataView.id,
-    currentSavedSearch?.id,
-    visibleFieldNames,
-    indexPattern,
-    currentSessionId,
-  ]);
+  }, [currentDataView, query?.esql]);
 
   const hasValidTimeField = useMemo(
     () => currentDataView && currentDataView.timeFieldName !== '',
@@ -253,6 +239,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
 
   const {
+    totalCount,
     progress: combinedProgress,
     overallStatsProgress,
     configs,
@@ -268,7 +255,23 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     setLastRefresh,
     getItemIdToExpandedRowMap,
     onQueryUpdate,
+    limitSize,
+    showEmptyFields,
+    fieldsCountStats,
+    setFieldStatFieldsToFetch,
   } = useESQLDataVisualizerData(input, dataVisualizerListState, setQuery);
+
+  useEffect(
+    function resetFieldStatsFieldToFetch() {
+      // If query returns 0 document, no need to do more work here
+      if (totalCount === undefined || totalCount === 0) {
+        setFieldStatFieldsToFetch(undefined);
+        return;
+      }
+    },
+    [totalCount]
+  );
+
   return (
     <EuiPageTemplate
       offset={0}
@@ -361,7 +364,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                   onChangeLimitSize={updateLimitSize}
                 />
               </EuiFlexGroup>
-              <EuiSpacer size="m" />
+
               <EuiProgress value={combinedProgress} max={100} size="xs" />
               <DataVisualizerTable<FieldVisConfig>
                 items={configs}

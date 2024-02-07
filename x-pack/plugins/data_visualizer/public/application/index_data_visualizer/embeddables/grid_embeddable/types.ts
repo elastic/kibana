@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Filter } from '@kbn/es-query';
+import { AggregateQuery, Filter } from '@kbn/es-query';
 import type { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -14,10 +14,10 @@ import type { SamplingOption } from '../../../../../common/types/field_stats';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 
-export interface DataVisualizerGridInput {
-  dataView: DataView;
+export interface DataVisualizerGridInput<T = Query> {
+  dataView?: DataView;
   savedSearch?: SavedSearch | null;
-  query?: Query;
+  query?: T;
   visibleFieldNames?: string[];
   filters?: Filter[];
   showPreviewByDefault?: boolean;
@@ -35,9 +35,13 @@ export interface DataVisualizerGridInput {
    * If esql:true, switch table to ES|QL mode
    */
   esql?: boolean;
+  /**
+   * If esql:true, the index pattern is used to validate time field
+   */
+  indexPattern?: string;
 }
 
-export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput;
+export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<AggregateQuery>;
 
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
