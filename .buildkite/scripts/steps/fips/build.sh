@@ -19,6 +19,7 @@ node scripts/build \
     --skip-cdn-assets \
     --skip-archives \
     --docker-images \
+    --docker-namespace="kibana-ci" \
     --docker-tag-qualifier="$BUILDKITE_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
