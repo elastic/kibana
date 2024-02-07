@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 import chroma from 'chroma-js';
-import findLast from 'lodash/findLast';
+import { findLast } from 'lodash';
 import { ColorMapping } from '../config';
 import { changeAlpha, combineColors, getValidColor } from './color_math';
 import { getPalette, NeutralPalette } from '../palettes';
