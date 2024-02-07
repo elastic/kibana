@@ -44,6 +44,7 @@ describe('parseUrlParams', () => {
       status: ['open'],
       search: 'My title',
       owner: ['cases'],
+      customFields: { my_field: ['foo'] },
     };
 
     const url = `cases=${encode(state)}`;
@@ -54,6 +55,11 @@ describe('parseUrlParams', () => {
           "elastic",
         ],
         "category": Array [],
+        "customFields": Object {
+          "my_field": Array [
+            "foo",
+          ],
+        },
         "search": "My title",
         "status": Array [
           "open",
@@ -64,6 +70,16 @@ describe('parseUrlParams', () => {
         ],
       }
     `);
+  });
+
+  it('protects against prototype attacks', () => {
+    const firstUrl = 'cases=(customFields:(__proto__:!(foo)))';
+    const secondUrl = 'cases=(customFields:(__proto__:(property:payload)))';
+
+    // @ts-expect-error: testing prototype attacks
+    expect(parseUrlParams(new URLSearchParams(firstUrl)).__proto__).toEqual({});
+    // @ts-expect-error: testing prototype attacks
+    expect(parseUrlParams(new URLSearchParams(secondUrl)).__proto__).toEqual({});
   });
 
   it('parses empty query params correctly', () => {
@@ -226,6 +242,13 @@ describe('parseUrlParams', () => {
           "perPage": 10,
         }
       `);
+    });
+
+    it('protects against prototype attacks', () => {
+      const url = '__proto__[property]=payload';
+
+      // @ts-expect-error: testing prototype attacks
+      expect(parseUrlParams(new URLSearchParams(url)).__proto__.property).toEqual(undefined);
     });
   });
 });
