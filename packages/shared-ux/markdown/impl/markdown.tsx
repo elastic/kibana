@@ -11,7 +11,7 @@ import {
   EuiMarkdownEditor,
   EuiMarkdownEditorProps,
   EuiMarkdownFormat,
-  getDefaultEuiMarkdownProcessingPlugins,
+  getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';
 import React, { useState } from 'react';
 
@@ -20,9 +20,10 @@ export type MarkdownProps = Partial<
 > & {
   /**
    * @param readOnly is needed to differentiate where markdown is used as a presentation of error messages
-   * This was previous the MarkdownSimple component
+   * This was previous the MarkdownSimple component, it's default value is false
    */
-  readOnly: boolean;
+  readOnly?: boolean;
+  enableTooltipSupport?: boolean;
   defaultValue?: string;
   markdownContent?: string;
   ariaLabelContent?: string;
@@ -35,18 +36,22 @@ export type MarkdownProps = Partial<
 
 export const Markdown = ({
   ariaLabelContent,
-  readOnly,
   markdownContent,
   children,
   openLinksInNewTab = true,
   defaultValue = '',
   placeholder = '',
   height = 'full',
+  readOnly = false,
+  enableTooltipSupport = false,
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
 
+  const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
+    exclude: enableTooltipSupport ? undefined : ['tooltip'],
+  });
+
   // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
-  const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
   processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
   // Render EuiMarkdownFormat when readOnly set to true
@@ -57,6 +62,7 @@ export const Markdown = ({
     return (
       <EuiMarkdownFormat
         aria-label={ariaLabelContent ?? 'markdown component'}
+        parsingPluginList={parsingPlugins}
         processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
       >
         {children ?? markdownContent!}
@@ -72,6 +78,8 @@ export const Markdown = ({
       value={value}
       onChange={setValue}
       height={height}
+      uiPlugins={uiPlugins}
+      parsingPluginList={parsingPlugins}
       processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
     />
   );
