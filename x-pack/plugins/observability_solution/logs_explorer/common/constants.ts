@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SmartFieldGridColumnOptions } from '@kbn/logs-explorer-plugin/common/display_options';
+import { SmartFieldGridColumnOptions } from './display_options';
 
 export const LOGS_EXPLORER_PROFILE_ID = 'logs-explorer';
 
