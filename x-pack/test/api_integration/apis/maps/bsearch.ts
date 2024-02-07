@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
             {
               name: 'geo.coordinates',
               type: 'geo_point',
-            }
+            },
           ],
           values: [],
         });
