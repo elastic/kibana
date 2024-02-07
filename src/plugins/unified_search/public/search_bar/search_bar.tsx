@@ -92,6 +92,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  onCancel?: () => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
@@ -608,6 +609,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isDisabled={this.props.isDisabled}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
+          onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}
           customSubmitButton={

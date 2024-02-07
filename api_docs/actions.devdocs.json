@@ -5257,6 +5257,51 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_EXCHANGE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_EXCHANGE_URL",
+        "description": [],
+        "signature": [
+          "\"https://login.microsoftonline.com\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
+        "description": [],
+        "signature": [
+          "\"https://graph.microsoft.com/.default\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_GRAPH_API_URL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_GRAPH_API_URL",
+        "description": [],
+        "signature": [
+          "\"https://graph.microsoft.com/v1.0\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.ExecutionLogSortFields",
         "type": "Type",
         "tags": [],

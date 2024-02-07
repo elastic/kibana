@@ -25,6 +25,7 @@ export const getThreatMatchRuleForAlertTesting = (
   language: 'kuery',
   query: '*:*',
   threat_query: '*:*',
+  threat_language: 'kuery',
   threat_mapping: [
     // We match host.name against host.name
     {

@@ -1,0 +1,180 @@
+{
+  "id": "@kbn/ml-cancellable-search",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-cancellable-search",
+        "id": "def-common.useCancellableSearch",
+        "type": "Function",
+        "tags": [],
+        "label": "useCancellableSearch",
+        "description": [],
+        "signature": [
+          "(data: ",
+          {
+            "pluginId": "data",
+            "scope": "public",
+            "docId": "kibDataPluginApi",
+            "section": "def-public.DataPublicPluginStart",
+            "text": "DataPublicPluginStart"
+          },
+          ") => { runRequest: <RequestBody, ResponseType extends ",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.IKibanaSearchResponse",
+            "text": "IKibanaSearchResponse"
+          },
+          "<any>>(requestBody: RequestBody, options?: {}) => Promise<ResponseType | null>; cancelRequest: () => void; isLoading: boolean; }"
+        ],
+        "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-cancellable-search",
+            "id": "def-common.useCancellableSearch.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-cancellable-search",
+        "id": "def-common.UseCancellableSearch",
+        "type": "Interface",
+        "tags": [],
+        "label": "UseCancellableSearch",
+        "description": [],
+        "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-cancellable-search",
+            "id": "def-common.UseCancellableSearch.runRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "runRequest",
+            "description": [],
+            "signature": [
+              "<RequestBody, ResponseType extends ",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.IKibanaSearchResponse",
+                "text": "IKibanaSearchResponse"
+              },
+              "<any>>(requestBody: RequestBody, options?: object | undefined) => Promise<ResponseType | null>"
+            ],
+            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ml-cancellable-search",
+                "id": "def-common.UseCancellableSearch.runRequest.$1",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "requestBody",
+                "description": [],
+                "signature": [
+                  "RequestBody"
+                ],
+                "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/ml-cancellable-search",
+                "id": "def-common.UseCancellableSearch.runRequest.$2",
+                "type": "Uncategorized",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "object | undefined"
+                ],
+                "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-cancellable-search",
+            "id": "def-common.UseCancellableSearch.cancelRequest",
+            "type": "Function",
+            "tags": [],
+            "label": "cancelRequest",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/ml-cancellable-search",
+            "id": "def-common.UseCancellableSearch.isLoading",
+            "type": "boolean",
+            "tags": [],
+            "label": "isLoading",
+            "description": [],
+            "path": "x-pack/packages/ml/cancellable_search/src/use_cancellable_search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
