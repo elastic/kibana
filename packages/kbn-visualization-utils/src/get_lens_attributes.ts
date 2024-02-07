@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Suggestion } from './types';
 
 export const getLensAttributesFromSuggestion = ({
@@ -20,7 +21,7 @@ export const getLensAttributesFromSuggestion = ({
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
-}) => {
+}): TypedLensByValueInput['attributes'] => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -35,11 +36,11 @@ export const getLensAttributesFromSuggestion = ({
         };
   const visualization = suggestionVisualizationState;
   const attributes = {
-    title: suggestion
-      ? suggestion.title
-      : i18n.translate('visualizationUtils.config.suggestion.title', {
-          defaultMessage: 'New suggestion',
-        }),
+    title:
+      suggestion?.title ??
+      i18n.translate('visualizationUtils.config.suggestion.title', {
+        defaultMessage: 'New suggestion',
+      }),
     references: [
       {
         id: dataView?.id ?? '',
@@ -55,10 +56,10 @@ export const getLensAttributesFromSuggestion = ({
       ...(dataView &&
         dataView.id &&
         !dataView.isPersisted() && {
-          adHocDataViews: { [dataView.id]: dataView.toSpec(false) },
+          adHocDataViews: { [dataView.id]: dataView.toMinimalSpec() },
         }),
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   };
-  return attributes;
+  return attributes as TypedLensByValueInput['attributes'];
 };

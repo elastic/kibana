@@ -65,11 +65,6 @@ describe('LensVisService attributes', () => {
           "references": Array [
             Object {
               "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
-            Object {
-              "id": "index-pattern-with-timefield-id",
               "name": "indexpattern-datasource-layer-unifiedHistogram",
               "type": "index-pattern",
             },
@@ -191,7 +186,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "Edit visualization",
+          "title": "New suggestion",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -222,11 +217,6 @@ describe('LensVisService attributes', () => {
       Object {
         "attributes": Object {
           "references": Array [
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
             Object {
               "id": "index-pattern-with-timefield-id",
               "name": "indexpattern-datasource-layer-unifiedHistogram",
@@ -368,7 +358,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "Edit visualization",
+          "title": "New suggestion",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -399,11 +389,6 @@ describe('LensVisService attributes', () => {
       Object {
         "attributes": Object {
           "references": Array [
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
             Object {
               "id": "index-pattern-with-timefield-id",
               "name": "indexpattern-datasource-layer-unifiedHistogram",
@@ -527,7 +512,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "Edit visualization",
+          "title": "New suggestion",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -557,12 +542,7 @@ describe('LensVisService attributes', () => {
           "references": Array [
             Object {
               "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-current-indexpattern",
-              "type": "index-pattern",
-            },
-            Object {
-              "id": "index-pattern-with-timefield-id",
-              "name": "indexpattern-datasource-layer-unifiedHistogram",
+              "name": "textBasedLanguages-datasource-layer-suggestion",
               "type": "index-pattern",
             },
           ],
@@ -759,12 +739,7 @@ describe('LensVisService attributes', () => {
       references: [
         {
           id: 'index-pattern-with-timefield-id',
-          name: 'indexpattern-datasource-current-indexpattern',
-          type: 'index-pattern',
-        },
-        {
-          id: 'index-pattern-with-timefield-id',
-          name: 'indexpattern-datasource-layer-unifiedHistogram',
+          name: 'textBasedLanguages-datasource-layer-suggestion',
           type: 'index-pattern',
         },
       ],

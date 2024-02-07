@@ -17,11 +17,11 @@ import type {
   LensSuggestionsApi,
   Suggestion,
   TermsIndexPatternColumn,
-  TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { Filter, getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
+import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
 import { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -37,6 +37,8 @@ import { computeInterval } from '../utils/compute_interval';
 import { fieldSupportsBreakdown } from '../utils/field_supports_breakdown';
 import { shouldDisplayHistogram } from '../layout/helpers';
 import { updateTablesInLensAttributes } from '../utils/lens_vis_from_table';
+
+const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
 const stateSelectorFactory =
   <S>(state$: Observable<S>) =>
@@ -411,7 +413,7 @@ export class LensVisService {
 
     const datasourceState = {
       layers: {
-        unifiedHistogram: { columnOrder, columns },
+        [UNIFIED_HISTOGRAM_LAYER_ID]: { columnOrder, columns },
       },
     };
 
@@ -419,7 +421,7 @@ export class LensVisService {
       layers: [
         {
           accessors: ['count_column'],
-          layerId: 'unifiedHistogram',
+          layerId: UNIFIED_HISTOGRAM_LAYER_ID,
           layerType: 'data',
           seriesType: 'bar_stacked',
           xAccessor: 'date_column',
@@ -575,7 +577,7 @@ export class LensVisService {
     const { dataView, query, filters, timeRange } = queryParams;
     const { type: suggestionType, suggestion } = currentSuggestionContext;
 
-    if (!suggestion || !suggestion.datasourceId) {
+    if (!suggestion || !suggestion.datasourceId || !query || !filters) {
       return {
         shouldUpdateVisContextDueToIncompatibleSuggestion: false,
         lensAttributesContext: undefined,
@@ -622,48 +624,22 @@ export class LensVisService {
     }
 
     if (!lensAttributesContext) {
-      const suggestionDatasourceState = Object.assign({}, suggestion.datasourceState);
-      const suggestionVisualizationState = Object.assign({}, suggestion.visualizationState);
-      const datasourceStates = {
-        [suggestion.datasourceId]: {
-          ...suggestionDatasourceState,
-        },
-      };
-      const visualization = suggestionVisualizationState;
+      const attributes = getLensAttributesFromSuggestion({
+        query: currentQuery,
+        filters,
+        suggestion,
+        dataView,
+      });
 
-      const attributes = {
-        title:
-          suggestion?.title ??
-          i18n.translate('unifiedHistogram.lensTitle', {
-            defaultMessage: 'Edit visualization',
-          }),
-        references: [
+      if (suggestionType === UnifiedHistogramSuggestionType.localHistogramDefault) {
+        attributes.references = [
           {
             id: dataView.id ?? '',
-            name: 'indexpattern-datasource-current-indexpattern',
+            name: `indexpattern-datasource-layer-${UNIFIED_HISTOGRAM_LAYER_ID}`,
             type: 'index-pattern',
           },
-          {
-            id: dataView.id ?? '',
-            name: 'indexpattern-datasource-layer-unifiedHistogram',
-            type: 'index-pattern',
-          },
-        ],
-        state: {
-          datasourceStates,
-          filters,
-          query: currentQuery,
-          visualization,
-          ...(dataView &&
-            dataView.id &&
-            !dataView.isPersisted() && {
-              adHocDataViews: {
-                [dataView.id]: dataView.toMinimalSpec(),
-              },
-            }),
-        },
-        visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
-      } as TypedLensByValueInput['attributes'];
+        ];
+      }
 
       lensAttributesContext = {
         attributes,
@@ -673,10 +649,10 @@ export class LensVisService {
     }
 
     if (
+      table && // already fetched data
       query &&
       isOfAggregateQueryType(query) &&
       suggestionType === UnifiedHistogramSuggestionType.supportedLensSuggestion &&
-      table &&
       lensAttributesContext?.attributes
     ) {
       lensAttributesContext = {
