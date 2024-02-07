@@ -176,9 +176,10 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
+  const canReadAssetCriticality = privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
-    enabled: privileges.data?.has_all_required,
+    enabled: canReadAssetCriticality,
   });
 
   return (
@@ -213,19 +214,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   ),
                 ]}
               />
-
-              <EuiTitle size="xs">
-                <h3>
-                  <FormattedMessage
-                    id="xpack.securitySolution..users.assetCriticality.sectionTitle"
-                    defaultMessage="Asset Criticality"
-                  />
-                </h3>
-              </EuiTitle>
-              <EuiSpacer size="s" />
-              <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
-              <EuiHorizontalRule margin="m" />
-
+              {canReadAssetCriticality && (
+                <>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.securitySolution..users.assetCriticality.sectionTitle"
+                        defaultMessage="Asset Criticality"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                  <EuiHorizontalRule margin="m" />
+                </>
+              )}
               <AnomalyTableProvider
                 criteriaFields={hostToCriteria(hostOverview)}
                 startDate={from}

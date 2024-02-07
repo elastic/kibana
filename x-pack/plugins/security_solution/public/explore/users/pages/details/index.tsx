@@ -179,9 +179,10 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
 
   const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
+  const canReadAssetCriticality = privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
-    enabled: privileges.data?.has_all_required,
+    enabled: canReadAssetCriticality,
   });
 
   return (
@@ -205,18 +206,22 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
               title={detailName}
             />
 
-            <EuiHorizontalRule margin="m" />
-            <EuiTitle size="xs">
-              <h3>
-                <FormattedMessage
-                  id="xpack.securitySolution..users.assetCriticality.sectionTitle"
-                  defaultMessage="Asset Criticality"
-                />
-              </h3>
-            </EuiTitle>
-            <EuiSpacer size="s" />
-            <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
-            <EuiHorizontalRule margin="m" />
+            {canReadAssetCriticality && (
+              <>
+                <EuiHorizontalRule margin="m" />
+                <EuiTitle size="xs">
+                  <h3>
+                    <FormattedMessage
+                      id="xpack.securitySolution..users.assetCriticality.sectionTitle"
+                      defaultMessage="Asset Criticality"
+                    />
+                  </h3>
+                </EuiTitle>
+                <EuiSpacer size="s" />
+                <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                <EuiHorizontalRule margin="m" />
+              </>
+            )}
 
             <AnomalyTableProvider
               criteriaFields={getCriteriaFromUsersType(UsersType.details, detailName)}
