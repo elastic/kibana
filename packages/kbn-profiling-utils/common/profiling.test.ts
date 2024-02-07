@@ -14,6 +14,7 @@ import {
   getCalleeSource,
   getFrameSymbolStatus,
   getLanguageType,
+  normalizeFrameType,
 } from './profiling';
 
 describe('Stack frame metadata operations', () => {
@@ -80,6 +81,14 @@ describe('Stack frame metadata operations', () => {
     });
     expect(getCalleeSource(metadata)).toEqual('runtime/malloc.go');
   });
+
+  test('metadata indicates an error frame', () => {
+    const metadata = createStackFrameMetadata({
+      FrameType: FrameType.Error,
+      AddressOrLine: 1234,
+    });
+    expect(getCalleeSource(metadata)).toEqual('unwinding error code #1234');
+  });
 });
 
 describe('getFrameSymbolStatus', () => {
@@ -98,6 +107,20 @@ describe('getFrameSymbolStatus', () => {
     expect(getFrameSymbolStatus({ sourceFilename: 'foo', sourceLine: 10 })).toEqual(
       FrameSymbolStatus.SYMBOLIZED
     );
+  });
+});
+
+describe('normalizeFrameType', () => {
+  it('rewrites any frame with error bit to the generic error variant', () => {
+    expect(normalizeFrameType(0x83 as FrameType)).toEqual(FrameType.Error);
+  });
+  it('rewrites unknown frame types to "unsymbolized" variant', () => {
+    expect(normalizeFrameType(0x123 as FrameType)).toEqual(FrameType.Unsymbolized);
+  });
+  it('passes regular known frame types through untouched', () => {
+    expect(normalizeFrameType(FrameType.JVM)).toEqual(FrameType.JVM);
+    expect(normalizeFrameType(FrameType.Native)).toEqual(FrameType.Native);
+    expect(normalizeFrameType(FrameType.JavaScript)).toEqual(FrameType.JavaScript);
   });
 });
 
