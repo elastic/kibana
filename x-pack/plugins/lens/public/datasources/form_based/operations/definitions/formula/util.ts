@@ -13,6 +13,7 @@ import type {
   TinymathVariable,
 } from '@kbn/tinymath';
 import type { Query } from '@kbn/es-query';
+import { parse } from '@kbn/tinymath';
 import { tinymathFunctions } from '@kbn/lens-formula-docs';
 import { nonNullable } from '../../../../../utils';
 import type {

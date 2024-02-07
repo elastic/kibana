@@ -9,7 +9,8 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EuiSwitch, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
+import { AggFunctionsMapping } from '@kbn/data-plugin/common';
 import {
   AVG_ID,
   AVG_NAME,
