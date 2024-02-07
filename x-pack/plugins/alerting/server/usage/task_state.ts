@@ -85,6 +85,11 @@ export const stateSchemaByVersion = {
         state.count_failed_and_unrecognized_rule_tasks_by_status_per_day || {},
       count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
         state.count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day || {},
+      count_rules_by_search_type: state.count_rules_by_search_type || {
+        es_query: 0,
+        search_source: 0,
+        esql_query: 0,
+      },
       avg_execution_time_per_day: state.avg_execution_time_per_day || 0,
       avg_execution_time_by_type_per_day: state.avg_execution_time_by_type_per_day || {},
       avg_es_search_duration_per_day: state.avg_es_search_duration_per_day || 0,
@@ -178,6 +183,11 @@ export const stateSchemaByVersion = {
         schema.string(),
         schema.recordOf(schema.string(), schema.number())
       ),
+      count_rules_by_search_type: schema.object({
+        es_query: schema.number(),
+        search_source: schema.number(),
+        esql_query: schema.number(),
+      }),
       avg_execution_time_per_day: schema.number(),
       avg_execution_time_by_type_per_day: schema.recordOf(schema.string(), schema.number()),
       avg_es_search_duration_per_day: schema.number(),
@@ -262,6 +272,11 @@ export const emptyState: LatestTaskStateSchema = {
   count_failed_and_unrecognized_rule_tasks_per_day: 0,
   count_failed_and_unrecognized_rule_tasks_by_status_per_day: {},
   count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day: {},
+  count_rules_by_search_type: {
+    es_query: 0,
+    search_source: 0,
+    esql_query: 0,
+  },
   avg_execution_time_per_day: 0,
   avg_execution_time_by_type_per_day: {},
   avg_es_search_duration_per_day: 0,

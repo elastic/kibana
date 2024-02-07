@@ -172,6 +172,7 @@ export function telemetryTaskRunner(
                   dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatus,
                 count_failed_and_unrecognized_rule_tasks_by_status_by_type_per_day:
                   dailyFailedAndUnrecognizedTasks.countFailedAndUnrecognizedTasksByStatusByType,
+                count_rules_by_search_type: totalCountAggregations.count_rules_by_search_type,
                 avg_execution_time_per_day: dailyExecutionCounts.avgExecutionTime,
                 avg_execution_time_by_type_per_day: dailyExecutionCounts.avgExecutionTimeByType,
                 avg_es_search_duration_per_day: dailyExecutionCounts.avgEsSearchDuration,
