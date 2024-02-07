@@ -53,9 +53,15 @@ export interface AddInferencePipelineFlyoutProps {
 
 export const AddInferencePipelineFlyout = (props: AddInferencePipelineFlyoutProps) => {
   const { indexName } = useValues(IndexNameLogic);
-  const { setIndexName } = useActions(MLInferenceLogic);
+  const { setIndexName, makeMlInferencePipelinesRequest, startPollingModels, makeMappingRequest } =
+    useActions(MLInferenceLogic);
   useEffect(() => {
     setIndexName(indexName);
+
+    // Trigger fetching of initial data: existing ML pipelines, available models, index mapping
+    makeMlInferencePipelinesRequest(undefined);
+    startPollingModels();
+    makeMappingRequest({ indexName });
   }, [indexName]);
 
   return (

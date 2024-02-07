@@ -281,11 +281,6 @@ export const MLInferenceLogic = kea<
       ['data as existingPipeline'],
     ],
   },
-  events: ({ actions }) => ({
-    afterMount: () => {
-      actions.startPollingModels();
-    },
-  }),
   listeners: ({ values, actions }) => ({
     attachPipeline: () => {
       const {
