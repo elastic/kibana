@@ -33,6 +33,7 @@ export enum FrameType {
   Perl,
   JavaScript,
   PHPJIT,
+  Error = 0xFF,
 }
 
 const frameTypeDescriptions = {
@@ -46,7 +47,27 @@ const frameTypeDescriptions = {
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
+  [FrameType.Error]: 'Error',
 };
+
+/**
+ * normalize the given frame type
+ * @param ft FrameType
+ * @returns FrameType
+ */
+export function normalizeFrameType(ft: FrameType): FrameType {
+  // Normalize any frame type with error bit into our uniform error variant.
+  if (((ft as number) & 0x80) != 0) {
+    return FrameType.Error;
+  }
+
+  // Guard against new / unknown frame types, rewriting them to "unsymbolized".
+  if (!(ft in frameTypeDescriptions)) {
+    return FrameType.Unsymbolized;
+  }
+
+  return ft;
+}
 
 /**
  * get frame type name
@@ -54,7 +75,7 @@ const frameTypeDescriptions = {
  * @returns string
  */
 export function describeFrameType(ft: FrameType): string {
-  return frameTypeDescriptions[ft];
+  return frameTypeDescriptions[normalizeFrameType(ft)];
 }
 
 export interface StackTraceEvent {
@@ -214,7 +235,9 @@ function getExeFileName(metadata: StackFrameMetadata) {
  */
 export function getCalleeLabel(metadata: StackFrameMetadata) {
   const inlineLabel = metadata.Inline ? '-> ' : '';
-  if (metadata.FunctionName !== '') {
+  if (metadata.FrameType === FrameType.Error) {
+    return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`
+  } else if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
     return `${inlineLabel}${getExeFileName(metadata)}: ${getFunctionName(
@@ -298,6 +321,10 @@ export function getLanguageType(param: LanguageTypeParams) {
  * @returns string
  */
 export function getCalleeSource(frame: StackFrameMetadata): string {
+  if (frame.FrameType === FrameType.Error) {
+    return `unwinding error code #${frame.AddressOrLine.toString()}`;
+  }
+
   const frameSymbolStatus = getFrameSymbolStatus({
     sourceFilename: frame.SourceFilename,
     sourceLine: frame.SourceLine,
