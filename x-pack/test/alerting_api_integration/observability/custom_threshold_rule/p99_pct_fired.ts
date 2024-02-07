@@ -6,6 +6,7 @@
  */
 
 import moment from 'moment';
+import { omit } from 'lodash';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
@@ -14,15 +15,16 @@ import {
 import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
+import { parseSearchParams } from '@kbn/share-plugin/common/url_service';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
   waitForRuleStatus,
 } from '../helpers/alerting_wait_for_helpers';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { ActionDocument } from './typings';
+import { ActionDocument, LogsExplorerLocatorParsedParams } from './typings';
+import { ISO_DATE_REGEX } from './constants';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getService }: FtrProviderContext) {
@@ -31,11 +33,23 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
 
-  describe('Custom  Threshold rule - GROUP_BY - FIRED', () => {
+  describe('Custom Threshold rule - P99 - PCT - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATE_VIEW_TITLE = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
+    const MOCKED_AD_HOC_DATA_VIEW = {
+      id: DATA_VIEW_ID,
+      title: DATE_VIEW_TITLE,
+      timeFieldName: '@timestamp',
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      allowNoIndex: false,
+      name: DATE_VIEW_NAME,
+      allowHidden: false,
+    };
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
     let actionId: string;
@@ -50,31 +64,17 @@ export default function ({ getService }: FtrProviderContext) {
             template: 'good',
             start: 'now-15m',
             end: 'now',
-            metrics: [
-              { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
-              { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
-              { name: 'system.cpu.total.norm.pct', method: 'linear', start: 0.8, end: 0.8 },
-            ],
+            metrics: [{ name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 }],
           },
         ],
-        indexing: {
-          dataset: 'fake_hosts' as Dataset,
-          eventsPerCycle: 1,
-          interval: 10000,
-          alignEventsToInterval: true,
-        },
+        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
+      logger.info(JSON.stringify(dataForgeIndices.join(',')));
       await waitForDocumentInIndex({
         esClient,
-        indexName: dataForgeIndices.join(','),
+        indexName: DATE_VIEW_TITLE,
         docCountTarget: 270,
-      });
-      await createDataView({
-        supertest,
-        name: DATA_VIEW,
-        id: DATA_VIEW_ID,
-        title: DATA_VIEW,
       });
     });
 
@@ -88,10 +88,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
-      });
-      await deleteDataView({
-        supertest,
-        id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, ...dataForgeIndices]);
       await cleanup({ client: esClient, config: dataForgeConfig, logger });
@@ -114,13 +110,11 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                comparator: Comparator.GT_OR_EQ,
-                threshold: [0.2],
-                timeSize: 1,
+                comparator: Comparator.GT,
+                threshold: [0.5],
+                timeSize: 5,
                 timeUnit: 'm',
-                metrics: [
-                  { name: 'A', field: 'system.cpu.total.norm.pct', aggType: Aggregators.AVERAGE },
-                ],
+                metrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: Aggregators.P99 }],
               },
             ],
             alertOnNoData: true,
@@ -130,9 +124,8 @@ export default function ({ getService }: FtrProviderContext) {
                 query: '',
                 language: 'kuery',
               },
-              index: DATA_VIEW_ID,
+              index: MOCKED_AD_HOC_DATA_VIEW,
             },
-            groupBy: ['host.name', 'container.id'],
           },
           actions: [
             {
@@ -146,7 +139,7 @@ export default function ({ getService }: FtrProviderContext) {
                     reason: '{{context.reason}}',
                     value: '{{context.value}}',
                     host: '{{context.host}}',
-                    group: '{{context.group}}',
+                    viewInAppUrl: '{{context.viewInAppUrl}}',
                   },
                 ],
               },
@@ -202,51 +195,29 @@ export default function ({ getService }: FtrProviderContext) {
           'custom_threshold.fired'
         );
         expect(resp.hits.hits[0]._source).property('tags').contain('observability');
-        expect(resp.hits.hits[0]._source).property(
-          'kibana.alert.instance.id',
-          'host-0,container-0'
-        );
+        expect(resp.hits.hits[0]._source).property('kibana.alert.instance.id', '*');
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
-        expect(resp.hits.hits[0]._source).property('host.name', 'host-0');
-        expect(resp.hits.hits[0]._source)
-          .property('host.mac')
-          .eql(['00-00-5E-00-53-23', '00-00-5E-00-53-24']);
-        expect(resp.hits.hits[0]._source).property('container.id', 'container-0');
-        expect(resp.hits.hits[0]._source).property('container.name', 'container-name');
-        expect(resp.hits.hits[0]._source).not.property('container.cpu');
-
-        expect(resp.hits.hits[0]._source)
-          .property('kibana.alert.group')
-          .eql([
-            {
-              field: 'host.name',
-              value: 'host-0',
-            },
-            {
-              field: 'container.id',
-              value: 'container-0',
-            },
-          ]);
 
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({
             criteria: [
               {
-                comparator: '>=',
-                threshold: [0.2],
-                timeSize: 1,
+                comparator: '>',
+                threshold: [0.5],
+                timeSize: 5,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'system.cpu.user.pct', aggType: 'p99' }],
               },
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
-            groupBy: ['host.name', 'container.id'],
+            searchConfiguration: {
+              index: MOCKED_AD_HOC_DATA_VIEW,
+              query: { query: '', language: 'kuery' },
+            },
           });
       });
 
@@ -262,15 +233,21 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0)`
+          `99th percentile of system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('80%');
-        expect(resp.hits.hits[0]._source?.host).eql(
-          '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
+        expect(resp.hits.hits[0]._source?.value).eql('250%');
+
+        const parsedViewInAppUrl = parseSearchParams<LogsExplorerLocatorParsedParams>(
+          new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
-        expect(resp.hits.hits[0]._source?.group).eql(
-          '{"field":"host.name","value":"host-0"},{"field":"container.id","value":"container-0"}'
-        );
+
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
+          dataset: DATE_VIEW_TITLE,
+          timeRange: { to: 'now' },
+          query: { query: '', language: 'kuery' },
+        });
+        expect(parsedViewInAppUrl.params.timeRange.from).match(ISO_DATE_REGEX);
       });
     });
   });

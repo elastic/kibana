@@ -31,10 +31,10 @@ export default function ({ getService }: FtrProviderContext) {
   const esDeleteAllIndices = getService('esDeleteAllIndices');
   const logger = getService('log');
 
-  describe('Custom  Threshold rule - GROUP_BY - FIRED', () => {
+  describe('Custom Threshold rule RATE - GROUP_BY - BYTES - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATA_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
+    const DATE_VIEW = 'kbn-data-forge-fake_hosts.fake_hosts-*';
     const DATA_VIEW_ID = 'data-view-id';
     let dataForgeConfig: PartialConfig;
     let dataForgeIndices: string[];
@@ -50,19 +50,10 @@ export default function ({ getService }: FtrProviderContext) {
             template: 'good',
             start: 'now-15m',
             end: 'now',
-            metrics: [
-              { name: 'system.cpu.user.pct', method: 'linear', start: 2.5, end: 2.5 },
-              { name: 'system.cpu.total.pct', method: 'linear', start: 0.5, end: 0.5 },
-              { name: 'system.cpu.total.norm.pct', method: 'linear', start: 0.8, end: 0.8 },
-            ],
+            metrics: [{ name: 'system.network.in.bytes', method: 'exp', start: 10, end: 100 }],
           },
         ],
-        indexing: {
-          dataset: 'fake_hosts' as Dataset,
-          eventsPerCycle: 1,
-          interval: 10000,
-          alignEventsToInterval: true,
-        },
+        indexing: { dataset: 'fake_hosts' as Dataset, eventsPerCycle: 1, interval: 10000 },
       };
       dataForgeIndices = await generate({ client: esClient, config: dataForgeConfig, logger });
       await waitForDocumentInIndex({
@@ -72,9 +63,9 @@ export default function ({ getService }: FtrProviderContext) {
       });
       await createDataView({
         supertest,
-        name: DATA_VIEW,
+        name: DATE_VIEW,
         id: DATA_VIEW_ID,
-        title: DATA_VIEW,
+        title: DATE_VIEW,
       });
     });
 
@@ -119,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeSize: 1,
                 timeUnit: 'm',
                 metrics: [
-                  { name: 'A', field: 'system.cpu.total.norm.pct', aggType: Aggregators.AVERAGE },
+                  { name: 'A', field: 'system.network.in.bytes', aggType: Aggregators.RATE },
                 ],
               },
             ],
@@ -240,7 +231,7 @@ export default function ({ getService }: FtrProviderContext) {
                 threshold: [0.2],
                 timeSize: 1,
                 timeUnit: 'm',
-                metrics: [{ name: 'A', field: 'system.cpu.total.norm.pct', aggType: 'avg' }],
+                metrics: [{ name: 'A', field: 'system.network.in.bytes', aggType: 'rate' }],
               },
             ],
             alertOnNoData: true,
@@ -262,9 +253,9 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          `Average system.cpu.total.norm.pct is 80%, above or equal the threshold of 20%. (duration: 1 min, data view: ${DATA_VIEW}, group: host-0,container-0)`
+          `Rate of system.network.in.bytes is 0.2 B/s, above or equal the threshold of 0.2 B/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('80%');
+        expect(resp.hits.hits[0]._source?.value).eql('0.2 B/s');
         expect(resp.hits.hits[0]._source?.host).eql(
           '{"name":"host-0","mac":["00-00-5E-00-53-23","00-00-5E-00-53-24"]}'
         );
