@@ -125,7 +125,7 @@ export const checkIfIndicesExist = ({
   signalIndexName,
   isDefaultDataViewSelected,
 }: CheckIfIndicesExistParams) => {
-  // TODO: lmao https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L403
+  // TODO: https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L403
   return scopeId === SourcererScopeName.detections
     ? patternList.includes(`${signalIndexName}`)
     : scopeId === SourcererScopeName.default
