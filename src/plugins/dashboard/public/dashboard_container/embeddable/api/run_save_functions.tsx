@@ -14,7 +14,9 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { DashboardContainerInput } from '../../../../common';
+
+import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -185,7 +187,8 @@ export async function runQuickSave(this: DashboardContainer) {
   if (managed) return;
 
   const nextPanels = await serializeAllPanelState(this);
-  let stateToSave: SavedDashboardInput = { ...currentState, panels: nextPanels };
+  const dashboardStateToSave: DashboardContainerInput = { ...currentState, panels: nextPanels };
+  let stateToSave: SavedDashboardInput = dashboardStateToSave;
   let persistableControlGroupInput: PersistableControlGroupInput | undefined;
   if (this.controlGroup) {
     persistableControlGroupInput = this.controlGroup.getPersistableInput();
@@ -198,7 +201,7 @@ export async function runQuickSave(this: DashboardContainer) {
     saveOptions: {},
   });
 
-  this.dispatch.setLastSavedInput(currentState);
+  this.dispatch.setLastSavedInput(dashboardStateToSave);
   this.lastSavedState.next();
   if (this.controlGroup && persistableControlGroupInput) {
     this.controlGroup.dispatch.setLastSavedInput(persistableControlGroupInput);
@@ -241,12 +244,38 @@ export async function runClone(this: DashboardContainer) {
         };
       }
 
+      const isManaged = this.getState().componentState.managed;
+      const newPanels = await (async () => {
+        if (!isManaged) return currentState.panels;
+
+        // this is a managed dashboard - unlink all by reference embeddables on clone
+        const unlinkedPanels: DashboardPanelMap = {};
+        for (const [panelId, panel] of Object.entries(currentState.panels)) {
+          const child = this.getChild(panelId);
+          if (
+            child &&
+            isReferenceOrValueEmbeddable(child) &&
+            child.inputIsRefType(child.getInput() as EmbeddableInput)
+          ) {
+            const valueTypeInput = await child.getInputAsValueType();
+            unlinkedPanels[panelId] = {
+              ...panel,
+              explicitInput: valueTypeInput,
+            };
+            continue;
+          }
+          unlinkedPanels[panelId] = panel;
+        }
+        return unlinkedPanels;
+      })();
+
       const saveResult = await saveDashboardState({
         saveOptions: {
           saveAsCopy: true,
         },
         currentState: {
           ...stateToSave,
+          panels: newPanels,
           title: newTitle,
         },
       });
