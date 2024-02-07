@@ -63,7 +63,6 @@ import {
   DashboardPublicState,
   DashboardReduxState,
   DashboardRenderPerformanceStats,
-  DashboardStateFromSaveModal,
 } from '../types';
 import {
   addFromLibrary,
@@ -531,21 +530,6 @@ export class DashboardContainer
   }
 
   public onDataViewsUpdate$ = new Subject<DataView[]>();
-
-  public saveDashboard(
-    savedState: DashboardContainerInput,
-    stateFromSaveModal?: DashboardStateFromSaveModal
-  ) {
-    batch(() => {
-      if (this.controlGroup && savedState?.controlGroupInput) {
-        this.controlGroup.dispatch.setLastSavedInput(savedState.controlGroupInput);
-      }
-      if (stateFromSaveModal) {
-        this.dispatch.setStateFromSaveModal(stateFromSaveModal);
-      }
-      this.dispatch.setLastSavedInput(savedState);
-    });
-  }
 
   public resetToLastSavedState() {
     this.dispatch.resetToLastSavedInput({});

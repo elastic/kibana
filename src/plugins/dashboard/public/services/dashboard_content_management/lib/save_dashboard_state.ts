@@ -90,7 +90,6 @@ export const saveDashboardState = async ({
     query,
     title,
     filters,
-    // version,
     timeRestore,
     description,
 
