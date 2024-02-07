@@ -38,7 +38,7 @@ interface Props {
   status: FETCH_STATUS;
   compact?: boolean;
   showPerPageOptions?: boolean;
-  shouldShowSparkPlotsProp?: boolean;
+  showSparkPlots?: boolean;
 }
 
 type FormattedSpanMetricGroup = SpanMetricGroup & {
@@ -57,11 +57,11 @@ export function DependenciesTable(props: Props) {
     compact = true,
     showPerPageOptions = true,
     initialPageSize,
-    shouldShowSparkPlotsProp,
+    showSparkPlots,
   } = props;
 
   const { isLarge } = useBreakpoints();
-  const shouldShowSparkPlots = shouldShowSparkPlotsProp ?? !isLarge;
+  const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
 
   const items: FormattedSpanMetricGroup[] = dependencies.map((dependency) => ({
     name: dependency.name,
