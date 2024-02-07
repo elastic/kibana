@@ -50,6 +50,7 @@ export {
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingAzureCostDiscountRate,
 } from './ui_settings_keys';
 
 export {

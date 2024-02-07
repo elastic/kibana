@@ -9,6 +9,22 @@ import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import { ProfilingESClient } from '../../../common/profiling_es_client';
 import { kqlQuery } from '../../utils/query';
 
+interface Params {
+  client: ProfilingESClient;
+  sampleSize: number;
+  rangeFrom: number;
+  rangeTo: number;
+  kuery: string;
+  durationSeconds: number;
+  co2PerKWH: number;
+  datacenterPUE: number;
+  pervCPUWattX86: number;
+  pervCPUWattArm64: number;
+  awsCostDiscountRate: number;
+  costPervCPUPerHour: number;
+  azureCostDiscountRate: number;
+}
+
 export async function searchStackTraces({
   client,
   sampleSize,
@@ -22,20 +38,8 @@ export async function searchStackTraces({
   pervCPUWattArm64,
   awsCostDiscountRate,
   costPervCPUPerHour,
-}: {
-  client: ProfilingESClient;
-  sampleSize: number;
-  rangeFrom: number;
-  rangeTo: number;
-  kuery: string;
-  durationSeconds: number;
-  co2PerKWH: number;
-  datacenterPUE: number;
-  pervCPUWattX86: number;
-  pervCPUWattArm64: number;
-  awsCostDiscountRate: number;
-  costPervCPUPerHour: number;
-}) {
+  azureCostDiscountRate,
+}: Params) {
   const response = await client.profilingStacktraces({
     query: {
       bool: {
@@ -62,6 +66,7 @@ export async function searchStackTraces({
     pervCPUWattArm64,
     awsCostDiscountRate,
     costPervCPUPerHour,
+    azureCostDiscountRate,
   });
 
   return decodeStackTraceResponse(response);

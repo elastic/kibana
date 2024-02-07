@@ -624,6 +624,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:profilingAzureCostDiscountRate': {
+    type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'data_views:fields_excluded_data_tiers': {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },

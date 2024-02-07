@@ -24,6 +24,7 @@ import {
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
@@ -46,7 +47,11 @@ const co2Settings = [
   profilingPervCPUWattX86,
   profilingPervCPUWattArm64,
 ];
-const costSettings = [profilingAWSCostDiscountRate, profilingCostPervCPUPerHour];
+const costSettings = [
+  profilingAWSCostDiscountRate,
+  profilingAzureCostDiscountRate,
+  profilingCostPervCPUPerHour,
+];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });

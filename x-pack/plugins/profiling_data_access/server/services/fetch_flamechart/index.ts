@@ -13,6 +13,7 @@ import {
   profilingDatacenterPUE,
   profilingPervCPUWattArm64,
   profilingPervCPUWattX86,
+  profilingAzureCostDiscountRate,
 } from '@kbn/observability-plugin/common';
 import { percentToFactor } from '../../utils/percent_to_factor';
 import { kqlQuery } from '../../utils/query';
@@ -40,6 +41,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       pervCPUWattArm64,
       awsCostDiscountRate,
       costPervCPUPerHour,
+      azureCostDiscountRate,
     ] = await Promise.all([
       core.uiSettings.client.get<number>(profilingCo2PerKWH),
       core.uiSettings.client.get<number>(profilingDatacenterPUE),
@@ -47,6 +49,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       core.uiSettings.client.get<number>(profilingPervCPUWattArm64),
       core.uiSettings.client.get<number>(profilingAWSCostDiscountRate),
       core.uiSettings.client.get<number>(profilingCostPervCPUPerHour),
+      core.uiSettings.client.get<number>(profilingAzureCostDiscountRate),
     ]);
 
     const profilingEsClient = createProfilingEsClient({ esClient });
@@ -76,6 +79,7 @@ export function createFetchFlamechart({ createProfilingEsClient }: RegisterServi
       pervCPUWattArm64,
       awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
       costPervCPUPerHour,
+      azureCostDiscountRate: percentToFactor(azureCostDiscountRate),
     });
     return { ...flamegraph, TotalSeconds: totalSeconds };
   };
