@@ -27,7 +27,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
-import { findLast } from 'lodash';
+import findLast from 'lodash/findLast';
 import { Assignment } from '../assignment/assignment';
 import {
   addNewAssignment,
