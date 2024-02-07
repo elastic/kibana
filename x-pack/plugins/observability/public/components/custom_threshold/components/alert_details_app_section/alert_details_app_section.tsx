@@ -130,6 +130,12 @@ export default function AlertDetailsAppSection({
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
 
+  const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
+
+  ruleParams.criteria.forEach((criterion) => {
+    chartTitleAndTooltip.push(generateChartTitle(criterion));
+  });
+
   const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
     label: 'Alert',
     type: 'manual',
@@ -223,11 +229,9 @@ export default function AlertDetailsAppSection({
       {ruleParams.criteria.map((criterion, index) => (
         <EuiFlexItem key={`criterion-${index}`}>
           <EuiPanel hasBorder hasShadow={false}>
-            <EuiToolTip content={generateChartTitle(criterion).tooltip}>
+            <EuiToolTip content={chartTitleAndTooltip[index].tooltip}>
               <EuiTitle size="xs">
-                <h4 data-test-subj={`chartTitle-${index}`}>
-                  {generateChartTitle(criterion).title}
-                </h4>
+                <h4 data-test-subj={`chartTitle-${index}`}>{chartTitleAndTooltip[index].title}</h4>
               </EuiTitle>
             </EuiToolTip>
             <EuiText size="s" color="subdued">
