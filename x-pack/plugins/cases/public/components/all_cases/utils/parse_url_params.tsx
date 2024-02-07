@@ -7,8 +7,11 @@
 
 import { safeDecode } from '@kbn/rison';
 import { isPlainObject } from 'lodash';
+import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
+import { stringToIntegerWithDefault } from '.';
 import { SortFieldCase } from '../../../../common/ui';
 import { LEGACY_SUPPORTED_STATE_KEYS, ALL_CASES_STATE_URL_KEY } from '../constants';
+import { AllCasesURLQueryParamsRt, validateSchema } from '../schema';
 import type { AllCasesURLQueryParams } from '../types';
 
 type LegacySupportedKeys = typeof LEGACY_SUPPORTED_STATE_KEYS[number];
@@ -21,6 +24,7 @@ const legacyDefaultState: Record<LegacySupportedKeys, string | number | string[]
   status: [],
   severity: [],
 };
+
 /**
  * Parses legacy state in URL.
  *
@@ -53,7 +57,24 @@ const parseLegacyUrl = (urlParams: URLSearchParams): AllCasesURLQueryParams => {
     ])
   );
 
-  return Object.fromEntries(entries.entries()) as AllCasesURLQueryParams;
+  const params = Object.fromEntries(entries.entries());
+  const allCasesParams: AllCasesURLQueryParams = { ...params };
+
+  if (params.page) {
+    allCasesParams.page = stringToIntegerWithDefault(
+      Array.isArray(params.page) ? params.page[0] : params.page,
+      DEFAULT_CASES_TABLE_STATE.queryParams.page
+    );
+  }
+
+  if (params.perPage) {
+    allCasesParams.perPage = stringToIntegerWithDefault(
+      Array.isArray(params.perPage) ? params.perPage[0] : params.perPage,
+      DEFAULT_CASES_TABLE_STATE.queryParams.perPage
+    );
+  }
+
+  return allCasesParams;
 };
 
 const parseValue = (values: Set<string>, defaultValue: unknown): string | string[] => {
@@ -65,7 +86,7 @@ export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryPara
   const allCasesParams = urlParams.get(ALL_CASES_STATE_URL_KEY);
 
   if (!allCasesParams) {
-    return parseLegacyUrl(urlParams);
+    return parseAndValidateLegacyUrl(urlParams);
   }
 
   const parsedAllCasesParams = safeDecode(allCasesParams);
@@ -74,5 +95,21 @@ export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryPara
     return {};
   }
 
-  return parsedAllCasesParams as AllCasesURLQueryParams;
+  const validatedAllCasesParams = validateSchema(parsedAllCasesParams, AllCasesURLQueryParamsRt);
+
+  if (!validatedAllCasesParams) {
+    return {};
+  }
+
+  return validatedAllCasesParams;
 }
+
+const parseAndValidateLegacyUrl = (urlParams: URLSearchParams): AllCasesURLQueryParams => {
+  const validatedUrlParams = validateSchema(parseLegacyUrl(urlParams), AllCasesURLQueryParamsRt);
+
+  if (!validatedUrlParams) {
+    return {};
+  }
+
+  return validatedUrlParams;
+};

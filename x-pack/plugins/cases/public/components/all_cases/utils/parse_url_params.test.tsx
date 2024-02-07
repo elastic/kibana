@@ -24,15 +24,9 @@ describe('parseUrlParams', () => {
         "assignees": Array [],
         "category": Array [],
         "customFields": Object {},
-        "owner": Array [],
         "page": 1,
         "perPage": 10,
-        "reporters": Array [],
         "search": "",
-        "searchFields": Array [
-          "title",
-          "description",
-        ],
         "severity": Array [],
         "sortField": "createdAt",
         "sortOrder": "desc",
@@ -60,9 +54,6 @@ describe('parseUrlParams', () => {
           "elastic",
         ],
         "category": Array [],
-        "owner": Array [
-          "cases",
-        ],
         "search": "My title",
         "status": Array [
           "open",
@@ -101,107 +92,140 @@ describe('parseUrlParams', () => {
     }
   });
 
+  it('validates the query params schema correctly', () => {
+    expect(
+      parseUrlParams(new URLSearchParams({ cases: encode({ status: 'foo' }) }))
+    ).toMatchInlineSnapshot(`Object {}`);
+  });
+
   describe('legacy URLs', () => {
     it('parses a legacy url with all legacy supported keys correctly', () => {
-      const url = 'status=foo&severity=foo&page=2&perPage=50&sortField=closedAt&sortOrder=asc';
+      const url = 'status=open&severity=low&page=2&perPage=50&sortField=closedAt&sortOrder=asc';
 
       expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
         Object {
-          "page": "2",
-          "perPage": "50",
+          "page": 2,
+          "perPage": 50,
           "severity": Array [
-            "foo",
+            "low",
           ],
           "sortField": "closedAt",
           "sortOrder": "asc",
           "status": Array [
-            "foo",
+            "open",
           ],
         }
       `);
     });
 
-    it('parses a url with status=foo,bar', () => {
-      const url = 'status=foo,bar';
+    it('parses a url with status=open,closed', () => {
+      const url = 'status=open,closed';
 
       expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-              Object {
-                "status": Array [
-                  "foo",
-                  "bar",
-                ],
-              }
-          `);
+        Object {
+          "status": Array [
+            "open",
+            "closed",
+          ],
+        }
+      `);
     });
 
-    it('parses a url with status=foo', () => {
+    it('parses a url with status=in-progress', () => {
+      const url = 'status=in-progress';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "status": Array [
+            "in-progress",
+          ],
+        }
+      `);
+    });
+
+    it('parses a url with status=open&status=closed', () => {
+      const url = 'status=open&status=closed';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "status": Array [
+            "open",
+            "closed",
+          ],
+        }
+      `);
+    });
+
+    it('parses a url with status=open,closed&status=in-progress', () => {
+      const url = 'status=open,closed&status=in-progress';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "status": Array [
+            "open",
+            "closed",
+            "in-progress",
+          ],
+        }
+      `);
+    });
+
+    it('parses a url with severity=low,medium&severity=high,critical', () => {
+      const url = 'severity=low,medium&severity=high,critical';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "severity": Array [
+            "low",
+            "medium",
+            "high",
+            "critical",
+          ],
+        }
+      `);
+    });
+
+    it('parses a url with severity=low,medium&severity=high&severity=critical', () => {
+      const url = 'severity=low,medium&severity=high&severity=critical';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "severity": Array [
+            "low",
+            "medium",
+            "high",
+            "critical",
+          ],
+        }
+      `);
+    });
+
+    it('parses a url with page=2&page=5&perPage=4&perPage=20', () => {
+      const url = 'page=2&page=5&perPage=4&perPage=20';
+
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
+        Object {
+          "page": 2,
+          "perPage": 4,
+        }
+      `);
+    });
+
+    it('validates the query params schema correctly', () => {
       const url = 'status=foo';
 
-      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-              Object {
-                "status": Array [
-                  "foo",
-                ],
-              }
-          `);
+      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`Object {}`);
     });
 
-    it('parses a url with status=foo&status=bar', () => {
-      const url = 'status=foo&status=bar';
+    it('sets the defaults to page and perPage correctly if they are not numbers', () => {
+      const url = 'page=foo&perPage=bar';
 
       expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-              Object {
-                "status": Array [
-                  "foo",
-                  "bar",
-                ],
-              }
-          `);
-    });
-
-    it('parses a url with status=foo,bar&status=baz', () => {
-      const url = 'status=foo,bar&status=baz';
-
-      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-              Object {
-                "status": Array [
-                  "foo",
-                  "bar",
-                  "baz",
-                ],
-              }
-          `);
-    });
-
-    it('parses a url with status=foo,bar&status=baz,qux', () => {
-      const url = 'status=foo,bar&status=baz,qux';
-
-      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-              Object {
-                "status": Array [
-                  "foo",
-                  "bar",
-                  "baz",
-                  "qux",
-                ],
-              }
-          `);
-    });
-
-    it('parses a url with status=foo,bar&status=baz,qux&status=quux', () => {
-      const url = 'status=foo,bar&status=baz,qux&status=quux';
-
-      expect(parseUrlParams(new URLSearchParams(url))).toMatchInlineSnapshot(`
-              Object {
-                "status": Array [
-                  "foo",
-                  "bar",
-                  "baz",
-                  "qux",
-                  "quux",
-                ],
-              }
-          `);
+        Object {
+          "page": 1,
+          "perPage": 10,
+        }
+      `);
     });
   });
 });

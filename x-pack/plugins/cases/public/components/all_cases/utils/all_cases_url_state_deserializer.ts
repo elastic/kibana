@@ -12,6 +12,7 @@ import type { QueryParams, FilterOptions } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
+import { stringToIntegerWithDefault } from '.';
 
 export const allCasesUrlStateDeserializer = (
   urlParamsMap: AllCasesURLQueryParams
@@ -41,21 +42,17 @@ export const allCasesUrlStateDeserializer = (
   };
 
   if (page) {
-    const pageAsInteger = stringToInteger(page);
-
-    queryParamsParsed.page =
-      pageAsInteger && pageAsInteger > 0
-        ? pageAsInteger
-        : DEFAULT_CASES_TABLE_STATE.queryParams.page;
+    queryParamsParsed.page = stringToIntegerWithDefault(
+      page,
+      DEFAULT_CASES_TABLE_STATE.queryParams.page
+    );
   }
 
   if (perPage) {
-    const perPageAsInteger = stringToInteger(perPage);
-
-    queryParamsParsed.perPage =
-      perPageAsInteger && perPageAsInteger > 0
-        ? perPageAsInteger
-        : DEFAULT_CASES_TABLE_STATE.queryParams.perPage;
+    queryParamsParsed.perPage = stringToIntegerWithDefault(
+      perPage,
+      DEFAULT_CASES_TABLE_STATE.queryParams.perPage
+    );
   }
 
   if (assignees) {
@@ -81,14 +78,4 @@ export const allCasesUrlStateDeserializer = (
   };
 
   return sanitizeState(state);
-};
-
-const stringToInteger = (value?: string | number): number | undefined => {
-  const num = Number(value);
-
-  if (isNaN(num)) {
-    return;
-  }
-
-  return num;
 };

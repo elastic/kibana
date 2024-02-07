@@ -14,3 +14,22 @@ export const flattenCustomFieldKey = (key: string): string => `${CUSTOM_FIELD_KE
 
 export const deflattenCustomFieldKey = (key: string): string =>
   key.replace(CUSTOM_FIELD_KEY_PREFIX, '');
+
+export const stringToInteger = (value?: string | number): number | undefined => {
+  const num = Number(value);
+
+  if (isNaN(num)) {
+    return;
+  }
+
+  return num;
+};
+
+export const stringToIntegerWithDefault = (
+  value: string | number,
+  defaultValue: number
+): number | undefined => {
+  const valueAsInteger = stringToInteger(value);
+
+  return valueAsInteger && valueAsInteger > 0 ? valueAsInteger : defaultValue;
+};

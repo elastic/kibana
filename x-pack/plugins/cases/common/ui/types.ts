@@ -162,6 +162,10 @@ export interface FilterOptions extends SystemFilterOptions {
 export type SingleCaseMetrics = SingleCaseMetricsResponse;
 export type SingleCaseMetricsFeature = Exclude<CaseMetricsFeature, CaseMetricsFeature.MTTR>;
 
+/**
+ * If you add a new value here and you want to support it on the URL
+ * you have to also add it here x-pack/plugins/cases/public/components/all_cases/schema.ts
+ */
 export enum SortFieldCase {
   closedAt = 'closedAt',
   createdAt = 'createdAt',

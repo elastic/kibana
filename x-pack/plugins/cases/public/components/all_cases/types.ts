@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type * as rt from 'io-ts';
 import type { FilterOptions, QueryParams, SortOrder } from '../../../common/ui';
+import type { AllCasesURLQueryParamsRt } from './schema';
 
 export const CASES_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
@@ -49,5 +51,4 @@ export interface AllCasesURLState {
   queryParams: Partial<QueryParams>;
 }
 
-export type AllCasesURLQueryParams = Partial<QueryParams> &
-  Partial<SupportedFilterOptionsInURL> & { customFields?: Record<string, string[]> };
+export type AllCasesURLQueryParams = rt.TypeOf<typeof AllCasesURLQueryParamsRt>;
