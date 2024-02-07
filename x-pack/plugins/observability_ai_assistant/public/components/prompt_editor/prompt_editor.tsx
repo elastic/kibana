@@ -142,6 +142,8 @@ export function PromptEditor({
   useEffect(() => {
     if (hidden) {
       onChangeHeight(0);
+    } else if (containerRef.current) {
+      onChangeHeight(containerRef.current.clientHeight);
     }
   }, [hidden, onChangeHeight]);
 
