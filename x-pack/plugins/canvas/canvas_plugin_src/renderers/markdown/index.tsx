@@ -11,7 +11,7 @@ import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { StartInitializer } from '../../plugin';
 import { RendererStrings } from '../../../i18n';
 import { Return as Config } from '../../functions/browser/markdown';

@@ -7,7 +7,7 @@
  */
 
 import React, { useEffect } from 'react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { MarkdownVisParams } from './types';
 
 import './markdown_vis.scss';

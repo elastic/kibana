@@ -10,7 +10,7 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import { ErrorLike } from '@kbn/expressions-plugin/common';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { renderSearchError } from '@kbn/search-errors';
 
 import { usePanelTitle } from '@kbn/presentation-publishing';
