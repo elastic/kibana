@@ -23,11 +23,13 @@ import {
   reactEmbeddableRegistryHasKey,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { map, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { v4 } from 'uuid';
+import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -461,6 +463,40 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) =>
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
+
+  // --------------------------------------------------------------------------------------
+  // Set parentApi.localFilters to include dashboardContainer filters and control group filters
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    if (!dashboardContainer.controlGroup) {
+      return;
+    }
+
+    const inputFilters$ = dashboardContainer.getInput$()
+      .pipe(
+        startWith(dashboardContainer.getInput()),
+        map((input) => input.filters),
+        distinctUntilChanged((previous, current) => {
+          return compareFilters(previous ?? [], current ?? []);
+        })
+      );
+
+      const localFilters = new BehaviorSubject<Filter[] | undefined>(combineDashboardFiltersWithControlGroupFilters(
+        dashboardContainer.getInput().filters ?? [],
+        dashboardContainer.controlGroup
+      ));
+      dashboardContainer.localFilters = localFilters;
+      combineLatest([inputFilters$, dashboardContainer.controlGroup.onFiltersPublished$]).subscribe(() => {
+        localFilters.next(combineDashboardFiltersWithControlGroupFilters(
+          dashboardContainer.getInput().filters ?? [],
+          dashboardContainer.controlGroup!
+        ));
+      });
+
+    dashboardContainer.integrationSubscriptions.add(
+      startSyncingDashboardDataViews.bind(dashboardContainer)()
+    );
+  });
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };
