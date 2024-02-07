@@ -6,13 +6,9 @@
  */
 import { createGetterSetter } from '@kbn/kibana-utils-plugin/common';
 import type { CoreStart } from '@kbn/core/public';
-import type {
-  EmbeddableFactory,
-  EmbeddableInput,
-  IEmbeddable,
-} from '@kbn/embeddable-plugin/public';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { PresentationContainer } from '@kbn/presentation-containers';
 import { getESQLAdHocDataview, getIndexForESQLQuery } from '@kbn/esql-utils';
 import type { Datasource, Visualization } from '../../types';
 import type { LensPluginStartDependencies } from '../../plugin';
@@ -20,6 +16,7 @@ import { fetchDataFromAggregateQuery } from '../../datasources/text_based/fetch_
 import { suggestionsApi } from '../../lens_suggestions_api';
 import { generateId } from '../../id_generator';
 import { executeEditAction } from './edit_action_helpers';
+import { Embeddable } from '../../embeddable';
 
 // datasourceMap and visualizationMap setters/getters
 export const [getVisualizationMap, setVisualizationMap] = createGetterSetter<
@@ -37,17 +34,11 @@ export function isCreateActionCompatible(core: CoreStart) {
 export async function executeCreateAction({
   deps,
   core,
-  createNewEmbeddable,
-  deleteEmbeddable,
+  api,
 }: {
   deps: LensPluginStartDependencies;
   core: CoreStart;
-  createNewEmbeddable: (
-    embeddableFactory: EmbeddableFactory,
-    initialInput?: Partial<EmbeddableInput>,
-    dismissNotification?: boolean
-  ) => Promise<undefined | IEmbeddable>;
-  deleteEmbeddable: (embeddableId: string) => void;
+  api: PresentationContainer;
 }) {
   const isCompatibleAction = isCreateActionCompatible(core);
   const defaultDataView = await deps.dataViews.getDefaultDataView({
@@ -110,20 +101,17 @@ export async function executeCreateAction({
     dataView,
   });
 
-  const input = {
-    attributes: attrs,
-    id: generateId(),
-  };
-  const embeddableStart = deps.embeddable;
-  const factory = embeddableStart.getEmbeddableFactory('lens');
-  if (!factory) {
-    return undefined;
-  }
-  const embeddable = await createNewEmbeddable(factory, input, true);
+  const embeddable = await api.addNewPanel<Embeddable>({
+    panelType: 'lens',
+    initialState: {
+      attributes: attrs,
+      id: generateId(),
+    },
+  });
   // open the flyout if embeddable has been created successfully
   if (embeddable) {
     const deletePanel = () => {
-      deleteEmbeddable(embeddable.id);
+      api.removePanel(embeddable.id);
     };
 
     executeEditAction({

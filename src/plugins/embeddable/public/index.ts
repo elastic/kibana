@@ -113,6 +113,8 @@ export {
   serializeReactEmbeddableTitles,
 } from './react_embeddable_system';
 
+export { registerSavedObjectToPanelMethod } from './registry/saved_object_to_panel_methods';
+
 export function plugin(initializerContext: PluginInitializerContext) {
   return new EmbeddablePublicPlugin(initializerContext);
 }
