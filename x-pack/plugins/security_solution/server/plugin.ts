@@ -532,7 +532,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         artifactClient,
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
-        logger,
+        logger: this.pluginContext.logger.get('ManifestManager'),
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
