@@ -31,12 +31,26 @@ export type StorageContextGetTransformFn = (
 
 /** Context that is sent to all storage instance methods */
 export interface StorageContext {
+  /** The Core HTTP request handler context */
   requestHandlerContext: RequestHandlerContext;
   version: {
+    /**
+     * The content type version for the request. It usually is the latest version although in some
+     * cases the client (browser) might still be on an older version and make requests with that version.
+     */
     request: Version;
+    /**
+     * The latest version of the content type. This is the version that the content type is currently on
+     * after updating the Kibana server.
+     */
     latest: Version;
   };
   utils: {
+    /**
+     * Get the transforms handlers for the content type.
+     * The transforms are used to transform the content object to the latest schema (up) and back
+     * to a previous schema (down).
+     */
     getTransforms: StorageContextGetTransformFn;
   };
 }

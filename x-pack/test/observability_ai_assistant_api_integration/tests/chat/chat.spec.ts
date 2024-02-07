@@ -69,6 +69,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .post(CHAT_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'my_api_call',
           messages,
           connectorId: 'does not exist',
           functions: [],
@@ -96,6 +97,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .set('kbn-xsrf', 'foo')
               .on('error', reject)
               .send({
+                name: 'my_api_call',
                 messages,
                 connectorId,
                 functions: [],
@@ -136,6 +138,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         .post(CHAT_API_URL)
         .set('kbn-xsrf', 'foo')
         .send({
+          name: 'my_api_call',
           messages,
           connectorId,
           functions: [],
