@@ -49,6 +49,8 @@ import { FieldsContext } from "./esql_parser";
 import { FieldContext } from "./esql_parser";
 import { FromCommandContext } from "./esql_parser";
 import { MetadataContext } from "./esql_parser";
+import { MetadataOptionContext } from "./esql_parser";
+import { Deprecated_metadataContext } from "./esql_parser";
 import { EvalCommandContext } from "./esql_parser";
 import { StatsCommandContext } from "./esql_parser";
 import { InlinestatsCommandContext } from "./esql_parser";
@@ -641,6 +643,28 @@ export interface esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitMetadata?: (ctx: MetadataContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.metadataOption`.
+	 * @param ctx the parse tree
+	 */
+	enterMetadataOption?: (ctx: MetadataOptionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.metadataOption`.
+	 * @param ctx the parse tree
+	 */
+	exitMetadataOption?: (ctx: MetadataOptionContext) => void;
+
+	/**
+	 * Enter a parse tree produced by `esql_parser.deprecated_metadata`.
+	 * @param ctx the parse tree
+	 */
+	enterDeprecated_metadata?: (ctx: Deprecated_metadataContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.deprecated_metadata`.
+	 * @param ctx the parse tree
+	 */
+	exitDeprecated_metadata?: (ctx: Deprecated_metadataContext) => void;
 
 	/**
 	 * Enter a parse tree produced by `esql_parser.evalCommand`.

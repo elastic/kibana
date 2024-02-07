@@ -33,7 +33,6 @@ export const metadataOption: CommandOptionsDefinition = {
     params: [{ name: 'column', type: 'column' }],
   },
   optional: true,
-  wrapped: ['[', ']'],
   skipCommonValidation: true,
   validate: (option, command, references) => {
     const messages: ESQLMessage[] = [];

@@ -37,7 +37,7 @@ import {
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
-  MetadataContext,
+  MetadataOptionContext,
   MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
@@ -92,9 +92,9 @@ export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstIte
 }
 
 function extractIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
-  if (ctx instanceof MetadataContext) {
+  if (ctx instanceof MetadataOptionContext) {
     return wrapIdentifierAsArray(ctx.fromIdentifier());
   }
   if (ctx instanceof MvExpandCommandContext) {
@@ -114,7 +114,7 @@ function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
 }
 
 export function collectAllColumnIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ): ESQLAstItem[] {
   const identifiers = extractIdentifiers(ctx);
   return makeColumnsOutOfIdentifiers(identifiers);

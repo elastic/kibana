@@ -255,7 +255,7 @@ describe('validation logic', () => {
       "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from assignment = 1`, [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "="',
+      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET, METADATA} but found "="',
       'Unknown index [assignment]',
     ]);
     testErrorsAndWarnings(`from index`, []);
@@ -267,21 +267,31 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
     testErrorsAndWarnings(`from fn()`, ['Unknown index [fn()]']);
     testErrorsAndWarnings(`from average()`, ['Unknown index [average()]']);
-    testErrorsAndWarnings(`from index [METADATA _id]`, []);
-    testErrorsAndWarnings(`from index [metadata _id]`, []);
+    for (const isWrapped of [true, false]) {
+      function setWrapping(option: string) {
+        return isWrapped ? `[${option}]` : option;
+      }
+      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id')}`, []);
+      testErrorsAndWarnings(`from index ${setWrapping('metadata _id')}`, []);
 
-    testErrorsAndWarnings(`from index [METADATA _id, _source]`, []);
-    testErrorsAndWarnings(`from index [METADATA _id, _source2]`, [
-      'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
-    ]);
-    testErrorsAndWarnings(`from index [metadata _id, _source] [METADATA _id2]`, [
-      'SyntaxError: expected {<EOF>, PIPE} but found "["',
-    ]);
-    testErrorsAndWarnings(`from index metadata _id`, [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "metadata"',
-    ]);
+      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id, _source')}`, []);
+      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id, _source2')}`, [
+        'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
+      ]);
+      testErrorsAndWarnings(
+        `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
+        [
+          isWrapped
+            ? 'SyntaxError: expected {COMMA, CLOSING_BRACKET} but found "["'
+            : 'SyntaxError: expected {<EOF>, PIPE, COMMA} but found "METADATA"',
+        ]
+      );
+
+      testErrorsAndWarnings(`from remote-ccs:indexes ${setWrapping('METADATA _id')}`, []);
+      testErrorsAndWarnings(`from *:indexes ${setWrapping('METADATA _id')}`, []);
+    }
     testErrorsAndWarnings(`from index (metadata _id)`, [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "(metadata"',
+      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET, METADATA} but found "(metadata"',
     ]);
     testErrorsAndWarnings(`from ind*, other*`, []);
     testErrorsAndWarnings(`from index*`, []);
@@ -294,8 +304,6 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from remote-*:indexes`, []);
     testErrorsAndWarnings(`from remote-ccs:indexes`, []);
     testErrorsAndWarnings(`from a, remote-ccs:indexes`, []);
-    testErrorsAndWarnings(`from remote-ccs:indexes [METADATA _id]`, []);
-    testErrorsAndWarnings(`from *:indexes [METADATA _id]`, []);
     testErrorsAndWarnings('from .secretIndex', []);
     testErrorsAndWarnings('from my-index', []);
     testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
