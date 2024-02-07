@@ -23,30 +23,13 @@ import { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/flee
 import { getFleetManagedIndexTemplates } from '../api/api';
 import { RouteEntry } from '../../../../common/security_integrations/cribl/types';
 import { getPolicyConfigValueFromRouteEntries, getRouteEntriesFromPolicyConfig } from '../../../../common/security_integrations/cribl/translator';
+import { allRouteEntriesArePaired, hasAtLeastOneValidRouteEntry } from './util/validator';
 
 const getDefaultRouteEntry = () => {
   return ({
     dataId: "",
     datastream: ""
   } as RouteEntry);
-};
-
-const hasAtLeastOneValidRouteEntry = (routeEntries: RouteEntry[]) => {
-  return routeEntries
-    .some(re => {
-      const hasCriblDataId = re.dataId && re.dataId.length > 0;
-      const hasDatastreamTarget = re.datastream && re.datastream.length > 0;
-      return hasCriblDataId && hasDatastreamTarget;
-    });
-};
-
-const allRouteEntriesArePaired = (routeEntries: RouteEntry[]) => {
-  return routeEntries
-    .every(re => {
-      const hasCriblDataId = re.dataId && re.dataId.length > 0;
-      const hasDatastreamTarget = re.datastream && re.datastream.length > 0;
-      return (hasCriblDataId && hasDatastreamTarget) || (!hasCriblDataId && !hasDatastreamTarget);
-    });
 };
 
 interface RouteEntryComponentProps {
@@ -218,12 +201,18 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
           <>
             <EuiCallOut
               size="s"
-              title={i18n.translate('xpack.securitySolution.securityIntegration.cribl.missingPermissionsCallout', {
-                defaultMessage: "Be sure you have the right privileges in order to populate options for datastreams.",
+              title={i18n.translate('xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutTitle', {
+                defaultMessage: "Be sure you have the necessary privileges",
               })}
               iconType="help"
-              data-test-subj="missing_permissions_callout"
-            />
+            >
+              <p>
+                <FormattedMessage
+                  id="xpack.securitySolution.securityIntegration.cribl.missingPermissionsCalloutDescription"
+                  defaultMessage="To configure this integration, you must have `manage_index_templates` privileges and `manage_pipeline` or `manage_ingest_pipelines` privileges."
+                />
+              </p>
+            </EuiCallOut>
             <EuiSpacer size="l" />
             </>
         )}
