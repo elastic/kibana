@@ -298,7 +298,6 @@ export type PublicAppInfo = Omit<
 > & {
   // remove optional on fields populated with default values
   status: AppStatus;
-  // navLinkStatus: AppNavLinkStatus;
   appRoute: string;
   keywords: string[];
   deepLinks: PublicAppDeepLinkInfo[];

@@ -73,11 +73,6 @@ export interface ChromeNavLink {
    * to disable the nav link when the license is expired.
    */
   readonly disabled?: boolean;
-
-  /**
-   * Hides a link from the navigation.
-   */
-  // readonly hidden?: boolean;
 }
 
 /**
