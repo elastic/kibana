@@ -202,7 +202,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   const [isEditingPrompt, setEditingPrompt] = useState(false);
   const [isInsightOpen, setInsightOpen] = useState(false);
   const [hasOpened, setHasOpened] = useState(false);
-  const [updatedPrompt, setUpdatedPrompt] = useState(false);
+  const [isPromptUpdated, setIsPromptUpdated] = useState(false);
 
   const connectors = useGenAIConnectors();
 
@@ -221,7 +221,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
     if (!userMessage) return false;
 
     userMessage.message.content = newPrompt;
-    setUpdatedPrompt(true);
+    setIsPromptUpdated(true);
     setInitialMessages(clonedMessages);
     setEditingPrompt(false);
     return true;
@@ -245,7 +245,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
   ) {
     children = (
       <>
-        {updatedPrompt ? (
+        {isPromptUpdated ? (
           <>
             <EuiFlexGroup alignItems="center" gutterSize="none">
               <EuiFlexItem grow={false}>
@@ -259,7 +259,7 @@ export function Insight({ messages, title, dataTestSubj }: InsightProps) {
                 <EuiButtonEmpty
                   data-test-subj="observabilityAiAssistantInsightResetDefaultPrompt"
                   onClick={() => {
-                    setUpdatedPrompt(false);
+                    setIsPromptUpdated(false);
                     setHasOpened(false);
                     setInsightOpen(false);
                     setInitialMessages(messages);
