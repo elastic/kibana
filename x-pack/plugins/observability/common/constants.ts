@@ -62,3 +62,5 @@ export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[
   AlertConsumers.LOGS,
   AlertConsumers.OBSERVABILITY,
 ];
+
+export const EventsAsUnit = 'events';
