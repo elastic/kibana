@@ -13,7 +13,6 @@ import { verifyApiAccess } from '../lib/license_api_access';
 import { mockHandlerArguments } from './_mock_handler_arguments';
 import { rulesClientMock } from '../rules_client.mock';
 import { RuleActionTypes, SanitizedDefaultRuleAction, SanitizedRule } from '../types';
-import { AsApiContract } from './lib';
 
 const rulesClient = rulesClientMock.create();
 jest.mock('../lib/license_api_access', () => ({
