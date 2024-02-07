@@ -459,9 +459,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         ...field,
         ...fieldData,
         loading: fieldData?.existsInDocs ?? true,
-        fieldFormat:
-          currentDataView?.getFormatterForFieldNoDefault(field.name) ??
-          fieldFormats.deserialize({ id: field.secondaryType }),
+        fieldFormat: fieldFormats.deserialize({ id: field.secondaryType }),
         aggregatable: true,
         deletable: false,
         type: getFieldType(field) as SupportedFieldType,
