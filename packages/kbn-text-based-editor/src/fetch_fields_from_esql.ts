@@ -24,7 +24,7 @@ export function fetchFieldsFromESQL(
   query: Query | AggregateQuery,
   expressions: ExpressionsStart,
   time?: TimeRange,
-  abortController?: AbortController
+  abortController?: AbortController,
   dataView?: DataView
 ) {
   return textBasedQueryStateToAstWithValidation({
