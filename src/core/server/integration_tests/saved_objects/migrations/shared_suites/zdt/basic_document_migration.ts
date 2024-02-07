@@ -43,7 +43,11 @@ export function createBasicDocumentsMigrationTest({
     });
 
     console.log('--- In beforeAll, trying to ls the cluster state');
-    cp.execSync('ls -la .es/es_test_serverless/stateless/cluster_state/', { stdio: 'inherit' });
+    try {
+      cp.execSync('ls -la .es/es_test_serverless/stateless/cluster_state/', { stdio: 'inherit' });
+    } catch (e) {
+      // no-op
+    }
 
     await fs.unlink(logFilePath).catch(() => {});
     esServer = await startES();
