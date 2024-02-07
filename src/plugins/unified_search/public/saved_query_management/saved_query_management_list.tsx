@@ -23,6 +23,7 @@ import {
   EuiToolTip,
   EuiText,
   EuiHorizontalRule,
+  EuiProgress,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
@@ -184,6 +185,7 @@ const savedQueryMultipleNamespacesDeleteWarning = i18n.translate(
 
 const SAVED_QUERY_PAGE_SIZE = 5;
 const SAVED_QUERY_SEARCH_DEBOUNCE = 500;
+const LOADING_INDICATOR_DELAY = 250;
 
 export const SavedQueryManagementList = ({
   showSaveQuery,
@@ -199,6 +201,7 @@ export const SavedQueryManagementList = ({
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [totalQueryCount, setTotalQueryCount] = useState(0);
   const [currentPageQueries, setCurrentPageQueries] = useState<SavedQuery[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [isInitializing, setIsInitializing] = useState(true);
   const currentPageFetchId = useRef(0);
   const selectableRef = useRef<EuiSelectable | null>(null);
@@ -221,6 +224,9 @@ export const SavedQueryManagementList = ({
 
   const fetchPage = useLatest(async () => {
     const fetchIdValue = ++currentPageFetchId.current;
+    const loadingTimeout = setTimeout(() => {
+      setIsLoading(true);
+    }, LOADING_INDICATOR_DELAY);
 
     try {
       const preparedSearch = searchTerm.trim();
@@ -247,7 +253,10 @@ export const SavedQueryManagementList = ({
       setCurrentPageQueries(filteredQueries);
       selectableRef.current?.scrollToItem(0);
     } finally {
+      clearTimeout(loadingTimeout);
+
       if (fetchIdValue === currentPageFetchId.current) {
+        setIsLoading(false);
         setIsInitializing(false);
       }
     }
@@ -386,7 +395,8 @@ export const SavedQueryManagementList = ({
         className="kbnSavedQueryManagement__listWrapper"
         data-test-subj="saved-query-management-list"
       >
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} css={{ position: 'relative' }}>
+          {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
           <EuiSelectable<SelectableProps>
             ref={selectableRef}
             aria-label={i18n.translate('unifiedSearch.search.searchBar.savedQueryListAriaLabel', {
