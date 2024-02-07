@@ -18,10 +18,7 @@ const getParsedParams = (search: string) => {
 };
 
 export function useQueryParams() {
-  const { from, to } = useUiSetting<TimePickerTimeDefaults>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS, {
-    from: 'now-15m',
-    to: 'now',
-  });
+  const { from, to } = useUiSetting<TimePickerTimeDefaults>(UI_SETTINGS.TIMEPICKER_TIME_DEFAULTS);
 
   const { rangeFrom, rangeTo } = getParsedParams(useLocation().search);
 
