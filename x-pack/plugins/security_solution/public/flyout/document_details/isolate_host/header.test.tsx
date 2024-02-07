@@ -58,4 +58,19 @@ describe('<PanelHeader />', () => {
       expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Beta');
     }
   );
+
+  it.each(['isolateHost', 'unisolateHost'])(
+    'should not display beta badge on %s host message for non-SentinelOne alerts',
+    (action) => {
+      (useIsolateHostPanelContext as jest.Mock).mockReturnValue({
+        isolateAction: action,
+      });
+      mockIsAlertFromSentinelOneEvent.mockReturnValue(false);
+
+      const { getByTestId } = renderPanelHeader();
+
+      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
+      expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).not.toHaveTextContent('Beta');
+    }
+  );
 });
