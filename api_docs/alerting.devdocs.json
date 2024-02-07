@@ -3146,10 +3146,10 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-server.Rule.notificationDelay",
+            "id": "def-server.Rule.alertDelay",
             "type": "Object",
             "tags": [],
-            "label": "notificationDelay",
+            "label": "alertDelay",
             "description": [],
             "signature": [
               "Readonly<{} & { active: number; }> | undefined"
@@ -3257,7 +3257,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+              "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\" | \"alertDelay\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
             ],
             "path": "x-pack/plugins/alerting/server/types.ts",
             "deprecated": false,
@@ -6316,6 +6316,48 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.AlertDelay",
+        "type": "Interface",
+        "tags": [],
+        "label": "AlertDelay",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "alerting",
+            "scope": "common",
+            "docId": "kibAlertingPluginApi",
+            "section": "def-common.AlertDelay",
+            "text": "AlertDelay"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/core-saved-objects-common",
+            "scope": "common",
+            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
+            "section": "def-common.SavedObjectAttributes",
+            "text": "SavedObjectAttributes"
+          }
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.AlertDelay.active",
+            "type": "number",
+            "tags": [],
+            "label": "active",
+            "description": [],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.AlertingFrameworkHealth",
         "type": "Interface",
         "tags": [],
@@ -7847,31 +7889,6 @@
       },
       {
         "parentPluginId": "alerting",
-        "id": "def-common.NotificationDelay",
-        "type": "Interface",
-        "tags": [],
-        "label": "NotificationDelay",
-        "description": [],
-        "path": "x-pack/plugins/alerting/common/rule.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "alerting",
-            "id": "def-common.NotificationDelay.active",
-            "type": "number",
-            "tags": [],
-            "label": "active",
-            "description": [],
-            "path": "x-pack/plugins/alerting/common/rule.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "alerting",
         "id": "def-common.Rule",
         "type": "Interface",
         "tags": [],
@@ -8367,18 +8384,18 @@
           },
           {
             "parentPluginId": "alerting",
-            "id": "def-common.Rule.notificationDelay",
+            "id": "def-common.Rule.alertDelay",
             "type": "Object",
             "tags": [],
-            "label": "notificationDelay",
+            "label": "alertDelay",
             "description": [],
             "signature": [
               {
                 "pluginId": "alerting",
                 "scope": "common",
                 "docId": "kibAlertingPluginApi",
-                "section": "def-common.NotificationDelay",
-                "text": "NotificationDelay"
+                "section": "def-common.AlertDelay",
+                "text": "AlertDelay"
               },
               " | undefined"
             ],
@@ -11546,7 +11563,7 @@
             "section": "def-common.SanitizedRule",
             "text": "SanitizedRule"
           },
-          "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
+          "<never>, \"id\" | \"consumer\" | \"name\" | \"actions\" | \"tags\" | \"enabled\" | \"schedule\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"snoozeSchedule\" | \"revision\" | \"alertDelay\"> & { producer: string; ruleTypeId: string; ruleTypeName: string; }"
         ],
         "path": "x-pack/plugins/alerting/common/rule.ts",
         "deprecated": false,
@@ -11561,7 +11578,7 @@
         "label": "TrackedLifecycleAlertState",
         "description": [],
         "signature": [
-          "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }"
+          "{ alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,
@@ -11601,7 +11618,7 @@
           "\nThis is redefined instead of derived from above `wrappedStateRt` because\nthere's no easy way to instantiate generic values such as the runtime type\nfactory function."
         ],
         "signature": [
-          "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; }>; }"
+          "RuleTypeState & { wrapped: State; trackedAlerts: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; trackedAlertsRecovered: Record<string, { alertId: string; alertUuid: string; started: string; flappingHistory: boolean[]; flapping: boolean; pendingRecoveredCount: number; activeCount: number; }>; }"
         ],
         "path": "x-pack/packages/kbn-alerting-state-types/src/lifecycle_state.ts",
         "deprecated": false,

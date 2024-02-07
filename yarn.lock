@@ -26016,13 +26016,6 @@ react-resizable@^3.0.4:
     prop-types "15.x"
     react-draggable "^4.0.3"
 
-react-resize-detector@^7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/react-resize-detector/-/react-resize-detector-7.1.1.tgz#18d5b84909d5ab13abe0a68ddf0fb8e80c553dfc"
-  integrity sha512-rU54VTstNzFLZAmMNHqt8xINjDWP7SQR05A2HUW0OGvl4vcrXzgaxrrqAY5tZMfkLkoYm5u0i0qGqCjdc2jyAA==
-  dependencies:
-    lodash "^4.17.21"
-
 react-reverse-portal@^2.1.0:
   version "2.1.0"
   resolved "https://registry.yarnpkg.com/react-reverse-portal/-/react-reverse-portal-2.1.0.tgz#3c572e1c0d9e49b8febf4bf2fd43b9819ce6f508"
