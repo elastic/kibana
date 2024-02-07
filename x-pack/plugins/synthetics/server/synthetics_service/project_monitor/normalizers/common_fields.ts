@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit } from 'lodash';
+import { omit, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { isValidNamespace } from '@kbn/fleet-plugin/common';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -219,9 +219,12 @@ export const getMonitorLocations = ({
     );
   }
 
-  return [...publicLocs, ...privateLocs]
+  const allLocations = [...publicLocs, ...privateLocs]
     .filter((location) => location !== undefined)
     .map((loc) => formatLocation(loc!)) as BrowserFields[ConfigKey.LOCATIONS];
+
+  // return only unique locations
+  return uniqBy(allLocations, 'id');
 };
 
 export class InvalidLocationError extends Error {
