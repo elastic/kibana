@@ -12,15 +12,9 @@ import ReactDOM from 'react-dom';
 import React, { Suspense, useCallback, useEffect, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
 import { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  Embeddable,
-  EmbeddableInput,
-  EmbeddableOutput,
-  IContainer,
-} from '@kbn/embeddable-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import type { Query } from '@kbn/es-query';
@@ -41,29 +35,10 @@ import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
+import { ESQLFieldStatsTableWrapper } from './esql_field_stats_table';
+import { DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput } from './types';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
-export interface DataVisualizerGridInput {
-  dataView: DataView;
-  savedSearch?: SavedSearch | null;
-  query?: Query;
-  visibleFieldNames?: string[];
-  filters?: Filter[];
-  showPreviewByDefault?: boolean;
-  allowEditDataView?: boolean;
-  id?: string;
-  /**
-   * Callback to add a filter to filter bar
-   */
-  onAddFilter?: (field: DataViewField | string, value: string, type: '+' | '-') => void;
-  sessionId?: string;
-  fieldsToFetch?: string[];
-  totalDocuments?: number;
-  samplingOption?: SamplingOption;
-}
-export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
-export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;
-
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 
 const restorableDefaults = getDefaultDataVisualizerListState();
@@ -170,7 +145,12 @@ export const IndexDataVisualizerViewWrapper = (props: {
 
   const input = useObservable(embeddableInput);
   if (input && input.dataView) {
-    return <EmbeddableWrapper input={input} onOutputChange={onOutputChange} />;
+    // @todo: lazy load
+    return input.esql ? (
+      <ESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />
+    ) : (
+      <EmbeddableWrapper input={input} onOutputChange={onOutputChange} />
+    );
   } else {
     return (
       <EuiEmptyPrompt

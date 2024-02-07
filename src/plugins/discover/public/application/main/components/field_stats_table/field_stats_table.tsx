@@ -66,6 +66,10 @@ export interface DataVisualizerGridEmbeddableOutput extends EmbeddableOutput {
 
 export interface FieldStatisticsTableProps {
   /**
+   * For when query is of type esql
+   */
+  esql?: boolean;
+  /**
    * Determines which columns are displayed
    */
   columns: string[];
@@ -121,6 +125,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     onAddFilter,
     trackUiMetric,
     searchSessionId,
+    esql,
   } = props;
   const totalHits = useObservable(stateContainer?.dataState.data$.totalHits$ ?? of(undefined));
   const totalDocuments = useMemo(() => totalHits?.result, [totalHits]);
@@ -169,6 +174,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     if (embeddable && !isErrorEmbeddable(embeddable)) {
       // Update embeddable whenever one of the important input changes
       embeddable.updateInput({
+        esql,
         dataView,
         savedSearch,
         query,
@@ -197,6 +203,7 @@ export const FieldStatisticsTable = (props: FieldStatisticsTableProps) => {
     searchSessionId,
     totalDocuments,
     stateContainer,
+    esql,
   ]);
 
   useEffect(() => {
