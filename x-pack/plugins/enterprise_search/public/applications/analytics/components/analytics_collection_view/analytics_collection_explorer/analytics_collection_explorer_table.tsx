@@ -48,7 +48,7 @@ import {
 
 import { AnalyticsCollectionExplorerCallout } from './analytics_collection_explorer_callout';
 
-interface TableSetting<T = ExploreTableItem, K = T> {
+interface TableSetting<T extends object = ExploreTableItem, K extends object = T> {
   columns: Array<
     EuiBasicTableColumn<T & K> & {
       render?: (euiTheme: UseEuiTheme['euiTheme']) => EuiTableFieldDataColumnType<T & K>['render'];

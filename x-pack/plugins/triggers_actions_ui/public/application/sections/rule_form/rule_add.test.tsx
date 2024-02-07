@@ -79,7 +79,8 @@ export const TestExpression: FunctionComponent<any> = () => {
   );
 };
 
-describe('rule_add', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/174397
+describe.skip('rule_add', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });

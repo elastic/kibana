@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MarkdownLang } from '@kbn/kibana-react-plugin/public';
+import { MarkdownLang } from '@kbn/code-editor';
 import { ViewStrings } from '../../../i18n';
 
 const { Markdown: strings } = ViewStrings;

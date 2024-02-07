@@ -16,6 +16,7 @@ import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
 import { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import {
@@ -92,6 +93,9 @@ export interface CustomThresholdRuleTypeParams extends RuleTypeParams {
   criteria: CustomMetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
   groupBy?: string | string[];
+}
+export interface CustomThresholdAlertFields {
+  [ALERT_GROUP]?: Array<{ field: string; value: string }>;
 }
 
 export const expressionTimestampsRT = rt.type({

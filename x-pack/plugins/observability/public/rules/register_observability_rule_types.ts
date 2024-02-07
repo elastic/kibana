@@ -88,7 +88,7 @@ const getDataViewId = (searchConfiguration?: SerializedSearchSourceFields) =>
 export const registerObservabilityRuleTypes = async (
   config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
-  logExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>
+  logsExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>
 ) => {
   observabilityRuleTypeRegistry.register({
     id: SLO_BURN_RATE_RULE_TYPE_ID,
@@ -112,6 +112,9 @@ export const registerObservabilityRuleTypes = async (
     requiresAppContext: false,
     defaultActionMessage: sloBurnRateDefaultActionMessage,
     defaultRecoveryMessage: sloBurnRateDefaultRecoveryMessage,
+    alertDetailsAppSection: lazy(
+      () => import('../components/slo/burn_rate/alert_details/alert_details_app_section')
+    ),
     priority: 100,
   });
 
@@ -148,7 +151,7 @@ export const registerObservabilityRuleTypes = async (
         link: getViewInAppUrl({
           metrics,
           startedAt: fields[ALERT_START],
-          logExplorerLocator,
+          logsExplorerLocator,
           filter: (searchConfiguration?.query as { query: string }).query,
           dataViewId,
         }),
@@ -156,7 +159,10 @@ export const registerObservabilityRuleTypes = async (
       };
     },
     alertDetailsAppSection: lazy(
-      () => import('../components/custom_threshold/components/alert_details_app_section')
+      () =>
+        import(
+          '../components/custom_threshold/components/alert_details_app_section/alert_details_app_section'
+        )
     ),
     priority: 5,
   });

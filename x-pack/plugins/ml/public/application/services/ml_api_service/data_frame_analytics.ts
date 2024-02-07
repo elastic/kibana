@@ -145,9 +145,10 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
       version: '1',
     });
   },
-  deleteDataFrameAnalytics(analyticsId: string) {
+  deleteDataFrameAnalytics(analyticsId: string, force: boolean = true) {
     return httpService.http<any>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
+      query: { force },
       method: 'DELETE',
       version: '1',
     });
@@ -155,11 +156,12 @@ export const dataFrameAnalyticsApiProvider = (httpService: HttpService) => ({
   deleteDataFrameAnalyticsAndDestIndex(
     analyticsId: string,
     deleteDestIndex: boolean,
-    deleteDestDataView: boolean
+    deleteDestDataView: boolean,
+    force: boolean = true
   ) {
     return httpService.http<DeleteDataFrameAnalyticsWithIndexResponse>({
       path: `${ML_INTERNAL_BASE_PATH}/data_frame/analytics/${analyticsId}`,
-      query: { deleteDestIndex, deleteDestDataView },
+      query: { deleteDestIndex, deleteDestDataView, force },
       method: 'DELETE',
       version: '1',
     });

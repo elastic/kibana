@@ -172,3 +172,14 @@ WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and
 
 . Find the {data-source} that you want to delete, and then
 click image:management/index-patterns/images/delete.png[Delete icon] in the *Actions* column.
+
+[float]
+[[data-view-field-cache]]
+=== {data-source} field cache
+
+The browser caches {data-source} field lists for increased performance. This is particularly impactful 
+for {data-sources} with a high field count that span a large number of indices and clusters. The field 
+list is updated every couple of minutes in typical {kib} usage. Alternatively, use the refresh button on the {data-source} 
+management detail page to get an updated field list. A force reload of {kib} has the same effect. 
+
+The field list may be impacted by changes in indices and user permissions.

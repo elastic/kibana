@@ -80,6 +80,20 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.diffingSubscription",
+            "type": "Object",
+            "tags": [],
+            "label": "diffingSubscription",
+            "description": [],
+            "signature": [
+              "Subscription"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.ControlGroupContainer.select",
             "type": "Function",
             "tags": [],
@@ -167,7 +181,15 @@
             "label": "dispatch",
             "description": [],
             "signature": [
-              "{ setControlStyle: (payload: ",
+              "{ setLastSavedInput: (payload: ",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
+              ") => void; setControlStyle: (payload: ",
               "ControlStyle",
               ") => void; setChainingSystem: (payload: ",
               "ControlGroupChainingSystem",
@@ -260,6 +282,31 @@
             "signature": [
               "Subject",
               "<string>"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.unsavedChanges",
+            "type": "Object",
+            "tags": [],
+            "label": "unsavedChanges",
+            "description": [
+              "This currently reports the **entire** persistable control group input on unsaved changes"
+            ],
+            "signature": [
+              "BehaviorSubject",
+              "<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.PersistableControlGroupInput",
+                "text": "PersistableControlGroupInput"
+              },
+              " | undefined>"
             ],
             "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
             "deprecated": false,
@@ -377,12 +424,12 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.ControlGroupContainer.Unnamed.$4",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "settings",
+                "label": "initialComponentState",
                 "description": [],
                 "signature": [
-                  "ControlGroupSettings",
+                  "ControlGroupComponentState",
                   " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
@@ -407,6 +454,46 @@
                 "isRequired": false
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.resetToLastSavedState",
+            "type": "Function",
+            "tags": [],
+            "label": "resetToLastSavedState",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlGroupContainer.getPersistableInput",
+            "type": "Function",
+            "tags": [],
+            "label": "getPersistableInput",
+            "description": [],
+            "signature": [
+              "() => Pick<Readonly<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.ControlGroupInput",
+                "text": "ControlGroupInput"
+              },
+              ">, \"id\" | \"controlStyle\" | \"ignoreParentSettings\" | \"panels\" | \"chainingSystem\">"
+            ],
+            "path": "src/plugins/controls/public/control_group/embeddable/control_group_container.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           },
           {
@@ -1660,8 +1747,8 @@
                 "section": "def-public.ContainerOutput",
                 "text": "ContainerOutput"
               },
-              "> | undefined, settings?: ",
-              "ControlGroupSettings",
+              "> | undefined, initialComponentState?: ",
+              "ControlGroupComponentState",
               " | undefined, fieldFilterPredicate?: ",
               "FieldFilterPredicate",
               " | undefined) => Promise<",
@@ -1740,12 +1827,12 @@
               {
                 "parentPluginId": "controls",
                 "id": "def-public.ControlGroupContainerFactory.create.$3",
-                "type": "Object",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "settings",
+                "label": "initialComponentState",
                 "description": [],
                 "signature": [
-                  "ControlGroupSettings",
+                  "ControlGroupComponentState",
                   " | undefined"
                 ],
                 "path": "src/plugins/controls/public/control_group/embeddable/control_group_container_factory.ts",
@@ -3492,6 +3579,68 @@
           },
           {
             "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableFactory.controlEditorOptionsComponent",
+            "type": "Function",
+            "tags": [],
+            "label": "controlEditorOptionsComponent",
+            "description": [],
+            "signature": [
+              "({ initialInput, onChange, setControlEditorValid, }: ",
+              {
+                "pluginId": "controls",
+                "scope": "public",
+                "docId": "kibControlsPluginApi",
+                "section": "def-public.ControlEditorProps",
+                "text": "ControlEditorProps"
+              },
+              "<",
+              {
+                "pluginId": "controls",
+                "scope": "common",
+                "docId": "kibControlsPluginApi",
+                "section": "def-common.RangeSliderEmbeddableInput",
+                "text": "RangeSliderEmbeddableInput"
+              },
+              ">) => JSX.Element"
+            ],
+            "path": "src/plugins/controls/public/range_slider/embeddable/range_slider_embeddable_factory.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.RangeSliderEmbeddableFactory.controlEditorOptionsComponent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "__0",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "controls",
+                    "scope": "public",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-public.ControlEditorProps",
+                    "text": "ControlEditorProps"
+                  },
+                  "<",
+                  {
+                    "pluginId": "controls",
+                    "scope": "common",
+                    "docId": "kibControlsPluginApi",
+                    "section": "def-common.RangeSliderEmbeddableInput",
+                    "text": "RangeSliderEmbeddableInput"
+                  },
+                  ">"
+                ],
+                "path": "src/plugins/controls/public/range_slider/components/range_slider_editor_options.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "controls",
             "id": "def-public.RangeSliderEmbeddableFactory.create",
             "type": "Function",
             "tags": [],
@@ -4186,6 +4335,38 @@
                 "description": [],
                 "signature": [
                   "Partial<T>"
+                ],
+                "path": "src/plugins/controls/public/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.ControlEditorProps.setControlEditorValid",
+            "type": "Function",
+            "tags": [],
+            "label": "setControlEditorValid",
+            "description": [],
+            "signature": [
+              "(isValid: boolean) => void"
+            ],
+            "path": "src/plugins/controls/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "controls",
+                "id": "def-public.ControlEditorProps.setControlEditorValid.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isValid",
+                "description": [],
+                "signature": [
+                  "boolean"
                 ],
                 "path": "src/plugins/controls/public/types.ts",
                 "deprecated": false,
@@ -5110,6 +5291,20 @@
             "signature": [
               "RangeValue",
               " | undefined"
+            ],
+            "path": "src/plugins/controls/common/range_slider/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-public.RangeSliderEmbeddableInput.step",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number | undefined"
             ],
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
@@ -6134,6 +6329,30 @@
       },
       {
         "parentPluginId": "controls",
+        "id": "def-common.getDefaultControlGroupPersistableInput",
+        "type": "Function",
+        "tags": [],
+        "label": "getDefaultControlGroupPersistableInput",
+        "description": [],
+        "signature": [
+          "() => ",
+          {
+            "pluginId": "controls",
+            "scope": "common",
+            "docId": "kibControlsPluginApi",
+            "section": "def-common.PersistableControlGroupInput",
+            "text": "PersistableControlGroupInput"
+          }
+        ],
+        "path": "src/plugins/controls/common/control_group/control_group_persistence.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
         "id": "def-common.persistableControlGroupInputIsEqual",
         "type": "Function",
         "tags": [],
@@ -6912,6 +7131,20 @@
             "path": "src/plugins/controls/common/range_slider/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "controls",
+            "id": "def-common.RangeSliderEmbeddableInput.step",
+            "type": "number",
+            "tags": [],
+            "label": "step",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/plugins/controls/common/range_slider/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -7099,17 +7332,13 @@
         "type": "Type",
         "tags": [],
         "label": "PersistableControlGroupInput",
-        "description": [
-          "\nOnly parts of the Control Group Input should be persisted"
-        ],
+        "description": [],
         "signature": [
           "{ controlStyle: ",
           "ControlStyle",
           "; ignoreParentSettings?: ",
           "ParentIgnoreSettings",
-          " | undefined; chainingSystem: ",
-          "ControlGroupChainingSystem",
-          "; panels: ",
+          " | undefined; panels: ",
           {
             "pluginId": "controls",
             "scope": "common",
@@ -7117,7 +7346,26 @@
             "section": "def-common.ControlsPanels",
             "text": "ControlsPanels"
           },
+          "; chainingSystem: ",
+          "ControlGroupChainingSystem",
           "; }"
+        ],
+        "path": "src/plugins/controls/common/control_group/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "controls",
+        "id": "def-common.persistableControlGroupInputKeys",
+        "type": "Array",
+        "tags": [],
+        "label": "persistableControlGroupInputKeys",
+        "description": [
+          "\nOnly parts of the Control Group Input should be persisted"
+        ],
+        "signature": [
+          "(\"controlStyle\" | \"ignoreParentSettings\" | \"panels\" | \"chainingSystem\")[]"
         ],
         "path": "src/plugins/controls/common/control_group/types.ts",
         "deprecated": false,

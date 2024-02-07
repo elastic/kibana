@@ -8,32 +8,32 @@
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { EndpointActionGenerator } from '../../../common/endpoint/data_generators/endpoint_action_generator';
 import {
+  ACTION_AGENT_FILE_INFO_ROUTE,
   ACTION_DETAILS_ROUTE,
   ACTION_STATUS_ROUTE,
-  GET_PROCESSES_ROUTE,
   BASE_ENDPOINT_ACTION_ROUTE,
+  EXECUTE_ROUTE,
+  GET_FILE_ROUTE,
+  GET_PROCESSES_ROUTE,
+  ISOLATE_HOST_ROUTE_V2,
   KILL_PROCESS_ROUTE,
   SUSPEND_PROCESS_ROUTE,
-  GET_FILE_ROUTE,
-  ACTION_AGENT_FILE_INFO_ROUTE,
-  EXECUTE_ROUTE,
-  UPLOAD_ROUTE,
-  ISOLATE_HOST_ROUTE_V2,
   UNISOLATE_HOST_ROUTE_V2,
+  UPLOAD_ROUTE,
 } from '../../../common/endpoint/constants';
 import type { ResponseProvidersInterface } from '../../common/mock/endpoint/http_handler_mock_factory';
 import { httpHandlerMockFactory } from '../../common/mock/endpoint/http_handler_mock_factory';
 import type {
-  ActionDetailsApiResponse,
-  ActionListApiResponse,
-  ResponseActionApiResponse,
-  PendingActionsResponse,
   ActionDetails,
+  ActionDetailsApiResponse,
+  ActionFileInfoApiResponse,
+  ActionListApiResponse,
   GetProcessesActionOutputContent,
+  PendingActionsResponse,
+  ResponseActionApiResponse,
+  ResponseActionExecuteOutputContent,
   ResponseActionGetFileOutputContent,
   ResponseActionGetFileParameters,
-  ActionFileInfoApiResponse,
-  ResponseActionExecuteOutputContent,
   ResponseActionsExecuteParameters,
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
@@ -126,6 +126,7 @@ export const responseActionsHttpMocks = httpHandlerMockFactory<ResponseActionsHt
       const response = new EndpointActionGenerator('seed').generateActionDetails();
 
       return {
+        agentTypes: ['endpoint'],
         elasticAgentIds: ['agent-a'],
         commands: ['isolate'],
         page: 0,

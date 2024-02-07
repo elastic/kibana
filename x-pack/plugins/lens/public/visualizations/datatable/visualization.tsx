@@ -631,6 +631,12 @@ export const getDatatableVisualization = ({
     return suggestion;
   },
 
+  getSortedColumns(state, datasourceLayers) {
+    const { sortedColumns } =
+      getDataSourceAndSortedColumns(state, datasourceLayers || {}, state.layerId) || {};
+    return sortedColumns;
+  },
+
   getVisualizationInfo(state) {
     const visibleMetricColumns = state.columns.filter(
       (c) => !c.hidden && c.colorMode && c.colorMode !== 'none'

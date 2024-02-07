@@ -11,7 +11,7 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 import { AlertsTableStateProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/alerts_table_state';
 import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
 import type { SloItem } from '../types';
-import { SLO_ALERTS_TABLE_CONFID } from '../../constants';
+import { SLO_ALERTS_TABLE_CONFIG_ID } from '../../constants';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
@@ -22,9 +22,14 @@ interface Props {
   timeRange: TimeRange;
   onLoaded?: () => void;
   lastReloadRequestTime: number | undefined;
+  showAllGroupByInstances?: boolean;
 }
 
-export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
+export const getSloInstanceFilter = (
+  sloId: string,
+  sloInstanceId: string,
+  showAllGroupByInstances = false
+) => {
   return {
     bool: {
       must: [
@@ -33,7 +38,7 @@ export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
             'slo.id': sloId,
           },
         },
-        ...(sloInstanceId !== ALL_VALUE
+        ...(sloInstanceId !== ALL_VALUE && !showAllGroupByInstances
           ? [
               {
                 term: {
@@ -47,7 +52,11 @@ export const getSloInstanceFilter = (sloId: string, sloInstanceId: string) => {
   };
 };
 
-export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
+export const useSloAlertsQuery = (
+  slos: SloItem[],
+  timeRange: TimeRange,
+  showAllGroupByInstances?: boolean
+) => {
   return useMemo(() => {
     const query: AlertsTableStateProps['query'] = {
       bool: {
@@ -66,7 +75,9 @@ export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
           },
           {
             bool: {
-              should: slos.map((slo) => getSloInstanceFilter(slo.id, slo.instanceId)),
+              should: slos.map((slo) =>
+                getSloInstanceFilter(slo.id, slo.instanceId, showAllGroupByInstances)
+              ),
             },
           },
         ],
@@ -74,19 +85,26 @@ export const useSloAlertsQuery = (slos: SloItem[], timeRange: TimeRange) => {
     };
 
     return query;
-  }, [slos, timeRange]);
+  }, [showAllGroupByInstances, slos, timeRange.from]);
 };
 
-export function SloAlertsTable({ slos, deps, timeRange, onLoaded, lastReloadRequestTime }: Props) {
+export function SloAlertsTable({
+  slos,
+  deps,
+  timeRange,
+  onLoaded,
+  lastReloadRequestTime,
+  showAllGroupByInstances,
+}: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = deps;
 
   return (
     <AlertsStateTable
-      query={useSloAlertsQuery(slos, timeRange)}
+      query={useSloAlertsQuery(slos, timeRange, showAllGroupByInstances)}
       alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-      configurationId={SLO_ALERTS_TABLE_CONFID}
+      configurationId={SLO_ALERTS_TABLE_CONFIG_ID}
       featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
       hideLazyLoader
       id={ALERTS_TABLE_ID}

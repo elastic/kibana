@@ -25,9 +25,10 @@ import {
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { LOG_EXPLORER_LOCATOR_ID, LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { LOGS_EXPLORER_LOCATOR_ID, LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { DiscoverStart } from '@kbn/discover-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -114,6 +115,7 @@ export interface ConfigSchema {
 export type ObservabilityPublicSetup = ReturnType<Plugin['setup']>;
 export interface ObservabilityPublicPluginsSetup {
   data: DataPublicPluginSetup;
+  fieldFormats: FieldFormatsSetup;
   observabilityShared: ObservabilitySharedPluginSetup;
   observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   share: SharePluginSetup;
@@ -137,6 +139,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
+  fieldFormats: FieldFormatsStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -171,6 +174,17 @@ export class Plugin
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
   private observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry =
     {} as ObservabilityRuleTypeRegistry;
+
+  private lazyRegisterAlertsTableConfiguration() {
+    /**
+     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
+     * See https://webpack.js.org/api/module-methods/#magic-comments
+     */
+    return import(
+      /* webpackChunkName: "lazy_register_observability_alerts_table_configuration" */
+      './components/alerts_table/register_alerts_table_configuration'
+    );
+  }
 
   // Define deep links as constant and hidden. Whether they are shown or hidden
   // in the global navigation will happen in `updateGlobalNavigation`.
@@ -249,15 +263,14 @@ export class Plugin
     const sloEditLocator = pluginsSetup.share.url.locators.create(new SloEditLocatorDefinition());
     const sloListLocator = pluginsSetup.share.url.locators.create(new SloListLocatorDefinition());
 
-    const logExplorerLocator =
-      pluginsSetup.share.url.locators.get<LogExplorerLocatorParams>(LOG_EXPLORER_LOCATOR_ID);
+    const logsExplorerLocator =
+      pluginsSetup.share.url.locators.get<LogsExplorerLocatorParams>(LOGS_EXPLORER_LOCATOR_ID);
 
     const mount = async (params: AppMountParameters<unknown>) => {
       // Load application bundle
       const { renderApp } = await import('./application');
       // Get start services
       const [coreStart, pluginsStart] = await coreSetup.getStartServices();
-
       const { ruleTypeRegistry, actionTypeRegistry } = pluginsStart.triggersActionsUi;
 
       return renderApp({
@@ -307,7 +320,7 @@ export class Plugin
 
     coreSetup.application.register(app);
 
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logExplorerLocator);
+    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logsExplorerLocator);
 
     const assertPlatinumLicense = async () => {
       const licensing = await pluginsSetup.licensing;
@@ -432,35 +445,19 @@ export class Plugin
   public start(coreStart: CoreStart, pluginsStart: ObservabilityPublicPluginsStart) {
     const { application } = coreStart;
     const config = this.initContext.config.get();
+    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
+    this.lazyRegisterAlertsTableConfiguration().then(({ registerAlertsTableConfiguration }) => {
+      return registerAlertsTableConfiguration(
+        alertsTableConfigurationRegistry,
+        this.observabilityRuleTypeRegistry,
+        config
+      );
+    });
 
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
       updater$: this.appUpdater$,
-    });
-
-    const getAsyncO11yAlertsTableConfiguration = async () => {
-      const { getAlertsTableConfiguration } = await import(
-        './components/alerts_table/get_alerts_table_configuration'
-      );
-      return getAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    const { alertsTableConfigurationRegistry } = pluginsStart.triggersActionsUi;
-
-    getAsyncO11yAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
-    });
-
-    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
-      const { getSloAlertsTableConfiguration } = await import(
-        './components/alerts_table/slo/get_slo_alerts_table_configuration'
-      );
-      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
-    };
-
-    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
-      alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
     return {

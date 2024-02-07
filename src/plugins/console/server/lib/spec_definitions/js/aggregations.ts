@@ -224,6 +224,25 @@ const rules = {
         // populated by a global rule
       },
     },
+    ip_prefix: {
+      __template: {
+        field: '',
+      },
+      ipPrefix: {
+        __template: {
+          prefixLength: 1,
+          isIpv6: false,
+        },
+        prefixLength: 1,
+        isIpv6: false,
+      },
+      field: '{field}',
+      format: '',
+      keyed: { __one_of: [true, false] },
+      script: {
+        // populated by a global rule
+      },
+    },
     ip_range: {
       __template: {
         field: '',

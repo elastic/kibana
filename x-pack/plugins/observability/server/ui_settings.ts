@@ -20,6 +20,7 @@ import {
   apmTraceExplorerTab,
   apmLabsButton,
   enableAgentExplorerView,
+  apmEnableTableSearchBar,
   enableAwsLambdaMetrics,
   apmAWSLambdaPriceFactor,
   apmAWSLambdaRequestCostPerMillion,
@@ -37,6 +38,7 @@ import {
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureHostsCustomDashboards,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -250,6 +252,24 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.boolean(),
   },
+  [enableInfrastructureHostsCustomDashboards]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureHostsCustomDashboards', {
+      defaultMessage: 'Custom dashboards for Host Details in Infrastructure',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureHostsCustomDashboardsDescription',
+      {
+        defaultMessage:
+          '{betaLabel} Enable option to link custom dashboards in the Host Details view.',
+        values: {
+          betaLabel: `<em>[${betaLabel}]</em>`,
+        },
+      }
+    ),
+    schema: schema.boolean(),
+  },
   [enableAwsLambdaMetrics]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
@@ -275,6 +295,23 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     description: i18n.translate('xpack.observability.enableAgentExplorerDescription', {
       defaultMessage: '{betaLabel} Enables Agent explorer view.',
+      values: {
+        betaLabel: `<em>[${betaLabel}]</em>`,
+      },
+    }),
+    schema: schema.boolean(),
+    value: true,
+    requiresPageReload: true,
+    type: 'boolean',
+  },
+  [apmEnableTableSearchBar]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTableSearchBar', {
+      defaultMessage: 'Instant table search',
+    }),
+    description: i18n.translate('xpack.observability.apmEnableTableSearchBarDescription', {
+      defaultMessage:
+        '{betaLabel} Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions and Errors',
       values: {
         betaLabel: `<em>[${betaLabel}]</em>`,
       },

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useKibana as _useKibana, CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { useKibana as _useKibana } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { AppServices } from './application';
 
 export { CodeEditor };

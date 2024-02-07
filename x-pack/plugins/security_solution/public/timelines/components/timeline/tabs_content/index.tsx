@@ -135,8 +135,8 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     setConversationId,
     showTimeline,
   }) => {
-    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const { hasAssistantPrivilege } = useAssistantAvailability();
+    const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {

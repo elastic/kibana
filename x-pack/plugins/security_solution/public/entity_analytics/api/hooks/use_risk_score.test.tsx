@@ -144,6 +144,13 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
         ...defaultRisk,
         isModuleEnabled: false,
         refetch: result.current.refetch,
+        error: {
+          attributes: {
+            caused_by: {
+              type: 'index_not_found_exception',
+            },
+          },
+        },
       });
     });
 

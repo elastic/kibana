@@ -15,4 +15,26 @@ describe('hosts risk search_strategy getHostRiskIndex', () => {
   it('should properly return user index if space is specified', () => {
     expect(getUserRiskIndex('testName', true, false)).toEqual('ml_user_risk_score_latest_testName');
   });
+
+  describe('with new risk score module installed', () => {
+    it('should properly return host index if onlyLatest is false', () => {
+      expect(getHostRiskIndex('default', false, true)).toEqual('risk-score.risk-score-default');
+    });
+
+    it('should properly return host index if onlyLatest is true', () => {
+      expect(getHostRiskIndex('default', true, true)).toEqual(
+        'risk-score.risk-score-latest-default'
+      );
+    });
+
+    it('should properly return user index if onlyLatest is false', () => {
+      expect(getUserRiskIndex('default', false, true)).toEqual('risk-score.risk-score-default');
+    });
+
+    it('should properly return user index if onlyLatest is true', () => {
+      expect(getUserRiskIndex('default', true, true)).toEqual(
+        'risk-score.risk-score-latest-default'
+      );
+    });
+  });
 });

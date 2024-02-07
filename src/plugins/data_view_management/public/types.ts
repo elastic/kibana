@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
+import type {
   ChromeStart,
   IUiSettingsClient,
   OverlayStart,
@@ -16,18 +16,19 @@ import {
   ApplicationStart,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
-import { IndexPatternManagementStart } from '.';
+import type { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
+import type { IndexPatternManagementStart } from '.';
 
 export interface IndexPatternManagmentContext {
   application: ApplicationStart;
@@ -50,6 +51,7 @@ export interface IndexPatternManagmentContext {
   spaces?: SpacesPluginStart;
   theme: ThemeServiceStart;
   savedObjectsManagement: SavedObjectsManagementPluginStart;
+  noDataPage?: NoDataPagePluginSetup;
 }
 
 export type IndexPatternManagmentContextValue =

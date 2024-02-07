@@ -29,7 +29,7 @@ export const createOrUpdateIlmPolicy = async ({
 }: CreateOrUpdateIlmPolicyOpts) => {
   if (dataStreamAdapter.isUsingDataStreams()) return;
 
-  logger.info(`Installing ILM policy ${name}`);
+  logger.debug(`Installing ILM policy ${name}`);
 
   try {
     await retryTransientEsErrors(() => esClient.ilm.putLifecycle({ name, policy }), { logger });

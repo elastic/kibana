@@ -103,5 +103,6 @@
     "@kbn/cloud",
     "@kbn/config",
     "@kbn/core-http-server-mocks",
+    "@kbn/code-editor",
   ]
 }

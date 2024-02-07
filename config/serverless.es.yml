@@ -5,7 +5,7 @@ xpack.apm.enabled: false
 
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: false
-xpack.observabilityLogExplorer.enabled: false
+xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false

@@ -14,9 +14,11 @@ export type {
   CustomCheerioStatic,
 } from './services/web_element_wrapper/custom_cheerio_api';
 export { Browsers } from './services/remote/browsers';
+export { type Browser } from './services/browser';
 export {
   NETWORK_PROFILES,
   type NetworkOptions,
   type NetworkProfile,
 } from './services/remote/network_profiles';
 export type { TimeoutOpt } from './types';
+export { TestSubjects } from './services/test_subjects';

@@ -35,6 +35,7 @@ Object {
     "managed_by": "observability",
     "version": 3,
   },
+  "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
     "index": ".slo-observability.sli-v3",
@@ -259,6 +260,7 @@ Object {
     "managed_by": "observability",
     "version": 3,
   },
+  "defer_validation": true,
   "description": "Rolled-up SLI data for SLO: irrelevant [id: irrelevant, revision: 1]",
   "dest": Object {
     "index": ".slo-observability.sli-v3",

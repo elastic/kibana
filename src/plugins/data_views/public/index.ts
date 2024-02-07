@@ -67,6 +67,7 @@ export type {
   DataViewsContract,
   HasDataViewsResponse,
   IndicesViaSearchResponse,
+  UserIdGetter,
 } from './types';
 
 // Export plugin after all other imports

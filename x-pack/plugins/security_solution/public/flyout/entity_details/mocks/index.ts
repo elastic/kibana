@@ -27,6 +27,15 @@ const userRiskScore: UserRiskScore = {
       calculated_score_norm: 70,
       multipliers: [],
       calculated_level: RiskSeverity.high,
+      '@timestamp': '',
+      id_field: '',
+      id_value: '',
+      calculated_score: 0,
+      category_1_count: 5,
+      category_1_score: 20,
+      category_2_count: 1,
+      category_2_score: 10,
+      notes: [],
       inputs: [
         {
           id: '_id',
@@ -52,6 +61,15 @@ const hostRiskScore: HostRiskScore = {
       calculated_score_norm: 70,
       multipliers: [],
       calculated_level: RiskSeverity.high,
+      '@timestamp': '',
+      id_field: '',
+      id_value: '',
+      calculated_score: 0,
+      category_1_count: 5,
+      category_1_score: 20,
+      category_2_count: 1,
+      category_2_score: 10,
+      notes: [],
       inputs: [
         {
           id: '_id',
@@ -81,6 +99,7 @@ export const mockUserRiskScoreState: RiskScoreState<RiskScoreEntity.user> = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
+  error: undefined,
 };
 
 export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
@@ -96,6 +115,7 @@ export const mockHostRiskScoreState: RiskScoreState<RiskScoreEntity.host> = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
+  error: undefined,
 };
 
 const hostMetadata: HostMetadataInterface = {

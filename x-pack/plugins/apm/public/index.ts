@@ -24,6 +24,7 @@ export interface ConfigSchema {
     migrationToFleetAvailable: boolean;
     sourcemapApiAvailable: boolean;
     storageExplorerAvailable: boolean;
+    profilingIntegrationAvailable: boolean;
   };
   serverless: {
     enabled: boolean;

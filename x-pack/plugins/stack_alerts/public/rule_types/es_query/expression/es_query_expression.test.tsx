@@ -23,8 +23,16 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
-jest.mock('@kbn/kibana-react-plugin/public', () => ({
-  useKibana: jest.fn(),
+jest.mock('@kbn/kibana-react-plugin/public', () => {
+  const module = jest.requireActual('@kbn/kibana-react-plugin/public');
+
+  return {
+    ...module,
+    useKibana: jest.fn(),
+  };
+});
+
+jest.mock('@kbn/code-editor', () => ({
   // Mocking CodeEditor
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   CodeEditor: (props: any) => (

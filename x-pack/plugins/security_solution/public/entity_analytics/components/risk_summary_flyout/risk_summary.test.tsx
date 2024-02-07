@@ -44,8 +44,37 @@ describe('RiskSummary', () => {
     );
 
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('Inputs1');
-    expect(getByTestId('risk-summary-table')).toHaveTextContent('CategoryAlerts');
+
+    // Alerts
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `AlertsScore${mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0}`
+    );
+
+    // Context
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `Inputs${mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0}`
+    );
+    expect(getByTestId('risk-summary-table')).toHaveTextContent(
+      `ContextsScore${mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0}`
+    );
+
+    // Result
+    expect(getByTestId('risk-summary-result-count')).toHaveTextContent(
+      `${
+        (mockHostRiskScoreState.data?.[0].host.risk.category_1_count ?? 0) +
+        (mockHostRiskScoreState.data?.[0].host.risk.category_2_count ?? 0)
+      }`
+    );
+
+    expect(getByTestId('risk-summary-result-score')).toHaveTextContent(
+      `${
+        (mockHostRiskScoreState.data?.[0].host.risk.category_1_score ?? 0) +
+        (mockHostRiskScoreState.data?.[0].host.risk.category_2_score ?? 0)
+      }`
+    );
   });
 
   it('renders risk summary table when riskScoreData is empty', () => {
@@ -102,7 +131,9 @@ describe('RiskSummary', () => {
 
     const lensAttributes: LensAttributes =
       mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
-    const datasourceLayers = Object.values(lensAttributes.state.datasourceStates.formBased.layers);
+    const datasourceLayers = Object.values(
+      lensAttributes.state.datasourceStates.formBased?.layers ?? {}
+    );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
     expect(lensAttributes.state.query.query).toEqual('host.name: test');
@@ -111,6 +142,48 @@ describe('RiskSummary', () => {
         sourceField: 'host.risk.calculated_score_norm',
       })
     );
+  });
+
+  it('builds lens cases attachment metadata for host risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockHostRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensMetadata: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata;
+
+    expect(lensMetadata).toMatchInlineSnapshot(`
+      Object {
+        "description": "Risk score for host test",
+      }
+    `);
+  });
+
+  it('builds lens cases attachment metadata for user risk score', () => {
+    render(
+      <TestProviders>
+        <RiskSummary
+          riskScoreData={mockUserRiskScoreState}
+          queryId={'testQuery'}
+          openDetailsPanel={() => {}}
+        />
+      </TestProviders>
+    );
+
+    const lensMetadata: LensAttributes =
+      mockVisualizationEmbeddable.mock.calls[0][0].casesAttachmentMetadata;
+
+    expect(lensMetadata).toMatchInlineSnapshot(`
+      Object {
+        "description": "Risk score for user test",
+      }
+    `);
   });
 
   it('builds lens attributes for user risk score', () => {
@@ -126,7 +199,9 @@ describe('RiskSummary', () => {
 
     const lensAttributes: LensAttributes =
       mockVisualizationEmbeddable.mock.calls[0][0].lensAttributes;
-    const datasourceLayers = Object.values(lensAttributes.state.datasourceStates.formBased.layers);
+    const datasourceLayers = Object.values(
+      lensAttributes.state.datasourceStates.formBased?.layers ?? {}
+    );
     const firstColumn = Object.values(datasourceLayers[0].columns)[0];
 
     expect(lensAttributes.state.query.query).toEqual('user.name: test');

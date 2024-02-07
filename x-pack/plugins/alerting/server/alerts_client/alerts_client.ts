@@ -223,7 +223,7 @@ export class AlertsClient<
       LegacyContext,
       WithoutReservedActionGroups<ActionGroupIds, RecoveryActionGroupId>
     >
-  ): ReportedAlertData {
+  ): ReportedAlertData<AlertData> {
     const context = alert.context ? alert.context : ({} as LegacyContext);
     const state = !isEmpty(alert.state) ? alert.state : null;
 
@@ -245,6 +245,7 @@ export class AlertsClient<
     return {
       uuid: legacyAlert.getUuid(),
       start: legacyAlert.getStart() ?? this.startedAtString,
+      alertDoc: this.fetchedAlerts.data[alert.id],
     };
   }
 
@@ -343,6 +344,11 @@ export class AlertsClient<
             })
           );
         } else {
+          // skip writing the alert document if the number of consecutive
+          // active alerts is less than the rule alertDelay threshold
+          if (activeAlerts[id].getActiveCount() < this.options.rule.alertDelay) {
+            continue;
+          }
           activeAlertsToIndex.push(
             buildNewAlert<
               AlertData,

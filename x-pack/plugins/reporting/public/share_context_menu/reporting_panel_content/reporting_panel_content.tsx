@@ -8,7 +8,7 @@
 import React, { Component, ReactElement } from 'react';
 import url from 'url';
 
-import { CSV_REPORT_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
 import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
@@ -251,7 +251,8 @@ class ReportingPanelContentUi extends Component<Props, State> {
       case PDF_REPORT_TYPE_V2:
         return 'PDF';
       case CSV_REPORT_TYPE:
-        return 'csv';
+      case CSV_REPORT_TYPE_V2:
+        return 'CSV';
       case 'png':
       case PNG_REPORT_TYPE_V2:
         return PNG_REPORT_TYPE;

@@ -15,7 +15,8 @@ export type CloudSecurityUsageCollectorType =
   | 'Rules'
   | 'Installation'
   | 'Alerts'
-  | 'Cloud Accounts';
+  | 'Cloud Accounts'
+  | 'Muted Rules';
 
 export type CloudProviderKey = 'cis_eks' | 'cis_gke' | 'cis_k8s' | 'cis_ake';
 export type CloudbeatConfigKeyType =
@@ -32,6 +33,7 @@ export interface CspmUsage {
   installation_stats: CloudSecurityInstallationStats[];
   alerts_stats: CloudSecurityAlertsStats[];
   cloud_account_stats: CloudSecurityAccountsStats[];
+  muted_rules_stats: MutedRulesStats[];
 }
 
 export interface PackageSetupStatus {
@@ -213,4 +215,16 @@ export interface AccountEntity {
   resources: {
     pods_count: Value;
   };
+}
+
+export interface MutedRulesStats {
+  id: string;
+  name: string;
+  section: string;
+  version: string;
+  benchmark_id: string;
+  benchmark_name: string;
+  benchmark_version: string;
+  posture_type: string;
+  rule_number: string;
 }

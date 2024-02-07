@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsUpdateResponse,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { FindResult, RulesClient } from '@kbn/alerting-plugin/server';
 import type { RuleParams } from '@kbn/alerting-plugin/server/application/rule/types';
 import type {
@@ -105,17 +102,22 @@ export const muteDetectionRules = async (
   return disabledDetectionRules;
 };
 
-export const updateRulesStates = async (
+export const updateBenchmarkRulesStates = async (
   encryptedSoClient: SavedObjectsClientContract,
   newRulesStates: CspBenchmarkRulesStates
-): Promise<SavedObjectsUpdateResponse<CspSettings>> => {
-  return await encryptedSoClient.update<CspSettings>(
+): Promise<CspBenchmarkRulesStates> => {
+  if (!Object.keys(newRulesStates).length) {
+    return {};
+  }
+
+  const response = await encryptedSoClient.update<CspSettings>(
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_TYPE,
     INTERNAL_CSP_SETTINGS_SAVED_OBJECT_ID,
     { rules: newRulesStates },
     // if there is no saved object yet, insert a new SO
     { upsert: { rules: newRulesStates } }
   );
+  return response.attributes.rules || {};
 };
 
 export const setRulesStates = (
@@ -135,8 +137,4 @@ export const setRulesStates = (
     };
   });
   return rulesStates;
-};
-
-export const buildRuleKey = (benchmarkId: string, benchmarkVersion: string, ruleNumber: string) => {
-  return `${benchmarkId};${benchmarkVersion};${ruleNumber}`;
 };

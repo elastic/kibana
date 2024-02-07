@@ -25,7 +25,7 @@ import {
   ACTION_INVESTIGATE_IN_TIMELINE,
 } from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
-import { useCreateTimeline } from '../../timelines/components/timeline/properties/use_create_timeline';
+import { useCreateTimeline } from '../../timelines/hooks/use_create_timeline';
 import {
   applyKqlFilterQuery,
   setActiveTabTimeline,

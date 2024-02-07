@@ -1873,19 +1873,6 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourceID",
-            "type": "string",
-            "tags": [],
-            "label": "SourceID",
-            "description": [
-              "should this be StackFrame.SourceID?"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.StackFrameMetadata.SourceFilename",
             "type": "string",
             "tags": [],
@@ -1912,90 +1899,12 @@
           },
           {
             "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.FunctionSourceLine",
-            "type": "number",
-            "tags": [],
-            "label": "FunctionSourceLine",
-            "description": [
-              "auto-generated - see createStackFrameMetadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
             "id": "def-common.StackFrameMetadata.ExeFileName",
             "type": "string",
             "tags": [],
             "label": "ExeFileName",
             "description": [
               "Executable.FileName"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.CommitHash",
-            "type": "string",
-            "tags": [],
-            "label": "CommitHash",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourceCodeURL",
-            "type": "string",
-            "tags": [],
-            "label": "SourceCodeURL",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourcePackageHash",
-            "type": "string",
-            "tags": [],
-            "label": "SourcePackageHash",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SourcePackageURL",
-            "type": "string",
-            "tags": [],
-            "label": "SourcePackageURL",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
-            ],
-            "path": "packages/kbn-profiling-utils/common/profiling.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/profiling-utils",
-            "id": "def-common.StackFrameMetadata.SamplingRate",
-            "type": "number",
-            "tags": [],
-            "label": "SamplingRate",
-            "description": [
-              "unused atm due to lack of symbolization metadata"
             ],
             "path": "packages/kbn-profiling-utils/common/profiling.ts",
             "deprecated": false,

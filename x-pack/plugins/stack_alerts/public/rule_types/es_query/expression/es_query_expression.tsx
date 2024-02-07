@@ -14,7 +14,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {

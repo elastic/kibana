@@ -91,7 +91,7 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
   },
   getSuggestionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CompletionItemProvider => {
     return {
-      triggerCharacters: [',', '(', '=', ' ', ''],
+      triggerCharacters: [',', '(', '=', ' ', '[', ''],
       async provideCompletionItems(
         model: monaco.editor.ITextModel,
         position: monaco.Position,
@@ -107,6 +107,27 @@ export const ESQLLang: CustomLangModuleType<ESQLCallbacks> = {
             ...suggestion,
             range: undefined as unknown as monaco.IRange,
           })),
+        };
+      },
+    };
+  },
+
+  getCodeActionProvider: (callbacks?: ESQLCallbacks): monaco.languages.CodeActionProvider => {
+    return {
+      async provideCodeActions(
+        model /** ITextModel*/,
+        range /** Range*/,
+        context /** CodeActionContext*/,
+        token /** CancellationToken*/
+      ) {
+        const astAdapter = new ESQLAstAdapter(
+          (...uris) => workerProxyService.getWorker(uris),
+          callbacks
+        );
+        const actions = await astAdapter.codeAction(model, range, context);
+        return {
+          actions,
+          dispose: () => {},
         };
       },
     };

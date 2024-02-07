@@ -12,6 +12,7 @@ servers:
 paths:
   /internal/asset_criticality:
     get:
+      operationId: AssetCriticalityGetRecord
       summary: Get Criticality Record
       parameters:
         - $ref: './common.schema.yaml#/components/parameters/id_value'

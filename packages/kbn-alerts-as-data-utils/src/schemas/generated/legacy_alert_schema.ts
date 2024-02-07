@@ -68,6 +68,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const LegacyAlertRequired = rt.type({
 });
+// prettier-ignore
 const LegacyAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'kibana.alert.risk_score': schemaNumber,

@@ -15,6 +15,20 @@ import { SelectedPolicyTab } from '../../components';
 
 export const AGENTLESS_POLICY_ID = 'agentless';
 
+export const useAgentlessPolicy = () => {
+  const { agentless: agentlessExperimentalFeatureEnabled } = ExperimentalFeaturesService.get();
+  const { cloud } = useStartServices();
+  const isServerless = !!cloud?.isServerlessEnabled;
+
+  const isAgentlessEnabled = agentlessExperimentalFeatureEnabled && isServerless;
+  const isAgentlessPolicyId = (id: string) => isAgentlessEnabled && id === AGENTLESS_POLICY_ID;
+
+  return {
+    isAgentlessEnabled,
+    isAgentlessPolicyId,
+  };
+};
+
 export function useSetupTechnology({
   updateNewAgentPolicy,
   newAgentPolicy,
@@ -26,9 +40,7 @@ export function useSetupTechnology({
   updateAgentPolicy: (policy: AgentPolicy) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
-  const { agentless: isAgentlessEnabled } = ExperimentalFeaturesService.get();
-  const { cloud } = useStartServices();
-  const isServerless = cloud?.isServerlessEnabled ?? false;
+  const { isAgentlessEnabled } = useAgentlessPolicy();
   const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
     SetupTechnology.AGENT_BASED
   );
@@ -44,10 +56,10 @@ export function useSetupTechnology({
       }
     };
 
-    if (isAgentlessEnabled && isServerless) {
+    if (isAgentlessEnabled) {
       fetchAgentlessPolicy();
     }
-  }, [isAgentlessEnabled, isServerless]);
+  }, [isAgentlessEnabled]);
 
   const handleSetupTechnologyChange = useCallback(
     (setupTechnology) => {

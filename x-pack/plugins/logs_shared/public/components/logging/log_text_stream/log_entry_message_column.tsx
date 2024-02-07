@@ -24,7 +24,7 @@ import {
   WrapMode,
 } from './text_styles';
 
-interface LogEntryMessageColumnProps {
+export interface LogEntryMessageColumnProps {
   columnValue: LogColumn;
   highlights: LogColumn[];
   isActiveHighlight: boolean;

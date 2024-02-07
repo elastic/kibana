@@ -89,7 +89,7 @@ export function fetchAll(
     // Mark all subjects as loading
     sendLoadingMsg(dataSubjects.main$, { recordRawType });
     sendLoadingMsg(dataSubjects.documents$, { recordRawType, query });
-    sendLoadingMsg(dataSubjects.totalHits$, { recordRawType });
+    // histogram will send `loading` for totalHits$
 
     // Start fetching all required requests
     const response =
@@ -116,9 +116,12 @@ export function fetchAll(
             meta: { fetchType },
           });
         }
+
+        const currentTotalHits = dataSubjects.totalHits$.getValue();
         // If the total hits (or chart) query is still loading, emit a partial
         // hit count that's at least our retrieved document count
-        if (dataSubjects.totalHits$.getValue().fetchStatus === FetchStatus.LOADING) {
+        if (currentTotalHits.fetchStatus === FetchStatus.LOADING && !currentTotalHits.result) {
+          // trigger `partial` only for the first request (if no total hits value yet)
           dataSubjects.totalHits$.next({
             fetchStatus: FetchStatus.PARTIAL,
             result: records.length,

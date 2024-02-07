@@ -154,13 +154,13 @@ Array [
         >
           Elasticsearch Service Console
           <span
-            class="emotion-euiLink__externalIcon"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+            class="emotion-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
@@ -174,13 +174,13 @@ Array [
         >
           Logs and metrics
           <span
-            class="emotion-euiLink__externalIcon"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+            class="emotion-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
@@ -194,13 +194,13 @@ Array [
         >
           the documentation page.
           <span
-            class="emotion-euiLink__externalIcon"
+            class="emotion-EuiExternalLinkIcon"
             data-euiicon-type="popout"
           >
             External link
           </span>
           <span
-            class="emotion-euiScreenReaderOnly-euiLink__screenReaderText"
+            class="emotion-euiScreenReaderOnly"
           >
             (opens in a new tab or window)
           </span>
