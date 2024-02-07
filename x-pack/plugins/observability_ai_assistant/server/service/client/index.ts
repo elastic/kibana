@@ -449,6 +449,8 @@ export class ObservabilityAIAssistantClient {
   ): Promise<Observable<ChatCompletionChunkEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
 
+    const spanId = (span?.ids['span.id'] || '').substring(0, 6);
+
     const messagesForOpenAI: Array<
       Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
         role: MessageRole;
@@ -484,6 +486,8 @@ export class ObservabilityAIAssistantClient {
     this.dependencies.logger.debug(`Sending conversation to connector`);
     this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
+    let now = performance.now();
+
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
@@ -495,7 +499,13 @@ export class ObservabilityAIAssistantClient {
       },
     });
 
-    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+    this.dependencies.logger.debug(
+      `Received action client response: ${executeResult.status} (took: ${Math.round(
+        performance.now() - now
+      )}ms)${spanId ? ` (${spanId})` : ''}`
+    );
+
+    now = performance.now();
 
     if (executeResult.status === 'error' && executeResult?.serviceMessage) {
       const tokenLimitRegex =
@@ -518,20 +528,24 @@ export class ObservabilityAIAssistantClient {
 
     const observable = streamIntoObservable(response).pipe(processOpenAiStream(), shareReplay());
 
-    if (span) {
-      lastValueFrom(observable)
-        .then(
-          () => {
-            span.setOutcome('success');
-          },
-          () => {
-            span.setOutcome('failure');
-          }
-        )
-        .finally(() => {
-          span.end();
-        });
-    }
+    lastValueFrom(observable)
+      .then(
+        () => {
+          span?.setOutcome('success');
+        },
+        () => {
+          span?.setOutcome('failure');
+        }
+      )
+      .finally(() => {
+        this.dependencies.logger.debug(
+          `Completed response in ${Math.round(performance.now() - now)}ms${
+            spanId ? ` (${spanId})` : ''
+          }`
+        );
+
+        span?.end();
+      });
 
     return observable;
   };
