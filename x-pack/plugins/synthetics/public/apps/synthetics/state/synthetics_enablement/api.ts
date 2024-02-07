@@ -20,3 +20,11 @@ export const fetchGetSyntheticsEnablement =
       MonitorManagementEnablementResultCodec
     );
   };
+export interface AssetsCheckResult {
+  hasAllAssets: boolean;
+  reinstalled?: boolean;
+  error?: string;
+}
+export const fetchGetSyntheticsAssetsCheck = async (): Promise<AssetsCheckResult> => {
+  return await apiService.put(SYNTHETICS_API_URLS.SYNTHETICS_ASSETS_CHECK, undefined);
+};

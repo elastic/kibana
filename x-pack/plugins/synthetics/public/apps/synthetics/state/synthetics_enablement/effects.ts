@@ -11,9 +11,10 @@ import {
   getSyntheticsEnablement,
   getSyntheticsEnablementSuccess,
   getSyntheticsEnablementFailure,
+  getSyntheticsAssetsChecks,
 } from './actions';
 import { fetchEffectFactory } from '../utils/fetch_effect';
-import { fetchGetSyntheticsEnablement } from './api';
+import { fetchGetSyntheticsAssetsCheck, fetchGetSyntheticsEnablement } from './api';
 
 export function* fetchSyntheticsEnablementEffect() {
   yield takeLeading(
@@ -22,6 +23,19 @@ export function* fetchSyntheticsEnablementEffect() {
       fetchGetSyntheticsEnablement,
       getSyntheticsEnablementSuccess,
       getSyntheticsEnablementFailure,
+      undefined,
+      failureMessage
+    )
+  );
+}
+
+export function* fetchSyntheticsAssetsCheckEffect() {
+  yield takeLeading(
+    getSyntheticsAssetsChecks.get,
+    fetchEffectFactory(
+      fetchGetSyntheticsAssetsCheck,
+      getSyntheticsAssetsChecks.success,
+      getSyntheticsAssetsChecks.fail,
       undefined,
       failureMessage
     )

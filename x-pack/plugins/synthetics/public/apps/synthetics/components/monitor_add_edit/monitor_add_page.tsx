@@ -9,6 +9,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 
+import { useSyntheticsAssetsCheck } from '../../hooks/use_synthetics_assets_check';
 import { useEnablement } from '../../hooks';
 import { getServiceLocations, selectServiceLocationsState } from '../../state';
 import { ServiceAllowedWrapper } from '../common/wrappers/service_allowed_wrapper';
@@ -28,6 +29,7 @@ export const MonitorAddPage = () => {
   useMonitorAddEditBreadcrumbs();
 
   useEnablement();
+  useSyntheticsAssetsCheck();
 
   const dispatch = useDispatch();
   useEffect(() => {

@@ -8,7 +8,6 @@ import { SavedObjectsClientContract } from '@kbn/core/server';
 import { toClientContract } from '../routes/settings/private_locations/helpers';
 import { getPrivateLocationsAndAgentPolicies } from '../routes/settings/private_locations/get_private_locations';
 import { SyntheticsServerSetup } from '../types';
-import { getServiceLocations } from './get_service_locations';
 import { SyntheticsMonitorClient } from './synthetics_monitor/synthetics_monitor_client';
 
 export async function getAllLocations({
@@ -26,7 +25,7 @@ export async function getAllLocations({
       { locations: publicLocations, throttling },
     ] = await Promise.all([
       getPrivateLocationsAndAgentPolicies(savedObjectsClient, syntheticsMonitorClient),
-      getServicePublicLocations(server, syntheticsMonitorClient),
+      getServicePublicLocations(syntheticsMonitorClient),
     ]);
     return {
       publicLocations,
@@ -43,21 +42,13 @@ export async function getAllLocations({
   }
 }
 
-const getServicePublicLocations = async (
-  server: SyntheticsServerSetup,
-  syntheticsMonitorClient: SyntheticsMonitorClient
-) => {
-  if (!syntheticsMonitorClient.syntheticsService.isAllowed) {
-    return {
-      locations: [],
-    };
-  }
-  if (syntheticsMonitorClient.syntheticsService.locations.length === 0) {
-    return await getServiceLocations(server);
+const getServicePublicLocations = async ({ syntheticsService }: SyntheticsMonitorClient) => {
+  if (syntheticsService.locations.length === 0) {
+    return await syntheticsService.registerServiceLocations();
   }
 
   return {
-    locations: syntheticsMonitorClient.syntheticsService.locations,
-    throttling: syntheticsMonitorClient.syntheticsService.throttling,
+    locations: syntheticsService.locations,
+    throttling: syntheticsService.throttling,
   };
 };

@@ -11,12 +11,12 @@ export enum SYNTHETICS_API_URLS {
   PARAMS = `/api/synthetics/params`,
 
   // Service end points
-  INDEX_TEMPLATES = '/internal/synthetics/service/index_templates',
   SERVICE_LOCATIONS = '/internal/uptime/service/locations',
   SYNTHETICS_MONITORS = '/internal/synthetics/service/monitors',
   SYNTHETICS_MONITOR_INSPECT = '/internal/synthetics/service/monitor/inspect',
   GET_SYNTHETICS_MONITOR = '/internal/synthetics/service/monitor/{monitorId}',
   SYNTHETICS_ENABLEMENT = '/internal/synthetics/service/enablement',
+  SYNTHETICS_ASSETS_CHECK = '/internal/synthetics/assets_check',
   RUN_ONCE_MONITOR = '/internal/synthetics/service/monitors/run_once',
   TRIGGER_MONITOR = '/internal/synthetics/service/monitors/trigger',
   SERVICE_ALLOWED = '/internal/synthetics/service/allowed',

@@ -17,7 +17,6 @@ export const getServiceAllowedRoute: SyntheticsRestApiRouteFactory = () => ({
 
     return {
       serviceAllowed: isESS ? syntheticsMonitorClient.syntheticsService.isAllowed : true,
-      signupUrl: syntheticsMonitorClient.syntheticsService.signupUrl,
     };
   },
 });
