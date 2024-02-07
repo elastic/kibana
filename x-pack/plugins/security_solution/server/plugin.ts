@@ -46,7 +46,13 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_UI_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
+import {
+  APP_ID,
+  APP_UI_ID,
+  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+  DEFAULT_ALERTS_INDEX,
+  SERVER_APP_ID,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -116,6 +122,7 @@ import {
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './fleet_integration';
+import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -230,6 +237,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    plugins.cases.attachmentFramework.registerExternalReference({
+      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+    });
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
@@ -532,7 +542,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         artifactClient,
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
-        logger,
+        logger: this.pluginContext.logger.get('ManifestManager'),
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
@@ -551,6 +561,13 @@ export class Plugin implements ISecuritySolutionPlugin {
         }
 
         turnOffPolicyProtectionsIfNotSupported(
+          core.elasticsearch.client.asInternalUser,
+          endpointFleetServicesFactory.asInternalUser(),
+          appFeaturesService,
+          logger
+        );
+
+        turnOffAgentPolicyFeatures(
           core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
           appFeaturesService,

@@ -221,10 +221,10 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
 
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        (await screen.findAllByLabelText('All actions')).at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -250,8 +250,8 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
@@ -276,8 +276,8 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
@@ -303,9 +303,9 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
+        (await screen.findAllByLabelText('All actions')).at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -335,8 +335,8 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();

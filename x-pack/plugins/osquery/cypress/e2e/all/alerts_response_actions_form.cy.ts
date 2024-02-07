@@ -24,8 +24,7 @@ import {
 import { clickRuleName, inputQuery, typeInECSFieldInput } from '../../tasks/live_query';
 import { closeDateTabIfVisible, closeToastIfVisible } from '../../tasks/integrations';
 
-// FLAKY: https://github.com/elastic/kibana/issues/169785
-describe.skip('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
+describe('Alert Event Details - Response Actions Form', { tags: ['@ess', '@serverless'] }, () => {
   let multiQueryPackId: string;
   let multiQueryPackName: string;
   let ruleId: string;
@@ -171,6 +170,7 @@ describe.skip('Alert Event Details - Response Actions Form', { tags: ['@ess', '@
         cy.contains('Search for a pack to run');
         cy.contains('Pack is a required field');
         cy.getBySel('comboBoxInput').type(`${packName}{downArrow}{enter}`);
+        cy.contains(packName);
       })
       .clickOutside();
     cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {

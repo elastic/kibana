@@ -18,6 +18,7 @@ import { useServices } from './services';
  */
 export const KibanaNoDataPage = ({
   onDataViewCreated,
+  onESQLNavigationComplete,
   noDataConfig,
   allowAdHocDataView,
   showPlainSpinner,
@@ -55,6 +56,7 @@ export const KibanaNoDataPage = ({
     return (
       <NoDataViewsPrompt
         onDataViewCreated={onDataViewCreated}
+        onESQLNavigationComplete={onESQLNavigationComplete}
         allowAdHocDataView={allowAdHocDataView}
       />
     );

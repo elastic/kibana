@@ -11,7 +11,7 @@ import {
   deleteConnectorById,
   fetchConnectorById,
   fetchConnectors,
-  fetchSyncJobsByConnectorId,
+  fetchSyncJobs,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -248,7 +248,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchSyncJobsByConnectorId(
+      const result = await fetchSyncJobs(
         client.asCurrentUser,
         request.params.connectorId,
         request.query.from,
@@ -545,7 +545,32 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       });
     })
   );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
 
+      let connectorResult;
+      try {
+        connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
+      } catch (error) {
+        throw error;
+      }
+      return response.ok({
+        body: {
+          connector: connectorResult?.value,
+        },
+      });
+    })
+  );
   router.delete(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}',
