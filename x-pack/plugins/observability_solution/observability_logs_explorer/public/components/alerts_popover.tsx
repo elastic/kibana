@@ -15,7 +15,7 @@ import { getDiscoverFiltersFromState } from '@kbn/logs-explorer-plugin/public';
 import type { AlertParams } from '@kbn/observability-plugin/public/components/custom_threshold/types';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
-import { useObservabilityLogExplorerPageStateContext } from '../state_machines/observability_log_explorer/src';
+import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
 
 type ThresholdRuleTypeParams = Pick<AlertParams, 'searchConfiguration'>;
 
@@ -60,7 +60,7 @@ export const AlertsPopover = () => {
 
   const manageRulesLinkProps = useLinkProps({ app: 'observability', pathname: '/alerts/rules' });
 
-  const [pageState] = useActor(useObservabilityLogExplorerPageStateContext());
+  const [pageState] = useActor(useObservabilityLogsExplorerPageStateContext());
 
   const [state, dispatch] = useReducer(alertsPopoverReducer, {
     isPopoverOpen: false,
@@ -76,10 +76,10 @@ export const AlertsPopover = () => {
     if (
       state.isAddRuleFlyoutOpen &&
       triggersActionsUi &&
-      pageState.matches({ initialized: 'validLogExplorerState' })
+      pageState.matches({ initialized: 'validLogsExplorerState' })
     ) {
-      const { logExplorerState } = pageState.context;
-      const index = hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec();
+      const { logsExplorerState } = pageState.context;
+      const index = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
 
       return triggersActionsUi.getAddRuleFlyout<ThresholdRuleTypeParams>({
         consumer: 'logs',
@@ -89,11 +89,11 @@ export const AlertsPopover = () => {
           params: {
             searchConfiguration: {
               index,
-              query: logExplorerState.query,
+              query: logsExplorerState.query,
               filter: getDiscoverFiltersFromState(
                 index.id,
-                logExplorerState.filters,
-                logExplorerState.controls
+                logsExplorerState.filters,
+                logsExplorerState.controls
               ),
             },
           },

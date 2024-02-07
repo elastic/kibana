@@ -54,7 +54,7 @@ export const DiscoverLinkForValidState = React.memo(
     pageState: InitializedPageState;
   }) => {
     const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(() => {
-      const index = hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec();
+      const index = hydrateDatasetSelection(logsExplorerState.datasetSelection).toDataviewSpec();
       return {
         breakdownField: logsExplorerState.chart.breakdownField ?? undefined,
         columns: getDiscoverColumnsFromDisplayOptions(logsExplorerState),
