@@ -30,7 +30,8 @@ const ECSSchemaOptions = ECSSchema.map((ecs) => ({
   value: ecs,
 }));
 
-const SINGLE_SELECTION = { asPlainText: true };
+const SINGLE_SELECTION = Object.freeze({ asPlainText: true });
+
 const FIELD_LABEL: string = 'Custom field name';
 const FieldNameFieldComponent = ({
   path,
@@ -57,7 +58,7 @@ const FieldNameFieldComponent = ({
       return (
         <FormattedMessage
           id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
-          defaultMessage="Entity_id is an Elastic Security agent specific field, if the alert does not come from Elastic Security agent we will not be able to send the action."
+          defaultMessage="Entity_id is an Elastic Defend agent specific field, if the alert does not come from Elastic Defend agent we will not be able to send the action."
         />
       );
     }

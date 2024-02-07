@@ -65,7 +65,7 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
   });
   describe('do not see results results when does not have RBAC', () => {
     before(() => {
-      login(ROLE.t2_analyst);
+      login(ROLE.t1_analyst);
     });
 
     it('show the permission denied callout', () => {
