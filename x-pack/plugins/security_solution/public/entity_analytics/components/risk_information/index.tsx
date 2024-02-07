@@ -249,13 +249,13 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep4"
-                defaultMessage="Produces a single normalized numeric value as the entity risk score"
+                defaultMessage="Produces a single normalized numeric value as the entity risk score."
               />
             </li>
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep5"
-                defaultMessage="Maps the entity risk label based on the normalized risk score"
+                defaultMessage="Maps the entity risk label based on the normalized risk score."
               />
             </li>
           </ol>
