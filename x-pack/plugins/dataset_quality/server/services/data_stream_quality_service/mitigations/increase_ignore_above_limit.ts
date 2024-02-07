@@ -8,8 +8,8 @@
 import {
   ClusterComponentTemplateNode,
   MappingPropertyBase,
-  MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
+import { merge } from 'lodash';
 import { IncreaseIgnoreAboveMitigation } from '../../../../common';
 import { GenericMitigationImplementation } from './types';
 
@@ -21,6 +21,8 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
     apply:
       ({ elasticsearchClient }) =>
       async (args) => {
+        const fieldPath = args.field.split('.');
+
         // get index template
         const {
           data_streams: [{ template: indexTemplateName }],
@@ -35,26 +37,21 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
           ...previousProperty,
           ignore_above: args.limit,
         });
-        const updateMappingProperties = (
-          previousMapping: MappingTypeMapping
-        ): MappingTypeMapping => ({
-          ...previousMapping,
-          properties: {
-            ...previousMapping.properties,
-            [args.field]: updateFieldMapping(previousMapping.properties?.[args.field] ?? {}),
-          },
-        });
-        // TODO: make it work with dotted fields (see functions at the end of this file)
 
-        // TODO: get mapping for field from data stream
+        // get latest mapping for field from data stream
         const fieldMappings = await elasticsearchClient.asCurrentUser.indices.getFieldMapping({
+          index: args.data_stream,
           fields: args.field,
         });
         const latestFieldMapping = Object.entries(fieldMappings)
           .sort(([firstIndexName, firstFieldMapping], [secondIndexName, secondFieldMapping]) =>
             firstIndexName < secondIndexName ? -1 : firstIndexName > secondIndexName ? 1 : 0
           )
-          .at(-1)?.[1]?.mappings?.[args.field]?.mapping?.[args.field];
+          .reduceRight<MappingPropertyBase | undefined>(
+            (_latestFieldMapping, [indexName, fieldMapping]) =>
+              _latestFieldMapping ?? fieldMapping.mappings?.[args.field]?.mapping?.[args.field],
+            undefined
+          );
 
         // update mapping in component template
         const {
@@ -66,7 +63,9 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
           ...previousComponentTemplate,
           template: {
             ...previousComponentTemplate.template,
-            mappings: updateMappingProperties(previousComponentTemplate.template.mappings ?? {}),
+            mappings: updateMappingAt(fieldPath, (previousMapping) =>
+              updateFieldMapping(merge({}, previousMapping, latestFieldMapping))
+            )(previousComponentTemplate.template.mappings ?? {}),
           },
         };
         await elasticsearchClient.asCurrentUser.cluster.putComponentTemplate({
@@ -83,21 +82,6 @@ export const increaseIgnoreAboveMitigation: GenericMitigationImplementation<Igno
           type: 'applied',
         };
       },
-  };
-
-const getMappingAt =
-  ([head, ...tail]: string[]) =>
-  (mappingProperty: MappingPropertyBase): MappingPropertyBase | undefined => {
-    if (head == null) {
-      return mappingProperty;
-    } else {
-      const childMappingProperty = mappingProperty.properties?.[head];
-      if (childMappingProperty != null) {
-        return getMappingAt(tail)(childMappingProperty);
-      } else {
-        return undefined;
-      }
-    }
   };
 
 const updateMappingAt =
