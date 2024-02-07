@@ -6,16 +6,16 @@
  */
 
 import { isEmpty } from 'lodash';
-import { CustomFieldTypes } from '../../../../common/types/domain';
 import { NO_ASSIGNEES_FILTERING_KEYWORD } from '../../../../common/constants';
-import type { QueryParams, FilterOptions } from '../../../../common/ui';
+import type { QueryParams, FilterOptions, CasesConfigurationUI } from '../../../../common/ui';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import type { AllCasesURLQueryParams, AllCasesURLState } from '../types';
 import { sanitizeState } from './sanitize_state';
 import { stringToIntegerWithDefault } from '.';
 
 export const allCasesUrlStateDeserializer = (
-  urlParamsMap: AllCasesURLQueryParams
+  urlParamsMap: AllCasesURLQueryParams,
+  customFieldsConfiguration: CasesConfigurationUI['customFields'] = []
 ): AllCasesURLState => {
   const queryParams: Partial<QueryParams> & Record<string, unknown> = {};
   const filterOptions: Partial<FilterOptions> & Record<string, unknown> = {};
@@ -61,11 +61,15 @@ export const allCasesUrlStateDeserializer = (
     );
   }
 
-  const customFieldsParams = Object.entries(customFields ?? {}).reduce(
-    // TODO: Remove type
-    (acc, [key, value]) => ({ ...acc, [key]: { type: CustomFieldTypes.TOGGLE, options: value } }),
-    {}
-  );
+  const customFieldsParams = Object.entries(customFields ?? {}).reduce((acc, [key, value]) => {
+    const foundCustomField = customFieldsConfiguration.find((cf) => cf.key === key);
+
+    if (!foundCustomField) {
+      return acc;
+    }
+
+    return { ...acc, [key]: { type: foundCustomField.type, options: value } };
+  }, {});
 
   const state: AllCasesURLState = {
     queryParams: queryParamsParsed,

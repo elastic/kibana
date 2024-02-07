@@ -132,10 +132,6 @@ export const useFilterConfig = ({
     onFilterOptionsChange,
   });
 
-  /**
-   * TODO: Think if this is enough. Is it generic enough to
-   * catch up new system fields in the feature?
-   */
   const activeCustomFieldsConfig = customFieldsFilterConfig.map((customField) => {
     return {
       ...customField,

@@ -26,6 +26,7 @@ import { allCasesUrlStateSerializer } from './utils/all_cases_url_state_serializ
 import { parseUrlParams } from './utils/parse_url_params';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { sanitizeState } from './utils/sanitize_state';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 interface UseAllCasesStateReturn {
   filterOptions: FilterOptions;
@@ -100,9 +101,12 @@ const useAllCasesUrlState = (): [
 ] => {
   const history = useHistory();
   const location = useLocation();
+  const {
+    data: { customFields: customFieldsConfiguration },
+  } = useGetCaseConfiguration();
 
   const urlParams = parseUrlParams(new URLSearchParams(decodeURIComponent(location.search)));
-  const parsedUrlParams = allCasesUrlStateDeserializer(urlParams);
+  const parsedUrlParams = allCasesUrlStateDeserializer(urlParams, customFieldsConfiguration);
 
   const updateQueryParams = useCallback(
     (updated: AllCasesTableState, mode: 'push' | 'replace' = 'push') => {

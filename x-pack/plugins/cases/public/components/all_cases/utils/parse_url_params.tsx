@@ -7,6 +7,8 @@
 
 import { safeDecode } from '@kbn/rison';
 import { isPlainObject } from 'lodash';
+import type { CaseStatuses } from '@kbn/cases-components';
+import type { CaseSeverity } from '../../../../common';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 import { stringToIntegerWithDefault } from '.';
 import { SortFieldCase } from '../../../../common/ui';
@@ -74,6 +76,16 @@ const parseLegacyUrl = (urlParams: URLSearchParams): AllCasesURLQueryParams => {
     );
   }
 
+  if (params.status) {
+    const statusAsArray = Array.isArray(params.status) ? params.status : [params.status];
+    allCasesParams.status = statusAsArray.filter(notAll).filter(Boolean) as CaseStatuses[];
+  }
+
+  if (params.severity) {
+    const severityAsArray = Array.isArray(params.severity) ? params.severity : [params.severity];
+    allCasesParams.severity = severityAsArray.filter(notAll).filter(Boolean) as CaseSeverity[];
+  }
+
   return allCasesParams;
 };
 
@@ -81,6 +93,8 @@ const parseValue = (values: Set<string>, defaultValue: unknown): string | string
   const valuesAsArray = Array.from(values.values());
   return Array.isArray(defaultValue) ? valuesAsArray : valuesAsArray[0] ?? '';
 };
+
+const notAll = (option: string) => option !== 'all';
 
 export function parseUrlParams(urlParams: URLSearchParams): AllCasesURLQueryParams {
   const allCasesParams = urlParams.get(ALL_CASES_STATE_URL_KEY);

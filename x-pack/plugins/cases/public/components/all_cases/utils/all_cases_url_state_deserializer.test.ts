@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CustomFieldTypes } from '../../../../common/types/domain';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 
 import { allCasesUrlStateDeserializer } from './all_cases_url_state_deserializer';
@@ -125,13 +126,35 @@ describe('allCasesUrlStateDeserializer', () => {
 
   it('parses custom fields correctly', () => {
     expect(
-      allCasesUrlStateDeserializer({
-        customFields: {
-          'my-custom-field-1': ['foo', 'qux'],
-          'my-custom-field-2': ['bar', 'baz'],
-          'my-custom-field-4': [],
+      allCasesUrlStateDeserializer(
+        {
+          customFields: {
+            'my-custom-field-1': ['foo', 'qux'],
+            'my-custom-field-2': ['bar', 'baz'],
+            'my-custom-field-4': [],
+          },
         },
-      })
+        [
+          {
+            key: 'my-custom-field-1',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+            label: 'foo',
+          },
+          {
+            key: 'my-custom-field-2',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+            label: 'foo',
+          },
+          {
+            key: 'my-custom-field-4',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+            label: 'foo',
+          },
+        ]
+      )
     ).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {
@@ -152,6 +175,42 @@ describe('allCasesUrlStateDeserializer', () => {
             },
             "my-custom-field-4": Object {
               "options": Array [],
+              "type": "toggle",
+            },
+          },
+        },
+        "queryParams": Object {},
+      }
+    `);
+  });
+
+  it('removes unknown custom fields', () => {
+    expect(
+      allCasesUrlStateDeserializer(
+        {
+          customFields: {
+            'my-custom-field-1': ['foo', 'qux'],
+            'my-custom-field-2': ['bar', 'baz'],
+          },
+        },
+        [
+          {
+            key: 'my-custom-field-1',
+            type: CustomFieldTypes.TOGGLE,
+            required: false,
+            label: 'foo',
+          },
+        ]
+      )
+    ).toMatchInlineSnapshot(`
+      Object {
+        "filterOptions": Object {
+          "customFields": Object {
+            "my-custom-field-1": Object {
+              "options": Array [
+                "foo",
+                "qux",
+              ],
               "type": "toggle",
             },
           },
