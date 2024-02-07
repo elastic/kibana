@@ -118,7 +118,7 @@ export function ChatBody({
   showLinkToConversationsApp: boolean;
   startedFrom?: StartedFrom;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
-  onToggleFlyoutWidthMode: (flyoutWidthMode: FlyoutWidthMode) => void;
+  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');

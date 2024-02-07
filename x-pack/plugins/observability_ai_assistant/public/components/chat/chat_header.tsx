@@ -12,6 +12,8 @@ import {
   EuiInlineEditTitle,
   EuiLoadingSpinner,
   EuiPanel,
+  EuiPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -132,26 +134,59 @@ export function ChatHeader({
             {flyoutWidthMode && onToggleFlyoutWidthMode ? (
               <>
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
-                      { defaultMessage: 'Navigate to conversations' }
-                    )}
-                    data-test-subj="observabilityAiAssistantChatHeaderButton"
-                    iconType="discuss"
-                    onClick={handleNavigateToConversations}
+                  <EuiPopover
+                    anchorPosition="downLeft"
+                    button={
+                      <EuiToolTip
+                        content={i18n.translate(
+                          'xpack.observabilityAiAssistant.chatHeader.euiToolTip.navigateToConversationsLabel',
+                          { defaultMessage: 'Navigate to conversations' }
+                        )}
+                        display="block"
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.euiButtonIcon.navigateToConversationsLabel',
+                            { defaultMessage: 'Navigate to conversations' }
+                          )}
+                          data-test-subj="observabilityAiAssistantChatHeaderButton"
+                          iconType="discuss"
+                          onClick={handleNavigateToConversations}
+                        />
+                      </EuiToolTip>
+                    }
                   />
                 </EuiFlexItem>
 
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    aria-label={i18n.translate(
-                      'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.toggleFlyoutWidthModeLabel',
-                      { defaultMessage: 'Toggle flyout width mode' }
-                    )}
-                    data-test-subj="observabilityAiAssistantChatHeaderButton"
-                    iconType={flyoutWidthMode === 'side' ? 'expand' : 'minimize'}
-                    onClick={handleToggleFlyoutWidthMode}
+                  <EuiPopover
+                    anchorPosition="downLeft"
+                    button={
+                      <EuiToolTip
+                        content={
+                          flyoutWidthMode === 'side'
+                            ? i18n.translate(
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.expandFlyoutWidthModeLabel',
+                                { defaultMessage: 'Expand flyout' }
+                              )
+                            : i18n.translate(
+                                'xpack.observabilityAiAssistant.chatHeader.euiToolTip.collapseFlyoutWidthModeLabel',
+                                { defaultMessage: 'Collapse flyout' }
+                              )
+                        }
+                        display="block"
+                      >
+                        <EuiButtonIcon
+                          aria-label={i18n.translate(
+                            'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.toggleFlyoutWidthModeLabel',
+                            { defaultMessage: 'Toggle flyout width mode' }
+                          )}
+                          data-test-subj="observabilityAiAssistantChatHeaderButton"
+                          iconType={flyoutWidthMode === 'side' ? 'expand' : 'minimize'}
+                          onClick={handleToggleFlyoutWidthMode}
+                        />
+                      </EuiToolTip>
+                    }
                   />
                 </EuiFlexItem>
               </>

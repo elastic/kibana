@@ -9,7 +9,15 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { v4 } from 'uuid';
 import { css } from '@emotion/css';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFlyout, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiPopover,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { useForceUpdate } from '../../hooks/use_force_update';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
@@ -67,14 +75,16 @@ export function ChatFlyout({
     border-right: solid 1px ${euiTheme.border.color};
   `;
 
-  const expandButtonClassName = css`
+  const expandButtonContainerClassName = css`
     position: absolute;
     margin-top: 16px;
     margin-left: ${conversationsExpanded
       ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
       : 5}px;
-    padding: ${euiTheme.size.s};
     z-index: 1;
+  `;
+
+  const expandButtonClassName = css`
     color: ${euiTheme.colors.primary};
   `;
 
@@ -92,7 +102,6 @@ export function ChatFlyout({
     margin-left: ${conversationsExpanded
       ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
       : 5}px;
-    padding: ${euiTheme.size.s};
     z-index: 1;
   `;
 
@@ -145,16 +154,37 @@ export function ChatFlyout({
     >
       <EuiFlexGroup gutterSize="none" className={containerClassName}>
         <EuiFlexItem className={sidebarClass}>
-          <EuiButtonIcon
-            aria-label={i18n.translate(
-              'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.expandConversationListLabel',
-              { defaultMessage: 'Expand conversation list' }
-            )}
-            className={expandButtonClassName}
-            color="text"
-            data-test-subj="observabilityAiAssistantChatFlyoutButton"
-            iconType={conversationsExpanded ? 'transitionLeftIn' : 'transitionLeftOut'}
-            onClick={() => setConversationsExpanded(!conversationsExpanded)}
+          <EuiPopover
+            anchorPosition="downLeft"
+            className={expandButtonContainerClassName}
+            button={
+              <EuiToolTip
+                content={
+                  conversationsExpanded
+                    ? i18n.translate(
+                        'xpack.observabilityAiAssistant.chatFlyout.euiToolTip.collapseConversationListLabel',
+                        { defaultMessage: 'Collapse conversation list' }
+                      )
+                    : i18n.translate(
+                        'xpack.observabilityAiAssistant.chatFlyout.euiToolTip.expandConversationListLabel',
+                        { defaultMessage: 'Expand conversation list' }
+                      )
+                }
+                display="block"
+              >
+                <EuiButtonIcon
+                  aria-label={i18n.translate(
+                    'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.expandConversationListLabel',
+                    { defaultMessage: 'Expand conversation list' }
+                  )}
+                  className={expandButtonClassName}
+                  color="text"
+                  data-test-subj="observabilityAiAssistantChatFlyoutButton"
+                  iconType={conversationsExpanded ? 'transitionLeftIn' : 'transitionLeftOut'}
+                  onClick={() => setConversationsExpanded(!conversationsExpanded)}
+                />
+              </EuiToolTip>
+            }
           />
 
           {conversationsExpanded ? (
@@ -165,15 +195,28 @@ export function ChatFlyout({
               onClickNewChat={handleClickNewChat}
             />
           ) : (
-            <EuiButtonIcon
-              aria-label={i18n.translate(
-                'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
-                { defaultMessage: 'New chat' }
-              )}
+            <EuiPopover
+              anchorPosition="downLeft"
+              button={
+                <EuiToolTip
+                  content={i18n.translate(
+                    'xpack.observabilityAiAssistant.chatFlyout.euiToolTip.newChatLabel',
+                    { defaultMessage: 'New chat' }
+                  )}
+                  display="block"
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
+                      { defaultMessage: 'New chat' }
+                    )}
+                    data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
+                    iconType="plusInCircle"
+                    onClick={handleClickNewChat}
+                  />
+                </EuiToolTip>
+              }
               className={newChatButtonClassName}
-              data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
-              iconType="plusInCircle"
-              onClick={handleClickNewChat}
             />
           )}
         </EuiFlexItem>
