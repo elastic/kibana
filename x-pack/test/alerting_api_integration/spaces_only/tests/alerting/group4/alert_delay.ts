@@ -12,7 +12,7 @@ import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common
 import { Spaces } from '../../../scenarios';
 
 // eslint-disable-next-line import/no-default-export
-export default function createNotificationDelayTests({ getService }: FtrProviderContext) {
+export default function createAlertDelayTests({ getService }: FtrProviderContext) {
   const es = getService('es');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const retry = getService('retry');
@@ -22,7 +22,7 @@ export default function createNotificationDelayTests({ getService }: FtrProvider
   const ACTIVE_PATH = 'alertInstances.instance.meta.activeCount';
   const RECOVERED_PATH = 'alertRecoveredInstances.instance.meta.activeCount';
 
-  describe('Notification Delay', () => {
+  describe('Alert Delay', () => {
     let actionId: string;
     const objectRemover = new ObjectRemover(supertestWithoutAuth);
 
@@ -37,20 +37,7 @@ export default function createNotificationDelayTests({ getService }: FtrProvider
 
     afterEach(() => objectRemover.removeAll());
 
-    it('should clear the activeCount if the notificationDelay is not configured for the rule', async () => {
-      const start = new Date().toISOString();
-      const pattern = {
-        instance: [true],
-      };
-
-      const ruleId = await createRule(actionId, pattern);
-      objectRemover.add(space.id, ruleId, 'rule', 'alerting');
-
-      const state = await getAlertState(start, ruleId, 0);
-      expect(get(state, ACTIVE_PATH)).to.eql(0);
-    });
-
-    it('should update the activeCount when alert is active and clear when recovered if the notificationDelay is configured for the rule', async () => {
+    it('should update the activeCount when alert is active and clear when recovered', async () => {
       let start = new Date().toISOString();
       const pattern = {
         instance: [true, true, true, false, true],
@@ -79,7 +66,7 @@ export default function createNotificationDelayTests({ getService }: FtrProvider
       expect(get(state, ACTIVE_PATH)).to.eql(1);
     });
 
-    it('should reset the activeCount when count of consecutive active alerts exceeds the notificationDelay count', async () => {
+    it('should continue incrementing the activeCount when count of consecutive active alerts exceeds the alertDelay count', async () => {
       let start = new Date().toISOString();
       const pattern = {
         instance: [true, true, true, true, true],
@@ -96,16 +83,16 @@ export default function createNotificationDelayTests({ getService }: FtrProvider
       expect(get(state, ACTIVE_PATH)).to.eql(2);
 
       start = new Date().toISOString();
-      state = await getAlertState(start, ruleId, 0, true);
-      expect(get(state, ACTIVE_PATH)).to.eql(0);
+      state = await getAlertState(start, ruleId, 3, true);
+      expect(get(state, ACTIVE_PATH)).to.eql(3);
 
       start = new Date().toISOString();
-      state = await getAlertState(start, ruleId, 1, true);
-      expect(get(state, ACTIVE_PATH)).to.eql(1);
+      state = await getAlertState(start, ruleId, 4, true);
+      expect(get(state, ACTIVE_PATH)).to.eql(4);
 
       start = new Date().toISOString();
-      state = await getAlertState(start, ruleId, 2, true);
-      expect(get(state, ACTIVE_PATH)).to.eql(2);
+      state = await getAlertState(start, ruleId, 5, true);
+      expect(get(state, ACTIVE_PATH)).to.eql(5);
     });
   });
 
@@ -187,7 +174,7 @@ export default function createNotificationDelayTests({ getService }: FtrProvider
               params: {},
             },
           ],
-          ...(activeCount ? { notification_delay: { active: activeCount } } : {}),
+          ...(activeCount ? { alert_delay: { active: activeCount } } : {}),
         })
       )
       .expect(200);
