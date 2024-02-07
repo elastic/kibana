@@ -335,5 +335,43 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await PageObjects.discover.getCurrentLensChart()).to.be('Bar vertical stacked');
       expect(await getCurrentVisSeriesTypeLabel()).to.be('Line');
     });
+
+    it('should close lens flyout on revert changes', async () => {
+      await PageObjects.discover.selectTextBaseLang();
+
+      await monacoEditor.setCodeEditorValue(
+        'from logstash-* | stats averageB = avg(bytes) by extension'
+      );
+      await testSubjects.click('querySubmitButton');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Bar vertical stacked');
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.chooseLensChart('Treemap');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Treemap');
+
+      await PageObjects.discover.saveSearch('testCustomESQLVisRevert');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.chooseLensChart('Donut');
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Donut');
+
+      await testSubjects.click('unifiedHistogramEditFlyoutVisualization'); // open the flyout
+      await testSubjects.existOrFail('lnsEditOnFlyFlyout');
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+      await PageObjects.discover.revertUnsavedChanges();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+      await testSubjects.missingOrFail('lnsEditOnFlyFlyout'); // it should close the flyout
+      expect(await PageObjects.discover.getCurrentLensChart()).to.be('Treemap');
+    });
   });
 }

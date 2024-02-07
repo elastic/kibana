@@ -170,6 +170,7 @@ export async function getEditLensConfiguration(
       if (wrapInFlyout) {
         return (
           <EuiFlyout
+            data-test-subj="lnsEditOnFlyFlyout"
             type="push"
             ownFocus
             paddingSize="m"

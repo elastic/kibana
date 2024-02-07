@@ -48,7 +48,7 @@ export const getTopNavBadges = ({
         onRevert: async () => {
           const lensEditFlyoutCancelButton = document.getElementById('lnsCancelEditOnFlyFlyout');
           if (lensEditFlyoutCancelButton) {
-            lensEditFlyoutCancelButton.click();
+            lensEditFlyoutCancelButton.click?.();
           }
           await stateContainer.actions.undoSavedSearchChanges();
         },
