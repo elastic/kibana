@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { extname } from 'path';
+
 import { schema } from '@kbn/config-schema';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
@@ -18,6 +20,8 @@ import { buildRouteValidation, buildSiemResponse } from './utils';
 import { createStreamFromBuffer } from './utils/create_stream_from_buffer';
 
 import { getListClient } from '.';
+
+const validFileExtensions = ['.csv', '.txt'];
 
 export const importListItemRoute = (router: ListsPluginRouter, config: ConfigType): void => {
   router.post(
@@ -42,9 +46,29 @@ export const importListItemRoute = (router: ListsPluginRouter, config: ConfigTyp
     async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
       try {
-        const stream = createStreamFromBuffer(request.body);
         const { deserializer, list_id: listId, serializer, type } = request.query;
         const lists = getListClient(context);
+
+        const filename = await lists.getImportFilename({
+          stream: createStreamFromBuffer(request.body),
+        });
+        if (!filename) {
+          return siemResponse.error({
+            body: 'To import a list item, the file name must be specified',
+            statusCode: 400,
+          });
+        }
+        const fileExtension = extname(filename).toLowerCase();
+        if (!validFileExtensions.includes(fileExtension)) {
+          return siemResponse.error({
+            body: `Unsupported media type. File must be one of the following types: [${validFileExtensions.join(
+              ', '
+            )}]`,
+            statusCode: 415,
+          });
+        }
+
+        const stream = createStreamFromBuffer(request.body);
         const listExists = await lists.getListIndexExists();
         if (!listExists) {
           return siemResponse.error({
