@@ -19,7 +19,7 @@ import {
   createMockAgentPolicyService,
 } from '@kbn/fleet-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-
+import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 import { createPackagePolicyMock, deletePackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { CspPlugin } from './plugin';
@@ -49,6 +49,11 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import * as onPackagePolicyPostCreateCallback from './fleet_integration/fleet_integration';
+import { updateCspDataViews } from './update_data_views/update_data_views';
+
+jest.mock('./update_data_views/update_data_views', () => ({
+  updateCspDataViews: jest.fn(),
+}));
 
 const chance = new Chance();
 
@@ -82,6 +87,7 @@ describe('Cloud Security Posture Plugin', () => {
       taskManager: taskManagerMock.createStart(),
       security: securityMock.createStart(),
       licensing: licensingMock.createStart(),
+      dataViews: createIndexPatternsStartMock(),
     };
 
     const contextMock = coreMock.createCustomRequestHandlerContext(mockRouteContext);
@@ -360,5 +366,16 @@ describe('Cloud Security Posture Plugin', () => {
         expect(spy).toHaveBeenCalledTimes(expectedNumberOfCallsToUninstallResources);
       }
     );
+
+    it('should update DataViews when plugin is initialized', async () => {
+      const context = coreMock.createPluginInitializerContext<unknown>();
+      plugin = new CspPlugin(context);
+
+      // Act
+      await plugin.initialize(coreMock.createStart(), mockPlugins);
+
+      // Assert
+      expect(updateCspDataViews).toHaveBeenCalledTimes(1);
+    });
   });
 });
