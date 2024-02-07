@@ -39,7 +39,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
           bedrockAPIUrlDocs: (
             <EuiLink
               data-test-subj="bedrock-api-doc"
-              href="https://docs.aws.amazon.com/bedrock/latest/APIReference/welcome.html"
+              href="https://docs.aws.amazon.com/general/latest/gr/bedrock.html"
               target="_blank"
             >
               {`${i18n.BEDROCK} ${i18n.DOCUMENTATION}`}

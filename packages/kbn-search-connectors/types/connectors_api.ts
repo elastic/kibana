@@ -26,3 +26,7 @@ export interface ConnectorsAPISyncJobResponse {
   count: number;
   results: ConnectorSyncJob[];
 }
+
+export interface ConnectorSecretCreateResponse {
+  id: string;
+}

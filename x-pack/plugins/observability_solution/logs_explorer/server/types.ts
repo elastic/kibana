@@ -7,6 +7,6 @@
 
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
 
-export interface LogExplorerSetupDeps {
+export interface LogsExplorerSetupDeps {
   share: SharePluginSetup;
 }
