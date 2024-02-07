@@ -37,7 +37,6 @@ import {
 import type { FieldRequestConfig, SupportedFieldType } from '../../../../common/types';
 import { kbnTypeToSupportedType } from '../../common/util/field_types_utils';
 import { getActions } from '../../common/components/field_data_row/action_menu';
-import type { DataVisualizerGridInput } from '../embeddables/grid_embeddable/grid_embeddable';
 import { getDefaultPageState } from '../components/index_data_visualizer_view/index_data_visualizer_view';
 import { useFieldStatsSearchStrategy } from './use_field_stats';
 import { useOverallStats } from './use_overall_stats';
@@ -45,6 +44,7 @@ import type { OverallStatsSearchStrategyParams } from '../../../../common/types/
 import type { AggregatableField, NonAggregatableField } from '../types/overall_stats';
 import { getSupportedAggs } from '../utils/get_supported_aggs';
 import { DEFAULT_BAR_TARGET } from '../../common/constants';
+import { DataVisualizerGridEmbeddableInput } from '../embeddables/grid_embeddable/types';
 
 const defaults = getDefaultPageState();
 
@@ -58,7 +58,7 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   probability: 0,
 };
 export const useDataVisualizerGridData = (
-  input: DataVisualizerGridInput,
+  input: DataVisualizerGridEmbeddableInput,
   dataVisualizerListState: Required<DataVisualizerIndexBasedAppState>,
   savedRandomSamplerPreference?: RandomSamplerOption,
   onUpdate?: (params: Dictionary<unknown>) => void
@@ -532,10 +532,10 @@ export const useDataVisualizerGridData = (
           const loadedFullStats = fieldStats.get(c.fieldName) ?? {};
           return loadedFullStats
             ? {
-                ...c,
-                loading: false,
-                stats: { ...c.stats, ...loadedFullStats },
-              }
+              ...c,
+              loading: false,
+              stats: { ...c.stats, ...loadedFullStats },
+            }
             : c;
         });
       }

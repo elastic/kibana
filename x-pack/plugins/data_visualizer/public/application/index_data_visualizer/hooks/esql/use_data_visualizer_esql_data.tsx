@@ -57,8 +57,10 @@ import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_vi
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../../embeddables/grid_embeddable/constants';
 import { getDefaultPageState } from '../../components/index_data_visualizer_view/index_data_visualizer_esql';
-import type { ESQLDataVisualizerGridEmbeddableInput } from '../../embeddables/grid_embeddable/types';
-
+import type {
+  ESQLDataVisualizerGridEmbeddableInput,
+  ESQLDataVisualizerIndexBasedAppState,
+} from '../../embeddables/grid_embeddable/types';
 
 const defaultSearchQuery = {
   match_all: {},

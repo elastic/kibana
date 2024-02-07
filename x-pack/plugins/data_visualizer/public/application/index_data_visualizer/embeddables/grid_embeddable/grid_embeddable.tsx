@@ -35,7 +35,7 @@ import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import { ESQLFieldStatsTableWrapper } from './esql_field_stats_table';
+import { ESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { DataVisualizerGridEmbeddableInput, DataVisualizerGridEmbeddableOutput } from './types';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
@@ -43,6 +43,7 @@ export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
 
 const restorableDefaults = getDefaultDataVisualizerListState();
 
+// @todo: refactor to a different file
 export const EmbeddableWrapper = ({
   input,
   onOutputChange,
