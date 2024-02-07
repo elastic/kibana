@@ -83,13 +83,13 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
         {} as HostMetrics
       ),
 
-      alertsCount,
+      alertsCount: alertsCount ? alertsCount : 0,
     };
   });
 };
 
-const isTitleColumn = (cell: any): cell is HostNodeRow['title'] => {
-  return typeof cell === 'object' && cell && 'name' in cell;
+const isTitleColumn = (cell: HostNodeRow[keyof HostNodeRow]): cell is HostNodeRow['title'] => {
+  return cell !== null && typeof cell === 'object' && cell && 'name' in cell;
 };
 
 const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
@@ -105,10 +105,14 @@ const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
 };
 
 const sortTableData =
-  ({ direction, field }: Sorting) =>
+  ({ direction, field }: Sorting, displayAlerts: boolean) =>
   (a: HostNodeRow, b: HostNodeRow) => {
     const aValue = a[field as keyof HostNodeRow];
     const bValue = b[field as keyof HostNodeRow];
+
+    if (displayAlerts) {
+      return sortValues(aValue, bValue, { direction, field });
+    }
 
     if (isTitleColumn(aValue) && isTitleColumn(bValue)) {
       return sortValues(aValue.name, bValue.name, { direction, field });
@@ -204,8 +208,8 @@ export const useHostsTable = () => {
     const endIndex = (pageIndex + 1) * pageSize;
     const startIndex = pageIndex * pageSize;
 
-    return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
-  }, [items, pagination, sorting]);
+    return items.sort(sortTableData(sorting, displayAlerts)).slice(startIndex, endIndex);
+  }, [items, pagination, sorting, displayAlerts]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [

@@ -34,12 +34,20 @@ export const mapToApiResponse = (
     };
   }
 
-  const hosts = buckets.map((bucket) => {
-    const metrics = convertMetricBucket(params, bucket);
-    const metadata = convertMetadataBucket(bucket);
+  const hosts = buckets
+    .map((bucket) => {
+      const metrics = convertMetricBucket(params, bucket);
+      const metadata = convertMetadataBucket(bucket);
 
-    return { name: bucket.key as string, metrics, metadata };
-  });
+      return { name: bucket.key as string, metrics, metadata };
+    })
+    .sort((a, b) => {
+      const cpuAValue = a.metrics.find((metric) => metric.name === 'cpu')?.value ?? null;
+      const cpuBValue = b.metrics.find((metric) => metric.name === 'cpu')?.value ?? null;
+
+      // If both cpuAValue and cpuBValue are not null or undefined, perform the comparison
+      return (cpuBValue! ?? 0) - (cpuAValue! ?? 0);
+    });
 
   const mergedHostWithAlertsCount = hosts.map((itm) => ({
     ...alertsCountResponse?.find((item) => item.name === itm.name),
