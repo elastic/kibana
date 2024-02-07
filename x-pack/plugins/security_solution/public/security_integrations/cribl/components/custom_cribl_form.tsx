@@ -219,7 +219,7 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
         <EuiFlexGroup>
           <EuiFlexItem>
             <FormattedMessage
-              id="xpack.integrations.fleetComponents.mappingInstruction"
+              id="xpack.securitySolution.securityIntegration.cribl.mappingInstruction"
               defaultMessage="Add mappings for your Cribl sources to a corresponding Elastic Fleet Integration datastream."
             />
           </EuiFlexItem>
