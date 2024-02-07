@@ -8,23 +8,21 @@
 
 import {
   type App,
+  AppStatus,
   type AppDeepLink,
   type PublicAppInfo,
   type PublicAppDeepLinkInfo,
+  type AppDeepLinkLocations,
 } from '@kbn/core-application-browser';
 
+export const linkVisibleEverywhere: AppDeepLinkLocations[] = ['globalSearch', 'sideNav'];
+
 export function getAppInfo(app: App): PublicAppInfo {
-  const { updater$, mount, ...infos } = app;
+  const { updater$, mount, visibleIn = linkVisibleEverywhere, ...infos } = app;
   return {
     ...infos,
-    status: app.status!,
-    // navLinkStatus:
-    //   navLinkStatus === AppNavLinkStatus.default
-    //     ? app.status === AppStatus.inaccessible
-    //       ? AppNavLinkStatus.hidden
-    //       : AppNavLinkStatus.visible
-    //     : navLinkStatus,
-    searchable: app.searchable ?? false,
+    status: app.status ?? AppStatus.accessible,
+    visibleIn: app.status === AppStatus.inaccessible ? [] : visibleIn,
     appRoute: app.appRoute!,
     keywords: app.keywords ?? [],
     deepLinks: getDeepLinkInfos(app.deepLinks),
@@ -38,9 +36,7 @@ function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
     return {
       ...deepLink,
       keywords: deepLink.keywords ?? [],
-      // navLinkStatus:
-      //   navLinkStatus === AppNavLinkStatus.default ? AppNavLinkStatus.hidden : navLinkStatus,
-      searchable: deepLink.searchable ?? false,
+      visibleIn: deepLink.visibleIn ?? [],
       deepLinks: getDeepLinkInfos(deepLink.deepLinks),
     };
   });

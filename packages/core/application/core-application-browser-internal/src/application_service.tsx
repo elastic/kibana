@@ -496,11 +496,11 @@ const populateDeepLinkDefaults = (
     return [];
   }
   return deepLinks.map((deepLink) => {
-    const visibleInSideNavigation = deepLink.visibleInSideNavigation ?? false;
+    const visibleIn = deepLink.visibleIn ?? []; // by default, deepLinks are not visible anywhere.
 
     return {
       ...deepLink,
-      visibleInSideNavigation: appStatus === AppStatus.accessible ? visibleInSideNavigation : false,
+      visibleIn: appStatus === AppStatus.inaccessible ? [] : visibleIn,
       deepLinks: populateDeepLinkDefaults(appStatus, deepLink.deepLinks),
     };
   });

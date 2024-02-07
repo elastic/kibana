@@ -7,7 +7,7 @@
  */
 
 import { of } from 'rxjs';
-import { App, AppDeepLink, AppNavLinkStatus, AppStatus } from '@kbn/core-application-browser';
+import { App, AppDeepLink, AppStatus } from '@kbn/core-application-browser';
 import { getAppInfo } from './get_app_info';
 
 describe('getAppInfo', () => {
@@ -17,8 +17,6 @@ describe('getAppInfo', () => {
     id: 'some-id',
     title: 'some-title',
     status: AppStatus.accessible,
-    navLinkStatus: AppNavLinkStatus.default,
-    searchable: true,
     appRoute: `/app/some-id`,
     ...props,
   });
@@ -27,8 +25,7 @@ describe('getAppInfo', () => {
     id: 'some-deep-link-id',
     title: 'my deep link',
     path: '/my-deep-link',
-    navLinkStatus: AppNavLinkStatus.default,
-    searchable: true,
+    visibleIn: ['globalSearch'],
     deepLinks: [],
     keywords: [],
     ...props,
@@ -42,8 +39,7 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
+      visibleIn: ['globalSearch', 'sideNav'],
       appRoute: `/app/some-id`,
       keywords: [],
       deepLinks: [],
@@ -66,16 +62,14 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
+      visibleIn: ['globalSearch', 'sideNav'],
       appRoute: `/app/some-id`,
       keywords: [],
       deepLinks: [
         {
           id: 'sub-id',
           title: 'sub-title',
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: true,
+          visibleIn: [],
           keywords: [],
           deepLinks: [
             {
@@ -83,8 +77,7 @@ describe('getAppInfo', () => {
               title: 'sub-sub-title',
               path: '/sub-sub',
               keywords: [],
-              navLinkStatus: AppNavLinkStatus.hidden,
-              searchable: true,
+              visibleIn: [],
               deepLinks: [], // default empty array added
             },
           ],
@@ -93,92 +86,41 @@ describe('getAppInfo', () => {
     });
   });
 
-  it('computes the navLinkStatus depending on the app status', () => {
+  it('computes the visibleIn depending on the app status', () => {
     expect(
       getAppInfo(
         createApp({
-          navLinkStatus: AppNavLinkStatus.default,
+          visibleIn: ['globalSearch', 'sideNav'],
           status: AppStatus.inaccessible,
         })
       )
     ).toEqual(
       expect.objectContaining({
-        navLinkStatus: AppNavLinkStatus.hidden,
+        visibleIn: [],
       })
     );
     expect(
       getAppInfo(
         createApp({
-          navLinkStatus: AppNavLinkStatus.default,
+          visibleIn: ['globalSearch', 'sideNav'],
           status: AppStatus.accessible,
         })
       )
     ).toEqual(
       expect.objectContaining({
-        navLinkStatus: AppNavLinkStatus.visible,
-      })
-    );
-  });
-
-  it('computes the searchable flag depending on the navLinkStatus when needed', () => {
-    expect(
-      getAppInfo(
-        createApp({
-          navLinkStatus: AppNavLinkStatus.default,
-          searchable: undefined,
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        searchable: true,
+        visibleIn: ['globalSearch', 'sideNav'],
       })
     );
     expect(
       getAppInfo(
         createApp({
-          navLinkStatus: AppNavLinkStatus.visible,
-          searchable: undefined,
+          // status is not set, default to accessible
+          visibleIn: ['globalSearch', 'sideNav'],
         })
       )
     ).toEqual(
       expect.objectContaining({
-        searchable: true,
-      })
-    );
-    expect(
-      getAppInfo(
-        createApp({
-          navLinkStatus: AppNavLinkStatus.disabled,
-          searchable: undefined,
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        searchable: false,
-      })
-    );
-    expect(
-      getAppInfo(
-        createApp({
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: undefined,
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        searchable: false,
-      })
-    );
-    expect(
-      getAppInfo(
-        createApp({
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: true,
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        searchable: true,
+        visibleIn: ['globalSearch', 'sideNav'],
       })
     );
   });
@@ -209,8 +151,7 @@ describe('getAppInfo', () => {
       id: 'some-id',
       title: 'some-title',
       status: AppStatus.accessible,
-      navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
+      visibleIn: ['globalSearch', 'sideNav'],
       appRoute: `/app/some-id`,
       keywords: [],
       order: 3,
@@ -218,16 +159,14 @@ describe('getAppInfo', () => {
         {
           id: 'sub-id',
           title: 'sub-title',
-          navLinkStatus: AppNavLinkStatus.hidden,
-          searchable: true,
+          visibleIn: [],
           order: 2,
           keywords: [],
           deepLinks: [
             {
               id: 'sub-sub-id',
               title: 'sub-sub-title',
-              navLinkStatus: AppNavLinkStatus.hidden,
-              searchable: true,
+              visibleIn: [],
               order: 1,
               path: '/sub-sub',
               keywords: ['sub sub'],
@@ -245,7 +184,7 @@ describe('getAppInfo', () => {
         createApp({
           deepLinks: [
             createDeepLink({
-              navLinkStatus: AppNavLinkStatus.visible,
+              visibleIn: ['globalSearch'],
             }),
           ],
         })
@@ -254,7 +193,7 @@ describe('getAppInfo', () => {
       expect.objectContaining({
         deepLinks: [
           expect.objectContaining({
-            navLinkStatus: AppNavLinkStatus.visible,
+            visibleIn: ['globalSearch'],
           }),
         ],
       })
@@ -262,100 +201,14 @@ describe('getAppInfo', () => {
     expect(
       getAppInfo(
         createApp({
-          deepLinks: [
-            createDeepLink({
-              navLinkStatus: AppNavLinkStatus.default,
-            }),
-          ],
+          deepLinks: [createDeepLink({ visibleIn: undefined })],
         })
       )
     ).toEqual(
       expect.objectContaining({
         deepLinks: [
           expect.objectContaining({
-            navLinkStatus: AppNavLinkStatus.hidden,
-          }),
-        ],
-      })
-    );
-    expect(
-      getAppInfo(
-        createApp({
-          deepLinks: [
-            createDeepLink({
-              navLinkStatus: undefined,
-            }),
-          ],
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        deepLinks: [
-          expect.objectContaining({
-            navLinkStatus: AppNavLinkStatus.hidden,
-          }),
-        ],
-      })
-    );
-  });
-
-  it('computes the deepLinks searchable depending on the navLinkStatus when needed', () => {
-    expect(
-      getAppInfo(
-        createApp({
-          deepLinks: [
-            createDeepLink({
-              navLinkStatus: AppNavLinkStatus.default,
-              searchable: undefined,
-            }),
-          ],
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        deepLinks: [
-          expect.objectContaining({
-            searchable: true,
-          }),
-        ],
-      })
-    );
-    expect(
-      getAppInfo(
-        createApp({
-          deepLinks: [
-            createDeepLink({
-              navLinkStatus: AppNavLinkStatus.hidden,
-              searchable: undefined,
-            }),
-          ],
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        deepLinks: [
-          expect.objectContaining({
-            searchable: false,
-          }),
-        ],
-      })
-    );
-    expect(
-      getAppInfo(
-        createApp({
-          deepLinks: [
-            createDeepLink({
-              navLinkStatus: AppNavLinkStatus.hidden,
-              searchable: true,
-            }),
-          ],
-        })
-      )
-    ).toEqual(
-      expect.objectContaining({
-        deepLinks: [
-          expect.objectContaining({
-            searchable: true,
+            visibleIn: [],
           }),
         ],
       })
