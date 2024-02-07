@@ -5,33 +5,29 @@
  * 2.0.
  */
 
-import React, {useCallback} from 'react';
-import {EuiBetaBadge, EuiFlexGroup, EuiFlexItem} from '@elastic/eui';
-import {BETA, BETA_TOOLTIP} from '../../common/translations';
-import {useLicense} from '../../common/hooks/use_license';
-import type {ImmutableArray} from '../../../common/endpoint/types';
+import React, { useCallback } from 'react';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { BETA, BETA_TOOLTIP } from '../../common/translations';
+import { useLicense } from '../../common/hooks/use_license';
+import type { ImmutableArray } from '../../../common/endpoint/types';
 import {
   type ConsoleResponseActionCommands,
   RESPONSE_CONSOLE_COMMAND_TO_API_COMMAND_MAP,
   type ResponseActionAgentType,
 } from '../../../common/endpoint/service/response_actions/constants';
-import {
-  isResponseActionSupported
-} from '../../../common/endpoint/service/response_actions/is_response_action_supported';
-import {
-  HeaderSentinelOneInfo
-} from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
+import { isResponseActionSupported } from '../../../common/endpoint/service/response_actions/is_response_action_supported';
+import { HeaderSentinelOneInfo } from '../components/endpoint_responder/components/header_info/sentinel_one/header_sentinel_one_info';
 
-import {useUserPrivileges} from '../../common/components/user_privileges';
+import { useUserPrivileges } from '../../common/components/user_privileges';
 import {
   ActionLogButton,
   getEndpointConsoleCommands,
   HeaderEndpointInfo,
   OfflineCallout,
 } from '../components/endpoint_responder';
-import {useConsoleManager} from '../components/console';
-import {MissingEncryptionKeyCallout} from '../components/missing_encryption_key_callout';
-import {RESPONDER_PAGE_TITLE} from './translations';
+import { useConsoleManager } from '../components/console';
+import { MissingEncryptionKeyCallout } from '../components/missing_encryption_key_callout';
+import { RESPONDER_PAGE_TITLE } from './translations';
 
 type ShowResponseActionsConsole = (props: ResponderInfoProps) => void;
 
