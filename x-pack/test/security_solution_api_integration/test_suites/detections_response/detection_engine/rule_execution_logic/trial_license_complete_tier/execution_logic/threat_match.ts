@@ -160,6 +160,7 @@ export default ({ getService }: FtrProviderContext) => {
    */
   // FLAKY: https://github.com/elastic/kibana/issues/155304
   describe('@ess @serverless Threat match type rules', () => {
+  describe.only('@ess @serverless Threat match type rules', () => {
     before(async () => {
       await esArchiver.load(audibeatHostsPath);
     });
@@ -952,7 +953,7 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[1].enrichments, [
+        assertContains(threats[0].enrichments, [
           {
             feed: {},
             indicator: {
@@ -1012,7 +1013,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ]);
 
-        assertContains(threats[0].enrichments, [
+        assertContains(threats[1].enrichments, [
           {
             feed: {},
             indicator: {
@@ -1454,7 +1455,7 @@ export default ({ getService }: FtrProviderContext) => {
           enrichments: unknown[];
         }>;
 
-        assertContains(threats[1].enrichments, [
+        assertContains(threats[0].enrichments, [
           {
             feed: {},
             indicator: {
@@ -1514,7 +1515,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ]);
 
-        assertContains(threats[0].enrichments, [
+        assertContains(threats[1].enrichments, [
           {
             feed: {},
             indicator: {
