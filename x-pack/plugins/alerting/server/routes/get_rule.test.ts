@@ -79,7 +79,7 @@ describe('getRuleRoute', () => {
   };
 
   const mockedAction0 = mockedAlert.actions[0] as SanitizedDefaultRuleAction;
-  const getResult: AsApiContract<SanitizedRule<{ bar: boolean }>> = {
+  const getResult = {
     ...pick(mockedAlert, 'consumer', 'name', 'schedule', 'tags', 'params', 'throttle', 'enabled'),
     rule_type_id: mockedAlert.alertTypeId,
     notify_when: mockedAlert.notifyWhen,
@@ -104,7 +104,6 @@ describe('getRuleRoute', () => {
         connector_type_id: mockedAction0.actionTypeId,
         uuid: mockedAction0.uuid,
         alerts_filter: mockedAction0.alertsFilter,
-        type: mockedAction0.type,
       },
     ],
   };
