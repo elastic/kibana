@@ -390,7 +390,7 @@ describe('helpers', () => {
         };
         const result = formatDefineStepData(mockStepData);
 
-        const expected = {
+        const expected: DefineStepRuleJson = {
           filters: mockStepData.queryBar.filters,
           index: mockStepData.index,
           language: 'eql',
@@ -424,7 +424,7 @@ describe('helpers', () => {
         };
         const result = formatDefineStepData(mockStepData);
 
-        const expected = {
+        const expected: DefineStepRuleJson = {
           filters: mockStepData.queryBar.filters,
           index: mockStepData.index,
           language: 'eql',
