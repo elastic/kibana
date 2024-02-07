@@ -12,7 +12,7 @@ import {
   getListMock,
   getEndpointListMock,
 } from '../../../../../common/detection_engine/schemas/types/lists.mock';
-import {
+import type {
   DefineStepRuleJson,
   ScheduleStepRuleJson,
   AboutStepRuleJson,
@@ -21,8 +21,8 @@ import {
   ActionsStepRule,
   ScheduleStepRule,
   DefineStepRule,
-  GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
+import { GroupByOptions } from '../../../../detections/pages/detection_engine/rules/types';
 import {
   getTimeTypeValue,
   formatDefineStepData,
