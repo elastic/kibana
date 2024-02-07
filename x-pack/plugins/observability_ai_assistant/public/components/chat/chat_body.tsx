@@ -28,7 +28,7 @@ import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { type Conversation, type Message, MessageRole } from '../../../common/types';
+import { type Conversation, type Message, MessageRole, Suggestion } from '../../../common/types';
 import { ChatHeader } from './chat_header';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { ChatTimeline } from './chat_timeline';
@@ -43,6 +43,8 @@ import {
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
+import { Suggestions } from '../suggestions/suggestions';
+import { useContextualSuggestions } from '../../hooks/use_contextual_suggestions';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -120,6 +122,8 @@ export function ChatBody({
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
+  const { signal } = new AbortController();
+
   const chatService = useObservabilityAIAssistantChatService();
 
   const { conversation, messages, next, state, stop, saveTitle } = useConversation({
@@ -160,6 +164,15 @@ export function ChatBody({
       ? 1200 - 250 + 'px' // page template max width - conversation list width.
       : '100%'};
   `;
+
+  const suggestions = useContextualSuggestions({
+    chatService,
+    connectors,
+    conversation,
+    messages,
+    signal,
+    state,
+  });
 
   const [stickToBottom, setStickToBottom] = useState(true);
 
@@ -289,6 +302,17 @@ export function ChatBody({
     }
   };
 
+  const handleSuggestionClick = (suggestion: Suggestion) => {
+    next(
+      messages.concat([
+        {
+          '@timestamp': new Date().toISOString(),
+          message: { role: MessageRole.User, content: suggestion.prompt },
+        },
+      ])
+    );
+  };
+
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
@@ -332,7 +356,11 @@ export function ChatBody({
               className={animClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
-                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+                <WelcomeMessage
+                  connectors={connectors}
+                  knowledgeBase={knowledgeBase}
+                  onSelectSuggestion={handleSuggestionClick}
+                />
               ) : (
                 <ChatTimeline
                   startedFrom={startedFrom}
@@ -361,6 +389,15 @@ export function ChatBody({
                   onActionClick={handleActionClick}
                 />
               )}
+              {conversation && conversation.value && 'id' in conversation.value.conversation ? (
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                  <Suggestions
+                    suggestions={state === ChatState.Loading ? [] : suggestions.value || []}
+                    isLoading={suggestions.loading}
+                    onSelect={handleSuggestionClick}
+                  />
+                </EuiPanel>
+              ) : null}
             </EuiPanel>
           </div>
         </EuiFlexItem>

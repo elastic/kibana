@@ -7,7 +7,7 @@
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
 import { merge } from 'lodash';
-import { Conversation } from '../../../common/types';
+import { Conversation, Suggestion } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { conversationCreateRt, conversationUpdateRt } from '../runtime_types';
 
@@ -162,6 +162,52 @@ const deleteConversationRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const getSuggestionsForConversationRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/conversation/{conversationId}/suggestions',
+  params: t.type({
+    path: t.type({
+      conversationId: t.string,
+    }),
+    body: t.type({
+      connectorId: t.string,
+    }),
+  }),
+
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<Suggestion[]> => {
+    const { service, request, params } = resources;
+
+    const client = await service.getClient({ request });
+
+    if (!client) {
+      throw notImplemented();
+    }
+
+    const {
+      body: { connectorId },
+      path: { conversationId },
+    } = params;
+
+    const controller = new AbortController();
+
+    request.events.aborted$.subscribe(() => {
+      controller.abort();
+    });
+
+    const suggestions = client.getContextualSuggestions({
+      conversationId,
+      connectorId,
+      signal: controller.signal,
+    });
+
+    return (await suggestions)
+      .split('\n')
+      .map((suggestion) => ({ prompt: suggestion.replace('"', '').slice(2) }));
+  },
+});
+
 export const conversationRoutes = {
   ...getConversationRoute,
   ...findConversationsRoute,
@@ -169,4 +215,5 @@ export const conversationRoutes = {
   ...updateConversationRoute,
   ...updateConversationTitle,
   ...deleteConversationRoute,
+  ...getSuggestionsForConversationRoute,
 };

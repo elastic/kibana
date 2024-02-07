@@ -42,8 +42,6 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
     const client = await service.getClient({ request });
 
-    client.setChatContext(params.body.chatContext);
-
     if (!client) {
       throw notImplemented();
     }

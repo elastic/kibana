@@ -455,6 +455,11 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
       }
     );
 
+    plugins.observabilityAIAssistant.service.registerStarterSuggestions([
+      { app: 'apm', prompt: 'How are my services doing?' },
+      { app: 'apm', prompt: 'Do my services have errors?' },
+    ]);
+
     if (fleet) {
       const agentEnrollmentExtensionData = getApmEnrollmentFlyoutData();
 
