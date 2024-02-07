@@ -39,19 +39,19 @@ const getSurveyFeedbackURL = ({
   const url = new URL(formUrl);
   if (kibanaVersion) {
     url.searchParams.append(
-      formConfig?.kibanaVersionQueryParam ?? KIBANA_VERSION_QUERY_PARAM,
+      formConfig?.kibanaVersionQueryParam || KIBANA_VERSION_QUERY_PARAM,
       kibanaVersion
     );
   }
   if (deploymentType) {
     url.searchParams.append(
-      formConfig?.kibanaDeploymentTypeQueryParam ?? KIBANA_DEPLOYMENT_TYPE_PARAM,
+      formConfig?.kibanaDeploymentTypeQueryParam || KIBANA_DEPLOYMENT_TYPE_PARAM,
       deploymentType
     );
   }
   if (sanitizedPath) {
     url.searchParams.append(
-      formConfig?.sanitizedPathQueryParam ?? SANITIZED_PATH_PARAM,
+      formConfig?.sanitizedPathQueryParam || SANITIZED_PATH_PARAM,
       sanitizedPath
     );
   }
