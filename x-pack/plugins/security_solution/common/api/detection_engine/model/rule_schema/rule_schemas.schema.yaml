@@ -279,6 +279,8 @@ components:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TiebreakerField'
         timestamp_field:
           $ref: './specific_attributes/eql_attributes.schema.yaml#/components/schemas/TimestampField'
+        alert_suppression:
+          $ref: './common_attributes.schema.yaml#/components/schemas/AlertSuppression'    
           
     EqlRuleCreateFields:
       allOf:
