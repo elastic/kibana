@@ -331,14 +331,13 @@ export const getLayerList = createSelector(
   (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
     const layers = layerDescriptorList
       .map((layerDescriptor) => {
-          try {
-            return createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor);
-          } catch (error) {
-            // ignore createLayerInstance exception, error surfaced to user in addLayer action
-            return null
-          }
+        try {
+          return createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor);
+        } catch (error) {
+          // ignore createLayerInstance exception, error surfaced to user in addLayer action
+          return null;
         }
-      )
+      })
       .filter(Boolean);
 
     const childrenMap = new Map<string, ILayer[]>();

@@ -194,7 +194,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id, false));
-    
+
     let layer: ILayer;
     try {
       layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
@@ -202,7 +202,7 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       onCreateLayerInstanceError(layerDescriptor, error);
       return;
     }
-    
+
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
   };
@@ -225,8 +225,8 @@ function onCreateLayerInstanceError(layerDescriptor: LayerDescriptor, error: Err
     title: i18n.translate('xpack.maps.layer.invalidDescriptorTitle', {
       defaultMessage: `Unable to add layer '{layerLabel}' to map`,
       values: {
-        layerLabel: layerDescriptor.label ?? layerDescriptor.id
-      }
+        layerLabel: layerDescriptor.label ?? layerDescriptor.id,
+      },
     }),
     text: error.message,
   });
