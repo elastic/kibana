@@ -156,23 +156,33 @@ export function LayerPanel(props: LayerPanelProps) {
   const { openColumnId, openColumnGroup, isComplete } = openDimension;
 
   useEffect(() => {
-    if (openColumnId) {
-      const derivedOpenColumnGroup = dimensionGroups.find((group) =>
-        group.accessors.some((a) => a.columnId === openColumnId)
-      );
-      // update the group if it changed (e.g. due to a moving a column to another column via chart picker)
-      if (
-        openColumnGroup &&
-        derivedOpenColumnGroup &&
-        openColumnGroup?.groupId !== derivedOpenColumnGroup?.groupId
-      ) {
-        setOpenDimension({
-          ...openDimension,
-          openColumnGroup: derivedOpenColumnGroup,
-        });
-      }
+    if (!openColumnId) {
+      return;
     }
-  }, [openColumnGroup, openColumnId, dimensionGroups, isComplete, openDimension]);
+
+    const derivedOpenColumnGroup = dimensionGroups.find((group) =>
+      group.accessors.some((a) => a.columnId === openColumnId)
+    );
+    // dont update if nothing has changed
+    if (
+      isComplete === !!derivedOpenColumnGroup &&
+      derivedOpenColumnGroup?.groupId === openColumnGroup?.groupId
+    ) {
+      return;
+    }
+    if (derivedOpenColumnGroup) {
+      // if column is found, mark it as complete. If it's moved to another group, update the group
+      setOpenDimension({
+        openColumnId,
+        openColumnGroup: derivedOpenColumnGroup,
+        isComplete: !!derivedOpenColumnGroup,
+      });
+    }
+    // if column is not found but is not new (is complete), close the dimension panel
+    if (isComplete && !derivedOpenColumnGroup) {
+      setOpenDimension({});
+    }
+  }, [openColumnId, dimensionGroups, isComplete, openColumnGroup?.groupId]);
 
   const allAccessors = dimensionGroups.flatMap((group) =>
     group.accessors.map((accessor) => accessor.columnId)
@@ -245,7 +255,6 @@ export function LayerPanel(props: LayerPanelProps) {
             frame: framePublicAPI,
           })
         );
-        setOpenDimension({ ...openDimension, isComplete: true });
       } else {
         if (forceRender) {
           updateDatasource(datasourceId, newState);
@@ -547,7 +556,6 @@ export function LayerPanel(props: LayerPanelProps) {
                                 onClick={(id: string) => {
                                   setOpenDimension({
                                     openColumnGroup: group,
-                                    isComplete: true,
                                     openColumnId: id,
                                   });
                                 }}
@@ -622,8 +630,6 @@ export function LayerPanel(props: LayerPanelProps) {
                           setOpenDimension({
                             openColumnGroup: group,
                             openColumnId: id,
-                            // static value dimensions or only vis dimensions get created immediately
-                            isComplete: group.supportStaticValue || !layerDatasource,
                           });
                         }}
                         onDrop={onDrop}
