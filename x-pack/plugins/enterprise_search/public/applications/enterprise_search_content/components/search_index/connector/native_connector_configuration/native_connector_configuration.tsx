@@ -135,6 +135,17 @@ export const NativeConnectorConfiguration: React.FC = () => {
             <EuiSteps
               steps={[
                 {
+                  children: <ResearchConfiguration nativeConnector={nativeConnector} />,
+                  status: hasResearched ? 'complete' : 'incomplete',
+                  title: i18n.translate(
+                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.researchConfigurationTitle',
+                    {
+                      defaultMessage: 'Research configuration requirements',
+                    }
+                  ),
+                  titleSize: 'xs',
+                },
+                {
                   children: (
                     <ApiKeyConfig
                       indexName={index.connector.name}
@@ -148,17 +159,6 @@ export const NativeConnectorConfiguration: React.FC = () => {
                     'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.regenerateApiKeyTitle',
                     {
                       defaultMessage: 'Regenerate API key',
-                    }
-                  ),
-                  titleSize: 'xs',
-                },
-                {
-                  children: <ResearchConfiguration nativeConnector={nativeConnector} />,
-                  status: hasResearched ? 'complete' : 'incomplete',
-                  title: i18n.translate(
-                    'xpack.enterpriseSearch.content.indices.configurationConnector.nativeConnector.steps.researchConfigurationTitle',
-                    {
-                      defaultMessage: 'Research configuration requirements',
                     }
                   ),
                   titleSize: 'xs',

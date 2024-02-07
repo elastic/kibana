@@ -98,7 +98,7 @@ export const ApiKeyConfig: React.FC<{
       {isModalVisible && <ConfirmModal onCancel={onCancel} onConfirm={onConfirm} />}
       <EuiFlexItem>
         <EuiText size="s">
-          {isNative
+          {!isNative
             ? i18n.translate(
                 'xpack.enterpriseSearch.content.indices.configurationConnector.apiKey.description',
                 {
