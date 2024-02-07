@@ -21,7 +21,7 @@ interface Props {
   isLoading: boolean;
   customFields: CaseUI['customFields'];
   customFieldsConfiguration: CasesConfigurationUI['customFields'];
-  onSubmit: (customFields: CaseUICustomField[]) => void;
+  onSubmit: (customField: CaseUICustomField) => void;
 }
 
 const CustomFieldsComponent: React.FC<Props> = ({
@@ -38,14 +38,14 @@ const CustomFieldsComponent: React.FC<Props> = ({
 
   const onSubmitCustomField = useCallback(
     (customFieldToAdd) => {
-      const allCustomFields = createMissingAndRemoveExtraCustomFields(
-        customFields,
-        customFieldsConfiguration
-      );
+      // const allCustomFields = createMissingAndRemoveExtraCustomFields(
+      //   customFields,
+      //   customFieldsConfiguration
+      // );
 
-      const updatedCustomFields = addOrReplaceCustomField(allCustomFields, customFieldToAdd);
+      // const updatedCustomFields = addOrReplaceCustomField(allCustomFields, customFieldToAdd);
 
-      onSubmit(updatedCustomFields);
+      onSubmit(customFieldToAdd);
     },
     [customFields, customFieldsConfiguration, onSubmit]
   );

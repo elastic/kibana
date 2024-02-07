@@ -21,6 +21,7 @@ import type {
   GetCaseConnectorsResponse,
   UserActionFindResponse,
   SingleCaseMetricsResponse,
+  CustomFieldPatchRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -47,6 +48,7 @@ import {
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
+  getCustomFieldUpdateUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -55,6 +57,7 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
+  INTERNAL_PATCH_CUSTOM_FIELDS_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -365,6 +368,29 @@ export const updateCases = async ({
   });
 
   return convertCasesToCamelCase(decodeCasesResponse(response));
+};
+
+export const updateCustomField = async ({
+  caseId,
+  customFieldId,
+  request,
+  signal,
+}: {
+  caseId: string;
+  customFieldId: string;
+  request: CustomFieldPatchRequest;
+  signal?: AbortSignal;
+}): Promise<CaseUI> => {
+  const response = await KibanaServices.get().http.fetch<Case>(
+    getCustomFieldUpdateUrl(caseId, customFieldId),
+    {
+      method: 'PATCH',
+      body: JSON.stringify(request),
+      signal,
+    }
+  );
+
+  return convertCaseToCamelCase(decodeCaseResponse(response));
 };
 
 export const postComment = async (
