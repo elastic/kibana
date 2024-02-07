@@ -77,6 +77,7 @@ const upgradeRule = async (
         // Force the prepackaged rule to use the enabled state from the existing rule,
         // regardless of what the prepackaged rule says
         enabled: existingRule.enabled,
+        exceptions_list: existingRule.params.exceptionsList,
         actions: existingRule.actions.map(transformAlertToRuleAction),
       },
     });
