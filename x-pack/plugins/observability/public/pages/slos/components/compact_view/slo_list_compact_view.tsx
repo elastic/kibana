@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { TagsList } from '@kbn/observability-shared-plugin/public';
+import { SloTagsList } from '../common/slo_tags_list';
 import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
@@ -262,7 +262,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'tags',
       name: 'Tags',
-      render: (tags: string[]) => <TagsList tags={tags} color="default" />,
+      render: (tags: string[]) => <SloTagsList tags={tags} color="default" />,
     },
     {
       field: 'instance',

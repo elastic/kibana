@@ -13,7 +13,7 @@ import { EuiBadgeProps } from '@elastic/eui/src/components/badge/badge';
 export interface TagsListProps {
   onClick?: (tag: string) => void;
   tags?: string[];
-  noOfTagsToDisplay?: number;
+  numberOfTagsToDisplay?: number;
   color?: EuiBadgeProps['color'];
   ignoreEmpty?: boolean;
 }
@@ -30,11 +30,11 @@ const getFilterLabel = (tag: string) => {
 const TagsList = ({
   ignoreEmpty,
   tags,
-  noOfTagsToDisplay = 3,
+  numberOfTagsToDisplay = 3,
   onClick,
   color = 'hollow',
 }: TagsListProps) => {
-  const [toDisplay, setToDisplay] = useState(noOfTagsToDisplay);
+  const [toDisplay, setToDisplay] = useState(numberOfTagsToDisplay);
 
   if (!tags || tags.length === 0) {
     if (ignoreEmpty) {
