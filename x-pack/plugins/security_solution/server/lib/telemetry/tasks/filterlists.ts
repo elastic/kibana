@@ -13,38 +13,47 @@ import type { ITaskMetricsService } from '../task_metrics.types';
 import type { TaskExecutionPeriod } from '../task';
 import { artifactService } from '../artifact';
 import { filterList } from '../filterlists';
-import { tlog } from '../helpers';
+import { newTelemetryLogger } from '../helpers';
 
 export function createTelemetryFilterListArtifactTaskConfig() {
+  const taskName = 'Security Solution Telemetry Filter List Artifact Task';
   return {
     type: 'security:telemetry-filterlist-artifact',
-    title: 'Security Solution Telemetry Filter List Artifact Task',
+    title: taskName,
     interval: '45m',
     timeout: '1m',
     version: '1.0.0',
     runTask: async (
       taskId: string,
       logger: Logger,
-      receiver: ITelemetryReceiver,
-      sender: ITelemetryEventsSender,
+      _receiver: ITelemetryReceiver,
+      _sender: ITelemetryEventsSender,
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const taskName = 'Security Solution Telemetry Filter List Artifact Task';
+      const log = newTelemetryLogger(logger.get('filterlist')).l;
+
+      log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
+
       const trace = taskMetricsService.start(taskName);
       try {
         const artifactName = 'telemetry-filterlists-v1';
-        const artifact = (await artifactService.getArtifact(
-          artifactName
-        )) as unknown as TelemetryFilterListArtifact;
-        tlog(logger, `New filterlist artifact: ${JSON.stringify(artifact)}`);
+        const artifactContent = await artifactService.getArtifact(artifactName);
+        if (!artifactContent) {
+          log('No new filterlist artifact found, skipping...');
+          taskMetricsService.end(trace);
+          return 0;
+        }
+
+        const artifact = artifactContent as unknown as TelemetryFilterListArtifact;
+        log(`New filterlist artifact: ${JSON.stringify(artifact)}`);
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;
         filterList.prebuiltRulesAlerts = artifact.prebuilt_rules_alerts;
         taskMetricsService.end(trace);
         return 0;
       } catch (err) {
-        tlog(logger, `Failed to set telemetry filterlist artifact due to ${err.message}`);
+        log(`Failed to set telemetry filterlist artifact due to ${err.message}`);
         filterList.resetAllToDefault();
         taskMetricsService.end(trace, err);
         return 0;

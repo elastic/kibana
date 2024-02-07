@@ -31,17 +31,25 @@ export function createTelemetryConfigurationTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger).l;
+      const log = newTelemetryLogger(logger.get('configuration')).l;
 
       log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
 
       const trace = taskMetricsService.start(taskName);
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
-        const configArtifact = (await artifactService.getArtifact(
-          artifactName
-        )) as unknown as TelemetryConfiguration;
+        const artifactContent = await artifactService.getArtifact(artifactName);
+
+        if (!artifactContent) {
+          log('No new configuration artifact found, skipping...');
+          taskMetricsService.end(trace);
+          return 0;
+        }
+
+        const configArtifact = artifactContent as unknown as TelemetryConfiguration;
+
         log(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
+
         telemetryConfiguration.max_detection_alerts_batch =
           configArtifact.max_detection_alerts_batch;
         telemetryConfiguration.telemetry_max_buffer_size = configArtifact.telemetry_max_buffer_size;
