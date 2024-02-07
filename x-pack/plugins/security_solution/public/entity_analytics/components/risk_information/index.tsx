@@ -32,8 +32,11 @@ import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
+import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
+import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
+import { AssetCriticalityBadge } from '../asset_criticality';
 
 interface RiskLevelTableItem {
   range?: string;
@@ -65,6 +68,30 @@ const riskLevelTableItems: RiskLevelTableItem[] = [
   { level: RiskSeverity.low, range: '20 - 40' },
   { level: RiskSeverity.unknown, range: i18n.UNKNOWN_RISK_DESCRIPTION },
 ];
+
+interface CriticalityLevelTableItem {
+  level: CriticalityLevel;
+  weight: number;
+}
+
+const criticalityLevelTableItems: CriticalityLevelTableItem[] = (
+  Object.keys(CriticalityModifiers) as CriticalityLevel[]
+).map((level) => ({ level, weight: CriticalityModifiers[level] }));
+
+const getCriticalityLevelTableColumns = (): Array<
+  EuiBasicTableColumn<CriticalityLevelTableItem>
+> => [
+  {
+    field: 'level',
+    name: i18n.INFORMATION_TIER_HEADER,
+    render: (level: CriticalityLevel) => <AssetCriticalityBadge criticalityLevel={level} />,
+  },
+  {
+    field: 'weight',
+    name: i18n.INFORMATION_WEIGHT_HEADER,
+  },
+];
+
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
@@ -240,6 +267,11 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           columns={getRiskLevelTableColumns()}
           items={riskLevelTableItems}
           data-test-subj="risk-level-information-table"
+        />
+        <EuiBasicTable
+          columns={getCriticalityLevelTableColumns()}
+          items={criticalityLevelTableItems}
+          data-test-subj="criticality-level-information-table"
         />
         <EuiSpacer size="l" />
         <RiskScoreDocLink
