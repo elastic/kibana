@@ -7,13 +7,19 @@
 
 import { OnRefreshChangeProps } from '@elastic/eui';
 import { useSelector } from '@xstate/react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
+import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
 
-  const { timeRange } = useSelector(service, (state) => state.context.filters);
+  const isLoadingIntegrations = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const { timeRange, integrations: selectedIntegrations } = useSelector(
+    service,
+    (state) => state.context.filters
+  );
+  const integrations = useSelector(service, (state) => state.context.integrations);
 
   const onTimeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
@@ -55,10 +61,35 @@ export const useDatasetQualityFilters = () => {
     [service, timeRange]
   );
 
+  const integrationItems: IntegrationItem[] = useMemo(
+    () =>
+      integrations.map((integration) => ({
+        ...integration,
+        label: integration.title,
+        checked: selectedIntegrations.includes(integration.name) ? 'on' : undefined,
+      })),
+    [integrations, selectedIntegrations]
+  );
+
+  const onIntegrationsChange = useCallback(
+    (newIntegrationItems: IntegrationItem[]) => {
+      service.send({
+        type: 'UPDATE_INTEGRATIONS',
+        integrations: newIntegrationItems
+          .filter((integration) => integration.checked === 'on')
+          .map((integration) => integration.name),
+      });
+    },
+    [service]
+  );
+
   return {
     timeRange,
     onTimeChange,
     onRefresh,
     onRefreshChange,
+    integrations: integrationItems,
+    onIntegrationsChange,
+    isLoadingIntegrations,
   };
 };

@@ -44,8 +44,8 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
 };
 
 const Header = dynamic(() => import('./header'));
-const Table = dynamic(() => import('./table'));
-const Filters = dynamic(() => import('./filters'));
+const Table = dynamic(() => import('./table/table'));
+const Filters = dynamic(() => import('./filters/filters'));
 
 function DatasetQuality() {
   return (

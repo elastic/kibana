@@ -10,14 +10,22 @@ import { EuiSuperDatePicker } from '@elastic/eui';
 import { UI_SETTINGS } from '@kbn/data-service';
 import { TimePickerQuickRange } from '@kbn/observability-shared-plugin/public/hooks/use_quick_time_ranges';
 import React, { useMemo } from 'react';
-import { useDatasetQualityFilters } from '../../hooks/use_dataset_quality_filters';
-import { useKibanaContextForPlugin } from '../../utils/use_kibana';
-import IntegrationsSelector from './integrations_selector/integrations_selector';
+import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
+import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { IntegrationsSelector } from './integrations_selector';
 
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Filters() {
-  const { timeRange, onTimeChange, onRefresh, onRefreshChange } = useDatasetQualityFilters();
+  const {
+    timeRange,
+    onTimeChange,
+    onRefresh,
+    onRefreshChange,
+    isLoadingIntegrations,
+    integrations,
+    onIntegrationsChange,
+  } = useDatasetQualityFilters();
 
   const {
     services: { uiSettings },
@@ -40,7 +48,11 @@ export default function Filters() {
   return (
     <EuiFlexGroup gutterSize="s">
       <EuiFlexItem grow={false}>
-        <IntegrationsSelector />
+        <IntegrationsSelector
+          isLoading={isLoadingIntegrations}
+          integrations={integrations}
+          onIntegrationsChange={onIntegrationsChange}
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiSuperDatePicker

@@ -6,6 +6,7 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
+import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
 import {
@@ -42,6 +43,7 @@ interface FiltersCriteria {
   inactive: boolean;
   fullNames: boolean;
   timeRange: TimeRange;
+  integrations: string[];
 }
 
 export interface WithTableOptions {
@@ -71,12 +73,17 @@ export interface WithDatasets {
   datasets: DataStreamStat[];
 }
 
+export interface WithIntegrations {
+  integrations: Integration[];
+}
+
 export type DefaultDatasetQualityControllerState = WithTableOptions &
   Partial<WithDataStreamStats> &
   Partial<WithDegradedDocs> &
   WithFlyoutOptions &
   WithDatasets &
-  WithFilters;
+  WithFilters &
+  WithIntegrations;
 
 type DefaultDatasetQualityStateContext = DefaultDatasetQualityControllerState &
   Partial<WithFlyoutOptions>;
@@ -141,6 +148,10 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'REFRESH_DATA';
+    }
+  | {
+      type: 'UPDATE_INTEGRATIONS';
+      integrations: string[];
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

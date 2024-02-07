@@ -27,12 +27,12 @@ import { css } from '@emotion/react';
 import {
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
   POOR_QUALITY_MINIMUM_PERCENTAGE,
-} from '../../../common/constants';
-import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
-import { IntegrationIcon } from '../common';
-import { useLinkToLogsExplorer } from '../../hooks';
-import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
+} from '../../../../common/constants';
+import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
+import { QualityIndicator, QualityPercentageIndicator } from '../../quality_indicator';
+import { IntegrationIcon } from '../../common';
+import { useLinkToLogsExplorer } from '../../../hooks';
+import { FlyoutDataset } from '../../../state_machines/dataset_quality_controller';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
   defaultMessage: 'Expand',

@@ -30,7 +30,9 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
         interval: ONE_MINUTE_IN_MS,
       },
     },
+    integrations: [],
   },
   flyout: {},
   datasets: [],
+  integrations: [],
 };

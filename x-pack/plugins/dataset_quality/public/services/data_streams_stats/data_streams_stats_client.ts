@@ -8,6 +8,7 @@
 import { HttpStart } from '@kbn/core/public';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
 import { find, merge } from 'lodash';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
@@ -54,7 +55,10 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       return merge({}, statsItem, { integration });
     });
 
-    return mergedDataStreamsStats.map(DataStreamStat.create);
+    return {
+      dataStreamStats: mergedDataStreamsStats.map(DataStreamStat.create),
+      integrations: integrations.map(Integration.create),
+    };
   }
 
   public async getDataStreamsDegradedStats(params: GetDataStreamsDegradedDocsStatsQuery) {

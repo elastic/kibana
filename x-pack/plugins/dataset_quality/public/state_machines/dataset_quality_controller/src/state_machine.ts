@@ -8,10 +8,12 @@
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
-import { DataStreamDetails } from '../../../../common/data_streams_stats';
+import {
+  DataStreamDetails,
+  DataStreamStatServiceResponse,
+} from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
-import { DataStreamStat } from '../../../../common/data_streams_stats/data_stream_stat';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -83,6 +85,10 @@ export const createPureDatasetQualityControllerStateMachine = (
             },
             REFRESH_DATA: {
               target: 'datasets.fetching',
+            },
+            UPDATE_INTEGRATIONS: {
+              target: 'datasets.loaded',
+              actions: ['storeIntegrations'],
             },
           },
         },
@@ -201,6 +207,16 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeIntegrations: assign((context, event) => {
+          return 'integrations' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  integrations: event.integrations,
+                },
+              }
+            : {};
+        }),
         storeFlyoutOptions: assign((context, event) => {
           return 'dataset' in event
             ? {
@@ -215,7 +231,8 @@ export const createPureDatasetQualityControllerStateMachine = (
         storeDataStreamStats: assign((_context, event) => {
           return 'data' in event
             ? {
-                dataStreamStats: event.data as DataStreamStat[],
+                dataStreamStats: (event.data as DataStreamStatServiceResponse).dataStreamStats,
+                integrations: (event.data as DataStreamStatServiceResponse).integrations,
               }
             : {};
         }),
