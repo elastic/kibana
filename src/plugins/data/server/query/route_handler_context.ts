@@ -205,7 +205,8 @@ export async function registerSavedQueryRouteHandlerContext(context: RequestHand
     total: number;
     savedQueries: SavedQueryRestResponse[];
   }> => {
-    const preparedSearch = escapeKuery(search.trim()).split(/\s+/).join(' AND ');
+    const cleanedSearch = search.replace(/\W/g, ' ').trim();
+    const preparedSearch = escapeKuery(cleanedSearch).split(/\s+/).join(' AND ');
     const { total, saved_objects: savedObjects } =
       await soClient.find<InternalSavedQueryAttributes>({
         type: 'query',

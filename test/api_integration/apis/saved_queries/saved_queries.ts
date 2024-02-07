@@ -342,6 +342,20 @@ export default function ({ getService }: FtrProviderContext) {
             ]);
           });
       });
+
+      it('should support searching for queries containing special characters', async () => {
+        await createQuery({ ...mockSavedQuery, title: 'query <> title' }).expect(200);
+
+        await findQueries({ search: 'ry <> ti' })
+          .expect(200)
+          .then((res) => {
+            expect(res.body.total).to.be(1);
+            expect(res.body.savedQueries.length).to.be(1);
+            expect(res.body.savedQueries.map((q: any) => q.attributes.title)).to.eql([
+              'query <> title',
+            ]);
+          });
+      });
     });
 
     describe('count', () => {

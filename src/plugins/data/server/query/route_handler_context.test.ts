@@ -115,7 +115,7 @@ describe('saved query route handler context', () => {
 
       expect(mockSavedObjectsClient.create).toHaveBeenCalledWith(
         'query',
-        internalSavedQueryAttributes,
+        { ...internalSavedQueryAttributes, timefilter: null },
         {
           references: [],
         }
@@ -239,7 +239,7 @@ describe('saved query route handler context', () => {
       expect(mockSavedObjectsClient.update).toHaveBeenCalledWith(
         'query',
         'foo',
-        internalSavedQueryAttributes,
+        { ...internalSavedQueryAttributes, timefilter: null },
         {
           references: [],
         }
@@ -334,7 +334,7 @@ describe('saved query route handler context', () => {
       };
       mockSavedObjectsClient.find.mockResolvedValue(mockResponse);
 
-      const response = await context.find({ search: 'Foo And Bar' });
+      const response = await context.find({ search: 'Foo < And > Bar' });
 
       expect(mockSavedObjectsClient.find).toHaveBeenCalledWith({
         type: 'query',
@@ -444,7 +444,6 @@ describe('saved query route handler context', () => {
             attributes: {
               description: 'baz',
               query: { language: 'kuery', query: 'response:200' },
-              filters: [],
               title: 'bar',
             },
             id: 'bar',
@@ -595,7 +594,7 @@ describe('saved query route handler context', () => {
       });
 
       const response = await context.get('food');
-      expect(response.attributes.filters[0].meta.index).toBe('my-new-index');
+      expect(response.attributes.filters?.[0].meta.index).toBe('my-new-index');
     });
 
     it('should throw if conflict', async () => {
