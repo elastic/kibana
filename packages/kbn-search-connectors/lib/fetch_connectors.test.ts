@@ -162,9 +162,9 @@ describe('fetchConnectors lib', () => {
       }));
       const thirdBatch = [{ id: 'connector2001', service_type: 'type1' }];
       mockClient.transport.request
-        .mockResolvedValueOnce({ results: firstBatch, count: 1001 })
-        .mockResolvedValueOnce({ results: secondBatch, count: 1001 })
-        .mockResolvedValueOnce({ results: thirdBatch, count: 1001 });
+        .mockResolvedValueOnce({ results: firstBatch, count: 2001 })
+        .mockResolvedValueOnce({ results: secondBatch, count: 2001 })
+        .mockResolvedValueOnce({ results: thirdBatch, count: 2001 });
 
       await expect(fetchConnectors(mockClient as unknown as ElasticsearchClient)).resolves.toEqual([
         ...firstBatch,
