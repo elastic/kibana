@@ -5,23 +5,25 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React, { useCallback, useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
 import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Chat, EmptyIndex } from '@kbn/ai-playground';
 
 import { EnterpriseSearchContentPageTemplate } from '../layout/page_template';
 
 import { IndicesLogic } from '../search_indices/indices_logic';
-
-import { Chat } from './components/chat';
-import { EmptyIndex } from './components/empty_index';
+import { KibanaLogic } from '../../../shared/kibana';
+import { NEW_INDEX_PATH } from '../../routes';
 
 export const AIPlayground: React.FC = () => {
   const { fetchIndices } = useActions(IndicesLogic);
   const { hasNoIndices, isLoading } = useValues(IndicesLogic);
+  const { navigateToUrl } = useValues(KibanaLogic);
+  const handleNavigateToIndex = useCallback(() => navigateToUrl(NEW_INDEX_PATH), [navigateToUrl]);
 
   useEffect(() => {
     fetchIndices({
@@ -51,7 +53,7 @@ export const AIPlayground: React.FC = () => {
       bottomBorder="extended"
     >
       {hasNoIndices ? (
-        <EmptyIndex />
+        <EmptyIndex onCreateIndexClick={handleNavigateToIndex} />
       ) : (
         <EuiPageTemplate.Section
           alignment="top"

@@ -20,6 +20,8 @@
       "@kbn/ai-assistant-management-observability-plugin/*": ["src/plugins/ai_assistant_management/observability/*"],
       "@kbn/ai-assistant-management-plugin": ["src/plugins/ai_assistant_management/selection"],
       "@kbn/ai-assistant-management-plugin/*": ["src/plugins/ai_assistant_management/selection/*"],
+      "@kbn/ai-playground": ["packages/kbn-ai-playground"],
+      "@kbn/ai-playground/*": ["packages/kbn-ai-playground/*"],
       "@kbn/aiops-components": ["x-pack/packages/ml/aiops_components"],
       "@kbn/aiops-components/*": ["x-pack/packages/ml/aiops_components/*"],
       "@kbn/aiops-plugin": ["x-pack/plugins/aiops"],
