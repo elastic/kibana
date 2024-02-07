@@ -1056,7 +1056,7 @@ describe('The custom threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason;
       expect(reasons).toBe(
-        'Average test.metric.1 is 1, above the threshold of 1; Average test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
+        'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });
@@ -1249,7 +1249,7 @@ describe('The custom threshold alert type', () => {
       expect(getViewInAppUrl).toBeCalledWith({
         dataViewId: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
         filter: mockQuery,
-        logExplorerLocator: undefined,
+        logsExplorerLocator: undefined,
         metrics: customThresholdCountCriterion.metrics,
         startedAt: expect.stringMatching(ISO_DATE_REGEX),
       });

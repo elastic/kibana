@@ -33,10 +33,10 @@ export default async function createTestConfig({ readConfigFile }: FtrConfigProv
 
 export type CreateTestConfig = Awaited<ReturnType<typeof createTestConfig>>;
 
-export type ObsLogExplorerServices = CreateTestConfig['services'];
-export type ObsLogExplorerPageObject = CreateTestConfig['pageObjects'];
+export type ObsLogsExplorerServices = CreateTestConfig['services'];
+export type ObsLogsExplorerPageObject = CreateTestConfig['pageObjects'];
 
 export type FtrProviderContext = GenericFtrProviderContext<
-  ObsLogExplorerServices,
-  ObsLogExplorerPageObject
+  ObsLogsExplorerServices,
+  ObsLogsExplorerPageObject
 >;

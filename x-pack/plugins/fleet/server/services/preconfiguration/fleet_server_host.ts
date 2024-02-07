@@ -110,6 +110,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
           (!existingHost.is_preconfigured ||
             existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
             existingHost.name !== preconfiguredFleetServerHost.name ||
+            isDifferent(existingHost.is_internal, preconfiguredFleetServerHost.is_internal) ||
             isDifferent(
               existingHost.host_urls.map(normalizeHostsForAgents),
               preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)

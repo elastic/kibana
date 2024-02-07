@@ -76,6 +76,7 @@ import {
   createPolicy,
   createSettingTuple,
   createLiteralString,
+  isMissingText,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -206,11 +207,16 @@ function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
 function visitLogicalIns(ctx: LogicalInContext) {
   const fn = createFunction(ctx.NOT() ? 'not_in' : 'in', ctx);
   const [left, ...list] = ctx.valueExpression();
-  const values = [visitValueExpression(left), list.map((ve) => visitValueExpression(ve))];
-  for (const arg of values) {
-    if (arg) {
-      const filteredArgs = Array.isArray(arg) ? arg.filter(nonNullable) : [arg];
-      fn.args.push(filteredArgs);
+  const leftArg = visitValueExpression(left);
+  if (leftArg) {
+    fn.args.push(...(Array.isArray(leftArg) ? leftArg : [leftArg]));
+    const values = list.map((ve) => visitValueExpression(ve));
+    const listArgs = values
+      .filter(nonNullable)
+      .flatMap((arg) => (Array.isArray(arg) ? arg.filter(nonNullable) : arg));
+    // distinguish between missing brackets (missing text error) and an empty list
+    if (!isMissingText(ctx.text)) {
+      fn.args.push(listArgs);
     }
   }
   // update the location of the assign based on arguments
@@ -244,6 +250,9 @@ function getComparisonName(ctx: ComparisonOperatorContext) {
 }
 
 function visitValueExpression(ctx: ValueExpressionContext) {
+  if (isMissingText(ctx.text)) {
+    return [];
+  }
   if (ctx instanceof ValueExpressionDefaultContext) {
     return visitOperatorExpression(ctx.operatorExpression());
   }
@@ -268,7 +277,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('multiply', ctx);
+    const fn = createFunction('*', ctx);
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -434,7 +443,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
     return [];
   }
   const negate = ctx.NOT();
-  const fnName = `${negate ? 'not_' : ''}is_null`;
+  const fnName = `is${negate ? ' not ' : ' '}null`;
   const fn = createFunction(fnName, ctx);
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {
@@ -538,16 +547,18 @@ export function visitDissect(ctx: DissectCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
   return [
     visitPrimaryExpression(ctx.primaryExpression()),
-    createLiteral('string', pattern),
-    ...visitDissectOptions(ctx.commandOptions()),
+    ...(pattern && !isMissingText(pattern.text)
+      ? [createLiteral('string', pattern), ...visitDissectOptions(ctx.commandOptions())]
+      : []),
   ].filter(nonNullable);
 }
 
 export function visitGrok(ctx: GrokCommandContext) {
   const pattern = ctx.string().tryGetToken(esql_parser.STRING, 0);
-  return [visitPrimaryExpression(ctx.primaryExpression()), createLiteral('string', pattern)].filter(
-    nonNullable
-  );
+  return [
+    visitPrimaryExpression(ctx.primaryExpression()),
+    ...(pattern && !isMissingText(pattern.text) ? [createLiteral('string', pattern)] : []),
+  ].filter(nonNullable);
 }
 
 function visitDissectOptions(ctx: CommandOptionsContext | undefined) {
