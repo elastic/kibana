@@ -110,7 +110,7 @@ describe('telemetry tasks', () => {
   });
 
   describe('detection-rules', () => {
-    it('shuld execute when scheduled', async () => {
+    it('should execute when scheduled', async () => {
       await mockAndScheduleDetectionRulesTask();
 
       // wait until the events are sent to the telemetry server
@@ -142,7 +142,7 @@ describe('telemetry tasks', () => {
     });
   });
 
-  describe('configuration', () => {
+  describe('sender configuration', () => {
     it('should use legacy sender by default', async () => {
       // launch a random task and verify it uses the new configuration
       const task = await mockAndScheduleDetectionRulesTask();
@@ -162,7 +162,6 @@ describe('telemetry tasks', () => {
       const configTask = getTelemetryTask(tasks, configTaskType);
 
       mockAxiosGet(fakeBufferAndSizesConfigAsyncEnabled);
-
       await eventually(async () => {
         await taskManagerPlugin.runSoon(configTask.getTaskId());
       });
@@ -244,9 +243,9 @@ describe('telemetry tasks', () => {
         });
       });
 
-      const requests = calls.filter(({ url, body: b }) => {
+      const requests = calls.filter(({ url, body }) => {
         return (
-          b.indexOf(getTelemetryTaskTitle(task)) !== -1 &&
+          body.indexOf(getTelemetryTaskTitle(task)) !== -1 &&
           url.startsWith(ENDPOINT_STAGING) &&
           url.endsWith('task-metrics')
         );
