@@ -30,7 +30,10 @@ import { ComplianceScoreBar } from '../../components/compliance_score_bar';
 import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 import { benchmarksNavigation } from '../../common/navigation/constants';
-import { useBenchmarkDynamicValues } from '../../common/hooks/use_benchmark_dynamic_values';
+import {
+  GetBenchmarkDynamicValues,
+  useBenchmarkDynamicValues,
+} from '../../common/hooks/use_benchmark_dynamic_values';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
@@ -98,7 +101,7 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
 );
 
 const getBenchmarkTableColumns = (
-  getBenchmarkDynamicValues
+  getBenchmarkDynamicValues: GetBenchmarkDynamicValues
 ): Array<EuiBasicTableColumn<Benchmark>> => [
   {
     field: 'id',
@@ -158,20 +161,30 @@ const getBenchmarkTableColumns = (
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
     render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
       // #################################################################################################
-      const resourcePlurals = getBenchmarkDynamicValues(
+      const { resourcePlurals, integrationLink } = getBenchmarkDynamicValues(
         benchmark.id,
         benchmarkEvaluation
-      ).resourcePlurals;
+      );
 
       if (benchmarkEvaluation === 0) {
         return (
-          <EuiButtonEmpty href={cspmIntegrationLink} iconType={'plusInCircle'} flush={'left'}>
-            {`Add ${resourcePlurals}`}
+          <EuiButtonEmpty href={integrationLink} iconType="plusInCircle" flush="left">
+            {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
+              defaultMessage: 'Add {resourcePlurals}',
+              values: { resourcePlurals },
+            })}
           </EuiButtonEmpty>
         );
       }
 
-      return `${benchmarkEvaluation} ${resourcePlurals}`;
+      return (
+        <EuiButtonEmpty href={integrationLink} flush="left">
+          {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
+            defaultMessage: '{benchmarkEvaluation} {resourcePlurals}',
+            values: { benchmarkEvaluation, resourcePlurals },
+          })}
+        </EuiButtonEmpty>
+      );
     },
   },
   {
