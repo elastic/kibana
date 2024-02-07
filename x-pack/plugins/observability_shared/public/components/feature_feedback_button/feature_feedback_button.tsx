@@ -23,13 +23,19 @@ const getDeploymentType = (isCloudEnv?: boolean, isServerlessEnv?: boolean): str
   return 'Self-Managed (you manage)';
 };
 
-const getSurveyFeedbackURL = (
-  formUrl: string,
-  formConfig?: FormConfig,
-  kibanaVersion?: string,
-  deploymentType?: string,
-  sanitizedPath?: string
-) => {
+const getSurveyFeedbackURL = ({
+  formUrl,
+  formConfig,
+  kibanaVersion,
+  deploymentType,
+  sanitizedPath,
+}: {
+  formUrl: string;
+  formConfig?: FormConfig;
+  kibanaVersion?: string;
+  deploymentType?: string;
+  sanitizedPath?: string;
+}) => {
   const url = new URL(formUrl);
   if (kibanaVersion) {
     url.searchParams.append(
@@ -96,7 +102,13 @@ export const FeatureFeedbackButton = ({
 
   return (
     <EuiButton
-      href={getSurveyFeedbackURL(formUrl, formConfig, kibanaVersion, deploymentType, sanitizedPath)}
+      href={getSurveyFeedbackURL({
+        formUrl,
+        formConfig,
+        kibanaVersion,
+        deploymentType,
+        sanitizedPath,
+      })}
       target="_blank"
       color={defaultButton ? undefined : 'warning'}
       iconType={defaultButton ? undefined : 'editorComment'}
