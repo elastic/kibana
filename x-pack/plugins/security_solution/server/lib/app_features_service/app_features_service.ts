@@ -126,35 +126,23 @@ export class AppFeaturesService {
     const API_ACTION_TAG_PREFIX = `access:${APP_ID}-`;
 
     http.registerOnPostAuth((request, response, toolkit) => {
-      const tags = request.route.options.tags;
-      const appFeatureTags = tags.filter((tag) => tag.startsWith(APP_FEATURE_TAG_PREFIX));
-      const actionTags = tags.filter((tag) => tag.startsWith(API_ACTION_TAG_PREFIX));
+      for (const tag of request.route.options.tags) {
+        let isEnabled = true;
+        if (tag.startsWith(APP_FEATURE_TAG_PREFIX)) {
+          isEnabled = this.isEnabled(
+            tag.substring(APP_FEATURE_TAG_PREFIX.length) as AppFeatureKeyType
+          );
+        } else if (tag.startsWith(API_ACTION_TAG_PREFIX)) {
+          isEnabled = this.isApiPrivilegeEnabled(tag.substring(API_ACTION_TAG_PREFIX.length));
+        }
 
-      if (appFeatureTags.length > 0) {
-        const disabled = appFeatureTags.some((tag) => {
-          const appFeatureKey = tag.substring(APP_FEATURE_TAG_PREFIX.length) as AppFeatureKeyType;
-          return !this.isEnabled(appFeatureKey);
-        });
-        if (disabled) {
+        if (!isEnabled) {
           this.logger.warn(
             `Accessing disabled route "${request.url.pathname}${request.url.search}": responding with 404`
           );
           return response.notFound();
         }
       }
-
-      if (actionTags.length > 0) {
-        const disabled = actionTags.some(
-          (tag) => !this.isApiPrivilegeEnabled(tag.substring(API_ACTION_TAG_PREFIX.length))
-        );
-        if (disabled) {
-          this.logger.warn(
-            `Accessing disabled route "${request.url.pathname}${request.url.search}": responding with 404`
-          );
-          return response.notFound();
-        }
-      }
-
       return toolkit.next();
     });
   }
