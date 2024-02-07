@@ -129,7 +129,7 @@ export function getDefaultChartsData(): ExplorerChartsData {
 }
 
 export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClusterClient) {
-  let handleError: (errorMsg: string, jobId: string) => void = () => { };
+  let handleError: (errorMsg: string, jobId: string) => void = () => {};
 
   async function fetchMetricData(
     index: string,
@@ -341,9 +341,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
       aggType === undefined
         ? { max: 'max', min: 'min' }
         : {
-          max: aggType.max,
-          min: aggType.min,
-        };
+            max: aggType.max,
+            min: aggType.min,
+          };
 
     // Build the criteria to use in the bool filter part of the request.
     // Add criteria for the job ID and time range.
@@ -1191,9 +1191,9 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
 
     data.errorMessages = errorMessages
       ? Object.entries(errorMessages!).reduce((acc, [errorMessage, jobs]) => {
-        acc[errorMessage] = Array.from(jobs);
-        return acc;
-      }, {} as Record<string, string[]>)
+          acc[errorMessage] = Array.from(jobs);
+          return acc;
+        }, {} as Record<string, string[]>)
       : undefined;
 
     return data;
