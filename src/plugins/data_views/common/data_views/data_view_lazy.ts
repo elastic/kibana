@@ -18,7 +18,7 @@ import { AbstractDataView } from './abstract_data_views';
 // import type { TimeBasedDataView } from './data_view';
 import { DataViewField } from '../fields';
 import { DataViewLazyFieldCache, createDataViewFieldCache } from './data_view_lazy_field_cache';
-import { fieldsMatchFieldsRequested } from './data_view_lazy_util';
+import { fieldMatchesFieldsRequested, fieldsMatchFieldsRequested } from './data_view_lazy_util';
 
 import type {
   DataViewFieldMap,
@@ -91,8 +91,10 @@ export class DataViewLazy extends AbstractDataView {
     // need to know if runtime fields are also mapped
     if (mapped || runtime) {
       // if we just need runtime fields, we can ask for the set of runtime fields specifically
-      // to do limit to intersection of requested fields and runtime fields
-      const fieldsToRequest = mapped ? fieldName : Object.keys(this.runtimeFieldMap);
+      // todo test intersection of runtime and mapped fields
+      const fieldsToRequest = mapped
+        ? fieldName
+        : fieldsMatchFieldsRequested(Object.keys(this.runtimeFieldMap), fieldName);
       const mappedFields = await this.getMappedFields({
         type,
         fieldName: fieldsToRequest,
@@ -347,7 +349,7 @@ export class DataViewLazy extends AbstractDataView {
 
     // CREATE RUNTIME FIELDS
     for (const [name, runtimeField] of Object.entries(this.runtimeFieldMap || {})) {
-      if (fieldsMatchFieldsRequested(name, fieldName)) {
+      if (fieldMatchesFieldsRequested(name, fieldName)) {
         // For composite runtime field we add the subFields, **not** the composite
         if (runtimeField.type === 'composite') {
           Object.entries(runtimeField.fields!).forEach(([subFieldName, subField]) => {
@@ -374,7 +376,7 @@ export class DataViewLazy extends AbstractDataView {
     const dataViewFields: DataViewField[] = [];
 
     this.scriptedFields.forEach((field) => {
-      if (!fieldsMatchFieldsRequested(field.name, fieldName)) {
+      if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
         return;
       }
       dataViewFields.push(

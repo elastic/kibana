@@ -6,14 +6,16 @@
  * Side Public License, v 1.
  */
 
-export const fieldsMatchFieldsRequested = (
+import { union } from 'lodash';
+
+export const fieldMatchesFieldsRequested = (
   fieldName: string,
   fieldsRequested: string[]
-): boolean => {
-  if (fieldsRequested.includes('*')) {
-    return true;
-  }
-
   // todo match wildcard
-  return fieldsRequested.includes(fieldName);
-};
+): boolean => (fieldsRequested.includes('*') ? true : fieldsRequested.includes(fieldName));
+
+export const fieldsMatchFieldsRequested = (
+  fieldName: string[],
+  fieldsRequested: string[]
+  // todo match wildcard
+): string[] => (fieldsRequested.includes('*') ? fieldName : union(fieldName, fieldsRequested));
