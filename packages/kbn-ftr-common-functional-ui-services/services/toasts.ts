@@ -85,7 +85,8 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissAllToasts(): Promise<void> {
-    const toasts = await (await this.getGlobalToastList()).findAllByCssSelector(`.euiToast`);
+    const list = await this.getGlobalToastList();
+    const toasts = await list.findAllByCssSelector(`.euiToast`);
 
     if (toasts.length === 0) return;
 
@@ -135,11 +136,13 @@ export class ToastsService extends FtrService {
   }
 
   public async getToastContentByIndex(index: number): Promise<string> {
-    return await (await this.getToastElementByIndex(index)).getVisibleText();
+    const elem = await this.getToastElementByIndex(index);
+    return await elem.getVisibleText();
   }
 
-  public async getAllToastElements(): Promise<WebElementWrapper[]> {
-    return await (await this.getGlobalToastList()).findAllByCssSelector(`.euiToast`);
+  public async getAllToastElements() {
+    const list = await this.getGlobalToastList();
+    return await list.findAllByCssSelector(`.euiToast`);
   }
 
   private async getGlobalToastList(options?: { timeout?: number }): Promise<WebElementWrapper> {
