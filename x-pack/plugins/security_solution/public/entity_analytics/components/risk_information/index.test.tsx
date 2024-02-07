@@ -43,6 +43,22 @@ describe.each([RiskScoreEntity.host, RiskScoreEntity.user])(
           expect(riskLevelsTable).toBeInTheDocument();
           expect(within(riskLevelsTable!).queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
         });
+
+        it('opens and displays an asset criticality tiers table with four (4) rows', () => {
+          const NUMBER_OF_ROWS = 1 + 4; // 1 header row + 4 tier rows
+          const { getByTestId, queryByTestId } = render(
+            <TestProviders>
+              <Component riskEntity={riskEntity} />
+            </TestProviders>
+          );
+
+          fireEvent.click(getByTestId('open-risk-information-flyout-trigger'));
+
+          const criticalityTiersTable = queryByTestId('criticality-level-information-table');
+
+          expect(criticalityTiersTable).toBeInTheDocument();
+          expect(within(criticalityTiersTable!).queryAllByRole('row')).toHaveLength(NUMBER_OF_ROWS);
+        });
       }
     );
   }
