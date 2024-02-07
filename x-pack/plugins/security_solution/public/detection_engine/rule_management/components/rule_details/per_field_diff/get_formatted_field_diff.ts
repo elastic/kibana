@@ -31,6 +31,12 @@ export const getFormattedFieldDiffGroups = (
   fieldName: keyof AllFieldsDiff,
   fields: Partial<RuleFieldsDiff>
 ): FormattedFieldDiff => {
+  /**
+   * Field types that contain groupings of rule fields must be formatted differently to compare and render
+   * each individual nested field and to satisfy types
+   *
+   * Setting shouldShowSubtitles to `true` displays the grouped field names in the rendered diff component
+   */
   switch (fieldName) {
     case 'data_source':
       const dataSourceThreeWayDiff = (fields as RuleFieldsDiffWithDataSource)[fieldName];

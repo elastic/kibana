@@ -283,20 +283,11 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     }
 
     return [
-      {
-        id: 'updates',
-        name: ruleDetailsI18n.UPDATES_TAB_LABEL,
-        content: (
-          <TabContentPadding>
-            <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
-          </TabContentPadding>
-        ),
-      },
       ...(isPerFieldPrebuiltRulesDiffingEnabled
         ? [
             {
-              id: 'perFieldUpdates',
-              name: 'Per-field Updates', // TODO: eventually will be "updates" too
+              id: 'updates',
+              name: ruleDetailsI18n.UPDATES_TAB_LABEL,
               content: (
                 <TabContentPadding>
                   <PerFieldRuleDiffTab ruleDiff={activeRule.diff} />
@@ -305,6 +296,15 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             },
           ]
         : []),
+      {
+        id: 'jsonViewUpdates',
+        name: ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL,
+        content: (
+          <TabContentPadding>
+            <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
+          </TabContentPadding>
+        ),
+      },
     ];
   }, [
     previewedRule,

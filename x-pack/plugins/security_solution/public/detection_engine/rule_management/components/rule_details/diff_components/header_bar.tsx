@@ -25,6 +25,7 @@ export const RuleDiffHeaderBar = () => {
         position: sticky;
         top: 0;
         background: ${euiTheme.colors.emptyShade};
+        z-index: 1; // Fixes accordion button displaying above header bug
       `}
     >
       <EuiSpacer size="m" />

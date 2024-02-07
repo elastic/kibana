@@ -14,7 +14,7 @@ import type { FieldDiff } from '../../../model/rule_details/rule_field_diff';
 
 export const sortAndStringifyJson = (fieldValue: unknown): string => {
   if (!fieldValue) {
-    return '';
+    return ''; // The JSON diff package we use does not accept `undefined` as a valid entry, empty string renders the equivalent of no field
   }
 
   if (typeof fieldValue === 'string') {

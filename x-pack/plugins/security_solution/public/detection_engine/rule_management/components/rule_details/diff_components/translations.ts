@@ -21,7 +21,9 @@ import {
   HISTORY_WINDOW_SIZE_FIELD_LABEL,
 } from '../translations';
 
-// Used when fields have different display names or formats than their corresponding rule object fields
+/**
+ * Used when fields have different display names or formats than their corresponding rule object fields
+ */
 export const fieldToDisplayNameMap: Record<string, string> = {
   data_source: i18n.translate(
     'xpack.securitySolution.detectionEngine.rules.upgradeRuleFields.dataSourceLabel',
