@@ -14,7 +14,15 @@ import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { compact, isEmpty, last, merge, noop, omit, pick, take } from 'lodash';
 import type OpenAI from 'openai';
-import { filter, isObservable, lastValueFrom, Observable, shareReplay, toArray } from 'rxjs';
+import {
+  filter,
+  firstValueFrom,
+  isObservable,
+  lastValueFrom,
+  Observable,
+  shareReplay,
+  toArray,
+} from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
@@ -483,10 +491,12 @@ export class ObservabilityAIAssistantClient {
       function_call: functionCall ? { name: functionCall } : undefined,
     };
 
-    this.dependencies.logger.debug(`Sending conversation to connector`);
+    this.dependencies.logger.debug(
+      `Sending conversation to connector (${encode(JSON.stringify(request)).length} tokens)`
+    );
     this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
-    let now = performance.now();
+    const now = performance.now();
 
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
@@ -504,8 +514,6 @@ export class ObservabilityAIAssistantClient {
         performance.now() - now
       )}ms)${spanId ? ` (${spanId})` : ''}`
     );
-
-    now = performance.now();
 
     if (executeResult.status === 'error' && executeResult?.serviceMessage) {
       const tokenLimitRegex =
@@ -527,6 +535,19 @@ export class ObservabilityAIAssistantClient {
     signal.addEventListener('abort', () => response.destroy());
 
     const observable = streamIntoObservable(response).pipe(processOpenAiStream(), shareReplay());
+
+    firstValueFrom(observable)
+      .then(
+        () => {},
+        () => {}
+      )
+      .finally(() => {
+        this.dependencies.logger.debug(
+          `Received first value after ${Math.round(performance.now() - now)}ms${
+            spanId ? ` (${spanId})` : ''
+          }`
+        );
+      });
 
     lastValueFrom(observable)
       .then(
