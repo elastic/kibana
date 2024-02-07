@@ -958,10 +958,13 @@ describe('AuthenticationService', () => {
       });
 
       it('renders unauthenticated page if user does not have an active session', async () => {
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
         const { authenticator, onPreResponseHandler } = getService();
         authenticator.getRequestOriginalURL.mockReturnValue('/mock-server-basepath/app/some');
         mockCanRedirectRequest.mockReturnValue(true);
-
         await expect(
           onPreResponseHandler(
             httpServerMock.createKibanaRequest({ path: '/app/some', query: { param: 'one two' } }),
@@ -971,17 +974,24 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
-            Refresh: `0;url=/mock-server-basepath/login?msg=UNAUTHENTICATED&next=${encodeURIComponent(
-              '/mock-server-basepath/app/some'
-            )}`,
           },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          buildNumber: 100500,
+          originalURL: '/mock-server-basepath/app/some',
         });
       });
 
       it('renders unauthenticated page if user has an active session', async () => {
+        const mockRenderUnauthorizedPage = jest
+          .requireMock('./unauthenticated_page')
+          .renderUnauthenticatedPage.mockReturnValue('rendered-view');
+
         mockStartAuthenticationParams.session.getSID.mockResolvedValue('some-sid');
 
         const { authenticator, onPreResponseHandler } = getService();
@@ -997,13 +1007,16 @@ describe('AuthenticationService', () => {
         ).resolves.toBe(mockReturnedValue);
 
         expect(mockOnPreResponseToolkit.render).toHaveBeenCalledWith({
-          body: '<div/>',
+          body: 'rendered-view',
           headers: {
             'Content-Security-Policy': CspConfig.DEFAULT.header,
-            Refresh: `0;url=/mock-server-basepath/logout?msg=UNAUTHENTICATED&next=${encodeURIComponent(
-              '/mock-server-basepath/app/some'
-            )}`,
           },
+        });
+
+        expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
+          basePath: mockSetupAuthenticationParams.http.basePath,
+          buildNumber: 100500,
+          originalURL: '/mock-server-basepath/app/some',
         });
       });
 

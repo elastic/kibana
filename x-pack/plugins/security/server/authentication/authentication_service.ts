@@ -203,6 +203,7 @@ export class AuthenticationService {
           const customBrandingValue = await customBranding.getBrandingFor(request, {
             unauthenticated: true,
           });
+
           return toolkit.render({
             body: renderUnauthenticatedPage({
               buildNumber,
