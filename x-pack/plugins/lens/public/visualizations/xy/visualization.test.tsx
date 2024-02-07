@@ -687,7 +687,7 @@ describe('xy_visualization', () => {
       let frame: ReturnType<typeof createMockFramePublicAPI>;
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
@@ -756,7 +756,7 @@ describe('xy_visualization', () => {
           indexPatterns: { indexPattern1: createMockedIndexPattern() },
         }),
       });
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -1566,7 +1566,7 @@ describe('xy_visualization', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -1666,7 +1666,7 @@ describe('xy_visualization', () => {
 
     beforeEach(() => {
       frame = createMockFramePublicAPI();
-      mockDatasource = createMockDatasource('testDatasource');
+      mockDatasource = createMockDatasource();
 
       mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
         { columnId: 'd', fields: [] },
@@ -2334,7 +2334,7 @@ describe('xy_visualization', () => {
     describe('annotations', () => {
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         frame.datasourceLayers = {
           first: mockDatasource.publicAPIMock,
@@ -2578,7 +2578,7 @@ describe('xy_visualization', () => {
 
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getOperationForColumnId.mockReturnValue({
           dataType: 'string',
@@ -2977,7 +2977,7 @@ describe('xy_visualization', () => {
         }
 
         function getFrameMock() {
-          const datasourceMock = createMockDatasource('testDatasource');
+          const datasourceMock = createMockDatasource();
           datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
             id === DATE_HISTORGRAM_COLUMN_ID
               ? ({
@@ -3120,7 +3120,7 @@ describe('xy_visualization', () => {
 
       beforeEach(() => {
         frame = createMockFramePublicAPI();
-        mockDatasource = createMockDatasource('testDatasource');
+        mockDatasource = createMockDatasource();
 
         mockDatasource.publicAPIMock.getTableSpec.mockReturnValue([
           { columnId: 'd', fields: [] },
@@ -3232,7 +3232,7 @@ describe('xy_visualization', () => {
         } as XYState;
       }
       function getFrameMock() {
-        const datasourceMock = createMockDatasource('testDatasource');
+        const datasourceMock = createMockDatasource();
         datasourceMock.publicAPIMock.getOperationForColumnId.mockImplementation((id) =>
           id === DATE_HISTORGRAM_COLUMN_ID
             ? ({

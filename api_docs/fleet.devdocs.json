@@ -7065,95 +7065,46 @@
               }
             ],
             "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fleet",
-        "id": "def-server.ESIndexPatternService",
-        "type": "Interface",
-        "tags": [],
-        "label": "ESIndexPatternService",
-        "description": [
-          "\nService to return the index pattern of EPM packages"
-        ],
-        "path": "x-pack/plugins/fleet/server/services/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
+          },
           {
             "parentPluginId": "fleet",
-            "id": "def-server.ESIndexPatternService.getESIndexPattern",
+            "id": "def-server.ArtifactsClientInterface.fetchAll",
             "type": "Function",
             "tags": [],
-            "label": "getESIndexPattern",
+            "label": "fetchAll",
             "description": [],
             "signature": [
-              "(savedObjectsClient: ",
+              "(options?: ",
+              "FetchAllArtifactsOptions",
+              " | undefined) => AsyncIterable<",
               {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsClientContract",
-                "text": "SavedObjectsClientContract"
+                "pluginId": "fleet",
+                "scope": "server",
+                "docId": "kibFleetPluginApi",
+                "section": "def-server.Artifact",
+                "text": "Artifact"
               },
-              ", pkgName: string, datasetPath: string) => Promise<string | undefined>"
+              "[]>"
             ],
-            "path": "x-pack/plugins/fleet/server/services/index.ts",
+            "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "fleet",
-                "id": "def-server.ESIndexPatternService.getESIndexPattern.$1",
-                "type": "Object",
+                "id": "def-server.ArtifactsClientInterface.fetchAll.$1",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "savedObjectsClient",
+                "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsClientContract",
-                    "text": "SavedObjectsClientContract"
-                  }
+                  "FetchAllArtifactsOptions",
+                  " | undefined"
                 ],
-                "path": "x-pack/plugins/fleet/server/services/index.ts",
+                "path": "x-pack/plugins/fleet/server/services/artifacts/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.ESIndexPatternService.getESIndexPattern.$2",
-                "type": "string",
-                "tags": [],
-                "label": "pkgName",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/fleet/server/services/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fleet",
-                "id": "def-server.ESIndexPatternService.getESIndexPattern.$3",
-                "type": "string",
-                "tags": [],
-                "label": "datasetPath",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/plugins/fleet/server/services/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -11388,6 +11339,146 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackagePolicyClient.fetchAllItemIds",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchAllItemIds",
+            "description": [
+              "\nReturns an `AsyncIterable` for retrieving all integration policy IDs"
+            ],
+            "signature": [
+              "(soClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ", options?: ",
+              "PackagePolicyClientFetchAllItemIdsOptions",
+              " | undefined) => AsyncIterable<string[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyClient.fetchAllItemIds.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyClient.fetchAllItemIds.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "PackagePolicyClientFetchAllItemIdsOptions",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-server.PackagePolicyClient.fetchAllItems",
+            "type": "Function",
+            "tags": [],
+            "label": "fetchAllItems",
+            "description": [
+              "\nReturns an `AsyncIterable` for retrieving all integration policies"
+            ],
+            "signature": [
+              "(soClient: ",
+              {
+                "pluginId": "@kbn/core-saved-objects-api-server",
+                "scope": "common",
+                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                "section": "def-common.SavedObjectsClientContract",
+                "text": "SavedObjectsClientContract"
+              },
+              ", options?: ",
+              "PackagePolicyClientFetchAllItemsOptions",
+              " | undefined) => AsyncIterable<",
+              {
+                "pluginId": "fleet",
+                "scope": "common",
+                "docId": "kibFleetPluginApi",
+                "section": "def-common.PackagePolicy",
+                "text": "PackagePolicy"
+              },
+              "[]>"
+            ],
+            "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyClient.fetchAllItems.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "soClient",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-saved-objects-api-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
+                    "section": "def-common.SavedObjectsClientContract",
+                    "text": "SavedObjectsClientContract"
+                  }
+                ],
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "fleet",
+                "id": "def-server.PackagePolicyClient.fetchAllItems.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  "PackagePolicyClientFetchAllItemsOptions",
+                  " | undefined"
+                ],
+                "path": "x-pack/plugins/fleet/server/services/package_policy_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -18493,26 +18584,6 @@
               "text": "FleetAuthz"
             },
             ">; }"
-          ],
-          "path": "x-pack/plugins/fleet/server/plugin.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        },
-        {
-          "parentPluginId": "fleet",
-          "id": "def-server.FleetStartContract.esIndexPatternService",
-          "type": "Object",
-          "tags": [],
-          "label": "esIndexPatternService",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "fleet",
-              "scope": "server",
-              "docId": "kibFleetPluginApi",
-              "section": "def-server.ESIndexPatternService",
-              "text": "ESIndexPatternService"
-            }
           ],
           "path": "x-pack/plugins/fleet/server/plugin.ts",
           "deprecated": false,

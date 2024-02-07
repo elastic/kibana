@@ -1218,6 +1218,8 @@ export class TimeSeriesExplorer extends React.Component {
                 showForecast={showForecast}
                 showModelBounds={showModelBounds}
                 lastRefresh={lastRefresh}
+                tableData={tableData}
+                sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
               />
               {focusAnnotationError !== undefined && (
                 <>
@@ -1316,7 +1318,7 @@ export class TimeSeriesExplorer extends React.Component {
             bounds={bounds}
             tableData={tableData}
             filter={this.tableFilter}
-            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
             selectedJobs={[
               {
                 id: selectedJob.job_id,

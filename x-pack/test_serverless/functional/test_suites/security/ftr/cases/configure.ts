@@ -80,7 +80,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.setValue('custom-field-label-input', 'Summary');
 
-        await testSubjects.setCheckbox('text-custom-field-options-wrapper', 'check');
+        await testSubjects.setCheckbox('text-custom-field-required-wrapper', 'check');
 
         await testSubjects.click('custom-field-flyout-save');
         expect(await testSubjects.exists('euiFlyoutCloseButton')).to.be(false);
