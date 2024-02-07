@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiTitle } from '@elastic/eui';
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { BETA, BETA_TOOLTIP } from '../../../common/translations';
+import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
 import { useIsolateHostPanelContext } from './context';
 import { FLYOUT_HEADER_TITLE_TEST_ID } from './test_ids';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
@@ -17,20 +19,31 @@ import { FlyoutHeader } from '../../shared/components/flyout_header';
  * Document details expandable right section header for the isolate host panel
  */
 export const PanelHeader: FC = () => {
-  const { isolateAction } = useIsolateHostPanelContext();
+  const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
+  const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
 
-  const title =
-    isolateAction === 'isolateHost' ? (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
-        defaultMessage="Isolate host"
-      />
-    ) : (
-      <FormattedMessage
-        id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
-        defaultMessage="Release host"
-      />
-    );
+  const title = (
+    <EuiFlexGroup responsive gutterSize="s">
+      <EuiFlexItem grow={false}>
+        {isolateAction === 'isolateHost' ? (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.isolateHost.isolateTitle"
+            defaultMessage="Isolate host"
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.securitySolution.flyout.isolateHost.releaseTitle"
+            defaultMessage="Release host"
+          />
+        )}
+      </EuiFlexItem>
+      {isSentinelOneAlert && (
+        <EuiFlexItem grow={false}>
+          <EuiBetaBadge label={BETA} tooltipContent={BETA_TOOLTIP} />
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
+  );
 
   return (
     <FlyoutHeader>
