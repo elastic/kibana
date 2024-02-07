@@ -40,12 +40,14 @@ import type { Session } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
-  http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  http: Pick<
+    HttpServiceSetup,
+    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+  >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
-  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -92,7 +94,6 @@ export class AuthenticationService {
     config,
     http,
     license,
-    buildNumber,
     elasticsearch,
     customBranding,
   }: AuthenticationServiceSetupParams) {
@@ -190,6 +191,7 @@ export class AuthenticationService {
       // If users can eventually re-login we want to redirect them directly to the page they tried
       // to access initially, but we only want to do that for routes that aren't part of the various
       // authentication flows that wouldn't make any sense after successful authentication.
+
       const originalURL = request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW)
         ? `${http.basePath.get(request)}/`
         : this.authenticator.getRequestOriginalURL(request);

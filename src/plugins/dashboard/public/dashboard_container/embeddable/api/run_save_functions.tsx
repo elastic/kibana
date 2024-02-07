@@ -14,7 +14,9 @@ import { showSaveModal } from '@kbn/saved-objects-plugin/public';
 import { cloneDeep } from 'lodash';
 import React from 'react';
 import { batch } from 'react-redux';
-import { DashboardContainerInput } from '../../../../common';
+
+import { EmbeddableInput, isReferenceOrValueEmbeddable } from '@kbn/embeddable-plugin/public';
+import { DashboardContainerInput, DashboardPanelMap } from '../../../../common';
 import { DASHBOARD_CONTENT_ID, SAVED_OBJECT_POST_TIME } from '../../../dashboard_constants';
 import {
   SaveDashboardReturn,
@@ -241,12 +243,38 @@ export async function runClone(this: DashboardContainer) {
         };
       }
 
+      const isManaged = this.getState().componentState.managed;
+      const newPanels = await (async () => {
+        if (!isManaged) return currentState.panels;
+
+        // this is a managed dashboard - unlink all by reference embeddables on clone
+        const unlinkedPanels: DashboardPanelMap = {};
+        for (const [panelId, panel] of Object.entries(currentState.panels)) {
+          const child = this.getChild(panelId);
+          if (
+            child &&
+            isReferenceOrValueEmbeddable(child) &&
+            child.inputIsRefType(child.getInput() as EmbeddableInput)
+          ) {
+            const valueTypeInput = await child.getInputAsValueType();
+            unlinkedPanels[panelId] = {
+              ...panel,
+              explicitInput: valueTypeInput,
+            };
+            continue;
+          }
+          unlinkedPanels[panelId] = panel;
+        }
+        return unlinkedPanels;
+      })();
+
       const saveResult = await saveDashboardState({
         saveOptions: {
           saveAsCopy: true,
         },
         currentState: {
           ...stateToSave,
+          panels: newPanels,
           title: newTitle,
         },
       });
