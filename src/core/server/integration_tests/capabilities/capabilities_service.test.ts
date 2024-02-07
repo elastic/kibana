@@ -13,6 +13,7 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import {
   HttpService,
   InternalHttpServicePreboot,
@@ -49,7 +50,7 @@ describe('CapabilitiesService', () => {
     });
     await service.preboot({ http: httpPreboot });
     serviceSetup = await service.setup({ http: httpSetup });
-    await server.start();
+    await server.start({ injection: injectionServiceMock.createInternalStartContract() });
   });
 
   afterEach(async () => {

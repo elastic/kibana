@@ -33,6 +33,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
   let core: ReportingCore;
   let screenshotting: jest.Mocked<ScreenshottingStart>;
 
@@ -42,7 +43,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   });
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    ({ server, httpSetup, startDeps } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
@@ -83,7 +84,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   it('returns a 200 when successful', async () => {
     registerDiagnoseBrowser(core, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
 
     screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
 
@@ -100,7 +101,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     const logs = `Could not find the default font`;
     registerDiagnoseBrowser(core, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
     screenshotting.diagnose.mockReturnValue(Rx.of(logs));
 
     return supertest(httpSetup.server.listener)
@@ -122,7 +123,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
   it('logs a message when the browser starts, but then has problems later', async () => {
     registerDiagnoseBrowser(core, mockLogger);
 
-    await server.start();
+    await server.start(startDeps);
     screenshotting.diagnose.mockReturnValue(Rx.of(`${devtoolMessage}\n${fontNotFoundMessage}`));
 
     return supertest(httpSetup.server.listener)
@@ -146,7 +147,7 @@ describe(`POST ${INTERNAL_ROUTES.DIAGNOSE.BROWSER}`, () => {
     it('increments the counter', async () => {
       registerDiagnoseBrowser(core, mockLogger);
 
-      await server.start();
+      await server.start(startDeps);
 
       screenshotting.diagnose.mockReturnValue(Rx.of(devtoolMessage));
 

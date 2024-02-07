@@ -12,6 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import { HttpService } from '@kbn/core-http-server-internal';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
@@ -25,6 +26,10 @@ const contextSetup = contextServiceMock.createSetupContract();
 const setupDeps = {
   context: contextSetup,
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 beforeEach(async () => {
@@ -68,7 +73,7 @@ describe('OnPreRouting', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -103,7 +108,7 @@ describe('OnPreRouting', () => {
       return t.next();
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/initial').expect(200, 'redirected');
 
@@ -131,7 +136,7 @@ describe('OnPreRouting', () => {
 
     registerOnPreRouting((req, res, t) => t.rewriteUrl('/login'));
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .get('/initial?name=foo')
@@ -159,7 +164,7 @@ describe('OnPreRouting', () => {
     registerOnPreRouting((req, res, t) => t.rewriteUrl('/reroute-1'));
     registerOnPreRouting((req, res, t) => t.rewriteUrl('/reroute-2'));
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .get('/initial?name=foo')
@@ -186,7 +191,7 @@ describe('OnPreRouting', () => {
 
     registerOnPreRouting((req, res, t) => t.next());
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/login').expect(200, {});
   });
@@ -209,7 +214,7 @@ describe('OnPreRouting', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -233,7 +238,7 @@ describe('OnPreRouting', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -253,7 +258,7 @@ describe('OnPreRouting', () => {
     registerOnPreRouting((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -280,7 +285,7 @@ describe('OnPreRouting', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreRouting((req, res, t) => ({} as any));
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -321,7 +326,7 @@ describe('OnPreRouting', () => {
       res.ok({ body: { customField: String((req as any).customField) } })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -344,7 +349,7 @@ describe('OnPreAuth', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -365,7 +370,7 @@ describe('OnPreAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -385,7 +390,7 @@ describe('OnPreAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -401,7 +406,7 @@ describe('OnPreAuth', () => {
     registerOnPreAuth((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -424,7 +429,7 @@ describe('OnPreAuth', () => {
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
 
     registerOnPreAuth((req, res, t) => ({} as any));
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -461,7 +466,7 @@ describe('OnPreAuth', () => {
       res.ok({ body: { customField: String(req.customField) } })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -487,7 +492,7 @@ describe('OnPreAuth', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .post('/')
@@ -517,7 +522,7 @@ describe('OnPostAuth', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -538,7 +543,7 @@ describe('OnPostAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -557,7 +562,7 @@ describe('OnPostAuth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -572,7 +577,7 @@ describe('OnPostAuth', () => {
     registerOnPostAuth((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -594,7 +599,7 @@ describe('OnPostAuth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) => ({} as any));
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -632,7 +637,7 @@ describe('OnPostAuth', () => {
       res.ok({ body: { customField: String((req as any).customField) } })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -658,7 +663,7 @@ describe('OnPostAuth', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .post('/')
@@ -695,7 +700,7 @@ describe('Auth', () => {
       res.ok({ body: { content: 'ok' } })
     );
     registerAuth((req, res, t) => t.authenticated());
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, { content: 'ok' });
   });
@@ -708,7 +713,7 @@ describe('Auth', () => {
       res.ok({ body: { content: 'ok' } })
     );
     registerAuth((req, res, t) => t.notHandled());
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -725,7 +730,7 @@ describe('Auth', () => {
     const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated());
     registerAuth(authenticate);
 
-    await server.start();
+    await server.start(startDeps);
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: true });
 
     expect(authenticate).toHaveBeenCalledTimes(1);
@@ -743,7 +748,7 @@ describe('Auth', () => {
     const authenticate = jest.fn();
     registerAuth(authenticate);
 
-    await server.start();
+    await server.start(startDeps);
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: false });
 
     expect(authenticate).toHaveBeenCalledTimes(0);
@@ -761,7 +766,7 @@ describe('Auth', () => {
     const authenticate = jest.fn().mockImplementation((req, res, t) => t.authenticated({}));
     await registerAuth(authenticate);
 
-    await server.start();
+    await server.start(startDeps);
     await supertest(innerServer.listener).get('/').expect(200, { authRequired: true });
 
     expect(authenticate).toHaveBeenCalledTimes(1);
@@ -773,7 +778,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerAuth((req, res) => res.unauthorized());
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(401);
   });
@@ -789,7 +794,7 @@ describe('Auth', () => {
         location: redirectTo,
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(302);
     expect(response.header.location).toBe(redirectTo);
@@ -801,7 +806,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerAuth((req, res, t) => t.redirected({} as any));
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(500);
   });
@@ -814,7 +819,7 @@ describe('Auth', () => {
     registerAuth((req, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -851,7 +856,7 @@ describe('Auth', () => {
       return toolkit.authenticated({ state: user });
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -895,7 +900,7 @@ describe('Auth', () => {
       sessionStorage.clear();
       return res.ok();
     });
-    await server.start();
+    await server.start(startDeps);
 
     const responseToSetCookie = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -944,7 +949,7 @@ describe('Auth', () => {
       fromRouteHandler = req.headers.authorization;
       return res.ok();
     });
-    await server.start();
+    await server.start(startDeps);
 
     const token = 'Basic: user:password';
     await supertest(innerServer.listener).get('/').set('Authorization', token).expect(200);
@@ -967,7 +972,7 @@ describe('Auth', () => {
     });
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -986,7 +991,7 @@ describe('Auth', () => {
     });
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.badRequest());
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1013,7 +1018,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1046,7 +1051,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(400);
 
@@ -1073,7 +1078,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/initial').expect(302);
 
@@ -1093,7 +1098,7 @@ describe('Auth', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(401);
 
@@ -1108,7 +1113,7 @@ describe('Auth', () => {
     registerOnPostAuth((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1130,7 +1135,7 @@ describe('Auth', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPostAuth((req, res, t) => ({} as any));
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1167,7 +1172,7 @@ describe('Auth', () => {
       res.ok({ body: { customField: String((req as any).customField) } })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, { customField: 'undefined' });
   });
@@ -1193,7 +1198,7 @@ describe('Auth', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .post('/')
@@ -1227,7 +1232,7 @@ describe('OnPreResponse', () => {
       callingOrder.push('second');
       return t.next();
     });
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200, 'ok');
 
@@ -1257,7 +1262,7 @@ describe('OnPreResponse', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1283,7 +1288,7 @@ describe('OnPreResponse', () => {
         headers: { 'x-kibana-header': 'value' },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1308,7 +1313,7 @@ describe('OnPreResponse', () => {
     registerOnPreResponse((req, res, t) => {
       throw new Error('reason');
     });
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1334,7 +1339,7 @@ describe('OnPreResponse', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok());
     registerOnPreResponse((req, res, t) => ({} as any));
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(500);
 
@@ -1365,7 +1370,7 @@ describe('OnPreResponse', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200);
   });
@@ -1395,7 +1400,7 @@ describe('OnPreResponse', () => {
       (context, req, res) => res.ok({ body: req.body.term })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener)
       .post('/')
@@ -1428,7 +1433,7 @@ describe('OnPreResponse', () => {
       return t.render({ body: 'overridden' });
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
 
@@ -1463,7 +1468,7 @@ describe('OnPreResponse', () => {
       });
     });
 
-    await server.start();
+    await server.start(startDeps);
 
     const result = await supertest(innerServer.listener).get('/').expect(200, 'overridden');
 
@@ -1487,7 +1492,7 @@ describe('runs with default preResponse handlers', () => {
         },
       })
     );
-    await server.start();
+    await server.start(startDeps);
 
     const response = await supertest(innerServer.listener).get('/').expect(200);
 
@@ -1537,7 +1542,7 @@ describe('run interceptors in the right order', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200);
     expect(executionOrder).toEqual([
@@ -1581,7 +1586,7 @@ describe('run interceptors in the right order', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(200);
     expect(executionOrder).toEqual(['onPreRouting', 'onPreAuth', 'onPostAuth', 'onPreResponse']);
@@ -1624,7 +1629,7 @@ describe('run interceptors in the right order', () => {
 
     router.get({ path: '/', validate: false }, (context, req, res) => res.ok({ body: 'ok' }));
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(innerServer.listener).get('/').expect(403);
     expect(executionOrder).toEqual(['onPreRouting', 'onPreAuth', 'auth', 'onPreResponse']);

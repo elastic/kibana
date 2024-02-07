@@ -26,6 +26,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
 
   const mockConfig = createMockConfigSchema({
     queue: { indexInterval: 'year', timeout: 10000, pollEnabled: true },
@@ -43,7 +44,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    ({ server, httpSetup, startDeps } = await setupServer(reportingSymbol));
   });
 
   afterEach(async () => {
@@ -54,7 +55,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     const core = await createReportingCore({});
 
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
@@ -68,7 +69,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
     const core = await createReportingCore({ security });
 
     registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
-    await server.start();
+    await server.start(startDeps);
 
     await supertest(httpSetup.server.listener)
       .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)
@@ -85,7 +86,7 @@ describe(`GET ${INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS}`, () => {
       core.getUsageCounter = jest.fn().mockReturnValue(usageCounter);
 
       registerDeprecationsRoutes(core, loggingSystemMock.createLogger());
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(INTERNAL_ROUTES.MIGRATE.GET_ILM_POLICY_STATUS)

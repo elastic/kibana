@@ -41,6 +41,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
@@ -72,7 +73,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
   const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    ({ server, httpSetup, startDeps } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
@@ -140,7 +141,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       mockEsClient.search.mockResponseOnce(getHits());
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
@@ -166,7 +167,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
@@ -180,7 +181,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       mockEsClient.search.mockResponseOnce(getHits());
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
@@ -196,7 +197,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       );
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
@@ -213,7 +214,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       );
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(503)
@@ -233,7 +234,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       );
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(500)
@@ -247,7 +248,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
@@ -261,7 +262,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
@@ -279,7 +280,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .delete(`/api/reporting/jobs/delete/dank`)
         .expect(200)
@@ -309,7 +310,7 @@ describe(`Reporting Job Management Routes: Public`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutesPublic(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .delete('/api/reporting/jobs/delete/denk')
         .expect(500)

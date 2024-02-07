@@ -20,6 +20,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-server-mocks';
 import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { coreLifecycleMock, coreInternalLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 import type { SharedGlobalConfig, PluginInitializerContext } from '@kbn/core-plugins-server';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 export { configServiceMock, configDeprecationsMock } from '@kbn/config-mocks';
 export { loggingSystemMock } from '@kbn/core-logging-server-mocks';
@@ -45,6 +46,7 @@ export { i18nServiceMock } from '@kbn/core-i18n-server-mocks';
 export { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 export { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 export { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
+export { injectionServiceMock } from '@kbn/core-di-server-mocks';
 
 export type {
   ElasticsearchClientMock,
@@ -131,12 +133,16 @@ function createCoreRequestHandlerContextMock() {
     deprecations: {
       client: deprecationsServiceMock.createClient(),
     },
+    injection: {
+      container: injectionServiceMock.createReadonlyContainer(),
+    },
   };
 }
 
 export type CustomRequestHandlerMock<T> = {
   core: Promise<ReturnType<typeof createCoreRequestHandlerContextMock>>;
   resolve: jest.MockedFunction<any>;
+  _source: symbol;
 } & {
   [Key in keyof T]: T[Key] extends Promise<unknown> ? T[Key] : Promise<T[Key]>;
 };
@@ -164,6 +170,8 @@ const createCustomRequestHandlerContextMock = <T>(contextParts: T): CustomReques
     }
     return resolved;
   });
+
+  mock._source = Symbol.for('mock');
 
   return mock;
 };

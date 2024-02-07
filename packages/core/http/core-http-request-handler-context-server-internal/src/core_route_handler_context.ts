@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { PluginOpaqueId } from '@kbn/core-base-common';
+import type { CoreId } from '@kbn/core-base-common-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CoreRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import {
@@ -24,6 +26,10 @@ import {
   CoreUiSettingsRouteHandlerContext,
   type InternalUiSettingsServiceStart,
 } from '@kbn/core-ui-settings-server-internal';
+import {
+  CoreInjectionRouteHandlerContext,
+  type InternalCoreDiServiceStart,
+} from '@kbn/core-di-server-internal';
 
 /**
  * Subset of `InternalCoreStart` used by {@link CoreRouteHandlerContext}
@@ -34,6 +40,7 @@ export interface CoreRouteHandlerContextParams {
   savedObjects: InternalSavedObjectsServiceStart;
   uiSettings: InternalUiSettingsServiceStart;
   deprecations: InternalDeprecationsServiceStart;
+  injection: InternalCoreDiServiceStart;
 }
 
 /**
@@ -46,8 +53,14 @@ export class CoreRouteHandlerContext implements CoreRequestHandlerContext {
   readonly savedObjects: CoreSavedObjectsRouteHandlerContext;
   readonly uiSettings: CoreUiSettingsRouteHandlerContext;
   readonly deprecations: CoreDeprecationsRouteHandlerContext;
+  readonly injection: CoreInjectionRouteHandlerContext;
 
-  constructor(coreStart: CoreRouteHandlerContextParams, request: KibanaRequest) {
+  constructor(
+    coreStart: CoreRouteHandlerContextParams,
+    request: KibanaRequest,
+    callerId: PluginOpaqueId | CoreId
+  ) {
+    this.injection = new CoreInjectionRouteHandlerContext(coreStart.injection, request, callerId);
     this.elasticsearch = new CoreElasticsearchRouteHandlerContext(coreStart.elasticsearch, request);
     this.savedObjects = new CoreSavedObjectsRouteHandlerContext(coreStart.savedObjects, request);
     this.uiSettings = new CoreUiSettingsRouteHandlerContext(

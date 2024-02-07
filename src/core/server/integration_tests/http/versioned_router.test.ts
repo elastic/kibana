@@ -13,9 +13,14 @@ import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
 import { schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer, createConfigService } from '@kbn/core-http-server-mocks';
-import type { HttpConfigType, HttpService } from '@kbn/core-http-server-internal';
+import type {
+  HttpConfigType,
+  HttpService,
+  HttpServiceStartDeps,
+} from '@kbn/core-http-server-internal';
 import type { IRouter } from '@kbn/core-http-server';
 import type { CliArgs } from '@kbn/config';
 import { ELASTIC_HTTP_VERSION_QUERY_PARAM } from '@kbn/core-http-common';
@@ -30,6 +35,7 @@ interface AdditionalOptions {
 describe('Routing versioned requests', () => {
   let router: IRouter;
   let supertest: Supertest.SuperTest<Supertest.Test>;
+  let startDeps: HttpServiceStartDeps;
 
   async function setupServer(cliArgs: Partial<CliArgs> = {}, options: AdditionalOptions = {}) {
     logger = loggingSystemMock.create();
@@ -53,6 +59,10 @@ describe('Routing versioned requests', () => {
     const { server: innerServer, createRouter } = await server.setup(setupDeps);
     router = createRouter('/');
     supertest = Supertest(innerServer.listener);
+
+    startDeps = {
+      injection: injectionServiceMock.createInternalStartContract(),
+    };
   }
 
   const setupDeps = {
@@ -79,7 +89,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { v: '2' } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -109,7 +119,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { v: '2' } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(supertest.get('/my-path').expect(200)).resolves.toEqual(
       expect.objectContaining({
@@ -128,7 +138,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { v: '1' } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -159,7 +169,7 @@ describe('Routing versioned requests', () => {
         }
       );
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -184,7 +194,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { foo: 'bar' } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -223,7 +233,7 @@ describe('Routing versioned requests', () => {
         }
       );
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -277,7 +287,7 @@ describe('Routing versioned requests', () => {
         }
       );
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -301,7 +311,7 @@ describe('Routing versioned requests', () => {
         { version: '2', validate: { response: { 200: { body: schema.number() } } } },
         async (ctx, req, res) => res.ok()
       );
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -320,7 +330,7 @@ describe('Routing versioned requests', () => {
         access: 'public',
       })
       .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -334,7 +344,7 @@ describe('Routing versioned requests', () => {
   it('errors when no handler could be found', async () => {
     router.versioned.get({ path: '/my-path', access: 'public' });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -360,7 +370,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { v: 'newest' } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -382,7 +392,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { v: 'newest' } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -401,7 +411,7 @@ describe('Routing versioned requests', () => {
         throw error;
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest.get('/my-path').set('Elastic-Api-Version', '1').expect(500);
 
@@ -425,7 +435,7 @@ describe('Routing versioned requests', () => {
       }
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     await expect(
       supertest
@@ -469,7 +479,7 @@ describe('Routing versioned requests', () => {
         );
     });
     it('finds version based on header', async () => {
-      await server.start();
+      await server.start(startDeps);
       await supertest
         .get('/my-public')
         .set('Elastic-Api-Version', '2023-10-31')
@@ -492,7 +502,7 @@ describe('Routing versioned requests', () => {
       }
     });
     it('finds version based on query param', async () => {
-      await server.start();
+      await server.start(startDeps);
       await supertest.get('/my-public').query({ apiVersion: '2023-10-31', a: 1 }).expect(200);
       {
         const [[_, req]] = publicHandler.mock.calls;
@@ -523,7 +533,7 @@ describe('Routing versioned requests', () => {
         return res.ok({ body: { ok: true } });
       });
 
-    await server.start();
+    await server.start(startDeps);
 
     await supertest.get('/my_path_to_bypass/123').expect(200);
     const response = await supertest.get('/my_other_path').expect(400);

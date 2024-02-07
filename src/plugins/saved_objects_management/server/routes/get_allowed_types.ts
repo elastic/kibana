@@ -8,6 +8,7 @@
 
 import type { IRouter, SavedObjectsType } from '@kbn/core/server';
 import type { SavedObjectManagementTypeInfo } from '../../common';
+import { myExampleRequestHandlerId } from '../injection_example';
 
 const convertType = (sot: SavedObjectsType): SavedObjectManagementTypeInfo => {
   return {
@@ -25,6 +26,12 @@ export const registerGetAllowedTypesRoute = (router: IRouter) => {
       validate: false,
     },
     async (context, req, res) => {
+      // access a request-scoped service
+      const { injection } = await context.core;
+      const myRequestService = injection.container.get(myExampleRequestHandlerId);
+      // type automatically inferred from the service identifier.
+      myRequestService.logSomethingRequestRelated();
+
       const allowedTypes = (await context.core).savedObjects.typeRegistry
         .getImportableAndExportableTypes()
         .filter((type) => type.management!.visibleInManagement ?? true)

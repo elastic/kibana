@@ -11,18 +11,17 @@ import { Type } from '@kbn/config-schema';
 import type { RecursiveReadonly, MaybePromise } from '@kbn/utility-types';
 import type { PathConfigType } from '@kbn/utils';
 import type { LoggerFactory } from '@kbn/logging';
-import type {
-  ConfigPath,
-  EnvironmentMode,
-  PackageInfo,
-  ConfigDeprecationProvider,
-} from '@kbn/config';
-import type { PluginName, PluginOpaqueId, PluginType } from '@kbn/core-base-common';
+import type { EnvironmentMode, PackageInfo, ConfigDeprecationProvider } from '@kbn/config';
+import type { PluginOpaqueId, PluginManifest } from '@kbn/core-base-common';
 import type { NodeInfo } from '@kbn/core-node-server';
 import type { ElasticsearchConfigType } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsConfigType } from '@kbn/core-saved-objects-base-server-internal';
 import type { CorePreboot, CoreSetup, CoreStart } from '@kbn/core-lifecycle-server';
 import { SharedGlobalConfigKeys } from './shared_global_config';
+
+// re-export for the POC instead of rewriting all imports
+export type { PluginManifest };
+
 type Maybe<T> = T | undefined;
 
 /**
@@ -149,129 +148,6 @@ export type MakeUsageFromSchema<T> = {
 };
 
 /**
- * Describes the set of required and optional properties plugin can define in its
- * mandatory JSON manifest file.
- *
- * @remarks
- * Should never be used in code outside of Core but is exported for
- * documentation purposes.
- *
- * @public
- */
-export interface PluginManifest {
-  /**
-   * Identifier of the plugin. Must be a string in camelCase. Part of a plugin public contract.
-   * Other plugins leverage it to access plugin API, navigate to the plugin, etc.
-   */
-  readonly id: PluginName;
-
-  /**
-   * Version of the plugin.
-   */
-  readonly version: string;
-
-  /**
-   * The version of Kibana the plugin is compatible with, defaults to "version".
-   */
-  readonly kibanaVersion: string;
-
-  /**
-   * Type of the plugin, defaults to `standard`.
-   */
-  readonly type: PluginType;
-
-  /**
-   * Root {@link ConfigPath | configuration path} used by the plugin, defaults
-   * to "id" in snake_case format.
-   *
-   * @example
-   * id: myPlugin
-   * configPath: my_plugin
-   */
-  readonly configPath: ConfigPath;
-
-  /**
-   * An optional list of the other plugins that **must be** installed and enabled
-   * for this plugin to function properly.
-   */
-  readonly requiredPlugins: readonly PluginName[];
-
-  /**
-   * List of plugin ids that this plugin's UI code imports modules from that are
-   * not in `requiredPlugins`.
-   *
-   * @remarks
-   * The plugins listed here will be loaded in the browser, even if the plugin is
-   * disabled. Required by `@kbn/optimizer` to support cross-plugin imports.
-   * "core" and plugins already listed in `requiredPlugins` do not need to be
-   * duplicated here.
-   */
-  readonly requiredBundles: readonly string[];
-
-  /**
-   * An optional list of the other plugins that if installed and enabled **may be**
-   * leveraged by this plugin for some additional functionality but otherwise are
-   * not required for this plugin to work properly.
-   */
-  readonly optionalPlugins: readonly PluginName[];
-
-  /**
-   * An optional list of plugin dependencies that can be resolved dynamically at runtime
-   * using the dynamic contract resolving capabilities from the plugin service.
-   */
-  readonly runtimePluginDependencies: readonly string[];
-
-  /**
-   * Specifies whether plugin includes some client/browser specific functionality
-   * that should be included into client bundle via `public/ui_plugin.js` file.
-   */
-  readonly ui: boolean;
-
-  /**
-   * Specifies whether plugin includes some server-side specific functionality.
-   */
-  readonly server: boolean;
-
-  /**
-   * Specifies directory names that can be imported by other ui-plugins built
-   * using the same instance of the @kbn/optimizer. A temporary measure we plan
-   * to replace with better mechanisms for sharing static code between plugins
-   * @deprecated To be deleted when https://github.com/elastic/kibana/issues/101948 is done.
-   */
-  readonly extraPublicDirs?: string[];
-
-  /**
-   * Only used for the automatically generated API documentation. Specifying service
-   * folders will cause your plugin API reference to be broken up into sub sections.
-   */
-  readonly serviceFolders?: readonly string[];
-
-  readonly owner: {
-    /**
-     * The name of the team that currently owns this plugin.
-     */
-    readonly name: string;
-    /**
-     * All internal plugins should have a github team specified. GitHub teams can be viewed here:
-     * https://github.com/orgs/elastic/teams
-     */
-    readonly githubTeam?: string;
-  };
-
-  /**
-   * TODO: make required once all plugins specify this.
-   * A brief description of what this plugin does and any capabilities it provides.
-   */
-  readonly description?: string;
-
-  /**
-   * Specifies whether this plugin - and its required dependencies - will be enabled for anonymous pages (login page, status page when
-   * configured, etc.) Default is false.
-   */
-  readonly enabledOnAnonymousPages?: boolean;
-}
-
-/**
  * The interface that should be returned by a `PluginInitializer` for a `preboot` plugin.
  *
  * @public
@@ -328,6 +204,72 @@ export type SharedGlobalConfig = RecursiveReadonly<{
   path: Pick<PathConfigType, typeof SharedGlobalConfigKeys.path[number]>;
   savedObjects: Pick<SavedObjectsConfigType, typeof SharedGlobalConfigKeys.savedObjects[number]>;
 }>;
+
+/**
+ * Accessor for a plugin's configuration
+ *
+ * @public
+ */
+export interface PluginConfig<ConfigSchema = unknown> {
+  /**
+   * Return an observable of the plugin's configuration
+   *
+   * @example
+   * ```typescript
+   * // plugins/my-plugin/server/plugin.ts
+   *
+   * export class MyPlugin implements Plugin {
+   *   constructor(private readonly initContext: PluginInitializerContext) {}
+   *   setup(core) {
+   *     this.configSub = this.initContext.config.create<MyPluginConfigType>().subscribe((config) => {
+   *       this.myService.reconfigure(config);
+   *     });
+   *   }
+   *   stop() {
+   *     this.configSub.unsubscribe();
+   *   }
+   * ```
+   *
+   * @example
+   * ```typescript
+   * // plugins/my-plugin/server/plugin.ts
+   *
+   * export class MyPlugin implements Plugin {
+   *   constructor(private readonly initContext: PluginInitializerContext) {}
+   *   async setup(core) {
+   *     this.config = await this.initContext.config.create<MyPluginConfigType>().pipe(take(1)).toPromise();
+   *   }
+   *   stop() {
+   *     this.configSub.unsubscribe();
+   *   }
+   * ```
+   *
+   * @remarks The underlying observable has a replay effect, meaning that awaiting for the first emission
+   *          will be resolved at next tick, without risks to delay any asynchronous code's workflow.
+   */
+  create: <T = ConfigSchema>() => Observable<T>;
+  /**
+   * Return the current value of the plugin's configuration synchronously.
+   *
+   * @example
+   * ```typescript
+   * // plugins/my-plugin/server/plugin.ts
+   *
+   * export class MyPlugin implements Plugin {
+   *   constructor(private readonly initContext: PluginInitializerContext) {}
+   *   setup(core) {
+   *     const config = this.initContext.config.get<MyPluginConfigType>();
+   *     // do something with the config
+   *   }
+   * }
+   * ```
+   *
+   * @remarks This should only be used when synchronous access is an absolute necessity, such
+   *          as during the plugin's setup or start lifecycle. For all other usages,
+   *          {@link create} should be used instead.
+   */
+  get: <T = ConfigSchema>() => T;
+}
 
 /**
  * Context that's available to plugins during initialization stage.
@@ -387,7 +329,7 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
   /**
    * Accessors for the plugin's configuration
    */
-  config: {
+  config: PluginConfig<ConfigSchema> & {
     /**
      * Provide access to Kibana legacy configuration values.
      *
@@ -399,64 +341,6 @@ export interface PluginInitializerContext<ConfigSchema = unknown> {
       globalConfig$: Observable<SharedGlobalConfig>;
       get: () => SharedGlobalConfig;
     };
-    /**
-     * Return an observable of the plugin's configuration
-     *
-     * @example
-     * ```typescript
-     * // plugins/my-plugin/server/plugin.ts
-     *
-     * export class MyPlugin implements Plugin {
-     *   constructor(private readonly initContext: PluginInitializerContext) {}
-     *   setup(core) {
-     *     this.configSub = this.initContext.config.create<MyPluginConfigType>().subscribe((config) => {
-     *       this.myService.reconfigure(config);
-     *     });
-     *   }
-     *   stop() {
-     *     this.configSub.unsubscribe();
-     *   }
-     * ```
-     *
-     * @example
-     * ```typescript
-     * // plugins/my-plugin/server/plugin.ts
-     *
-     * export class MyPlugin implements Plugin {
-     *   constructor(private readonly initContext: PluginInitializerContext) {}
-     *   async setup(core) {
-     *     this.config = await this.initContext.config.create<MyPluginConfigType>().pipe(take(1)).toPromise();
-     *   }
-     *   stop() {
-     *     this.configSub.unsubscribe();
-     *   }
-     * ```
-     *
-     * @remarks The underlying observable has a replay effect, meaning that awaiting for the first emission
-     *          will be resolved at next tick, without risks to delay any asynchronous code's workflow.
-     */
-    create: <T = ConfigSchema>() => Observable<T>;
-    /**
-     * Return the current value of the plugin's configuration synchronously.
-     *
-     * @example
-     * ```typescript
-     * // plugins/my-plugin/server/plugin.ts
-     *
-     * export class MyPlugin implements Plugin {
-     *   constructor(private readonly initContext: PluginInitializerContext) {}
-     *   setup(core) {
-     *     const config = this.initContext.config.get<MyPluginConfigType>();
-     *     // do something with the config
-     *   }
-     * }
-     * ```
-     *
-     * @remarks This should only be used when synchronous access is an absolute necessity, such
-     *          as during the plugin's setup or start lifecycle. For all other usages,
-     *          {@link create} should be used instead.
-     */
-    get: <T = ConfigSchema>() => T;
   };
 }
 

@@ -44,7 +44,7 @@ export const createMockClients = () => {
 type MockClients = ReturnType<typeof createMockClients>;
 
 export type ElasticAssistantRequestHandlerContextMock = MockedKeys<
-  AwaitedProperties<Omit<ElasticAssistantRequestHandlerContext, 'resolve'>>
+  AwaitedProperties<Omit<ElasticAssistantRequestHandlerContext, 'resolve' | '_source'>>
 > & {
   core: MockClients['core'];
 };

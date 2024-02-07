@@ -13,6 +13,7 @@ import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createConfigService, createHttpServer } from '@kbn/core-http-server-mocks';
 import { HttpService, HttpServerSetup } from '@kbn/core-http-server-internal';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { schema } from '@kbn/config-schema';
 import { IConfigServiceMock } from '@kbn/config-mocks';
 import { Logger } from '@kbn/logging';
@@ -28,9 +29,14 @@ const xsrfDisabledTestPath = '/xsrf/test/route/disabled';
 const kibanaName = 'my-kibana-name';
 const internalProductHeader = 'x-elastic-internal-origin';
 const internalProductQueryParam = 'elasticInternalOrigin';
+
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 const testConfig: Parameters<typeof createConfigService>[0] = {
@@ -79,7 +85,7 @@ describe('core lifecycle handlers', () => {
       router.get({ path: testRoute, validate: false }, (context, req, res) => {
         return res.ok({ body: 'ok' });
       });
-      await server.start();
+      await server.start(startDeps);
     });
 
     it('accepts requests with the correct version passed in the version header', async () => {
@@ -127,7 +133,7 @@ describe('core lifecycle handlers', () => {
       router.get({ path: testErrorRoute, validate: false }, (context, req, res) => {
         return res.badRequest({ body: 'bad request' });
       });
-      await server.start();
+      await server.start(startDeps);
     });
 
     it('adds the expected headers in case of success', async () => {
@@ -178,7 +184,7 @@ describe('core lifecycle handlers', () => {
         );
       });
 
-      await server.start();
+      await server.start(startDeps);
     });
 
     nonDestructiveMethods.forEach((method) => {
@@ -268,7 +274,7 @@ describe('core lifecycle handlers', () => {
           return res.ok({ body: 'ok()' });
         }
       );
-      await server.start();
+      await server.start(startDeps);
     });
 
     it('rejects requests to internal routes without special values', async () => {
@@ -345,7 +351,7 @@ describe('core lifecycle handlers with restrict internal routes enforced', () =>
           return res.ok({ body: 'ok()' });
         }
       );
-      await server.start();
+      await server.start(startDeps);
     });
 
     it('request requests without the internal product header to internal routes', async () => {
@@ -393,7 +399,7 @@ describe('core lifecycle handlers with no strict client version check', () => {
       return res.custom({ body: 'nok', statusCode: 500 });
     });
     innerServer = serverSetup.server;
-    await server.start();
+    await server.start(startDeps);
   });
 
   afterEach(async () => {

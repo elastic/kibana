@@ -98,6 +98,7 @@ const setup = ({ storage }: { storage?: TestSOContentStorage } = {}) => {
   const requestHandlerContext = {
     core: Promise.resolve(requestHandlerCoreContext),
     resolve: jest.fn(),
+    _source: Symbol.for('test'),
   };
 
   return {

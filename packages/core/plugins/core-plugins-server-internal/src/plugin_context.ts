@@ -283,6 +283,9 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       onSetup: (...dependencyNames) => runtimeResolver.onSetup(plugin.name, dependencyNames),
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
     },
+    injection: {
+      setupModule: (callback) => deps.injection.configurePluginModule(plugin.opaqueId, callback),
+    },
   };
 }
 
@@ -357,6 +360,9 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
     coreUsageData: deps.coreUsageData,
     plugins: {
       onStart: (...dependencyNames) => runtimeResolver.onStart(plugin.name, dependencyNames),
+    },
+    injection: {
+      container: deps.injection.getPluginContainer(plugin.opaqueId),
     },
   };
 }

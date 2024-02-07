@@ -16,12 +16,13 @@ const pluginId = Symbol('globalSearch');
 describe('GET /internal/global_search/searchable_types', () => {
   let server: SetupServerReturn['server'];
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
   let globalSearchHandlerContext: ReturnType<
     typeof globalSearchPluginMock.createRouteHandlerContext
   >;
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(pluginId));
+    ({ server, httpSetup, startDeps } = await setupServer(pluginId));
 
     globalSearchHandlerContext = globalSearchPluginMock.createRouteHandlerContext();
     httpSetup.registerRouteHandlerContext<
@@ -36,7 +37,7 @@ describe('GET /internal/global_search/searchable_types', () => {
 
     registerInternalSearchableTypesRoute(router);
 
-    await server.start();
+    await server.start(startDeps);
   });
 
   afterEach(async () => {

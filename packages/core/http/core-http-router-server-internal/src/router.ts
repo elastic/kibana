@@ -131,6 +131,12 @@ export interface RouterOptions {
     /** {@inheritdoc VersionedRouterArgs['useVersionResolutionStrategyForInternalPaths'] }*/
     useVersionResolutionStrategyForInternalPaths?: string[];
   };
+
+  /**
+   * Optional, if present the callback will be called once the handler has been called
+   * (regardless of result / status, will be executed even in case of errors)
+   */
+  afterRequestHandled?: (request: KibanaRequest) => void;
 }
 
 /**
@@ -245,6 +251,10 @@ export class Router<Context extends RequestHandlerContextBase = RequestHandlerCo
       // return a generic 500 to avoid error info / stack trace surfacing
       this.logError('500 Server Error', 500, { request, error });
       return hapiResponseAdapter.toInternalError();
+    } finally {
+      if (this.options.afterRequestHandled) {
+        this.options.afterRequestHandled(kibanaRequest);
+      }
     }
   }
 

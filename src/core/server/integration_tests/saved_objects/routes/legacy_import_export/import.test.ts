@@ -40,6 +40,7 @@ import {
   registerLegacyImportRoute,
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
+import { getStartDeps } from '../routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
@@ -67,7 +68,7 @@ describe('POST /api/dashboards/import', () => {
       saved_objects: importObjects,
     } as SavedObjectsBulkResponse);
 
-    await server.start();
+    await server.start(getStartDeps());
   });
 
   afterEach(async () => {

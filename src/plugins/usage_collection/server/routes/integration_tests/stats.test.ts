@@ -19,6 +19,7 @@ import {
   loggingSystemMock,
   metricsServiceMock,
   executionContextServiceMock,
+  injectionServiceMock,
 } from '@kbn/core/server/mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { registerStatsRoute } from '../stats';
@@ -69,7 +70,9 @@ describe('/api/stats', () => {
       overallStatus$,
     });
 
-    await server.start();
+    await server.start({
+      injection: injectionServiceMock.createInternalStartContract(),
+    });
   });
 
   afterEach(async () => {

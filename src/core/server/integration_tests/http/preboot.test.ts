@@ -10,6 +10,7 @@ import supertest from 'supertest';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
+import { injectionServiceMock } from '@kbn/core-di-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
 import { createHttpServer } from '@kbn/core-http-server-mocks';
 import { HttpService } from '@kbn/core-http-server-internal';
@@ -21,6 +22,9 @@ const prebootDeps = {
 const setupDeps = {
   context: contextServiceMock.createSetupContract(),
   executionContext: executionContextServiceMock.createInternalSetupContract(),
+};
+const startDeps = {
+  injection: injectionServiceMock.createInternalStartContract(),
 };
 
 beforeEach(async () => {
@@ -117,7 +121,7 @@ describe('Preboot HTTP server', () => {
       res.ok({ body: 'hello-post' })
     );
 
-    await server.start();
+    await server.start(startDeps);
 
     // Preboot routes should no longer work.
     await supertest(innerPrebootServer.listener).get('/preboot-get').expect(503, {

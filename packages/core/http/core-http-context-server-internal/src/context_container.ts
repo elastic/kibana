@@ -93,7 +93,7 @@ export class ContextContainer implements IContextContainer {
     const contextsToBuild = new Set(this.getContextNamesForSource(source));
     const builtContextPromises: Record<string, Promise<unknown>> = {};
 
-    const builtContext = {} as HandlerContextType<RequestHandler>;
+    const builtContext = { _source: source } as HandlerContextType<RequestHandler>;
     (builtContext as unknown as RequestHandlerContextBase).resolve = async (keys) => {
       const resolved = await Promise.all(
         keys.map(async (key) => {
@@ -181,6 +181,7 @@ const createExposedContext = ({
 }) => {
   const exposedContext: Partial<HandlerContextType<RequestHandler>> = {};
   exposedContext.resolve = contextAccessors.resolve;
+  exposedContext._source = contextAccessors._source;
 
   for (const contextName of exposedContextNames) {
     if (contextName === currentContextName) {

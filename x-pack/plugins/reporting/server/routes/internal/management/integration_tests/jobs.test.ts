@@ -41,6 +41,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
   let httpSetup: SetupServerReturn['httpSetup'];
+  let startDeps: SetupServerReturn['startDeps'];
   let exportTypesRegistry: ExportTypesRegistry;
   let core: ReportingCore;
   let mockSetupDeps: ReportingInternalSetup;
@@ -74,7 +75,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
   const mockConfigSchema = createMockConfigSchema({ roles: { enabled: false } });
 
   beforeEach(async () => {
-    ({ server, httpSetup } = await setupServer(reportingSymbol));
+    ({ server, httpSetup, startDeps } = await setupServer(reportingSymbol));
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
@@ -149,7 +150,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
@@ -175,7 +176,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
@@ -189,7 +190,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
@@ -205,7 +206,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       );
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
@@ -222,7 +223,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
@@ -239,7 +240,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/test`)
@@ -256,7 +257,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       );
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(503)
@@ -276,7 +277,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       );
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(500)
@@ -290,7 +291,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
@@ -306,7 +307,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
@@ -323,7 +324,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       );
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
@@ -340,7 +341,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       );
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(400)
@@ -362,7 +363,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       );
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/japanese-dashboard`)
         .expect(200)
@@ -399,7 +400,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
 
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
 
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
@@ -418,7 +419,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.INFO_PREFIX}/dank`)
         .expect(200)
@@ -435,7 +436,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(`${INTERNAL_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
         .expect(200)
@@ -453,7 +454,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(200)
@@ -470,7 +471,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .get(INTERNAL_ROUTES.JOBS.COUNT)
         .expect(200)
@@ -500,7 +501,7 @@ describe(`Reporting Job Management Routes: Internal`, () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutes(core);
 
-      await server.start();
+      await server.start(startDeps);
       await supertest(httpSetup.server.listener)
         .delete(`${INTERNAL_ROUTES.JOBS.DELETE_PREFIX}/dank`)
         .expect(500)

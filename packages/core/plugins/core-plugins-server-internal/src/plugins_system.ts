@@ -6,11 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { withTimeout, isPromise } from '@kbn/std';
-import type { DiscoveredPlugin, PluginName } from '@kbn/core-base-common';
+import { isPromise, withTimeout } from '@kbn/std';
+import { DiscoveredPlugin, PluginName, PluginType } from '@kbn/core-base-common';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { Logger } from '@kbn/logging';
-import { PluginType } from '@kbn/core-base-common';
 import type { PluginWrapper } from './plugin';
 import { type PluginDependencies } from './types';
 import {
@@ -24,6 +23,7 @@ import type {
   PluginsServiceStartDeps,
 } from './plugins_service';
 import { RuntimePluginContractResolver } from './plugin_contract_resolver';
+import { buildPluginModule } from './injection_modules';
 
 const Sec = 1000;
 
@@ -92,6 +92,13 @@ export class PluginsSystem<T extends PluginType> {
       return contracts;
     }
 
+    // don't handle DI on preboot phase for now
+    if (this.type === PluginType.standard) {
+      const { injection: injectionService } = deps as PluginsServiceSetupDeps;
+      // register the plugin-scoped module exposing services such as logging and config
+      injectionService.registerPluginModule(buildPluginModule(this.coreContext));
+    }
+
     const runtimeDependencies = buildPluginRuntimeDependencyMap(this.plugins);
     this.runtimeResolver.setDependencyMap(runtimeDependencies);
 
@@ -129,6 +136,12 @@ export class PluginsSystem<T extends PluginType> {
           plugin,
           runtimeResolver: this.runtimeResolver,
         });
+      }
+
+      // don't handle DI on preboot phase for now
+      if (this.type === PluginType.standard) {
+        const { injection: injectionService } = deps as PluginsServiceSetupDeps;
+        injectionService.createPluginContainer(plugin.opaqueId, plugin.manifest);
       }
 
       await plugin.init();

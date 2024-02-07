@@ -58,5 +58,17 @@ module.exports = () => ({
         allowDeclareFields: true,
       },
     ],
+
+    // need to run before the typescript preset, else the param decorators
+    // are stripped from the imports
+    {
+      plugins: [
+        // Required for TypeScript decorators support
+        require.resolve('babel-plugin-transform-typescript-metadata'),
+
+        // Required for TypeScript decorators support
+        [require.resolve('@babel/plugin-proposal-decorators'), { version: 'legacy' }],
+      ],
+    },
   ],
 });

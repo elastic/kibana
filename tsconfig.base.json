@@ -288,6 +288,16 @@
       "@kbn/core-deprecations-server-internal/*": ["packages/core/deprecations/core-deprecations-server-internal/*"],
       "@kbn/core-deprecations-server-mocks": ["packages/core/deprecations/core-deprecations-server-mocks"],
       "@kbn/core-deprecations-server-mocks/*": ["packages/core/deprecations/core-deprecations-server-mocks/*"],
+      "@kbn/core-di-common": ["packages/core/di/core-di-common"],
+      "@kbn/core-di-common/*": ["packages/core/di/core-di-common/*"],
+      "@kbn/core-di-common-internal": ["packages/core/di/core-di-common-internal"],
+      "@kbn/core-di-common-internal/*": ["packages/core/di/core-di-common-internal/*"],
+      "@kbn/core-di-server": ["packages/core/di/core-di-server"],
+      "@kbn/core-di-server/*": ["packages/core/di/core-di-server/*"],
+      "@kbn/core-di-server-internal": ["packages/core/di/core-di-server-internal"],
+      "@kbn/core-di-server-internal/*": ["packages/core/di/core-di-server-internal/*"],
+      "@kbn/core-di-server-mocks": ["packages/core/di/core-di-server-mocks"],
+      "@kbn/core-di-server-mocks/*": ["packages/core/di/core-di-server-mocks/*"],
       "@kbn/core-doc-links-browser": ["packages/core/doc-links/core-doc-links-browser"],
       "@kbn/core-doc-links-browser/*": ["packages/core/doc-links/core-doc-links-browser/*"],
       "@kbn/core-doc-links-browser-internal": ["packages/core/doc-links/core-doc-links-browser-internal"],
@@ -1812,6 +1822,10 @@
     "downlevelIteration": true,
     // import tslib helpers rather than inlining helpers for iteration or spreading, for instance
     "importHelpers": true,
+    // Allow usage of experimental decorators
+    "experimentalDecorators": true,
+    // Emits decorators metadata
+    "emitDecoratorMetadata": true,
     // adding global typings
     "types": [
       "node",

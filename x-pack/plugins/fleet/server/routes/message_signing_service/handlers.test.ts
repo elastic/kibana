@@ -16,7 +16,7 @@ import type { FleetRequestHandlerContext } from '../../types';
 import { rotateKeyPairHandler } from './handlers';
 
 describe('FleetMessageSigningServiceHandler', () => {
-  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve'>>;
+  let context: AwaitedProperties<Omit<FleetRequestHandlerContext, 'resolve' | '_source'>>;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
   let request: KibanaRequest<
     undefined,
