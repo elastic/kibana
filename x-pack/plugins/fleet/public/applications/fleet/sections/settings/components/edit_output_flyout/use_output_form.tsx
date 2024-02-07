@@ -156,7 +156,7 @@ function extractKafkaOutputSecrets(
   return Object.keys(secrets).length ? secrets : null;
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
   const fleetStatus = useFleetStatus();
 
   const { showExperimentalShipperOptions } = ExperimentalFeaturesService.get();
@@ -166,7 +166,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   );
 
   const [isLoading, setIsloading] = useState(false);
-  const { notifications } = useStartServices();
+  const { notifications, cloud } = useStartServices();
   const { confirm } = useConfirmModal();
 
   // preconfigured output do not allow edition
@@ -208,11 +208,17 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateCATrustedFingerPrint,
     isDisabled('ca_trusted_fingerprint')
   );
+  // ES output's host URL is restricted to default in serverless
+  const isServerless = cloud?.isServerlessEnabled;
+  // Set the hosts to default for new ES output in serverless.
+  const elasticsearchUrlDefaultValue =
+    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+  const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
-    output?.hosts ?? [],
+    elasticsearchUrlDefaultValue,
     validateESHosts,
-    isDisabled('hosts')
+    elasticsearchUrlDisabled
   );
 
   const presetInput = useInput(

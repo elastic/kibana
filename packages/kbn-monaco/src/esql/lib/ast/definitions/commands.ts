@@ -72,10 +72,24 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     signature: {
       multipleParams: true,
-      params: [{ name: 'expression', type: 'function' }],
+      params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
     modes: [],
+    validate: (command: ESQLCommand) => {
+      const messages: ESQLMessage[] = [];
+      if (!command.args.length) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate('monaco.esql.validation.statsNoArguments', {
+            defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
+          }),
+          type: 'error',
+          code: 'statsNoArguments',
+        });
+      }
+      return messages;
+    },
   },
   {
     name: 'eval',

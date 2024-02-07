@@ -154,6 +154,12 @@ export function getRuleType(
     validate: {
       params: EsQueryRuleParamsSchema,
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: EsQueryRuleParamsSchema,
+      },
+    },
     actionVariables: {
       context: [
         { name: 'message', description: actionVariableContextMessageLabel },

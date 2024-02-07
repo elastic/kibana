@@ -46,7 +46,13 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
-import { APP_ID, APP_UI_ID, DEFAULT_ALERTS_INDEX, SERVER_APP_ID } from '../common/constants';
+import {
+  APP_ID,
+  APP_UI_ID,
+  CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+  DEFAULT_ALERTS_INDEX,
+  SERVER_APP_ID,
+} from '../common/constants';
 import { registerEndpointRoutes } from './endpoint/routes/metadata';
 import { registerPolicyRoutes } from './endpoint/routes/policy';
 import { registerActionRoutes } from './endpoint/routes/actions';
@@ -230,6 +236,9 @@ export class Plugin implements ISecuritySolutionPlugin {
     });
 
     this.telemetryUsageCounter = plugins.usageCollection?.createUsageCounter(APP_ID);
+    plugins.cases.attachmentFramework.registerExternalReference({
+      id: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+    });
 
     const { ruleDataService } = plugins.ruleRegistry;
     let ruleDataClient: IRuleDataClient | null = null;
@@ -285,6 +294,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery.createActionService,
+        experimentalFeatures: config.experimentalFeatures,
       }),
     };
 
@@ -532,7 +542,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         artifactClient,
         exceptionListClient,
         packagePolicyService: plugins.fleet.packagePolicyService,
-        logger,
+        logger: this.pluginContext.logger.get('ManifestManager'),
         experimentalFeatures: config.experimentalFeatures,
         packagerTaskPackagePolicyUpdateBatchSize: config.packagerTaskPackagePolicyUpdateBatchSize,
         esClient: core.elasticsearch.client.asInternalUser,
