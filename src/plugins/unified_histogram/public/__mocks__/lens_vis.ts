@@ -21,7 +21,6 @@ const TIME_RANGE: TimeRange = {
 };
 
 export const getLensVisMock = async ({
-  chartTitle,
   filters,
   query,
   columns,
@@ -33,7 +32,6 @@ export const getLensVisMock = async ({
   allSuggestions,
   hasHistogramSuggestionForESQL,
 }: {
-  chartTitle?: string;
   filters: QueryParams['filters'];
   query: QueryParams['query'];
   dataView: QueryParams['dataView'];
@@ -74,7 +72,6 @@ export const getLensVisMock = async ({
   });
 
   lensService.update({
-    chartTitle,
     queryParams: {
       query,
       filters,

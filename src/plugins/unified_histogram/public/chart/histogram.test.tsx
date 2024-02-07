@@ -31,7 +31,6 @@ const getMockLensAttributes = async () => {
   };
   return (
     await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query,
       columns: [],

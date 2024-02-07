@@ -255,6 +255,7 @@ export const UnifiedHistogramLayout = ({
 
   // const prevUpdateDeps = useRef<any[]>();
 
+  const originalChartTimeInterval = originalChart?.timeInterval;
   useEffect(() => {
     if (isChartLoading) {
       // console.log('chart is loading', requestParams.query, externalVisContextJSON);
@@ -313,8 +314,7 @@ export const UnifiedHistogramLayout = ({
         isPlainRecord,
         columns,
       },
-      chartTitle: originalChart?.title,
-      timeInterval: originalChart?.timeInterval,
+      timeInterval: originalChartTimeInterval,
       breakdownField: breakdown?.field,
       table,
       onSuggestionContextChange,
@@ -326,7 +326,7 @@ export const UnifiedHistogramLayout = ({
     requestParams.query,
     requestParams.filters,
     originalTimeRange,
-    originalChart,
+    originalChartTimeInterval,
     isPlainRecord,
     columns,
     breakdown,

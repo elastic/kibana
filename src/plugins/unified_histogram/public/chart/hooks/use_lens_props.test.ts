@@ -25,7 +25,6 @@ describe('useLensProps', () => {
     };
     const attributesContext = (
       await getLensVisMock({
-        chartTitle: 'test',
         filters: [],
         query,
         columns: [],
@@ -67,7 +66,6 @@ describe('useLensProps', () => {
     };
     const attributesContext = (
       await getLensVisMock({
-        chartTitle: 'test',
         filters: [],
         query,
         columns: [],
@@ -109,7 +107,6 @@ describe('useLensProps', () => {
     };
     const attributesContext = (
       await getLensVisMock({
-        chartTitle: 'test',
         filters: [],
         query,
         columns: [],

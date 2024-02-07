@@ -84,6 +84,9 @@ export function ChartConfigPanel({
           wrapInFlyout
           datasourceId="textBased"
           hidesSuggestions
+          onApplyCb={(data) => {
+            // console.log(data);
+          }}
         />
       );
       setEditLensConfigPanel(panel);

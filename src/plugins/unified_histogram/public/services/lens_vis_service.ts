@@ -84,7 +84,6 @@ export class LensVisService {
   prevUpdateContext:
     | {
         queryParams: QueryParams;
-        chartTitle: string | undefined;
         timeInterval: string | undefined;
         breakdownField: DataViewField | undefined;
         table: Datatable | undefined;
@@ -124,7 +123,6 @@ export class LensVisService {
   update = ({
     externalVisContext,
     queryParams,
-    chartTitle,
     timeInterval,
     breakdownField,
     table,
@@ -133,7 +131,6 @@ export class LensVisService {
   }: {
     externalVisContext: ExternalVisContext | undefined;
     queryParams: QueryParams;
-    chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table?: Datatable;
@@ -171,7 +168,6 @@ export class LensVisService {
       currentSuggestionContext: suggestionState.currentSuggestionContext,
       externalVisContext,
       queryParams,
-      chartTitle,
       timeInterval,
       breakdownField,
       table,
@@ -205,7 +201,6 @@ export class LensVisService {
 
     this.prevUpdateContext = {
       queryParams,
-      chartTitle,
       timeInterval,
       breakdownField,
       table,
@@ -224,7 +219,6 @@ export class LensVisService {
 
     const {
       queryParams,
-      chartTitle,
       timeInterval,
       breakdownField,
       table,
@@ -236,7 +230,6 @@ export class LensVisService {
       currentSuggestionContext: editedSuggestionContext,
       externalVisContext: undefined,
       queryParams,
-      chartTitle,
       timeInterval,
       breakdownField,
       table,
@@ -565,7 +558,6 @@ export class LensVisService {
     currentSuggestionContext,
     externalVisContext,
     queryParams,
-    chartTitle,
     timeInterval,
     breakdownField,
     table,
@@ -573,7 +565,6 @@ export class LensVisService {
     currentSuggestionContext: UnifiedHistogramSuggestionContext;
     externalVisContext: ExternalVisContext | undefined;
     queryParams: QueryParams;
-    chartTitle: string | undefined;
     timeInterval: string | undefined;
     breakdownField: DataViewField | undefined;
     table: Datatable | undefined;
@@ -642,7 +633,6 @@ export class LensVisService {
 
       const attributes = {
         title:
-          chartTitle ??
           suggestion?.title ??
           i18n.translate('unifiedHistogram.lensTitle', {
             defaultMessage: 'Edit visualization',

@@ -50,7 +50,6 @@ describe('LensVisService attributes', () => {
   it('should return correct attributes', async () => {
     const breakdownField: DataViewField | undefined = undefined;
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters,
       query,
       dataView,
@@ -192,7 +191,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "test",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -211,7 +210,6 @@ describe('LensVisService attributes', () => {
       (f) => f.name === 'extension'
     );
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters,
       query,
       dataView,
@@ -370,7 +368,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "test",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -389,7 +387,6 @@ describe('LensVisService attributes', () => {
       (f) => f.name === 'scripted'
     );
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters,
       query,
       dataView,
@@ -530,7 +527,7 @@ describe('LensVisService attributes', () => {
               "valueLabels": "hide",
             },
           },
-          "title": "test",
+          "title": "Edit visualization",
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -546,7 +543,6 @@ describe('LensVisService attributes', () => {
 
   it('should return correct attributes for text based languages', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters,
       query: queryEsql,
       dataView,
@@ -726,7 +722,7 @@ describe('LensVisService attributes', () => {
               "xAccessor": "81e332d6-ee37-42a8-a646-cea4fc75d2d3",
             },
           },
-          "title": "test",
+          "title": "Heat map",
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
@@ -746,7 +742,6 @@ describe('LensVisService attributes', () => {
       isPersisted: () => false,
     } as DataView;
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters,
       query: queryEsql,
       dataView: adHocDataview,
@@ -773,14 +768,13 @@ describe('LensVisService attributes', () => {
           type: 'index-pattern',
         },
       ],
-      title: 'test',
+      title: 'Heat map',
       visualizationType: 'lnsHeatmap',
     });
   });
 
-  it('should return suggestion title if no title is given', async () => {
+  it('should return suggestion title', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: undefined,
       filters,
       query: queryEsql,
       dataView,
@@ -797,7 +791,6 @@ describe('LensVisService attributes', () => {
       esql: 'from logstash-* | limit 10 | EVAL timestamp=DATE_TRUNC(10 minute, @timestamp) | stats results = count(*) by timestamp | rename timestamp as `@timestamp every 10 minute`',
     };
     const lensVis = await getLensVisMock({
-      chartTitle: undefined,
       filters,
       query: queryEsql,
       dataView: dataViewWithAtTimefieldMock,

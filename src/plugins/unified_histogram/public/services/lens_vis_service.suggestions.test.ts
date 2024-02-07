@@ -21,7 +21,6 @@ describe('LensVisService suggestions', () => {
   test('should use a histogram fallback if suggestions are empty for non aggregate query', async () => {
     const query: Query | AggregateQuery = { language: 'kuery', query: 'extension : css' };
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query,
       dataView: dataViewMock,
@@ -40,7 +39,6 @@ describe('LensVisService suggestions', () => {
 
   test('should return suggestions for aggregate query', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query: { esql: 'from the-data-view | stats maxB = max(bytes)' },
       dataView: dataViewMock,
@@ -67,7 +65,6 @@ describe('LensVisService suggestions', () => {
 
   test('should return suggestionUnsupported if no timerange is provided and no suggestions returned by the api', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query: { esql: 'from the-data-view | stats maxB = max(bytes)' },
       dataView: dataViewMock,
@@ -94,7 +91,6 @@ describe('LensVisService suggestions', () => {
 
   test('should return histogramSuggestion if no suggestions returned by the api', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query: { esql: 'from the-data-view | limit 100' },
       dataView: dataViewMock,
@@ -132,7 +128,6 @@ describe('LensVisService suggestions', () => {
 
   test('should return histogramSuggestion even if the ESQL query contains a DROP @timestamp statement', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query: { esql: 'from the-data-view | DROP @timestamp | limit 100' },
       dataView: dataViewMock,
@@ -170,7 +165,6 @@ describe('LensVisService suggestions', () => {
 
   test('should not return histogramSuggestion if no suggestions returned by the api and transformational commands', async () => {
     const lensVis = await getLensVisMock({
-      chartTitle: 'test',
       filters: [],
       query: { esql: 'from the-data-view | limit 100 | keep @timestamp' },
       dataView: dataViewMock,

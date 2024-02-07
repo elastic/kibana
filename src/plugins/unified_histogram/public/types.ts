@@ -118,10 +118,6 @@ export interface UnifiedHistogramChartContext {
    * Controls the time interval of the chart
    */
   timeInterval?: string;
-  /**
-   * The chart title -- sets the title property on the Lens chart input
-   */
-  title?: string;
 }
 
 /**
