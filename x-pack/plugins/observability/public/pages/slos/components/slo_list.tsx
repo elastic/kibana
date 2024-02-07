@@ -6,8 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiTablePagination } from '@elastic/eui';
-import { useIsMutating } from '@tanstack/react-query';
 import React from 'react';
+import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { SearchState, useUrlSearchState } from '../hooks/use_url_search_state';
 import { SlosView } from './slos_view';
@@ -36,10 +36,7 @@ export function SloList() {
   });
   const { results = [], total = 0 } = sloList ?? {};
 
-  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
-  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
-  const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
+  const loading = useSloCrudLoading();
 
   const onStateChange = (newState: Partial<SearchState>) => {
     storeState({ page: 0, ...newState });
@@ -54,7 +51,7 @@ export function SloList() {
           onChangeView={(newView) => onStateChange({ view: newView })}
           onStateChange={onStateChange}
           state={state}
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
+          loading={isLoading || loading}
         />
       </EuiFlexItem>
       {groupBy === 'ungrouped' && (

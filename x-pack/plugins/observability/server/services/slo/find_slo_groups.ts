@@ -196,7 +196,7 @@ export class FindSLOGroups {
   }
 
   async groupBySavedQueries(query: QueryDslQueryContainer) {
-    const savedQueriesAggs = await this.findSavedQueries();
+    const { savedQueriesAggs, savedQueries } = await this.findSavedQueries();
     const response = await typedSearch(this.esClient, {
       index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
       size: 0,
@@ -217,9 +217,11 @@ export class FindSLOGroups {
           if (bucket.doc_count === 0) {
             return;
           }
+          const savedQuery = savedQueries.find((item) => item.title === group);
           const sliDocument = bucket.worst?.hits?.hits[0]?._source as SliDocument;
           return {
             group,
+            savedQuery,
             groupBy: 'savedQueries',
             summary: {
               total: bucket.doc_count ?? 0,
@@ -247,9 +249,9 @@ export class FindSLOGroups {
     // @ts-expect-error
     const { savedQueries } = await savedQuery.getAll();
     const data = savedQueries as Array<SavedObject<SavedQueryAttributes>>;
-    const resultAggs: Record<string, AggregationsAggregationContainer> = {};
+    const savedQueriesAggs: Record<string, AggregationsAggregationContainer> = {};
     data.forEach(({ attributes: { title, query } }) => {
-      resultAggs[title] = {
+      savedQueriesAggs[title] = {
         filter: {
           bool: {
             filter: [
@@ -261,6 +263,6 @@ export class FindSLOGroups {
         aggs,
       };
     });
-    return resultAggs;
+    return { savedQueriesAggs, savedQueries: data.map(({ attributes }) => attributes) };
   }
 }

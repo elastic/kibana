@@ -8,9 +8,10 @@
 import { EuiSelectableOption } from '@elastic/eui';
 import { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useCallback, useEffect } from 'react';
 import styled from 'styled-components';
-import { useIsMutating } from '@tanstack/react-query';
+import { Query } from '@kbn/es-query';
+import { useSloCrudLoading } from '../hooks/use_crud_loading';
 import { QuickFilters } from './common/quick_filters';
 import { useKibana } from '../../../utils/kibana_react';
 import { SLO_SUMMARY_DESTINATION_INDEX_NAME } from '../../../../common/slo/constants';
@@ -30,54 +31,50 @@ export type Item<T> = EuiSelectableOption & {
 export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar() {
-  const { state, store: storeState } = useUrlSearchState();
-  const { kqlQuery, filters } = state;
-
-  const containerRef = React.useRef<HTMLDivElement>(null);
-
-  const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
-  const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
-  const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-
-  const loading = isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo;
-
-  const { dataView } = useCreateDataView({
-    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
-  });
-
-  const onStateChange = (newState: Partial<SearchState>) => {
-    storeState({ page: 0, ...newState });
-  };
-
   const {
+    data: { query },
     unifiedSearch: {
       ui: { SearchBar },
     },
   } = useKibana<ObservabilityPublicPluginsStart>().services;
 
+  const { state, store: storeState } = useUrlSearchState();
+
+  const loading = useSloCrudLoading();
+
+  const { dataView } = useCreateDataView({
+    indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,
+  });
+
+  const onStateChange = useCallback(
+    (newState: Partial<SearchState>) => {
+      storeState({ page: 0, ...newState });
+    },
+    [storeState]
+  );
+
+  useEffect(() => {
+    query.state$.subscribe(() => {
+      const queryState = query.getState();
+      onStateChange({
+        kqlQuery: String((queryState.query as Query).query),
+        filters: queryState.filters,
+      });
+    });
+  }, [onStateChange, query]);
+
   return (
-    <Container ref={containerRef}>
+    <Container>
       <SearchBar
         appName="observability"
-        placeholder={i18n.translate('xpack.observability.slo.list.search', {
-          defaultMessage: 'Search your SLOs...',
-        })}
+        placeholder={PLACEHOLDER}
         indexPatterns={dataView ? [dataView] : []}
         isDisabled={loading}
         renderQueryInputAppend={() => (
           <QuickFilters initialState={state} loading={loading} onStateChange={onStateChange} />
         )}
-        filters={filters}
-        onFiltersUpdated={(newFilters) => {
-          onStateChange({ filters: newFilters });
-        }}
-        onQuerySubmit={({ query: value }) => {
-          onStateChange({ kqlQuery: String(value?.query), lastRefresh: Date.now() });
-        }}
-        query={{ query: String(kqlQuery), language: 'kuery' }}
-        showSubmitButton={true}
         showDatePicker={false}
+        showQueryMenu={true}
         showQueryInput={true}
         disableQueryLanguageSwitcher={true}
         saveQueryMenuVisibility="globally_managed"
@@ -92,3 +89,7 @@ const Container = styled.div`
     padding: 0;
   }
 `;
+
+const PLACEHOLDER = i18n.translate('xpack.observability.slo.list.search', {
+  defaultMessage: 'Search your SLOs ...',
+});

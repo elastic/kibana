@@ -10,6 +10,8 @@ import deepmerge from 'deepmerge';
 import { useHistory } from 'react-router-dom';
 import { Filter } from '@kbn/es-query';
 import { useEffect, useRef, useState } from 'react';
+import { useKibana } from '../../../utils/kibana_react';
+import { ObservabilityPublicPluginsStart } from '../../..';
 import { DEFAULT_SLO_PAGE_SIZE } from '../../../../common/slo/constants';
 import type { SortField, SortDirection } from '../components/slo_list_search_bar';
 import type { GroupByField } from '../components/slo_list_group_by';
@@ -46,8 +48,12 @@ export const DEFAULT_STATE = {
 
 export function useUrlSearchState(): {
   state: SearchState;
-  store: (state: Partial<SearchState>) => Promise<string | undefined>;
+  store: (state: Partial<SearchState>) => void;
 } {
+  const {
+    data: { query },
+  } = useKibana<ObservabilityPublicPluginsStart>().services;
+
   const [state, setState] = useState<SearchState>(DEFAULT_STATE);
   const history = useHistory();
   const urlStateStorage = useRef(
@@ -59,31 +65,44 @@ export function useUrlSearchState(): {
   );
 
   useEffect(() => {
-    const sub = urlStateStorage.current
+    const currentState = urlStateStorage.current;
+
+    const sub = currentState
       ?.change$<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY)
       .subscribe((newSearchState) => {
         if (newSearchState) {
           setState(newSearchState);
         }
       });
+    const initState =
+      currentState?.get<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY) ?? DEFAULT_STATE;
+    setState(initState);
 
-    setState(
-      urlStateStorage.current?.get<SearchState>(SLO_LIST_SEARCH_URL_STORAGE_KEY) ?? DEFAULT_STATE
-    );
+    if (initState.kqlQuery) {
+      query.queryString.setQuery({
+        query: initState.kqlQuery,
+        language: 'kuery',
+      });
+    }
+    if (initState.filters && initState.filters.length > 0) {
+      query.filterManager.setFilters(initState.filters);
+    }
 
     return () => {
       sub?.unsubscribe();
     };
-  }, [urlStateStorage]);
+  }, [query.filterManager, query.queryString, urlStateStorage]);
   return {
     state: deepmerge(DEFAULT_STATE, state),
-    store: (newState: Partial<SearchState>) =>
+    store: (newState: Partial<SearchState>) => {
+      setState((stateN) => ({ ...stateN, ...newState }));
       urlStateStorage.current?.set(
         SLO_LIST_SEARCH_URL_STORAGE_KEY,
         { ...state, ...newState },
         {
           replace: true,
         }
-      ),
+      );
+    },
   };
 }
