@@ -1350,8 +1350,8 @@
             "text": "ElasticsearchClient"
           },
           ", connectorId: string, isNative: boolean) => Promise<",
-          "UpdateResponse",
-          "<unknown>>"
+          "Result",
+          ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_native.ts",
         "deprecated": false,
@@ -1898,7 +1898,7 @@
             "text": "ElasticsearchClient"
           },
           ", connectorId: string, indexName: string) => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_index_name.ts",
@@ -2258,7 +2258,7 @@
             "text": "ConnectorStatus"
           },
           ") => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_status.ts",
