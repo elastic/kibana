@@ -75,7 +75,6 @@ steps:
       machineType: n2-standard-2
     timeout_in_minutes: 10
     env:
-      LIMIT_CONFIG_TYPE: 'integration'
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
       JEST_INTEGRATION_SCRIPT: '.buildkite/scripts/steps/test/jest_integration.sh'
       FTR_CONFIGS_SCRIPT: '.buildkite/scripts/steps/test/ftr_configs.sh'
