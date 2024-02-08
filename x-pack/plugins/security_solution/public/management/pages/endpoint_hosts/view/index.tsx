@@ -10,6 +10,8 @@ import styled from 'styled-components';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import {
   EuiBasicTable,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
   type EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
@@ -360,6 +362,7 @@ export const EndpointList = () => {
     isAutoRefreshEnabled,
     patternsError,
     metadataTransformStats,
+    initialized,
   } = useEndpointSelector(selector);
   const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
@@ -552,7 +555,22 @@ export const EndpointList = () => {
   const mutableListData = useMemo(() => [...listData], [listData]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (endpointsExist) {
+    if (!initialized) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            icon={<EuiLoadingLogo logo="logoSecurity" size="xl" />}
+            title={
+              <h2>
+                {i18n.translate('xpack.securitySolution.endpoint.list.loadingEndpointManagement', {
+                  defaultMessage: 'Loading Endpoint Management',
+                })}
+              </h2>
+            }
+          />
+        </ManagementEmptyStateWrapper>
+      );
+    } else if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
@@ -616,12 +634,13 @@ export const EndpointList = () => {
     selectedPolicyId,
     setTableRowProps,
     sorting,
+    initialized,
   ]);
 
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!endpointsExist}
+      hideHeader={!endpointsExist || !initialized}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -637,35 +656,37 @@ export const EndpointList = () => {
       headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      <>
-        <TransformFailedCallout
-          metadataTransformStats={metadataTransformStats}
-          hasNoPolicyData={!hasPolicyData}
-        />
-        <EuiFlexGroup gutterSize="s" alignItems="center">
-          {shouldShowKQLBar && (
-            <EuiFlexItem>
-              <AdminSearchBar />
+      {initialized && (
+        <>
+          <TransformFailedCallout
+            metadataTransformStats={metadataTransformStats}
+            hasNoPolicyData={!hasPolicyData}
+          />
+          <EuiFlexGroup gutterSize="s" alignItems="center">
+            {shouldShowKQLBar && (
+              <EuiFlexItem>
+                <AdminSearchBar />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false} style={refreshStyle}>
+              <StyledDatePicker>
+                <EuiSuperDatePicker
+                  className="endpointListDatePicker"
+                  onTimeChange={onTimeChange}
+                  isDisabled={hasSelectedEndpoint}
+                  onRefresh={onRefresh}
+                  isPaused={refreshIsPaused}
+                  refreshInterval={refreshInterval}
+                  onRefreshChange={onRefreshChange}
+                  isAutoRefreshOnly={true}
+                />
+              </StyledDatePicker>
             </EuiFlexItem>
-          )}
-          <EuiFlexItem grow={false} style={refreshStyle}>
-            <StyledDatePicker>
-              <EuiSuperDatePicker
-                className="endpointListDatePicker"
-                onTimeChange={onTimeChange}
-                isDisabled={hasSelectedEndpoint}
-                onRefresh={onRefresh}
-                isPaused={refreshIsPaused}
-                refreshInterval={refreshInterval}
-                onRefreshChange={onRefreshChange}
-                isAutoRefreshOnly={true}
-              />
-            </StyledDatePicker>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-        <EuiSpacer size="m" />
-      </>
-      {hasListData && (
+          </EuiFlexGroup>
+          <EuiSpacer size="m" />
+        </>
+      )}
+      {hasListData && initialized && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (

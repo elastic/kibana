@@ -138,6 +138,11 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
       ...state,
       policyItemsLoading: false,
     };
+  } else if (action.type === 'serverFinishedInitialization') {
+    return {
+      ...state,
+      initialized: true,
+    };
   } else if (action.type === 'endpointPackageInfoStateChanged') {
     return handleEndpointPackageInfoStateChanged(state, action);
   } else if (action.type === 'serverReturnedEndpointExistValue') {
