@@ -85,6 +85,7 @@ export const fetchStringFieldsStats = (
       ),
       map((resp) => {
         if (!isIKibanaSearchResponse(resp)) return resp;
+
         const aggregations = resp.rawResponse.aggregations;
 
         const aggsPath = ['sample'];
@@ -102,7 +103,9 @@ export const fetchStringFieldsStats = (
 
           const { topValuesSampleSize, topValues } = processTopValues(
             fieldAgg,
-            get(aggregations, ['sample', 'doc_count'])
+            get(aggregations, ['sample', 'probability']) < 1
+              ? get(aggregations, ['sample', 'doc_count'])
+              : undefined
           );
           const stats = {
             fieldName: field.fieldName,
