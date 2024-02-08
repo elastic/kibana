@@ -15,6 +15,7 @@ export class ToastsService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly config = this.ctx.getService('config');
+  private readonly log = this.ctx.getService('log');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   /**
    * Returns the title and message of a specific error toast.
@@ -85,22 +86,19 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissAllToasts(): Promise<void> {
-    const list = await this.getGlobalToastList();
-    const toasts = await list.findAllByCssSelector(`.euiToast`);
+    const xs = await this.getAllToastElements();
+    this.log.debug(`\nλjs toasts: \n${JSON.stringify(xs, null, 2)}`);
+    this.log.debug(`\nλjs toasts.length: \n  ${xs.length}`);
 
-    if (toasts.length === 0) return;
+    if (xs.length === 0) return;
 
-    for (const toast of toasts) {
-      await toast.moveMouseTo();
-
-      if (await this.testSubjects.descendantExists('toastCloseButton', toast)) {
-        try {
-          const dismissButton = await this.testSubjects.findDescendant('toastCloseButton', toast);
-          await dismissButton.click();
-        } catch (err) {
-          // ignore errors
-          // toasts are finnicky because they can dismiss themselves right before you close them
-        }
+    for (const toastElement of xs) {
+      try {
+        await toastElement.moveMouseTo();
+        const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
+        await closeBtn.click();
+      } catch (err) {
+        // ignore errors, toast clear themselves after timeout
       }
     }
   }
