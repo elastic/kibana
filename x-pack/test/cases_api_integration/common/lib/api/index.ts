@@ -46,7 +46,7 @@ import {
   CasesFindResponse,
   CasesPatchRequest,
   CasesStatusResponse,
-  CustomFieldPatchRequest,
+  CustomFieldPutRequest,
   GetRelatedCasesByAlertResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
@@ -823,7 +823,7 @@ export const replaceCustomField = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
   customFieldId: string;
-  params: CustomFieldPatchRequest;
+  params: CustomFieldPutRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
