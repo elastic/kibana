@@ -473,13 +473,28 @@
   "type": "doc",
   "value": {
     "index": ".kibana_alerting_cases",
-    "id": "action_task_params:de958a84-0c3f-4745-9cc2-8bfedbad9de9",
+    "id": "api_key_pending_invalidation:c59bf1f3-0787-43c5-a861-007a9ab7b027",
+    "source": {
+      "api_key_pending_invalidation": {
+        "createdAt": "2035-01-17T22:46:44.927Z",
+        "apiKeyId": "f8Can4gakYB5dLovujssdBDGGl3cHISWBwimrllucqqD6GKHwd6gfPLa6rfSkrjUDdC7pTsUvfNFLmqjcGeqKwsgPxvfj6KI/Wsbt6LugJ1iXw6aEZbf7fmH99FvnNt20k20dD6a+dieGdA/Z8TVaf8Ql3y2Uxrf0KdBStXDGf6ouUDr7rBLRGjameio7qqtfZ092MHA/l1e2nnrypRH3to="
+      },
+      "type": "api_key_pending_invalidation",
+      "references": [],
+      "managed": false
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".kibana_alerting_cases",
+    "id": "action_task_params:248408b1-b3b0-46a0-80fa-e2b6fbc9085d",
     "source": {
       "action_task_params": {
-        "apiKey": "cykZR9eNJTgMn2kSHWTQx2MvJtxdBZzHJnol/oNkblpIZd8zxJmzP7ov5mspipQ0cUmblkjwlqm7NWSR9P/2Na9Eb8d4llc+ePjCXFbTQoEBl80P5hxDyf8rW/SkZiUsXEAhixTwjavqT8mSFGgikzHnM4fHoHxIFSEp+v7BHWdll66hX6ESY2eZ2XVG1lKt42e533FIzQeXHJ5Olh0=",
+        "apiKey": "UI4MwCfF2yw1h+JQMEEFu18HI0ebFrGxbgKFA76YHKLOdpG9PY4oG5h+ctJjVlyUtcv8+DGnnvpjmxWErJxSe9ni8aQn9cBEZAqScOt1V7eZ5JB2fUVQxFIkrTmOG20vih1OSjaZl4tm55vziSXnvnQapksFWaQGQuIp1c2EasBESHrx9FTgpnUR7UvULYx3eNeQHIvenB030c8gDwg=",
         "actionId": "some-action-id",
-        "actionExecutionId": "some-action-exe-id",
-        "isEphemeral": false,
         "consumer": "some-consumer",
         "params": {
           "param1": "a",
@@ -505,26 +520,7 @@
             "type": "obj3-type"
           }
         ],
-        "source": "some-source",
-        "taskInfo": {
-          "scheduled": "2024-01-17T23:09:25.993Z",
-          "attempts": 2,
-          "numSkippedRuns": 1
-        },
-        "actionInfo": {
-          "actionTypeId": "some-action-type-id",
-          "name": "some-action-name",
-          "config": {
-            "option1": "1",
-            "option2": "2"
-          },
-          "secrets": {
-            "secret1": "shhh",
-            "secret2": "not to be seen"
-          },
-          "actionId": "some-action-id",
-          "isInMemory": false
-        }
+        "source": "SAVED_OBJECT"
       },
       "type": "action_task_params",
       "references": [],
@@ -534,8 +530,8 @@
       ],
       "coreMigrationVersion": "8.8.0",
       "typeMigrationVersion": "8.0.0",
-      "updated_at": "2024-01-17T23:09:25.993Z",
-      "created_at": "2024-01-17T23:09:25.993Z"
+      "updated_at": "2024-02-08T15:31:13.593Z",
+      "created_at": "2024-02-08T15:31:13.593Z"
     }
   }
 }

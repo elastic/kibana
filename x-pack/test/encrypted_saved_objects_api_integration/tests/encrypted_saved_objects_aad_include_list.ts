@@ -45,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       it(`successfully decrypts 'action_task_params' objects`, async () => {
         const decryptResponse = await supertest
           .get(
-            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action_task_params/de958a84-0c3f-4745-9cc2-8bfedbad9de9`
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/action_task_params/248408b1-b3b0-46a0-80fa-e2b6fbc9085d`
           )
           .expect(200);
 
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
       // it.only(`successfully decrypts 'api_key_pending_invalidation' objects`, async () => {
       //   const decryptResponse = await supertest
       //     .get(
-      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/bfda0e42-23d7-468c-8ed4-bf3c3de82cf3`
+      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/c59bf1f3-0787-43c5-a861-007a9ab7b027`
       //     )
       //     .expect(200);
 
