@@ -203,11 +203,10 @@ export class ApplicationService {
         validateApp(app);
 
         const { updater$, ...appProps } = app;
-        const appStatus: AppStatus = app.status ?? AppStatus.accessible;
         this.apps.set(app.id, {
           ...appProps,
-          status: appStatus,
-          deepLinks: populateDeepLinkDefaults(appStatus, appProps.deepLinks),
+          status: app.status ?? AppStatus.accessible,
+          deepLinks: populateDeepLinkDefaults(appProps.deepLinks),
         });
         if (updater$) {
           registerStatusUpdater(app.id, updater$);
@@ -459,20 +458,16 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     }
     const fields = wrapper.updater(app);
     if (fields) {
-      // status and navLinkStatus enums are ordered by reversed priority
-      // if multiple updaters wants to change these fields, we will always follow the priority order.
-      const nextStatus: AppStatus = Math.max(
-        changes.status ?? AppStatus.accessible,
-        fields.status ?? AppStatus.accessible
-      );
-
       changes = {
         ...changes,
         ...fields,
-        status: nextStatus,
-        ...(fields.deepLinks
-          ? { deepLinks: populateDeepLinkDefaults(nextStatus, fields.deepLinks) }
-          : {}),
+      // status and navLinkStatus enums are ordered by reversed priority
+      // if multiple updaters wants to change these fields, we will always follow the priority order.
+        status: Math.max(
+        changes.status ?? AppStatus.accessible,
+        fields.status ?? AppStatus.accessible
+        ),
+        ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
     }
   });
@@ -483,10 +478,7 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
   };
 };
 
-const populateDeepLinkDefaults = (
-  appStatus: AppStatus,
-  deepLinks?: AppDeepLink[]
-): AppDeepLink[] => {
+const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   if (!deepLinks) {
     return [];
   }
@@ -494,7 +486,7 @@ const populateDeepLinkDefaults = (
     return {
       ...deepLink,
       visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
-      deepLinks: populateDeepLinkDefaults(appStatus, deepLink.deepLinks),
+      deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
     };
   });
 };
