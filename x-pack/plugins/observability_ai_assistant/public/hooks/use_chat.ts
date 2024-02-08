@@ -256,6 +256,7 @@ export function useChat({
       handleError,
       persist,
       conversationId,
+      selectedLanguage,
     ]
   );
 
