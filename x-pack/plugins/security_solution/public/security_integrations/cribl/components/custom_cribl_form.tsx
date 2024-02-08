@@ -19,7 +19,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { PackagePolicyReplaceDefineStepExtensionComponentProps } from '@kbn/fleet-plugin/public/types';
+import type {
+  NewPackagePolicy,
+  PackagePolicyReplaceDefineStepExtensionComponentProps,
+} from '@kbn/fleet-plugin/public/types';
 import { getFleetManagedIndexTemplates } from '../api/api';
 import type { RouteEntry } from '../../../../common/security_integrations/cribl/types';
 import {
@@ -120,6 +123,8 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
     const [missingReqPermissions, setMissingReqPermissions] = useState<boolean>();
     const [datastreamOpts, setDatastreamOpts] = useState<string[]>([]);
 
+    const [initialPackagePolicy] = useState<NewPackagePolicy>(newPolicy);
+
     useEffect(() => {
       const fetchData = async () => {
         // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
@@ -138,26 +143,34 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
     // Set route entries from initial state
     useEffect(() => {
       if (isEditPage) {
-        const fromConfig = getRouteEntriesFromPolicyConfig(newPolicy.vars);
-        if (fromConfig.length > 0) {
-          setRouteEntries(fromConfig);
-          return;
+        if (initialPackagePolicy) {
+          const fromConfig = getRouteEntriesFromPolicyConfig(initialPackagePolicy.vars);
+          if (fromConfig.length > 0) {
+            setRouteEntries(fromConfig);
+            return;
+          }
         }
       }
       const defaultRouteEntries = [getDefaultRouteEntry()];
       setRouteEntries(defaultRouteEntries);
-    }, [isEditPage, newPolicy.vars]);
+    }, [isEditPage, initialPackagePolicy]);
 
     const onChangeCriblDataId = (index: number, value: string) => {
       const newValues = [...routeEntries];
-      newValues[index].dataId = value;
+      newValues[index] = {
+        ...routeEntries[index],
+        dataId: value,
+      };
       setRouteEntries(newValues);
       updateCriblPolicy(newValues);
     };
 
     const onChangeDatastream = (index: number, value: string) => {
       const newValues = [...routeEntries];
-      newValues[index].datastream = value;
+      newValues[index] = {
+        ...routeEntries[index],
+        datastream: value,
+      };
       setRouteEntries(newValues);
       updateCriblPolicy(newValues);
     };
