@@ -472,6 +472,16 @@ export const initializeDashboard = async ({
       return;
     }
 
+    function getCombinedFilters() {
+      return combineDashboardFiltersWithControlGroupFilters(
+        dashboardContainer.getInput().filters ?? [],
+        dashboardContainer.controlGroup!
+      );
+    }
+
+    const localFilters = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+    dashboardContainer.localFilters = localFilters;
+
     const inputFilters$ = dashboardContainer.getInput$().pipe(
       startWith(dashboardContainer.getInput()),
       map((input) => input.filters),
@@ -480,26 +490,16 @@ export const initializeDashboard = async ({
       })
     );
 
-    const localFilters = new BehaviorSubject<Filter[] | undefined>(
-      combineDashboardFiltersWithControlGroupFilters(
-        dashboardContainer.getInput().filters ?? [],
-        dashboardContainer.controlGroup
-      )
-    );
-    dashboardContainer.localFilters = localFilters;
-    combineLatest([inputFilters$, dashboardContainer.controlGroup.onFiltersPublished$]).subscribe(
-      () => {
-        localFilters.next(
-          combineDashboardFiltersWithControlGroupFilters(
-            dashboardContainer.getInput().filters ?? [],
-            dashboardContainer.controlGroup!
-          )
-        );
-      }
+    // Can not use onFiltersPublished$ directly since it does not have an intial value and
+    // combineLatest will not emit until each observable emits at least one value
+    const controlGroupFilters$ = dashboardContainer.controlGroup.onFiltersPublished$.pipe(
+      startWith(dashboardContainer.controlGroup.getOutput().filters)
     );
 
     dashboardContainer.integrationSubscriptions.add(
-      startSyncingDashboardDataViews.bind(dashboardContainer)()
+      combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
+        localFilters.next(getCombinedFilters());
+      })
     );
   });
 
