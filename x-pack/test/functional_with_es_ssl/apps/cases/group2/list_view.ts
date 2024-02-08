@@ -24,6 +24,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('cases list', () => {
     before(async () => {
@@ -661,7 +662,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const search = `severity=${theCase.severity}&status=${theCase.status}&page=1&perPage=1sortField=createdAt&sortOrder=desc`;
 
-        await cases.navigation.navigateToAllCasesList(search);
+        await cases.navigation.navigateToApp('cases', 'cases-app', search);
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
