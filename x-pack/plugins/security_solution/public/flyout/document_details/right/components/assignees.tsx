@@ -81,18 +81,14 @@ export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
-    const setAlertAssignees = useSetAlertAssignees();
 
     const { hasIndexWrite } = useAlertsPrivileges();
+    const setAlertAssignees = useSetAlertAssignees();
 
     const uids = useMemo(() => new Set(assignedUserIds), [assignedUserIds]);
     const { data: assignedUsers } = useBulkGetUserProfiles({ uids });
 
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-    const togglePopover = useCallback(() => {
-      setIsPopoverOpen((value) => !value);
-    }, []);
 
     const onSuccess = useCallback(() => {
       if (onAssigneesUpdated) onAssigneesUpdated();
@@ -107,6 +103,10 @@ export const Assignees: FC<AssigneesProps> = memo(
       },
       [eventId, onSuccess, setAlertAssignees]
     );
+
+    const togglePopover = useCallback(() => {
+      setIsPopoverOpen((value) => !value);
+    }, []);
 
     const searchInputId = useGeneratedHtmlId({
       prefix: 'searchInput',
