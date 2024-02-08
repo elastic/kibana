@@ -32,7 +32,11 @@ import {
   Ping,
   GetMonitorAvailabilityParams,
 } from '../../../../common/runtime_types';
-import { CLIENT_ALERT_TYPES, MONITOR_STATUS } from '../../../../common/constants/uptime_alerts';
+import {
+  CLIENT_ALERT_TYPES,
+  MONITOR_STATUS,
+  SYNTHETICS_RULE_TYPE_PRODUCER,
+} from '../../../../common/constants/uptime_alerts';
 import {
   updateState,
   getViewInAppUrl,
@@ -282,7 +286,7 @@ export const statusCheckAlertFactory: UptimeAlertTypeFactory<ActionGroupIds> = (
 ) => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   category: DEFAULT_APP_CATEGORIES.observability.id,
-  producer: 'uptime',
+  producer: SYNTHETICS_RULE_TYPE_PRODUCER,
   name: i18n.translate('xpack.uptime.alerts.monitorStatus', {
     defaultMessage: 'Uptime monitor status',
   }),
