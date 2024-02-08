@@ -7,7 +7,7 @@
  */
 
 import { Plugin, CoreSetup } from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 export class CorePluginDeepLinksPlugin
   implements Plugin<CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart>
@@ -19,19 +19,19 @@ export class CorePluginDeepLinksPlugin
       appRoute: '/app/dl',
       defaultPath: '/home',
       category: DEFAULT_APP_CATEGORIES.security,
-      navLinkStatus: AppNavLinkStatus.hidden,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'home',
           title: 'DL Home',
           path: '/home',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: ['globalSearch', 'sideNav'],
         },
         {
           id: 'pageA',
           title: 'DL page A',
           path: '/page-a',
-          navLinkStatus: AppNavLinkStatus.visible,
+          visibleIn: ['globalSearch', 'sideNav'],
         },
         {
           id: 'sectionOne',
@@ -41,7 +41,7 @@ export class CorePluginDeepLinksPlugin
               id: 'pageB',
               title: 'DL page B',
               path: '/page-b',
-              navLinkStatus: AppNavLinkStatus.visible,
+              visibleIn: ['globalSearch', 'sideNav'],
             },
           ],
         },
