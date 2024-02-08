@@ -63,7 +63,8 @@ const requeueInvalidTasksConfig = schema.object({
 });
 
 const requestTimeoutsConfig = schema.object({
-  update_by_query: schema.number({ defaultValue: 1000 * 60, min: 1000, max: 1000 * 60 * 15 }),
+  /* The request timeout config for task manager's updateByQuery default:30s, min:10s, max:10m */
+  update_by_query: schema.number({ defaultValue: 1000 * 30, min: 1000 * 10, max: 1000 * 60 * 10 }),
 });
 
 export const configSchema = schema.object(
