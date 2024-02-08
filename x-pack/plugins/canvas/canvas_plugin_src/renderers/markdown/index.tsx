@@ -35,6 +35,7 @@ export const getMarkdownRenderer =
             className="canvasMarkdown"
             style={fontStyle as CSSProperties}
             openLinksInNewTab={config.openLinksInNewTab}
+            readOnly
           >
             {config.content}
           </Markdown>

@@ -80,6 +80,7 @@ function MarkdownVisualization(props) {
                   <Markdown
                     onRender={initialRender}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
+                    readOnly
                   >
                     {markdownSource}
                   </Markdown>

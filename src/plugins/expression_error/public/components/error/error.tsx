@@ -47,7 +47,7 @@ export const Error: FC<Props> = ({ payload, onClose }) => {
       <p>{message ? strings.getDescription() : ''}</p>
       {message && (
         <p style={{ padding: '0 16px' }}>
-          <Markdown openLinksInNewTab={true}>{message}</Markdown>
+          <Markdown readOnly>{message}</Markdown>
         </p>
       )}
       <ShowDebugging payload={payload} />

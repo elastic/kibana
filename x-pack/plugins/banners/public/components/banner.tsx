@@ -26,7 +26,7 @@ export const Banner: FC<BannerProps> = ({ bannerConfig }) => {
       }}
     >
       <div className="eui-textTruncate" data-test-subj="bannerInnerWrapper">
-        <Markdown openLinksInNewTab={true}>{textContent}</Markdown>
+        <Markdown readOnly>{textContent}</Markdown>
       </div>
     </div>
   );

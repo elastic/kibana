@@ -82,7 +82,7 @@ export const PresentationPanelError = ({
       body={
         searchErrorDisplay?.body ?? (
           <EuiText size="s">
-            <Markdown openLinksInNewTab={true} data-test-subj="errorMessageMarkdown">
+            <Markdown data-test-subj="errorMessageMarkdown" readOnly>
               {error.message}
             </Markdown>
           </EuiText>

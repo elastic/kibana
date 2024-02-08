@@ -43,7 +43,7 @@ function createNewSection(
           <>
             <h3>{getFunctionSignatureLabel(key, operationDefinitionMap, false)}</h3>
 
-            {fnDescription ? <Markdown>{fnDescription}</Markdown> : null}
+            {fnDescription ? <Markdown readOnly>{fnDescription}</Markdown> : null}
           </>
         ),
       };
@@ -85,7 +85,7 @@ export function getDocumentationSections({
     items: formulasSections.common.items.map(
       ({ label, description }: { label: string; description: string }) => ({
         label,
-        description: <Markdown>{description}</Markdown>,
+        description: <Markdown readOnly>{description}</Markdown>,
       })
     ),
   });
