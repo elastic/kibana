@@ -6,9 +6,5 @@
  * Side Public License, v 1.
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/shared-ux/markdown/impl'],
-  setupFilesAfterEnv: ['<rootDir>/packages/shared-ux/markdown/impl/setup_tests.ts'],
-};
+// eslint-disable-next-line import/no-extraneous-dependencies
+import '@testing-library/jest-dom';

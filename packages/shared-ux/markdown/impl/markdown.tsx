@@ -38,6 +38,7 @@ export const Markdown = ({
   ariaLabelContent,
   markdownContent,
   children,
+  className,
   openLinksInNewTab = true,
   defaultValue = '',
   placeholder = '',
@@ -62,6 +63,7 @@ export const Markdown = ({
     }
     return (
       <EuiMarkdownFormat
+        className={className}
         aria-label={ariaLabelContent ?? 'markdown component'}
         parsingPluginList={parsingPlugins}
         processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
@@ -75,6 +77,7 @@ export const Markdown = ({
   // Otherwise render the Markdown Editor if readOnly false
   return (
     <EuiMarkdownEditor
+      className={className}
       aria-label={ariaLabelContent ?? 'markdown component'}
       placeholder={placeholder}
       value={value}
