@@ -45,6 +45,11 @@ describe('telemetry task state', () => {
             "on_active_alert": 0,
             "on_throttle_interval": 0,
           },
+          "count_rules_by_search_type": Object {
+            "es_query": 0,
+            "esql_query": 0,
+            "search_source": 0,
+          },
           "count_rules_executions_by_type_per_day": Object {},
           "count_rules_executions_failured_by_reason_by_type_per_day": Object {},
           "count_rules_executions_failured_by_reason_per_day": Object {},
@@ -136,6 +141,11 @@ describe('telemetry task state', () => {
         count_rules_with_muted_alerts: 35,
         count_rules_with_tags: 36,
         count_total: 37,
+        count_rules_by_search_type: {
+          es_query: 0,
+          search_source: 10,
+          esql_query: 7,
+        },
         error_messages: ['foo'],
         has_errors: true,
         percentile_num_alerts_by_type_per_day: { '.index-threshold': 38 },

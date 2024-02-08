@@ -139,6 +139,24 @@ describe('kibana index telemetry', () => {
               },
             ],
           },
+          by_search_type: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'esQuery',
+                doc_count: 0,
+              },
+              {
+                key: 'searchSource',
+                doc_count: 1,
+              },
+              {
+                key: 'esqlQuery',
+                doc_count: 3,
+              },
+            ],
+          },
           max_throttle_time: { value: 60 },
           min_throttle_time: { value: 0 },
           avg_throttle_time: { value: 30 },
@@ -220,6 +238,11 @@ describe('kibana index telemetry', () => {
             __index: 4,
           },
         },
+        count_rules_by_search_type: {
+          es_query: 0,
+          search_source: 1,
+          esql_query: 3,
+        },
       });
     });
 
@@ -285,6 +308,11 @@ describe('kibana index telemetry', () => {
           min: 0,
         },
         count_connector_types_by_consumers: {},
+        count_rules_by_search_type: {
+          es_query: 0,
+          search_source: 0,
+          esql_query: 0,
+        },
       });
     });
   });

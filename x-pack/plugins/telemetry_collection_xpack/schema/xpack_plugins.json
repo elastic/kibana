@@ -1751,6 +1751,19 @@
             }
           }
         },
+        "count_rules_by_search_type": {
+          "properties": {
+            "es_query": {
+              "type": "long"
+            },
+            "search_source": {
+              "type": "long"
+            },
+            "esql_query": {
+              "type": "long"
+            }
+          }
+        },
         "avg_execution_time_per_day": {
           "type": "long"
         },
