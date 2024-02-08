@@ -10,7 +10,7 @@ import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-
+import type { TaskInstanceFields } from '@kbn/reporting-common/types';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -22,10 +22,14 @@ import { CsvPagingStrategy } from '../../types';
 
 export interface CsvExportSettings {
   timezone: string;
+  taskInstanceFields: TaskInstanceFields;
   scroll: {
     strategy?: CsvPagingStrategy;
     size: number;
-    duration: string;
+    /**
+     * compute scroll duration, duration is returned in ms by default
+     */
+    duration: (args: TaskInstanceFields, format?: 'ms' | 's') => string;
   };
   bom: string;
   separator: string;
@@ -39,6 +43,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
+  taskInstanceFields: TaskInstanceFields,
   config: ReportingConfigType['csv'],
   timezone: string | undefined,
   logger: Logger
@@ -75,10 +80,33 @@ export const getExportSettings = async (
 
   return {
     timezone: setTimezone,
+    taskInstanceFields,
     scroll: {
       strategy: config.scroll.strategy as CsvPagingStrategy,
       size: config.scroll.size,
-      duration: config.scroll.duration,
+      duration: ({ retryAt }, format = 'ms') => {
+        if (config.scroll.duration !== 'auto') {
+          return config.scroll.duration;
+        }
+
+        if (!retryAt) {
+          throw new Error(
+            'config "xpack.reporting.csv.scroll.duration" of "auto" mandates that the task instance field passed specifies a retryAt value'
+          );
+        }
+
+        const now = new Date(Date.now()).getTime();
+        const timeTillRetry = new Date(retryAt).getTime();
+
+        if (now >= timeTillRetry) {
+          return `0${format}`;
+        }
+
+        const _duration = timeTillRetry - now;
+        const result = format === 'ms' ? `${_duration}ms` : `${_duration / 1000}s`;
+        logger.debug(`using timeout duration of ${result} for csv scroll`);
+        return result;
+      },
     },
     bom,
     includeFrozen,
