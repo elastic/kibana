@@ -341,6 +341,7 @@ const AssistantComponent: React.FC<Props> = ({
   );
 
   const {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,
@@ -364,6 +365,7 @@ const AssistantComponent: React.FC<Props> = ({
       <>
         <EuiCommentList
           comments={getComments({
+            abortStream,
             currentConversation,
             showAnonymizedValues,
             amendMessage,

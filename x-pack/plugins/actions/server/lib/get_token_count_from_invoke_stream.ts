@@ -32,11 +32,13 @@ export async function getTokenCountFromInvokeStream({
   responseStream,
   body,
   logger,
+  signal,
 }: {
   actionTypeId: string;
   responseStream: Readable;
   body: InvokeBody;
   logger: Logger;
+  signal?: AbortSignal;
 }): Promise<{
   total: number;
   prompt: number;
@@ -52,7 +54,9 @@ export async function getTokenCountFromInvokeStream({
   ).length;
 
   const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
-  const parsedResponse = await parser(responseStream, logger);
+  const parsedResponse = await parser(responseStream, logger, signal);
+
+  console.log('parsedResponse', parsedResponse);
 
   const completionTokens = encode(parsedResponse).length;
   return {
@@ -62,10 +66,16 @@ export async function getTokenCountFromInvokeStream({
   };
 }
 
-type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
+type StreamParser = (
+  responseStream: Readable,
+  logger: Logger,
+  signal?: AbortSignal
+) => Promise<string>;
 
 const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   const responseBuffer: Uint8Array[] = [];
+  // do not destroy response stream on abort for bedrock
+  // Amazon charges the same tokens whether the stream is destroyed or not, so let it finish to calculate
   responseStream.on('data', (chunk) => {
     // special encoding for bedrock, do not attempt to convert to string
     responseBuffer.push(chunk);
@@ -78,16 +88,22 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
   return parseBedrockBuffer(responseBuffer);
 };
 
-const parseOpenAIStream: StreamParser = async (responseStream, logger) => {
+const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) => {
   let responseBody: string = '';
+  const destroyStream = () => {
+    // Manually destroy the stream when the abort event is triggered
+    responseStream.destroy();
+  };
   responseStream.on('data', (chunk) => {
     // no special encoding, can safely use toString and append to responseBody
     responseBody += chunk.toString();
   });
   try {
+    signal?.addEventListener('abort', destroyStream);
     await finished(responseStream);
   } catch (e) {
-    logger.error('An error occurred while calculating streaming response tokens');
+    if ('Premature close' !== e.message)
+      logger.error('An error occurred while calculating streaming response tokens');
   }
   return parseOpenAIResponse(responseBody);
 };

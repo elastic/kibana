@@ -30,6 +30,7 @@ export interface UseChatSendProps {
 }
 
 export interface UseChatSend {
+  abortStream: () => void;
   handleButtonSendMessage: (m: string) => void;
   handleOnChatCleared: () => void;
   handlePromptChange: (prompt: string) => void;
@@ -54,7 +55,7 @@ export const useChatSend = ({
   setSelectedPromptContexts,
   setUserPrompt,
 }: UseChatSendProps): UseChatSend => {
-  const { isLoading, sendMessages } = useSendMessages();
+  const { isLoading, sendMessages, abortStream } = useSendMessages();
   const { appendMessage, appendReplacements, clearConversation, removeLastMessage } =
     useConversation();
 
@@ -179,6 +180,7 @@ export const useChatSend = ({
   ]);
 
   return {
+    abortStream,
     handleButtonSendMessage,
     handleOnChatCleared,
     handlePromptChange,

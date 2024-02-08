@@ -43,6 +43,7 @@ const transformMessageWithReplacements = ({
 };
 
 export const getComments = ({
+  abortStream,
   amendMessage,
   currentConversation,
   isEnabledLangChain,
@@ -50,6 +51,7 @@ export const getComments = ({
   regenerateMessage,
   showAnonymizedValues,
 }: {
+  abortStream: () => void;
   amendMessage: ({ conversationId, content }: { conversationId: string; content: string }) => void;
   currentConversation: Conversation;
   isEnabledLangChain: boolean;
@@ -78,6 +80,7 @@ export const getComments = ({
           timestamp: '...',
           children: (
             <StreamComment
+              abortStream={abortStream}
               amendMessage={amendMessageOfConversation}
               connectorTypeTitle={connectorTypeTitle}
               content=""
@@ -127,6 +130,7 @@ export const getComments = ({
           ...messageProps,
           children: (
             <StreamComment
+              abortStream={abortStream}
               amendMessage={amendMessageOfConversation}
               connectorTypeTitle={connectorTypeTitle}
               index={index}
@@ -149,6 +153,7 @@ export const getComments = ({
         actions: <CommentActions message={transformedMessage} />,
         children: (
           <StreamComment
+            abortStream={abortStream}
             amendMessage={amendMessageOfConversation}
             connectorTypeTitle={connectorTypeTitle}
             content={transformedMessage.content}

@@ -74,6 +74,7 @@ export interface ExecuteOptions<Source = unknown> {
   executionId?: string;
   consumer?: string;
   relatedSavedObjects?: RelatedSavedObjects;
+  signal?: AbortSignal;
 }
 
 export type ActionExecutorContract = PublicMethodsOf<ActionExecutor>;
@@ -109,6 +110,7 @@ export class ActionExecutor {
     consumer,
     relatedSavedObjects,
     actionExecutionId,
+    signal,
   }: ExecuteOptions): Promise<ActionTypeExecutorResult<unknown>> {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
@@ -342,6 +344,7 @@ export class ActionExecutor {
             actionTypeId,
             logger,
             result,
+            signal,
             validatedParams,
           })
             .then((tokenTracking) => {

@@ -15,6 +15,7 @@ import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 
 interface Props {
+  abortStream: () => void;
   amendMessage: (message: string) => void;
   content?: string;
   isEnabledLangChain: boolean;
@@ -29,6 +30,7 @@ interface Props {
 }
 
 export const StreamComment = ({
+  abortStream,
   amendMessage,
   content,
   connectorTypeTitle,
@@ -85,6 +87,7 @@ export const StreamComment = ({
         <StopGeneratingButton
           onClick={() => {
             setComplete(true);
+            abortStream();
           }}
         />
       );
@@ -96,7 +99,7 @@ export const StreamComment = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
+  }, [abortStream, isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
 
   return (
     <MessagePanel

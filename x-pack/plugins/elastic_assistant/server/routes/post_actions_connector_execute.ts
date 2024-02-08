@@ -7,7 +7,7 @@
 
 import { IRouter, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
+import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import { StaticReturnType } from '../lib/langchain/executors/types';
 import {
@@ -44,6 +44,11 @@ export const postActionsConnectorExecuteRoute = (
       },
     },
     async (context, request, response) => {
+      request.events.aborted$.subscribe(() => {
+        console.log('Request was aborted aborted$');
+      });
+
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
       const resp = buildResponse(response);
       const assistantContext = await context.elasticAssistant;
       const logger: Logger = assistantContext.logger;
@@ -61,7 +66,7 @@ export const postActionsConnectorExecuteRoute = (
           !requestHasRequiredAnonymizationParams(request)
         ) {
           logger.debug('Executing via actions framework directly');
-          const result = await executeAction({ actions, request, connectorId });
+          const result = await executeAction({ abortSignal, actions, request, connectorId });
           telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
@@ -98,6 +103,7 @@ export const postActionsConnectorExecuteRoute = (
         };
 
         const langChainResponse = await callAgentExecutor({
+          abortSignal,
           alertsIndexPattern: request.body.alertsIndexPattern,
           allow: request.body.allow,
           allowReplacement: request.body.allowReplacement,

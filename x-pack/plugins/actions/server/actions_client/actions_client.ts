@@ -678,6 +678,7 @@ export class ActionsClient {
     params,
     source,
     relatedSavedObjects,
+    signal,
   }: Omit<ExecuteOptions, 'request' | 'actionExecutionId'>): Promise<
     ActionTypeExecutorResult<unknown>
   > {
@@ -726,6 +727,7 @@ export class ActionsClient {
       request: this.context.request,
       relatedSavedObjects,
       actionExecutionId: uuidv4(),
+      signal,
     });
   }
 

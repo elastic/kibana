@@ -22,6 +22,7 @@ interface OwnProps {
   actionTypeId: string;
   logger: Logger;
   result: ActionTypeExecutorRawResult<unknown>;
+  signal?: AbortSignal;
   validatedParams: Record<string, unknown>;
 }
 /*
@@ -37,6 +38,7 @@ export const getGenAiTokenTracking = async ({
   actionTypeId,
   logger,
   result,
+  signal,
   validatedParams,
 }: OwnProps): Promise<{
   total_tokens: number;
@@ -53,6 +55,7 @@ export const getGenAiTokenTracking = async ({
           streamIterable: data[1],
           body: (validatedParams as { subActionParams: InvokeAsyncIteratorBody }).subActionParams,
           logger,
+          signal,
         });
         return {
           total_tokens: total,
@@ -84,6 +87,7 @@ export const getGenAiTokenTracking = async ({
         actionTypeId,
         body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
         logger,
+        signal,
       });
       return {
         total_tokens: total,

@@ -6,7 +6,7 @@
  */
 
 import { HttpSetup } from '@kbn/core-http-browser';
-import { useCallback, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
@@ -23,6 +23,7 @@ interface SendMessagesProps {
 }
 
 interface UseSendMessages {
+  abortStream: () => void;
   isLoading: boolean;
   sendMessages: ({
     apiConfig,
@@ -40,7 +41,7 @@ export const useSendMessages = (): UseSendMessages => {
     knowledgeBase,
   } = useAssistantContext();
   const [isLoading, setIsLoading] = useState(false);
-
+  const abortController = useRef(new AbortController());
   const sendMessages = useCallback(
     async ({ apiConfig, http, messages, onNewReplacements, replacements }: SendMessagesProps) => {
       setIsLoading(true);
@@ -57,10 +58,12 @@ export const useSendMessages = (): UseSendMessages => {
           http,
           replacements,
           messages,
+          signal: abortController.current.signal,
           size: knowledgeBase.latestAlerts,
           onNewReplacements,
         });
       } finally {
+        console.log('finally??');
         setIsLoading(false);
       }
     },
@@ -75,5 +78,10 @@ export const useSendMessages = (): UseSendMessages => {
     ]
   );
 
-  return { isLoading, sendMessages };
+  const cancelRequest = useCallback(() => {
+    abortController.current.abort();
+    abortController.current = new AbortController();
+  }, []);
+
+  return { isLoading, sendMessages, abortStream: cancelRequest };
 };

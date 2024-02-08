@@ -68,6 +68,7 @@ export interface AssistantProviderProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: (commentArgs: {
+    abortStream: () => void;
     amendMessage: (args: { conversationId: string; content: string }) => void;
     currentConversation: Conversation;
     isEnabledLangChain: boolean;
@@ -106,6 +107,7 @@ export interface UseAssistantContext {
   conversationIds: string[];
   conversations: Record<string, Conversation>;
   getComments: (commentArgs: {
+    abortStream: () => void;
     currentConversation: Conversation;
     isEnabledLangChain: boolean;
     isFetchingResponse: boolean;

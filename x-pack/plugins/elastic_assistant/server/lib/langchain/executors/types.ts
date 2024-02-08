@@ -17,6 +17,7 @@ import { RequestBody, ResponseBody } from '../types';
 import type { AssistantTool } from '../../../types';
 
 export interface AgentExecutorParams<T extends boolean> {
+  abortSignal?: AbortSignal;
   alertsIndexPattern?: string;
   actions: ActionsPluginStart;
   allow?: string[];

@@ -12,6 +12,7 @@ import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
 export interface Props {
+  abortSignal?: AbortSignal;
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -26,12 +27,15 @@ export const executeAction = async ({
   actions,
   request,
   connectorId,
+  abortSignal,
 }: Props): Promise<StaticResponse | Readable> => {
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: request.body.params,
+    consumer: 'it me steph',
+    signal: abortSignal,
   });
 
   if (actionResult.status === 'error') {

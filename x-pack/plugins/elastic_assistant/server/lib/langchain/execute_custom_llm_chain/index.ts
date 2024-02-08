@@ -28,6 +28,7 @@ export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
  *
  */
 export const callAgentExecutor: AgentExecutor<true | false> = async ({
+  abortSignal,
   actions,
   alertsIndexPattern,
   allow,
@@ -59,6 +60,7 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     request,
     llmType,
     logger,
+    signal: abortSignal,
     streaming: isStream,
     // prevents the agent from retrying on failure
     // failure could be due to bad connector, we should deliver that result to the client asap
@@ -134,22 +136,33 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
       responseWithHeaders,
     } = streamFactory<{ type: string; payload: string }>(request.headers, logger, false, false);
 
+    let didEnd = false;
+
     const handleStreamEnd = (finalResponse: string) => {
+      console.log('HANLDE STREAM END finalResponse', finalResponse);
       // @yuliia this would be a good place for pushing the response to the chat history
       streamEnd();
+      didEnd = true;
     };
+
+    let message = '';
 
     executor
       .invoke(
         {
           input: latestMessage[0].content,
           chat_history: [],
+          signal: abortSignal,
         },
         {
           callbacks: [
             {
               handleLLMNewToken(payload) {
-                if (payload.length) push({ payload, type: 'content' });
+                if (payload.length && !didEnd) {
+                  push({ payload, type: 'content' });
+                  // store message in case of error
+                  message += payload;
+                }
               },
               handleChainEnd(llmResult) {
                 handleStreamEnd(llmResult.output);
@@ -167,6 +180,11 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
         // If I put await on this function the error works properly, but when there is not an error
         // it waits for the entire stream to complete before resolving
         const error = transformError(err);
+
+        if (error.message === 'AbortError') {
+          // user aborted the stream, we must end it manually here
+          return handleStreamEnd(message);
+        }
         logger.error(`Error streaming from LangChain: ${error.message}`);
         const errorMessages = [
           `An error occurred while streaming from LangChain:\n\n`,

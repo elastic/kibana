@@ -30,6 +30,7 @@ interface ActionsClientChatOpenAIParams {
   streaming?: boolean;
   traceId?: string;
   maxRetries?: number;
+  signal?: AbortSignal;
 }
 
 /**
@@ -57,6 +58,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
   #request: KibanaRequest<unknown, unknown, RequestBody>;
   #actionResultData: string;
   #traceId: string;
+  #signal?: AbortSignal;
   constructor({
     actions,
     connectorId,
@@ -65,6 +67,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     logger,
     request,
     maxRetries,
+    signal,
   }: ActionsClientChatOpenAIParams) {
     super({
       maxRetries,
@@ -77,7 +80,6 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       azureOpenAIApiVersion: 'nothing',
       openAIApiKey: '',
     });
-
     this.#actions = actions;
     this.#connectorId = connectorId;
     this.#traceId = traceId;
@@ -86,6 +88,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
     this.#request = request;
     this.#actionResultData = '';
     this.streaming = true;
+    this.#signal = signal;
   }
 
   getActionResultData(): string {
@@ -151,6 +154,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
       subActionParams: InvokeAIActionParamsSchema;
       subAction: string;
     };
+    signal?: AbortSignal;
   } {
     // create a new connector request body with the assistant message:
     return {
@@ -179,6 +183,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
           })),
         },
       },
+      signal: this.#signal,
     };
   }
 }

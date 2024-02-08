@@ -26,10 +26,12 @@ export async function getTokenCountFromInvokeAsyncIterator({
   streamIterable,
   body,
   logger,
+  signal,
 }: {
   streamIterable: Stream<ChatCompletionChunk>;
   body: InvokeAsyncIteratorBody;
   logger: Logger;
+  signal?: AbortSignal;
 }): Promise<{
   total: number;
   prompt: number;
@@ -53,7 +55,7 @@ export async function getTokenCountFromInvokeAsyncIterator({
       .join('\n')
   ).length;
 
-  const parsedResponse = await parseOpenAIStream(streamIterable, logger);
+  const parsedResponse = await parseOpenAIStream(streamIterable, logger, signal);
 
   const completionTokens = encode(parsedResponse).length;
   return {
@@ -65,13 +67,22 @@ export async function getTokenCountFromInvokeAsyncIterator({
 
 type StreamParser = (
   streamIterable: Stream<ChatCompletionChunk>,
-  logger: Logger
+  logger: Logger,
+  signal?: AbortSignal
 ) => Promise<string>;
 
-const parseOpenAIStream: StreamParser = async (streamIterable, logger) => {
+const parseOpenAIStream: StreamParser = async (streamIterable, logger, signal) => {
   let responseBody: string = '';
+  let aborted = false;
   try {
+    signal?.addEventListener('abort', () => {
+      aborted = true;
+    });
     for await (const data of streamIterable) {
+      if (aborted) {
+        // Break out of the loop if the signal is aborted
+        break;
+      }
       if (!data) {
         continue;
       }

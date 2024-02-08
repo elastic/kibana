@@ -86,7 +86,11 @@ export const useStream = ({
         setComplete(true);
       },
       error: (err) => {
-        setError(err.message);
+        if (err.name === 'AbortError') {
+          // the fetch was canceled, we don't need to do anything about it
+        } else {
+          setError(err.message);
+        }
       },
     });
     setSubscription(newSubscription);
