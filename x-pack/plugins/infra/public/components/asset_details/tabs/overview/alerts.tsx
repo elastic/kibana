@@ -39,7 +39,7 @@ export const AlertsSummaryContent = ({
   const { featureFlags } = usePluginConfig();
   const [isAlertFlyoutVisible, { toggle: toggleAlertFlyout }] = useBoolean(false);
   const { overrides } = useAssetDetailsRenderPropsContext();
-  const [isAlertSectionOpen, setIsAlertSectionOpen] =
+  const [collapsibleStatus, setCollapsibleStatus] =
     useState<EuiAccordionProps['forceState']>('open');
   const [activeAlertsCount, setActiveAlertsCount] = useState<number | undefined>(undefined);
 
@@ -54,11 +54,11 @@ export const AlertsSummaryContent = ({
   );
 
   const onLoaded = (alertsCount?: AlertsCount) => {
-    const hasActiveAlerts =
-      typeof alertsCount?.activeAlertCount === 'number' && alertsCount?.activeAlertCount > 0;
+    const { activeAlertCount = 0 } = alertsCount ?? {};
+    const hasActiveAlerts = activeAlertCount > 0;
 
-    setIsAlertSectionOpen(hasActiveAlerts ? 'open' : 'closed');
-    setActiveAlertsCount(alertsCount?.activeAlertCount ?? 0);
+    setCollapsibleStatus(hasActiveAlerts ? 'open' : 'closed');
+    setActiveAlertsCount(alertsCount?.activeAlertCount);
   };
 
   return (
@@ -69,7 +69,7 @@ export const AlertsSummaryContent = ({
         data-test-subj="infraAssetDetailsAlertsCollapsible"
         id="alerts"
         closedSectionContent={<AlertsClosedContent activeAlertCount={activeAlertsCount} />}
-        initialTriggerValue={isAlertSectionOpen}
+        initialTriggerValue={collapsibleStatus}
         extraAction={
           <EuiFlexGroup alignItems="center" responsive={false}>
             {featureFlags.inventoryThresholdAlertRuleEnabled && (
