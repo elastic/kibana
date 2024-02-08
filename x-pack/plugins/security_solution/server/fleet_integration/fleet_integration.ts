@@ -53,18 +53,11 @@ import { ENDPOINT_INTEGRATION_CONFIG_KEY } from './constants';
 import { createEventFilters } from './handlers/create_event_filters';
 import type { AppFeaturesService } from '../lib/app_features_service/app_features_service';
 import { removeProtectionUpdatesNote } from './handlers/remove_protection_updates_note';
-import { putCriblRoutingPipeline } from './handlers/put_cribl_routing_pipeline';
 
 const isEndpointPackagePolicy = <T extends { package?: { name: string } }>(
   packagePolicy: T
 ): boolean => {
   return packagePolicy.package?.name === 'endpoint';
-};
-
-const isCriblPackagePolicy = <T extends { package?: { name: string } }>(
-  packagePolicy: T
-): boolean => {
-  return packagePolicy.package?.name === 'cribl';
 };
 
 const shouldUpdateMetaValues = (
@@ -372,14 +365,4 @@ export const getPackagePolicyDeleteCallback = (
 
     await Promise.all(policiesToRemove);
   };
-};
-
-export const getCriblPackagePolicyPostCreateOrUpdateCallback = async (
-  esClient: ElasticsearchClient,
-  packagePolicy: NewPackagePolicy,
-  logger: Logger
-): Promise<void> => {
-  if (isCriblPackagePolicy(packagePolicy)) {
-    return putCriblRoutingPipeline(esClient, packagePolicy, logger);
-  }
 };

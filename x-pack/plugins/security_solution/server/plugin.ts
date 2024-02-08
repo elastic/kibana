@@ -122,8 +122,8 @@ import {
 } from '../common/entity_analytics/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';
 import { getAssistantTools } from './assistant/tools';
-import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './fleet_integration';
 import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent_policy_features';
+import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
