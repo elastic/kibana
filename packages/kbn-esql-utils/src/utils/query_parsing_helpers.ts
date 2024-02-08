@@ -17,7 +17,7 @@ export function getIndexPatternFromSQLQuery(sqlQuery?: string): string {
     sql = `${splitFroms[fromsLength - 2]} FROM ${splitFroms[fromsLength - 1]}`;
   }
   // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
+  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;]+)/, 'i');
   const matches = sql?.match(regex);
   if (matches) {
     return matches[1];
@@ -34,7 +34,7 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   }
   const parsedString = esql?.replaceAll('`', '');
   // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;\s]+)/, 'i');
+  const regex = new RegExp(/FROM\s+([(\w*:)?\w*-.!@$^()~;\s]+)/, 'i');
   const matches = parsedString?.match(regex);
   if (matches) {
     return matches[1]?.trim();

@@ -290,7 +290,7 @@ export const createLifecycleExecutor =
             trackedAlertRecoveredIds
           );
 
-          const { alertUuid, started, flapping, pendingRecoveredCount } = !isNew
+          const { alertUuid, started, flapping, pendingRecoveredCount, activeCount } = !isNew
             ? state.trackedAlerts[alertId]
             : {
                 alertUuid: lifecycleAlertServices.getAlertUuid(alertId),
@@ -299,6 +299,7 @@ export const createLifecycleExecutor =
                   ? state.trackedAlertsRecovered[alertId].flapping
                   : false,
                 pendingRecoveredCount: 0,
+                activeCount: 0,
               };
 
           const event: ParsedTechnicalFields & ParsedExperimentalFields = {
@@ -342,16 +343,20 @@ export const createLifecycleExecutor =
             flappingHistory,
             flapping,
             pendingRecoveredCount,
+            activeCount,
           };
         });
 
     const trackedEventsToIndex = makeEventsDataMapFor(trackedAlertIds);
     const newEventsToIndex = makeEventsDataMapFor(newAlertIds);
     const trackedRecoveredEventsToIndex = makeEventsDataMapFor(trackedAlertRecoveredIds);
-    const allEventsToIndex = [
-      ...getAlertsForNotification(flappingSettings, trackedEventsToIndex),
-      ...newEventsToIndex,
-    ];
+    const allEventsToIndex = getAlertsForNotification(
+      flappingSettings,
+      rule.alertDelay?.active ?? 0,
+      trackedEventsToIndex,
+      newEventsToIndex,
+      { maintenanceWindowIds, timestamp: commonRuleFields[TIMESTAMP] }
+    );
 
     // Only write alerts if:
     // - writing is enabled
@@ -392,18 +397,34 @@ export const createLifecycleExecutor =
     }
 
     const nextTrackedAlerts = Object.fromEntries(
-      allEventsToIndex
+      [...newEventsToIndex, ...trackedEventsToIndex]
         .filter(({ event }) => event[ALERT_STATUS] !== ALERT_STATUS_RECOVERED)
-        .map(({ event, flappingHistory, flapping: isCurrentlyFlapping, pendingRecoveredCount }) => {
-          const alertId = event[ALERT_INSTANCE_ID]!;
-          const alertUuid = event[ALERT_UUID]!;
-          const started = new Date(event[ALERT_START]!).toISOString();
-          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
-          return [
-            alertId,
-            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
-          ];
-        })
+        .map(
+          ({
+            event,
+            flappingHistory,
+            flapping: isCurrentlyFlapping,
+            pendingRecoveredCount,
+            activeCount,
+          }) => {
+            const alertId = event[ALERT_INSTANCE_ID]!;
+            const alertUuid = event[ALERT_UUID]!;
+            const started = new Date(event[ALERT_START]!).toISOString();
+            const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+            return [
+              alertId,
+              {
+                alertId,
+                alertUuid,
+                started,
+                flappingHistory,
+                flapping,
+                pendingRecoveredCount,
+                activeCount,
+              },
+            ];
+          }
+        )
     );
 
     const nextTrackedAlertsRecovered = Object.fromEntries(
@@ -416,16 +437,32 @@ export const createLifecycleExecutor =
             event[ALERT_STATUS] === ALERT_STATUS_RECOVERED &&
             (flapping || flappingHistory.filter((f: boolean) => f).length > 0)
         )
-        .map(({ event, flappingHistory, flapping: isCurrentlyFlapping, pendingRecoveredCount }) => {
-          const alertId = event[ALERT_INSTANCE_ID]!;
-          const alertUuid = event[ALERT_UUID]!;
-          const started = new Date(event[ALERT_START]!).toISOString();
-          const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
-          return [
-            alertId,
-            { alertId, alertUuid, started, flappingHistory, flapping, pendingRecoveredCount },
-          ];
-        })
+        .map(
+          ({
+            event,
+            flappingHistory,
+            flapping: isCurrentlyFlapping,
+            pendingRecoveredCount,
+            activeCount,
+          }) => {
+            const alertId = event[ALERT_INSTANCE_ID]!;
+            const alertUuid = event[ALERT_UUID]!;
+            const started = new Date(event[ALERT_START]!).toISOString();
+            const flapping = isFlapping(flappingSettings, flappingHistory, isCurrentlyFlapping);
+            return [
+              alertId,
+              {
+                alertId,
+                alertUuid,
+                started,
+                flappingHistory,
+                flapping,
+                pendingRecoveredCount,
+                activeCount,
+              },
+            ];
+          }
+        )
     );
 
     return {
