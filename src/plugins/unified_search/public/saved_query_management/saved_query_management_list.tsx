@@ -16,7 +16,6 @@ import {
   EuiPopoverFooter,
   EuiButtonIcon,
   EuiConfirmModal,
-  usePrettyDuration,
   ShortDate,
   EuiPagination,
   EuiBadge,
@@ -24,10 +23,12 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiProgress,
+  PrettyDuration,
 } from '@elastic/eui';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState, useRef, useEffect, useMemo, RefObject } from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
 import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
@@ -35,6 +36,7 @@ import './saved_query_management_list.scss';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { debounce, max } from 'lodash';
 import useLatest from 'react-use/lib/useLatest';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { strings as queryBarMenuPanelsStrings } from '../query_string_input/query_bar_menu_panels';
 import { PanelTitle } from '../query_string_input/panel_title';
@@ -125,24 +127,32 @@ const commonDurationRanges: DurationRange[] = [
   },
 ];
 
-const itemTitle = (attributes: SavedQueryAttributes, format: string) => {
-  let label = attributes.title;
-  const prettifier = usePrettyDuration;
+const itemTitle = (attributes: SavedQueryAttributes, services: IUnifiedSearchPluginServices) => {
+  const label = [attributes.title];
 
   if (attributes.description) {
-    label += `; ${attributes.description}`;
+    label.push(attributes.description);
   }
 
   if (attributes.timefilter) {
-    label += `; ${prettifier({
-      timeFrom: attributes.timefilter?.from,
-      timeTo: attributes.timefilter?.to,
-      quickRanges: commonDurationRanges,
-      dateFormat: format,
-    })}`;
+    label.push(
+      // This is a hack to render the PrettyDuration component to a string since itemTitle
+      // is called in a loop, so the usePrettyDuration hook is not an option, and it must
+      // return a string, but there is no non-hook alternative that returns a string
+      renderToStaticMarkup(
+        <KibanaRenderContextProvider {...services}>
+          <PrettyDuration
+            timeFrom={attributes.timefilter.from}
+            timeTo={attributes.timefilter.to}
+            quickRanges={commonDurationRanges}
+            dateFormat={services.uiSettings.get('dateFormat')}
+          />
+        </KibanaRenderContextProvider>
+      )
+    );
   }
 
-  return label;
+  return label.join('; ');
 };
 
 const itemLabel = (attributes: SavedQueryAttributes) => {
@@ -196,7 +206,7 @@ export const SavedQueryManagementList = ({
   onClearSavedQuery,
   onClose,
 }: SavedQueryManagementListProps) => {
-  const { uiSettings, notifications } = useKibana<IUnifiedSearchPluginServices>().services;
+  const services = useKibana<IUnifiedSearchPluginServices>().services;
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPageNumber, setCurrentPageNumber] = useState(0);
   const [totalQueryCount, setTotalQueryCount] = useState(0);
@@ -208,7 +218,6 @@ export const SavedQueryManagementList = ({
   const [selectedSavedQuery, setSelectedSavedQuery] = useState(loadedSavedQuery);
   const [toBeDeletedSavedQuery, setToBeDeletedSavedQuery] = useState<SavedQuery | null>(null);
   const [showDeletionConfirmationModal, setShowDeletionConfirmationModal] = useState(false);
-  const format = uiSettings.get('dateFormat');
 
   const debouncedSetSearchTerm = useMemo(() => {
     return debounce((newSearchTerm: string) => {
@@ -298,7 +307,7 @@ export const SavedQueryManagementList = ({
         try {
           await savedQueryService.deleteSavedQuery(savedQueryId);
 
-          notifications.toasts.addSuccess(
+          services.notifications.toasts.addSuccess(
             i18n.translate('unifiedSearch.search.searchBar.deleteQuerySuccessMessage', {
               defaultMessage: 'Query "{queryTitle}" was deleted',
               values: {
@@ -307,7 +316,7 @@ export const SavedQueryManagementList = ({
             })
           );
         } catch (error) {
-          notifications.toasts.addDanger(
+          services.notifications.toasts.addDanger(
             i18n.translate('unifiedSearch.search.searchBar.deleteQueryErrorMessage', {
               defaultMessage:
                 'An error occured while deleting query "{queryTitle}": {errorMessage}',
@@ -326,9 +335,9 @@ export const SavedQueryManagementList = ({
     [
       currentPageQueries,
       loadedSavedQuery,
-      notifications.toasts,
       onClearSavedQuery,
       savedQueryService,
+      services.notifications.toasts,
     ]
   );
 
@@ -337,7 +346,7 @@ export const SavedQueryManagementList = ({
       return {
         key: savedQuery.id,
         label: savedQuery.attributes.title,
-        title: itemTitle(savedQuery.attributes, format),
+        title: itemTitle(savedQuery.attributes, services),
         'data-test-subj': `load-saved-query-${savedQuery.attributes.title}-button`,
         value: savedQuery.id,
         checked: selectedSavedQuery && savedQuery.id === selectedSavedQuery.id ? 'on' : undefined,
@@ -346,7 +355,7 @@ export const SavedQueryManagementList = ({
         },
       };
     });
-  }, [currentPageQueries, format, selectedSavedQuery]);
+  }, [currentPageQueries, selectedSavedQuery, services]);
 
   const renderOption = useCallback(
     (option: RenderOptionProps) => {
