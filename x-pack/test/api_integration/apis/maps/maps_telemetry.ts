@@ -104,7 +104,7 @@ export default function ({ getService }: FtrProviderContext) {
               min: 1,
             },
             GEOJSON_VECTOR: {
-              avg:  0.8571428571428571,
+              avg: 0.8571428571428571,
               max: 6,
               min: 1,
             },
