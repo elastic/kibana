@@ -214,7 +214,7 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedSettingValue', {
           defaultMessage:
-            'Unrecognized value [{value}], {command} [{setting}] needs to be one of [{expected}]',
+            'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
           values: {
             setting: out.setting,
             expected: out.expected,

@@ -13,10 +13,9 @@ import {
   isAssignmentComplete,
   isColumnItem,
   isFunctionItem,
-  isSettingItem,
 } from '../shared/helpers';
-import type { ESQLColumn, ESQLCommand, ESQLCommandMode, ESQLAstItem, ESQLMessage } from '../types';
-import { ccqMode } from './settings';
+import type { ESQLColumn, ESQLCommand, ESQLAstItem, ESQLMessage } from '../types';
+import { enrichModes } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -353,41 +352,10 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
     options: [onOption, withOption],
-    modes: [ccqMode],
+    modes: [enrichModes],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
-    },
-    validate: (command: ESQLCommand) => {
-      const messages: ESQLMessage[] = [];
-      if (command.args.some(isSettingItem)) {
-        const settings = command.args.filter(isSettingItem);
-        const settingCounters: Record<string, number> = {};
-        const settingLookup: Record<string, ESQLCommandMode> = {};
-        for (const setting of settings) {
-          if (!settingCounters[setting.name]) {
-            settingCounters[setting.name] = 0;
-            settingLookup[setting.name] = setting;
-          }
-          settingCounters[setting.name]++;
-        }
-        const duplicateSettings = Object.entries(settingCounters).filter(([_, count]) => count > 1);
-        messages.push(
-          ...duplicateSettings.map(([name]) => ({
-            location: settingLookup[name].location,
-            text: i18n.translate('monaco.esql.validation.duplicateSettingWarning', {
-              defaultMessage:
-                'Multiple definition of setting [{name}]. Only last one will be applied.',
-              values: {
-                name,
-              },
-            }),
-            type: 'warning' as const,
-            code: 'duplicateSettingWarning',
-          }))
-        );
-      }
-      return messages;
     },
   },
 ];

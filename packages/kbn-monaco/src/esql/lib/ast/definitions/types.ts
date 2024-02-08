@@ -64,9 +64,11 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   ) => ESQLMessage[];
 }
 
-export interface CommandModeDefinition extends CommandBaseDefinition {
+export interface CommandModeDefinition {
   name: string;
   description: string;
+  values: Array<{ name: string; description: string }>;
+  prefix?: string;
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {

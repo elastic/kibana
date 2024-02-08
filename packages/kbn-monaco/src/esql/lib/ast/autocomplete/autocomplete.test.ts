@@ -18,6 +18,7 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
 import { TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { camelCase } from 'lodash';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -636,28 +637,24 @@ describe('autocomplete', () => {
 
   describe('enrich', () => {
     const modes = ['any', 'coordinator', 'remote'];
+    const policyNames = policies.map(({ name, suggestedAs }) => suggestedAs || name);
     for (const prevCommand of [
       '',
-      '| enrich other-policy ',
-      '| enrich other-policy on b ',
-      '| enrich other-policy with c ',
+      // '| enrich other-policy ',
+      // '| enrich other-policy on b ',
+      // '| enrich other-policy with c ',
     ]) {
+      testSuggestions(`from a ${prevCommand}| enrich `, policyNames);
       testSuggestions(
-        `from a ${prevCommand}| enrich `,
-        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+        `from a ${prevCommand}| enrich _`,
+        modes.map((mode) => `_${mode}:$0`),
+        '_'
       );
-      testSuggestions(
-        `from a ${prevCommand}| enrich [`,
-        modes.map((mode) => `ccq.mode:${mode}`),
-        '['
-      );
-      // Not suggesting duplicate setting
-      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:any] [`, [], '[');
-      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:`, modes, ':');
-      testSuggestions(
-        `from a ${prevCommand}| enrich [ccq.mode:any] `,
-        policies.map(({ name, suggestedAs }) => suggestedAs || name)
-      );
+      for (const mode of modes) {
+        testSuggestions(`from a ${prevCommand}| enrich _${mode}:`, policyNames, ':');
+        testSuggestions(`from a ${prevCommand}| enrich _${mode.toUpperCase()}:`, policyNames, ':');
+        testSuggestions(`from a ${prevCommand}| enrich _${camelCase(mode)}:`, policyNames, ':');
+      }
       testSuggestions(`from a ${prevCommand}| enrich policy `, ['on $0', 'with $0', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
@@ -1080,6 +1077,13 @@ describe('autocomplete', () => {
     });
     it('should trigger further suggestions for commands', async () => {
       const suggestions = await getSuggestionsFor('from a | ');
+      // test that all commands will retrigger suggestions
+      expect(
+        suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+      ).toBeTruthy();
+    });
+    it('should trigger further suggestions after enrich mode', async () => {
+      const suggestions = await getSuggestionsFor('from a | enrich _any:');
       // test that all commands will retrigger suggestions
       expect(
         suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)

@@ -74,9 +74,8 @@ import {
   createColumnStar,
   wrapIdentifierAsArray,
   createPolicy,
-  createSettingTuple,
-  createLiteralString,
   isMissingText,
+  createSetting,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -121,25 +120,15 @@ export function collectAllColumnIdentifiers(
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
+  if (!ctx._policyName || !ctx._policyName.text || /<missing /.test(ctx._policyName.text)) {
     return [];
   }
-  return [createPolicy(ctx._policyName)];
-}
-
-export function getPolicySettings(ctx: EnrichCommandContext) {
-  if (!ctx.setting() || !ctx.setting().length) {
-    return [];
+  const policyComponents = ctx._policyName.text.split(':');
+  if (policyComponents.length > 1) {
+    const [setting, policyName] = policyComponents;
+    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
   }
-  return ctx.setting().map((setting) => {
-    const node = createSettingTuple(setting);
-    if (setting._name?.text && setting._value?.text) {
-      node.args.push(createLiteralString(setting._value)!);
-      return node;
-    }
-    // incomplete setting
-    return node;
-  });
+  return [createPolicy(ctx._policyName, policyComponents[0])];
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {

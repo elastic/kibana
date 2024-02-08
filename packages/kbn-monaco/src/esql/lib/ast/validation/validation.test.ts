@@ -1721,55 +1721,50 @@ describe('validation logic', () => {
 
   describe('enrich', () => {
     testErrorsAndWarnings(`from a | enrich`, [
-      'SyntaxError: expected {OPENING_BRACKET, ENRICH_POLICY_NAME} but found "<EOF>"',
+      "SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'",
     ]);
-    testErrorsAndWarnings(`from a | enrich [`, [
-      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich _`, ['Unknown policy [_]']);
+    testErrorsAndWarnings(`from a | enrich _:`, [
+      "SyntaxError: token recognition error at: ':'",
+      'Unknown policy [_]',
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode`, [
-      'SyntaxError: expected {COLON} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich _:policy`, [
+      'Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:`, [
-      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich :policy`, [
+      "SyntaxError: token recognition error at: ':'",
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich any:`, [
+      "SyntaxError: token recognition error at: ':'",
+      'Unknown policy [any]',
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] `, [
-      "SyntaxError: extraneous input '<EOF>' expecting {OPENING_BRACKET, ENRICH_POLICY_NAME}",
+    testErrorsAndWarnings(`from a | enrich _any:`, [
+      "SyntaxError: token recognition error at: ':'",
+      'Unknown policy [_any]',
+    ]);
+    testErrorsAndWarnings(`from a | enrich any:policy`, [
+      'Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:value] policy `, [
-      'Unrecognized value [value], ENRICH [ccq.mode] needs to be one of [ANY, COORDINATOR, REMOTE]',
-    ]);
     for (const value of ['any', 'coordinator', 'remote']) {
-      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value}] policy `, []);
-      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value.toUpperCase()}] policy `, []);
+      testErrorsAndWarnings(`from a | enrich _${value}:policy `, []);
+      testErrorsAndWarnings(`from a | enrich _${value} :  policy `, [
+        "SyntaxError: token recognition error at: ':'",
+        "SyntaxError: extraneous input 'policy' expecting <EOF>",
+        `Unknown policy [_${value}]`,
+      ]);
+      testErrorsAndWarnings(`from a | enrich _${value}:  policy `, [
+        "SyntaxError: token recognition error at: ':'",
+        "SyntaxError: extraneous input 'policy' expecting <EOF>",
+        `Unknown policy [_${value}]`,
+      ]);
+      testErrorsAndWarnings(`from a | enrich _${camelCase(value)}:policy `, []);
+      testErrorsAndWarnings(`from a | enrich _${value.toUpperCase()}:policy `, []);
     }
 
-    testErrorsAndWarnings(`from a | enrich [setting:value policy`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-      'Unsupported setting [setting], expected [ccq.mode]',
+    testErrorsAndWarnings(`from a | enrich _unknown:policy`, [
+      'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-    ]);
-
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-    ]);
-
-    testErrorsAndWarnings(`from a | enrich [setting:value] policy`, [
-      'Unsupported setting [setting], expected [ccq.mode]',
-    ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] policy[]`, []);
-
-    testErrorsAndWarnings(
-      `from a | enrich [ccq.mode:any][ccq.mode:coordinator] policy[]`,
-      [],
-      ['Multiple definition of setting [ccq.mode]. Only last one will be applied.']
-    );
     testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
     testErrorsAndWarnings(`from a | enrich policy on `, [
       "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
