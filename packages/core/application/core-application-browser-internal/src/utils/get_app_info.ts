@@ -25,7 +25,7 @@ export function getAppInfo(app: App): PublicAppInfo {
     visibleIn: app.status === AppStatus.inaccessible ? [] : visibleIn,
     appRoute: app.appRoute!,
     keywords: app.keywords ?? [],
-    deepLinks: getDeepLinkInfos(app.deepLinks),
+    deepLinks: app.status === AppStatus.inaccessible ? [] : getDeepLinkInfos(app.deepLinks),
   };
 }
 

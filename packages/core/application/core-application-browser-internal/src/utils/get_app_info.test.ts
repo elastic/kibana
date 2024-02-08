@@ -46,6 +46,12 @@ describe('getAppInfo', () => {
     });
   });
 
+  it('does not return any deepLinks if the app is inaccessible', () => {
+    const app = createApp({ status: AppStatus.inaccessible, deepLinks: [createDeepLink()] });
+    const info = getAppInfo(app);
+    expect(info.deepLinks).toEqual([]);
+  });
+
   it('populates default values for nested deepLinks', () => {
     const app = createApp({
       deepLinks: [
