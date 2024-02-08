@@ -6,10 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID } from '@kbn/management-settings-ids';
-import { ENABLE_DOCKED_CONSOLE_UI_SETTING_ID } from '@kbn/dev-tools-plugin/common';
-
-export const SEARCH_PROJECT_SETTINGS = [
-  COURIER_IGNORE_FILTER_IF_FIELD_NOT_IN_INDEX_ID,
-  ENABLE_DOCKED_CONSOLE_UI_SETTING_ID,
-];
+/**
+ * The UI Setting prefix and category for dev tools UI Settings
+ */
+export const DEV_TOOLS_FEATURE_ID = 'devTools';
+/**
+ * UI Setting ID for enabling / disabling the docked console in Kibana
+ */
+export const ENABLE_DOCKED_CONSOLE_UI_SETTING_ID = 'devTools:enableDockedConsole';
