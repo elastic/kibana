@@ -238,7 +238,6 @@ async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
-<<<<<<< HEAD
   const scores = scoresAsString.split('\n').map((line) => {
     const [index, score] = line
       .split(',')
@@ -247,9 +246,6 @@ async function scoreSuggestions({
 
     return { id: suggestions[index].id, score };
   });
-=======
-  resources.logger.debug(`Scores: ${JSON.stringify(scores, null, 2)}`);
->>>>>>> 1c3fa24be396176454df3dd3a67c7acdfcea46d4
 
   if (scores.length === 0) {
     return [];
