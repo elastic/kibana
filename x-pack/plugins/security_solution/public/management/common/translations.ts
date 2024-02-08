@@ -53,7 +53,7 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Isolate the host',
     }),
     privileges: i18n.translate(
-      'xpack.securitySolution.endpointConsoleCommands.suspendProcess.privileges',
+      'xpack.securitySolution.endpointConsoleCommands.isolate.privileges',
       {
         defaultMessage:
           'Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission.',
@@ -73,7 +73,7 @@ export const CONSOLE_COMMANDS = {
       defaultMessage: 'Kill/terminate a process',
     }),
     privileges: i18n.translate(
-      'xpack.securitySolution.endpointConsoleCommands.suspendProcess.privileges',
+      'xpack.securitySolution.endpointConsoleCommands.killProcess.privileges',
       {
         defaultMessage:
           'Insufficient privileges to kill process. Contact your Kibana administrator if you think you should have this permission.',
