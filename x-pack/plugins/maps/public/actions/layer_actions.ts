@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { AnyAction, Dispatch } from 'redux';
 import { ThunkDispatch } from 'redux-thunk';
 import type { Query } from '@kbn/es-query';
@@ -61,7 +60,6 @@ import {
   VectorLayerDescriptor,
   VectorStyleDescriptor,
 } from '../../common/descriptor_types';
-import { getToasts } from '../kibana_services';
 import { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import { OnSourceChangeArgs } from '../classes/sources/source';
@@ -194,42 +192,17 @@ export function addLayer(layerDescriptor: LayerDescriptor) {
       layer: layerDescriptor,
     });
     dispatch(syncDataForLayerId(layerDescriptor.id, false));
-
-    let layer: ILayer;
-    try {
-      layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
-    } catch (error) {
-      onCreateLayerInstanceError(layerDescriptor, error);
-      return;
-    }
-
+    const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get licensed features
     const features = await layer.getLicensedFeatures();
     features.forEach(notifyLicensedFeatureUsage);
   };
 }
 
 export function addLayerWithoutDataSync(layerDescriptor: LayerDescriptor) {
-  try {
-    createLayerInstance(layerDescriptor, []);
-  } catch (error) {
-    onCreateLayerInstanceError(layerDescriptor, error);
-  }
   return {
     type: ADD_LAYER,
     layer: layerDescriptor,
   };
-}
-
-function onCreateLayerInstanceError(layerDescriptor: LayerDescriptor, error: Error) {
-  getToasts().addWarning({
-    title: i18n.translate('xpack.maps.layer.invalidDescriptorTitle', {
-      defaultMessage: `Unable to add layer '{layerLabel}' to map`,
-      values: {
-        layerLabel: layerDescriptor.label ?? layerDescriptor.id,
-      },
-    }),
-    text: error.message,
-  });
 }
 
 export function addPreviewLayers(layerDescriptors: LayerDescriptor[]) {

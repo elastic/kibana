@@ -23,6 +23,7 @@ import {
 import { VectorStyle } from '../classes/styles/vector/vector_style';
 import { isLayerGroup, LayerGroup } from '../classes/layers/layer_group';
 import { HeatmapLayer } from '../classes/layers/heatmap_layer';
+import { InvalidLayer } from '../classes/layers/invalid_layer';
 import { getTimeFilter } from '../kibana_services';
 import { getChartsPaletteServiceGetColor } from '../reducers/non_serializable_instances';
 import { copyPersistentState, TRACKED_LAYER_DESCRIPTOR } from '../reducers/copy_persistent_state';
@@ -76,54 +77,58 @@ export function createLayerInstance(
   customIcons: CustomIcon[],
   chartsPaletteServiceGetColor?: (value: string) => string | null
 ): ILayer {
-  if (layerDescriptor.type === LAYER_TYPE.LAYER_GROUP) {
-    return new LayerGroup({ layerDescriptor: layerDescriptor as LayerGroupDescriptor });
-  }
+  try {
+    if (layerDescriptor.type === LAYER_TYPE.LAYER_GROUP) {
+      return new LayerGroup({ layerDescriptor: layerDescriptor as LayerGroupDescriptor });
+    }
 
-  const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
-  switch (layerDescriptor.type) {
-    case LAYER_TYPE.RASTER_TILE:
-      return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
-    case LAYER_TYPE.EMS_VECTOR_TILE:
-      return new EmsVectorTileLayer({
-        layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
-        source: source as EMSTMSSource,
-      });
-    case LAYER_TYPE.HEATMAP:
-      return new HeatmapLayer({
-        layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
-        source: source as ESGeoGridSource,
-      });
-    case LAYER_TYPE.GEOJSON_VECTOR:
-      return new GeoJsonVectorLayer({
-        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
-        source: source as IVectorSource,
-        joins: createJoinInstances(
-          layerDescriptor as VectorLayerDescriptor,
-          source as IVectorSource
-        ),
-        customIcons,
-        chartsPaletteServiceGetColor,
-      });
-    case LAYER_TYPE.BLENDED_VECTOR:
-      return new BlendedVectorLayer({
-        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
-        source: source as IVectorSource,
-        customIcons,
-        chartsPaletteServiceGetColor,
-      });
-    case LAYER_TYPE.MVT_VECTOR:
-      return new MvtVectorLayer({
-        layerDescriptor: layerDescriptor as VectorLayerDescriptor,
-        source: source as IVectorSource,
-        joins: createJoinInstances(
-          layerDescriptor as VectorLayerDescriptor,
-          source as IVectorSource
-        ),
-        customIcons,
-      });
-    default:
-      throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+    const source: ISource = createSourceInstance(layerDescriptor.sourceDescriptor);
+    switch (layerDescriptor.type) {
+      case LAYER_TYPE.RASTER_TILE:
+        return new RasterTileLayer({ layerDescriptor, source: source as IRasterSource });
+      case LAYER_TYPE.EMS_VECTOR_TILE:
+        return new EmsVectorTileLayer({
+          layerDescriptor: layerDescriptor as EMSVectorTileLayerDescriptor,
+          source: source as EMSTMSSource,
+        });
+      case LAYER_TYPE.HEATMAP:
+        return new HeatmapLayer({
+          layerDescriptor: layerDescriptor as HeatmapLayerDescriptor,
+          source: source as ESGeoGridSource,
+        });
+      case LAYER_TYPE.GEOJSON_VECTOR:
+        return new GeoJsonVectorLayer({
+          layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+          source: source as IVectorSource,
+          joins: createJoinInstances(
+            layerDescriptor as VectorLayerDescriptor,
+            source as IVectorSource
+          ),
+          customIcons,
+          chartsPaletteServiceGetColor,
+        });
+      case LAYER_TYPE.BLENDED_VECTOR:
+        return new BlendedVectorLayer({
+          layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+          source: source as IVectorSource,
+          customIcons,
+          chartsPaletteServiceGetColor,
+        });
+      case LAYER_TYPE.MVT_VECTOR:
+        return new MvtVectorLayer({
+          layerDescriptor: layerDescriptor as VectorLayerDescriptor,
+          source: source as IVectorSource,
+          joins: createJoinInstances(
+            layerDescriptor as VectorLayerDescriptor,
+            source as IVectorSource
+          ),
+          customIcons,
+        });
+      default:
+        throw new Error(`Unrecognized layerType ${layerDescriptor.type}`);
+    }
+  } catch (error) {
+    return new InvalidLayer(layerDescriptor, error);
   }
 }
 
@@ -329,16 +334,9 @@ export const getLayerList = createSelector(
   getChartsPaletteServiceGetColor,
   getCustomIcons,
   (layerDescriptorList, chartsPaletteServiceGetColor, customIcons) => {
-    const layers = layerDescriptorList
-      .map((layerDescriptor) => {
-        try {
-          return createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor);
-        } catch (error) {
-          // ignore createLayerInstance exception, error surfaced to user in addLayer action
-          return null;
-        }
-      })
-      .filter(Boolean) as ILayer[];
+    const layers = layerDescriptorList.map((layerDescriptor) =>
+      createLayerInstance(layerDescriptor, customIcons, chartsPaletteServiceGetColor)
+    );
 
     const childrenMap = new Map<string, ILayer[]>();
     layers.forEach((layer) => {
@@ -426,13 +424,9 @@ export const getQueryableUniqueIndexPatternIds = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        try {
-          const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
-          if (layer.isVisible()) {
-            indexPatternIds.push(...layer.getQueryableIndexPatternIds());
-          }
-        } catch (error) {
-          // ignore createLayerInstance exception, error surfaced to user in addLayer action
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+        if (layer.isVisible()) {
+          indexPatternIds.push(...layer.getQueryableIndexPatternIds());
         }
       });
     } else {
@@ -460,12 +454,8 @@ export const getMostCommonDataViewId = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        try {
-          const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
-          incrementCount(layer.getIndexPatternIds());
-        } catch (error) {
-          // ignore createLayerInstance exception, error surfaced to user in addLayer action
-        }
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get index pattern ids
+        incrementCount(layer.getIndexPatternIds());
       });
     } else {
       layerList.forEach((layer) => {
@@ -494,12 +484,8 @@ export const getGeoFieldNames = createSelector(
 
     if (waitingForMapReadyLayerList.length) {
       waitingForMapReadyLayerList.forEach((layerDescriptor) => {
-        try {
-          const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get geo field names
-          geoFieldNames.push(...layer.getGeoFieldNames());
-        } catch (error) {
-          // ignore createLayerInstance exception, error surfaced to user in addLayer action
-        }
+        const layer = createLayerInstance(layerDescriptor, []); // custom icons not needed, layer instance only used to get geo field names
+        geoFieldNames.push(...layer.getGeoFieldNames());
       });
     } else {
       layerList.forEach((layer) => {
