@@ -94,6 +94,10 @@ export const Assignees: FC<AssigneesProps> = memo(
       if (onAssigneesUpdated) onAssigneesUpdated();
     }, [onAssigneesUpdated]);
 
+    const togglePopover = useCallback(() => {
+      setIsPopoverOpen((value) => !value);
+    }, []);
+
     const handleApplyAssignees = useCallback(
       async (assignees) => {
         setIsPopoverOpen(false);
@@ -103,10 +107,6 @@ export const Assignees: FC<AssigneesProps> = memo(
       },
       [eventId, onSuccess, setAlertAssignees]
     );
-
-    const togglePopover = useCallback(() => {
-      setIsPopoverOpen((value) => !value);
-    }, []);
 
     const searchInputId = useGeneratedHtmlId({
       prefix: 'searchInput',
