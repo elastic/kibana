@@ -86,6 +86,7 @@ describe('Cases routes', () => {
   });
 
   // FLAKY: https://github.com/elastic/kibana/issues/175229
+  // FLAKY: https://github.com/elastic/kibana/issues/175230
   describe.skip('Create case', () => {
     it('navigates to the create case page', () => {
       renderWithRouter(['/cases/create']);
