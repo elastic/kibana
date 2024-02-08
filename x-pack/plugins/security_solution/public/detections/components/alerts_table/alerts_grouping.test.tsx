@@ -529,4 +529,41 @@ describe('GroupedAlertsTable', () => {
       }
     });
   });
+
+  it('sends telemetry data when selected group changes', () => {
+    jest
+      .spyOn(window.localStorage, 'getItem')
+      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    store = createMockStore({
+      ...mockGlobalState,
+      groups: {
+        [testProps.tableId]: {
+          options: mockOptions,
+          activeGroups: ['kibana.alert.rule.name'],
+        },
+      },
+    });
+
+    const { getByTestId } = render(
+      <TestProviders store={store}>
+        <GroupedAlertsTable {...testProps} />
+      </TestProviders>
+    );
+
+    fireEvent.click(getByTestId('group-selector-dropdown'));
+    fireEvent.click(getByTestId('panel-user.name'));
+
+    expect(mockedTelemetry.reportAlertsGroupingChanged).toHaveBeenCalledWith({
+      groupByField: 'user.name',
+      tableId: testProps.tableId,
+    });
+
+    fireEvent.click(getByTestId('group-selector-dropdown'));
+    fireEvent.click(getByTestId('panel-host.name'));
+
+    expect(mockedTelemetry.reportAlertsGroupingChanged).toHaveBeenCalledWith({
+      groupByField: 'host.name',
+      tableId: testProps.tableId,
+    });
+  });
 });

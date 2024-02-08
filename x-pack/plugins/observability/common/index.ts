@@ -33,6 +33,7 @@ export {
   apmLabsButton,
   enableInfrastructureHostsView,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureHostsCustomDashboards,
   enableAwsLambdaMetrics,
   enableAgentExplorerView,
   apmEnableTableSearchBar,

@@ -27,5 +27,6 @@ uploadRest() {
 
 echo "--- Uploading static site"
 
+.buildkite/scripts/common/activate_service_account.sh gs://elastic-kibana-coverage-live
 uploadBase
 uploadRest
