@@ -38,7 +38,7 @@ export function SloListSearchBar() {
     },
   } = useKibana<ObservabilityPublicPluginsStart>().services;
 
-  const { state, store: storeState } = useUrlSearchState();
+  const { state, onStateChange: storeState } = useUrlSearchState();
 
   const loading = useSloCrudLoading();
 
