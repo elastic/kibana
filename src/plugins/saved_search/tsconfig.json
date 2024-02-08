@@ -29,9 +29,8 @@
     "@kbn/discover-utils",
     "@kbn/logging",
     "@kbn/core-plugins-server",
-    "@kbn/utility-types",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/saved-search-so-plugin",
+    "@kbn/saved-search",
   ],
   "exclude": [
     "target/**/*",
