@@ -32,6 +32,8 @@ export const InvokeAIActionParamsSchema = schema.object({
     })
   ),
   model: schema.maybe(schema.string()),
+  // abort signal from client
+  signal: schema.maybe(schema.any()),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
