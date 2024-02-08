@@ -36,8 +36,8 @@ import {
 import {
   CachedFetchModelsApiLogic,
   CachedFetchModlesApiLogicActions,
+  FetchModelsApiResponse,
 } from '../../../../api/ml_models/cached_fetch_models_api_logic';
-import { FetchModelsApiResponse } from '../../../../api/ml_models/fetch_models_api_logic';
 import {
   StartTextExpansionModelApiLogic,
   StartTextExpansionModelApiLogicActions,
