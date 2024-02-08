@@ -31,7 +31,6 @@ export interface DataVisualizerIndexBasedAppState extends Omit<ListingPageUrlSta
   searchQueryLanguage?: SearchQueryLanguage;
   visibleFieldTypes?: string[];
   visibleFieldNames?: string[];
-  samplerShardSize?: number;
   showDistributions?: boolean;
   showAllFields?: boolean;
   showEmptyFields?: boolean;

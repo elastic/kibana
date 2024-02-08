@@ -8,33 +8,32 @@
 import { backOff } from 'exponential-backoff';
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
-import { take, filter } from 'rxjs/operators';
+import { filter, take } from 'rxjs/operators';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type {
   CoreSetup,
   CoreStart,
+  ElasticsearchClient,
   ElasticsearchServiceStart,
+  HttpServiceSetup,
+  KibanaRequest,
   Logger,
   Plugin,
   PluginInitializerContext,
-  SavedObjectsServiceStart,
-  HttpServiceSetup,
-  KibanaRequest,
-  ServiceStatus,
-  ElasticsearchClient,
   SavedObjectsClientContract,
+  SavedObjectsServiceStart,
+  ServiceStatus,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
-
-import { DEFAULT_APP_CATEGORIES, SavedObjectsClient, ServiceStatusLevels } from '@kbn/core/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
-  EncryptedSavedObjectsPluginStart,
   EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import type {
   AuditLogger,
@@ -57,61 +56,54 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 
 import type { FleetConfigType } from '../common/types';
 import type { FleetAuthz } from '../common';
-import type { ExperimentalFeatures } from '../common/experimental_features';
-
 import {
-  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   INTEGRATIONS_PLUGIN_ID,
+  MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../common';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import { parseExperimentalConfigValue } from '../common/experimental_features';
 
 import { getFilesClientFactory } from './services/files/get_files_client_factory';
 
 import type { MessageSigningServiceInterface } from './services/security';
 import {
-  getRouteRequiredAuthz,
-  makeRouterWithFleetAuthz,
   calculateRouteAuthz,
   getAuthzFromRequest,
+  getRouteRequiredAuthz,
+  makeRouterWithFleetAuthz,
   MessageSigningService,
 } from './services/security';
 
 import {
-  PLUGIN_ID,
-  OUTPUT_SAVED_OBJECT_TYPE,
   AGENT_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
-  PACKAGES_SAVED_OBJECT_TYPE,
   ASSETS_SAVED_OBJECT_TYPE,
-  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
   DOWNLOAD_SOURCE_SAVED_OBJECT_TYPE,
   FLEET_SERVER_HOST_SAVED_OBJECT_TYPE,
+  OUTPUT_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGES_SAVED_OBJECT_TYPE,
+  PLUGIN_ID,
+  PRECONFIGURATION_DELETION_RECORD_SAVED_OBJECT_TYPE,
 } from './constants';
-import { registerSavedObjects, registerEncryptedSavedObjects } from './saved_objects';
+import { registerEncryptedSavedObjects, registerSavedObjects } from './saved_objects';
 import { registerRoutes } from './routes';
 
 import type { ExternalCallback, FleetRequestHandlerContext } from './types';
-import type {
-  ESIndexPatternService,
-  AgentService,
-  AgentPolicyServiceInterface,
-  PackageService,
-} from './services';
-import { FleetUsageSender } from './services';
+import type { AgentPolicyServiceInterface, AgentService, PackageService } from './services';
 import {
-  appContextService,
-  licenseService,
-  ESIndexPatternSavedObjectService,
   agentPolicyService,
-  packagePolicyService,
   AgentServiceImpl,
+  appContextService,
+  FleetUsageSender,
+  licenseService,
+  packagePolicyService,
   PackageServiceImpl,
 } from './services';
 import {
-  registerFleetUsageCollector,
   fetchAgentsUsage,
   fetchFleetUsage,
+  registerFleetUsageCollector,
 } from './collectors/register';
 import { FleetArtifactsClient } from './services/artifacts';
 import type { FleetRouter } from './types/request_context';
@@ -206,7 +198,6 @@ export interface FleetStartContract {
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
   };
-  esIndexPatternService: ESIndexPatternService;
   packageService: PackageService;
   agentService: AgentService;
   /**
@@ -583,6 +574,9 @@ export class FleetPlugin
           }
         );
 
+        // initialize (generate/encrypt/validate) Uninstall Tokens asynchronously
+        this.initializeUninstallTokens();
+
         this.fleetStatus$.next({
           level: ServiceStatusLevels.available,
           summary: 'Fleet is available',
@@ -610,7 +604,6 @@ export class FleetPlugin
         fromRequest: getAuthzFromRequest,
       },
       fleetSetupCompleted: () => fleetSetupPromise,
-      esIndexPatternService: new ESIndexPatternSavedObjectService(),
       packageService: this.setupPackageService(
         core.elasticsearch.client.asInternalUser,
         internalSoClient
@@ -624,6 +617,7 @@ export class FleetPlugin
         list: agentPolicyService.list,
         getFullAgentPolicy: agentPolicyService.getFullAgentPolicy,
         getByIds: agentPolicyService.getByIDs,
+        bumpRevision: agentPolicyService.bumpRevision.bind(agentPolicyService),
       },
       packagePolicyService,
       registerExternalCallback: (type: ExternalCallback[0], callback: ExternalCallback[1]) => {
@@ -697,5 +691,55 @@ export class FleetPlugin
     }
 
     return this.logger;
+  }
+
+  private async initializeUninstallTokens() {
+    try {
+      await this.generateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token generation.', { error: { message: error } });
+    }
+
+    try {
+      await this.validateUninstallTokens();
+    } catch (error) {
+      appContextService
+        .getLogger()
+        .error('Error happened during uninstall token validation.', { error: { message: error } });
+    }
+  }
+
+  private async generateUninstallTokens() {
+    const logger = appContextService.getLogger();
+
+    logger.debug('Generating Agent uninstall tokens');
+    if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.warn(
+        'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
+      );
+    }
+    await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+
+    if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
+      logger.debug('Checking for and encrypting plain text uninstall tokens');
+      await appContextService.getUninstallTokenService()?.encryptTokens();
+    }
+  }
+
+  private async validateUninstallTokens() {
+    const logger = appContextService.getLogger();
+    logger.debug('Validating uninstall tokens');
+
+    const unintallTokenValidationError = await appContextService
+      .getUninstallTokenService()
+      ?.checkTokenValidityForAllPolicies();
+
+    if (unintallTokenValidationError) {
+      logger.warn(unintallTokenValidationError.error.message);
+    } else {
+      logger.debug('Uninstall tokens validation successful.');
+    }
   }
 }

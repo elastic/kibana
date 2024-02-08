@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('generates no alerts when a value list exception is added for an ML rule', async () => {
-        const valueListId = 'value-list-id';
+        const valueListId = 'value-list-id.txt';
         await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
         const { previewId } = await previewRuleWithExceptionEntries({
           supertest,
@@ -289,8 +289,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(1);
         const fullAlert = previewAlerts[0]._source;
 
-        expect(fullAlert?.['kibana.alert.host.criticality_level']).toBe('normal');
-        expect(fullAlert?.['kibana.alert.user.criticality_level']).toBe('very_important');
+        expect(fullAlert?.['host.asset.criticality']).toBe('normal');
+        expect(fullAlert?.['user.asset.criticality']).toBe('very_important');
       });
     });
   });

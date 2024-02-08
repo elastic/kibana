@@ -27,20 +27,16 @@ import {
 
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { GetEvaluateResponse, PostEvaluateResponse } from '@kbn/elastic-assistant-common';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../../assistant_context';
 import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
-import { usePerformEvaluation } from './use_perform_evaluation';
+import { usePerformEvaluation } from '../../api/evaluate/use_perform_evaluation';
 import { getApmLink, getDiscoverLink } from './utils';
-import { PostEvaluationResponse } from '../../api';
+import { useEvaluationData } from '../../api/evaluate/use_evaluation_data';
 
-/**
- * See AGENT_EXECUTOR_MAP in `x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts`
- * for the agent name -> executor mapping
- */
-const DEFAULT_AGENTS = ['DefaultAgentExecutor', 'OpenAIFunctionsExecutor'];
 const DEFAULT_EVAL_TYPES_OPTIONS = [
   { label: 'correctness' },
   { label: 'esql-validator', disabled: true },
@@ -65,6 +61,11 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   } = usePerformEvaluation({
     http,
   });
+  const { data: evalData } = useEvaluationData({ http });
+  const defaultAgents = useMemo(
+    () => (evalData as GetEvaluateResponse)?.agentExecutors ?? [],
+    [evalData]
+  );
 
   // Run Details
   // Project Name
@@ -195,8 +196,8 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     [selectedAgentOptions]
   );
   const agentOptions = useMemo(() => {
-    return DEFAULT_AGENTS.map((label) => ({ label }));
-  }, []);
+    return defaultAgents.map((label) => ({ label }));
+  }, [defaultAgents]);
 
   // Evaluation
   // Evaluation Type
@@ -283,12 +284,12 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
   ]);
 
   const discoverLink = useMemo(
-    () => getDiscoverLink(basePath, (evalResponse as PostEvaluationResponse)?.evaluationId ?? ''),
+    () => getDiscoverLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
     [basePath, evalResponse]
   );
 
   const apmLink = useMemo(
-    () => getApmLink(basePath, (evalResponse as PostEvaluationResponse)?.evaluationId ?? ''),
+    () => getApmLink(basePath, (evalResponse as PostEvaluateResponse)?.evaluationId ?? ''),
     [basePath, evalResponse]
   );
 

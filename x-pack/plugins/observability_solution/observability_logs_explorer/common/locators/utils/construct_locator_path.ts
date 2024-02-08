@@ -17,10 +17,13 @@ import {
   DatasetSelectionPlain,
 } from '@kbn/logs-explorer-plugin/common';
 import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from '../../url_schema';
+import {
+  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
+  logsExplorerUrlSchemaV1,
+} from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
 
-type ControlsPageState = NonNullable<urlSchemaV1.UrlSchema['controls']>;
+type ControlsPageState = NonNullable<logsExplorerUrlSchemaV1.UrlSchema['controls']>;
 
 interface LocatorPathConstructionParams {
   datasetSelection: DatasetSelectionPlain;
@@ -35,7 +38,7 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
     useHash,
   } = params;
 
-  const pageState = urlSchemaV1.urlSchemaRT.encode(
+  const pageState = logsExplorerUrlSchemaV1.urlSchemaRT.encode(
     deepCompactObject({
       v: 1,
       datasetSelection,
