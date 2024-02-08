@@ -179,7 +179,7 @@ async function scoreSuggestions({
 
   const newUserMessageContent =
     dedent(`Given the following question, score the documents that are relevant to the question. on a scale from 0 to 7,
-    0 being completely relevant, and 10 being extremely relevant. Information is relevant to the question if it helps in
+    0 being completely relevant, and 7 being extremely relevant. Information is relevant to the question if it helps in
     answering the question. Judge it according to the following criteria:
 
     - The document is relevant to the question, and the rest of the conversation
@@ -229,7 +229,7 @@ async function scoreSuggestions({
     (
       await client.chat('score_suggestions', {
         connectorId,
-        messages: [...messages.slice(-1), newUserMessage],
+        messages: [...messages.slice(0, -1), newUserMessage],
         functions: [scoreFunction],
         functionCall: 'score',
         signal,
