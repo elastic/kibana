@@ -35,7 +35,7 @@ interface Dependencies {
 type InitialState = LogsExplorerPublicStateUpdate;
 
 export const createLogsExplorerControllerFactory =
-  ({ core, plugins: { data, discover } }: Dependencies) =>
+  ({ core, plugins }: Dependencies) =>
   async ({
     customizations = {},
     initialState,
@@ -43,6 +43,8 @@ export const createLogsExplorerControllerFactory =
     customizations?: LogsExplorerCustomizations;
     initialState?: InitialState;
   }): Promise<LogsExplorerController> => {
+    const { data } = plugins;
+
     const datasetsClient = new DatasetsService().start({
       http: core.http,
     }).client;
@@ -68,7 +70,7 @@ export const createLogsExplorerControllerFactory =
 
     const machine = createLogsExplorerControllerStateMachine({
       datasetsClient,
-      discover,
+      plugins,
       initialContext,
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,

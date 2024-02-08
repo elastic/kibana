@@ -14,6 +14,7 @@ import type {
   DatasetEncodingError,
   DatasetSelection,
   DataViewSelection,
+  SingleDatasetSelection,
 } from '../../../../common/dataset_selection';
 
 export interface WithDatasetSelection {
@@ -46,16 +47,20 @@ export type LogsExplorerControllerTypeState =
       context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
     }
   | {
-      value: 'initializingDataView';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      value: 'initializingSelection';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
     }
   | {
       value: 'initializingControlPanels';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
-    }
-  | {
-      value: 'initializingStateContainer';
-      context: WithDatasetSelection & WithControlPanels & WithQueryState & WithDisplayOptions;
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
     }
   | {
       value: 'initialized';
@@ -90,7 +95,7 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
-      value: 'initialized.datasetSelection.updatingDataView';
+      value: 'initialized.datasetSelection.creatingAdHocDataView';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -140,6 +145,13 @@ export type LogsExplorerControllerEvent =
   | {
       type: 'RECEIVED_STATE_CONTAINER';
       discoverStateContainer: DiscoverStateContainer;
+    }
+  | {
+      type: 'INITIALIZE_DATA_VIEW';
+    }
+  | {
+      type: 'INITIALIZE_DATASET';
+      data?: SingleDatasetSelection;
     }
   | {
       type: 'LISTEN_TO_CHANGES';

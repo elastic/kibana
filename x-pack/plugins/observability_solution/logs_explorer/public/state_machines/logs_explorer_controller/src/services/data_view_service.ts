@@ -8,7 +8,7 @@
 import { InvokeCreator } from 'xstate';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
-export const createAndSetDataView =
+export const createAdHocDataView =
   (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   async (context) => {
     if (!('discoverStateContainer' in context)) return;

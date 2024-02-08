@@ -24,6 +24,10 @@ export const isDatasetSelection = (input: any): input is DatasetSelection => {
   );
 };
 
+export const isUnresolvedDatasetSelection = (input: any): input is UnresolvedDatasetSelection => {
+  return input instanceof UnresolvedDatasetSelection;
+};
+
 export const isDataViewSelection = (input: any): input is DataViewSelection => {
   return input instanceof DataViewSelection;
 };

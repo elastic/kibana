@@ -8,7 +8,7 @@
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
-import { isDataViewSelection } from '../../../../../common/dataset_selection';
+import { DataViewSelection, isDataViewSelection } from '../../../../../common/dataset_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,
@@ -84,12 +84,31 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
   context.discoverStateContainer.appState.update(getDiscoverAppStateFromContext(context));
 };
 
-export const redirectToDiscover =
+export const redirectToDiscoverAction =
   (
     discover: DiscoverStart
   ): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
-  (_context, event) => {
+  (context, event) => {
     if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
-      discover.locator?.navigate({ dataViewId: event.data.selection.dataView.id });
+      return redirectToDiscover({ context, datasetSelection: event.data, discover });
     }
   };
+
+export const redirectToDiscover = ({
+  context,
+  datasetSelection,
+  discover,
+}: {
+  discover: DiscoverStart;
+  context: LogsExplorerControllerContext;
+  datasetSelection: DataViewSelection;
+}) => {
+  return discover.locator?.navigate({
+    filters: context.filters,
+    query: context.query,
+    refreshInterval: context.refreshInterval,
+    timeRange: context.time,
+    breakdownField: context.chart.breakdownField ?? undefined,
+    dataViewSpec: datasetSelection.selection.dataView.toDataviewSpec(),
+  });
+};
