@@ -149,34 +149,28 @@ export const createPureDatasetsSummaryPanelStateMachine = (
     },
     {
       actions: {
-        storeDatasetsQuality: assign((_context, event) => {
-          return 'data' in event ? { datasetsQuality: event.data as DatasetsQuality } : {};
-        }),
-        storeDatasetsActivity: assign((_context, event) => {
-          return 'data' in event ? { datasetsActivity: event.data as DatasetsActivityDetails } : {};
-        }),
-        storeEstimatedData: assign((_context, event) => {
-          return 'data' in event
+        storeDatasetsQuality: assign((_context, event) =>
+          'data' in event ? { datasetsQuality: event.data as DatasetsQuality } : {}
+        ),
+        storeDatasetsActivity: assign((_context, event) =>
+          'data' in event ? { datasetsActivity: event.data as DatasetsActivityDetails } : {}
+        ),
+        storeEstimatedData: assign((_context, event) =>
+          'data' in event
             ? {
                 estimatedData: event.data as EstimatedDataDetails,
               }
-            : {};
-        }),
-        incrementDatasetsQualityRetries: assign(({ retries }, _event) => {
-          return {
-            retries: { ...retries, datasetsQualityRetries: retries.datasetsQualityRetries + 1 },
-          };
-        }),
-        incrementDatasetsActivityRetries: assign(({ retries }, _event) => {
-          return {
-            retries: { ...retries, datasetsActivityRetries: retries.datasetsActivityRetries + 1 },
-          };
-        }),
-        incrementEstimatedDataRetries: assign(({ retries }, _event) => {
-          return {
-            retries: { ...retries, estimatedDataRetries: retries.estimatedDataRetries + 1 },
-          };
-        }),
+            : {}
+        ),
+        incrementDatasetsQualityRetries: assign(({ retries }, _event) => ({
+          retries: { ...retries, datasetsQualityRetries: retries.datasetsQualityRetries + 1 },
+        })),
+        incrementDatasetsActivityRetries: assign(({ retries }, _event) => ({
+          retries: { ...retries, datasetsActivityRetries: retries.datasetsActivityRetries + 1 },
+        })),
+        incrementEstimatedDataRetries: assign(({ retries }, _event) => ({
+          retries: { ...retries, estimatedDataRetries: retries.estimatedDataRetries + 1 },
+        })),
       },
       guards: {
         canRetry: (context, event, { cond }) => {

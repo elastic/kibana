@@ -12,7 +12,9 @@ import { DatasetsQualityIndicators } from './datasets_quality_indicators';
 import { ActiveDatasets } from './active_datasets';
 import { EstimatedData } from './estimated_data';
 
-export function SummaryPanel() {
+// Allow for lazy loading
+// eslint-disable-next-line import/no-default-export
+export default function SummaryPanel() {
   return (
     <EuiFlexGroup gutterSize="m">
       <DatasetsQualityIndicators />

@@ -90,7 +90,7 @@ const QualityIndicator = ({
         <EuiTitle size="m">
           <h3>
             <EuiHealth textSize="inherit" color={quality}>
-              {value}
+              {value || 0}
             </EuiHealth>
           </h3>
         </EuiTitle>

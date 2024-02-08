@@ -12,7 +12,6 @@ import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
 import { DatasetQualityController } from '../../controller';
-import { SummaryPanel } from './summary_panel/summary_panel';
 import { SummaryPanelProvider } from '../../hooks';
 import { DataStreamsStatsService } from '../../services/data_streams_stats';
 
@@ -57,6 +56,7 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
 
 const Header = dynamic(() => import('./header'));
 const Table = dynamic(() => import('./table'));
+const SummaryPanel = dynamic(() => import('./summary_panel/summary_panel'));
 
 function DatasetQuality() {
   return (
