@@ -97,11 +97,18 @@ export async function isPackageInstalled(options: {
   return installedPackage !== undefined;
 }
 
+// Error used to retry in isPackageVersionOrLaterInstalled
+class CurrentlyInstallingError extends Error {}
+
+/**
+ * Check if a package is currently installed,
+ * if the package is currently installing it will retry until MAX_ENSURE_INSTALL_TIME is reached
+ */
 export async function isPackageVersionOrLaterInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   pkgVersion: string;
-}): Promise<{ package: Installation; installType: InstallType } | false> {
+}): Promise<{ package: Installation } | false> {
   return pRetry(
     async () => {
       const { savedObjectsClient, pkgName, pkgVersion } = options;
@@ -112,30 +119,31 @@ export async function isPackageVersionOrLaterInstalled(options: {
         (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
       ) {
         if (installedPackage.install_status === 'installing') {
-          throw new ConcurrentInstallOperationError(
+          throw new CurrentlyInstallingError(
             `Package ${pkgName}-${pkgVersion} is currently installing`
           );
+        } else if (installedPackage.install_status === 'install_failed') {
+          return false;
         }
 
-        let installType: InstallType;
-        try {
-          installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
-        } catch (e) {
-          installType = 'unknown';
-        }
-        return { package: installedPackage, installType };
+        return { package: installedPackage };
       }
       return false;
     },
     {
       maxRetryTime: MAX_ENSURE_INSTALL_TIME,
       onFailedAttempt: (error) => {
-        if (!(error instanceof ConcurrentInstallOperationError)) {
+        if (!(error instanceof CurrentlyInstallingError)) {
           throw error;
         }
       },
     }
-  );
+  ).catch((err): false => {
+    if (err instanceof CurrentlyInstallingError) {
+      return false;
+    }
+    throw err;
+  });
 }
 
 export async function ensureInstalledPackage(options: {
