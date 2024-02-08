@@ -34,6 +34,7 @@ const isUnsafeConsoleCall = (node) => {
 const isUnsafeConsoleObjectPatternDeclarator = (node) => {
   return (
     node.id.type === esTypes.ObjectPattern &&
+    node.init.type &&
     node.init.type === esTypes.Identifier &&
     node.init.name === 'unsafeConsole'
   );
