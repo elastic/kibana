@@ -124,7 +124,7 @@ export const createPureLogsExplorerControllerStateMachine = (
                         actions: ['redirectToDiscover'],
                       },
                       {
-                        cond: 'isLogssDataViewDescriptor',
+                        cond: 'isLogsDataViewDescriptor',
                         target: 'changingDataView',
                         actions: ['storeDatasetSelection'],
                       },
@@ -147,7 +147,7 @@ export const createPureLogsExplorerControllerStateMachine = (
                         actions: ['redirectToDiscover'],
                       },
                       {
-                        cond: 'isLogssDataViewDescriptor',
+                        cond: 'isLogsDataViewDescriptor',
                         target: 'changingDataView',
                         actions: ['storeDatasetSelection'],
                       },
@@ -286,7 +286,7 @@ export const createPureLogsExplorerControllerStateMachine = (
         controlGroupAPIExists: (_context, event) => {
           return 'controlGroupAPI' in event && event.controlGroupAPI != null;
         },
-        isLogssDataViewDescriptor: (_context, event) => {
+        isLogsDataViewDescriptor: (_context, event) => {
           if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
             return event.data.selection.dataView.isLogsDataType();
           }

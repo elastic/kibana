@@ -71,7 +71,15 @@ export type DatasetsSelectorTypestate =
       context: DefaultDatasetsSelectorContext;
     }
   | {
+      value: 'selection.validatingSelection';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
       value: 'selection.single';
+      context: DefaultDatasetsSelectorContext;
+    }
+  | {
+      value: 'selection.dataView';
       context: DefaultDatasetsSelectorContext;
     }
   | {
