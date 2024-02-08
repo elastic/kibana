@@ -1144,22 +1144,6 @@
           },
           {
             "parentPluginId": "aiops",
-            "id": "def-public.LogRateAnalysisContentWrapperProps.setGlobalState",
-            "type": "Any",
-            "tags": [],
-            "label": "setGlobalState",
-            "description": [
-              "On global timefilter update"
-            ],
-            "signature": [
-              "any"
-            ],
-            "path": "x-pack/plugins/aiops/public/components/log_rate_analysis/log_rate_analysis_content/log_rate_analysis_content_wrapper.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "aiops",
             "id": "def-public.LogRateAnalysisContentWrapperProps.initialAnalysisStart",
             "type": "CompoundType",
             "tags": [],
