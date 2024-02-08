@@ -229,7 +229,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('generates no alerts when a value list exception is added for an ML rule', async () => {
-        const valueListId = 'value-list-id';
+        const valueListId = 'value-list-id.txt';
         await importFile(supertest, log, 'keyword', ['mothra'], valueListId);
         const { previewId } = await previewRuleWithExceptionEntries({
           supertest,
