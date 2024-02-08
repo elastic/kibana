@@ -103,6 +103,62 @@ export const buildCustomThresholdRule = (
           timeSize: 15,
           timeUnit: 'm',
         },
+        {
+          comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'A',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+          ],
+          threshold: [0.8],
+          timeSize: 15,
+          timeUnit: 'm',
+          equation:
+            'A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A + A',
+        },
+        {
+          comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'C',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+            {
+              name: 'D',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+          ],
+          threshold: [0.8],
+          timeSize: 15,
+          timeUnit: 'm',
+        },
+        {
+          comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'CAD',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+            {
+              name: 'CADE',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+            {
+              name: 'ADE',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+          ],
+          threshold: [0.8],
+          timeSize: 15,
+          timeUnit: 'm',
+        },
       ],
       searchConfiguration: {
         query: {

@@ -448,10 +448,16 @@ export class PluginsService
     uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
   ) {
     for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      deps.http.registerStaticDir(
+      /**
+       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+       * Eventually we only want to serve from the sha scoped path
+       */
+      [
+        deps.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
         `/plugins/${pluginName}/assets/{path*}`,
-        pluginInfo.publicAssetsDir
-      );
+      ].forEach((path) => {
+        deps.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
+      });
     }
   }
 }

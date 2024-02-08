@@ -53,14 +53,24 @@ export const ResponseActionsForm = ({
       const fieldErrors = reduce<string[], Array<{ type: string; errors: string[] }>>(
         map(items, 'path'),
         (acc, path) => {
-          if (fields[`${path}.params`]?.errors?.length) {
-            acc.push({
-              type: upperFirst((fields[`${path}.actionTypeId`].value as string).substring(1)),
-              errors: map(fields[`${path}.params`].errors, 'message'),
-            });
-            return acc;
-          }
+          map(fields, (_, name) => {
+            const paramsPath = `${path}.params`;
 
+            if (name.includes(paramsPath)) {
+              if (fields[name]?.errors?.length) {
+                const responseActionType = upperFirst(
+                  (fields[`${path}.actionTypeId`].value as string).substring(1)
+                );
+                acc.push({
+                  type: responseActionType,
+                  errors: map(fields[name].errors, 'message'),
+                });
+              }
+              return acc;
+            }
+
+            return acc;
+          });
           return acc;
         },
         []
