@@ -19,7 +19,7 @@ import { getCategoriesRoute } from './cases/categories/get_categories';
 import { getCaseMetricRoute } from './internal/get_case_metrics';
 import { getCasesMetricRoute } from './internal/get_cases_metrics';
 import { searchCasesRoute } from './internal/search_cases';
-import { updateCustomFieldRoute } from './internal/update_custom_field';
+import { replaceCustomFieldRoute } from './internal/replace_custom_field';
 
 export const getInternalRoutes = (userProfileService: UserProfileService) =>
   [
@@ -35,5 +35,5 @@ export const getInternalRoutes = (userProfileService: UserProfileService) =>
     getCaseMetricRoute,
     getCasesMetricRoute,
     searchCasesRoute,
-    updateCustomFieldRoute,
+    replaceCustomFieldRoute,
   ] as CaseRoute[];

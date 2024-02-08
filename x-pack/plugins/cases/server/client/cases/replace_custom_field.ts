@@ -13,19 +13,15 @@ import type { CustomFieldPatchRequest } from '../../../common/types/api';
 import { CaseRequestCustomFieldsRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
-import { flattenCaseSavedObject } from '../../common/utils';
 import { validateMaxUserActions } from '../../../common/utils/validators';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
-import type { Case } from '../../../common/types/domain';
-import { CaseRt } from '../../../common/types/domain';
+import type { CaseCustomField } from '../../../common/types/domain';
+import { CaseCustomFieldRt } from '../../../common/types/domain';
 import { decodeWithExcessOrThrow } from '../../../common/api';
-import {
-  validateCustomFieldKeysAgainstConfiguration,
-  validateCustomFieldTypesInRequest,
-} from './validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 import type { UserActionEvent } from '../../services/user_actions/types';
 
-export interface UpdateCustomFieldArgs {
+export interface ReplaceCustomFieldArgs {
   /**
    * The ID of a case
    */
@@ -45,11 +41,11 @@ export interface UpdateCustomFieldArgs {
  *
  * @ignore
  */
-export const updateCustomField = async (
-  { caseId, customFieldId, request }: UpdateCustomFieldArgs,
+export const replaceCustomField = async (
+  { caseId, customFieldId, request }: ReplaceCustomFieldArgs,
   clientArgs: CasesClientArgs,
   casesClient: CasesClient
-): Promise<Case> => {
+): Promise<CaseCustomField> => {
   const {
     services: { caseService, userActionService },
     user,
@@ -81,6 +77,21 @@ export const updateCustomField = async (
       throw Boom.badRequest('cannot find custom field');
     }
 
+    validateCustomFieldTypesInRequest({
+      requestCustomFields: [
+        {
+          value,
+          type: foundCustomField.type,
+          key: customFieldId,
+        } as CaseCustomField,
+      ],
+      customFieldsConfiguration: configurations[0].customFields,
+    });
+
+    if (value == null && foundCustomField.required) {
+      throw Boom.badRequest('Custom field value cannot be null or undefined.');
+    }
+
     const customFieldsToUpdate = [
       {
         value,
@@ -94,24 +105,6 @@ export const updateCustomField = async (
       decodeWithExcessOrThrow(CaseRequestCustomFieldsRt)(customFieldsToUpdate);
 
     const updatedAt = new Date().toISOString();
-
-    if (value == null && foundCustomField.required) {
-      throw Boom.badRequest('Custom field value cannot be null or undefined.');
-    }
-
-    if (value && typeof value === 'string' && value.trim() === '' && foundCustomField.required) {
-      throw Boom.badRequest('Required custom field of type text value cannot be empty.');
-    }
-
-    validateCustomFieldKeysAgainstConfiguration({
-      requestCustomFields: decodedCustomFields,
-      customFieldsConfiguration: configurations[0].customFields,
-    });
-
-    validateCustomFieldTypesInRequest({
-      requestCustomFields: decodedCustomFields,
-      customFieldsConfiguration: configurations[0].customFields,
-    });
 
     const patchCasesPayload = {
       caseId,
@@ -138,15 +131,13 @@ export const updateCustomField = async (
       refresh: false,
     });
 
-    const returnUpdatedCase = flattenCaseSavedObject({
-      savedObject: {
-        ...caseToUpdate,
-        ...updatedCase,
-        attributes: { ...caseToUpdate.attributes, ...updatedCase?.attributes },
-        references: updatedCase.references ?? caseToUpdate.references,
-        version: updatedCase?.version ?? caseToUpdate.version,
-      },
-    });
+    const updatedCustomField = updatedCase.attributes.customFields?.find(
+      (cf) => cf.key === customFieldId
+    );
+
+    if (!updatedCustomField) {
+      throw new Error('Cannot find updated custom field.');
+    }
 
     const builtUserActions =
       userActionsDict != null
@@ -159,10 +150,10 @@ export const updateCustomField = async (
       builtUserActions,
     });
 
-    return decodeOrThrow(CaseRt)(returnUpdatedCase);
+    return decodeOrThrow(CaseCustomFieldRt)(updatedCustomField);
   } catch (error) {
     throw createCaseError({
-      message: `Failed to update customField, id: ${customFieldId} of case: ${caseId} version:${request.caseVersion} : ${error}`,
+      message: `Failed to replace customField, id: ${customFieldId} of case: ${caseId} version:${request.caseVersion} : ${error}`,
       error,
       logger,
     });

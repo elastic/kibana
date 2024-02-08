@@ -6,15 +6,15 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { INTERNAL_PATCH_CUSTOM_FIELDS_URL } from '../../../../common/constants';
+import { INTERNAL_PUT_CUSTOM_FIELDS_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
 import { createCasesRoute } from '../create_cases_route';
 import type { customFieldsApiV1 } from '../../../../common/types/api';
-import type { caseDomainV1 } from '../../../../common/types/domain';
+import type { customFieldDomainV1 } from '../../../../common/types/domain';
 
-export const updateCustomFieldRoute = createCasesRoute({
-  method: 'patch',
-  path: INTERNAL_PATCH_CUSTOM_FIELDS_URL,
+export const replaceCustomFieldRoute = createCasesRoute({
+  method: 'put',
+  path: INTERNAL_PUT_CUSTOM_FIELDS_URL,
   params: {
     params: schema.object({
       case_id: schema.string(),
@@ -29,7 +29,7 @@ export const updateCustomFieldRoute = createCasesRoute({
       const customFieldId = request.params.custom_field_id;
       const details = request.body as customFieldsApiV1.CustomFieldPatchRequest;
 
-      const res: caseDomainV1.Case = await casesClient.cases.updateCustomField({
+      const res: customFieldDomainV1.CaseCustomField = await casesClient.cases.replaceCustomField({
         caseId,
         customFieldId,
         request: details,
@@ -40,7 +40,7 @@ export const updateCustomFieldRoute = createCasesRoute({
       });
     } catch (error) {
       throw createCaseError({
-        message: `Failed to patch customField in route: ${error}`,
+        message: `Failed to replace customField in route: ${error}`,
         error,
       });
     }

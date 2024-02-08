@@ -9,9 +9,9 @@ import { CustomFieldTypes } from '../../../common/types/domain';
 import { MAX_USER_ACTIONS_PER_CASE } from '../../../common/constants';
 import { mockCases } from '../../mocks';
 import { createCasesClientMock, createCasesClientMockArgs } from '../mocks';
-import { updateCustomField } from './update_custom_field';
+import { replaceCustomField } from './replace_custom_field';
 
-describe('Update custom field', () => {
+describe('Replace custom field', () => {
   const customFields = [
     {
       key: 'first_key',
@@ -57,13 +57,13 @@ describe('Update custom field', () => {
     ]);
   });
 
-  it('can update text customField', async () => {
+  it('can replace text customField', async () => {
     clientArgs.services.caseService.patchCase.mockResolvedValue({
       ...theCase,
     });
 
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: theCase.id,
           customFieldId: 'first_key',
@@ -105,13 +105,13 @@ describe('Update custom field', () => {
     );
   });
 
-  it('can update toggle customField', async () => {
+  it('can replace toggle customField', async () => {
     clientArgs.services.caseService.patchCase.mockResolvedValue({
       ...theCase,
     });
 
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: theCase.id,
           customFieldId: 'second_key',
@@ -155,7 +155,7 @@ describe('Update custom field', () => {
 
   it('does not throw error when customField value is null and the custom field is not required', async () => {
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'second_key',
@@ -172,7 +172,7 @@ describe('Update custom field', () => {
 
   it('throws error when customField value is null and the custom field is required', async () => {
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'first_key',
@@ -185,13 +185,13 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
     );
   });
 
   it('throws error when required customField of type text has value as empty string', async () => {
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'first_key',
@@ -204,13 +204,13 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The value field cannot be an empty string.,Invalid value \\"            \\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The value field cannot be an empty string.,Invalid value \\"            \\" supplied to \\"value\\""`
     );
   });
 
   it('throws error when customField value is undefined and the custom field is required', async () => {
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'first_key',
@@ -224,7 +224,7 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
     );
   });
 
@@ -232,7 +232,7 @@ describe('Update custom field', () => {
     clientArgs.services.caseService.getCase.mockResolvedValue(mockCases[0]);
 
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'missing_key',
@@ -245,13 +245,13 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: cannot find custom field"`
+      `"Failed to replace customField, id: missing_key of case: mock-id-1 version:WzAsMV0= : Error: cannot find custom field"`
     );
   });
 
   it('throws error when the customField type does not match the configuration', async () => {
     await expect(
-      updateCustomField(
+      replaceCustomField(
         {
           caseId: mockCases[0].id,
           customFieldId: 'second_key',
@@ -264,7 +264,34 @@ describe('Update custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to update customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"foobar\\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"foobar\\" supplied to \\"value\\""`
+    );
+  });
+
+  it('throws error when the customField not found after update', async () => {
+    clientArgs.services.caseService.patchCase.mockResolvedValue({
+      ...theCase,
+      attributes: {
+        ...theCase.attributes,
+        customFields: [],
+      },
+    });
+
+    await expect(
+      replaceCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'second_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            value: false,
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to replace customField, id: second_key of case: mock-id-1 version:WzAsMV0= : Error: Cannot find updated custom field."`
     );
   });
 
@@ -282,7 +309,7 @@ describe('Update custom field', () => {
       clientArgs.services.caseService.patchCase.mockResolvedValue(theCase);
 
       await expect(
-        updateCustomField(
+        replaceCustomField(
           {
             caseId: mockCases[0].id,
             customFieldId: 'first_key',
@@ -308,7 +335,7 @@ describe('Update custom field', () => {
       });
 
       await expect(
-        updateCustomField(
+        replaceCustomField(
           {
             caseId: mockCases[0].id,
             customFieldId: 'first_key',
@@ -321,7 +348,7 @@ describe('Update custom field', () => {
           casesClient
         )
       ).rejects.toThrow(
-        `Failed to update customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The case with id mock-id-1 has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
+        `Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The case with id mock-id-1 has reached the limit of ${MAX_USER_ACTIONS_PER_CASE} user actions.`
       );
     });
   });

@@ -56,7 +56,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/user_actions_get_users'));
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
     loadTestFile(require.resolve('./internal/search_cases'));
-    loadTestFile(require.resolve('./internal/patch_custom_field'));
+    loadTestFile(require.resolve('./internal/replace_custom_field'));
 
     /**
      * Attachments framework

@@ -15,7 +15,7 @@ import {
   createCase,
   createConfiguration,
   getConfigurationRequest,
-  updateCustomField,
+  replaceCustomField,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -33,13 +33,13 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('patch_custom_field', () => {
+  describe('replace_custom_field', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
 
     describe('basic tests', () => {
-      it('should patch a text customField', async () => {
+      it('should replace a text customField', async () => {
         await createConfiguration(
           supertest,
           getConfigurationRequest({
@@ -77,7 +77,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-        const patchedCase = await updateCustomField({
+        const replacedCustomField = await replaceCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field_1',
@@ -87,18 +87,11 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(patchedCase.customFields).to.eql([
-          {
-            key: 'test_custom_field_1',
-            type: CustomFieldTypes.TEXT,
-            value: 'this is updated text field value',
-          },
-          {
-            key: 'test_custom_field_2',
-            type: CustomFieldTypes.TOGGLE,
-            value: true,
-          },
-        ]);
+        expect(replacedCustomField).to.eql({
+          key: 'test_custom_field_1',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is updated text field value',
+        });
       });
 
       it('should patch a toggle customField', async () => {
@@ -139,7 +132,7 @@ export default ({ getService }: FtrProviderContext): void => {
             },
           ],
         });
-        const patchedCase = await updateCustomField({
+        const replacedCustomField = await replaceCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field_2',
@@ -149,18 +142,11 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        expect(patchedCase.customFields).to.eql([
-          {
-            key: 'test_custom_field_2',
-            type: CustomFieldTypes.TOGGLE,
-            value: false,
-          },
-          {
-            key: 'test_custom_field_1',
-            type: CustomFieldTypes.TEXT,
-            value: 'text field value',
-          },
-        ]);
+        expect(replacedCustomField).to.eql({
+          key: 'test_custom_field_2',
+          type: CustomFieldTypes.TOGGLE,
+          value: false,
+        });
       });
 
       it('does not throw error when updating an optional custom field with a null value', async () => {
@@ -191,7 +177,7 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        await updateCustomField({
+        await replaceCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
@@ -223,13 +209,12 @@ export default ({ getService }: FtrProviderContext): void => {
         );
         const postedCase = await createCase(supertest, postCaseReq);
 
-        await updateCustomField({
+        await replaceCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'random_key',
           params: {
             caseVersion: postedCase.version,
-
             value: 'this is updated text field value',
           },
           expectedHttpCode: 400,
@@ -264,13 +249,12 @@ export default ({ getService }: FtrProviderContext): void => {
           ],
         });
 
-        await updateCustomField({
+        await replaceCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
           params: {
             caseVersion: postedCase.version,
-
             value: null,
           },
           expectedHttpCode: 400,
@@ -295,7 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
         );
         const postedCase = await createCase(supertest, postCaseReq);
 
-        await updateCustomField({
+        await replaceCustomField({
           supertest,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
@@ -311,7 +295,7 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('rbac', () => {
       const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-      it('should update the custom field when the user has the correct permissions', async () => {
+      it('should replace the custom field when the user has the correct permissions', async () => {
         await createConfiguration(
           supertestWithoutAuth,
           getConfigurationRequest({
@@ -338,7 +322,7 @@ export default ({ getService }: FtrProviderContext): void => {
           space: 'space1',
         });
 
-        const patchedCase = await updateCustomField({
+        await replaceCustomField({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
@@ -348,12 +332,11 @@ export default ({ getService }: FtrProviderContext): void => {
             value: 'this is updated text field value',
           },
           auth: { user: secOnly, space: 'space1' },
+          expectedHttpCode: 200,
         });
-
-        expect(patchedCase.owner).to.eql('securitySolutionFixture');
       });
 
-      it('should not update a custom field when the user does not have the correct ownership', async () => {
+      it('should not replace a custom field when the user does not have the correct ownership', async () => {
         await createConfiguration(
           supertestWithoutAuth,
           getConfigurationRequest({
@@ -392,7 +375,7 @@ export default ({ getService }: FtrProviderContext): void => {
           { user: obsOnly, space: 'space1' }
         );
 
-        await updateCustomField({
+        await replaceCustomField({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
@@ -408,7 +391,7 @@ export default ({ getService }: FtrProviderContext): void => {
       for (const user of [globalRead, secOnlyRead, obsOnlyRead, obsSecRead, noKibanaPrivileges]) {
         it(`User ${
           user.username
-        } with role(s) ${user.roles.join()} - should NOT update a custom field`, async () => {
+        } with role(s) ${user.roles.join()} - should NOT replace a custom field`, async () => {
           await createConfiguration(
             supertestWithoutAuth,
             { ...getConfigurationRequest(), owner: 'observabilityFixture' },
@@ -429,7 +412,7 @@ export default ({ getService }: FtrProviderContext): void => {
             }
           );
 
-          await updateCustomField({
+          await replaceCustomField({
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
             customFieldId: 'test_custom_field',
@@ -443,7 +426,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       }
 
-      it('should NOT update a custom field in a space with no permissions', async () => {
+      it('should NOT replace a custom field in a space with no permissions', async () => {
         await createConfiguration(
           supertestWithoutAuth,
           { ...getConfigurationRequest(), owner: 'observabilityFixture' },
@@ -464,7 +447,7 @@ export default ({ getService }: FtrProviderContext): void => {
           }
         );
 
-        await updateCustomField({
+        await replaceCustomField({
           supertest: supertestWithoutAuth,
           caseId: postedCase.id,
           customFieldId: 'test_custom_field',
