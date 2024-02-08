@@ -5,62 +5,43 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import { useCallback } from 'react';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Action, ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import useAsync from 'react-use/lib/useAsync';
-import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import {
-  type LensVisualizationState,
-  type Chart,
   type LensAttributes,
-  type ChartModel,
-  type XYLayerConfig,
-  LensAttributesBuilder,
-  XYChart,
-  MetricChart,
-  MetricLayer,
-  XYDataLayer,
-  XYReferenceLinesLayer,
-} from '@kbn/lens-embeddable-utils';
-import { InfraClientSetupDeps } from '../types';
+  type LensConfig,
+  LensConfigBuilder,
+} from '@kbn/lens-embeddable-utils/config_builder';
+import { useKibanaContextForPlugin } from './use_kibana';
 
-export type UseLensAttributesParams = Omit<ChartModel, 'id'>;
+export type UseLensAttributesParams = LensConfig;
 
-export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesParams) => {
+export const useLensAttributes = (params: UseLensAttributesParams) => {
   const {
-    services: { lens },
-  } = useKibana<InfraClientSetupDeps>();
+    services: { lens, dataViews },
+  } = useKibanaContextForPlugin();
   const { navigateToPrefilledEditor } = lens;
-  const { value, error } = useAsync(() => {
-    return lens.stateHelperApi();
-  }, [lens]);
-  const { formula: formulaAPI } = value ?? {};
 
-  const attributes = useMemo(() => {
-    if (!dataView || !formulaAPI) {
-      return null;
+  const { value: attributes, error } = useAsync(async () => {
+    const { formula: formulaAPI } = await lens.stateHelperApi();
+    if (!dataViews || !formulaAPI || !params.dataset) {
+      return undefined;
     }
 
-    const builder = new LensAttributesBuilder({
-      visualization: chartFactory({
-        dataView,
-        formulaAPI,
-        ...params,
-      }),
-    });
+    const builder = new LensConfigBuilder(formulaAPI, dataViews);
 
-    return builder.build();
-  }, [dataView, formulaAPI, params]);
+    return builder.build(params) as Promise<LensAttributes>;
+  }, [params.chartType, params.dataset, dataViews]);
 
   const injectFilters = useCallback(
     ({ filters, query }: { filters: Filter[]; query: Query }): LensAttributes | null => {
       if (!attributes) {
         return null;
       }
+
       return {
         ...attributes,
         state: {
@@ -125,79 +106,19 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   );
 
   const getFormula = () => {
-    const firstDataLayer = [
-      ...(Array.isArray(params.layers) ? params.layers : [params.layers]),
-    ].find((p) => p.layerType === 'data');
-
-    if (!firstDataLayer) {
-      return '';
+    if (params.chartType === 'xy') {
+      return params.layers[0].yAxis[0].value;
     }
 
-    const mainFormulaConfig = Array.isArray(firstDataLayer.data)
-      ? firstDataLayer.data[0]
-      : firstDataLayer.data;
-
-    return mainFormulaConfig.value;
+    return params.value;
   };
 
-  return { formula: getFormula(), attributes, getExtraActions, error };
-};
-
-const chartFactory = ({
-  dataView,
-  formulaAPI,
-  ...params
-}: {
-  dataView: DataView;
-  formulaAPI: FormulaPublicApi;
-} & UseLensAttributesParams): Chart<LensVisualizationState> => {
-  switch (params.visualizationType) {
-    case 'lnsXY':
-      if (!Array.isArray(params.layers)) {
-        throw new Error(`Invalid layers type. Expected an array of layers.`);
-      }
-
-      const xyLayerFactory = (layer: XYLayerConfig) => {
-        switch (layer.layerType) {
-          case 'data': {
-            return new XYDataLayer(layer);
-          }
-          case 'referenceLine': {
-            return new XYReferenceLinesLayer(layer);
-          }
-          default:
-            throw new Error(`Invalid layer type`);
-        }
-      };
-
-      const { layers, ...rest } = params;
-      return new XYChart({
-        dataView,
-        formulaAPI,
-        layers: layers.map((layerItem) => {
-          return xyLayerFactory(layerItem);
-        }),
-        ...rest,
-      });
-
-    case 'lnsMetric':
-      if (Array.isArray(params.layers)) {
-        throw new Error(`Invalid layer type. Expected a single layer object.`);
-      }
-
-      return new MetricChart({
-        dataView,
-        formulaAPI,
-        layers: new MetricLayer({
-          data: params.layers.data,
-          options: { ...params.layers.options },
-          layerType: params.layers.layerType,
-        }),
-        title: params.title,
-      });
-    default:
-      throw new Error(`Unsupported chart type`);
-  }
+  return {
+    formula: getFormula(),
+    attributes: attributes as LensAttributes | null,
+    getExtraActions,
+    error,
+  };
 };
 
 const getOpenInLensAction = (onExecute: () => void): Action => {

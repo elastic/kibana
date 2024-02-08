@@ -11,7 +11,7 @@ import type { EditorError } from '../../../types';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';
 import { suggest } from '../ast/autocomplete/autocomplete';
-import { getHoverItem } from '../ast/hover';
+import { getHoverItem } from '../ast/hover/hover';
 import { getSignatureHelp } from '../ast/signature';
 
 // from linear offset to Monaco position
@@ -115,5 +115,15 @@ export class ESQLAstAdapter {
         range: undefined as unknown as monaco.IRange,
       })),
     };
+  }
+
+  async codeAction(
+    model: monaco.editor.ITextModel,
+    range: monaco.Range,
+    context: monaco.languages.CodeActionContext
+  ) {
+    const getAstFn = await this.getAstWorker(model);
+    const codeActions = await getActions(model, range, context, getAstFn, this.callbacks);
+    return codeActions;
   }
 }

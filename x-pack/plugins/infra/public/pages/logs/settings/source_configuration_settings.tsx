@@ -101,6 +101,14 @@ export const LogsSettingsPage = () => {
         <Prompt
           prompt={sourceConfigurationFormElement.isDirty ? unsavedFormPromptMessage : undefined}
         />
+        {isInlineLogView && (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <InlineLogViewCallout revertToDefaultLogView={revertToDefaultLogView} />
+              <EuiSpacer />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
         <EuiPanel paddingSize="l" hasShadow={false} hasBorder={true}>
           <NameConfigurationPanel
             isLoading={isLoading}
@@ -145,56 +153,48 @@ export const LogsSettingsPage = () => {
                       isLoading
                       fill
                     >
-                      Loading
+                      {i18n.translate('xpack.infra.logsSettingsPage.loadingButtonLabel', {
+                        defaultMessage: 'Loading',
+                      })}
                     </EuiButton>
                   </EuiFlexItem>
                 </EuiFlexGroup>
               ) : (
-                <>
-                  {isInlineLogView && (
-                    <EuiFlexGroup>
-                      <EuiFlexItem>
-                        <InlineLogViewCallout revertToDefaultLogView={revertToDefaultLogView} />
-                        <EuiSpacer />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  )}
-                  <EuiFlexGroup justifyContent="flexEnd">
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="discardSettingsButton"
-                        color="danger"
-                        iconType="cross"
-                        isDisabled={isLoading || !sourceConfigurationFormElement.isDirty}
-                        onClick={() => {
-                          sourceConfigurationFormElement.resetValue();
-                        }}
-                      >
-                        <FormattedMessage
-                          id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
-                          defaultMessage="Discard"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiButton
-                        data-test-subj="applySettingsButton"
-                        color="primary"
-                        isDisabled={
-                          !sourceConfigurationFormElement.isDirty ||
-                          sourceConfigurationFormElement.validity.validity !== 'valid'
-                        }
-                        fill
-                        onClick={persistUpdates}
-                      >
-                        <FormattedMessage
-                          id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
-                          defaultMessage="Apply"
-                        />
-                      </EuiButton>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </>
+                <EuiFlexGroup justifyContent="flexEnd">
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="discardSettingsButton"
+                      color="danger"
+                      iconType="cross"
+                      isDisabled={isLoading || !sourceConfigurationFormElement.isDirty}
+                      onClick={() => {
+                        sourceConfigurationFormElement.resetValue();
+                      }}
+                    >
+                      <FormattedMessage
+                        id="xpack.infra.sourceConfiguration.discardSettingsButtonLabel"
+                        defaultMessage="Discard"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      data-test-subj="applySettingsButton"
+                      color="primary"
+                      isDisabled={
+                        !sourceConfigurationFormElement.isDirty ||
+                        sourceConfigurationFormElement.validity.validity !== 'valid'
+                      }
+                      fill
+                      onClick={persistUpdates}
+                    >
+                      <FormattedMessage
+                        id="xpack.infra.sourceConfiguration.applySettingsButtonLabel"
+                        defaultMessage="Apply"
+                      />
+                    </EuiButton>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               )}
             </EuiFlexItem>
           )}

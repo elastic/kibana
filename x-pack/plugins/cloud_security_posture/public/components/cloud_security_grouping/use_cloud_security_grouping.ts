@@ -13,14 +13,14 @@ import {
   GroupPanelRenderer,
   GroupStatsRenderer,
 } from '@kbn/securitysolution-grouping/src';
+
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
 import { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 
 const DEFAULT_PAGE_SIZE = 10;
-const GROUPING_ID = 'cspLatestFindings';
-const MAX_GROUPING_LEVELS = 1;
+const DEFAULT_MAX_GROUPING_LEVELS = 3;
 
 /*
  Utility hook to handle the grouping logic of the cloud security components
@@ -33,6 +33,9 @@ export const useCloudSecurityGrouping = ({
   unit,
   groupPanelRenderer,
   groupStatsRenderer,
+  groupingLevel,
+  groupingLocalStorageKey,
+  maxGroupingLevels = DEFAULT_MAX_GROUPING_LEVELS,
 }: {
   dataView: DataView;
   groupingTitle: string;
@@ -41,6 +44,9 @@ export const useCloudSecurityGrouping = ({
   unit: (count: number) => string;
   groupPanelRenderer?: GroupPanelRenderer<any>;
   groupStatsRenderer?: GroupStatsRenderer<any>;
+  groupingLevel?: number;
+  groupingLocalStorageKey: string;
+  maxGroupingLevels?: number;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -48,18 +54,9 @@ export const useCloudSecurityGrouping = ({
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { query, error } = useBaseEsQuery({
-    dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
   });
-
-  /**
-   * Reset the active page when the filters or query change
-   * This is needed because the active page is not automatically reset when the filters or query change
-   */
-  useEffect(() => {
-    setActivePageIndex(0);
-  }, [urlQuery.filters, urlQuery.query]);
 
   const grouping = useGrouping({
     componentProps: {
@@ -69,15 +66,37 @@ export const useCloudSecurityGrouping = ({
     },
     defaultGroupingOptions,
     fields: dataView.fields,
-    groupingId: GROUPING_ID,
-    maxGroupingLevels: MAX_GROUPING_LEVELS,
+    groupingId: groupingLocalStorageKey,
+    maxGroupingLevels,
     title: groupingTitle,
-    onGroupChange: () => {
+    onGroupChange: ({ groupByFields }) => {
       setActivePageIndex(0);
+      setUrlQuery({
+        groupBy: groupByFields,
+      });
     },
   });
 
-  const selectedGroup = grouping.selectedGroups[0];
+  const selectedGroup = groupingLevel
+    ? grouping.selectedGroups[groupingLevel]
+    : grouping.selectedGroups[0];
+  /**
+   * Reset the active page when the filters or query change
+   * This is needed because the active page is not automatically reset when the filters or query change
+   */
+  useEffect(() => {
+    setActivePageIndex(0);
+  }, [urlQuery.filters, urlQuery.query]);
+
+  /**
+   * Set the selected groups from the URL query on the initial render
+   */
+  useEffect(() => {
+    if (urlQuery.groupBy) {
+      grouping.setSelectedGroups(urlQuery.groupBy);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // This is recommended by the grouping component to cover an edge case
   // where the selectedGroup has multiple values
@@ -104,6 +123,7 @@ export const useCloudSecurityGrouping = ({
 
   return {
     activePageIndex,
+    setActivePageIndex,
     grouping,
     pageSize,
     query,

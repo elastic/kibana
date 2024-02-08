@@ -16,7 +16,7 @@ export const LCP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.lcp',
 });
 
 export const INP_LABEL = i18n.translate('xpack.observability.ux.coreVitals.inp', {
-  defaultMessage: 'Interaction to Next Paint',
+  defaultMessage: 'Interaction to next paint',
 });
 
 export const CLS_LABEL = i18n.translate('xpack.observability.ux.coreVitals.cls', {

@@ -117,7 +117,6 @@ export interface RiskScoreBucket {
       score: number;
       normalized_score: number;
       notes: string[];
-      level: string;
       category_1_score: number;
       category_1_count: number;
     };

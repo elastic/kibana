@@ -29,6 +29,7 @@ jest.mock('../../../../hooks', () => {
     }),
     sendPostBulkAgentUpgrade: jest.fn(),
     useAgentVersion: jest.fn().mockReturnValue('8.10.2'),
+    useKibanaVersion: jest.fn().mockReturnValue('8.10.2'),
   };
 });
 
@@ -89,8 +90,8 @@ describe('AgentUpgradeAgentModal', () => {
         agentCount: 30,
       });
 
-      const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
       await waitFor(() => {
+        const el = utils.getByTestId('agentUpgradeModal.VersionCombobox');
         expect(el.classList.contains('euiComboBox-isDisabled')).toBe(false);
       });
     });
@@ -101,11 +102,59 @@ describe('AgentUpgradeAgentModal', () => {
         agentCount: 1,
       });
 
-      const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
-      const input = within(container).getByRole<HTMLInputElement>('combobox');
+      await waitFor(() => {
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('8.10.2');
+      });
+    });
+
+    it('should make combo invalid on clearing version', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [{ id: 'agent1', local_metadata: { host: 'abc' } }] as any,
+        agentCount: 1,
+      });
 
       await waitFor(() => {
-        expect(input?.value).toEqual('8.10.2');
+        fireEvent.click(utils.getByTestId('comboBoxClearButton'));
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('');
+        expect(utils.getByText('Version is required')).toBeInTheDocument();
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+      });
+    });
+
+    it('should make combo invalid on clearing version - bulk action', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: '*',
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        fireEvent.click(utils.getByTestId('comboBoxClearButton'));
+        const container = utils.getByTestId('agentUpgradeModal.VersionCombobox');
+        const input = within(container).getByRole<HTMLInputElement>('combobox');
+        expect(input?.value).toEqual('');
+        expect(utils.getByText('Version is required')).toBeInTheDocument();
+        expect(utils.getByTestId('confirmModalConfirmButton')).toBeDisabled();
+      });
+    });
+
+    it('should display the custom version text input if no versions', async () => {
+      const { utils } = renderAgentUpgradeAgentModal({
+        agents: [
+          {
+            id: 'agent1',
+            local_metadata: { host: 'abc', elastic: { agent: { version: '8.12.0' } } },
+          },
+        ] as any,
+        agentCount: 1,
+      });
+
+      await waitFor(() => {
+        const input = utils.getByTestId('agentUpgradeModal.VersionInput');
+        expect(input?.textContent).toEqual('');
       });
     });
 
@@ -199,6 +248,30 @@ describe('AgentUpgradeAgentModal', () => {
         isUpdating: true,
       });
 
+      const el = utils.getByTestId('confirmModalConfirmButton');
+      expect(el).toBeDisabled();
+    });
+  });
+
+  it('should disable submit button and display a warning for a single agent that is not upgradeable', async () => {
+    const { utils } = renderAgentUpgradeAgentModal({
+      agents: [
+        {
+          status: 'offline',
+          upgrade_started_at: '2022-11-21T12:27:24Z',
+          id: 'agent1',
+          local_metadata: { elastic: { agent: { version: '8.9.0' } } },
+        },
+      ] as any,
+      agentCount: 2,
+    });
+    await waitFor(() => {
+      expect(utils.queryByText(/The selected agent is not upgradeable/)).toBeInTheDocument();
+      expect(
+        utils.queryByText(
+          /Reason: agent cannot be upgraded through Fleet. It may be running in a container or it is not installed as a service./
+        )
+      ).toBeInTheDocument();
       const el = utils.getByTestId('confirmModalConfirmButton');
       expect(el).toBeDisabled();
     });

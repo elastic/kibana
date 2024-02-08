@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { Meta, Story } from '@storybook/react';
 import React, { useEffect, useState } from 'react';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { Cytoscape } from '../cytoscape';
 import { Centerer } from './centerer';
 import exampleResponseHipsterStore from './example_response_hipster_store.json';

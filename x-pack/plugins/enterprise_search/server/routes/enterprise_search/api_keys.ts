@@ -54,9 +54,19 @@ export function registerApiKeysRoutes(
       const { client } = (await context.core).elasticsearch;
       const user = security.authc.getCurrentUser(request);
       if (user) {
-        const apiKeys = await client.asCurrentUser.security.getApiKey({ username: user.username });
-        const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
-        return response.ok({ body: { api_keys: validKeys } });
+        try {
+          const apiKeys = await client.asCurrentUser.security.getApiKey({
+            username: user.username,
+          });
+          const validKeys = apiKeys.api_keys.filter(({ invalidated }) => !invalidated);
+          return response.ok({ body: { api_keys: validKeys } });
+        } catch {
+          // Ideally we check the error response here for unauthorized user
+          // Unfortunately the error response is not structured enough for us to filter those
+          // Always returning an empty array should also be fine, and deals with transient errors
+
+          return response.ok({ body: { api_keys: [] } });
+        }
       }
       return response.customError({
         body: 'Could not retrieve current user, security plugin is not ready',

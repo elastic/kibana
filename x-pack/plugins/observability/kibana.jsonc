@@ -16,11 +16,14 @@
       "cases",
       "charts",
       "contentManagement",
+      "controls",
       "data",
       "dataViews",
       "dataViewEditor",
       "embeddable",
+      "fieldFormats",
       "uiActions",
+      "presentationUtil",
       "exploratoryView",
       "features",
       "files",
@@ -29,6 +32,7 @@
       "observabilityShared",
       "observabilityAIAssistant",
       "ruleRegistry",
+      "taskManager",
       "triggersActionsUi",
       "security",
       "share",
@@ -36,7 +40,7 @@
       "visualizations",
       "dashboard",
       "expressions",
-      "logExplorer",
+      "logsExplorer",
       "licensing"
     ],
     "optionalPlugins": [
@@ -54,7 +58,9 @@
       "kibanaUtils",
       "unifiedSearch",
       "stackAlerts",
-      "spaces"
+      "spaces",
+      "embeddable",
+      "ingestPipelines"
     ],
     "extraPublicDirs": [
       "common"

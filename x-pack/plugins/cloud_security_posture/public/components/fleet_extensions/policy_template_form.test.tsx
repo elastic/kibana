@@ -1644,7 +1644,26 @@ describe('<CspPolicyTemplateForm />', () => {
     });
   });
 
-  it(`renders Service principal with Client Username and Password fields`, () => {
+  it(`should not render Service principal with Client Username and Password option`, () => {
+    let policy = getMockPolicyAzure();
+    policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+      'azure.credentials.type': { value: 'managed_identity' },
+    });
+
+    const { queryByRole } = render(
+      <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.7.0')} />
+    );
+
+    expect(
+      queryByRole('option', {
+        name: 'Service principal with Client Username and Password',
+        selected: false,
+      })
+    ).not.toBeInTheDocument();
+  });
+
+  // TODO: remove when service_principal_with_client_username_and_password is removed from the code base
+  it.skip(`renders Service principal with Client Username and Password fields`, () => {
     let policy = getMockPolicyAzure();
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.type': { value: 'service_principal_with_client_username_and_password' },
@@ -1666,7 +1685,8 @@ describe('<CspPolicyTemplateForm />', () => {
     expect(getByLabelText('Client Password')).toBeInTheDocument();
   });
 
-  it(`updates Service principal with Client Username and Password fields`, () => {
+  // TODO: remove when service_principal_with_client_username_and_password is removed from the code base
+  it.skip(`updates Service principal with Client Username and Password fields`, () => {
     let policy = getMockPolicyAzure();
     policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
       'azure.credentials.type': { value: 'service_principal_with_client_username_and_password' },

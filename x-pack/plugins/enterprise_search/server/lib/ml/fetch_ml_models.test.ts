@@ -371,7 +371,7 @@ describe('fetchMlModels', () => {
     expect(models.length).toBe(2);
     expect(models[0]).toMatchObject({
       modelId: ELSER_MODEL_ID,
-      deploymentState: MlModelDeploymentState.Downloaded,
+      deploymentState: MlModelDeploymentState.NotDeployed,
     });
     expect(mockTrainedModelsProvider.getTrainedModels).toHaveBeenCalledTimes(2);
   });

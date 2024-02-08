@@ -54,7 +54,8 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
-interface DiscoverStateContainerParams {
+
+export interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
@@ -570,6 +571,7 @@ function createUrlGeneratorState({
       : data.query.timefilter.timefilter.getTime(),
     searchSessionId: shouldRestoreSearchSession ? data.search.session.getSessionId() : undefined,
     columns: appState.columns,
+    grid: appState.grid,
     sort: appState.sort,
     savedQuery: appState.savedQuery,
     interval: appState.interval,

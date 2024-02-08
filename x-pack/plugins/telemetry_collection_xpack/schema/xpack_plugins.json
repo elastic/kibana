@@ -7000,6 +7000,86 @@
                       "type": "long"
                     }
                   }
+                },
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -7716,6 +7796,40 @@
               }
             }
           }
+        },
+        "muted_rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "section": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              }
+            }
+          }
         }
       }
     },
@@ -8218,6 +8332,34 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
+            "esql": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ES|QL layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ES|QL layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ES|QL layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ES|QL layers in cluster"
                   }
                 }
               }

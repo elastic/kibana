@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { take } from 'rxjs/operators';
+import { firstValueFrom } from 'rxjs';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import { ThemeService } from './theme_service';
 
@@ -23,7 +23,16 @@ describe('ThemeService', () => {
     it('exposes a `theme$` observable with the values provided by the injected metadata', async () => {
       injectedMetadata.getTheme.mockReturnValue({ version: 'v8', darkMode: true });
       const { theme$ } = themeService.setup({ injectedMetadata });
-      const theme = await theme$.pipe(take(1)).toPromise();
+      const theme = await firstValueFrom(theme$);
+      expect(theme).toEqual({
+        darkMode: true,
+      });
+    });
+
+    it('#getTheme() returns the current theme', async () => {
+      injectedMetadata.getTheme.mockReturnValue({ version: 'v8', darkMode: true });
+      const setup = themeService.setup({ injectedMetadata });
+      const theme = setup.getTheme();
       expect(theme).toEqual({
         darkMode: true,
       });
@@ -41,7 +50,17 @@ describe('ThemeService', () => {
       injectedMetadata.getTheme.mockReturnValue({ version: 'v8', darkMode: true });
       themeService.setup({ injectedMetadata });
       const { theme$ } = themeService.start();
-      const theme = await theme$.pipe(take(1)).toPromise();
+      const theme = await firstValueFrom(theme$);
+      expect(theme).toEqual({
+        darkMode: true,
+      });
+    });
+
+    it('#getTheme() returns the current theme', async () => {
+      injectedMetadata.getTheme.mockReturnValue({ version: 'v8', darkMode: true });
+      themeService.setup({ injectedMetadata });
+      const start = themeService.start();
+      const theme = start.getTheme();
       expect(theme).toEqual({
         darkMode: true,
       });

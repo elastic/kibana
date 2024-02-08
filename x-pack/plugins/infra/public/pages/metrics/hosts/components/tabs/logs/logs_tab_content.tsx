@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { InfraLoadingPanel } from '../../../../../../components/loading';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
@@ -35,6 +36,9 @@ export const LogsTabContent = () => {
 
   const { logViewReference: logView, loading: logViewLoading } = useLogViewReference({
     id: 'hosts-logs-view',
+    name: i18n.translate('xpack.infra.hostsViewPage.tabs.logs.LogsByHostWidgetName', {
+      defaultMessage: 'Logs by host',
+    }),
     extraFields: ['host.name'],
   });
 

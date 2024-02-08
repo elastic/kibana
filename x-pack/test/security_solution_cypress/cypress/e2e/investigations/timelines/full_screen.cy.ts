@@ -14,7 +14,6 @@ import {
   enterFullScreenMode,
   exitFullScreenMode,
 } from '../../../tasks/security_main';
-import { populateTimeline } from '../../../tasks/timeline';
 
 import { hostsUrl } from '../../../urls/navigation';
 
@@ -23,7 +22,6 @@ describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
     login();
     visitWithTimeRange(hostsUrl('allHosts'));
     openTimelineUsingToggle();
-    populateTimeline();
   });
 
   it('Should hide timeline header and tab list area', () => {

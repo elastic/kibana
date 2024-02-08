@@ -1467,6 +1467,14 @@
           "name": "format",
           "description": "Format of response - json or yaml",
           "in": "query"
+        },
+        {
+          "schema": {
+            "type": "boolean"
+          },
+          "name": "prerelease",
+          "description": "Specify if version is prerelease",
+          "in": "query"
         }
       ]
     },
@@ -5075,6 +5083,9 @@
                   "is_default": {
                     "type": "boolean"
                   },
+                  "is_internal": {
+                    "type": "boolean"
+                  },
                   "host_urls": {
                     "type": "array",
                     "items": {
@@ -5185,6 +5196,9 @@
                     "type": "string"
                   },
                   "is_default": {
+                    "type": "boolean"
+                  },
+                  "is_internal": {
                     "type": "boolean"
                   },
                   "host_urls": {
@@ -7663,8 +7677,8 @@
           },
           "namespace": {
             "type": "string",
-            "description": "namespace by default \"default\"",
-            "example": "default"
+            "description": "The package policy namespace. Leave blank to inherit the agent policy's namespace.",
+            "example": "customnamespace"
           },
           "policy_id": {
             "type": "string",
@@ -7928,6 +7942,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8027,6 +8044,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8252,6 +8272,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8358,6 +8381,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8426,6 +8452,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8529,6 +8558,9 @@
             "type": "boolean"
           },
           "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "name": {
@@ -8734,6 +8766,9 @@
           "is_default_monitoring": {
             "type": "boolean"
           },
+          "is_internal": {
+            "type": "boolean"
+          },
           "name": {
             "type": "string"
           },
@@ -8873,6 +8908,9 @@
             "type": "string"
           },
           "is_default": {
+            "type": "boolean"
+          },
+          "is_internal": {
             "type": "boolean"
           },
           "is_preconfigured": {

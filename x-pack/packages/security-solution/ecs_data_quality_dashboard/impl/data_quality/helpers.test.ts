@@ -35,6 +35,9 @@ import {
   getTotalSizeInBytes,
   hasValidTimestampMapping,
   isMappingCompatible,
+  postStorageResult,
+  getStorageResults,
+  StorageResult,
 } from './helpers';
 import {
   hostNameWithTextMapping,
@@ -77,6 +80,8 @@ import {
   PatternRollup,
   UnallowedValueCount,
 } from './types';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 const ecsMetadata: Record<string, EcsMetadata> = EcsFlat as unknown as Record<string, EcsMetadata>;
 
@@ -97,6 +102,7 @@ describe('helpers', () => {
       ],
       pattern: 'auditbeat-*',
       sameFamily: 0,
+      checkedAt: Date.now(),
     };
 
     it('returns undefined when results is undefined', () => {
@@ -1188,6 +1194,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         '.ds-packetbeat-8.6.1-2023.02.04-000001': {
           docsCount: 1628343,
@@ -1198,6 +1205,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'packetbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1215,6 +1223,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1225,6 +1234,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1235,6 +1245,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1252,6 +1263,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-index-1': {
           docsCount: 4,
@@ -1262,6 +1274,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
         'auditbeat-custom-empty-index-1': {
           docsCount: 0,
@@ -1272,6 +1285,7 @@ describe('helpers', () => {
           markdownComments: ['foo', 'bar', 'baz'],
           pattern: 'auditbeat-*',
           sameFamily: 0,
+          checkedAt: Date.now(),
         },
       };
 
@@ -1337,6 +1351,7 @@ describe('helpers', () => {
         markdownComments: ['foo', 'bar', 'baz'],
         pattern: 'packetbeat-*',
         sameFamily: 0,
+        checkedAt: Date.now(),
       };
 
       expect(getErrorSummary(resultWithError)).toEqual({
@@ -1487,6 +1502,83 @@ describe('helpers', () => {
           pattern: 'auditbeat-*',
         },
       ]);
+    });
+  });
+
+  describe('postStorageResult', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it posts the result', async () => {
+      const storageResult = { indexName: 'test' } as unknown as StorageResult;
+      await postStorageResult({
+        storageResult,
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        toasts,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'POST',
+          body: JSON.stringify(storageResult),
+        })
+      );
+    });
+
+    test('it throws error', async () => {
+      const storageResult = { indexName: 'test' } as unknown as StorageResult;
+      fetch.mockRejectedValueOnce('test-error');
+      await postStorageResult({
+        httpFetch: fetch,
+        storageResult,
+        abortController: new AbortController(),
+        toasts,
+      });
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
+    });
+  });
+
+  describe('getStorageResults', () => {
+    const { fetch } = httpServiceMock.createStartContract();
+    const { toasts } = notificationServiceMock.createStartContract();
+    beforeEach(() => {
+      fetch.mockClear();
+    });
+
+    test('it gets the results', async () => {
+      await getStorageResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        pattern: 'auditbeat-*',
+        toasts,
+      });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/ecs_data_quality_dashboard/results',
+        expect.objectContaining({
+          method: 'GET',
+          query: { pattern: 'auditbeat-*' },
+        })
+      );
+    });
+
+    it('should catch error', async () => {
+      fetch.mockRejectedValueOnce('test-error');
+
+      const results = await getStorageResults({
+        httpFetch: fetch,
+        abortController: new AbortController(),
+        pattern: 'auditbeat-*',
+        toasts,
+      });
+
+      expect(toasts.addError).toHaveBeenCalledWith('test-error', { title: expect.any(String) });
+      expect(results).toEqual([]);
     });
   });
 });

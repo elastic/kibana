@@ -99,7 +99,7 @@ $reorderItemMargin: $euiSizeS;
   position: absolute;
   width: 100%;
   top: 0;
-  height: calc(100% + #{$reorderItemMargin / 2});
+  height: calc(100% + #{calc($reorderItemMargin / 2)});
 }
 
 .domDragDrop-translatableDrop {

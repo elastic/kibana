@@ -17,7 +17,7 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { IRuleDataReader } from '@kbn/rule-registry-plugin/server';
+import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { Filter, DataViewFieldBase } from '@kbn/es-query';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import { getFilter } from '../utils/get_filter';
@@ -26,8 +26,6 @@ import { findThresholdSignals } from './find_threshold_signals';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 import { getThresholdSignalHistory } from './get_threshold_signal_history';
 import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
-import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
-import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 
 import type {
   BulkCreate,
@@ -59,7 +57,7 @@ export const thresholdExecutor = async ({
   state,
   bulkCreate,
   wrapHits,
-  ruleDataReader,
+  ruleDataClient,
   primaryTimestamp,
   secondaryTimestamp,
   aggregatableTimestampField,
@@ -81,7 +79,7 @@ export const thresholdExecutor = async ({
   state: ThresholdAlertState;
   bulkCreate: BulkCreate;
   wrapHits: WrapHits;
-  ruleDataReader: IRuleDataReader;
+  ruleDataClient: IRuleDataClient;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   aggregatableTimestampField: string;
@@ -112,7 +110,9 @@ export const thresholdExecutor = async ({
           to: tuple.to.toISOString(),
           frameworkRuleId: completeRule.alertId,
           bucketByFields: ruleParams.threshold.field,
-          ruleDataReader,
+          spaceId,
+          ruleDataClient,
+          esClient: services.scopedClusterClient.asCurrentUser,
         });
 
     const validSignalHistory = getSignalHistory(state, signalHistory, tuple);
@@ -153,14 +153,9 @@ export const thresholdExecutor = async ({
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
 
-    let createResult: GenericBulkCreateResponse<BaseFieldsLatest>;
     let newSignalHistory: ThresholdSignalHistory;
 
-    if (
-      alertSuppression?.duration &&
-      runOpts?.experimentalFeatures?.alertSuppressionForThresholdRuleEnabled &&
-      hasPlatinumLicense
-    ) {
+    if (alertSuppression?.duration && hasPlatinumLicense) {
       const suppressedResults = await bulkCreateSuppressedThresholdAlerts({
         buckets,
         completeRule,
@@ -173,13 +168,17 @@ export const thresholdExecutor = async ({
         spaceId,
         runOpts,
       });
-      createResult = suppressedResults.bulkCreateResult;
+      const createResult = suppressedResults.bulkCreateResult;
 
       newSignalHistory = buildThresholdSignalHistory({
         alerts: suppressedResults.unsuppressedAlerts,
       });
+      addToSearchAfterReturn({
+        current: result,
+        next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
+      });
     } else {
-      createResult = await bulkCreateThresholdSignals({
+      const createResult = await bulkCreateThresholdSignals({
         buckets,
         completeRule,
         filter: esFilter,
@@ -197,12 +196,12 @@ export const thresholdExecutor = async ({
       newSignalHistory = buildThresholdSignalHistory({
         alerts: transformBulkCreatedItemsToHits(createResult.createdItems),
       });
-    }
 
-    addToSearchAfterReturn({
-      current: result,
-      next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
-    });
+      addToSearchAfterReturn({
+        current: result,
+        next: { ...createResult, success: createResult.success && isEmpty(searchErrors) },
+      });
+    }
 
     result.errors.push(...previousSearchErrors);
     result.errors.push(...searchErrors);

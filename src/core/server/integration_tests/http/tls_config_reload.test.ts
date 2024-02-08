@@ -10,7 +10,6 @@ import supertest from 'supertest';
 import { duration } from 'moment';
 import { BehaviorSubject, of } from 'rxjs';
 import { KBN_CERT_PATH, KBN_KEY_PATH, ES_KEY_PATH, ES_CERT_PATH } from '@kbn/dev-utils';
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { Router } from '@kbn/core-http-router-server-internal';
 import {
   HttpServer,
@@ -20,6 +19,8 @@ import {
   externalUrlConfig,
 } from '@kbn/core-http-server-internal';
 import { isServerTLS, flattenCertificateChain, fetchPeerCertificate } from './tls_utils';
+import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import type { Logger } from '@kbn/logging';
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
@@ -27,16 +28,16 @@ const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
 
 describe('HttpServer - TLS config', () => {
   let server: HttpServer;
-  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
+  let logger: Logger;
 
   beforeAll(() => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   });
 
   beforeEach(() => {
-    const loggingService = loggingSystemMock.create();
-    logger = loggingSystemMock.createLogger();
-    server = new HttpServer(loggingService, 'tests', of(duration('1s')));
+    const coreContext = mockCoreContext.create();
+    logger = coreContext.logger.get();
+    server = new HttpServer(coreContext, 'tests', of(duration('1s')));
   });
 
   it('supports dynamic reloading of the TLS configuration', async () => {
@@ -62,7 +63,9 @@ describe('HttpServer - TLS config', () => {
 
     const router = new Router('', logger, enhanceWithContext, {
       isDev: false,
-      versionedRouteResolution: 'oldest',
+      versionedRouterOptions: {
+        defaultHandlerResolutionStrategy: 'oldest',
+      },
     });
     router.get(
       {

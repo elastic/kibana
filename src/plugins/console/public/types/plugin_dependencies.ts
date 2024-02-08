@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import { ReactElement } from 'react';
+import { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
-import { SharePluginSetup, LocatorPublic } from '@kbn/share-plugin/public';
+import { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import { ConsoleUILocatorParams } from './locator';
+import { EmbeddableConsoleProps } from './embeddable_console';
 
 export interface AppSetupUIPluginDependencies {
   home?: HomePublicPluginSetup;
@@ -20,6 +22,29 @@ export interface AppSetupUIPluginDependencies {
   usageCollection?: UsageCollectionSetup;
 }
 
+export interface AppStartUIPluginDependencies {
+  home?: HomePublicPluginStart;
+  share: SharePluginStart;
+  usageCollection?: UsageCollectionStart;
+}
+
+/**
+ * Console plugin's setup service object
+ */
 export interface ConsolePluginSetup {
+  /**
+   * Public locator for the console UI
+   */
   locator?: LocatorPublic<ConsoleUILocatorParams>;
+}
+
+/**
+ * Console plugin's start service object
+ */
+export interface ConsolePluginStart {
+  /**
+   * renderEmbeddableConsole is available if the console UI is enabled. This function can be called to
+   * render an embeddable version of the developer console on the page.
+   */
+  renderEmbeddableConsole?: (props?: EmbeddableConsoleProps) => ReactElement | null;
 }

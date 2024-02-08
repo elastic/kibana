@@ -5,21 +5,12 @@
  * 2.0.
  */
 
-import { cloneDeep } from 'lodash/fp';
 import { mount } from 'enzyme';
 import React from 'react';
 
 import '../../../common/mock/match_media';
-import {
-  mockGlobalState,
-  TestProviders,
-  SUB_PLUGINS_REDUCER,
-  createSecuritySolutionStorageMock,
-  kibanaObservable,
-} from '../../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { OverviewNetwork } from '.';
-import type { State } from '../../../common/store';
-import { createStore } from '../../../common/store';
 import { useNetworkOverview } from '../../containers/overview_network';
 import { SecurityPageName } from '../../../app/types';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
@@ -83,22 +74,15 @@ const useNetworkOverviewMock = useNetworkOverview as jest.Mock;
 const mockUseQueryToggle = useQueryToggle as jest.Mock;
 
 describe('OverviewNetwork', () => {
-  const state: State = mockGlobalState;
-
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
   beforeEach(() => {
     jest.clearAllMocks();
     useNetworkOverviewMock.mockReturnValue([false, MOCKED_RESPONSE]);
     mockUseQueryToggle.mockReturnValue({ toggleStatus: true, setToggleStatus: jest.fn() });
-    const myState = cloneDeep(state);
-    store = createStore(myState, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
   });
 
   test('it renders the expected widget title', () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
@@ -111,7 +95,7 @@ describe('OverviewNetwork', () => {
   test('it renders an empty subtitle while loading', () => {
     useNetworkOverviewMock.mockReturnValueOnce([true, { overviewNetwork: {} }]);
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
@@ -121,7 +105,7 @@ describe('OverviewNetwork', () => {
 
   test('it renders the expected event count in the subtitle after loading events', async () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
@@ -133,7 +117,7 @@ describe('OverviewNetwork', () => {
 
   it('it renders View Network', () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );
@@ -143,7 +127,7 @@ describe('OverviewNetwork', () => {
 
   it('when click on View Network we call navigateToApp to make sure to navigate to right page', () => {
     const wrapper = mount(
-      <TestProviders store={store}>
+      <TestProviders>
         <OverviewNetwork {...defaultProps} />
       </TestProviders>
     );

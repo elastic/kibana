@@ -7,23 +7,10 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
-import type {
-  NoDataPagePublicSetup,
-  NoDataPagePublicSetupDependencies,
-  NoDataPagePublicStart,
-  NoDataPagePublicStartDependencies,
-} from './types';
+import type { NoDataPagePublicSetup, NoDataPagePublicStart } from './types';
 import type { NoDataPageConfig } from '../config';
 
-export class NoDataPagePlugin
-  implements
-    Plugin<
-      NoDataPagePublicSetup,
-      NoDataPagePublicStart,
-      NoDataPagePublicSetupDependencies,
-      NoDataPagePublicStartDependencies
-    >
-{
+export class NoDataPagePlugin implements Plugin<NoDataPagePublicSetup, NoDataPagePublicStart> {
   constructor(private initializerContext: PluginInitializerContext<NoDataPageConfig>) {}
 
   public setup(_core: CoreSetup): NoDataPagePublicSetup {

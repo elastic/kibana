@@ -24,7 +24,7 @@ import { Index } from '../../../../../../common';
 import { documentationService } from '../../../../services';
 import { useAppContext } from '../../../../app_context';
 
-export const DetailsPageMappingsContent: FunctionComponent<{ index: Index; data: any }> = ({
+export const DetailsPageMappingsContent: FunctionComponent<{ index: Index; data: string }> = ({
   index,
   data,
 }) => {
@@ -110,7 +110,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{ index: Index; data:
               height: 100%;
             `}
           >
-            {JSON.stringify(data, null, 2)}
+            {data}
           </EuiCodeBlock>
         </EuiPanel>
       </EuiFlexItem>

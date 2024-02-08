@@ -17,8 +17,8 @@ import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list
 import expect from '@kbn/expect';
 import { asyncForEach } from '@kbn/std';
 
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from '../services/lib/web_element_wrapper';
 
 interface OptionsListAdditionalSettings {
   searchTechnique?: OptionsListSearchTechnique;
@@ -28,6 +28,10 @@ interface OptionsListAdditionalSettings {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
+}
+
+interface RangeSliderAdditionalSettings {
+  step?: number;
 }
 
 export const OPTIONS_LIST_ANIMAL_SOUND_SUGGESTIONS: { [key: string]: number } = {
@@ -185,45 +189,17 @@ export class DashboardPageControls extends FtrService {
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async updateAllQuerySyncSettings(querySync: boolean) {
-    this.log.debug(`Update all control group query sync settings to ${querySync}`);
+  public async updateFilterSyncSetting(querySync: boolean) {
+    this.log.debug(`Update filter sync setting to ${querySync}`);
     await this.openControlGroupSettingsFlyout();
-    await this.setSwitchState(querySync, 'control-group-query-sync');
+    await this.setSwitchState(querySync, 'control-group-filter-sync');
     await this.testSubjects.click('control-group-editor-save');
   }
 
-  public async ensureAdvancedQuerySyncIsOpened() {
-    const advancedAccordion = await this.testSubjects.find(`control-group-query-sync-advanced`);
-    const opened = await advancedAccordion.elementHasClass('euiAccordion-isOpen');
-    if (!opened) {
-      await this.testSubjects.click(`control-group-query-sync-advanced`);
-      await this.retry.try(async () => {
-        expect(await advancedAccordion.elementHasClass('euiAccordion-isOpen')).to.be(true);
-      });
-    }
-  }
-
-  public async updateSyncTimeRangeAdvancedSetting(syncTimeRange: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncTimeRange}`);
+  public async updateTimeRangeSyncSetting(syncTimeRange: boolean) {
+    this.log.debug(`Update time range sync setting to ${syncTimeRange}`);
     await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
     await this.setSwitchState(syncTimeRange, 'control-group-query-sync-time-range');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateSyncQueryAdvancedSetting(syncQuery: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncQuery}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
-    await this.setSwitchState(syncQuery, 'control-group-query-sync-query');
-    await this.testSubjects.click('control-group-editor-save');
-  }
-
-  public async updateSyncFilterAdvancedSetting(syncFilters: boolean) {
-    this.log.debug(`Update filter sync advanced setting to ${syncFilters}`);
-    await this.openControlGroupSettingsFlyout();
-    await this.ensureAdvancedQuerySyncIsOpened();
-    await this.setSwitchState(syncFilters, 'control-group-query-sync-filters');
     await this.testSubjects.click('control-group-editor-save');
   }
 
@@ -266,7 +242,7 @@ export class DashboardPageControls extends FtrService {
     width?: ControlWidth;
     dataViewTitle?: string;
     grow?: boolean;
-    additionalSettings?: OptionsListAdditionalSettings;
+    additionalSettings?: OptionsListAdditionalSettings | RangeSliderAdditionalSettings;
   }) {
     this.log.debug(`Creating ${controlType} control ${title ?? fieldName}`);
     await this.openCreateControlFlyout();
@@ -282,8 +258,13 @@ export class DashboardPageControls extends FtrService {
 
     if (additionalSettings) {
       if (controlType === OPTIONS_LIST_CONTROL) {
-        // only options lists currently have additional settings
-        await this.optionsListSetAdditionalSettings(additionalSettings);
+        await this.optionsListSetAdditionalSettings(
+          additionalSettings as OptionsListAdditionalSettings
+        );
+      } else if (controlType === RANGE_SLIDER_CONTROL) {
+        await this.rangeSliderSetAdditionalSettings(
+          additionalSettings as RangeSliderAdditionalSettings
+        );
       }
     }
 
@@ -392,10 +373,11 @@ export class DashboardPageControls extends FtrService {
 
   public async optionsListOpenPopover(controlId: string) {
     this.log.debug(`Opening popover for Options List: ${controlId}`);
-
-    await this.testSubjects.click(`optionsList-control-${controlId}`);
     await this.retry.try(async () => {
-      await this.testSubjects.existOrFail(`optionsList-control-popover`);
+      await this.testSubjects.click(`optionsList-control-${controlId}`);
+      await this.retry.waitForWithTimeout('popover to open', 500, async () => {
+        return await this.testSubjects.exists(`optionsList-control-popover`);
+      });
     });
   }
 
@@ -654,6 +636,17 @@ export class DashboardPageControls extends FtrService {
     return dataViewName;
   }
 
+  // Range Slider editor functions
+  public async rangeSliderEditorSetStep(value: number) {
+    this.log.debug(`Setting range slider step to ${value}`);
+    await this.testSubjects.setValue('rangeSliderControl__stepAdditionalSetting', `${value}`);
+  }
+
+  public async rangeSliderSetAdditionalSettings({ step }: RangeSliderAdditionalSettings) {
+    this.log.debug(`Setting range slider step to ${step}`);
+    if (step) await this.rangeSliderEditorSetStep(step);
+  }
+
   // Range slider functions
   public async rangeSliderGetLowerBoundAttribute(controlId: string, attribute: string) {
     this.log.debug(`Getting range slider lower bound ${attribute} for ${controlId}`);
@@ -680,6 +673,7 @@ export class DashboardPageControls extends FtrService {
       expect(await this.rangeSliderGetLowerBoundAttribute(controlId, 'value')).to.be(value);
     });
   }
+
   public async rangeSliderSetUpperBound(controlId: string, value: string) {
     this.log.debug(`Setting range slider lower bound to ${value}`);
     await this.retry.try(async () => {

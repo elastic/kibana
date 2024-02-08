@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetPreviewDataResponse, Indicator } from '@kbn/slo-schema';
+import { GetPreviewDataResponse, Indicator, Objective } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -21,7 +21,8 @@ export interface UseGetPreviewData {
 export function useGetPreviewData(
   isValid: boolean,
   indicator: Indicator,
-  range: { start: number; end: number }
+  range: { start: number; end: number },
+  objective?: Objective
 ): UseGetPreviewData {
   const { http } = useKibana().services;
 
@@ -31,7 +32,11 @@ export function useGetPreviewData(
       const response = await http.post<GetPreviewDataResponse>(
         '/internal/observability/slos/_preview',
         {
-          body: JSON.stringify({ indicator, range }),
+          body: JSON.stringify({
+            indicator,
+            range,
+            ...(objective ? { objective } : null),
+          }),
           signal,
         }
       );

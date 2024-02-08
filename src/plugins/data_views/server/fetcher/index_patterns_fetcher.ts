@@ -32,6 +32,7 @@ export interface FieldDescriptor {
   timeZone?: string[];
   timeSeriesMetric?: estypes.MappingTimeSeriesMetricType;
   timeSeriesDimension?: boolean;
+  defaultFormatter?: string;
 }
 
 interface FieldSubType {

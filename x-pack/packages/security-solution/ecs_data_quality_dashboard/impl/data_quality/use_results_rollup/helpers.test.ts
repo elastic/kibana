@@ -13,7 +13,6 @@ import {
   getTotalIndices,
   getTotalIndicesChecked,
   getTotalSameFamily,
-  onPatternRollupUpdated,
   updateResultOnCheckCompleted,
 } from './helpers';
 import { auditbeatWithAllResults } from '../mock/pattern_rollup/mock_auditbeat_pattern_rollup';
@@ -62,6 +61,7 @@ describe('helpers', () => {
       markdownComments: ['foo', 'bar', 'baz'],
       pattern: '.alerts-security.alerts-default',
       sameFamily: 7,
+      checkedAt: 1706526408000,
     };
 
     const alertIndexWithSameFamily: PatternRollup = {
@@ -166,21 +166,6 @@ describe('helpers', () => {
     });
   });
 
-  describe('onPatternRollupUpdated', () => {
-    test('it returns a new collection with the updated rollup', () => {
-      const before: Record<string, PatternRollup> = {
-        'auditbeat-*': auditbeatWithAllResults,
-      };
-
-      expect(
-        onPatternRollupUpdated({
-          patternRollup: mockPacketbeatPatternRollup,
-          patternRollups: before,
-        })
-      ).toEqual(patternRollups);
-    });
-  });
-
   describe('updateResultOnCheckCompleted', () => {
     const packetbeatStats861: IndicesStatsIndicesStats =
       mockPacketbeatPatternRollup.stats != null
@@ -276,6 +261,7 @@ describe('helpers', () => {
               ],
               pattern: 'packetbeat-*',
               sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -377,6 +363,7 @@ describe('helpers', () => {
               ],
               pattern: 'packetbeat-*',
               sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,
@@ -466,6 +453,7 @@ describe('helpers', () => {
               indexName: '.ds-packetbeat-8.6.1-2023.02.04-000001',
               markdownComments: [],
               pattern: 'packetbeat-*',
+              checkedAt: undefined,
             },
           },
           sizeInBytes: 1464758182,
@@ -526,6 +514,7 @@ describe('helpers', () => {
               ],
               pattern: 'packetbeat-*',
               sameFamily: 0,
+              checkedAt: expect.any(Number),
             },
           },
           sizeInBytes: 1464758182,

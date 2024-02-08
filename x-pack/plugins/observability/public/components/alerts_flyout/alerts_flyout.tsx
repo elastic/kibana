@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { EuiFlyout, EuiFlyoutHeader, EuiFlyoutProps } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 
+import { EcsFieldsResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
 import { AlertsFlyoutHeader } from './alerts_flyout_header';
 import { AlertsFlyoutBody } from './alerts_flyout_body';
 import { AlertsFlyoutFooter } from './alerts_flyout_footer';
@@ -18,6 +19,7 @@ import type { TopAlert } from '../../typings/alerts';
 
 type AlertsFlyoutProps = {
   alert?: TopAlert;
+  rawAlert?: EcsFieldsResponse;
   alerts?: Array<Record<string, unknown>>;
   isInApp?: boolean;
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry;
@@ -26,6 +28,7 @@ type AlertsFlyoutProps = {
 
 export function AlertsFlyout({
   alert,
+  rawAlert,
   alerts,
   isInApp = false,
   observabilityRuleTypeRegistry,
@@ -41,16 +44,16 @@ export function AlertsFlyout({
   if (!alertData) {
     alertData = decoratedAlerts?.find((a) => a.fields[ALERT_UUID] === selectedAlertId) as TopAlert;
   }
-  if (!alertData) {
+  if (!alertData || !rawAlert) {
     return null;
   }
 
   return (
-    <EuiFlyout className="oblt__flyout" onClose={onClose} size="s" data-test-subj="alertsFlyout">
+    <EuiFlyout className="oblt__flyout" onClose={onClose} size="m" data-test-subj="alertsFlyout">
       <EuiFlyoutHeader hasBorder>
         <AlertsFlyoutHeader alert={alertData} />
       </EuiFlyoutHeader>
-      <AlertsFlyoutBody alert={alertData} />
+      <AlertsFlyoutBody alert={alertData} rawAlert={rawAlert} />
       <AlertsFlyoutFooter alert={alertData} isInApp={isInApp} />
     </EuiFlyout>
   );

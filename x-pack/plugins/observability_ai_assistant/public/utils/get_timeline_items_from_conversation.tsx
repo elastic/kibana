@@ -16,14 +16,8 @@ import type { ChatTimelineItem } from '../components/chat/chat_timeline';
 import { RenderFunction } from '../components/render_function';
 import type { ObservabilityAIAssistantChatService } from '../types';
 import { ChatState } from '../hooks/use_chat';
-
-function safeParse(jsonStr: string) {
-  try {
-    return JSON.parse(jsonStr);
-  } catch (err) {
-    return jsonStr;
-  }
-}
+import { safeJsonParse } from './safe_json_parse';
+import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from '../components/chat/types';
 
 function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   let value: object;
@@ -31,7 +25,7 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   if (!message.name) {
     const name = message.function_call?.name;
     const args = message.function_call?.arguments
-      ? safeParse(message.function_call.arguments)
+      ? safeJsonParse(message.function_call.arguments)
       : undefined;
 
     value = {
@@ -41,9 +35,9 @@ function convertMessageToMarkdownCodeBlock(message: Message['message']) {
   } else {
     const content =
       message.role !== MessageRole.Assistant && message.content
-        ? safeParse(message.content)
+        ? safeJsonParse(message.content)
         : message.content;
-    const data = message.data ? safeParse(message.data) : undefined;
+    const data = message.data ? safeJsonParse(message.data) : undefined;
     value = omitBy(
       {
         content,
@@ -71,6 +65,8 @@ export function getTimelineItemsfromConversation({
   messages,
   startedFrom,
   chatState,
+  chatFlyoutSecondSlotHandler,
+  onActionClick,
 }: {
   chatService: ObservabilityAIAssistantChatService;
   currentUser?: Pick<AuthenticatedUser, 'username' | 'full_name'>;
@@ -78,6 +74,8 @@ export function getTimelineItemsfromConversation({
   messages: Message[];
   startedFrom?: StartedFrom;
   chatState: ChatState;
+  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
+  onActionClick: ChatActionClickHandler;
 }): ChatTimelineItem[] {
   const messagesWithoutSystem = messages.filter(
     (message) => message.message.role !== MessageRole.System
@@ -170,6 +168,8 @@ export function getTimelineItemsfromConversation({
                   name={message.message.name}
                   arguments={prevFunctionCall?.arguments}
                   response={message.message}
+                  onActionClick={onActionClick}
+                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                 />
               ) : undefined;
 

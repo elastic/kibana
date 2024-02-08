@@ -15,6 +15,12 @@ const getTabsOnNetworkUrl = (tabName: NetworkRouteType) => `${NETWORK_PATH}/${ta
 
 export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => {
   const networkNavTabs = {
+    [NetworkRouteType.events]: {
+      id: NetworkRouteType.events,
+      name: i18n.NAVIGATION_EVENTS_TITLE,
+      href: getTabsOnNetworkUrl(NetworkRouteType.events),
+      disabled: false,
+    },
     [NetworkRouteType.flows]: {
       id: NetworkRouteType.flows,
       name: i18n.NAVIGATION_FLOWS_TITLE,
@@ -43,12 +49,6 @@ export const navTabsNetwork = (hasMlUserPermissions: boolean): NetworkNavTab => 
       id: NetworkRouteType.anomalies,
       name: i18n.NAVIGATION_ANOMALIES_TITLE,
       href: getTabsOnNetworkUrl(NetworkRouteType.anomalies),
-      disabled: false,
-    },
-    [NetworkRouteType.events]: {
-      id: NetworkRouteType.events,
-      name: i18n.NAVIGATION_EVENTS_TITLE,
-      href: getTabsOnNetworkUrl(NetworkRouteType.events),
       disabled: false,
     },
   };

@@ -26,6 +26,7 @@ import {
   TRANSACTION_TYPE,
 } from '../es_fields/apm';
 import { getEnvironmentLabel } from '../environment_filter_values';
+import { AnomalyDetectorType } from '../anomaly_detection/apm_ml_detectors';
 
 export const APM_SERVER_FEATURE_ID = 'apm';
 
@@ -179,24 +180,27 @@ export function formatTransactionErrorRateReason({
 export function formatAnomalyReason({
   serviceName,
   severityLevel,
-  measured,
+  anomalyScore,
   windowSize,
   windowUnit,
+  detectorType,
 }: {
   serviceName: string;
   severityLevel: string;
-  measured: number;
+  anomalyScore: number;
   windowSize: number;
   windowUnit: string;
+  detectorType: AnomalyDetectorType;
 }) {
   return i18n.translate(
     'xpack.apm.alertTypes.transactionDurationAnomaly.reason',
     {
-      defaultMessage: `{severityLevel} anomaly with a score of {measured} was detected in the last {interval} for {serviceName}.`,
+      defaultMessage: `{severityLevel} {detectorTypeLabel} anomaly with a score of {anomalyScore}, was detected in the last {interval} for {serviceName}.`,
       values: {
         serviceName,
         severityLevel,
-        measured,
+        detectorTypeLabel: getApmMlDetectorLabel(detectorType),
+        anomalyScore,
         interval: formatDurationFromTimeUnitChar(
           windowSize,
           windowUnit as TimeUnitChar
@@ -293,6 +297,35 @@ export const ANOMALY_ALERT_SEVERITY_TYPES = [
 export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
+
+export function getApmMlDetectorLabel(type: AnomalyDetectorType) {
+  switch (type) {
+    case AnomalyDetectorType.txLatency:
+      return i18n.translate('xpack.apm.alerts.anomalyDetector.latencyLabel', {
+        defaultMessage: 'latency',
+      });
+    case AnomalyDetectorType.txThroughput:
+      return i18n.translate(
+        'xpack.apm.alerts.anomalyDetector.throughputLabel',
+        {
+          defaultMessage: 'throughput',
+        }
+      );
+    case AnomalyDetectorType.txFailureRate:
+      return i18n.translate(
+        'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
+        {
+          defaultMessage: 'failed transaction rate',
+        }
+      );
+  }
+}
+
+export const ANOMALY_DETECTOR_SELECTOR_OPTIONS = [
+  AnomalyDetectorType.txLatency,
+  AnomalyDetectorType.txThroughput,
+  AnomalyDetectorType.txFailureRate,
+].map((type) => ({ type, label: getApmMlDetectorLabel(type) }));
 
 // Server side registrations
 // x-pack/plugins/apm/server/lib/alerts/<alert>.ts

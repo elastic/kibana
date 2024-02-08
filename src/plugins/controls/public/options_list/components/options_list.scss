@@ -31,10 +31,9 @@
       color: $euiColorDanger;
     }
 
-    .euiFilterButton__text-hasNotification {
+    .optionsList--selectionText {
       flex-grow: 1;
-      justify-content: space-between;
-      width: 0;
+      text-align: left;
     }
   }
 
@@ -65,7 +64,7 @@
     }
 
     .optionsList__actionsRow {
-      margin: ($euiSizeS / 2) 0 !important;
+      margin: calc($euiSizeS / 2) 0 !important;
 
       .optionsList__actionBarDivider {
         height: $euiSize;

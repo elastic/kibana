@@ -47,7 +47,12 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('CSV Generation from SearchSource: Dashboard', () => {
     before(async () => {
-      await esArchiver.load(archives.data);
+      await esArchiver.load(archives.data, {
+        performance: {
+          batchSize: 300,
+          concurrency: 5,
+        },
+      });
       await kibanaServer.importExport.load(archives.savedObjects);
       await kibanaServer.uiSettings.update({
         'csv:quoteValues': true,

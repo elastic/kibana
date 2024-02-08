@@ -113,7 +113,7 @@ export function WelcomeMessageKnowledgeBase({
             <EuiText color="subdued" size="s">
               {i18n.translate(
                 'xpack.observabilityAiAssistant.welcomeMessageKnowledgeBase.yourKnowledgeBaseIsNotSetUpCorrectlyLabel',
-                { defaultMessage: 'Your Knowledge base is not set up correctly' }
+                { defaultMessage: `Your Knowledge base hasn't been set up.` }
               )}
             </EuiText>
 
@@ -127,13 +127,13 @@ export function WelcomeMessageKnowledgeBase({
                     data-test-subj="observabilityAiAssistantWelcomeMessageSetUpKnowledgeBaseButton"
                     fill
                     isLoading={checkForInstallStatus}
-                    iconType="refresh"
+                    iconType="importAction"
                     onClick={handleRetryInstall}
                   >
                     {i18n.translate(
                       'xpack.observabilityAiAssistant.welcomeMessage.retryButtonLabel',
                       {
-                        defaultMessage: 'Retry install',
+                        defaultMessage: 'Install Knowledge base',
                       }
                     )}
                   </EuiButton>

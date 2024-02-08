@@ -16,6 +16,7 @@ import { EuiButtonEmpty, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard, TrainedModelHealthPopover } from './inference_pipeline_card';
+import { MODEL_REDACTED_VALUE } from './ml_inference/utils';
 import { MLModelTypeBadge } from './ml_model_type_badge';
 
 export const DEFAULT_VALUES: InferencePipeline = {
@@ -61,11 +62,29 @@ describe('InferencePipelineCard', () => {
     const subtitle = wrapper.find(EuiText).at(0).children();
     expect(subtitle.text()).toBe(DEFAULT_VALUES.modelId);
   });
+  it("renders message about redaction instead of model ID if it's redacted", () => {
+    const values = {
+      ...DEFAULT_VALUES,
+      modelId: '',
+    };
+    const wrapper = shallow(<InferencePipelineCard {...values} />);
+    expect(wrapper.find(EuiText)).toHaveLength(1);
+    const subtitle = wrapper.find(EuiText).at(0).children();
+    expect(subtitle.text()).toBe(MODEL_REDACTED_VALUE);
+  });
   it('renders model type as badge', () => {
     const wrapper = shallow(<InferencePipelineCard {...mockValues} />);
     expect(wrapper.find(MLModelTypeBadge)).toHaveLength(1);
     const badge = wrapper.find(MLModelTypeBadge).render();
     expect(badge.text()).toBe('ner');
+  });
+  it('does not render model type if model ID is redacted', () => {
+    const values = {
+      ...DEFAULT_VALUES,
+      modelId: '',
+    };
+    const wrapper = shallow(<InferencePipelineCard {...values} />);
+    expect(wrapper.find(MLModelTypeBadge)).toHaveLength(0);
   });
 });
 

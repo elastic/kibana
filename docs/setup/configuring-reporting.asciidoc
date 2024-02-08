@@ -116,7 +116,7 @@ With <<grant-user-access, {kib} application privileges>> enabled in Reporting, y
 NOTE: This link:https://www.elastic.co/guide/en/kibana/current/role-management-api-put.html[API request] needs to be executed against the link:https://www.elastic.co/guide/en/kibana/current/api.html[Kibana API endpoint].
 [source, sh]
 ---------------------------------------------------------------
-POST <kibana host>:<port>/api/_security/role/custom_reporting_user
+PUT <kibana host>:<port>/api/security/role/custom_reporting_user
 {
 	"elasticsearch": {
 		"cluster": [],

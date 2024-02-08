@@ -15,9 +15,9 @@ import { euiThemeVars } from '@kbn/ui-theme';
 
 import type { TimelineStatusLiteralWithNull } from '../../../../../../common/api/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../../common/api/timeline';
-import { timelineSelectors } from '../../../../store/timeline';
+import { timelineSelectors } from '../../../../store';
 import { useDeepEqualSelector } from '../../../../../common/hooks/use_selector';
-import { timelineDefaults } from '../../../../store/timeline/defaults';
+import { timelineDefaults } from '../../../../store/defaults';
 import * as i18n from './translations';
 import { StatefulSearchOrFilter } from '../../search_or_filter';
 import { DataProviders } from '../../data_providers';

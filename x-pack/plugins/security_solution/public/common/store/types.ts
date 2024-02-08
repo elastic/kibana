@@ -17,7 +17,7 @@ import type { InputsState } from './inputs/reducer';
 import type { SourcererState } from './sourcerer/reducer';
 import type { HostsPluginState } from '../../explore/hosts/store';
 import type { DragAndDropState } from './drag_and_drop/reducer';
-import type { TimelinePluginState } from '../../timelines/store/timeline';
+import type { TimelinePluginState } from '../../timelines/store';
 import type { NetworkPluginState } from '../../explore/network/store';
 import type { ManagementPluginState } from '../../management';
 import type { UsersPluginState } from '../../explore/users/store';

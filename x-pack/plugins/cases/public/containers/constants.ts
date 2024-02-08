@@ -46,8 +46,8 @@ export const casesQueriesKeys = {
   license: () => [...casesQueriesKeys.connectors, 'license'] as const,
   tags: () => [...casesQueriesKeys.all, 'tags'] as const,
   categories: () => [...casesQueriesKeys.all, 'categories'] as const,
-  alertFeatureIds: (alertRegistrationContexts: string[]) =>
-    [...casesQueriesKeys.alerts, 'features', alertRegistrationContexts] as const,
+  alertFeatureIds: (alertIds: string[]) =>
+    [...casesQueriesKeys.alerts, 'features', alertIds] as const,
   configuration: (params: unknown) => [...casesQueriesKeys.all, 'configuration', params] as const,
 };
 

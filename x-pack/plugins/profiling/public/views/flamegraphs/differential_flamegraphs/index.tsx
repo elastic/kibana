@@ -126,9 +126,6 @@ export function DifferentialFlameGraphsView() {
             baseValue={
               state.data?.primaryFlamegraph
                 ? {
-                    duration: totalSeconds,
-                    selfCPU: state.data.primaryFlamegraph.SelfCPU,
-                    totalCPU: state.data.primaryFlamegraph.TotalCPU,
                     totalCount: state.data.primaryFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? baselineTime : baseline,
                     totalAnnualCO2Kgs: state.data.primaryFlamegraph.TotalAnnualCO2KgsItems[0],
@@ -139,9 +136,6 @@ export function DifferentialFlameGraphsView() {
             comparisonValue={
               state.data?.comparisonFlamegraph
                 ? {
-                    duration: totalComparisonSeconds,
-                    selfCPU: state.data.comparisonFlamegraph.SelfCPU,
-                    totalCPU: state.data.comparisonFlamegraph.TotalCPU,
                     totalCount: state.data.comparisonFlamegraph.TotalSamples,
                     scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
                     totalAnnualCO2Kgs: state.data.comparisonFlamegraph.TotalAnnualCO2KgsItems[0],

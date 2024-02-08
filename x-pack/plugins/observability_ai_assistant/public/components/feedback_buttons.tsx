@@ -16,6 +16,11 @@ interface FeedbackButtonsProps {
   onClickFeedback: (feedback: Feedback) => void;
 }
 
+const THANK_YOU_MESSAGE = i18n.translate(
+  'xpack.observabilityAiAssistant.feedbackButtons.em.thanksForYourFeedbackLabel',
+  { defaultMessage: 'Thanks for your feedback' }
+);
+
 export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
   const { notifications } = useKibana().services;
 
@@ -24,13 +29,13 @@ export function FeedbackButtons({ onClickFeedback }: FeedbackButtonsProps) {
   const handleClickPositive = () => {
     onClickFeedback('positive');
     setHasBeenClicked(true);
-    notifications.toasts.addSuccess('Thanks for your feedback!');
+    notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
   };
 
   const handleClickNegative = () => {
     onClickFeedback('negative');
     setHasBeenClicked(true);
-    notifications.toasts.addSuccess('Thanks for your feedback!');
+    notifications.toasts.addSuccess(THANK_YOU_MESSAGE);
   };
 
   return (

@@ -1,0 +1,265 @@
+{
+  "index_patterns": [
+    "kbn-data-forge-fake_stack.admin-console-*"
+  ],
+  "mappings": {
+    "_meta": {
+      "version": "1.6.0"
+    },
+    "date_detection": false,
+    "dynamic_templates": [
+      {
+        "strings_as_keyword": {
+          "mapping": {
+            "fields": {
+              "text": {
+                "norms": false,
+                "type": "text"
+              }
+            },
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "match_mapping_type": "string"
+        }
+      }
+    ],
+    "properties": {
+      "@timestamp": {
+        "type": "date"
+      },
+      "event": {
+        "properties": {
+          "action": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "category": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "duration": {
+            "type": "long"
+          }
+        }
+      },
+      "host": {
+        "properties": {
+          "name": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "http": {
+        "properties": {
+          "request": {
+            "properties": {
+              "body": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "content": {
+                    "fields": {
+                      "text": {
+                        "type": "match_only_text"
+                      }
+                    },
+                    "type": "wildcard"
+                  }
+                }
+              },
+              "bytes": {
+                "type": "long"
+              },
+              "id": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "method": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "mime_type": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "referrer": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              }
+            }
+          },
+          "response": {
+            "properties": {
+              "body": {
+                "properties": {
+                  "bytes": {
+                    "type": "long"
+                  },
+                  "content": {
+                    "fields": {
+                      "text": {
+                        "type": "match_only_text"
+                      }
+                    },
+                    "type": "wildcard"
+                  }
+                }
+              },
+              "bytes": {
+                "type": "long"
+              },
+              "mime_type": {
+                "ignore_above": 1024,
+                "type": "keyword"
+              },
+              "status_code": {
+                "type": "long"
+              }
+            }
+          },
+          "version": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "labels": {
+        "type": "object"
+      },
+      "log": {
+        "properties": {
+          "level": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "logger": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "message": {
+        "type": "match_only_text"
+      },
+      "tags": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "url": {
+        "properties": {
+          "domain": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "extension": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "fragment": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "full": {
+            "fields": {
+              "text": {
+                "type": "match_only_text"
+              }
+            },
+            "type": "wildcard"
+          },
+          "original": {
+            "fields": {
+              "text": {
+                "type": "match_only_text"
+              }
+            },
+            "type": "wildcard"
+          },
+          "password": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "path": {
+            "type": "wildcard"
+          },
+          "port": {
+            "type": "long"
+          },
+          "query": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "registered_domain": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "scheme": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "subdomain": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "top_level_domain": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "username": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "user": {
+        "properties": {
+          "id": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "name": {
+            "fields": {
+              "text": {
+                "type": "match_only_text"
+              }
+            },
+            "ignore_above": 1024,
+            "type": "keyword"
+          },
+          "roles": {
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      },
+      "user_agent": {
+        "properties": {
+          "original": {
+            "fields": {
+              "text": {
+                "type": "match_only_text"
+              }
+            },
+            "ignore_above": 1024,
+            "type": "keyword"
+          }
+        }
+      }
+    }
+  },
+  "order": 1,
+  "settings": {
+    "index": {
+      "codec": "best_compression",
+      "mapping": {
+        "total_fields": {
+          "limit": 2000
+        }
+      },
+      "refresh_interval": "2s"
+    }
+  }
+}
