@@ -405,17 +405,22 @@ export class OptionsListEmbeddable
     }
 
     if (!newFilter) return { filters: [] };
-
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
     return { filters: [newFilter] };
   };
 
-  private buildFilter = async (
-    input?: Partial<OptionsListEmbeddableInput>
-  ): Promise<ControlFilterOutput> => {
-    const { validSelections } = this.getState().componentState ?? {};
-    return await this.selectionsToFilters({ selectedOptions: validSelections });
+  private buildFilter = async (): Promise<ControlFilterOutput> => {
+    const {
+      componentState: { validSelections },
+      explicitInput: { existsSelected, exclude },
+    } = this.getState();
+
+    return await this.selectionsToFilters({
+      existsSelected,
+      exclude,
+      selectedOptions: validSelections,
+    });
   };
 
   public clearSelections() {
