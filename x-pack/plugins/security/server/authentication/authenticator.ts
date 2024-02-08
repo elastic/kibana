@@ -46,6 +46,7 @@ import type { ConfigType } from '../config';
 import { getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import {
+  getPrintableSessionId,
   type Session,
   SessionConcurrencyLimitError,
   SessionExpiredError,
@@ -315,7 +316,7 @@ export class Authenticator {
         : [];
 
     if (providers.length === 0) {
-      this.logger.debug(
+      this.logger.warn(
         `Login attempt for provider with ${
           isLoginAttemptWithProviderName(attempt)
             ? `name ${attempt.provider.name}`
@@ -505,11 +506,31 @@ export class Authenticator {
    * @param request Request instance.
    */
   async reauthenticate(request: KibanaRequest) {
-    assertRequest(request);
+    // "Fake" requests cannot be re-authenticated as there are no sessions associated with them.
+    if (!(request instanceof CoreKibanaRequest)) {
+      this.logger.debug(
+        `Re-authentication is only supported for instances of \`CoreKibanaRequest\`, but got [\`${typeof request}\`] with keys [${
+          request ? Object.keys(request) : []
+        }].`
+      );
+      return AuthenticationResult.notHandled();
+    }
+
+    // Return early if request doesn't have any associated session. We retrieve session ID separately from the session
+    // content because it doesn't trigger session invalidation for expired sessions.
+    const sid = await this.session.getSID(request);
+    if (!sid) {
+      this.logger.debug(
+        'Re-authentication is only supported for requests with associated sessions.'
+      );
+      return AuthenticationResult.notHandled();
+    }
 
     const { value: existingSessionValue } = await this.getSessionValue(request);
     if (!existingSessionValue) {
-      this.logger.warn('Session is no longer available and cannot be re-authenticated.');
+      this.logger
+        .get(getPrintableSessionId(sid))
+        .warn('Session is no longer available and cannot be re-authenticated.');
       return AuthenticationResult.notHandled();
     }
 
@@ -763,7 +784,7 @@ export class Authenticator {
     // invalidation (e.g. when Elasticsearch is temporarily unavailable).
     if (authenticationResult.failed()) {
       if (ownsSession && getErrorStatusCode(authenticationResult.error) === 401) {
-        this.logger.debug('Authentication attempt failed, existing session will be invalidated.');
+        this.logger.warn('Authentication attempt failed, existing session will be invalidated.');
         await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       }
       return null;
@@ -799,7 +820,7 @@ export class Authenticator {
     // 3. If we re-authenticated user with another username (e.g. during IdP initiated SSO login or
     // when client certificate changes and PKI provider needs to re-authenticate user).
     if (providerHasChanged) {
-      this.logger.debug(
+      this.logger.warn(
         'Authentication provider has changed, existing session will be invalidated.'
       );
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
@@ -815,7 +836,7 @@ export class Authenticator {
       });
       existingSessionValue = null;
     } else if (usernameHasChanged) {
-      this.logger.debug('Username has changed, existing session will be invalidated.');
+      this.logger.warn('Username has changed, existing session will be invalidated.');
       await this.invalidateSessionValue({ request, sessionValue: existingSessionValue });
       existingSessionValue = null;
     }

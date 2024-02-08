@@ -2418,10 +2418,14 @@ describe('Authenticator', () => {
       authenticator = new Authenticator(mockOptions);
     });
 
-    it('fails if request is not provided.', async () => {
-      await expect(authenticator.reauthenticate(undefined as any)).rejects.toThrowError(
-        'Request should be a valid "KibanaRequest" instance, was [undefined].'
+    it('does not handle re-authentication if request is not provided.', async () => {
+      await expect(authenticator.reauthenticate(undefined as any)).resolves.toEqual(
+        AuthenticationResult.notHandled()
       );
+
+      await expect(
+        authenticator.reauthenticate({ headers: { authorization: 'Basic xxxx' } } as any)
+      ).resolves.toEqual(AuthenticationResult.notHandled());
     });
 
     it('does not try to reauthenticate request if session is not available.', async () => {
@@ -2463,6 +2467,7 @@ describe('Authenticator', () => {
 
     it('does not clear session if provider cannot handle authentication', async () => {
       const request = httpServerMock.createKibanaRequest();
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
@@ -2492,6 +2497,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2512,6 +2518,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2534,6 +2541,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.succeeded(user, { state: newState })
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
@@ -2560,6 +2568,7 @@ describe('Authenticator', () => {
       mockBasicAuthenticationProvider.authenticate.mockResolvedValue(
         AuthenticationResult.failed(failureReason)
       );
+      mockOptions.session.getSID.mockResolvedValue(mockSessVal.sid);
       mockOptions.session.get.mockResolvedValue({ error: null, value: mockSessVal });
 
       await expect(authenticator.reauthenticate(request)).resolves.toEqual(
