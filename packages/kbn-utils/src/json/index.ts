@@ -5,6 +5,16 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export * from './src/json';
-export * from './src/path';
-export * from './src/streams';
+
+/**
+ * Given a JS object, will return a JSON.stringified result with consistently
+ * sorted keys.
+ */
+export function prettyPrintAndSortKeys(object: object): string {
+  const keys = new Set<string>();
+  JSON.stringify(object, (key, value) => {
+    keys.add(key);
+    return value;
+  });
+  return JSON.stringify(object, Array.from(keys).sort(), 2);
+}
