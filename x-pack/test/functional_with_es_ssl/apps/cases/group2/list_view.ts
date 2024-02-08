@@ -28,6 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   describe('cases list', () => {
     before(async () => {
+      await cases.api.deleteAllCases();
       await cases.navigation.navigateToApp();
     });
 
