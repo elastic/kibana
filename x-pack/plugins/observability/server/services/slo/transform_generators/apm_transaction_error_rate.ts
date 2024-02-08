@@ -11,7 +11,7 @@ import {
   apmTransactionErrorRateIndicatorSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
@@ -111,7 +111,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
     }
 
     if (indicator.params.filter) {
-      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {

@@ -12,7 +12,7 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { getElastichsearchQueryOrThrow, TransformGenerator } from '.';
+import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_NAME,
@@ -112,7 +112,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
     }
 
     if (!!indicator.params.filter) {
-      queryFilter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+      queryFilter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
     }
 
     return {

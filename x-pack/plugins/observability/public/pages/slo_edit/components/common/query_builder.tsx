@@ -8,6 +8,8 @@
 import { EuiFormRow } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import styled from 'styled-components';
+import { KqlWithFiltersSchema } from '@kbn/slo-schema';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -34,7 +36,7 @@ export function QueryBuilder({
 }: Props) {
   const {
     unifiedSearch: {
-      ui: { QueryStringInput },
+      ui: { SearchBar },
     },
   } = useKibana().services;
 
@@ -66,24 +68,64 @@ export function QueryBuilder({
         rules={{
           required: Boolean(required) && Boolean(dataView),
         }}
-        render={({ field, fieldState }) => (
-          <QueryStringInput
-            appName="Observability"
-            dataTestSubj={dataTestSubj}
-            disableLanguageSwitcher
-            indexPatterns={dataView ? [dataView] : []}
-            isDisabled={!dataView}
-            isInvalid={fieldState.invalid}
-            languageSwitcherPopoverAnchorPosition="rightDown"
-            placeholder={placeholder}
-            query={{ query: String(field.value), language: 'kuery' }}
-            size="s"
-            onChange={(value) => {
-              field.onChange(value.query);
-            }}
-          />
-        )}
+        render={({ field, fieldState }) => {
+          const existingValue = field.value as KqlWithFiltersSchema;
+
+          return (
+            <Container>
+              <SearchBar
+                appName="Observability"
+                dataTestSubj={dataTestSubj}
+                indexPatterns={dataView ? [dataView] : []}
+                isDisabled={!dataView}
+                placeholder={placeholder}
+                query={{
+                  query:
+                    typeof existingValue === 'string'
+                      ? String(existingValue)
+                      : existingValue.kqlQuery,
+                  language: 'kuery',
+                }}
+                onQuerySubmit={(value) => {
+                  if (typeof existingValue === 'string') {
+                    field.onChange(String(value.query?.query));
+                  } else {
+                    field.onChange({
+                      ...(existingValue ?? {}),
+                      kqlQuery: String(value.query?.query),
+                    });
+                  }
+                }}
+                onFiltersUpdated={(filters) => {
+                  if (typeof existingValue === 'string') {
+                    field.onChange({
+                      filters,
+                      kqlQuery: existingValue,
+                    });
+                  } else {
+                    field.onChange({
+                      ...(existingValue ?? {}),
+                      filters,
+                    });
+                  }
+                }}
+                showDatePicker={false}
+                showSubmitButton={false}
+                showQueryInput={true}
+                disableQueryLanguageSwitcher={true}
+                onClearSavedQuery={() => {}}
+                filters={typeof existingValue === 'string' ? [] : existingValue?.filters ?? []}
+              />
+            </Container>
+          );
+        }}
       />
     </EuiFormRow>
   );
 }
+
+const Container = styled.div`
+  .uniSearchBar {
+    padding: 0;
+  }
+`;

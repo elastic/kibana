@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { allOrAnyString, dateRangeSchema } from './common';
+import { allOrAnyString, dateRangeSchema, kqlWithFiltersSchema } from './common';
 
 const apmTransactionDurationIndicatorTypeSchema = t.literal('sli.apm.transactionDuration');
 const apmTransactionDurationIndicatorSchema = t.type({
@@ -21,7 +21,7 @@ const apmTransactionDurationIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: kqlWithFiltersSchema,
     }),
   ]),
 });
@@ -38,7 +38,7 @@ const apmTransactionErrorRateIndicatorSchema = t.type({
       index: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: kqlWithFiltersSchema,
     }),
   ]),
 });
@@ -49,12 +49,12 @@ const kqlCustomIndicatorSchema = t.type({
   params: t.intersection([
     t.type({
       index: t.string,
-      good: t.string,
-      total: t.string,
+      good: kqlWithFiltersSchema,
+      total: kqlWithFiltersSchema,
       timestampField: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: kqlWithFiltersSchema,
     }),
   ]),
 });
@@ -83,7 +83,7 @@ const timesliceMetricBasicMetricWithField = t.intersection([
     field: t.string,
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -93,7 +93,7 @@ const timesliceMetricDocCountMetric = t.intersection([
     aggregation: t.literal('doc_count'),
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -105,7 +105,7 @@ const timesliceMetricPercentileMetric = t.intersection([
     percentile: t.number,
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -131,7 +131,7 @@ const timesliceMetricIndicatorSchema = t.type({
       timestampField: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: kqlWithFiltersSchema,
     }),
   ]),
 });
@@ -142,7 +142,7 @@ const metricCustomDocCountMetric = t.intersection([
     aggregation: t.literal('doc_count'),
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -153,7 +153,7 @@ const metricCustomBasicMetric = t.intersection([
     field: t.string,
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -172,7 +172,7 @@ const metricCustomIndicatorSchema = t.type({
       timestampField: t.string,
     }),
     t.partial({
-      filter: t.string,
+      filter: kqlWithFiltersSchema,
     }),
   ]),
 });
@@ -186,7 +186,7 @@ const rangeBasedHistogramMetricDef = t.intersection([
     to: t.number,
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -197,7 +197,7 @@ const valueCountBasedHistogramMetricDef = t.intersection([
     aggregation: valueCountHistogramMetricType,
   }),
   t.partial({
-    filter: t.string,
+    filter: kqlWithFiltersSchema,
   }),
 ]);
 
@@ -217,7 +217,7 @@ const histogramIndicatorSchema = t.type({
       total: histogramMetricDef,
     }),
     t.partial({
-      filter: t.string,
+      filter: kqlWithFiltersSchema,
     }),
   ]),
 });
