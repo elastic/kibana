@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getFlattenedObject } from '@kbn/std';
-import omit from 'lodash/omit';
+import { omit } from 'lodash';
 import type { SearchHit } from '@kbn/es-types';
 
 import styled from 'styled-components';

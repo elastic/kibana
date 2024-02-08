@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import uniqBy from 'lodash/uniqBy';
+import { uniqBy } from 'lodash';
 import type { monaco } from '../../../../monaco_imports';
 import type { AutocompleteCommandDefinition } from './types';
 import { nonNullable } from '../ast_helpers';

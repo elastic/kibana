@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import isEqual from 'lodash/isEqual';
+import { isEqual } from 'lodash';
 
 import { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
 import { hasUnsavedChange } from './has_unsaved_change';

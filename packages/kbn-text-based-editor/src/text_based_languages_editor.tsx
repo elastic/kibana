@@ -8,7 +8,7 @@
 
 import React, { useRef, memo, useEffect, useState, useCallback, useMemo } from 'react';
 import classNames from 'classnames';
-import memoize from 'lodash/memoize';
+import { memoize } from 'lodash';
 import {
   SQLLang,
   monaco,
