@@ -38,14 +38,14 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       const trace = taskMetricsService.start(taskName);
       try {
         const artifactName = 'telemetry-filterlists-v1';
-        const artifactContent = await artifactService.getArtifact(artifactName);
-        if (!artifactContent) {
+        const manifest = await artifactService.getArtifact(artifactName);
+        if (manifest.notModified) {
           log('No new filterlist artifact found, skipping...');
           taskMetricsService.end(trace);
           return 0;
         }
 
-        const artifact = artifactContent as unknown as TelemetryFilterListArtifact;
+        const artifact = manifest.data as unknown as TelemetryFilterListArtifact;
         log(`New filterlist artifact: ${JSON.stringify(artifact)}`);
         filterList.endpointAlerts = artifact.endpoint_alerts;
         filterList.exceptionLists = artifact.exception_lists;

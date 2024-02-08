@@ -38,15 +38,15 @@ export function createTelemetryConfigurationTaskConfig() {
       const trace = taskMetricsService.start(taskName);
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
-        const artifactContent = await artifactService.getArtifact(artifactName);
+        const manifest = await artifactService.getArtifact(artifactName);
 
-        if (!artifactContent) {
+        if (manifest.notModified) {
           log('No new configuration artifact found, skipping...');
           taskMetricsService.end(trace);
           return 0;
         }
 
-        const configArtifact = artifactContent as unknown as TelemetryConfiguration;
+        const configArtifact = manifest.data as unknown as TelemetryConfiguration;
 
         log(`Got telemetry configuration artifact: ${JSON.stringify(configArtifact)}`);
 

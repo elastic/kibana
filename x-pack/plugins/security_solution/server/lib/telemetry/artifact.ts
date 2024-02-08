@@ -6,14 +6,25 @@
  */
 
 import axios from 'axios';
+import { cloneDeep } from 'lodash';
 import AdmZip from 'adm-zip';
 import type { ITelemetryReceiver } from './receiver';
 import type { ESClusterInfo } from './types';
 
 export interface IArtifact {
   start(receiver: ITelemetryReceiver): Promise<void>;
-  getArtifact(name: string): Promise<unknown | undefined>;
+  getArtifact(name: string): Promise<Manifest>;
   getManifestUrl(): string | undefined;
+}
+
+export interface Manifest {
+  data: unknown;
+  notModified: boolean;
+}
+
+interface CacheEntry {
+  manifest: Manifest;
+  etag: string;
 }
 
 export class Artifact implements IArtifact {
@@ -22,7 +33,7 @@ export class Artifact implements IArtifact {
   private readonly AXIOS_TIMEOUT_MS = 10_000;
   private receiver?: ITelemetryReceiver;
   private esClusterInfo?: ESClusterInfo;
-  private etagByName: Map<string, string | undefined> = new Map();
+  private cache: Map<string, CacheEntry> = new Map();
 
   public async start(receiver: ITelemetryReceiver) {
     this.receiver = receiver;
@@ -37,41 +48,54 @@ export class Artifact implements IArtifact {
     }
   }
 
-  public async getArtifact(name: string): Promise<unknown | undefined> {
+  public async getArtifact(name: string): Promise<Manifest> {
+    return axios
+      .get(this.getManifestUrl(), {
+        headers: this.headers(name),
+        timeout: this.AXIOS_TIMEOUT_MS,
+        validateStatus: (status) => status < 500,
+        responseType: 'arraybuffer',
+      })
+      .then(async (response) => {
+        switch (response.status) {
+          case 200:
+            const manifest = {
+              data: await this.getManifest(name, response.data),
+              notModified: false,
+            };
+            // only update etag if we got a valid manifest
+            if (response.headers && response.headers.etag) {
+              const cacheEntry = {
+                manifest: { ...manifest, notModified: true },
+                etag: response.headers?.etag ?? '',
+              };
+              this.cache.set(name, cacheEntry);
+            }
+            return cloneDeep(manifest);
+          case 304:
+            return cloneDeep(this.getCachedManifest(name));
+          case 404:
+            throw Error(`No manifest resource found at url: ${this.manifestUrl}`);
+          default:
+            throw Error(`Failed to download manifest, unexpected status code: ${response.status}`);
+        }
+      });
+  }
+
+  public getManifestUrl() {
     if (this.manifestUrl) {
-      return axios
-        .get(this.manifestUrl, {
-          headers: this.headers(name),
-          timeout: this.AXIOS_TIMEOUT_MS,
-          validateStatus: (status) => status < 500,
-          responseType: 'arraybuffer',
-        })
-        .then((response) => {
-          switch (response.status) {
-            case 200:
-              const manifest = this.getManifest(name, response.data);
-              // only update etag if we got a valid manifest
-              if (response.headers && response.headers.etag) {
-                this.etagByName.set(name, response.headers.etag);
-              }
-              return manifest;
-            case 304:
-              return undefined;
-            case 404:
-              throw Error(`No manifest resource found at url: ${this.manifestUrl}`);
-            default:
-              throw Error(
-                `Failed to download manifest, unexpected status code: ${response.status}`
-              );
-          }
-        });
+      return this.manifestUrl;
     } else {
       throw Error(`No manifest url for version ${this.esClusterInfo?.version?.number}`);
     }
   }
 
-  public getManifestUrl() {
-    return this.manifestUrl;
+  public getCachedManifest(name: string): Manifest {
+    const entry = this.cache.get(name);
+    if (!entry) {
+      throw Error(`No cached manifest for name ${name}`);
+    }
+    return entry.manifest;
   }
 
   private async getManifest(name: string, data: Buffer): Promise<unknown> {
@@ -98,8 +122,9 @@ export class Artifact implements IArtifact {
 
   // morre info https://www.rfc-editor.org/rfc/rfc9110#name-etag
   private headers(name: string): Record<string, string> {
-    if (this.etagByName.has(name) && this.etagByName.get(name) !== undefined) {
-      return { 'If-None-Match': this.etagByName.get(name) ?? '' };
+    const etag = this.cache.get(name)?.etag;
+    if (etag) {
+      return { 'If-None-Match': etag };
     }
     return {};
   }

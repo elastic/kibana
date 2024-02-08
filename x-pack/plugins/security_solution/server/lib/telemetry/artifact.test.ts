@@ -14,6 +14,10 @@ jest.mock('axios');
 const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('telemetry artifact test', () => {
+  beforeEach(() => {
+    mockedAxios.get.mockReset();
+  });
+
   test('start should set manifest url for snapshot version', async () => {
     const expectedManifestUrl =
       'https://artifacts.security.elastic.co/downloads/kibana/manifest/artifacts-8.0.0.zip';
@@ -92,9 +96,10 @@ describe('telemetry artifact test', () => {
           },
         })
       );
-    const artifactObject: TelemetryConfiguration = (await artifact.getArtifact(
-      'telemetry-buffer-and-batch-sizes-v1'
-    )) as unknown as TelemetryConfiguration;
+    const manifest = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
+    expect(manifest).not.toBeFalsy();
+    const artifactObject: TelemetryConfiguration =
+      manifest.data as unknown as TelemetryConfiguration;
     expect(artifactObject.telemetry_max_buffer_size).toEqual(100);
     expect(artifactObject.max_security_list_telemetry_batch).toEqual(100);
     expect(artifactObject.max_endpoint_telemetry_batch).toEqual(300);
@@ -103,43 +108,34 @@ describe('telemetry artifact test', () => {
   });
 
   test('getArtifact should cache response', async () => {
-    const mockTelemetryReceiver = createMockTelemetryReceiver();
-    const artifact = new Artifact();
     const fakeEtag = '123';
-    await artifact.start(mockTelemetryReceiver);
     const axiosResponse = {
       status: 200,
       data: 'x-pack/plugins/security_solution/server/lib/telemetry/__mocks__/kibana-artifacts.zip',
       headers: { etag: fakeEtag },
     };
+    const artifact = new Artifact();
+
+    await artifact.start(createMockTelemetryReceiver());
+
     mockedAxios.get
       .mockImplementationOnce(() => Promise.resolve(axiosResponse))
-      .mockImplementationOnce(() =>
-        Promise.resolve({
-          status: 200,
-          data: {
-            telemetry_max_buffer_size: 100,
-            max_security_list_telemetry_batch: 100,
-            max_endpoint_telemetry_batch: 300,
-            max_detection_rule_telemetry_batch: 1_000,
-            max_detection_alerts_batch: 50,
-          },
-        })
-      )
+      .mockImplementationOnce(() => Promise.resolve({ status: 200, data: {} }))
       .mockImplementationOnce(() => Promise.resolve({ status: 304 }));
-    const artifactObject: TelemetryConfiguration = (await artifact.getArtifact(
-      'telemetry-buffer-and-batch-sizes-v1'
-    )) as unknown as TelemetryConfiguration;
-    expect(artifactObject.telemetry_max_buffer_size).toEqual(100);
-    expect(artifactObject.max_security_list_telemetry_batch).toEqual(100);
-    expect(artifactObject.max_endpoint_telemetry_batch).toEqual(300);
-    expect(artifactObject.max_detection_rule_telemetry_batch).toEqual(1_000);
-    expect(artifactObject.max_detection_alerts_batch).toEqual(50);
 
-    const response = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
-    expect(response).toBe(undefined);
+    let manifest = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
+    expect(manifest).not.toBeFalsy();
+    expect(manifest.notModified).toEqual(false);
+    expect(mockedAxios.get.mock.calls.length).toBe(2);
 
-    const [_url, config] = mockedAxios.get.mock.calls[5];
-    expect((config?.headers ?? {})['If-None-Match']).toEqual(fakeEtag);
+    manifest = await artifact.getArtifact('telemetry-buffer-and-batch-sizes-v1');
+    expect(manifest).not.toBeFalsy();
+    expect(manifest.notModified).toEqual(true);
+    expect(mockedAxios.get.mock.calls.length).toBe(3);
+
+    const [_url, config] = mockedAxios.get.mock.calls[2];
+    const headers = config?.headers ?? {};
+    expect(headers).not.toBeFalsy();
+    expect(headers['If-None-Match']).toEqual(fakeEtag);
   });
 });
