@@ -20,25 +20,26 @@ import {
 } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateSLOInput } from '@kbn/slo-schema';
+import { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
 import { CreateSLOForm } from '../../types';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 
 type Props = {
+  isEditMode: boolean;
   disabled: boolean;
+  slo?: GetSLOResponse;
 };
 
-export function EquivalentApiRequest({ disabled }: Props) {
+export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
-
   const [sloData, setSloData] = useState<CreateSLOInput>();
 
   useEffect(() => {
     if (!isFlyoutVisible) {
       return;
     }
+
     trigger().then((isValid) => {
       if (isValid) {
         setSloData(transformCreateSLOFormToCreateSLOInput(getValues()));
@@ -70,7 +71,7 @@ export function EquivalentApiRequest({ disabled }: Props) {
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCodeBlock language="javascript" isCopyable paddingSize="s">
-            {'POST /api/observability/slos'}
+            {isEditMode ? `PUT /api/observability/slos/${slo!.id}` : 'POST /api/observability/slos'}
           </EuiCodeBlock>
           <EuiSpacer size="s" />
           <EuiText>
