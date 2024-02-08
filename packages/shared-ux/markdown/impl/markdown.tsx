@@ -44,6 +44,7 @@ export const Markdown = ({
   height = 'full',
   readOnly = false,
   enableTooltipSupport = false,
+  ...restProps
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
 
@@ -64,6 +65,7 @@ export const Markdown = ({
         aria-label={ariaLabelContent ?? 'markdown component'}
         parsingPluginList={parsingPlugins}
         processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
+        data-test-subj={restProps['data-test-subj']}
       >
         {children ?? markdownContent!}
       </EuiMarkdownFormat>
@@ -81,6 +83,7 @@ export const Markdown = ({
       uiPlugins={uiPlugins}
       parsingPluginList={parsingPlugins}
       processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
+      data-test-subj={restProps['data-test-subj']}
     />
   );
 };
