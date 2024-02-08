@@ -341,6 +341,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
+      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -414,6 +415,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const hoverProvider = useMemo(
     () => (language === 'esql' ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
+  );
+
+  const codeActionProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getCodeActionProvider?.(esqlCallbacks) : undefined),
     [language, esqlCallbacks]
   );
 
@@ -541,6 +547,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       vertical: 'auto',
     },
     overviewRulerBorder: false,
+    // this becomes confusing with multiple markers, so quick fixes
+    // will be proposed only within the tooltip
+    lightbulb: {
+      enabled: false,
+    },
     readOnly:
       isLoading ||
       isDisabled ||
@@ -776,6 +787,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           return hoverProvider?.provideHover(model, position, token);
                         },
                       }}
+                      codeActions={codeActionProvider}
                       onChange={onQueryUpdate}
                       editorDidMount={(editor) => {
                         editor1.current = editor;
@@ -801,6 +813,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           if (content) {
                             codeRef.current = content || editor.getValue();
                           }
+                        });
+
+                        // this is fixing a bug between the EUIPopover and the monaco editor
+                        // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+                        // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+                        // and the user needs to click again the editor.
+                        // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+                        editor.onMouseDown(() => {
+                          setTimeout(() => {
+                            editor.focus();
+                          }, 100);
                         });
 
                         editor.onDidFocusEditorText(() => {

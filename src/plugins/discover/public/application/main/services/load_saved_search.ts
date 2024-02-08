@@ -78,7 +78,11 @@ export const loadSavedSearch = async (
         savedSearch: nextSavedSearch,
       });
       const dataViewDifferentToAppState = stateDataView.id !== savedSearchDataViewId;
-      if (stateDataView && (dataViewDifferentToAppState || !savedSearchDataViewId)) {
+      if (
+        !nextSavedSearch.isTextBasedQuery &&
+        stateDataView &&
+        (dataViewDifferentToAppState || !savedSearchDataViewId)
+      ) {
         nextSavedSearch.searchSource.setField('index', stateDataView);
       }
     }

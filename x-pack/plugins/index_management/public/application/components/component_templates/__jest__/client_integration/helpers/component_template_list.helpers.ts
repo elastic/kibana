@@ -115,3 +115,6 @@ export type ComponentTemplateTestSubjects =
   | 'deleteComponentTemplateButton'
   | 'reloadButton'
   | 'componentTemplatesSearch';
+  | 'deprecatedComponentTemplateBadge'
+  | 'componentTemplatesFiltersButton'
+  | 'componentTemplates--deprecatedFilter';

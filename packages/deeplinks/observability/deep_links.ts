@@ -17,7 +17,7 @@ import {
 } from './constants';
 
 type LogsApp = typeof LOGS_APP_ID;
-type ObservabilityLogExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
+type ObservabilityLogsExplorerApp = typeof OBSERVABILITY_LOGS_EXPLORER_APP_ID;
 type ObservabilityOverviewApp = typeof OBSERVABILITY_OVERVIEW_APP_ID;
 type MetricsApp = typeof METRICS_APP_ID;
 type ApmApp = typeof APM_APP_ID;
@@ -26,7 +26,7 @@ type ObservabilityOnboardingApp = typeof OBSERVABILITY_ONBOARDING_APP_ID;
 
 export type AppId =
   | LogsApp
-  | ObservabilityLogExplorerApp
+  | ObservabilityLogsExplorerApp
   | ObservabilityOverviewApp
   | ObservabilityOnboardingApp
   | ApmApp

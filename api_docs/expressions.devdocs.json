@@ -6829,7 +6829,7 @@
         "label": "useExpressionRenderer",
         "description": [],
         "signature": [
-          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }: ",
+          "(nodeRef: React.RefObject<HTMLElement>, {\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }: ",
           {
             "pluginId": "expressions",
             "scope": "public",
@@ -6863,7 +6863,7 @@
             "id": "def-public.useExpressionRenderer.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    ...loaderParams\n  }",
+            "label": "{\n    debounce,\n    expression,\n    hasCustomErrorRenderer,\n    onData$,\n    onEvent,\n    onRender$,\n    reload$,\n    abortController,\n    ...loaderParams\n  }",
             "description": [],
             "signature": [
               {
@@ -7036,6 +7036,20 @@
                 "section": "def-common.DatatableColumnMeta",
                 "text": "DatatableColumnMeta"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -9579,6 +9593,20 @@
             "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExpressionRendererParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/use_expression_renderer.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -10965,6 +10993,20 @@
                 "text": "KibanaExecutionContext"
               },
               " | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.abortController",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
             ],
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false,
@@ -18471,6 +18513,20 @@
                 "section": "def-common.DatatableColumnMeta",
                 "text": "DatatableColumnMeta"
               }
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -30262,6 +30318,20 @@
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumn.isNull",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isNull",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -37965,7 +38035,7 @@
           "\nMode of the expression render environment.\nThis value can be set from a consumer embedding an expression renderer and is accessible\nfrom within the active render function as part of the handlers.\nThe following modes are supported:\n* view (default): The chart is rendered in a container with the main purpose of viewing the chart (e.g. in a container like dashboard or canvas)\n* preview: The chart is rendered in very restricted space (below 100px width and height) and should only show a rough outline\n* edit: The chart is rendered within an editor and configuration elements within the chart should be displayed"
         ],
         "signature": [
-          "\"view\" | \"edit\" | \"preview\""
+          "\"edit\" | \"view\" | \"preview\""
         ],
         "path": "src/plugins/expressions/common/expression_renderers/types.ts",
         "deprecated": false,
