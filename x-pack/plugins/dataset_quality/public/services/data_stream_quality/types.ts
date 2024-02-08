@@ -10,6 +10,7 @@ import {
   CheckPlan,
   DataStreamQualityCheckArguments,
   DataStreamQualityCheckExecution,
+  MitigationExecution,
   MitigationParams,
 } from '../../../common';
 
@@ -29,5 +30,5 @@ export interface IDataStreamQualityClient {
     checkId: string,
     args: DataStreamQualityCheckArguments
   ): Promise<DataStreamQualityCheckExecution>;
-  applyMitigation(dataStream: string, mitigation: MitigationParams): Promise<void>;
+  applyMitigation(dataStream: string, mitigation: MitigationParams): Promise<MitigationExecution>;
 }

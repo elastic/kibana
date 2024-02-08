@@ -14,6 +14,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiLoadingSpinner,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
@@ -267,6 +268,9 @@ const ConfiguringIncreaseIgnoreAboveMitigationForm = React.memo(
 
 const ConnectedAppliedMitigationPanel = React.memo(() => {
   const [mitigationState, send] = useActor(useDataStreamQualityMitigationStateContext());
+  const {
+    context: { latestMitigationExecution },
+  } = mitigationState;
 
   const finish = useCallback(() => {
     send({
@@ -274,13 +278,65 @@ const ConnectedAppliedMitigationPanel = React.memo(() => {
     });
   }, [send]);
 
-  return (
-    <StepPanel title="Applied mitigation" color="success">
-      <EuiButton color="success" onClick={finish}>
-        Finish
-      </EuiButton>
-    </StepPanel>
-  );
+  if (latestMitigationExecution == null) {
+    return null;
+  }
+
+  if (latestMitigationExecution.result.type === 'applied') {
+    return (
+      <StepPanel title={`Applied mitigation ${latestMitigationExecution.id}`} color="success">
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h2>Changes made</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          {latestMitigationExecution.result.changes.map((change) => {
+            return (
+              <EuiFlexItem
+                key={`change-${change.change}-${change.asset_type}-${change.asset_name}`}
+              >
+                <EuiPanel hasShadow={false} hasBorder>
+                  <EuiDescriptionList
+                    type="column"
+                    listItems={[
+                      {
+                        title: 'Change',
+                        description: change.change,
+                      },
+                      {
+                        title: 'Asset type',
+                        description: change.asset_type,
+                      },
+                      {
+                        title: 'Asset name',
+                        description: change.asset_name,
+                      },
+                    ]}
+                  />
+                </EuiPanel>
+              </EuiFlexItem>
+            );
+          })}
+          <EuiFlexItem>
+            <EuiButton color="success" onClick={finish}>
+              Finish
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </StepPanel>
+    );
+  } else {
+    return (
+      <StepPanel title={`Failed mitigation ${latestMitigationExecution.id}`} color="danger">
+        <p>{latestMitigationExecution.result.name}</p>
+        <p>{latestMitigationExecution.result.description}</p>
+        <EuiButton color="success" onClick={finish}>
+          Finish
+        </EuiButton>
+      </StepPanel>
+    );
+  }
 });
 
 const ConnectedApplyingMitigationPanel = React.memo(() => {

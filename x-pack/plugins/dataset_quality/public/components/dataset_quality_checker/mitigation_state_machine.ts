@@ -9,6 +9,7 @@ import { ActionTypes, assign, createMachine, InterpreterFrom, pure } from 'xstat
 import {
   CheckTimeRange,
   Mitigation,
+  MitigationExecution,
   MitigationForCause,
   QualityProblemCause,
   QualityProblemParams,
@@ -22,7 +23,7 @@ export const createPureDataStreamQualityMitigationStateMachine = (
 ) =>
   createMachine(
     {
-      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAsjVVBlQPYB2AdBW6hFQ5RG6Zq06wAxBE5guggG5sA1nJjoRY0RIDaABgC6iUAAc2sJp2MgAHogCsAZi4AOAJx6AbI5eO9Adjc3AEZggBYAGhBaRGD-Zz1ExMd7ACZgvVT7f1SAX1yotEwcfCIyShoGJhZtbl5+QWFq8Q4pGQ45RRU1MA1m2tgdYKMkEDMLWus7BABaVO9XVL1HT1T05fng+yiYhDiEpOW0jKz-fMKMbDwCEnJqOk0a9m4AC1RYR5apAGNOADNmKR8J9avoRqZzJYOFNYnEuAEXHpsmFPCEQqidogVm54fY3IE9PjjvNziAildSrcKg9+s8uKgTCYKLRGiDntJZPIOEpVPTGcy2ZwwdZxlCYXslosXMF5o5-C4XKk3GlMQhEZ54YcUutTqTySUbuV7lVRE9OHymSyhIKOJIwLhcGxcFwmRg-k7CBaBbShYYRZDJqNpmFggkXHivG5FWF0m5VZ5-P4uInHGEkY5laFPHrLgayndKjauG9YAA5Ng2qQAjhUWAvYWjUWB0DTGb7Lj2Vb2MJy8PBDxuSLRWJeDVhIJRzzd+JeHPFa756kmrR0hlMqiQG2Sau1+t+xsB57i0JJzyeNOecL9vTSlKq5X2VzBTyKvRhfxhBU3ucUw0Fmmmi0XB-KgVAUJuPq2vgeC0A2EITEeQaIAmYRcOESLnuGIZyv4qphI+E5BP4wQuN4nahD+eZUsaRYgWBEGAbU26CLucFjIeVhIQgCbBFw3jzKR9hONkcSqhkZ5cOOQSCe+firJRC7UYWkFcL8HAAlAQKspBkhrt6jHPGxTaIS2sSpq4iqKh+bhyl49jBKq2Q4vYWrHJk2QKZSRrKQZ5pqRpWnWjp0FAhwRkcdCXFps5Wz2NKJFxC5pGqqk-gaqlqZ4omg4Kv49j5AUIAcGwEBwNY+qKd5AErpx8FilxMyOKEizLKs6yOJs2zDrMISaokoQdRm-hvsEnl-kuRb1AIQW+a0-oIbVtjIXofV6KGfiBCE4Sqo1kmEee8r4jGipjYuNEqSWlbzfVpl7BmfHKk1bhLD2U7PSlQSrUcOrZPlhUVV5-7Lma3B6VaTSzddzZLQgTgduGUYkWth0ZvGeUdq5P1nP9uaVUDRYluWV0HgtkW3XMa1cB1rX4eh-ZBB9OKHN9Jy-adSnVSDXDtGAUMmTDV5Uykypvp2hJxt14mPlkSTaqz2MXPOgMTSpekbhANp84t0yhitCLhDkSw3qkTWqu4qRfXL7kK2SuPK+ds3AaB4Ea5BWtkzD3hJjecWONiCrpA53Woi4XCEblg0m39iu-mdPk1dw-mArg2mQyTN0C1saGfvhLjyqsH5KnhCpcDLiQuGmftxHEBW5EAA */
+      /** @xstate-layout N4IgpgJg5mDOIC5QBECGAXVBldAnMqAtgIoCuqANgJboCeAsjVVBlQPYB2AdBW6hFQ5RG6Zq06wAxBE5guggG5sA1nJjoRY0RIDaABgC6iUAAc2sJp2MgAHogCsAZi4AOAJx6AbI5eO9Adjc3AEZggBYAGhBaRGD-Zz1ExMd7ACZgvVT7f1SAX1yotEwcfCIyShoGJhZtbl5+QWFq8Q4pGQ45RRU1MA1m2tgdYKMkEDMLWus7BABaVO9XVL1HT1T05fng+yiYhDiEpOW0jKz-fMKMbDwCEnJqOk0a9m4AC1RYR5apAGNOADNmKR8J9avoRqZzJYOFNYnEuAEXHpsmFPCEQqidogVm54fY3IE9PjjvNziAildSrcKg9+s8uKgTCYKLRGiDntJZPIOEpVPTGcy2ZwwdZxlCYXsMlx-GE1jLUmFHOkUi5MQh-C5gvD-MtHP4tp4DakzgUyZcSjdyvcqqInpw+UyWUJBRxJGBcLg2LguEyMH9PYR7QLaULDCLIZNRtMwsEEi48V43C55ek3KrPP5-FL4mEkY43PZQp5SeTzWU7pVnVw3rAAHJsZ1SAEcKiwF7C0aiiOgaYzfZceyrewK9UFjxuSLRWJeTxcMJBROeIfxLzFs3XMvU61aOkMplUSDOyRNltt0Md8PPcWhTWKjU+PyBELhVVuFauYKeJN6MLSlyIlyrsU65UlalZ-KgVAUAewYuvgeC0O2EITJekaIOmYRcOESKeGEcbRrq-iqmE9hcPOQR6i43gDqEgEUha5Y0jaLRcOBkHQUxtRHoIJ6IWMF5WKhCDppq3jzJR9hONkcSqhkBqzvO4k-n4qy0aWIEVjBXC-BwAJQECrIwZIu5Bhxzy8Z2KHdrEjgYX+qRJtKr7aouwSqtkOL2IcKTrKcqnAZaGmmXa2m6fpTqGXBQIcOZ-HQoJOYeVs9gasEGr+J5lGqkaM5GjZeIZuOf7pfkJocGwEBwNYJb+QxW62nFSFioJMyOKEizLKs6yKp4WyqjMHikWROHqviMoASa1WUgFjHbna9QCOFQWtGGyECVZQl6PCSQxg+QShBOuwtfJ87De40r2XkE1rlNtWVtWDYrU160xjiqJOMEbhLAqi6fVlQRbUk3knNk9h+Tdm6VsZjpNEtj1drYDjOMleIaoicTuHmabpf2XnHJk2Rg-REOadWdYPeeq0NQjsxLDeSwrMRWEfUEf04ocRw+SDhMbqBmntGAcOWdT4Q3ik+bfgOhKppOexeCRWSA3jvlXUB4O80tgb7hAzqC2twt+FqGo-msiRJq1qruKkAPJErBMq3RPOBbN3CsVB2swbrVPTN4mZ6HGvjYnZoRpomg1BEViqR6D9tqdNdXMSFgK4AZsMU09wtbJhuHES46qrOd0u7LhLhcArps5o4rV6sa+RAA */
       context: initialContext,
       predictableActionArguments: true,
       id: dataStreamQualityMitigationStateMachineId,
@@ -67,7 +68,10 @@ export const createPureDataStreamQualityMitigationStateMachine = (
           invoke: {
             src: 'applyMitigation',
             id: 'applyMitigation',
-            onDone: 'appliedMitigation',
+            onDone: {
+              target: 'appliedMitigation',
+              actions: 'storeMitigationExecution',
+            },
             onError: {
               target: 'failedMitigation',
               actions: 'storeApplicationError',
@@ -89,7 +93,7 @@ export const createPureDataStreamQualityMitigationStateMachine = (
           on: {
             finish: {
               target: 'done',
-              actions: 'clearCurrentMitigation',
+              actions: ['clearCurrentMitigation', 'clearMitigationExecution'],
             },
           },
         },
@@ -144,6 +148,20 @@ export const createPureDataStreamQualityMitigationStateMachine = (
             },
           };
         }),
+        clearMitigationExecution: assign((context, event) => {
+          return {
+            latestMitigationExecution: null,
+          };
+        }),
+        storeMitigationExecution: assign((context, event) => {
+          if (event.type !== (`${ActionTypes.DoneInvoke}.applyMitigation` as const)) {
+            return context;
+          }
+
+          return {
+            latestMitigationExecution: event.data,
+          };
+        }),
       },
       guards: {
         hasMitigations: (context, event) =>
@@ -168,6 +186,7 @@ export const createDataStreamQualityMitigationStateMachine = ({
     parameters: initialParameters,
     mitigations: [],
     currentMitigation: null,
+    latestMitigationExecution: null,
   }).withConfig({
     services: {
       getMitigations: async (
@@ -207,15 +226,18 @@ export const createDataStreamQualityMitigationStateMachine = ({
           },
         ];
       },
-      applyMitigation: async (context, event): Promise<void> => {
+      applyMitigation: async (
+        context,
+        event
+      ): Promise<DataStreamQualityMitigationServices['applyMitigation']['data']> => {
         if (event.type !== 'applyMitigation') {
-          return;
+          throw new Error('Invalid event');
         }
 
         const {
           mitigation: { data_stream: dataStream, ...mitigationParams },
         } = event;
-        await dataStreamQualityClient.applyMitigation(dataStream, mitigationParams);
+        return await dataStreamQualityClient.applyMitigation(dataStream, mitigationParams);
       },
     },
   });
@@ -230,6 +252,7 @@ export interface DataStreamQualityMitigationContext {
   parameters: Parameters;
   mitigations: MitigationForCause[];
   currentMitigation: { cause: QualityProblemCause; mitigation: Mitigation } | null;
+  latestMitigationExecution: MitigationExecution | null;
 }
 
 export interface DataStreamQualityMitigationServices {
@@ -240,7 +263,7 @@ export interface DataStreamQualityMitigationServices {
     data: MitigationForCause[];
   };
   applyMitigation: {
-    data: null;
+    data: MitigationExecution;
   };
 }
 
@@ -269,10 +292,11 @@ export type DataStreamQualityMitigationEvent =
       data: DataStreamQualityMitigationServices['getMitigations']['data'];
     }
   | {
-      type: `${ActionTypes.DoneInvoke}.applyMitigations`;
+      type: `${ActionTypes.DoneInvoke}.applyMitigation`;
+      data: DataStreamQualityMitigationServices['applyMitigation']['data'];
     }
   | {
-      type: `${ActionTypes.ErrorPlatform}.applyMitigations`;
+      type: `${ActionTypes.ErrorPlatform}.applyMitigation`;
     };
 
 export type DataStreamQualityMitigationInterpreter = InterpreterFrom<
