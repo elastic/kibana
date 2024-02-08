@@ -12,9 +12,7 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 /** @typedef {import("eslint").Rule.RuleModule} Rule */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.Node} Node */
 /** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} CallExpression */
-/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.FunctionExpression} FunctionExpression */
-/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.ArrowFunctionExpression} ArrowFunctionExpression */
-/** @typedef {import("eslint").Rule.RuleFixer} Fixer */
+/** @typedef {import("@typescript-eslint/typescript-estree").TSESTree.CallExpression} VariableDeclarator */
 
 const ERROR_MSG = 'Unexpected unsafeConsole statement.';
 
