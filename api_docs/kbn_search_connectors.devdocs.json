@@ -2171,7 +2171,7 @@
             "text": "ElasticsearchClient"
           },
           ", connectorId: string, serviceType: string) => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_service_type.ts",

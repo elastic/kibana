@@ -1149,6 +1149,74 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
         });
 
+        it('patches a case with missing optional custom fields to their default values', async () => {
+          await createConfiguration(
+            supertest,
+            getConfigurationRequest({
+              overrides: {
+                customFields: [
+                  {
+                    key: 'text_custom_field',
+                    label: 'text',
+                    type: CustomFieldTypes.TEXT,
+                    defaultValue: 'default value',
+                    required: false,
+                  },
+                  {
+                    key: 'toggle_custom_field',
+                    label: 'toggle',
+                    type: CustomFieldTypes.TOGGLE,
+                    defaultValue: false,
+                    required: false,
+                  },
+                ],
+              },
+            })
+          );
+
+          const originalValues = [
+            {
+              key: 'text_custom_field',
+              type: CustomFieldTypes.TEXT,
+              value: 'hello',
+            },
+            {
+              key: 'toggle_custom_field',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+          ] as CaseCustomFields;
+
+          const postedCase = await createCase(supertest, {
+            ...postCaseReq,
+            customFields: originalValues,
+          });
+
+          const patchedCases = await updateCase({
+            supertest,
+            params: {
+              cases: [
+                {
+                  id: postedCase.id,
+                  version: postedCase.version,
+                  customFields: [
+                    {
+                      key: 'toggle_custom_field',
+                      type: CustomFieldTypes.TOGGLE,
+                      value: false,
+                    },
+                  ],
+                },
+              ],
+            },
+          });
+
+          expect(patchedCases[0].customFields).to.eql([
+            { ...originalValues[1], value: false },
+            { ...originalValues[0], value: 'default value' },
+          ]);
+        });
+
         it('400s trying to patch a case with missing required custom fields if they dont have default values', async () => {
           await createConfiguration(
             supertest,
