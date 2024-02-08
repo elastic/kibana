@@ -32,22 +32,23 @@ describe('<PanelHeader />', () => {
   beforeEach(() => {
     mockUseIsExperimentalFeatureEnabled.mockReturnValue(false);
   });
-  (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction: 'isolateHost' });
 
-  it('should display isolate host message', () => {
+  it.each([
+    {
+      isolateAction: 'isolateHost',
+      title: 'Isolate host',
+    },
+    {
+      isolateAction: 'unisolateHost',
+      title: 'Release host',
+    },
+  ])('should display release host message', ({ isolateAction, title }) => {
+    (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction });
+
     const { getByTestId } = renderPanelHeader();
 
     expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Isolate host');
-  });
-
-  it('should display release host message', () => {
-    (useIsolateHostPanelContext as jest.Mock).mockReturnValue({ isolateAction: 'unisolateHost' });
-
-    const { getByTestId } = renderPanelHeader();
-
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toBeInTheDocument();
-    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent('Release host');
+    expect(getByTestId(FLYOUT_HEADER_TITLE_TEST_ID)).toHaveTextContent(title);
   });
 
   it.each(['isolateHost', 'unisolateHost'])(
