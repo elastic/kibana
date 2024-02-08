@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
   deleteConnectorById,
+  deleteConnectorSecret,
   fetchConnectorById,
   fetchConnectors,
   fetchSyncJobs,
@@ -545,7 +546,32 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       });
     })
   );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
 
+      let connectorResult;
+      try {
+        connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
+      } catch (error) {
+        throw error;
+      }
+      return response.ok({
+        body: {
+          connector: connectorResult?.value,
+        },
+      });
+    })
+  );
   router.delete(
     {
       path: '/internal/enterprise_search/connectors/{connectorId}',
@@ -564,17 +590,24 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { shouldDeleteIndex } = request.query;
 
       let connectorResponse;
-      let indexNameToDelete;
       try {
-        if (shouldDeleteIndex) {
-          const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
-          indexNameToDelete = connector?.value.index_name;
-        }
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+        const indexNameToDelete = shouldDeleteIndex ? connector?.value.index_name : null;
+        const apiKeyId = connector?.value.api_key_id;
+        const secretId = connector?.value.api_key_secret_id;
+
         connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
+
         if (indexNameToDelete) {
           await deleteIndexPipelines(client, indexNameToDelete);
           await deleteAccessControlIndex(client, indexNameToDelete);
           await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+        }
+        if (apiKeyId) {
+          await client.asCurrentUser.security.invalidateApiKey({ ids: [apiKeyId] });
+        }
+        if (secretId) {
+          await deleteConnectorSecret(client.asCurrentUser, secretId);
         }
       } catch (error) {
         if (isResourceNotFoundException(error)) {
