@@ -88,12 +88,14 @@ export function PaletteSelector({
     <>
       {preserveChangesModal}
       <EuiFormRow
+        fullWidth
         label={i18n.translate('coloring.colorMapping.paletteSelector.paletteLabel', {
           defaultMessage: `Color palette`,
         })}
       >
         <EuiColorPalettePicker
           data-test-subj="kbnColoring_ColorMapping_PalettePicker"
+          fullWidth
           palettes={[...palettes.values()]
             .filter((d) => d.name !== 'Neutral')
             .map((palette) => ({

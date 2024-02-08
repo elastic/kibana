@@ -96,6 +96,7 @@ export function Container({
             </EuiToolTip>
           </div>
           <EuiFormRow
+            fullWidth
             label={i18n.translate('coloring.colorMapping.container.gradientHeader', {
               defaultMessage: 'Gradient',
             })}
@@ -112,6 +113,7 @@ export function Container({
 
       <EuiFlexItem>
         <EuiFormRow
+          fullWidth
           label={i18n.translate('coloring.colorMapping.container.mappingAssignmentHeader', {
             defaultMessage: 'Color assignments',
           })}

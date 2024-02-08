@@ -81,8 +81,7 @@ export function Gradient({
           right: 6px;
           height: 8px;
           top: 12px;
-          border-start-end-radius: 6px;
-          border-end-end-radius: 6px;
+          border-radius: 6px;
           background-origin: border-box;
           background-image: linear-gradient(
             to right,

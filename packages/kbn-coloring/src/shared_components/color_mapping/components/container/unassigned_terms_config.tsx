@@ -76,6 +76,7 @@ export function UnassignedTermsConfig({
 
   return (
     <EuiFormRow
+      fullWidth
       label={i18n.translate('coloring.colorMapping.container.unassignedTermsModeHeader', {
         defaultMessage: 'Color for unassigned terms',
       })}
