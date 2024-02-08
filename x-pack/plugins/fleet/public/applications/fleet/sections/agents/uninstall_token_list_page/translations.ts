@@ -35,8 +35,3 @@ export const SEARCH_BY_POLICY_ID_PLACEHOLDER = i18n.translate(
   'xpack.fleet.uninstallTokenList.searchByPolicyPlaceholder',
   { defaultMessage: 'Search by policy ID' }
 );
-
-export const EMPTY_POLICY_NAME_HINT = i18n.translate(
-  'xpack.fleet.uninstallTokenList.emptyPolicyNameHint',
-  { defaultMessage: 'The agent policy using this uninstall token has already been deleted.' }
-);

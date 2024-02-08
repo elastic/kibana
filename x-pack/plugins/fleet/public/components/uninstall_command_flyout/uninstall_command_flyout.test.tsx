@@ -169,11 +169,32 @@ describe('UninstallCommandFlyout', () => {
       );
     });
 
-    it('displays the selected policy id to the user', () => {
+    it('displays the selected policy id and policy name to the user', () => {
       const renderResult = render();
 
       const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
-      expect(policyIdHint.textContent).toBe('Valid for the following agent policy: policy_id');
+      expect(policyIdHint.textContent).toBe(
+        'Valid for the following agent policy:policy_name (policy_id)'
+      );
+    });
+
+    it('displays hint if policy name is missing', () => {
+      const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
+        isLoading: false,
+        error: null,
+        data: {
+          item: { ...uninstallTokenFixture, policy_name: null },
+        },
+      };
+      useGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
+
+      const renderResult = render();
+
+      const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
+      expect(policyIdHint.textContent).toBe(
+        'Valid for the following agent policy:The related agent policy has already been deleted, hence its name is unknown. (policy_id)'
+      );
+      expect(renderResult.getByTestId('emptyPolicyNameHint')).toBeInTheDocument();
     });
   });
 
