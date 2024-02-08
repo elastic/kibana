@@ -25,6 +25,7 @@ properties:
           type: string
       channels:
         type: array
+        deprecated: true
         description: >
           The name of a channel that your Slack app has access to.
         maxItems: 1

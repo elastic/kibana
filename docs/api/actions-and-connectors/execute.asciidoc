@@ -611,7 +611,8 @@ on the `subAction` value.
 (Optional, array of strings) The Slack channel identifier, which must be one of the allowed channels in the connector configuration.
 
 `channels`:::
-(Optional, array of strings) The name of a channel that your Slack app has access to.
+(Optional, array of strings)
+The name of a channel that your Slack app has access to. deprecated:[8.12.0]
 
 `text`:::
 (Optional, string) The Slack message text, which cannot contain Markdown, images, or other advanced formatting.
