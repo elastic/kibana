@@ -25,7 +25,7 @@ export interface UseInspectSLOResponse {
   isError: boolean;
 }
 
-export function useInspectSlo(slo: CreateSLOInput, shouldInspect: boolean) {
+export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {
   const { http } = useKibana().services;
 
   const { isLoading, isError, isSuccess, data } = useQuery({

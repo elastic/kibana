@@ -34,7 +34,7 @@ import React, { ReactNode, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ObservabilityPublicPluginsStart } from '../../../..';
 import { enableInspectEsQueries } from '../../../../../common';
-import { useInspectSlo } from '../../../../hooks/slo/use_inspect_slo';
+import { useFetchSloInspect } from '../../../../hooks/slo/use_fetch_slo_inspect';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
@@ -64,7 +64,7 @@ function SLOInspect({ slo, disabled }: Props) {
   const [isFormValid, setFormValid] = useState(false);
 
   const sloFormValues = transformCreateSLOFormToCreateSLOInput(getValues());
-  const { data: inspectSloData, isLoading } = useInspectSlo(
+  const { data: inspectSloData, isLoading } = useFetchSloInspect(
     { ...sloFormValues, id: slo?.id, revision: slo?.revision },
     isFlyoutVisible && isFormValid
   );
