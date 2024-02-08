@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import type { Conversation } from '@kbn/elastic-assistant';
-import { getConversationById, type AssistantTelemetry } from '@kbn/elastic-assistant';
+import { type AssistantTelemetry } from '@kbn/elastic-assistant';
 import { useCallback } from 'react';
 import { useKibana } from '../../common/lib/kibana';
 import { useBaseConversations } from '../use_conversation_store';
 
 export const useAssistantTelemetry = (): AssistantTelemetry => {
   const {
-    services: { telemetry, http },
+    services: { telemetry },
   } = useKibana();
   const baseConversations = useBaseConversations();
 
-  const getAnonymizedConversationId = useCallback(
-    async (id) => {
-      const conversation = baseConversations[id]
-        ? baseConversations[id]
-        : await getConversationById({ http, id });
-      const convo = (conversation as Conversation) ?? { isDefault: false };
-      return convo.isDefault ? id : 'Custom';
+  const getAnonymizedConversationTitle = useCallback(
+    async (title) => {
+      // With persistent storage for conversation replacing id to title, because id is UUID now
+      // and doesn't make any value for telemetry tracking
+      return baseConversations[title] ? title : 'Custom';
     },
-    [baseConversations, http]
+    [baseConversations]
   );
 
   const reportTelemetry = useCallback(
@@ -38,9 +35,9 @@ export const useAssistantTelemetry = (): AssistantTelemetry => {
     }> =>
       fn({
         ...rest,
-        conversationId: await getAnonymizedConversationId(conversationId),
+        conversationId: await getAnonymizedConversationTitle(conversationId),
       }),
-    [getAnonymizedConversationId]
+    [getAnonymizedConversationTitle]
   );
 
   return {

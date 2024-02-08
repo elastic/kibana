@@ -8,7 +8,7 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 import { HttpSetup } from '@kbn/core/public';
 import { IHttpFetchError } from '@kbn/core-http-browser';
-import type { Conversation, Message } from '../../assistant_context/types';
+import type { Conversation, RawMessage } from '../../assistant_context/types';
 import { API_ERROR } from '../translations';
 import { MODEL_GPT_3_5_TURBO } from '../../connectorland/models/model_selector/model_selector';
 import {
@@ -21,6 +21,7 @@ import { PerformEvaluationParams } from './evaluate/use_perform_evaluation';
 export * from './conversations';
 
 export interface FetchConnectorExecuteAction {
+  conversationId: string;
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   allow?: string[];
@@ -29,11 +30,7 @@ export interface FetchConnectorExecuteAction {
   assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
-  messages: Message[];
-  onNewReplacements: (
-    newReplacements: Record<string, string>
-  ) => Promise<Record<string, string> | undefined>;
-  replacements?: Record<string, string>;
+  messages: RawMessage[];
   signal?: AbortSignal | undefined;
   size?: number;
 }
@@ -49,6 +46,7 @@ export interface FetchConnectorExecuteResponse {
 }
 
 export const fetchConnectorExecuteAction = async ({
+  conversationId,
   isEnabledRAGAlerts,
   alertsIndexPattern,
   allow,
@@ -57,29 +55,22 @@ export const fetchConnectorExecuteAction = async ({
   assistantStreamingEnabled,
   http,
   messages,
-  onNewReplacements,
-  replacements,
   apiConfig,
   signal,
   size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
-  const outboundMessages = messages.map((msg) => ({
-    role: msg.role,
-    content: msg.content,
-  }));
-
   const body =
     apiConfig?.provider === OpenAiProviderType.OpenAi
       ? {
           model: apiConfig.model ?? MODEL_GPT_3_5_TURBO,
-          messages: outboundMessages,
+          messages,
           n: 1,
           stop: null,
           temperature: 0.2,
         }
       : {
           // Azure OpenAI and Bedrock invokeAI both expect this body format
-          messages: outboundMessages,
+          messages,
         };
 
   // TODO: Remove in part 3 of streaming work for security solution
@@ -92,7 +83,6 @@ export const fetchConnectorExecuteAction = async ({
     alertsIndexPattern,
     allow,
     allowReplacement,
-    replacements,
     size,
   });
 
@@ -102,6 +92,7 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeStream',
         },
+        conversationId,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
         ...optionalRequestParams,
@@ -111,6 +102,7 @@ export const fetchConnectorExecuteAction = async ({
           subActionParams: body,
           subAction: 'invokeAI',
         },
+        conversationId,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
         ...optionalRequestParams,
@@ -190,8 +182,6 @@ export const fetchConnectorExecuteAction = async ({
             transactionId: response.trace_data?.transaction_id,
           }
         : undefined;
-
-    await onNewReplacements(response.replacements ?? {});
 
     return {
       response: hasParsableResponse({

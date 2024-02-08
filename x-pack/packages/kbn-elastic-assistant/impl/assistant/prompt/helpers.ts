@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import { transformRawData } from '@kbn/elastic-assistant-common';
-
-import type { Message } from '../../assistant_context/types';
-import { SYSTEM_PROMPT_CONTEXT_NON_I18N } from '../../content/prompts/system/translations';
-import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
+import type { Message, RawMessage } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
 import type { Prompt } from '../types';
 
@@ -33,55 +29,39 @@ export const getSystemMessages = ({
   return [message];
 };
 
-export async function getCombinedMessage({
-  currentReplacements,
-  getAnonymizedValue = defaultGetAnonymizedValue,
+export function getCombinedRawMessages({
   isNewChat,
-  onNewReplacements,
   promptText,
   selectedPromptContexts,
   selectedSystemPrompt,
 }: {
-  currentReplacements: Record<string, string> | undefined;
-  getAnonymizedValue?: ({
-    currentReplacements,
-    rawValue,
-  }: {
-    currentReplacements: Record<string, string> | undefined;
-    rawValue: string;
-  }) => string;
   isNewChat: boolean;
-  onNewReplacements: (
-    newReplacements: Record<string, string>
-  ) => Promise<Record<string, string> | undefined>;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
-}): Promise<Message> {
-  const promptContextsContent = await Promise.all(
-    Object.keys(selectedPromptContexts)
-      .sort()
-      .map(async (id) => {
-        const promptContext = await transformRawData({
-          allow: selectedPromptContexts[id].allow,
-          allowReplacement: selectedPromptContexts[id].allowReplacement,
-          currentReplacements,
-          getAnonymizedValue,
-          onNewReplacements,
-          rawData: selectedPromptContexts[id].rawData,
-        });
+}): RawMessage[] {
+  if (Object.keys(selectedPromptContexts).length === 0) {
+    return [
+      {
+        content: `${isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''}
 
-        return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
-      })
-  );
+  ${promptText}`,
+        role: 'user', // we are combining the system and user messages into one message
+      },
+    ];
+  }
 
-  return {
-    content: `${
-      isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
-    }${promptContextsContent}
-
-${promptText}`,
-    role: 'user', // we are combining the system and user messages into one message
-    timestamp: new Date().toLocaleString(),
-  };
+  return Object.keys(selectedPromptContexts)
+    .sort()
+    .map((id) => {
+      return {
+        content: isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : '',
+        role: 'user', // we are combining the system and user messages into one message
+        timestamp: new Date().toLocaleString(),
+        allow: selectedPromptContexts[id].allow,
+        allowReplacement: selectedPromptContexts[id].allowReplacement,
+        rawData: selectedPromptContexts[id].rawData,
+        promptText,
+      };
+    });
 }

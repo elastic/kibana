@@ -16,6 +16,38 @@ import { z } from 'zod';
  *   version: 1
  */
 
+import { UUID } from '../conversations/common_attributes.gen';
+
+export type RawMessageData = z.infer<typeof RawMessageData>;
+export const RawMessageData = z.object({}).catchall(z.unknown());
+
+/**
+ * AI assistant connector execution params.
+ */
+export type ConnectorExecutionParams = z.infer<typeof ConnectorExecutionParams>;
+export const ConnectorExecutionParams = z.object({
+  subActionParams: z.object({
+    messages: z.array(
+      z.object({
+        promptText: z.string().optional(),
+        allow: z.array(z.string()).optional(),
+        allowReplacement: z.array(z.string()).optional(),
+        rawData: RawMessageData.optional(),
+        /**
+         * Message role.
+         */
+        role: z.enum(['system', 'user', 'assistant']),
+        content: z.string(),
+      })
+    ),
+    model: z.string().optional(),
+    n: z.number().optional(),
+    stop: z.array(z.string()).optional(),
+    temperature: z.number().optional(),
+  }),
+  subAction: z.string(),
+});
+
 export type ExecuteConnectorRequestParams = z.infer<typeof ExecuteConnectorRequestParams>;
 export const ExecuteConnectorRequestParams = z.object({
   /**
@@ -27,28 +59,8 @@ export type ExecuteConnectorRequestParamsInput = z.input<typeof ExecuteConnector
 
 export type ExecuteConnectorRequestBody = z.infer<typeof ExecuteConnectorRequestBody>;
 export const ExecuteConnectorRequestBody = z.object({
-  params: z.object({
-    subActionParams: z
-      .object({
-        messages: z
-          .array(
-            z.object({
-              /**
-               * Message role.
-               */
-              role: z.enum(['system', 'user', 'assistant']).optional(),
-              content: z.string().optional(),
-            })
-          )
-          .optional(),
-        model: z.string().optional(),
-        n: z.number().optional(),
-        stop: z.array(z.string()).optional(),
-        temperature: z.number().optional(),
-      })
-      .optional(),
-    subAction: z.string().optional(),
-  }),
+  conversationId: UUID,
+  params: ConnectorExecutionParams,
   alertsIndexPattern: z.string().optional(),
   allow: z.array(z.string()).optional(),
   allowReplacement: z.array(z.string()).optional(),

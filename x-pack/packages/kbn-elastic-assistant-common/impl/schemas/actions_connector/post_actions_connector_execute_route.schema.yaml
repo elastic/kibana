@@ -26,39 +26,12 @@ paths:
               type: object
               required:
                 - params
+                - conversationId
               properties:
+                conversationId:
+                  $ref: '../conversations/common_attributes.schema.yaml#/components/schemas/UUID'
                 params:
-                  type: object
-                  properties:
-                    subActionParams: 
-                      type: object
-                      properties:
-                        messages:
-                          type: array
-                          items:
-                            type: object
-                            properties:
-                              role:
-                                type: string
-                                description: Message role.
-                                enum:
-                                  - system 
-                                  - user
-                                  - assistant
-                              content:
-                                type: string
-                        model:
-                          type: string
-                        n:
-                          type: number
-                        stop:
-                          type: array
-                          items:
-                            type: string
-                        temperature:
-                          type: number
-                    subAction:
-                      type: string
+                  $ref: '#/components/schemas/ConnectorExecutionParams'
                 alertsIndexPattern:
                   type: string
                 allow:
@@ -118,3 +91,63 @@ paths:
                     type: string
                   message:
                     type: string
+
+components:
+  schemas:
+    RawMessageData:
+      type: object
+      additionalProperties: true
+
+    ConnectorExecutionParams:
+      type: object
+      description: AI assistant connector execution params.
+      required:
+        - subActionParams
+        - subAction
+      properties:
+        subActionParams: 
+          type: object
+          required:
+            - messages
+          properties:
+            messages:
+              type: array
+              items:
+                type: object
+                required:
+                  - role
+                  - content
+                properties:
+                  promptText:
+                    type: string
+                  allow:
+                    type: array
+                    items:
+                      type: string
+                  allowReplacement:
+                    type: array
+                    items:
+                      type: string
+                  rawData:
+                    $ref: '#/components/schemas/RawMessageData'
+                  role:
+                    type: string
+                    description: Message role.
+                    enum:
+                      - system 
+                      - user
+                      - assistant
+                  content:
+                    type: string
+            model:
+              type: string
+            n:
+              type: number
+            stop:
+              type: array
+              items:
+                type: string
+            temperature:
+              type: number
+        subAction:
+          type: string

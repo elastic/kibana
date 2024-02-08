@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { Conversation } from '@kbn/elastic-assistant';
@@ -16,6 +16,7 @@ import {
 } from '@kbn/elastic-assistant';
 
 import type { FetchConversationsResponse } from '@kbn/elastic-assistant/impl/assistant/api';
+import { once } from 'lodash/fp';
 import { useBasePath, useKibana } from '../common/lib/kibana';
 import { useAssistantTelemetry } from './use_assistant_telemetry';
 import { getComments } from './get_comments';
@@ -55,35 +56,15 @@ export const AssistantProvider: React.FC = ({ children }) => {
   const basePath = useBasePath();
 
   const baseConversations = useBaseConversations();
-  const onFetchedConversations = useCallback(
-    (conversationsData: FetchConversationsResponse): Record<string, Conversation> =>
-      mergeBaseWithPersistedConversations({}, conversationsData),
-    []
-  );
-  const {
-    data: conversationsData,
-    isLoading,
-    isError,
-  } = useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
   const assistantAvailability = useAssistantAvailability();
   const assistantTelemetry = useAssistantTelemetry();
 
-  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
-    useAnonymizationStore();
-
-  const { signalIndexName } = useSignalIndex();
-  const alertsIndexPattern = signalIndexName ?? undefined;
-  const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
-
-  // migrate conversations with messages from the local storage
-  // won't happen again if the user conversations exist in the index
-  const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
-
-  useEffect(() => {
-    const migrateConversationsFromLocalStorage = async () => {
+  const migrateConversationsFromLocalStorage = once(
+    async (conversationsData: Record<string, Conversation>) => {
+      // migrate conversations with messages from the local storage
+      // won't happen next time
+      const conversations = storage.get(`securitySolution.${LOCAL_STORAGE_KEY}`);
       if (
-        !isLoading &&
-        !isError &&
         conversationsData &&
         Object.keys(conversationsData).length === 0 &&
         conversations &&
@@ -109,11 +90,34 @@ export const AssistantProvider: React.FC = ({ children }) => {
             iconType: 'check',
             title: LOCAL_CONVERSATIONS_MIGRATION_STATUS_TOAST_TITLE,
           });
+          return true;
         }
+        return false;
       }
-    };
-    migrateConversationsFromLocalStorage();
-  }, [conversations, conversationsData, http, isError, isLoading, notifications.toasts, storage]);
+    }
+  );
+  const onFetchedConversations = useCallback(
+    (conversationsData: FetchConversationsResponse): Record<string, Conversation> => {
+      const mergedData = mergeBaseWithPersistedConversations({}, conversationsData);
+      if (assistantAvailability.isAssistantEnabled && assistantAvailability.hasAssistantPrivilege) {
+        migrateConversationsFromLocalStorage(mergedData);
+      }
+      return mergedData;
+    },
+    [
+      assistantAvailability.hasAssistantPrivilege,
+      assistantAvailability.isAssistantEnabled,
+      migrateConversationsFromLocalStorage,
+    ]
+  );
+  useFetchCurrentUserConversations({ http, onFetch: onFetchedConversations });
+
+  const { defaultAllow, defaultAllowReplacement, setDefaultAllow, setDefaultAllowReplacement } =
+    useAnonymizationStore();
+
+  const { signalIndexName } = useSignalIndex();
+  const alertsIndexPattern = signalIndexName ?? undefined;
+  const toasts = useAppToasts() as unknown as IToasts; // useAppToasts is the current, non-deprecated method of getting the toasts service in the Security Solution, but it doesn't return the IToasts interface (defined by core)
 
   return (
     <ElasticAssistantProvider

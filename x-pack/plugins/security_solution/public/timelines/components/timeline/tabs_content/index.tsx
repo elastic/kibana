@@ -98,7 +98,7 @@ interface BasicTimelineTab {
 type ActiveTimelineTabProps = BasicTimelineTab & {
   activeTimelineTab: TimelineTabs;
   showTimeline: boolean;
-  setConversationId: Dispatch<SetStateAction<string>>;
+  setConversationTitle: Dispatch<SetStateAction<string>>;
 };
 
 const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
@@ -108,7 +108,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     rowRenderers,
     timelineId,
     timelineType,
-    setConversationId,
+    setConversationTitle,
     showTimeline,
   }) => {
     const { hasAssistantPrivilege } = useAssistantAvailability();
@@ -149,7 +149,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
           >
             {activeTimelineTab === TimelineTabs.securityAssistant ? (
               <AssistantTab
-                setConversationId={setConversationId}
+                setConversationTitle={setConversationTitle}
                 shouldRefocusPrompt={
                   showTimeline && activeTimelineTab === TimelineTabs.securityAssistant
                 }
@@ -160,7 +160,7 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
       } else {
         return null;
       }
-    }, [activeTimelineTab, setConversationId, showTimeline]);
+    }, [activeTimelineTab, setConversationTitle, showTimeline]);
 
     /* Future developer -> why are we doing that
      * It is really expansive to re-render the QueryTab because the drag/drop
@@ -295,7 +295,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const isEnterprisePlus = useLicense().isEnterprise();
 
-  const [conversationId, setConversationId] = useState<string>(TIMELINE_CONVERSATION_TITLE);
+  const [conversationTitle, setConversationTitle] = useState<string>(TIMELINE_CONVERSATION_TITLE);
   const { reportAssistantInvoked } = useAssistantTelemetry();
 
   const allTimelineNoteIds = useMemo(() => {
@@ -348,11 +348,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     setActiveTab(TimelineTabs.securityAssistant);
     if (activeTab !== TimelineTabs.securityAssistant) {
       reportAssistantInvoked({
-        conversationId,
+        conversationId: conversationTitle,
         invokedBy: TIMELINE_CONVERSATION_TITLE,
       });
     }
-  }, [activeTab, conversationId, reportAssistantInvoked, setActiveTab]);
+  }, [activeTab, conversationTitle, reportAssistantInvoked, setActiveTab]);
 
   const setEsqlAsActiveTab = useCallback(() => {
     dispatch(
@@ -486,7 +486,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
         timelineId={timelineId}
         timelineType={timelineType}
         timelineDescription={timelineDescription}
-        setConversationId={setConversationId}
+        setConversationTitle={setConversationTitle}
         showTimeline={showTimeline}
       />
     </>

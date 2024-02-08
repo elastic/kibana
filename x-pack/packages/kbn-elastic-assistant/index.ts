@@ -53,7 +53,7 @@ export { NewChat } from './impl/new_chat';
  * registered where the data is available, and then the _New chat_ button can be displayed
  * in another part of the tree.
  */
-export { NewChatByTitle } from './impl/new_chat_by_id';
+export { NewChatByTitle } from './impl/new_chat_by_title';
 
 /**
  * `useAssistantOverlay` is a hook that registers context with the assistant overlay, and

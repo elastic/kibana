@@ -166,10 +166,12 @@ const AssistantComponent: React.FC<Props> = ({
 
   const refetchCurrentConversation = useCallback(
     async (cId?: string) => {
-      if (!cId || cId === selectedConversationTitle || !conversations[selectedConversationTitle]) {
+      if (cId === selectedConversationTitle || !conversations[selectedConversationTitle]) {
         return;
       }
-      const updatedConversation = await getConversation(cId ?? selectedConversationTitle);
+      const updatedConversation = await getConversation(
+        cId ?? conversations[selectedConversationTitle].id
+      );
       if (updatedConversation) {
         setCurrentConversation(updatedConversation);
       }
@@ -466,6 +468,7 @@ const AssistantComponent: React.FC<Props> = ({
     setEditingSystemPromptId,
     selectedPromptContexts,
     setSelectedPromptContexts,
+    setCurrentConversation,
     refresh: refetchCurrentConversation,
   });
 

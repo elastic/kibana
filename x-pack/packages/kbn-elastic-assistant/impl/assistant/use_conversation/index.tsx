@@ -28,7 +28,8 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
 };
 
 interface AppendMessageProps {
-  conversationId: string;
+  id: string;
+  title: string;
   message: Message;
 }
 interface AmendMessageProps {
@@ -52,10 +53,7 @@ interface SetApiConfigProps {
 }
 
 interface UseConversation {
-  appendMessage: ({
-    conversationId,
-    message,
-  }: AppendMessageProps) => Promise<Message[] | undefined>;
+  appendMessage: ({ id, title, message }: AppendMessageProps) => Promise<Message[] | undefined>;
   amendMessage: ({ conversationId, content }: AmendMessageProps) => Promise<void>;
   appendReplacements: ({
     conversationId,
@@ -133,9 +131,9 @@ export const useConversation = (): UseConversation => {
    * Append a message to the conversation[] for a given conversationId
    */
   const appendMessage = useCallback(
-    async ({ conversationId, message }: AppendMessageProps): Promise<Message[] | undefined> => {
+    async ({ id, message, title }: AppendMessageProps): Promise<Message[] | undefined> => {
       assistantTelemetry?.reportAssistantMessageSent({
-        conversationId,
+        conversationId: title,
         role: message.role,
         isEnabledKnowledgeBase,
         isEnabledRAGAlerts,
@@ -143,7 +141,7 @@ export const useConversation = (): UseConversation => {
 
       const res = await appendConversationMessages({
         http,
-        conversationId,
+        conversationId: id,
         messages: [message],
       });
       return res?.messages;

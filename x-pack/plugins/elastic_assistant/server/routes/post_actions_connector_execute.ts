@@ -13,6 +13,8 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
+  getAnonymizedValue,
+  transformRawData,
 } from '@kbn/elastic-assistant-common';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
@@ -28,8 +30,30 @@ import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import { ESQL_RESOURCE } from './knowledge_base/constants';
 import { callAgentExecutor } from '../lib/langchain/execute_custom_llm_chain';
-import { DEFAULT_PLUGIN_NAME, getPluginNameFromRequest } from './helpers';
+import {
+  DEFAULT_PLUGIN_NAME,
+  getMessageFromRawResponse,
+  getPluginNameFromRequest,
+} from './helpers';
 import { buildRouteValidationWithZod } from './route_validation';
+
+export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
+  return `CONTEXT:\n"""\n${context}\n"""`;
+};
+
+export const getMessageContentWithReplacements = ({
+  messageContent,
+  replacements,
+}: {
+  messageContent: string;
+  replacements: Record<string, string> | undefined;
+}): string =>
+  replacements != null
+    ? Object.keys(replacements).reduce(
+        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+        messageContent
+      )
+    : messageContent;
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -62,6 +86,75 @@ export const postActionsConnectorExecuteRoute = (
         const telemetry = assistantContext.telemetry;
 
         try {
+          const authenticatedUser = assistantContext.getCurrentUser();
+          if (authenticatedUser == null) {
+            return response.unauthorized({
+              body: `Authenticated user not found`,
+            });
+          }
+
+          const dataClient = await assistantContext.getAIAssistantConversationsDataClient();
+          const conversation = await dataClient?.getConversation({
+            id: request.body.conversationId,
+            authenticatedUser,
+          });
+
+          if (conversation == null) {
+            return response.notFound({
+              body: `conversation id: "${request.body.conversationId}" not found`,
+            });
+          }
+
+          let replacements: Record<string, string> | undefined;
+          const onNewReplacementsFunc = async (newReplacements: Record<string, string>) => {
+            const res = await dataClient?.updateConversation({
+              existingConversation: conversation,
+              conversationUpdateProps: {
+                id: request.body.conversationId,
+                replacements: newReplacements,
+              },
+            });
+            replacements = res?.replacements as Record<string, string> | undefined;
+            return res?.replacements as Record<string, string> | undefined;
+          };
+
+          const promptContext = await transformRawData({
+            allow: request.body.params.subActionParams.messages[0].allow ?? [],
+            allowReplacement:
+              request.body.params.subActionParams.messages[0].allowReplacement ?? [],
+            currentReplacements: conversation.replacements as Record<string, string> | undefined,
+            getAnonymizedValue,
+            onNewReplacements: onNewReplacementsFunc,
+            rawData: request.body.params.subActionParams.messages[0].rawData as Record<
+              string,
+              unknown[]
+            >,
+          });
+
+          const messageContentWithReplacements = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
+
+          const anonymizedContent = `${request.body.params.subActionParams.messages[0].content}${messageContentWithReplacements}
+
+            ${request.body.params.subActionParams.messages[0].promptText}`;
+
+          const dateTimeString = new Date().toLocaleString();
+          const updatedConversation = await dataClient?.appendConversationMessages({
+            existingConversation: conversation,
+            messages: request.body.params.subActionParams.messages.map((m) => ({
+              content: getMessageContentWithReplacements({
+                messageContent: anonymizedContent,
+                replacements,
+              }),
+              role: m.role,
+              timestamp: dateTimeString,
+            })),
+          });
+          if (updatedConversation == null) {
+            return response.badRequest({
+              body: `conversation id: "${request.body.conversationId}" not updated`,
+            });
+          }
+
           const connectorId = decodeURIComponent(request.params.connectorId);
 
           // get the actions plugin start contract from the request context:
@@ -73,7 +166,40 @@ export const postActionsConnectorExecuteRoute = (
             !requestHasRequiredAnonymizationParams(request)
           ) {
             logger.debug('Executing via actions framework directly');
-            const result = await executeAction({ actions, request, connectorId });
+            const result = await executeAction({
+              onMessageSent: (content) => {
+                dataClient?.appendConversationMessages({
+                  existingConversation: updatedConversation,
+                  messages: [
+                    getMessageFromRawResponse({
+                      rawContent: getMessageContentWithReplacements({
+                        messageContent: content,
+                        replacements,
+                      }),
+                    }),
+                  ],
+                });
+              },
+              actions,
+              request,
+              connectorId,
+              params: {
+                subAction: request.body.params.subAction,
+                subActionParams: {
+                  ...request.body.params.subActionParams,
+                  messages: [
+                    ...(conversation.messages?.map((c) => ({
+                      role: c.role,
+                      content: c.content,
+                    })) ?? []),
+                    {
+                      role: request.body.params.subActionParams.messages[0].role,
+                      content: anonymizedContent,
+                    },
+                  ],
+                },
+              },
+            });
             telemetry.reportEvent(INVOKE_ASSISTANT_SUCCESS_EVENT.eventType, {
               isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
               isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
@@ -101,9 +227,16 @@ export const postActionsConnectorExecuteRoute = (
 
           // convert the assistant messages to LangChain messages:
           const langChainMessages = getLangChainMessages(
-            (request.body.params?.subActionParams?.messages ?? []) as Array<
-              Pick<Message, 'content' | 'role'>
-            >
+            ([
+              ...(conversation.messages?.map((c) => ({
+                role: c.role,
+                content: c.content,
+              })) ?? []),
+              {
+                role: request.body.params.subActionParams.messages[0].role,
+                content: anonymizedContent,
+              },
+            ] ?? []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 
           const elserId = await getElser(request, (await context.core).savedObjects.getClient());
@@ -137,6 +270,22 @@ export const postActionsConnectorExecuteRoute = (
             isEnabledKnowledgeBase: request.body.isEnabledKnowledgeBase,
             isEnabledRAGAlerts: request.body.isEnabledRAGAlerts,
           });
+
+          dataClient?.appendConversationMessages({
+            existingConversation: conversation,
+            messages: [
+              getMessageFromRawResponse({
+                rawContent: langChainResponseBody.data,
+                traceData: langChainResponseBody.trace_data
+                  ? {
+                      traceId: langChainResponseBody.trace_data.trace_id,
+                      transactionId: langChainResponseBody.trace_data.transaction_id,
+                    }
+                  : {},
+              }),
+            ],
+          });
+
           return response.ok({
             body: {
               ...langChainResponseBody,

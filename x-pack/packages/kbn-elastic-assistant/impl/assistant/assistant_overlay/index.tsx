@@ -44,16 +44,16 @@ export const AssistantOverlay = React.memo(() => {
         promptContextId: pid,
         conversationTitle: cTitle,
       }: ShowAssistantOverlayProps) => {
-        const newConversationId = getLastConversationTitle(cTitle);
+        const newConversationTitle = getLastConversationTitle(cTitle);
         if (so)
           assistantTelemetry?.reportAssistantInvoked({
-            conversationId: newConversationId,
+            conversationId: newConversationTitle,
             invokedBy: 'click',
           });
 
         setIsModalVisible(so);
         setPromptContextId(pid);
-        setConversationTitle(newConversationId);
+        setConversationTitle(newConversationTitle);
       },
     [assistantTelemetry, getLastConversationTitle]
   );

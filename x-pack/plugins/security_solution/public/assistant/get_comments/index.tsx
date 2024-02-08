@@ -34,11 +34,11 @@ const transformMessageWithReplacements = ({
     ...message,
     content:
       showAnonymizedValues || !replacements
-        ? content
-        : getMessageContentWithReplacements({
+        ? getMessageContentWithReplacements({
             messageContent: content,
             replacements,
-          }),
+          })
+        : content,
   };
 };
 

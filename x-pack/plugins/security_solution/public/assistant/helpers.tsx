@@ -71,7 +71,7 @@ export const getMessageContentWithReplacements = ({
 }): string =>
   replacements != null
     ? Object.keys(replacements).reduce(
-        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+        (acc, replacement) => acc.replaceAll(replacements[replacement], replacement),
         messageContent
       )
     : messageContent;

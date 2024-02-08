@@ -194,7 +194,8 @@ export const useConnectorSetup = ({
         refetchConnectors?.();
         setIsConnectorModalVisible(false);
         await appendMessage({
-          conversationId: updatedConversation.id,
+          id: updatedConversation.id,
+          title: updatedConversation.title,
           message: {
             role: 'assistant',
             content: i18n.CONNECTOR_SETUP_COMPLETE,
