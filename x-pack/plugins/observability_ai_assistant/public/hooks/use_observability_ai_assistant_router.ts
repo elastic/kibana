@@ -21,13 +21,20 @@ interface StatefulObservabilityAIAssistantRouter extends ObservabilityAIAssistan
     path: T,
     ...params: TypeAsArgs<TypeOf<ObservabilityAIAssistantRoutes, T>>
   ): void;
+  navigateToConversationsApp<T extends PathsOf<ObservabilityAIAssistantRoutes>>(
+    path: T,
+    ...params: TypeAsArgs<TypeOf<ObservabilityAIAssistantRoutes, T>>
+  ): void;
 }
 
 export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssistantRouter {
   const history = useHistory();
 
   const {
-    services: { http },
+    services: {
+      http,
+      application: { navigateToApp },
+    },
   } = useKibana();
 
   const link = (...args: any[]) => {
@@ -43,6 +50,32 @@ export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssi
 
         history.push(next);
       },
+      navigateToConversationsApp: (path, ...args) => {
+        const [_, route, routeParam] = path.split('/');
+
+        const sanitized = routeParam.replace('{', '').replace('}', '');
+
+        const pathKey = args[0]?.path;
+
+        if (typeof pathKey !== 'object') {
+          return;
+        }
+
+        if (Object.keys(pathKey).length === 0) {
+          navigateToApp('observabilityAIAssistant', {
+            path: route,
+          });
+          return;
+        }
+
+        if (Object.keys(pathKey).length === 1) {
+          navigateToApp('observabilityAIAssistant', {
+            // @ts-expect-error
+            path: `${route}/${pathKey[sanitized]}`,
+          });
+          return;
+        }
+      },
       replace: (path, ...args) => {
         const next = link(path, ...args);
         history.replace(next);
@@ -51,6 +84,6 @@ export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssi
         return http.basePath.prepend('/app/observabilityAIAssistant' + link(path, ...args));
       },
     }),
-    [http, history]
+    [history, navigateToApp, http.basePath]
   );
 }

@@ -11,6 +11,7 @@ import React from 'react';
 import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CodeBox } from './code_box';
 import { LanguageDefinition } from '../types';
@@ -26,6 +27,7 @@ interface IngestDataProps {
   };
   assetBasePath: string;
   application?: ApplicationStart;
+  consolePlugin?: ConsolePluginStart;
   sharePlugin: SharePluginStart;
   languages: LanguageDefinition[];
   consoleRequest?: string;
@@ -39,6 +41,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
   docLinks,
   assetBasePath,
   application,
+  consolePlugin,
   sharePlugin,
   languages,
   consoleRequest,
@@ -58,6 +61,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
           setSelectedLanguage={setSelectedLanguage}
           assetBasePath={assetBasePath}
           application={application}
+          consolePlugin={consolePlugin}
           sharePlugin={sharePlugin}
         />
       }
