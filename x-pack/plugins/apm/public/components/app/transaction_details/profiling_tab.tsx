@@ -5,13 +5,17 @@
  * 2.0.
  */
 import {
+  EuiLoadingSpinner,
   EuiSpacer,
   EuiTabbedContent,
   EuiTabbedContentProps,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
+import { css } from '@emotion/react';
+import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../hooks/use_apm_params';
+import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { ProfilingFlamegraph } from './profiling_flamegraph';
 import { ProfilingTopNFunctions } from './profiling_top_functions';
 
@@ -27,6 +31,7 @@ function ProfilingTab() {
     },
     path: { serviceName },
   } = useApmParams('/services/{serviceName}/transactions/view');
+  const { isProfilingAvailable, isLoading } = useProfilingPlugin();
 
   const tabs = useMemo((): EuiTabbedContentProps['tabs'] => {
     return [
@@ -82,6 +87,23 @@ function ProfilingTab() {
     transactionName,
     transactionType,
   ]);
+
+  if (isLoading) {
+    return (
+      <div
+        css={css`
+          display: flex;
+          justify-content: center;
+        `}
+      >
+        <EuiLoadingSpinner size="m" />
+      </div>
+    );
+  }
+
+  if (isProfilingAvailable === false) {
+    return <ProfilingEmptyState />;
+  }
 
   return (
     <EuiTabbedContent
