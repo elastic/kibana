@@ -9,8 +9,8 @@ import Boom from '@hapi/boom';
 
 import type { CasesClient, CasesClientArgs } from '..';
 
-import type { CustomFieldPatchRequest } from '../../../common/types/api';
-import { CaseRequestCustomFieldsRt } from '../../../common/types/api';
+import type { CustomFieldPutRequest } from '../../../common/types/api';
+import { CustomFieldPutRequestRt, CaseRequestCustomFieldsRt } from '../../../common/types/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import { validateMaxUserActions } from '../../../common/utils/validators';
@@ -33,7 +33,7 @@ export interface ReplaceCustomFieldArgs {
   /**
    * value of custom field to update, case version
    */
-  request: CustomFieldPatchRequest;
+  request: CustomFieldPutRequest;
 }
 
 /**
@@ -56,9 +56,17 @@ export const replaceCustomField = async (
   try {
     const { value, caseVersion } = request;
 
+    decodeWithExcessOrThrow(CustomFieldPutRequestRt)(request);
+
     const caseToUpdate = await caseService.getCase({
       id: caseId,
     });
+
+    if (caseToUpdate.version !== caseVersion) {
+      throw Boom.conflict(
+        `This case ${caseToUpdate.id} has been updated. Please refresh before saving additional updates.`
+      );
+    }
 
     const configurations = await casesClient.configure.get({
       owner: caseToUpdate.attributes.owner,

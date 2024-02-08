@@ -27,7 +27,7 @@ export const replaceCustomFieldRoute = createCasesRoute({
       const casesClient = await caseContext.getCasesClient();
       const caseId = request.params.case_id;
       const customFieldId = request.params.custom_field_id;
-      const details = request.body as customFieldsApiV1.CustomFieldPatchRequest;
+      const details = request.body as customFieldsApiV1.CustomFieldPutRequest;
 
       const res: customFieldDomainV1.CaseCustomField = await casesClient.cases.replaceCustomField({
         caseId,

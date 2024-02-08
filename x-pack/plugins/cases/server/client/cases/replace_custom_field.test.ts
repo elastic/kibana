@@ -170,6 +170,45 @@ describe('Replace custom field', () => {
     ).resolves.not.toThrow();
   });
 
+  it('throws error when request is invalid', async () => {
+    await expect(
+      replaceCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'first_key',
+          request: {
+            caseVersion: mockCases[0].version ?? '',
+            // @ts-expect-error check for invalid attribute
+            foo: 'bar',
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
+    );
+  });
+
+  it('throws error when case version does not match', async () => {
+    await expect(
+      replaceCustomField(
+        {
+          caseId: mockCases[0].id,
+          customFieldId: 'first_key',
+          request: {
+            caseVersion: 'random-version',
+            value: 'test',
+          },
+        },
+        clientArgs,
+        casesClient
+      )
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:random-version : Error: This case mock-id-1 has been updated. Please refresh before saving additional updates."`
+    );
+  });
+
   it('throws error when customField value is null and the custom field is required', async () => {
     await expect(
       replaceCustomField(
@@ -204,7 +243,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: The value field cannot be an empty string.,Invalid value \\"            \\" supplied to \\"value\\""`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"            \\" supplied to \\"value\\",The value field cannot be an empty string."`
     );
   });
 
@@ -224,7 +263,7 @@ describe('Replace custom field', () => {
         casesClient
       )
     ).rejects.toThrowErrorMatchingInlineSnapshot(
-      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Custom field value cannot be null or undefined."`
+      `"Failed to replace customField, id: first_key of case: mock-id-1 version:WzAsMV0= : Error: Invalid value \\"undefined\\" supplied to \\"value\\""`
     );
   });
 

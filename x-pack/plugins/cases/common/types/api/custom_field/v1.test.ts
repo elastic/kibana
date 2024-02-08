@@ -7,7 +7,7 @@
 
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH } from '../../../constants';
-import { CaseCustomFieldTextWithValidationValueRt, CustomFieldPatchRequestRt } from './v1';
+import { CaseCustomFieldTextWithValidationValueRt, CustomFieldPutRequestRt } from './v1';
 
 describe('Custom Fields', () => {
   describe('CaseCustomFieldTextWithValidationValueRt', () => {
@@ -39,14 +39,14 @@ describe('Custom Fields', () => {
     });
   });
 
-  describe('CustomFieldPatchRequestRt', () => {
+  describe('CustomFieldPutRequestRt', () => {
     const defaultRequest = {
       caseVersion: 'WzQ3LDFd',
       value: 'this is a text field value',
     };
 
     it('has expected attributes in request', () => {
-      const query = CustomFieldPatchRequestRt.decode(defaultRequest);
+      const query = CustomFieldPutRequestRt.decode(defaultRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -59,7 +59,7 @@ describe('Custom Fields', () => {
         caseVersion: 'WzQ3LDFd',
         value: false,
       };
-      const query = CustomFieldPatchRequestRt.decode(newRequest);
+      const query = CustomFieldPutRequestRt.decode(newRequest);
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -68,7 +68,7 @@ describe('Custom Fields', () => {
     });
 
     it('removes foo:bar attributes from request', () => {
-      const query = CustomFieldPatchRequestRt.decode({ ...defaultRequest, foo: 'bar' });
+      const query = CustomFieldPutRequestRt.decode({ ...defaultRequest, foo: 'bar' });
 
       expect(query).toStrictEqual({
         _tag: 'Right',
@@ -79,7 +79,7 @@ describe('Custom Fields', () => {
     it(`throws an error when a text customField is longer than ${MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH}`, () => {
       expect(
         PathReporter.report(
-          CustomFieldPatchRequestRt.decode({
+          CustomFieldPutRequestRt.decode({
             caseVersion: 'WzQ3LDFd',
             value: '#'.repeat(MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH + 1),
           })
@@ -92,7 +92,7 @@ describe('Custom Fields', () => {
     it('throws an error when a text customField is empty', () => {
       expect(
         PathReporter.report(
-          CustomFieldPatchRequestRt.decode({
+          CustomFieldPutRequestRt.decode({
             caseVersion: 'WzQ3LDFd',
             value: '',
           })
