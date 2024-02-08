@@ -23,8 +23,7 @@ export const CreateCdnAssets: Task = {
 
   async run(config, log, build) {
     const buildSource = build.resolvePath();
-    // TODO: update to buildShaShort after https://github.com/elastic/kibana/pull/175898
-    const buildSha = config.getBuildSha().substring(0, 12);
+    const buildSha = config.getBuildShaShort();
     const buildVersion = config.getBuildVersion();
     const assets = config.resolveFromRepo('build', 'cdn-assets');
     const bundles = resolve(assets, buildSha, 'bundles');
