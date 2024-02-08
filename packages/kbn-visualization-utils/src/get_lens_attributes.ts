@@ -8,7 +8,6 @@
 import { i18n } from '@kbn/i18n';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { Suggestion } from './types';
 
 export const getLensAttributesFromSuggestion = ({
@@ -21,7 +20,17 @@ export const getLensAttributesFromSuggestion = ({
   query: Query | AggregateQuery;
   suggestion: Suggestion | undefined;
   dataView?: DataView;
-}): TypedLensByValueInput['attributes'] => {
+}): {
+  references: Array<{ name: string; id: string; type: string }>;
+  visualizationType: string;
+  state: {
+    visualization: {};
+    datasourceStates: Record<string, unknown>;
+    query: Query | AggregateQuery;
+    filters: Filter[];
+  };
+  title: string;
+} => {
   const suggestionDatasourceState = Object.assign({}, suggestion?.datasourceState);
   const suggestionVisualizationState = Object.assign({}, suggestion?.visualizationState);
   const datasourceStates =
@@ -61,5 +70,5 @@ export const getLensAttributesFromSuggestion = ({
     },
     visualizationType: suggestion ? suggestion.visualizationId : 'lnsXY',
   };
-  return attributes as TypedLensByValueInput['attributes'];
+  return attributes;
 };
