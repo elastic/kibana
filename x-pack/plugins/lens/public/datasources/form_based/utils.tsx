@@ -403,7 +403,7 @@ export function getUnsupportedOperationsWarningMessage(
                 operations: (
                   <>
                     {columnsGrouped.map(([affectedColumn, rootColumn], i) => (
-                      <React.Fragment key={(rootColumn ?? affectedColumn).label}>
+                      <React.Fragment key={rootColumn?.label ?? affectedColumn?.label}>
                         <strong>{(rootColumn ?? affectedColumn).label}</strong>
                         {i < columnsGrouped.length - 1 ? ', ' : ''}
                       </React.Fragment>
