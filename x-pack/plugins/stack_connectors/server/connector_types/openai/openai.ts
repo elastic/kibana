@@ -168,7 +168,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body request body for the API request
    * @param stream flag indicating whether it is a streaming request or not
    */
-  public async streamApi({ body, stream }: StreamActionParams): Promise<RunActionResponse> {
+  public async streamApi({ body, stream, signal }: StreamActionParams): Promise<RunActionResponse> {
     const executeBody = getRequestWithStreamOption(
       this.provider,
       this.url,
@@ -183,6 +183,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: stream ? StreamingResponseSchema : RunActionResponseSchema,
       data: executeBody,
+      signal,
       ...axiosOptions,
     });
     return stream ? pipeStreamingResponse(response) : response.data;
@@ -232,9 +233,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * @param body - the OpenAI Invoke request body
    */
   public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
+    const { signal, ...rest } = body;
+
     const res = (await this.streamApi({
-      body: JSON.stringify(body),
+      body: JSON.stringify(rest),
       stream: true,
+      signal,
     })) as unknown as IncomingMessage;
 
     return res.pipe(new PassThrough());
@@ -252,16 +256,19 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   public async invokeAsyncIterator(
     body: InvokeAIActionParams
   ): Promise<Array<Stream<ChatCompletionChunk>>> {
-    const messages = body.messages as unknown as ChatCompletionMessageParam[];
+    const { signal, ...rest } = body;
+    const messages = rest.messages as unknown as ChatCompletionMessageParam[];
     const requestBody: ChatCompletionCreateParamsStreaming = {
-      ...body,
+      ...rest,
       stream: true,
       messages,
       model:
-        body.model ??
+        rest.model ??
         ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
     };
-    const stream = await this.openAI.chat.completions.create(requestBody);
+    const stream = await this.openAI.chat.completions.create(requestBody, {
+      signal,
+    });
     // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
     const teed = stream.tee();
     return teed;

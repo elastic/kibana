@@ -100,10 +100,12 @@ describe('getTokenCountFromInvokeStream', () => {
 
       const tokenPromise = getTokenCountFromInvokeStream({
         responseStream: stream.transform,
-        body,
+        body: {
+          ...body,
+          signal: abortController.signal,
+        },
         logger,
         actionTypeId: '.gen-ai',
-        signal: abortController.signal,
       });
 
       abortController.abort();
@@ -156,10 +158,12 @@ describe('getTokenCountFromInvokeStream', () => {
       const abortController = new AbortController();
       const tokenPromise = getTokenCountFromInvokeStream({
         responseStream: stream.transform,
-        body,
+        body: {
+          ...body,
+          signal: abortController.signal,
+        },
         logger,
         actionTypeId: '.bedrock',
-        signal: abortController.signal,
       });
 
       abortController.abort();

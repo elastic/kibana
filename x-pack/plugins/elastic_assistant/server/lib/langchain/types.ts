@@ -50,4 +50,5 @@ export interface InvokeAIActionParamsSchema {
   stop?: ChatCompletionCreateParamsNonStreaming['stop'];
   temperature?: ChatCompletionCreateParamsNonStreaming['temperature'];
   functions?: ChatCompletionCreateParamsNonStreaming['functions'];
+  signal?: AbortSignal;
 }

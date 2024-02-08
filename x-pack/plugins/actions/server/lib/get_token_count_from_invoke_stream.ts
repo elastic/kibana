@@ -17,6 +17,7 @@ export interface InvokeBody {
     role: string;
     content: string;
   }>;
+  signal?: AbortSignal;
 }
 
 /**
@@ -32,19 +33,17 @@ export async function getTokenCountFromInvokeStream({
   responseStream,
   body,
   logger,
-  signal,
 }: {
   actionTypeId: string;
   responseStream: Readable;
   body: InvokeBody;
   logger: Logger;
-  signal?: AbortSignal;
 }): Promise<{
   total: number;
   prompt: number;
   completion: number;
 }> {
-  const chatCompletionRequest = body;
+  const { signal, ...chatCompletionRequest } = body;
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
   const promptTokens = encode(
@@ -54,6 +53,7 @@ export async function getTokenCountFromInvokeStream({
   ).length;
 
   const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
+
   const parsedResponse = await parser(responseStream, logger, signal);
 
   const completionTokens = encode(parsedResponse).length;
@@ -104,14 +104,16 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
   };
 
   responseStream.on('data', onData);
+
   try {
+    // even though the stream is destroyed in the axios request, the response body is still calculated
+    // if we do not destroy the stream, the response never resolves
     signal?.addEventListener('abort', destroyStream);
     await finished(responseStream);
   } catch (e) {
     if ('Premature close' !== e.message)
       logger.error('An error occurred while calculating streaming response tokens');
   }
-
   return parseOpenAIResponse(responseBody);
 };
 

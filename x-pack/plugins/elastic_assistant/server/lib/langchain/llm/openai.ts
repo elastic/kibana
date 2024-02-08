@@ -181,6 +181,7 @@ export class ActionsClientChatOpenAI extends ChatOpenAI {
             ...('tool_calls' in message ? { tool_calls: message?.tool_calls } : {}),
             ...('tool_call_id' in message ? { tool_call_id: message?.tool_call_id } : {}),
           })),
+          signal: this.#signal,
         },
       },
       signal: this.#signal,

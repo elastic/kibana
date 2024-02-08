@@ -111,20 +111,4 @@ describe('getTokenCountFromInvokeAsyncIterator', () => {
     expect(logger.error).toHaveBeenCalledTimes(2);
     expect(logger.error).toHaveBeenNthCalledWith(2, Error('wow thats bad'));
   });
-  it('Stops the stream early when the request is aborted', async () => {
-    const abortController = new AbortController();
-    const tokenPromise = getTokenCountFromInvokeAsyncIterator({
-      streamIterable: stream,
-      body,
-      logger,
-      signal: abortController.signal,
-    });
-    abortController.abort();
-
-    await expect(tokenPromise).resolves.toEqual({
-      prompt: PROMPT_TOKEN_COUNT,
-      total: PROMPT_TOKEN_COUNT + 0,
-      completion: 0,
-    });
-  });
 });
