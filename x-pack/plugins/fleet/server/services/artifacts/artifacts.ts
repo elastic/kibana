@@ -15,6 +15,8 @@ import { isEmpty, sortBy } from 'lodash';
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+import { createEsSearchIterable } from '../utils/create_es_search_iterable';
+
 import type { ListResult } from '../../../common/types';
 import { FLEET_SERVER_ARTIFACTS_INDEX } from '../../../common';
 
@@ -34,6 +36,7 @@ import type {
   ArtifactsClientCreateOptions,
   ListArtifactsProps,
   NewArtifact,
+  FetchAllArtifactsOptions,
 } from './types';
 import {
   esSearchHitToArtifact,
@@ -137,10 +140,10 @@ export const bulkCreateArtifacts = async (
     artifacts,
     appContextService.getConfig()?.createArtifactsBulkBatchSize
   );
-
   const logger = appContextService.getLogger();
   const nonConflictErrors = [];
   logger.debug(`Number of batches generated for fleet artifacts: ${batches.length}`);
+
   for (let batchN = 0; batchN < batches.length; batchN++) {
     logger.debug(
       `Creating artifacts for batch ${batchN + 1} with ${batches[batchN].length / 2} artifacts`
@@ -154,22 +157,27 @@ export const bulkCreateArtifacts = async (
         refresh,
       })
     );
+
     // Track errors of the bulk create action
     if (res.errors) {
       nonConflictErrors.push(
         ...res.items.reduce<Error[]>((acc, item) => {
-          if (item.create?.status !== 409) {
-            acc.push(new Error(item.create?.error?.reason));
+          // 409's (conflict - record already exists) are ignored since the artifact already exists
+          if (item.create && item.create.status !== 409) {
+            acc.push(
+              new Error(
+                `Create of artifact id [${item.create._id}] returned: result [${
+                  item.create.result
+                }], status [${item.create.status}], reason [${JSON.stringify(
+                  item.create?.error || ''
+                )}]`
+              )
+            );
           }
           return acc;
         }, [])
       );
     }
-  }
-
-  // If any non conflict error, it returns only the errors
-  if (nonConflictErrors.length > 0) {
-    return { errors: nonConflictErrors };
   }
 
   // Use non sorted artifacts array to preserve the artifacts order in the response
@@ -182,6 +190,7 @@ export const bulkCreateArtifacts = async (
 
   return {
     artifacts: nonSortedEsArtifactsResponse,
+    errors: nonConflictErrors.length ? nonConflictErrors : undefined,
   };
 };
 
@@ -280,4 +289,67 @@ export const encodeArtifactContent = async (
   };
 
   return encodedArtifact;
+};
+
+/**
+ * Returns an iterator that loops through all the artifacts stored in the index
+ *
+ * @param esClient
+ * @param options
+ *
+ * @example
+ *
+ * async () => {
+ *   for await (const value of fetchAllArtifactsIterator()) {
+ *     // process page of data here
+ *   }
+ * }
+ */
+export const fetchAllArtifacts = (
+  esClient: ElasticsearchClient,
+  options: FetchAllArtifactsOptions = {}
+): AsyncIterable<Artifact[]> => {
+  const { kuery = '', perPage = 1000, sortField, sortOrder, includeArtifactBody = true } = options;
+
+  return createEsSearchIterable<ArtifactElasticsearchProperties>({
+    esClient,
+    searchRequest: {
+      index: FLEET_SERVER_ARTIFACTS_INDEX,
+      rest_total_hits_as_int: true,
+      track_total_hits: false,
+      q: kuery,
+      size: perPage,
+      sort: [
+        {
+          // MUST have a sort field and sort order
+          [sortField || 'created']: {
+            order: sortOrder || 'asc',
+          },
+        },
+      ],
+      _source_excludes: includeArtifactBody ? undefined : 'body',
+    },
+    resultsMapper: (data): Artifact[] => {
+      return data.hits.hits.map((hit) => {
+        // @ts-expect-error @elastic/elasticsearch _source is optional
+        const artifact = esSearchHitToArtifact(hit);
+
+        // If not body attribute is included, still create the property in the object (since the
+        // return type is `Artifact` and `body` is required), but throw an error is caller attempts
+        // to still access it.
+        if (!includeArtifactBody) {
+          Object.defineProperty(artifact, 'body', {
+            enumerable: false,
+            get(): string {
+              throw new Error(
+                `'body' attribute not included due to request to 'fetchAllArtifacts()' having options 'includeArtifactBody' set to 'false'`
+              );
+            },
+          });
+        }
+
+        return artifact;
+      });
+    },
+  });
 };
