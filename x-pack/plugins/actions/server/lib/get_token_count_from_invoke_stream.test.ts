@@ -94,6 +94,28 @@ describe('getTokenCountFromInvokeStream', () => {
       });
       expect(logger.error).toHaveBeenCalled();
     });
+    it('Stops the stream early when the request is aborted', async () => {
+      const mockDestroy = jest.spyOn(stream.transform, 'destroy');
+      const abortController = new AbortController();
+
+      const tokenPromise = getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body,
+        logger,
+        actionTypeId: '.gen-ai',
+        signal: abortController.signal,
+      });
+
+      abortController.abort();
+
+      await expect(tokenPromise).resolves.toEqual({
+        prompt: PROMPT_TOKEN_COUNT,
+        total: PROMPT_TOKEN_COUNT + 0,
+        completion: 0,
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+      expect(mockDestroy).toHaveBeenCalled();
+    });
   });
   describe('Bedrock stream', () => {
     beforeEach(() => {
@@ -129,6 +151,24 @@ describe('getTokenCountFromInvokeStream', () => {
         completion: COMPLETION_TOKEN_COUNT,
       });
       expect(logger.error).toHaveBeenCalled();
+    });
+    it('Does not stop the stream early when the request is aborted', async () => {
+      const abortController = new AbortController();
+      const tokenPromise = getTokenCountFromInvokeStream({
+        responseStream: stream.transform,
+        body,
+        logger,
+        actionTypeId: '.bedrock',
+        signal: abortController.signal,
+      });
+
+      abortController.abort();
+      stream.complete();
+      await expect(tokenPromise).resolves.toEqual({
+        prompt: PROMPT_TOKEN_COUNT,
+        total: PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT,
+        completion: COMPLETION_TOKEN_COUNT,
+      });
     });
   });
 });

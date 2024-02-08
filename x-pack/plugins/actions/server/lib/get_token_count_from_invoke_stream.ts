@@ -89,13 +89,21 @@ const parseBedrockStream: StreamParser = async (responseStream, logger) => {
 const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) => {
   let responseBody: string = '';
   const destroyStream = () => {
-    // Manually destroy the stream when the abort event is triggered
+    // Pause the stream to prevent further data events
+    responseStream.pause();
+    // Remove the 'data' event listener once the stream is paused
+    responseStream.removeListener('data', onData);
+    // Manually destroy the stream
+    responseStream.emit('close');
     responseStream.destroy();
   };
-  responseStream.on('data', (chunk) => {
+
+  const onData = (chunk: string) => {
     // no special encoding, can safely use toString and append to responseBody
     responseBody += chunk.toString();
-  });
+  };
+
+  responseStream.on('data', onData);
   try {
     signal?.addEventListener('abort', destroyStream);
     await finished(responseStream);
@@ -103,6 +111,7 @@ const parseOpenAIStream: StreamParser = async (responseStream, logger, signal) =
     if ('Premature close' !== e.message)
       logger.error('An error occurred while calculating streaming response tokens');
   }
+
   return parseOpenAIResponse(responseBody);
 };
 
