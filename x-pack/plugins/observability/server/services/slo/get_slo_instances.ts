@@ -16,7 +16,7 @@ export class GetSLOInstances {
   public async execute(sloId: string): Promise<GetSLOInstancesResponse> {
     const slo = await this.repository.findById(sloId);
 
-    if (slo.groupBy === ALL_VALUE) {
+    if ([slo.groupBy].flat().includes(ALL_VALUE)) {
       return { groupBy: ALL_VALUE, instances: [] };
     }
 

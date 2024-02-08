@@ -18,7 +18,7 @@ export interface Props {
 export function SloGroupByBadge({ slo, color }: Props) {
   const groupingEntries = Object.entries(slo.groupings);
 
-  if (!slo.groupBy || [slo.groupBy].flat().includes(ALL_VALUE) || !groupingEntries.length) {
+  if ([slo.groupBy].flat().includes(ALL_VALUE) || !groupingEntries.length) {
     return null;
   }
 

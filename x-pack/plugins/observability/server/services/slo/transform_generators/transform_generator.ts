@@ -72,9 +72,11 @@ export abstract class TransformGenerator {
       fixedInterval = slo.objective.timesliceWindow!.format();
     }
 
+    const groups = [slo.groupBy].flat().filter((group) => !!group);
+
     const groupings =
-      slo.groupBy !== '' && slo.groupBy !== ALL_VALUE
-        ? [slo.groupBy].flat().reduce(
+      !groups.includes(ALL_VALUE) && groups.length
+        ? groups.reduce(
             (acc, field) => {
               return {
                 ...acc,
