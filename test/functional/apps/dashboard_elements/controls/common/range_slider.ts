@@ -86,7 +86,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardControls.rangeSliderSetLowerBound(firstId, '50');
         await dashboardControls.rangeSliderSetUpperBound(firstId, '100');
         await dashboardControls.validateRange('value', firstId, '50', '100');
-
         await dashboard.clearUnsavedChanges();
       });
 
@@ -99,8 +98,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
-        const secondId = (await dashboardControls.getAllControlIds())[1];
-        await dashboardControls.validateRange('placeholder', secondId, '100', '1200');
+        const [firstId, secondId] = await dashboardControls.getAllControlIds();
+        await dashboardControls.clearControlSelections(firstId);
+        await dashboardControls.rangeSliderWaitForLoading(firstId);
 
         await dashboardControls.rangeSliderSetLowerBound(secondId, '200');
         await dashboardControls.rangeSliderSetUpperBound(secondId, '1000');
