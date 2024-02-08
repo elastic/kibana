@@ -89,7 +89,7 @@ export const getUpdatedHashes = ({
 
 // Convert an object to an md5 hash string, using a stable serialization (canonicalStringify)
 function md5Object(obj: any) {
-  return crypto.createHash('md5').update(canonicalStringify(obj)).digest('hex');
+  return crypto.createHash('sha256').update(canonicalStringify(obj)).digest('hex');
 }
 
 // JSON.stringify is non-canonical, meaning the same object may produce slightly
