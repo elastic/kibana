@@ -114,9 +114,9 @@ describe('Table', () => {
 
   it(`prevents saved objects from being deleted`, () => {
     const selectedSavedObjects = [
-      { type: 'visualization' },
-      { type: 'search' },
-      { type: 'index-pattern' },
+      { type: 'visualization', meta: { hiddenType: false } },
+      { type: 'search', meta: { hiddenType: false } },
+      { type: 'index-pattern', meta: { hiddenType: false } },
     ] as any;
     const customizedProps = {
       ...defaultProps,
@@ -158,16 +158,33 @@ describe('Table', () => {
   });
 
   describe('managed content', () => {
-    it('keeps the delete button disabled when the selection only contains managed SOs', async () => {
-      const selectedSavedObjects = [
-        { type: 'visualization', managed: true },
-        { type: 'search', managed: true },
-        { type: 'index-pattern', managed: true },
+    it('keeps the delete button disabled when the selection only contains managed and hidden SOs', async () => {
+      const managedSavedObjects = [
+        { type: 'visualization', managed: true, meta: { hiddenType: false } },
+        { type: 'search', managed: true, meta: { hiddenType: false } },
+        { type: 'index-pattern', managed: true, meta: { hiddenType: false } },
+      ] as any;
+
+      const hiddenSavedObjects = [
+        { type: 'visualization', managed: false, meta: { hiddenType: true } },
+        { type: 'search', managed: false, meta: { hiddenType: true } },
+        { type: 'index-pattern', managed: false, meta: { hiddenType: true } },
       ] as any;
 
       const { rerender } = render(
         <I18nProvider>
-          <Table {...defaultProps} selectedSavedObjects={selectedSavedObjects} />
+          <Table {...defaultProps} selectedSavedObjects={managedSavedObjects} />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
+      });
+
+      rerender(
+        <I18nProvider>
+          <Table {...defaultProps} selectedSavedObjects={hiddenSavedObjects} />
         </I18nProvider>
       );
 
@@ -180,8 +197,28 @@ describe('Table', () => {
         <I18nProvider>
           <Table
             {...defaultProps}
-            selectedSavedObjects={[...selectedSavedObjects, { type: 'lens', managed: false }]}
+            selectedSavedObjects={[...managedSavedObjects, ...hiddenSavedObjects]}
           />
+        </I18nProvider>
+      );
+
+      await waitFor(() => {
+        expect(screen.getByTestId('savedObjectsManagementDelete')).toBeDisabled();
+        expect(screen.getByRole('button', { name: 'Export' })).toBeEnabled();
+      });
+    });
+
+    it('enables the delete button when the selection contains at least one unmanaged, non-hidden SO', async () => {
+      const selectedSavedObjects = [
+        { type: 'visualization', managed: true, meta: { hiddenType: false } },
+        { type: 'search', managed: true, meta: { hiddenType: false } },
+        { type: 'index-pattern', managed: false, meta: { hiddenType: true } },
+        { type: 'lens', managed: false, meta: { hiddenType: false } }, // deletable!
+      ] as any;
+
+      render(
+        <I18nProvider>
+          <Table {...defaultProps} selectedSavedObjects={selectedSavedObjects} />
         </I18nProvider>
       );
 

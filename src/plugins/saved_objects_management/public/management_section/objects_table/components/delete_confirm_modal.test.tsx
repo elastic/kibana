@@ -205,6 +205,7 @@ describe('DeleteConfirmModal', () => {
       createObject({ managed: true }),
       createObject({ managed: false }),
       createObject({ managed: true }),
+      createObject({ hiddenType: true }),
     ];
 
     const wrapper = mountWithIntl(
@@ -223,7 +224,7 @@ describe('DeleteConfirmModal', () => {
     expect(callout).toHaveLength(1);
 
     expect(callout.text()).toMatchInlineSnapshot(
-      `"Some objects cannot be deleted2 objects are managed by Elastic and cannot be deleted."`
+      `"Some objects have been excluded1 object is hidden and cannot be deleted.2 objects are managed by Elastic and cannot be deleted."`
     );
   });
 
