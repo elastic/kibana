@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React, { useCallback } from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { InspectSLOPortal } from './common/inspect_slo_portal';
 import { EquivalentApiRequest } from './common/equivalent_api_request';
 import { paths } from '../../../../common/locators/paths';
 import { useCreateSlo } from '../../../hooks/slo/use_create_slo';
@@ -32,6 +31,7 @@ import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
 import { useCreateRule } from '../../../hooks/use_create_rule';
 import { createBurnRateRuleRequestBody } from '../helpers/create_burn_rate_rule_request_body';
 import { BurnRateRuleParams } from '../../../typings';
+import { SLOInspectWrapper } from './common/slo_inspect';
 
 export interface Props {
   slo?: GetSLOResponse;
@@ -168,9 +168,9 @@ export function SloEditForm({ slo }: Props) {
               isCreateSloLoading={isCreateSloLoading}
               isUpdateSloLoading={isUpdateSloLoading}
             />
+            <SLOInspectWrapper slo={slo} />
           </EuiFlexGroup>
         </EuiFlexGroup>
-        <InspectSLOPortal slo={slo} />
       </FormProvider>
     </>
   );

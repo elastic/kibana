@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import {
   EuiAccordion,
   EuiButton,
+  EuiButtonEmpty,
   EuiButtonIcon,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -37,7 +38,11 @@ import { useInspectSlo } from '../../../../hooks/slo/use_inspect_slo';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
-import { Props } from './inspect_slo_portal';
+import { GetSLOResponse } from '@kbn/slo-schema';
+
+type Props = {
+  slo?: GetSLOResponse;
+};
 
 export function SLOInspectWrapper({ slo }: Props) {
   const {
@@ -208,7 +213,8 @@ function SLOInspect({ slo }: Props) {
         }
         repositionOnScroll
       >
-        <EuiButton
+        <EuiButtonEmpty
+          color="primary"
           data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
           onClick={handleInspectButtonClick}
           iconType="inspect"
@@ -217,7 +223,7 @@ function SLOInspect({ slo }: Props) {
           {i18n.translate('xpack.observability.sLOInspect.sLOInspectButtonLabel', {
             defaultMessage: 'SLO Inspect',
           })}
-        </EuiButton>
+        </EuiButtonEmpty>
       </EuiToolTip>
 
       {flyout}
