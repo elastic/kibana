@@ -7,11 +7,17 @@
 
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
-import { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import {
+  Aggregators,
+  CustomThresholdExpressionMetric,
+} from '../../../../../common/custom_threshold_rule/types';
+import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 
 export const createCustomMetricsAggregations = (
   id: string,
   customMetrics: CustomThresholdExpressionMetric[],
+  currentTimeFrame: { start: number; end: number },
+  timeFieldName: string,
   equation?: string
 ) => {
   const bucketsPath: { [id: string]: string } = {};
@@ -28,6 +34,28 @@ export const createCustomMetricsAggregations = (
             ? toElasticsearchQuery(fromKueryExpression(metric.filter))
             : { match_all: {} },
         },
+      };
+    }
+    if (aggregation === Aggregators.P95 || aggregation === Aggregators.P99) {
+      bucketsPath[metric.name] = key;
+      return {
+        ...acc,
+        [key]: {
+          percentiles: {
+            field: metric.field,
+            percents: [aggregation === Aggregators.P95 ? 95 : 99],
+            keyed: true,
+          },
+        },
+      };
+    }
+
+    if (aggregation === Aggregators.RATE) {
+      bucketsPath[metric.name] = key;
+      return {
+        ...acc,
+        ...createRateAggsBuckets(currentTimeFrame, key, timeFieldName, metric.field || ''),
+        ...createRateAggsBucketScript(currentTimeFrame, key),
       };
     }
 

@@ -8,6 +8,7 @@
 import React, { FC, useEffect, useState, useCallback, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { MlTooltipComponent } from '../../../components/chart_tooltip';
 import { TimeseriesChart } from './timeseries_chart';
 import { CombinedJob } from '../../../../../common/types/anomaly_detection_jobs';
@@ -17,6 +18,7 @@ import { useMlKibana, useNotifications } from '../../../contexts/kibana';
 import { getBoundsRoundedToInterval } from '../../../util/time_buckets';
 import { getControlsForDetector } from '../../get_controls_for_detector';
 import { MlAnnotationUpdatesContext } from '../../../contexts/ml/ml_annotation_updates_context';
+import { SourceIndicesWithGeoFields } from '../../../explorer/explorer_utils';
 
 interface TimeSeriesChartWithTooltipsProps {
   bounds: any;
@@ -30,6 +32,11 @@ interface TimeSeriesChartWithTooltipsProps {
   chartProps: any;
   lastRefresh: number;
   contextAggregationInterval: any;
+  tableData?: {
+    anomalies: MlAnomaliesTableRecord[];
+    interval: string;
+  };
+  sourceIndicesWithGeoFields: SourceIndicesWithGeoFields;
 }
 export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> = ({
   bounds,
@@ -43,6 +50,11 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
   chartProps,
   lastRefresh,
   contextAggregationInterval,
+  tableData = {
+    anomalies: [],
+    interval: 'second',
+  },
+  sourceIndicesWithGeoFields,
 }) => {
   const { toasts: toastNotifications } = useNotifications();
   const {
@@ -132,6 +144,8 @@ export const TimeSeriesChartWithTooltips: FC<TimeSeriesChartWithTooltipsProps> =
             showForecast={showForecast}
             showModelBounds={showModelBounds}
             tooltipService={tooltipService}
+            tableData={tableData}
+            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
           />
         )}
       </MlTooltipComponent>

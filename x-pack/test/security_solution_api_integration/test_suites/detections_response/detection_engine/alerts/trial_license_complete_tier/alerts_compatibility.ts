@@ -636,7 +636,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Threshold', () => {
+    // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176359
+    describe.skip('Threshold', () => {
       beforeEach(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/7.16.0');
         await createAlertsIndex(supertest, log);
