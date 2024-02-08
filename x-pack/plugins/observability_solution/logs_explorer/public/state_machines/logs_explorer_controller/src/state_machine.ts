@@ -33,7 +33,7 @@ import {
   updateContextFromDiscoverAppState,
   updateDiscoverAppStateFromContext,
 } from './services/discover_service';
-import { initializeSelection, validateSelection } from './services/selection_service';
+import { initializeSelection } from './services/selection_service';
 import {
   subscribeToTimefilterService,
   updateContextFromTimefilter,
@@ -337,7 +337,6 @@ export const createLogsExplorerControllerStateMachine = ({
       initializeSelection: initializeSelection({ datasetsClient, discover }),
       subscribeControlGroup: subscribeControlGroup(),
       updateControlPanels: updateControlPanels(),
-      validateSelection: validateSelection({ datasetsClient }),
       discoverStateService: subscribeToDiscoverState(),
       timefilterService: subscribeToTimefilterService(query),
     },
