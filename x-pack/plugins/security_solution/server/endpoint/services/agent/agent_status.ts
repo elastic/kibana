@@ -21,7 +21,7 @@ import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { HostStatus } from '../../../../common/endpoint/types';
 
-interface GetAgentStatusOptions {
+export interface GetAgentStatusOptions {
   // NOTE: only sentinel_one currently supported
   agentType: ResponseActionAgentType & 'sentinel_one';
   agentIds: string[];
@@ -126,7 +126,7 @@ export const getAgentStatus = async ({
   }, {} as AgentStatusApiResponse['data']);
 };
 
-enum SENTINEL_ONE_NETWORK_STATUS {
+export enum SENTINEL_ONE_NETWORK_STATUS {
   CONNECTING = 'connecting',
   CONNECTED = 'connected',
   DISCONNECTING = 'disconnecting',
