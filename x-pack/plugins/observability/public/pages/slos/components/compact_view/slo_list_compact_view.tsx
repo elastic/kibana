@@ -19,6 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { SloTagsList } from '../common/slo_tags_list';
 import { useCloneSlo } from '../../../../hooks/slo/use_clone_slo';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
@@ -233,7 +234,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'name',
       name: 'Name',
-      width: '20%',
+      width: '15%',
       truncateText: { lines: 2 },
       'data-test-subj': 'sloItem',
       render: (_, slo: SLOWithSummaryResponse) => {
@@ -257,6 +258,11 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           </EuiToolTip>
         );
       },
+    },
+    {
+      field: 'tags',
+      name: 'Tags',
+      render: (tags: string[]) => <SloTagsList tags={tags} color="default" />,
     },
     {
       field: 'instance',
@@ -379,6 +385,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
         columns={columns}
         loading={loading}
         noItemsMessage={loading ? LOADING_SLOS_LABEL : NO_SLOS_FOUND}
+        tableLayout="auto"
       />
       {sloToAddRule ? (
         <AddRuleFlyout
