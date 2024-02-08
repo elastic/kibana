@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALERT_RULE_PARAMETERS, ALERT_START, TIMESTAMP } from '@kbn/rule-data-utils';
+import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
 import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
@@ -49,24 +49,11 @@ export const getInventoryViewInAppUrl = (
 
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
-  // console.log('inventoryFields', inventoryFields['host.name']);
-  // console.log('inventoryFields all', inventoryFields);
-  let inventoryViewInAppUrl = '/app/metrics/link-to/inventory?';
+  let viewInAppUrl = '/app/metrics/link-to/inventory?';
 
   if (nodeType) {
     if (nodeType.includes('host') && inventoryFields['host.name']) {
-      const timestamp = Date.parse(inventoryFields[TIMESTAMP]); //#TODO re-think: do we want timestamp or kibana.alert.start
-      const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
-
-      const queryParams = {
-        from: timestamp,
-        to: timestamp + fifteenMinutesInMilliseconds,
-      };
-
-      const encodedParams = encode(stringify(queryParams));
-
-      inventoryViewInAppUrl = `/app/metrics/link-to/host-detail/${inventoryFields['host.name']}?${encodedParams}`;
-      console.log('inventoryViewInAppUrl', inventoryViewInAppUrl);
+      viewInAppUrl = getLinkToHostDetails(inventoryFields['host.name'], inventoryFields[TIMESTAMP]);
     } else {
       const linkToParams: Record<string, any> = {
         nodeType: inventoryFields[nodeTypeField][0],
@@ -95,11 +82,21 @@ export const getInventoryViewInAppUrl = (
       } else {
         linkToParams.metric = encode({ type: criteriaMetric });
       }
-      inventoryViewInAppUrl += stringify(linkToParams);
+      viewInAppUrl += stringify(linkToParams);
     }
   }
 
-  console.log(inventoryViewInAppUrl);
-
-  return inventoryViewInAppUrl;
+  return viewInAppUrl;
 };
+
+export function getLinkToHostDetails(hostName: string, timestamp: string): string {
+  const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
+  const queryParams = {
+    from: Date.parse(timestamp),
+    to: Date.parse(timestamp) + fifteenMinutesInMilliseconds,
+  };
+
+  const encodedParams = encode(stringify(queryParams));
+
+  return `/app/metrics/link-to/host-detail/${hostName}?${encodedParams}`;
+}
