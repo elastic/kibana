@@ -143,6 +143,7 @@ describe('ResponseActionsClientImpl base class', () => {
         caseIds: ['case-999'],
         alertIds: [KNOWN_ALERT_ID_1, KNOWN_ALERT_ID_2, KNOWN_ALERT_ID_3],
         comment: 'this is a case comment',
+        actionId: 'action-123',
         hosts: [
           {
             hostId: '1-2-3',
@@ -226,76 +227,29 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
         attachments: [
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: 'action-123',
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  agentType: 'endpoint',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
         ],
         caseId: 'case-3',
@@ -305,7 +259,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should not error if update to a case fails', async () => {
       (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
         if (options.caseId === 'case-2') {
-          throw new Error('update filed to case-2');
+          throw new Error('update failed to case-2');
         }
       });
       await baseClassMock.updateCases(updateCasesOptions);

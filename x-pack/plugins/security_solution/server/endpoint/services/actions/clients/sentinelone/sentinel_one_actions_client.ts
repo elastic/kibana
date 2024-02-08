@@ -216,6 +216,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: reqIndexOptions.command,
       caseIds: reqIndexOptions.case_ids,
       alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
       hosts: actionRequest.endpoint_ids.map((agentId) => {
         return {
           hostId: agentId,
@@ -270,6 +271,7 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: reqIndexOptions.command,
       caseIds: reqIndexOptions.case_ids,
       alertIds: reqIndexOptions.alert_ids,
+      actionId: actionRequestDoc.EndpointActions.action_id,
       hosts: actionRequest.endpoint_ids.map((agentId) => {
         return {
           hostId: agentId,

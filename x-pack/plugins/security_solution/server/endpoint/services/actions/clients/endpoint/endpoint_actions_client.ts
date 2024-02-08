@@ -121,6 +121,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       comment: actionReq.comment,
       caseIds: actionReq.case_ids,
       alertIds: actionReq.alert_ids,
+      actionId: response.id,
       hosts: actionReq.endpoint_ids.map((hostId) => {
         return {
           hostId,

@@ -11,6 +11,7 @@ export * from './create_connector';
 export * from './create_connector_document';
 export * from './create_connector_secret';
 export * from './delete_connector';
+export * from './delete_connector_secret';
 export * from './fetch_connectors';
 export * from './fetch_sync_jobs';
 export * from './update_filtering';
