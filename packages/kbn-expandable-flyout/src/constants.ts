@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export const EXPANDABLE_FLYOUT_URL_KEY = 'eventFlyout' as const;
+export const REDUX_UD_FOR_MEMORY_STORAGE = 'memory';

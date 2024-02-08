@@ -9,6 +9,8 @@
 import { Provider as ReduxProvider } from 'react-redux';
 import { configureStore } from '@reduxjs/toolkit';
 import React, { FC, PropsWithChildren } from 'react';
+import { REDUX_UD_FOR_MEMORY_STORAGE } from '../constants';
+import { ExpandableFlyoutContextProvider } from '../context';
 import { reducer } from '../reducer';
 import { Context } from '../redux';
 import { initialState, State } from '../state';
@@ -29,8 +31,10 @@ export const TestProvider: FC<PropsWithChildren<TestProviderProps>> = ({
   });
 
   return (
-    <ReduxProvider store={store} context={Context}>
-      {children}
-    </ReduxProvider>
+    <ExpandableFlyoutContextProvider urlKey={REDUX_UD_FOR_MEMORY_STORAGE}>
+      <ReduxProvider store={store} context={Context}>
+        {children}
+      </ReduxProvider>
+    </ExpandableFlyoutContextProvider>
   );
 };

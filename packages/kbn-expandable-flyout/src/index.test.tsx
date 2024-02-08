@@ -18,7 +18,9 @@ import {
 } from './components/test_ids';
 import { type State } from './state';
 import { TestProvider } from './test/provider';
+import { REDUX_UD_FOR_MEMORY_STORAGE } from './constants';
 
+const id = REDUX_UD_FOR_MEMORY_STORAGE;
 const registeredPanels: Panel[] = [
   {
     key: 'key',
@@ -28,11 +30,9 @@ const registeredPanels: Panel[] = [
 
 describe('ExpandableFlyout', () => {
   it(`shouldn't render flyout if no panels`, () => {
-    const context = {
-      right: undefined,
-      left: undefined,
-      preview: [],
-    } as unknown as State;
+    const context: State = {
+      byId: {},
+    };
 
     const result = render(
       <TestProvider state={context}>
@@ -45,12 +45,16 @@ describe('ExpandableFlyout', () => {
 
   it('should render right section', () => {
     const context = {
-      right: {
-        id: 'key',
+      byId: {
+        [id]: {
+          right: {
+            id: 'key',
+          },
+          left: undefined,
+          preview: undefined,
+        },
       },
-      left: {},
-      preview: [],
-    } as unknown as State;
+    };
 
     const { getByTestId } = render(
       <TestProvider state={context}>
@@ -63,12 +67,16 @@ describe('ExpandableFlyout', () => {
 
   it('should render left section', () => {
     const context = {
-      right: {},
-      left: {
-        id: 'key',
+      byId: {
+        [id]: {
+          right: undefined,
+          left: {
+            id: 'key',
+          },
+          preview: undefined,
+        },
       },
-      preview: [],
-    } as unknown as State;
+    };
 
     const { getByTestId } = render(
       <TestProvider state={context}>
@@ -81,14 +89,18 @@ describe('ExpandableFlyout', () => {
 
   it('should render preview section', () => {
     const context = {
-      right: {},
-      left: {},
-      preview: [
-        {
-          id: 'key',
+      byId: {
+        [id]: {
+          right: undefined,
+          left: undefined,
+          preview: [
+            {
+              id: 'key',
+            },
+          ],
         },
-      ],
-    } as State;
+      },
+    };
 
     const { getByTestId } = render(
       <TestProvider state={context}>

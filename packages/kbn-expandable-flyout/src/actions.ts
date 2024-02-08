@@ -26,21 +26,34 @@ export const openPanelsAction = createAction<{
   right?: FlyoutPanelProps;
   left?: FlyoutPanelProps;
   preview?: FlyoutPanelProps;
+  id: string;
 }>(ActionType.openFlyout);
 
-export const openRightPanelAction = createAction<FlyoutPanelProps>(ActionType.openRightPanel);
-export const openLeftPanelAction = createAction<FlyoutPanelProps>(ActionType.openLeftPanel);
-export const openPreviewPanelAction = createAction<FlyoutPanelProps>(ActionType.openPreviewPanel);
+export const openRightPanelAction = createAction<{
+  right: FlyoutPanelProps;
+  id: string;
+}>(ActionType.openRightPanel);
+export const openLeftPanelAction = createAction<{
+  left: FlyoutPanelProps;
+  id: string;
+}>(ActionType.openLeftPanel);
+export const openPreviewPanelAction = createAction<{
+  preview: FlyoutPanelProps;
+  id: string;
+}>(ActionType.openPreviewPanel);
 
-export const closePanelsAction = createAction(ActionType.closeFlyout);
-export const closeRightPanelAction = createAction(ActionType.closeRightPanel);
-export const closeLeftPanelAction = createAction(ActionType.closeLeftPanel);
-export const closePreviewPanelAction = createAction(ActionType.closePreviewPanel);
+export const closePanelsAction = createAction<{ id: string }>(ActionType.closeFlyout);
+export const closeRightPanelAction = createAction<{ id: string }>(ActionType.closeRightPanel);
+export const closeLeftPanelAction = createAction<{ id: string }>(ActionType.closeLeftPanel);
+export const closePreviewPanelAction = createAction<{ id: string }>(ActionType.closePreviewPanel);
 
-export const previousPreviewPanelAction = createAction(ActionType.previousPreviewPanel);
+export const previousPreviewPanelAction = createAction<{ id: string }>(
+  ActionType.previousPreviewPanel
+);
 
 export const urlChangedAction = createAction<{
   right?: FlyoutPanelProps;
   left?: FlyoutPanelProps;
   preview?: FlyoutPanelProps;
+  id: string;
 }>(ActionType.urlChanged);

@@ -6,11 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { stateSelector, useSelector } from '../redux';
+import { REDUX_UD_FOR_MEMORY_STORAGE } from '../constants';
+import { useExpandableFlyoutContext } from '../context';
+import { selectPanelsById, useSelector } from '../redux';
 
 /**
- * This hook allows you to access the flyout state, read open panels and previews.
+ * This hook allows you to access the flyout state, read open right, left and preview panels.
  */
 export const useExpandableFlyoutState = () => {
-  return useSelector(stateSelector);
+  const { urlKey } = useExpandableFlyoutContext();
+  const id = urlKey || REDUX_UD_FOR_MEMORY_STORAGE;
+  return useSelector(selectPanelsById(id));
 };
