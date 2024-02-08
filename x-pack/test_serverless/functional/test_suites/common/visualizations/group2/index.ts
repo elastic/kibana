@@ -7,14 +7,8 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
-  const svlCommonPage = getPageObject('svlCommonPage');
-
+export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Visualizations - Group 2', function () {
-    before(async () => {
-      await svlCommonPage.loginWithRole('viewer');
-    });
-
     loadTestFile(require.resolve('./open_in_lens/agg_based'));
   });
 };
