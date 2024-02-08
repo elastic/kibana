@@ -11,9 +11,9 @@ import { HttpResponse } from '@kbn/core/public';
 
 import { ErrorResponse, HttpError, Status } from '../../../../../../../../common/types/api';
 import { MlModelDeploymentState } from '../../../../../../../../common/types/ml';
-import { CreateTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+import { CreateModelApiLogic } from '../../../../../api/ml_models/create_model_api_logic';
 import { FetchTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
-import { StartTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import { StartModelApiLogic } from '../../../../../api/ml_models/start_model_api_logic';
 
 import {
   getTextExpansionError,
@@ -22,9 +22,9 @@ import {
 } from './text_expansion_callout_logic';
 
 const DEFAULT_VALUES: TextExpansionCalloutValues = {
-  createTextExpansionModelError: undefined,
-  createTextExpansionModelStatus: Status.IDLE,
-  createdTextExpansionModel: undefined,
+  createModelError: undefined,
+  createModelStatus: Status.IDLE,
+  createdModel: undefined,
   fetchTextExpansionModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
@@ -33,8 +33,8 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   isModelStarted: false,
   isPollingTextExpansionModelActive: false,
   isStartButtonDisabled: false,
-  startTextExpansionModelError: undefined,
-  startTextExpansionModelStatus: Status.IDLE,
+  startModelError: undefined,
+  startModelStatus: Status.IDLE,
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,
   textExpansionError: null,
@@ -45,21 +45,19 @@ jest.useFakeTimers();
 
 describe('TextExpansionCalloutLogic', () => {
   const { mount } = new LogicMounter(TextExpansionCalloutLogic);
-  const { mount: mountCreateTextExpansionModelApiLogic } = new LogicMounter(
-    CreateTextExpansionModelApiLogic
-  );
+  const { mount: mountCreateModelApiLogic } = new LogicMounter(CreateModelApiLogic);
   const { mount: mountFetchTextExpansionModelApiLogic } = new LogicMounter(
     FetchTextExpansionModelApiLogic
   );
-  const { mount: mountStartTextExpansionModelApiLogic } = new LogicMounter(
-    StartTextExpansionModelApiLogic
+  const { mount: mountStartModelApiLogic } = new LogicMounter(
+    StartModelApiLogic
   );
 
   beforeEach(() => {
     jest.clearAllMocks();
-    mountCreateTextExpansionModelApiLogic();
+    mountCreateModelApiLogic();
     mountFetchTextExpansionModelApiLogic();
-    mountStartTextExpansionModelApiLogic();
+    mountStartModelApiLogic();
     mount();
   });
 
@@ -124,12 +122,12 @@ describe('TextExpansionCalloutLogic', () => {
       });
     });
 
-    describe('createTextExpansionModelSuccess', () => {
-      it('sets createdTextExpansionModel', () => {
+    describe('createModelSuccess', () => {
+      it('sets createdModel', () => {
         jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
         jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
 
-        TextExpansionCalloutLogic.actions.createTextExpansionModelSuccess({
+        TextExpansionCalloutLogic.actions.createModelSuccess({
           deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
         });
@@ -240,7 +238,7 @@ describe('TextExpansionCalloutLogic', () => {
       it('sets startedTextExpansionModel', () => {
         jest.spyOn(TextExpansionCalloutLogic.actions, 'fetchTextExpansionModel');
 
-        TextExpansionCalloutLogic.actions.startTextExpansionModelSuccess({
+        TextExpansionCalloutLogic.actions.startModelSuccess({
           deploymentState: MlModelDeploymentState.FullyAllocated,
           modelId: 'mock-model-id',
         });
@@ -288,11 +286,11 @@ describe('TextExpansionCalloutLogic', () => {
   describe('selectors', () => {
     describe('isCreateButtonDisabled', () => {
       it('is set to false if the fetch model API is idle', () => {
-        CreateTextExpansionModelApiLogic.actions.apiReset();
+        CreateModelApiLogic.actions.apiReset();
         expect(TextExpansionCalloutLogic.values.isCreateButtonDisabled).toBe(false);
       });
       it('is set to true if the fetch model API is not idle', () => {
-        CreateTextExpansionModelApiLogic.actions.apiSuccess({
+        CreateModelApiLogic.actions.apiSuccess({
           deploymentState: MlModelDeploymentState.Downloading,
           modelId: 'mock-model-id',
         });
@@ -310,13 +308,13 @@ describe('TextExpansionCalloutLogic', () => {
       } as HttpError;
 
       it('returns null when there are no errors', () => {
-        CreateTextExpansionModelApiLogic.actions.apiReset();
+        CreateModelApiLogic.actions.apiReset();
         FetchTextExpansionModelApiLogic.actions.apiReset();
-        StartTextExpansionModelApiLogic.actions.apiReset();
+        StartModelApiLogic.actions.apiReset();
         expect(TextExpansionCalloutLogic.values.textExpansionError).toBe(null);
       });
       it('returns extracted error for create', () => {
-        CreateTextExpansionModelApiLogic.actions.apiError(error);
+        CreateModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
           title: 'Error with ELSER deployment',
           message: 'Mocked error message',
@@ -330,7 +328,7 @@ describe('TextExpansionCalloutLogic', () => {
         });
       });
       it('returns extracted error for start', () => {
-        StartTextExpansionModelApiLogic.actions.apiError(error);
+        StartModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
           title: 'Error starting ELSER deployment',
           message: 'Mocked error message',
