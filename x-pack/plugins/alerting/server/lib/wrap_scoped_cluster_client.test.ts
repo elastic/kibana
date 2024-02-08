@@ -19,7 +19,7 @@ const eqlQuery = {
 };
 const esqlQueryRequest = {
   method: 'POST',
-  path: '/_esql',
+  path: '/_query',
   body: {
     query: 'from .kibana_task_manager',
   },
@@ -291,7 +291,7 @@ describe('wrapScopedClusterClient', () => {
         }).client();
 
         await expect(
-          wrappedSearchClient.asInternalUser.transport.request({ method: 'POST', path: '/_esql' })
+          wrappedSearchClient.asInternalUser.transport.request({ method: 'POST', path: '/_query' })
         ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong!"`);
       });
 
@@ -322,7 +322,7 @@ describe('wrapScopedClusterClient', () => {
         expect(stats.totalSearchDurationMs).toBeGreaterThan(-1);
 
         expect(logger.debug).toHaveBeenCalledWith(
-          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_esql\",\"body\":{\"query\":\"from .kibana_task_manager\"}} - with options {}`
+          `executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {\"method\":\"POST\",\"path\":\"/_query\",\"body\":{\"query\":\"from .kibana_task_manager\"}} - with options {}`
         );
       });
 
@@ -342,7 +342,10 @@ describe('wrapScopedClusterClient', () => {
         }).client();
 
         await expect(
-          abortableSearchClient.asInternalUser.transport.request({ method: 'POST', path: '/_esql' })
+          abortableSearchClient.asInternalUser.transport.request({
+            method: 'POST',
+            path: '/_query',
+          })
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"ES|QL search has been aborted due to cancelled execution"`
         );
