@@ -70,6 +70,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionUploadEnabled: true,
 
+  /*
+   * Enables Automated Endpoint Process actions
+   */
+  automatedProcessActionsEnabled: false,
+
   /**
    * Enables the ability to send Response actions to SentinelOne
    */
