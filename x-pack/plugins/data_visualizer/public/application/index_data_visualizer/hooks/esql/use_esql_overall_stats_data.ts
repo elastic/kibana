@@ -189,6 +189,7 @@ export const useESQLOverallStatsData = (
       lastRefresh: number;
       filter?: QueryDslQueryContainer;
       limitSize?: ESQLDefaultLimitSizeOption;
+      totalCount?: number;
     }
     | undefined
 ) => {
@@ -229,7 +230,13 @@ export const useESQLOverallStatsData = (
           error: undefined,
         });
 
-        const { searchQuery, intervalMs, filter, limitSize } = fieldStatsRequest;
+        const {
+          searchQuery,
+          intervalMs,
+          filter,
+          limitSize,
+          totalCount: knownTotalCount,
+        } = fieldStatsRequest;
 
         if (!isESQLQuery(searchQuery)) {
           return;
@@ -286,10 +293,14 @@ export const useESQLOverallStatsData = (
           intervalInMs,
         });
         let { totalCount, documentCountStats } = tableData;
+        if (knownTotalCount !== undefined) {
+          totalCount = knownTotalCount;
+        }
         if (
-          totalCount === undefined ||
-          documentCountStats === undefined ||
-          hashedDocCountParams !== previousDocCountRequest.current
+          knownTotalCount === undefined &&
+          (totalCount === undefined ||
+            documentCountStats === undefined ||
+            hashedDocCountParams !== previousDocCountRequest.current)
         ) {
           setTableData({ totalCount: undefined, documentCountStats: undefined });
 
