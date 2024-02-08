@@ -47,6 +47,8 @@ interface AbstractDataViewDeps {
   metaFields?: string[];
 }
 
+type DataViewFieldBaseSpec = Record<string, DataViewFieldBase>;
+
 export abstract class AbstractDataView {
   /**
    * Saved object id
@@ -124,8 +126,7 @@ export abstract class AbstractDataView {
    */
   public matchedIndices: string[] = [];
 
-  // todo reues type
-  protected scriptedFields: Record<string, DataViewFieldBase>; // DataViewFieldBase[];
+  protected scriptedFields: DataViewFieldBaseSpec;
 
   private allowHidden: boolean = false;
 
@@ -162,7 +163,7 @@ export abstract class AbstractDataView {
           .reduce((acc, field) => {
             acc[field.name] = field;
             return acc;
-          }, {} as Record<string, DataViewFieldBase>)
+          }, {} as DataViewFieldBaseSpec)
       : {};
 
     // set dependencies

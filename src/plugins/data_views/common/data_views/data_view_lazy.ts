@@ -21,7 +21,7 @@ import { DataViewLazyFieldCache, createDataViewFieldCache } from './data_view_la
 import { fieldMatchesFieldsRequested, fieldsMatchFieldsRequested } from './data_view_lazy_util';
 
 import type {
-  DataViewFieldMap,
+  DataViewFieldMap as DataViewFieldSpecMap,
   DataViewSpec,
   FieldConfiguration,
   RuntimeField,
@@ -57,6 +57,8 @@ interface GetFieldsParams {
   forceRefresh?: boolean;
 }
 
+type DataViewFieldMap = Record<string, DataViewField>;
+
 export class DataViewLazy extends AbstractDataView {
   private apiClient: IDataViewsApiClient;
   private fieldCache: DataViewLazyFieldCache = createDataViewFieldCache();
@@ -88,9 +90,9 @@ export class DataViewLazy extends AbstractDataView {
       forceRefresh = false,
     }: GetFieldsParams // todo implement
   ) {
-    let mappedResult: Record<string, DataViewField> = {};
-    let scriptedResult: Record<string, DataViewField> = {};
-    let runtimeResult: Record<string, DataViewField> = {};
+    let mappedResult: DataViewFieldMap = {};
+    let scriptedResult: DataViewFieldMap = {};
+    let runtimeResult: DataViewFieldMap = {};
     // need to know if runtime fields are also mapped
     if (mapped || runtime) {
       // if we just need runtime fields, we can ask for the set of runtime fields specifically
@@ -104,7 +106,7 @@ export class DataViewLazy extends AbstractDataView {
         forceRefresh,
       });
     }
-    // todo double check which field type is given preference
+    // todo test which field type is given preference
     if (scripted) {
       scriptedResult = this.getScriptedFields({ fieldName });
     }
@@ -132,7 +134,7 @@ export class DataViewLazy extends AbstractDataView {
       }
       col[field.name] = cachedField;
       return col;
-    }, {} as Record<string, DataViewField>);
+    }, {} as DataViewFieldMap);
 
   /**
    * Add a runtime field - Appended to existing mapped field or a new field is
@@ -317,7 +319,7 @@ export class DataViewLazy extends AbstractDataView {
   }
 
   private getRuntimeFieldSpecMap = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) => {
-    const spec: DataViewFieldMap = {};
+    const spec: DataViewFieldSpecMap = {};
 
     const addRuntimeFieldToSpecFields = (
       name: string,
@@ -522,7 +524,7 @@ export class DataViewLazy extends AbstractDataView {
     }
 
     const getFieldsAsMap = async () => {
-      const fields: DataViewFieldMap = {};
+      const fields: DataViewFieldSpecMap = {};
       const fldMap = await this.getFields({ fieldName: ['*'] });
       Object.values(fldMap).forEach((field) => {
         fields[field.name] = field.toSpec({ getFormatterForField: this.getFormatterForField });
