@@ -53,7 +53,7 @@ export const createThreatSignal = async ({
   inputIndexFields,
   threatIndexFields,
   sortOrder = 'desc',
-  isAlertSuppressionConfigured,
+  isAlertSuppressionActive,
 }: CreateThreatSignalOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatFilter = buildThreatMappingFilter({
     threatMapping,
@@ -125,7 +125,7 @@ export const createThreatSignal = async ({
       secondaryTimestamp,
     };
 
-    if (isAlertSuppressionConfigured) {
+    if (isAlertSuppressionActive) {
       result = await searchAfterAndBulkCreateSuppressedAlerts({
         ...searchAfterBulkCreateParams,
         wrapSuppressedHits,

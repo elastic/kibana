@@ -1247,7 +1247,8 @@ export default ({ getService }: FtrProviderContext) => {
                 value: ['agent-a'],
               },
             ],
-            // should be 7 suppressed alerts
+            // There 4 documents in threats index, each matches one document in source index on each of 2 rule executions
+            // In total it gives 8 potential alerts. With suppression enabled 1 is created, the rest 7 are suppressed
             [ALERT_SUPPRESSION_DOCS_COUNT]: 7,
           });
         });

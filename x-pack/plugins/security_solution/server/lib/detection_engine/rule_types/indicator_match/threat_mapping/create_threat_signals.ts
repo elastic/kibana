@@ -220,12 +220,12 @@ export const createThreatSignals = async ({
 
   const license = await firstValueFrom(licensing.license$);
   const hasPlatinumLicense = license.hasAtLeast('platinum');
-  const isAlertSuppressionEnabled = Boolean(
+  const isAlertSuppressionConfigured = Boolean(
     completeRule.ruleParams.alertSuppression?.groupBy?.length
   );
 
-  const isAlertSuppressionConfigured =
-    isAlertSuppressionEnabled &&
+  const isAlertSuppressionActive =
+    isAlertSuppressionConfigured &&
     Boolean(runOpts.experimentalFeatures?.alertSuppressionForIndicatorMatchRuleEnabled) &&
     hasPlatinumLicense;
 
@@ -298,7 +298,7 @@ export const createThreatSignals = async ({
           threatIndexFields,
           runOpts,
           sortOrder,
-          isAlertSuppressionConfigured,
+          isAlertSuppressionActive,
         }),
     });
   } else {
@@ -363,7 +363,7 @@ export const createThreatSignals = async ({
           threatIndexFields,
           runOpts,
           sortOrder,
-          isAlertSuppressionConfigured,
+          isAlertSuppressionActive,
         }),
     });
   }

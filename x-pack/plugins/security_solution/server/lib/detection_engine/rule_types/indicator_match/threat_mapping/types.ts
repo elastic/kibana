@@ -121,7 +121,7 @@ export interface CreateThreatSignalOptions {
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
-  isAlertSuppressionConfigured: boolean;
+  isAlertSuppressionActive: boolean;
 }
 
 export interface CreateEventSignalOptions {
@@ -165,7 +165,7 @@ export interface CreateEventSignalOptions {
   threatIndexFields: DataViewFieldBase[];
   runOpts: RunOpts<ThreatRuleParams>;
   sortOrder?: SortOrderOrUndefined;
-  isAlertSuppressionConfigured: boolean;
+  isAlertSuppressionActive: boolean;
 }
 
 type EntryKey = 'field' | 'value';
