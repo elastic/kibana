@@ -49,11 +49,8 @@ export class InvalidLayer extends AbstractLayer {
   getErrors() {
     return [
       {
-        title: i18n.translate('xpack.maps.invalidDescriptorLayer.errorTitle', {
-          defaultMessage: `Unable to add layer '{layerLabel}' to map`,
-          values: {
-            layerLabel: this._descriptor.label ?? this._descriptor.id,
-          },
+        title: i18n.translate('xpack.maps.invalidLayer.errorTitle', {
+          defaultMessage: `Unable to create layer`,
         }),
         body: this._error.message,
       },
