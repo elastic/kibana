@@ -323,18 +323,18 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       };
 
       before(async () => {
+        await cases.api.deleteAllCases();
         await createUsersAndRoles(getService, users, roles);
         await cases.api.activateUserProfiles([casesAllUser, casesAllUser2]);
 
         profiles.push(...(await cases.api.suggestUserProfiles({ name: 'all', owners: ['cases'] })));
-
-        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
 
         await header.waitUntilLoadingHasFinished();
       });
 
       beforeEach(async () => {
         await browser.clearLocalStorage();
+        await cases.api.createConfigWithCustomFields({ customFields, owner: 'cases' });
         await createCases();
         await header.waitUntilLoadingHasFinished();
         await cases.casesTable.waitForCasesToBeListed();
