@@ -75,11 +75,13 @@ const mockOptions = {
   previousStartedAt: null,
   params: {
     searchConfiguration: {
+      index: {},
       query: {
         query: mockQuery,
         language: 'kuery',
       },
     },
+    alertOnNoData: true,
   },
   state: {
     wrapped: initialRuleState,
@@ -573,6 +575,7 @@ describe('The custom threshold alert type', () => {
             },
           ],
           searchConfiguration: {
+            index: {},
             query: {
               query: filterQuery,
               language: 'kuery',
