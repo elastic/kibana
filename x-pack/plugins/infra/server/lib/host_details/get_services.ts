@@ -136,8 +136,8 @@ export const getServices = async (
   const services = Array.from(serviceMap)
     .slice(0, size)
     .map(([serviceName, { agentName }]) => ({
-      'service.name': serviceName,
-      'agent.name': agentName,
+      serviceName,
+      agentName,
     }));
   return { services };
 };

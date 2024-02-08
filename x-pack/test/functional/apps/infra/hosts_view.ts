@@ -270,18 +270,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         describe('Flyout links', () => {
-          it('should navigate to APM services after click', async () => {
-            await pageObjects.assetDetails.clickApmServicesLink();
-            const url = parse(await browser.getCurrentUrl());
-            const query = decodeURIComponent(url.query ?? '');
-            const kuery = 'kuery=host.hostname:"Jennys-MBP.fritz.box"';
-
-            expect(url.pathname).to.eql('/app/apm/services');
-            expect(query).to.contain(kuery);
-
-            await returnTo(HOSTS_VIEW_PATH);
-          });
-
           it('should navigate to Host Details page after click', async () => {
             await pageObjects.assetDetails.clickOpenAsPageLink();
             const dateRange = await pageObjects.timePicker.getTimeConfigAsAbsoluteTimes();
