@@ -958,7 +958,7 @@ Then all properties of the rule should be sorted alphabetically
 
 #### **Scenario: User can see changes in a side-by-side per-field diff view**
 
-**Automation**: 1 e2e test
+**Automation**: 1 e2e test + 1 UI integration test
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -970,6 +970,8 @@ And all field diff accordions should be open by default
 And correct rule version numbers should be displayed in their respective columns
 When the user selects another rule without closing the preview
 Then the preview should display the changes for the newly selected rule
+
+CASE: Test case should work when target rule version contains a different rule type than current
 ```
 
 #### **Scenario: Field groupings should be rendered together in the same accordion panel**
@@ -981,7 +983,7 @@ Given a prebuilt rule is installed in Kibana
 And this rule contains one or more <field> values
 When user opens the upgrade preview
 The <field> diff accordion panel should display its grouped rule properties
-And each property should have its name displayed inside the panel
+And each property should have its name displayed inside the panel above its value
 
 Examples:
 | field              |
@@ -1025,6 +1027,7 @@ And this rule has multiple fields that are different between the current and tar
 When a user opens the upgrade preview
 Then the multiple field diff accordions should be sorted in the same order as on the rule details overview tab
 And the field diff accordions should be grouped inside its corresponding <section> accordion
+And any <section> accordion that doesn't have fields inside it shouldn't be displayed
 
 Examples:
 | section     |
