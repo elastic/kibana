@@ -41,7 +41,6 @@ import {
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
-import { HOST_FIELD } from '../../../../common/constants';
 
 type InventoryMetricThresholdAllowedActionGroups = ActionGroupIdsOf<
   typeof FIRED_ACTIONS | typeof WARNING_ACTIONS

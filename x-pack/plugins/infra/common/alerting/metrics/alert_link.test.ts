@@ -98,6 +98,19 @@ describe('Inventory Threshold Rule', () => {
       );
     });
 
+    it('should point to host-details when host.name is present', () => {
+      const fields = {
+        [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
+        [`${ALERT_RULE_PARAMETERS}.nodeType`]: 'kubernetes',
+        [`${ALERT_RULE_PARAMETERS}.criteria.metric`]: ['cpu'],
+        [`host.name`]: ['my-host'],
+      } as unknown as ParsedTechnicalFields & Record<string, any>;
+      const url = getInventoryViewInAppUrl(fields);
+      expect(url).toEqual(
+        '/app/metrics/link-to/host-detail/my-host?from=1640995200000&to=1640996100000'
+      );
+    });
+
     it('should work with custom metrics when ALERT_RULE_PARAMETERS is an object', () => {
       const fields = {
         '@timestamp': '2022-01-01T00:00:00.000Z',
