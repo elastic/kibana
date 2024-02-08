@@ -42,6 +42,15 @@ export const useBulkAlertAssigneesItems = ({
   const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
+  const handleOnAlertAssigneesSubmit = useCallback(
+    async (assignees, ids, onSuccess, setIsLoading) => {
+      if (setAlertAssignees) {
+        await setAlertAssignees(assignees, ids, onSuccess, setIsLoading);
+      }
+    },
+    [setAlertAssignees]
+  );
+
   const onSuccess = useCallback(() => {
     onAssigneesUpdate?.();
   }, [onAssigneesUpdate]);
@@ -120,9 +129,10 @@ export const useBulkAlertAssigneesItems = ({
         setIsLoading={setIsBulkActionsLoading}
         clearSelection={clearSelection}
         closePopoverMenu={closePopoverMenu}
+        onSubmit={handleOnAlertAssigneesSubmit}
       />
     ),
-    [onSuccess]
+    [handleOnAlertAssigneesSubmit, onSuccess]
   );
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(

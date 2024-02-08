@@ -16,18 +16,12 @@ import type { AssigneesIdsSelection } from './types';
 import { removeNoAssigneesSelection } from './utils';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 import { AssigneesSelectable } from './assignees_selectable';
-import { useSetAlertAssignees } from '../toolbar/bulk_actions/use_set_alert_assignees';
 
 export interface AssigneesApplyPanelProps {
   /**
    * Identifier of search field.
    */
   searchInputId?: string;
-
-  /**
-   * Alert ids that will be used to create the update query
-   */
-  alertIds: string[];
 
   /**
    * The array of ids of the users assigned to the alert
@@ -37,33 +31,14 @@ export interface AssigneesApplyPanelProps {
   /**
    * A callback function that will be called on apply button click
    */
-  onApplyStarted: () => void;
-
-  /**
-   * A callback function that will be called on successful api response
-   */
-  onApplySuccess: () => void;
-
-  /**
-   * A function that sets the alert table in a loading state
-   */
-  setTableLoading: (param: boolean) => void;
+  onApply: (updatedAssignees: AlertAssignees) => void;
 }
 
 /**
  * The popover to allow selection of users from a list
  */
 export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
-  ({
-    searchInputId,
-    alertIds,
-    assignedUserIds,
-    onApplyStarted,
-    onApplySuccess,
-    setTableLoading,
-  }) => {
-    const setAlertAssignees = useSetAlertAssignees();
-
+  ({ searchInputId, assignedUserIds, onApply }) => {
     /**
      * We use `selectedUserIds` to keep track of currently selected user ids,
      * whereas `assignedUserIds` holds actually assigned user ids.
@@ -98,19 +73,8 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
     }, []);
 
     const handleApplyButtonClick = useCallback(async () => {
-      onApplyStarted();
-      if (setAlertAssignees && isDirty) {
-        await setAlertAssignees(assigneesToUpdate, alertIds, onApplySuccess, setTableLoading);
-      }
-    }, [
-      alertIds,
-      assigneesToUpdate,
-      isDirty,
-      onApplyStarted,
-      onApplySuccess,
-      setAlertAssignees,
-      setTableLoading,
-    ]);
+      onApply(assigneesToUpdate);
+    }, [assigneesToUpdate, onApply]);
 
     return (
       <div data-test-subj={ASSIGNEES_APPLY_PANEL_TEST_ID}>

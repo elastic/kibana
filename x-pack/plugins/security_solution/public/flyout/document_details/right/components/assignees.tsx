@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { getEmptyTagValue } from '../../../../common/components/empty_value';
 import { ASSIGNEES_PANEL_WIDTH } from '../../../../common/components/assignees/constants';
 import { AssigneesApplyPanel } from '../../../../common/components/assignees/assignees_apply_panel';
@@ -80,6 +81,7 @@ export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated, isPreview }) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const upsellingMessage = useUpsellingMessage('alert_assignments');
+    const setAlertAssignees = useSetAlertAssignees();
 
     const { hasIndexWrite } = useAlertsPrivileges();
 
@@ -92,13 +94,19 @@ export const Assignees: FC<AssigneesProps> = memo(
       setIsPopoverOpen((value) => !value);
     }, []);
 
-    const handleApplyStarted = useCallback(() => {
-      setIsPopoverOpen(false);
-    }, []);
-
-    const handleApplySuccess = useCallback(() => {
+    const onSuccess = useCallback(() => {
       if (onAssigneesUpdated) onAssigneesUpdated();
     }, [onAssigneesUpdated]);
+
+    const handleApplyAssignees = useCallback(
+      async (assignees) => {
+        setIsPopoverOpen(false);
+        if (setAlertAssignees) {
+          await setAlertAssignees(assignees, [eventId], onSuccess, noop);
+        }
+      },
+      [eventId, onSuccess, setAlertAssignees]
+    );
 
     const searchInputId = useGeneratedHtmlId({
       prefix: 'searchInput',
@@ -132,19 +140,14 @@ export const Assignees: FC<AssigneesProps> = memo(
         >
           <AssigneesApplyPanel
             searchInputId={searchInputId}
-            alertIds={[eventId]}
             assignedUserIds={assignedUserIds}
-            onApplyStarted={handleApplyStarted}
-            onApplySuccess={handleApplySuccess}
-            setTableLoading={noop}
+            onApply={handleApplyAssignees}
           />
         </EuiPopover>
       );
     }, [
       assignedUserIds,
-      eventId,
-      handleApplyStarted,
-      handleApplySuccess,
+      handleApplyAssignees,
       hasIndexWrite,
       isPlatinumPlus,
       isPopoverOpen,
