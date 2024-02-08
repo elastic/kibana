@@ -20,10 +20,12 @@ export function throwSerializedChatCompletionErrors() {
   ): Observable<Exclude<T, ChatCompletionErrorEvent>> => {
     return source$.pipe(
       tap((event) => {
+        // de-serialise error
         if (event.type === StreamingChatResponseEventType.ChatCompletionError) {
           const code = event.error.code ?? ChatCompletionErrorCode.InternalError;
           const message = event.error.message;
-          throw new ChatCompletionError(code, message);
+          const meta = event.error.meta;
+          throw new ChatCompletionError(code, message, meta);
         }
       }),
       filter(

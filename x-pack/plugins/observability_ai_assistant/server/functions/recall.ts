@@ -15,6 +15,7 @@ import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
+import { RespondFunctionResources } from '../service/types';
 
 export function registerRecallFunction({
   client,
@@ -42,7 +43,7 @@ export function registerRecallFunction({
           "lens function usage",
           "get_apm_timeseries function usage"    
         ],
-        "contexts": [
+        "categories": [
           "lens",
           "apm"
         ]
@@ -61,22 +62,22 @@ export function registerRecallFunction({
               type: 'string',
             },
           },
-          contexts: {
+          categories: {
             type: 'array',
             additionalItems: false,
             additionalProperties: false,
             description:
-              'Contexts or categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
+              'Categories of internal documentation that you want to search for. By default internal documentation will be excluded. Use `apm` to get internal APM documentation, `lens` to get internal Lens documentation, or both.',
             items: {
               type: 'string',
               enum: ['apm', 'lens'],
             },
           },
         },
-        required: ['queries', 'contexts'],
+        required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: { queries, contexts }, messages, connectorId }, signal) => {
+    async ({ arguments: { queries, categories }, messages, connectorId }, signal) => {
       const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
 
       if (!systemMessage) {
@@ -91,13 +92,9 @@ export function registerRecallFunction({
         userMessage,
         client,
         signal,
-        contexts,
+        categories,
         queries,
       });
-
-      resources.logger.debug(`Received ${suggestions.length} suggestions`);
-
-      resources.logger.debug(JSON.stringify(suggestions, null, 2));
 
       if (suggestions.length === 0) {
         return {
@@ -113,10 +110,8 @@ export function registerRecallFunction({
         client,
         connectorId,
         signal,
+        resources,
       });
-
-      resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
-      resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
         content: relevantDocuments as unknown as Serializable,
@@ -129,13 +124,13 @@ async function retrieveSuggestions({
   userMessage,
   queries,
   client,
-  contexts,
+  categories,
   signal,
 }: {
   userMessage?: Message;
   queries: string[];
   client: ObservabilityAIAssistantClient;
-  contexts: Array<'apm' | 'lens'>;
+  categories: Array<'apm' | 'lens'>;
   signal: AbortSignal;
 }) {
   const queriesWithUserPrompt =
@@ -145,7 +140,7 @@ async function retrieveSuggestions({
 
   const recallResponse = await client.recall({
     queries: queriesWithUserPrompt,
-    contexts,
+    categories,
   });
 
   return recallResponse.entries.map((entry) => omit(entry, 'labels', 'is_correction', 'score'));
@@ -177,6 +172,7 @@ async function scoreSuggestions({
   client,
   connectorId,
   signal,
+  resources,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   systemMessage: Message;
@@ -185,7 +181,10 @@ async function scoreSuggestions({
   client: ObservabilityAIAssistantClient;
   connectorId: string;
   signal: AbortSignal;
+  resources: RespondFunctionResources;
 }) {
+  resources.logger.debug(`Suggestions: ${JSON.stringify(suggestions, null, 2)}`);
+
   const systemMessageExtension =
     dedent(`You have the function called score available to help you inform the user about how relevant you think a given document is to the conversation.
     Please give a score between 1 and 7, fractions are allowed.
@@ -248,7 +247,7 @@ async function scoreSuggestions({
 
   const response = await lastValueFrom(
     (
-      await client.chat({
+      await client.chat('score_suggestions', {
         connectorId,
         messages: [extendedSystemMessage, newUserMessage],
         functions: [scoreFunction],
@@ -261,6 +260,8 @@ async function scoreSuggestions({
   const { scores } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
     scoreFunctionRequest.message.function_call.arguments
   );
+
+  resources.logger.debug(`Scores: ${JSON.stringify(scores, null, 2)}`);
 
   if (scores.length === 0) {
     return [];
@@ -278,6 +279,11 @@ async function scoreSuggestions({
   const relevantDocuments = suggestions.filter((suggestion) =>
     relevantDocumentIds.includes(suggestion.id)
   );
+
+  resources.logger.debug(
+    `Found ${relevantDocumentIds.length} relevant suggestions from the knowledge base. ${scores.length} suggestions were considered in total.`
+  );
+  resources.logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
   return relevantDocuments;
 }
