@@ -179,11 +179,14 @@ const getBenchmarkTableColumns = (
         );
       }
 
+      const isKspmBenchmark = ['cis_k8s', 'cis_eks'].includes(benchmark.id);
+      const groupByField = isKspmBenchmark ? 'orchestrator.cluster.id' : 'cloud.account.id';
+
       return (
         <EuiButtonEmpty
           flush="left"
           onClick={() => {
-            navToFindings();
+            navToFindings({ 'rule.benchmark.id': benchmark.id }, [groupByField]);
           }}
         >
           {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
