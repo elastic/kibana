@@ -170,6 +170,6 @@ export function setupSavedObjects(
   encryptedSavedObjects.registerType({
     type: 'api_key_pending_invalidation',
     attributesToEncrypt: new Set(['apiKeyId']),
-    attributesToIncludeInAAD: new Set('createdAt'),
+    attributesToIncludeInAAD: new Set(['createdAt']),
   });
 }

@@ -452,36 +452,19 @@
 {
   "type": "doc",
   "value": {
-    "index": ".kibana_alerting_cases",
-    "id": "api_key_pending_invalidation:bfda0e42-23d7-468c-8ed4-bf3c3de82cf3",
+    "index": ".kibana_alerting_cases_8.13.0_001",
+    "id": "api_key_pending_invalidation:e67824d0-b428-47c7-be46-fd4e2021519f",
     "source": {
       "api_key_pending_invalidation": {
-        "createdAt": "2024-01-23T03:25:33.002Z",
-        "apiKeyId": "bhBpeJkCPf8xPNKpQMgIitKX9dFj+VDPiO8y/L0qv4M1w9f6InFW7PGa3aU84VhGGFWx/VSVvhlCg/GaH5BYH0YV3xMOjLImv2rus+strbJECjOWWgCqBAnthCx1bpEc8mvl7lLAZ2zJuhRPUatHEw6Sqmr6V/+V6nn7PhoVS7ceVdEzlAw2PwcT2Tt7poePob0fXeVu5ml3pU+RdvFtVQI="
+        "createdAt": "2024-02-08T19:10:37.114Z",
+        "apiKeyId": "QXdPIxu0RSFEr2g0n0F/adxDeiu5hR4+CAnX/OvW59oJwTs3knvVxnPttXfcNR8V2fE3btEN5wwXh+fgZ+ADZ3E/fbFxz1Op8tToYWlSheZX3RennPgfnfi5f99edg0FWtAf0TU2FlBnAqzmDrxzhA+q6m3mj4/hzZKuJI2ghuECWJFj0wMLQ6ZDdCLOdRrX5MU7Enxtqvue7uZGboJxEoA="
       },
       "type": "api_key_pending_invalidation",
       "references": [],
       "managed": false,
       "coreMigrationVersion": "8.8.0",
-      "updated_at": "2024-01-23T03:25:33.002Z",
-      "created_at": "2024-01-23T03:25:33.002Z"
-    }
-  }
-}
-
-{
-  "type": "doc",
-  "value": {
-    "index": ".kibana_alerting_cases",
-    "id": "api_key_pending_invalidation:c59bf1f3-0787-43c5-a861-007a9ab7b027",
-    "source": {
-      "api_key_pending_invalidation": {
-        "createdAt": "2035-01-17T22:46:44.927Z",
-        "apiKeyId": "f8Can4gakYB5dLovujssdBDGGl3cHISWBwimrllucqqD6GKHwd6gfPLa6rfSkrjUDdC7pTsUvfNFLmqjcGeqKwsgPxvfj6KI/Wsbt6LugJ1iXw6aEZbf7fmH99FvnNt20k20dD6a+dieGdA/Z8TVaf8Ql3y2Uxrf0KdBStXDGf6ouUDr7rBLRGjameio7qqtfZ092MHA/l1e2nnrypRH3to="
-      },
-      "type": "api_key_pending_invalidation",
-      "references": [],
-      "managed": false
+      "updated_at": "2024-02-08T19:10:37.114Z",
+      "created_at": "2024-02-08T19:10:37.114Z"
     }
   }
 }

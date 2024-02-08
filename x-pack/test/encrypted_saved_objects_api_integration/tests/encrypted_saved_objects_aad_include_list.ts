@@ -81,19 +81,18 @@ export default function ({ getService }: FtrProviderContext) {
         );
       });
 
-      // Still working on this one, not passing...
-      // it.only(`successfully decrypts 'api_key_pending_invalidation' objects`, async () => {
-      //   const decryptResponse = await supertest
-      //     .get(
-      //       `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/c59bf1f3-0787-43c5-a861-007a9ab7b027`
-      //     )
-      //     .expect(200);
+      it(`successfully decrypts 'api_key_pending_invalidation' objects`, async () => {
+        const decryptResponse = await supertest
+          .get(
+            `/api/hidden_saved_objects/get-decrypted-as-internal-user/api_key_pending_invalidation/e67824d0-b428-47c7-be46-fd4e2021519f`
+          )
+          .expect(200);
 
-      //   const decryptedObject = JSON.parse(decryptResponse.text);
-      //   expect(decryptedObject.attributes.apiKeyId).to.eql(
-      //     'This api key id was encrypted prior to the AAD include list change.'
-      //   );
-      // });
+        const decryptedObject = JSON.parse(decryptResponse.text);
+        expect(decryptedObject.attributes.apiKeyId).to.eql(
+          'This api key id was encrypted prior to the AAD include list change.'
+        );
+      });
 
       it(`successfully decrypts 'ingest-outputs' objects`, async () => {
         const decryptResponse = await supertest
