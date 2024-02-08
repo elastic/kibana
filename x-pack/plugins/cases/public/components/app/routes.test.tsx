@@ -99,7 +99,8 @@ describe('Cases routes', () => {
     });
   });
 
-  describe('Cases settings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175231
+  describe.skip('Cases settings', () => {
     it('navigates to the cases settings page', () => {
       renderWithRouter(['/cases/configure']);
       expect(screen.getByText('Settings')).toBeInTheDocument();
