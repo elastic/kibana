@@ -9,8 +9,15 @@
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
+import { makeLensEmbeddableFactory } from '@kbn/lens-plugin/server/embeddable/make_lens_embeddable_factory';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
+
+const lensEmbeddableFactory = makeLensEmbeddableFactory(
+  () => ({}),
+  () => ({}),
+  {}
+);
 
 const testMigrateMatchAllQuery = (migrationFn: Function) => {
   it('should migrate obsolete match_all query', () => {
@@ -366,8 +373,11 @@ Object {
 
     const versionToTest = '9.1.1';
     const migrations = getAllMigrations({
-      // providing a function for search source migration that's just setting `migrated` to true
-      [versionToTest]: (state) => ({ ...state, migrated: true }),
+      searchSourceMigrations: {
+        // providing a function for search source migration that's just setting `migrated` to true
+        [versionToTest]: (state) => ({ ...state, migrated: true }),
+      },
+      lensEmbeddableFactory,
     });
 
     expect(
@@ -398,7 +408,10 @@ Object {
 
     const versionToTest = '9.1.2';
     const migrations = getAllMigrations({
-      [versionToTest]: (state) => ({ ...state, migrated: true }),
+      searchSourceMigrations: {
+        [versionToTest]: (state) => ({ ...state, migrated: true }),
+      },
+      lensEmbeddableFactory,
     });
 
     expect(
