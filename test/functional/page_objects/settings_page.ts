@@ -615,7 +615,13 @@ export class SettingsPageObject extends FtrService {
     await this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
 
+    let hasSubmittedTheForm = false;
+
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // the flyout got closed
+        return;
+      }
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
@@ -626,6 +632,8 @@ export class SettingsPageObject extends FtrService {
       }
       const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
       await indexPatternSaveBtn.click();
+
+      hasSubmittedTheForm = true;
 
       const form = await this.testSubjects.findAll('indexPatternEditorForm');
       const hasValidationErrors =
