@@ -17,6 +17,7 @@ import type {
 } from './types';
 import { executor } from './executor';
 import { ActionGroupId, RecoveryActionGroupId, GEO_CONTAINMENT_ID } from './constants';
+import { STACK_ALERTS_AAD_CONFIG } from '../constants';
 
 const actionVariables = {
   context: [
@@ -184,6 +185,12 @@ export function getRuleType(): GeoContainmentRuleType {
     validate: {
       params: ParamsSchema,
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ParamsSchema,
+      },
+    },
     actionVariables,
     minimumLicenseRequired: 'gold',
     isExportable: true,
@@ -200,5 +207,7 @@ export function getRuleType(): GeoContainmentRuleType {
         return injectEntityAndBoundaryIds(params, references);
       },
     },
+    // @ts-ignore
+    alerts: STACK_ALERTS_AAD_CONFIG,
   };
 }

@@ -7,7 +7,6 @@
 
 import { EuiButton } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -19,26 +18,29 @@ export const InlineLogViewCallout = ({
   return (
     <EuiCallOut
       color="warning"
-      title={i18n.translate('xpack.infra.logs.settings.inlineLogViewCalloutTitle', {
-        defaultMessage: 'Inline Log View in use',
-      })}
+      title={
+        <FormattedMessage
+          id="xpack.infra.logs.settings.inlineLogViewCalloutWidgetTitle"
+          defaultMessage="You are configuring an embedded widget"
+        />
+      }
     >
       <>
         <p>
-          {i18n.translate('xpack.infra.logs.settings.inlineLogViewCalloutDescription', {
-            defaultMessage:
-              'An inline Log View is currently being used, changes will be synchronized to the URL, but they will not be persisted.',
-          })}
+          <FormattedMessage
+            id="xpack.infra.logs.settings.inlineLogViewCalloutWidgetDescription"
+            defaultMessage="Changes will be synchronized to the URL, but they will not be persisted to the default Logs Stream view."
+          />
         </p>
         <EuiButton
           data-test-subj="infraInlineLogViewCalloutRevertToDefaultPersistedLogViewButton"
           fullWidth={false}
-          fill
+          color="warning"
           onClick={revertToDefaultLogView}
         >
           <FormattedMessage
             id="xpack.infra.logs.settings.inlineLogViewCalloutButtonText"
-            defaultMessage="Revert to default (persisted) Log View"
+            defaultMessage="Revert to default Logs Stream view"
           />
         </EuiButton>
       </>

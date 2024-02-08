@@ -12,6 +12,7 @@ import {
   LATEST_FINDINGS_RETENTION_POLICY,
 } from '../../../../common/constants';
 import { createDetectionRule } from '../../../common/api/create_detection_rule';
+import { generateBenchmarkRuleTags } from '../../../../common/utils/detection_rules';
 
 const DEFAULT_RULE_RISK_SCORE = 0;
 const DEFAULT_RULE_SEVERITY = 'low';
@@ -45,43 +46,6 @@ const convertReferencesLinksToArray = (input: string | undefined) => {
 
   // Remove the numbers and new lines
   return matches.map((link) => link.replace(/^\d+\. /, '').replace(/\n/g, ''));
-};
-
-const CSP_RULE_TAG = 'Cloud Security';
-const CSP_RULE_TAG_USE_CASE = 'Use Case: Configuration Audit';
-const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
-
-const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
-
-/*
- * Returns an array of CspFinding tags that can be used to search and filter a detection rule
- */
-export const getFindingsDetectionRuleSearchTags = ({ rule }: CspFinding) => {
-  // ex: cis_gcp to ['CIS', 'GCP']
-  const benchmarkIdTags = rule.benchmark.id.split('_').map((tag) => tag.toUpperCase());
-  // ex: 'CIS GCP 1.1'
-  const benchmarkRuleNumberTag = `${rule.benchmark.id.replace('_', ' ').toUpperCase()} ${
-    rule.benchmark.rule_number
-  }`;
-
-  return benchmarkIdTags.concat([benchmarkRuleNumberTag]);
-};
-
-const generateFindingsTags = (finding: CspFinding) => {
-  return [STATIC_RULE_TAGS]
-    .concat(getFindingsDetectionRuleSearchTags(finding))
-    .concat(
-      finding.rule.benchmark.posture_type
-        ? [
-            finding.rule.benchmark.posture_type.toUpperCase(),
-            `${CSP_RULE_TAG_DATA_SOURCE_PREFIX}${finding.rule.benchmark.posture_type.toUpperCase()}`,
-          ]
-        : []
-    )
-    .concat(
-      finding.rule.benchmark.posture_type === 'cspm' ? ['Domain: Cloud'] : ['Domain: Container']
-    )
-    .flat();
 };
 
 const generateFindingsRuleQuery = (finding: CspFinding) => {
@@ -128,7 +92,7 @@ export const createDetectionRuleFromFinding = async (http: HttpSetup, finding: C
       references: convertReferencesLinksToArray(finding.rule.references),
       name: finding.rule.name,
       description: finding.rule.rationale,
-      tags: generateFindingsTags(finding),
+      tags: generateBenchmarkRuleTags(finding.rule),
       investigation_fields: DEFAULT_INVESTIGATION_FIELDS,
       note: finding.rule.remediation,
     },

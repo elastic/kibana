@@ -96,13 +96,15 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
   // handle special cases for the dataset value
   const humanFriendlyDataset = getFriendlyNameForPartitionId(dataset);
 
+  const time = moment(timestamp).toISOString();
+
   const viewInStreamLinkProps = useLinkProps({
     app: 'logs',
     pathname: 'stream',
     search: {
       logPosition: encode({
         end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        position: { tiebreaker, time: moment(timestamp).toISOString() },
+        position: { tiebreaker, time },
         start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         streamLive: false,
       }),
@@ -182,7 +184,7 @@ export const LogEntryExampleMessage: React.FunctionComponent<Props> = ({
       onMouseLeave={setItemIsNotHovered}
     >
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn format={exampleTimestampFormat} time={timestamp} />
+        <LogEntryTimestampColumn format={exampleTimestampFormat} time={time} />
       </LogEntryColumn>
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn
@@ -301,7 +303,10 @@ export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
                 data-test-subj="logColumnHeader messageLogColumnHeader"
                 key={columnConfiguration.messageColumn.id}
               >
-                Message
+                {i18n.translate(
+                  'xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel',
+                  { defaultMessage: 'Message' }
+                )}
               </LogColumnHeader>
             );
           } else if (isFieldLogColumnConfiguration(columnConfiguration)) {

@@ -29,7 +29,7 @@ import type { ClientConfigType } from '@kbn/reporting-public';
 
 import type { Job } from '../../lib/job';
 import { useInternalApiClient } from '../../lib/reporting_api_client';
-import { InspectInConsoleButton } from './inspect_in_console_button';
+import { InspectInConsoleButton } from './inspect_in_console_button/inspect_in_console_button';
 import { ReportInfoFlyoutContent } from './report_info_flyout_content';
 
 interface Props {

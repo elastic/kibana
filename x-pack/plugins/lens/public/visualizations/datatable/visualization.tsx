@@ -496,6 +496,7 @@ export const getDatatableVisualization = ({
               width: column.width,
               isTransposed: column.isTransposed,
               transposable: isTransposable,
+              alignment: column.alignment,
               colorMode: canColor && column.colorMode ? column.colorMode : 'none',
               palette: paletteService.get(CUSTOM_PALETTE).toExpression(paletteParams),
               summaryRow: hasNoSummaryRow ? undefined : column.summaryRow!,
@@ -628,6 +629,12 @@ export const getDatatableVisualization = ({
       },
     };
     return suggestion;
+  },
+
+  getSortedColumns(state, datasourceLayers) {
+    const { sortedColumns } =
+      getDataSourceAndSortedColumns(state, datasourceLayers || {}, state.layerId) || {};
+    return sortedColumns;
   },
 
   getVisualizationInfo(state) {

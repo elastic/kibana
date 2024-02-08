@@ -17,7 +17,10 @@ import {
   EuiStat,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useUiTracker } from '@kbn/observability-shared-plugin/public';
+import {
+  BottomBarActions,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { getOptionLabel } from '../../../../../../../common/agent_configuration/all_option';
@@ -30,7 +33,6 @@ import {
 import { AgentName } from '../../../../../../../typings/es_schemas/ui/fields/agent';
 import { useApmPluginContext } from '../../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FETCH_STATUS } from '../../../../../../hooks/use_fetcher';
-import { BottomBarActions } from '../../../bottom_bar_actions';
 import { saveConfig } from './save_config';
 import { SettingFormRow } from './setting_form_row';
 
@@ -200,6 +202,7 @@ export function SettingsPage({
             { defaultMessage: 'Save configuration' }
           )}
           unsavedChangesCount={unsavedChangesCount}
+          appTestSubj="apm"
         />
       )}
     </>

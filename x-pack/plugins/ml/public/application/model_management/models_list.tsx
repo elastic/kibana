@@ -305,7 +305,7 @@ export const ModelsList: FC<Props> = ({
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchFailedErrorMessage', {
-          defaultMessage: 'Models fetch failed',
+          defaultMessage: 'Error loading trained models',
         })
       );
     }
@@ -383,7 +383,7 @@ export const ModelsList: FC<Props> = ({
       displayErrorToast(
         error,
         i18n.translate('xpack.ml.trainedModels.modelsList.fetchModelStatsErrorMessage', {
-          defaultMessage: 'Fetch model stats failed',
+          defaultMessage: 'Error loading trained models statistics',
         })
       );
       return false;

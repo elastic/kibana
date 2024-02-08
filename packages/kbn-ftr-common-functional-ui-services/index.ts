@@ -8,3 +8,17 @@
 
 export { services as commonFunctionalUIServices } from './services/all';
 export type { FtrProviderContext } from './services/ftr_provider_context';
+export { WebElementWrapper } from './services/web_element_wrapper';
+export type {
+  CustomCheerio,
+  CustomCheerioStatic,
+} from './services/web_element_wrapper/custom_cheerio_api';
+export { Browsers } from './services/remote/browsers';
+export { type Browser } from './services/browser';
+export {
+  NETWORK_PROFILES,
+  type NetworkOptions,
+  type NetworkProfile,
+} from './services/remote/network_profiles';
+export type { TimeoutOpt } from './types';
+export { TestSubjects } from './services/test_subjects';

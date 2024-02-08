@@ -18,8 +18,8 @@ import {
   RemoteElasticSearchSchema,
 } from './output';
 
-import { AgentPolicyBaseSchema } from './agent_policy';
-import { NamespaceSchema } from './package_policy';
+import { AgentPolicyBaseSchema, AgentPolicyNamespaceSchema } from './agent_policy';
+import { PackagePolicyNamespaceSchema } from './package_policy';
 
 const varsSchema = schema.maybe(
   schema.arrayOf(
@@ -45,6 +45,7 @@ export const PreconfiguredPackagesSchema = schema.arrayOf(
       },
     }),
     prerelease: schema.maybe(schema.boolean()),
+    skipDataStreamRollover: schema.maybe(schema.boolean()),
   }),
   {
     defaultValue: [],
@@ -102,6 +103,7 @@ export const PreconfiguredFleetServerHostsSchema = schema.arrayOf(
     id: schema.string(),
     name: schema.string(),
     is_default: schema.boolean({ defaultValue: false }),
+    is_internal: schema.maybe(schema.boolean()),
     host_urls: schema.arrayOf(schema.string(), { minSize: 1 }),
     proxy_id: schema.nullable(schema.string()),
   }),
@@ -129,7 +131,7 @@ export const PreconfiguredFleetProxiesSchema = schema.arrayOf(
 export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
   schema.object({
     ...AgentPolicyBaseSchema,
-    namespace: schema.maybe(NamespaceSchema),
+    namespace: schema.maybe(AgentPolicyNamespaceSchema),
     id: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
     is_default: schema.maybe(schema.boolean()),
     is_default_fleet_server: schema.maybe(schema.boolean()),
@@ -153,7 +155,7 @@ export const PreconfiguredAgentPoliciesSchema = schema.arrayOf(
           }),
         }),
         description: schema.maybe(schema.string()),
-        namespace: schema.maybe(NamespaceSchema),
+        namespace: schema.maybe(PackagePolicyNamespaceSchema),
         inputs: schema.maybe(
           schema.arrayOf(
             schema.object({

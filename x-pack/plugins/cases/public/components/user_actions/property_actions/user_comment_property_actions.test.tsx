@@ -17,7 +17,12 @@ import {
 import { UserCommentPropertyActions } from './user_comment_property_actions';
 import { waitFor } from '@testing-library/react';
 
-describe('UserCommentPropertyActions', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175310
+// FLAKY: https://github.com/elastic/kibana/issues/175311
+// FLAKY: https://github.com/elastic/kibana/issues/175312
+// FLAKY: https://github.com/elastic/kibana/issues/175313
+// FLAKY: https://github.com/elastic/kibana/issues/175314
+describe.skip('UserCommentPropertyActions', () => {
   let appMock: AppMockRenderer;
 
   const props = {

@@ -435,8 +435,8 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "goodEvents": 0,
           "isTempDoc": true,
           "service": Object {
-            "environment": null,
-            "name": null,
+            "environment": "irrelevant",
+            "name": "irrelevant",
           },
           "sliValue": -1,
           "slo": Object {
@@ -469,8 +469,8 @@ exports[`ResetSLO resets all associated resources 11`] = `
           "statusCode": 0,
           "totalEvents": 0,
           "transaction": Object {
-            "name": null,
-            "type": null,
+            "name": "irrelevant",
+            "type": "irrelevant",
           },
         },
         "id": "slo-irrelevant",

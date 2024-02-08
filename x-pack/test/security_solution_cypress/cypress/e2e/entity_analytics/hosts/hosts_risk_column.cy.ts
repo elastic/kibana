@@ -11,8 +11,7 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { hostsUrl } from '../../../urls/navigation';
 import { TABLE_CELL } from '../../../screens/alerts_details';
 import { kqlSearch } from '../../../tasks/security_header';
-import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
-import { enableRiskEngine } from '../../../tasks/entity_analytics';
+import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
@@ -23,7 +22,6 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       login();
-      deleteRiskEngineConfiguration();
     });
 
     after(() => {
@@ -47,12 +45,11 @@ describe('All hosts table', { tags: ['@ess', '@serverless'] }, () => {
 
     beforeEach(() => {
       login();
-      enableRiskEngine();
+      mockRiskEngineEnabled();
     });
 
     after(() => {
       cy.task('esArchiverUnload', 'risk_scores_new');
-      deleteRiskEngineConfiguration();
     });
 
     it('it renders risk column', () => {

@@ -671,7 +671,7 @@ module.exports = {
      */
     {
       files: [
-        'test/functional/services/lib/web_element_wrapper/scroll_into_view_if_necessary.js',
+        'packages/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/scroll_into_view_if_necessary.js',
         '**/browser_exec_scripts/**/*.js',
       ],
       rules: {
@@ -1121,6 +1121,7 @@ module.exports = {
         'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/timelines/**/*.{js,mjs,ts,tsx}',
         'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+        'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['eslint-plugin-node', 'react'],
       env: {
@@ -1218,6 +1219,8 @@ module.exports = {
             'x-pack/plugins/security_solution_ess/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/security_solution_serverless/**/*.{js,mjs,ts,tsx}',
             'x-pack/plugins/cases/**/*.{js,mjs,ts,tsx}',
+            'x-pack/plugins/ecs_data_quality_dashboard/**/*.{js,mjs,ts,tsx}',
+            'packages/kbn-data-stream-adapter/**/*.{js,mjs,ts,tsx}',
           ],
           rules: {
             '@typescript-eslint/consistent-type-imports': 'error',

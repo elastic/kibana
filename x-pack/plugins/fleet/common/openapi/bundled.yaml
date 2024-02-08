@@ -925,6 +925,11 @@ paths:
         name: format
         description: Format of response - json or yaml
         in: query
+      - schema:
+          type: boolean
+        name: prerelease
+        description: Specify if version is prerelease
+        in: query
   /agents/setup:
     get:
       summary: Get agent setup info
@@ -3166,6 +3171,8 @@ paths:
                   type: string
                 is_default:
                   type: boolean
+                is_internal:
+                  type: boolean
                 host_urls:
                   type: array
                   items:
@@ -3235,6 +3242,8 @@ paths:
                 name:
                   type: string
                 is_default:
+                  type: boolean
+                is_internal:
                   type: boolean
                 host_urls:
                   type: array
@@ -4927,8 +4936,10 @@ components:
           example: my description
         namespace:
           type: string
-          description: namespace by default "default"
-          example: default
+          description: >-
+            The package policy namespace. Leave blank to inherit the agent
+            policy's namespace.
+          example: customnamespace
         policy_id:
           type: string
           description: Agent policy ID where that package policy will be added
@@ -5114,6 +5125,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5181,6 +5194,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5330,6 +5345,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5400,6 +5417,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5442,6 +5461,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5512,6 +5533,8 @@ components:
         is_default:
           type: boolean
         is_default_monitoring:
+          type: boolean
+        is_internal:
           type: boolean
         name:
           type: string
@@ -5647,6 +5670,8 @@ components:
           type: boolean
         is_default_monitoring:
           type: boolean
+        is_internal:
+          type: boolean
         name:
           type: string
         type:
@@ -5740,6 +5765,8 @@ components:
         name:
           type: string
         is_default:
+          type: boolean
+        is_internal:
           type: boolean
         is_preconfigured:
           type: boolean

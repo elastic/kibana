@@ -18,7 +18,11 @@ import {
   RuleAction,
   RuleAlertData,
 } from '../types';
-import { ConcreteTaskInstance, isUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  isUnrecoverableError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import { TaskRunnerContext } from './task_runner_factory';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -83,6 +87,7 @@ import { getMockMaintenanceWindow } from '../data/maintenance_window/test_helper
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { MaintenanceWindow } from '../application/maintenance_window/types';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 jest.mock('uuid', () => ({
   v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
@@ -1942,6 +1947,7 @@ describe('Task Runner', () => {
     expect(loggerMeta?.tags).toEqual(['test', '1', 'rule-run-failed']);
     expect(loggerMeta?.error?.stack_trace).toBeDefined();
     expect(logger.error).toBeCalledTimes(1);
+    expect(getErrorSource(runnerResult.taskRunError as Error)).toBe(TaskErrorSource.USER);
   });
 
   test('recovers gracefully when the Rule Task Runner throws an exception when loading rule to prepare for run', async () => {
@@ -2948,6 +2954,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 1,
             },
             state: {
               duration: '0',
@@ -3118,6 +3125,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 1,
             },
             state: {
               duration: '0',
@@ -3135,6 +3143,7 @@ describe('Task Runner', () => {
               maintenanceWindowIds: [],
               flapping: false,
               pendingRecoveredCount: 0,
+              activeCount: 1,
             },
             state: {
               duration: '0',
@@ -3326,6 +3335,7 @@ describe('Task Runner', () => {
 
     expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(1);
     expect(result).toEqual({ error });
+    expect(getErrorSource(result.error as Error)).toBe(TaskErrorSource.FRAMEWORK);
   });
 
   function testAlertingEventLogCalls({

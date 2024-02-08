@@ -62,7 +62,9 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
           })}
           anchorClassName="eui-fullWidth"
         >
-          <EuiIcon type="iInCircle" size="m" />
+          <button data-test-subj="hostsViewLimitOptionsButton">
+            <EuiIcon type="iInCircle" />
+          </button>
         </EuiToolTip>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

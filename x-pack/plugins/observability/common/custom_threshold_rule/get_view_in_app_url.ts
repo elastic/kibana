@@ -11,21 +11,27 @@ import type { TimeRange } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { CustomThresholdExpressionMetric } from './types';
 
-export const getViewInAppUrl = (
-  metrics: CustomThresholdExpressionMetric[],
-  startedAt?: string,
-  logExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>,
-  filter?: string,
-  dataViewId?: string,
-  endedAt?: string
-) => {
-  if (!logExplorerLocator) return '';
+export interface GetViewInAppUrlArgs {
+  dataViewId?: string;
+  endedAt?: string;
+  startedAt?: string;
+  filter?: string;
+  logsExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>;
+  metrics?: CustomThresholdExpressionMetric[];
+}
 
-  let timeRange: TimeRange | undefined;
-  if (startedAt) {
-    timeRange = getPaddedAlertTimeRange(startedAt, endedAt);
-    timeRange.to = endedAt ? timeRange.to : 'now';
-  }
+export const getViewInAppUrl = ({
+  dataViewId,
+  endedAt,
+  startedAt = new Date().toISOString(),
+  filter,
+  logsExplorerLocator,
+  metrics = [],
+}: GetViewInAppUrlArgs) => {
+  if (!logsExplorerLocator) return '';
+
+  const timeRange: TimeRange | undefined = getPaddedAlertTimeRange(startedAt, endedAt);
+  timeRange.to = endedAt ? timeRange.to : 'now';
 
   const query = {
     query: '',
@@ -41,7 +47,7 @@ export const getViewInAppUrl = (
     query.query = filter;
   }
 
-  return logExplorerLocator?.getRedirectUrl({
+  return logsExplorerLocator?.getRedirectUrl({
     dataset: dataViewId,
     timeRange,
     query,

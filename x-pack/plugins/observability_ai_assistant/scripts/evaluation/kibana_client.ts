@@ -6,30 +6,35 @@
  */
 
 import axios, { AxiosInstance, AxiosResponse } from 'axios';
-import { pick } from 'lodash';
-import { filter, lastValueFrom, map, tap, toArray } from 'rxjs';
+import { pick, remove } from 'lodash';
+import { filter, lastValueFrom, map, toArray } from 'rxjs';
 import { format, parse, UrlObject } from 'url';
+import { ToolingLog } from '@kbn/tooling-log';
+import pRetry from 'p-retry';
 import { Message, MessageRole } from '../../common';
 import {
-  ChatCompletionErrorCode,
-  ConversationCompletionError,
+  ChatCompletionChunkEvent,
+  ChatCompletionErrorEvent,
   ConversationCreateEvent,
   MessageAddEvent,
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import { FunctionDefinition } from '../../common/types';
-import { concatenateOpenAiChunks } from '../../common/utils/concatenate_openai_chunks';
-import { processOpenAiStream } from '../../common/utils/process_openai_stream';
+import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
+import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { APIReturnType, ObservabilityAIAssistantAPIClientRequestParamsOf } from '../../public';
 import { getAssistantSetupMessage } from '../../public/service/get_assistant_setup_message';
 import { streamIntoObservable } from '../../server/service/util/stream_into_observable';
 import { EvaluationResult } from './types';
 
+// eslint-disable-next-line spaced-comment
+/// <reference types="@kbn/ambient-ftr-types"/>
+
 type InnerMessage = Message['message'];
 type StringOrMessageList = string | InnerMessage[];
 
-interface ChatClient {
+export interface ChatClient {
   chat: (message: StringOrMessageList) => Promise<InnerMessage>;
   complete: (
     ...args: [StringOrMessageList] | [string, InnerMessage[]]
@@ -39,11 +44,17 @@ interface ChatClient {
     {}: { conversationId?: string; messages: InnerMessage[] },
     criteria: string[]
   ) => Promise<EvaluationResult>;
+  getResults: () => EvaluationResult[];
+  onResult: (cb: (result: EvaluationResult) => void) => () => void;
 }
 
 export class KibanaClient {
   axios: AxiosInstance;
-  constructor(private readonly url: string, private readonly spaceId?: string) {
+  constructor(
+    private readonly log: ToolingLog,
+    private readonly url: string,
+    private readonly spaceId?: string
+  ) {
     this.axios = axios.create({
       headers: {
         'kbn-xsrf': 'foo',
@@ -69,14 +80,63 @@ export class KibanaClient {
     return url;
   }
 
+  callKibana<T>(
+    method: string,
+    props: { query?: UrlObject['query']; pathname: string },
+    data?: any
+  ) {
+    const url = this.getUrl(props);
+    return this.axios<T>({
+      method,
+      url,
+      data: data || {},
+      headers: {
+        'kbn-xsrf': 'true',
+        'x-elastic-internal-origin': 'foo',
+      },
+    });
+  }
+
+  async installKnowledgeBase() {
+    this.log.debug('Checking to see whether knowledge base is installed');
+
+    const {
+      data: { ready },
+    } = await this.callKibana<{ ready: boolean }>('GET', {
+      pathname: '/internal/observability_ai_assistant/kb/status',
+    });
+
+    if (ready) {
+      this.log.info('Knowledge base is installed');
+      return;
+    }
+
+    if (!ready) {
+      this.log.info('Installing knowledge base');
+    }
+
+    await pRetry(
+      async () => {
+        const response = await this.callKibana<{}>('POST', {
+          pathname: '/internal/observability_ai_assistant/kb/setup',
+        });
+        this.log.info('Knowledge base is ready');
+        return response.data;
+      },
+      { retries: 10 }
+    );
+
+    this.log.info('Knowledge base installed');
+  }
+
   createChatClient({
     connectorId,
     persist,
-    title,
+    suite,
   }: {
     connectorId: string;
     persist: boolean;
-    title?: string;
+    suite: Mocha.Suite;
   }): ChatClient {
     function getMessages(message: string | Array<Message['message']>): Array<Message['message']> {
       if (typeof message === 'string') {
@@ -103,17 +163,44 @@ export class KibanaClient {
       return { functionDefinitions, contextDefinitions };
     }
 
-    async function chat({
-      messages,
-      functions,
-      functionCall,
-    }: {
-      messages: Message[];
-      functions: FunctionDefinition[];
-      functionCall?: string;
-    }) {
+    let currentTitle: string = '';
+
+    suite.beforeEach(function () {
+      const currentTest: Mocha.Test = this.currentTest;
+      const titles: string[] = [];
+      titles.push(this.currentTest.title);
+      let parent = currentTest.parent;
+      while (parent) {
+        titles.push(parent.title);
+        parent = parent.parent;
+      }
+      currentTitle = titles.reverse().join(' ');
+    });
+
+    suite.afterEach(function () {
+      currentTitle = '';
+    });
+
+    const onResultCallbacks: Array<{
+      callback: (result: EvaluationResult) => void;
+      unregister: () => void;
+    }> = [];
+
+    async function chat(
+      name: string,
+      {
+        messages,
+        functions,
+        functionCall,
+      }: {
+        messages: Message[];
+        functions: FunctionDefinition[];
+        functionCall?: string;
+      }
+    ) {
       const params: ObservabilityAIAssistantAPIClientRequestParamsOf<'POST /internal/observability_ai_assistant/chat'>['params']['body'] =
         {
+          name,
           messages,
           connectorId,
           functions: functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
@@ -124,18 +211,23 @@ export class KibanaClient {
           await that.axios.post(
             that.getUrl({
               pathname: '/internal/observability_ai_assistant/chat',
-              query: { stream: true },
             }),
             params,
-            { responseType: 'stream' }
+            { responseType: 'stream', timeout: NaN }
           )
         ).data
-      ).pipe(processOpenAiStream(), concatenateOpenAiChunks());
+      ).pipe(
+        map((line) => JSON.parse(line) as ChatCompletionChunkEvent | ChatCompletionErrorEvent),
+        throwSerializedChatCompletionErrors(),
+        concatenateChatCompletionChunks()
+      );
 
-      const receivedMessage = await lastValueFrom(stream$);
+      const message = await lastValueFrom(stream$);
 
-      return receivedMessage.message;
+      return message.message;
     }
+
+    const results: EvaluationResult[] = [];
 
     return {
       chat: async (message) => {
@@ -147,7 +239,7 @@ export class KibanaClient {
             '@timestamp': new Date().toISOString(),
           })),
         ];
-        return chat({ messages, functions: functionDefinitions });
+        return chat('chat', { messages, functions: functionDefinitions });
       },
       complete: async (...args) => {
         const messagesArg = args.length === 1 ? args[0] : args[1];
@@ -172,21 +264,14 @@ export class KibanaClient {
                 messages,
                 connectorId,
                 persist,
-                title,
+                title: currentTitle,
               },
-              { responseType: 'stream' }
+              { responseType: 'stream', timeout: NaN }
             )
           ).data
         ).pipe(
           map((line) => JSON.parse(line) as StreamingChatResponseEvent),
-          tap((event) => {
-            if (event.type === StreamingChatResponseEventType.ConversationCompletionError) {
-              throw new ConversationCompletionError(
-                event.error.code ?? ChatCompletionErrorCode.InternalError,
-                event.error.message
-              );
-            }
-          }),
+          throwSerializedChatCompletionErrors(),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
@@ -217,7 +302,7 @@ export class KibanaClient {
         };
       },
       evaluate: async ({ messages, conversationId }, criteria) => {
-        const message = await chat({
+        const message = await chat('evaluate', {
           messages: [
             {
               '@timestamp': new Date().toISOString(),
@@ -228,7 +313,7 @@ export class KibanaClient {
 
                 Your goal is to verify whether a conversation between the user and the assistant matches the given criteria.
                 
-                For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and what the
+                For each criterion, calculate a score. Explain your score, by describing what the assistant did right, and describing and quoting what the
                 assistant did wrong, where it could improve, and what the root cause was in case of a failure.`,
               },
             },
@@ -287,14 +372,18 @@ export class KibanaClient {
           functionCall: 'scores',
         });
 
-        return {
+        const scoredCriteria = (
+          JSON.parse(message.function_call!.arguments!) as {
+            criteria: Array<{ index: number; score: number; reasoning: string }>;
+          }
+        ).criteria;
+
+        const result: EvaluationResult = {
+          name: currentTitle,
           conversationId,
           messages,
-          scores: (
-            JSON.parse(message.function_call.arguments) as {
-              criteria: Array<{ index: number; score: number; reasoning: string }>;
-            }
-          ).criteria.map(({ index, score, reasoning }) => {
+          passed: scoredCriteria.every(({ score }) => score >= 1),
+          scores: scoredCriteria.map(({ index, score, reasoning }) => {
             return {
               criterion: criteria[index],
               score,
@@ -302,6 +391,22 @@ export class KibanaClient {
             };
           }),
         };
+
+        results.push(result);
+
+        onResultCallbacks.forEach(({ callback }) => {
+          callback(result);
+        });
+
+        return result;
+      },
+      getResults: () => results,
+      onResult: (callback) => {
+        const unregister = () => {
+          remove(onResultCallbacks, { callback });
+        };
+        onResultCallbacks.push({ callback, unregister });
+        return unregister;
       },
     };
   }

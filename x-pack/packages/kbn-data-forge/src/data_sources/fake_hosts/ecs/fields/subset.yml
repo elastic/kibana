@@ -1,0 +1,16 @@
+---
+name: fake_hosts
+fields:
+  base:
+    fields: '*'
+  event:
+    fields:
+      module: {}
+      dataset: {}
+  host:
+    fields: '*'
+  metricset:
+    fields: '*'
+  system:
+    fields: '*'
+

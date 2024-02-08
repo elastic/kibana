@@ -24,6 +24,9 @@ export class ActionInternal<Context extends object = object>
   public readonly showNotification?: boolean;
   public readonly disabled?: boolean;
 
+  public readonly subscribeToCompatibilityChanges?: Action<Context>['subscribeToCompatibilityChanges'];
+  public readonly couldBecomeCompatible?: Action<Context>['couldBecomeCompatible'];
+
   constructor(public readonly definition: ActionDefinition<Context>) {
     this.id = this.definition.id;
     this.type = this.definition.type || '';
@@ -32,6 +35,13 @@ export class ActionInternal<Context extends object = object>
     this.grouping = this.definition.grouping;
     this.showNotification = this.definition.showNotification;
     this.disabled = this.definition.disabled;
+
+    if (this.definition.subscribeToCompatibilityChanges) {
+      this.subscribeToCompatibilityChanges = definition.subscribeToCompatibilityChanges;
+    }
+    if (this.definition.couldBecomeCompatible) {
+      this.couldBecomeCompatible = definition.couldBecomeCompatible;
+    }
   }
 
   public execute(context: Context) {

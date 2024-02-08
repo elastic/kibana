@@ -67,7 +67,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
         paramsProperty={'body'}
         inputTargetValue={body}
         label={i18n.BODY}
-        aria-label={i18n.BODY_DESCRIPTION}
+        ariaLabel={i18n.BODY_DESCRIPTION}
         errors={errors.body as string[]}
         onDocumentsChange={(json: string) => {
           editSubActionParams({ body: json });
@@ -77,7 +77,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
             editSubActionParams({ body: '' });
           }
         }}
-        data-test-subj="bedrock-bodyJsonEditor"
+        dataTestSubj="bedrock-bodyJsonEditor"
       />
       <EuiFormRow
         fullWidth

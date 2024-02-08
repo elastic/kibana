@@ -7,38 +7,37 @@
 import { notImplemented } from '@hapi/boom';
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import type { CreateChatCompletionResponse } from 'openai';
+import type OpenAI from 'openai';
 import { Readable } from 'stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
+import { observableIntoStream } from '../../service/util/observable_into_stream';
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
   options: {
     tags: ['access:ai_assistant'],
   },
-  params: t.intersection([
-    t.type({
-      body: t.intersection([
-        t.type({
-          messages: t.array(messageRt),
-          connectorId: t.string,
-          functions: t.array(
-            t.type({
-              name: t.string,
-              description: t.string,
-              parameters: t.any,
-            })
-          ),
-        }),
-        t.partial({
-          functionCall: t.string,
-        }),
-      ]),
-    }),
-    t.partial({ query: t.type({ stream: toBooleanRt }) }),
-  ]),
-  handler: async (resources): Promise<Readable | CreateChatCompletionResponse> => {
+  params: t.type({
+    body: t.intersection([
+      t.type({
+        name: t.string,
+        messages: t.array(messageRt),
+        connectorId: t.string,
+        functions: t.array(
+          t.type({
+            name: t.string,
+            description: t.string,
+            parameters: t.any,
+          })
+        ),
+      }),
+      t.partial({
+        functionCall: t.string,
+      }),
+    ]),
+  }),
+  handler: async (resources): Promise<Readable> => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });
@@ -48,11 +47,8 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, functions, functionCall },
-      query = { stream: true },
+      body: { name, messages, connectorId, functions, functionCall },
     } = params;
-
-    const stream = query.stream;
 
     const controller = new AbortController();
 
@@ -60,10 +56,9 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
       controller.abort();
     });
 
-    return client.chat({
+    const response$ = await client.chat(name, {
       messages,
       connectorId,
-      stream,
       signal: controller.signal,
       ...(functions.length
         ? {
@@ -72,6 +67,8 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
           }
         : {}),
     });
+
+    return observableIntoStream(response$);
   },
 });
 
@@ -93,7 +90,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       }),
     ]),
   }),
-  handler: async (resources): Promise<Readable | CreateChatCompletionResponse> => {
+  handler: async (resources): Promise<Readable | OpenAI.Chat.ChatCompletion> => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });
@@ -118,7 +115,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       client,
     });
 
-    return client.complete({
+    const response$ = await client.complete({
       messages,
       connectorId,
       conversationId,
@@ -127,6 +124,8 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       signal: controller.signal,
       functionClient,
     });
+
+    return observableIntoStream(response$);
   },
 });
 

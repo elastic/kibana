@@ -281,7 +281,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
     });
 
-    it('should transition from a multi-layer stacked bar to donut chart using suggestions', async () => {
+    it('should transition from a multi-layer stacked bar to treemap chart using suggestions', async () => {
       await PageObjects.visualize.navigateToNewVisualization();
       await PageObjects.visualize.clickVisType('lens');
       await PageObjects.lens.goToTimeRange();
@@ -313,10 +313,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       await PageObjects.lens.save('twolayerchart');
-      await testSubjects.click('lnsSuggestion-donut > lnsSuggestion');
+      await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
       expect(await PageObjects.lens.getLayerCount()).to.eql(1);
-      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sliceByDimensionPanel')).to.eql(
+      expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_sizeByDimensionPanel')).to.eql(

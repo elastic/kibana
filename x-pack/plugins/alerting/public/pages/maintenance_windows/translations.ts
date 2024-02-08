@@ -211,7 +211,7 @@ export const CREATE_FORM_CATEGORY_STACK_RULES = i18n.translate(
 export const CREATE_FORM_SCOPED_QUERY_TITLE = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.scopedQuery.title',
   {
-    defaultMessage: 'Define scope of rules',
+    defaultMessage: 'Filters',
   }
 );
 
@@ -219,7 +219,7 @@ export const CREATE_FORM_SCOPED_QUERY_DESCRIPTION = i18n.translate(
   'xpack.alerting.maintenanceWindows.createForm.scopedQuery.description',
   {
     defaultMessage:
-      'Use KQL to further narrow down the alerts affected by this maintenance window.',
+      'Add filters that refine the scope of the maintenance window. You can select only one category when filters are enabled.',
   }
 );
 

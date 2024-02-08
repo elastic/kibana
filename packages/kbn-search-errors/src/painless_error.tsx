@@ -7,43 +7,58 @@
  */
 
 import React from 'react';
+import { estypes } from '@elastic/elasticsearch';
+import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
-import type { ApplicationStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { IEsError } from './types';
-import { EsError, isEsError } from './es_error';
-import { getRootCause } from './utils';
+import { EsError } from './es_error';
 
 export class PainlessError extends EsError {
-  painlessStack?: string;
-  indexPattern?: DataView;
-  constructor(err: IEsError, openInInspector: () => void, indexPattern?: DataView) {
-    super(err, openInInspector);
-    this.indexPattern = indexPattern;
+  private readonly applicationStart: ApplicationStart;
+  private readonly painlessCause: estypes.ErrorCause;
+  private readonly dataView?: DataView;
+
+  constructor(
+    err: IEsError,
+    openInInspector: () => void,
+    painlessCause: estypes.ErrorCause,
+    applicationStart: ApplicationStart,
+    dataView?: DataView
+  ) {
+    super(
+      err,
+      i18n.translate('searchErrors.painlessError.painlessScriptedFieldErrorMessage', {
+        defaultMessage:
+          'Error executing runtime field or scripted field on data view {indexPatternName}',
+        values: {
+          indexPatternName: dataView?.title || '',
+        },
+      }),
+      openInInspector
+    );
+    this.applicationStart = applicationStart;
+    this.painlessCause = painlessCause;
+    this.dataView = dataView;
   }
 
   public getErrorMessage() {
-    const rootCause = getRootCause(this.err.attributes?.error);
-    const scriptFromStackTrace = rootCause?.script_stack
-      ? rootCause?.script_stack?.slice(-2).join('\n')
+    const scriptFromStackTrace = this.painlessCause?.script_stack
+      ? this.painlessCause?.script_stack?.slice(-2).join('\n')
       : undefined;
     // if the error has been properly processed it will highlight where it occurred.
-    const hasScript = rootCause?.script_stack?.slice(-1)[0]?.indexOf('HERE') || -1 >= 0;
-    const humanReadableError = rootCause?.caused_by?.reason;
+    const hasScript = this.painlessCause?.script_stack?.slice(-1)[0]?.indexOf('HERE') || -1 >= 0;
+    const humanReadableError = this.painlessCause?.caused_by?.reason;
     // fallback, show ES stacktrace
-    const painlessStack = rootCause?.script_stack ? rootCause?.script_stack.join('\n') : undefined;
+    const painlessStack = this.painlessCause?.script_stack
+      ? this.painlessCause?.script_stack.join('\n')
+      : undefined;
 
     return (
-      <>
+      <div>
         <EuiText size="s" data-test-subj="painlessScript">
-          {i18n.translate('searchErrors.painlessError.painlessScriptedFieldErrorMessage', {
-            defaultMessage:
-              'Error executing runtime field or scripted field on index pattern {indexPatternName}',
-            values: {
-              indexPatternName: this?.indexPattern?.title,
-            },
-          })}
+          {this.message}
         </EuiText>
         <EuiSpacer size="s" />
         {scriptFromStackTrace || painlessStack ? (
@@ -56,21 +71,21 @@ export class PainlessError extends EsError {
             {humanReadableError}
           </EuiText>
         ) : null}
-      </>
+      </div>
     );
   }
 
-  getActions(application: ApplicationStart) {
-    function onClick(indexPatternId?: string) {
-      application.navigateToApp('management', {
-        path: `/kibana/indexPatterns${indexPatternId ? `/patterns/${indexPatternId}` : ''}`,
-      });
-    }
-    const actions = super.getActions(application) ?? [];
+  getActions() {
+    const actions = super.getActions() ?? [];
     actions.push(
       <EuiButtonEmpty
         key="editPainlessScript"
-        onClick={() => onClick(this?.indexPattern?.id)}
+        onClick={() => () => {
+          const dataViewId = this.dataView?.id;
+          this.applicationStart.navigateToApp('management', {
+            path: `/kibana/indexPatterns${dataViewId ? `/patterns/${dataViewId}` : ''}`,
+          });
+        }}
         size="s"
       >
         {i18n.translate('searchErrors.painlessError.buttonTxt', {
@@ -80,14 +95,4 @@ export class PainlessError extends EsError {
     );
     return actions;
   }
-}
-
-export function isPainlessError(err: Error | IEsError) {
-  if (!isEsError(err)) return false;
-
-  const rootCause = getRootCause((err as IEsError).attributes?.error);
-  if (!rootCause) return false;
-
-  const { lang } = rootCause;
-  return lang === 'painless';
 }

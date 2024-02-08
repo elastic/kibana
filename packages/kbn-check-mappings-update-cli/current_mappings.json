@@ -1564,6 +1564,9 @@
       "prerelease_integrations_enabled": {
         "type": "boolean"
       },
+      "output_secret_storage_requirements_met": {
+        "type": "boolean"
+      },
       "secret_storage_requirements_met": {
         "type": "boolean"
       }
@@ -1691,6 +1694,10 @@
         "type": "text"
       },
       "is_preconfigured": {
+        "type": "boolean",
+        "index": false
+      },
+      "is_internal": {
         "type": "boolean",
         "index": false
       },
@@ -2083,6 +2090,10 @@
       },
       "is_default": {
         "type": "boolean"
+      },
+      "is_internal": {
+        "type": "boolean",
+        "index": false
       },
       "host_urls": {
         "type": "keyword",

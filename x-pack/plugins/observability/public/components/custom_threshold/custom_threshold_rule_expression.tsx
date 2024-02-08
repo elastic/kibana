@@ -42,7 +42,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
-import { PreviewChart } from './components/preview_chart/preview_chart';
+import { RuleConditionChart as PreviewChart } from './components/rule_condition_chart/rule_condition_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -98,11 +98,11 @@ export default function Expressions(props: Props) {
       if (!ruleParams.searchConfiguration || !ruleParams.searchConfiguration.index) {
         if (metadata?.currentOptions?.searchConfiguration) {
           initialSearchConfiguration = {
-            ...metadata.currentOptions.searchConfiguration,
             query: {
               query: ruleParams.searchConfiguration?.query ?? '',
               language: 'kuery',
             },
+            ...metadata.currentOptions.searchConfiguration,
           };
         } else {
           const newSearchSource = data.search.searchSource.createEmpty();
@@ -164,10 +164,6 @@ export default function Expressions(props: Props) {
       preFillCriteria();
     }
 
-    if (!ruleParams.filterQuery) {
-      preFillFilterQuery();
-    }
-
     if (!ruleParams.groupBy) {
       preFillGroupBy();
     }
@@ -176,7 +172,7 @@ export default function Expressions(props: Props) {
       setRuleParams('alertOnNoData', true);
     }
     if (typeof ruleParams.alertOnGroupDisappear === 'undefined') {
-      setRuleParams('alertOnGroupDisappear', true);
+      preFillAlertOnGroupDisappear();
     }
   }, [metadata]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -277,23 +273,13 @@ export default function Expressions(props: Props) {
     [ruleParams.criteria, setRuleParams]
   );
 
-  const preFillFilterQuery = useCallback(() => {
-    const md = metadata;
-
-    if (md && md.currentOptions?.filterQuery) {
-      setRuleParams('searchConfiguration', {
-        ...ruleParams.searchConfiguration,
-        query: {
-          query: md.currentOptions.filterQuery,
-          language: 'kuery',
-        },
-      });
-    }
-  }, [metadata, setRuleParams, ruleParams.searchConfiguration]);
-
   const preFillCriteria = useCallback(() => {
     const md = metadata;
     if (md?.currentOptions?.criteria?.length) {
+      const { timeSize: prefillTimeSize, timeUnit: prefillTimeUnit } =
+        md.currentOptions.criteria[0];
+      if (prefillTimeSize) setTimeSize(prefillTimeSize);
+      if (prefillTimeUnit) setTimeUnit(prefillTimeUnit);
       setRuleParams(
         'criteria',
         md.currentOptions.criteria.map((criterion) => ({
@@ -310,6 +296,15 @@ export default function Expressions(props: Props) {
     const md = metadata;
     if (md && md.currentOptions?.groupBy) {
       setRuleParams('groupBy', md.currentOptions.groupBy);
+    }
+  }, [metadata, setRuleParams]);
+
+  const preFillAlertOnGroupDisappear = useCallback(() => {
+    const md = metadata;
+    if (md && typeof md.currentOptions?.alertOnGroupDisappear !== 'undefined') {
+      setRuleParams('alertOnGroupDisappear', md.currentOptions.alertOnGroupDisappear);
+    } else {
+      setRuleParams('alertOnGroupDisappear', true);
     }
   }, [metadata, setRuleParams]);
 
@@ -462,6 +457,7 @@ export default function Expressions(props: Props) {
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
                   error={(errors[idx] as IErrorObject) || emptyError}
+                  timeRange={{ from: `now-${(timeSize ?? 1) * 20}${timeUnit}`, to: 'now' }}
                 />
               </ExpressionRow>
             </div>

@@ -6,7 +6,7 @@
  */
 
 import { isEqual } from 'lodash';
-import { LogExplorerLocatorParams } from '@kbn/deeplinks-observability';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
@@ -52,14 +52,14 @@ import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_mi
 
 export interface CustomThresholdLocators {
   alertsLocator?: LocatorPublic<AlertsLocatorParams>;
-  logExplorerLocator?: LocatorPublic<LogExplorerLocatorParams>;
+  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
 }
 
 export const createCustomThresholdExecutor = ({
   basePath,
   logger,
   config,
-  locators: { alertsLocator, logExplorerLocator },
+  locators: { alertsLocator, logsExplorerLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
@@ -295,13 +295,13 @@ export const createCustomThresholdExecutor = ({
             }
             return formatAlertResult(evaluation).currentValue;
           }),
-          viewInAppUrl: getViewInAppUrl(
-            alertResults.length === 1 ? alertResults[0][group].metrics : [],
-            indexedStartedAt,
-            logExplorerLocator,
-            params.searchConfiguration.query.query,
-            params.searchConfiguration?.index?.title ?? dataViewId
-          ),
+          viewInAppUrl: getViewInAppUrl({
+            dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+            filter: params.searchConfiguration.query.query,
+            logsExplorerLocator,
+            metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            startedAt: indexedStartedAt,
+          }),
           ...additionalContext,
         });
       }
@@ -321,6 +321,7 @@ export const createCustomThresholdExecutor = ({
       const alertUuid = getAlertUuid(recoveredAlertId);
       const timestamp = startedAt.toISOString();
       const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+      const group = groupByKeysObjectForRecovered[recoveredAlertId];
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
@@ -333,8 +334,15 @@ export const createCustomThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        group: groupByKeysObjectForRecovered[recoveredAlertId],
+        group,
         timestamp: startedAt.toISOString(),
+        viewInAppUrl: getViewInAppUrl({
+          dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+          filter: params.searchConfiguration.query.query,
+          logsExplorerLocator,
+          metrics: params.criteria[0]?.metrics,
+          startedAt: indexedStartedAt,
+        }),
         ...additionalContext,
       });
     }

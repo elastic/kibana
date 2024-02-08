@@ -6,15 +6,13 @@
  */
 
 import type { JSONSchema } from 'json-schema-to-ts';
-import type {
-  CreateChatCompletionResponse,
-  CreateChatCompletionResponseChoicesInner,
-} from 'openai';
+import type OpenAI from 'openai';
 import type { Observable } from 'rxjs';
+import { ChatCompletionChunkEvent, MessageAddEvent } from './conversation_complete';
 
-export type CreateChatCompletionResponseChunk = Omit<CreateChatCompletionResponse, 'choices'> & {
+export type CreateChatCompletionResponseChunk = Omit<OpenAI.ChatCompletionChunk, 'choices'> & {
   choices: Array<
-    Omit<CreateChatCompletionResponseChoicesInner, 'message'> & {
+    Omit<OpenAI.ChatCompletionChunk.Choice, 'message'> & {
       delta: { content?: string; function_call?: { name?: string; arguments?: string } };
     }
   >;
@@ -88,7 +86,7 @@ export interface KnowledgeBaseEntry {
   confidence: 'low' | 'medium' | 'high';
   is_correction: boolean;
   public: boolean;
-  labels: Record<string, string>;
+  labels?: Record<string, string>;
   role: KnowledgeBaseEntryRole;
 }
 
@@ -104,11 +102,12 @@ export type FunctionResponse =
       content?: any;
       data?: any;
     }
-  | Observable<CreateChatCompletionResponseChunk>;
+  | Observable<ChatCompletionChunkEvent | MessageAddEvent>;
 
 export enum FunctionVisibility {
-  System = 'system',
-  User = 'user',
+  AssistantOnly = 'assistantOnly',
+  UserOnly = 'userOnly',
+  Internal = 'internal',
   All = 'all',
 }
 

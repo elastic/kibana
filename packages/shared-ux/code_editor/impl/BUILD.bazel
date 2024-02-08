@@ -1,0 +1,36 @@
+load("@build_bazel_rules_nodejs//:index.bzl", "js_library")
+
+SRCS = glob(
+  [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  exclude = [
+    "**/test_helpers.ts",
+    "**/*.config.js",
+    "**/*.mock.*",
+    "**/*.test.*",
+    "**/*.stories.*",
+    "**/__snapshots__/**",
+    "**/integration_tests/**",
+    "**/mocks/**",
+    "**/scripts/**",
+    "**/storybook/**",
+    "**/test_fixtures/**",
+    "**/test_helpers/**",
+  ],
+)
+
+BUNDLER_DEPS = [
+  "@npm//react",
+  "@npm//tslib",
+  "@npm//react-monaco-editor",
+]
+
+js_library(
+  name = "code_editor",
+  package_name = "@kbn/code-editor",
+  srcs = SRCS + ["package.json"],
+  deps = BUNDLER_DEPS,
+  visibility = ["//visibility:public"],
+)

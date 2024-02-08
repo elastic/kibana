@@ -96,6 +96,7 @@ export function TagsDimensionEditor({
         defaultMessage: 'Color mapping',
       })}
       style={{ alignItems: 'center' }}
+      fullWidth
     >
       <EuiFlexGroup
         alignItems="center"

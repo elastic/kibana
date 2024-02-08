@@ -6,12 +6,12 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
+import { OptionalText } from './optional_text';
 
 export interface Props {
   dataTestSubj: string;
@@ -32,11 +32,17 @@ export function QueryBuilder({
   required,
   tooltip,
 }: Props) {
-  const { data, dataViews, docLinks, http, notifications, storage, uiSettings, unifiedSearch } =
-    useKibana().services;
+  const {
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
+  } = useKibana().services;
 
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
-  const { dataView } = useCreateDataView({ indexPatternString });
+
+  const { dataView } = useCreateDataView({
+    indexPatternString,
+  });
 
   return (
     <EuiFormRow
@@ -49,6 +55,7 @@ export function QueryBuilder({
           label
         )
       }
+      labelAppend={!required ? <OptionalText /> : undefined}
       isInvalid={getFieldState(name).invalid}
       fullWidth
     >
@@ -57,27 +64,15 @@ export function QueryBuilder({
         name={name}
         control={control}
         rules={{
-          required: Boolean(required),
+          required: Boolean(required) && Boolean(dataView),
         }}
         render={({ field, fieldState }) => (
           <QueryStringInput
             appName="Observability"
-            bubbleSubmitEvent={false}
             dataTestSubj={dataTestSubj}
-            deps={{
-              data,
-              dataViews,
-              docLinks,
-              http,
-              notifications,
-              storage,
-              uiSettings,
-              unifiedSearch,
-            }}
-            disableAutoFocus
             disableLanguageSwitcher
             indexPatterns={dataView ? [dataView] : []}
-            isDisabled={!indexPatternString}
+            isDisabled={!dataView}
             isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}

@@ -74,6 +74,8 @@ export interface SavedSearch {
   rowsPerPage?: number;
   sampleSize?: number;
   breakdownField?: string;
+  // Whether or not this saved search is managed by the system
+  managed: boolean;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {
     outcome?: SavedObjectsResolveResponse['outcome'];

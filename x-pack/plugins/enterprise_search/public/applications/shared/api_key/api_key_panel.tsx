@@ -25,7 +25,6 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 
 import { FetchApiKeysAPILogic } from '../../enterprise_search_overview/api/fetch_api_keys_logic';
 import { KibanaLogic } from '../kibana';
@@ -37,16 +36,16 @@ const COPIED_LABEL = i18n.translate('xpack.enterpriseSearch.overview.apiKey.copi
 });
 
 export const ApiKeyPanel: React.FC = () => {
-  const { cloud, navigateToUrl } = useValues(KibanaLogic);
+  const { cloud, esConfig, navigateToUrl } = useValues(KibanaLogic);
   const { makeRequest } = useActions(FetchApiKeysAPILogic);
   const { data } = useValues(FetchApiKeysAPILogic);
   const [isFlyoutOpen, setIsFlyoutOpen] = useState(false);
+  const elasticsearchEndpoint = esConfig.elasticsearch_host;
 
   useEffect(() => makeRequest({}), []);
 
   const apiKeys = data?.api_keys || [];
   const cloudId = cloud?.cloudId;
-  const elasticsearchEndpoint = cloud?.elasticsearchUrl || ELASTICSEARCH_URL_PLACEHOLDER;
 
   return (
     <>

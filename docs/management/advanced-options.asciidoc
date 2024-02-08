@@ -433,6 +433,9 @@ Set the default environment for the APM app. When left empty, data from all envi
 [[observability-apm-enable-profiling]]`observability:apmEnableProfilingIntegration`::
 Enable the Universal Profiling integration in APM.
 
+[[observability-apm-enable-table-search-bar]]`observability:apmEnableTableSearchBar`::
+beta:[] Enables faster searching in APM tables by adding a handy search bar with live filtering. Available for the following tables: Services, Transactions, and Errors.
+
 [[observability-enable-aws-lambda-metrics]]`observability:enableAwsLambdaMetrics`::
 preview:[] Display Amazon Lambda metrics in the service metrics tab.
 
@@ -453,6 +456,9 @@ preview:[] Enable the APM Trace Explorer feature, that allows you to search and 
 
 [[observability-infrastructure-profiling-integration]]`observability:enableInfrastructureProfilingIntegration`::
 preview:[] Enables the Profiling view in Host details within Infrastructure.
+
+[[observability-infrastructure-hosts-custom-dashboard]]`observability:enableInfrastructureHostsCustomDashboards`::
+preview:[] Enables option to link custom dashboards in the Host Details view.
 
 [float]
 [[kibana-reporting-settings]]

@@ -107,7 +107,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
   [AppIds.REPORTING]: {
     category: appCategories.CONTENT,
     description: i18n.translate('management.landing.withCardNavigation.reportingDescription', {
-      defaultMessage: 'Manage generated PDF, PNG and CSV reports.',
+      defaultMessage: 'Manage generated CSV reports.',
     }),
     icon: 'visPie',
   },

@@ -117,7 +117,7 @@ export class SavedSearchEmbeddable
 
   private abortController?: AbortController;
   private savedSearch: SavedSearch | undefined;
-  private panelTitle: string = '';
+  private panelTitleInternal: string = '';
   private filtersSearchSource!: ISearchSource;
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
@@ -144,9 +144,9 @@ export class SavedSearchEmbeddable
     };
 
     this.subscription = this.getUpdated$().subscribe(() => {
-      const titleChanged = this.output.title && this.panelTitle !== this.output.title;
+      const titleChanged = this.output.title && this.panelTitleInternal !== this.output.title;
       if (titleChanged) {
-        this.panelTitle = this.output.title || '';
+        this.panelTitleInternal = this.output.title || '';
       }
       if (!this.searchProps) {
         return;
@@ -180,7 +180,7 @@ export class SavedSearchEmbeddable
         unwrapResult
       );
 
-      this.panelTitle = this.getCurrentTitle();
+      this.panelTitleInternal = this.getCurrentTitle();
 
       await this.initializeOutput();
 
@@ -592,8 +592,8 @@ export class SavedSearchEmbeddable
 
     searchProps.columns = columnState.columns;
     searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
-    searchProps.sharedItemTitle = this.panelTitle;
-    searchProps.searchTitle = this.panelTitle;
+    searchProps.sharedItemTitle = this.panelTitleInternal;
+    searchProps.searchTitle = this.panelTitleInternal;
     searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
     searchProps.rowsPerPageState =
       this.input.rowsPerPage ||
@@ -758,7 +758,7 @@ export class SavedSearchEmbeddable
   /**
    * @returns Local/panel-level array of filters for Saved Search embeddable
    */
-  public async getFilters() {
+  public getFilters() {
     return mapAndFlattenFilters(
       (this.savedSearch?.searchSource.getFields().filter as Filter[]) ?? []
     );
@@ -767,7 +767,7 @@ export class SavedSearchEmbeddable
   /**
    * @returns Local/panel-level query for Saved Search embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedSearch?.searchSource.getFields().query;
   }
 

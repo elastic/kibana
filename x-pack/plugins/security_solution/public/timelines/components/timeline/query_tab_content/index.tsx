@@ -55,7 +55,6 @@ import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useTimelineEventsCountPortal } from '../../../../common/hooks/use_timeline_events_count';
 import type { TimelineModel } from '../../../store/model';
 import { useTimelineFullScreen } from '../../../../common/containers/use_full_screen';
-import { activeTimeline } from '../../../containers/active_timeline_context';
 import { DetailsPanel } from '../../side_panel';
 import { ExitFullScreen } from '../../../../common/components/exit_full_screen';
 import { getDefaultControlColumn } from '../body/control_columns';
@@ -296,15 +295,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
-
-    if (
-      expandedDetail[TimelineTabs.query]?.panelView &&
-      timelineId === TimelineId.active &&
-      showExpandedDetails
-    ) {
-      activeTimeline.toggleExpandedDetail({});
-    }
-  }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
+  }, [onEventClosed, timelineId]);
 
   useEffect(() => {
     dispatch(

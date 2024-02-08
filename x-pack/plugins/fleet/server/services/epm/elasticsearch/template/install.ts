@@ -23,33 +23,29 @@ import type {
   RegistryDataStream,
   IndexTemplateEntry,
   RegistryElasticsearch,
-  InstallablePackage,
   IndexTemplate,
   IndexTemplateMappings,
   TemplateMapEntry,
   TemplateMap,
   EsAssetReference,
-  PackageInfo,
   ExperimentalDataStreamFeature,
 } from '../../../../types';
 import { loadFieldsFromYaml, processFields } from '../../fields/field';
-import { getAsset, getPathParts } from '../../archive';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
 import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
   STACK_COMPONENT_TEMPLATES,
 } from '../../../../constants';
-
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
-
 import {
   applyDocOnlyValueToMapping,
   forEachMappings,
 } from '../../../experimental_datastream_features_helper';
-
 import { appContextService } from '../../../app_context';
+import type { PackageInstallContext } from '../../../../../common/types';
 
 import {
   generateMappings,
@@ -59,12 +55,12 @@ import {
   getTemplatePriority,
 } from './template';
 import { buildDefaultSettings } from './default_settings';
+import { isUserSettingsTemplate } from './utils';
 
 const FLEET_COMPONENT_TEMPLATE_NAMES = FLEET_COMPONENT_TEMPLATES.map((tmpl) => tmpl.name);
 
 export const prepareToInstallTemplates = (
-  installablePackage: InstallablePackage | PackageInfo,
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   esReferences: EsAssetReference[],
   experimentalDataStreamFeatures: ExperimentalDataStreamFeature[] = [],
   onlyForDataStreams?: RegistryDataStream[]
@@ -73,6 +69,7 @@ export const prepareToInstallTemplates = (
   assetsToRemove: EsAssetReference[];
   install: (esClient: ElasticsearchClient, logger: Logger) => Promise<IndexTemplateEntry[]>;
 } => {
+  const { packageInfo } = packageInstallContext;
   // remove package installation's references to index templates
   const assetsToRemove = esReferences.filter(
     ({ type }) =>
@@ -81,7 +78,7 @@ export const prepareToInstallTemplates = (
   );
 
   // build templates per data stream from yml files
-  const dataStreams = onlyForDataStreams || installablePackage.data_streams;
+  const dataStreams = onlyForDataStreams || packageInfo.data_streams;
   if (!dataStreams) return { assetsToAdd: [], assetsToRemove, install: () => Promise.resolve([]) };
 
   const templates = dataStreams.map((dataStream) => {
@@ -90,7 +87,7 @@ export const prepareToInstallTemplates = (
         datastreamFeature.data_stream === getRegistryDataStreamAssetBaseName(dataStream)
     );
 
-    return prepareTemplate({ pkg: installablePackage, dataStream, experimentalDataStreamFeature });
+    return prepareTemplate({ packageInstallContext, dataStream, experimentalDataStreamFeature });
   });
 
   const assetsToAdd = getAllTemplateRefs(templates.map((template) => template.indexTemplate));
@@ -102,8 +99,8 @@ export const prepareToInstallTemplates = (
       // install any pre-built index template assets,
       // atm, this is only the base package's global index templates
       // Install component templates first, as they are used by the index templates
-      await installPreBuiltComponentTemplates(paths, esClient, logger);
-      await installPreBuiltTemplates(paths, esClient, logger);
+      await installPreBuiltComponentTemplates(packageInstallContext, esClient, logger);
+      await installPreBuiltTemplates(packageInstallContext, esClient, logger);
 
       await Promise.all(
         templates.map((template) =>
@@ -122,15 +119,17 @@ export const prepareToInstallTemplates = (
 };
 
 const installPreBuiltTemplates = async (
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   esClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  const templatePaths = paths.filter((path) => isTemplate(path));
+  const templatePaths = packageInstallContext.paths.filter((path) => isTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = getPathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
-    const content = JSON.parse(getAsset(path).toString('utf8'));
+    const content = JSON.parse(
+      getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
+    );
 
     const esClientParams = { name: templateName, body: content };
     const esClientRequestOptions = { ignore: [404] };
@@ -159,15 +158,17 @@ const installPreBuiltTemplates = async (
 };
 
 const installPreBuiltComponentTemplates = async (
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   esClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  const templatePaths = paths.filter((path) => isComponentTemplate(path));
+  const templatePaths = packageInstallContext.paths.filter((path) => isComponentTemplate(path));
   const templateInstallPromises = templatePaths.map(async (path) => {
     const { file } = getPathParts(path);
     const templateName = file.substr(0, file.lastIndexOf('.'));
-    const content = JSON.parse(getAsset(path).toString('utf8'));
+    const content = JSON.parse(
+      getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf8')
+    );
 
     const esClientParams = {
       name: templateName,
@@ -286,12 +287,6 @@ function putComponentTemplate(
     name,
   };
 }
-
-type TemplateBaseName = string;
-type UserSettingsTemplateName = `${TemplateBaseName}${typeof USER_SETTINGS_TEMPLATE_SUFFIX}`;
-
-const isUserSettingsTemplate = (name: string): name is UserSettingsTemplateName =>
-  name.endsWith(USER_SETTINGS_TEMPLATE_SUFFIX);
 
 export function buildComponentTemplates(params: {
   mappings: IndexTemplateMappings;
@@ -419,26 +414,13 @@ async function installDataStreamComponentTemplates({
 }) {
   await Promise.all(
     Object.entries(componentTemplates).map(async ([name, body]) => {
+      // @custom component template should be lazily created by user
       if (isUserSettingsTemplate(name)) {
-        try {
-          // Attempt to create custom component templates, ignore if they already exist
-          const { clusterPromise } = putComponentTemplate(esClient, logger, {
-            body,
-            name,
-            create: true,
-          });
-          return await clusterPromise;
-        } catch (e) {
-          if (e?.statusCode === 400 && e.body?.error?.reason.includes('already exists')) {
-            // ignore
-          } else {
-            throw e;
-          }
-        }
-      } else {
-        const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
-        return clusterPromise;
+        return;
       }
+
+      const { clusterPromise } = putComponentTemplate(esClient, logger, { body, name });
+      return clusterPromise;
     })
   );
 }
@@ -518,16 +500,16 @@ export async function ensureAliasHasWriteIndex(opts: {
 }
 
 export function prepareTemplate({
-  pkg,
+  packageInstallContext,
   dataStream,
   experimentalDataStreamFeature,
 }: {
-  pkg: Pick<PackageInfo, 'name' | 'version' | 'type'>;
+  packageInstallContext: PackageInstallContext;
   dataStream: RegistryDataStream;
   experimentalDataStreamFeature?: ExperimentalDataStreamFeature;
 }): { componentTemplates: TemplateMap; indexTemplate: IndexTemplateEntry } {
-  const { name: packageName, version: packageVersion } = pkg;
-  const fields = loadFieldsFromYaml(pkg, dataStream.path);
+  const { name: packageName, version: packageVersion } = packageInstallContext.packageInfo;
+  const fields = loadFieldsFromYaml(packageInstallContext, dataStream.path);
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
@@ -624,6 +606,7 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,
       }));
+
     return indexTemplates.concat(componentTemplates);
   });
 }

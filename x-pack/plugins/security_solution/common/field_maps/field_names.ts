@@ -17,6 +17,23 @@ export const ALERT_THRESHOLD_RESULT = `${ALERT_NAMESPACE}.threshold_result` as c
 export const ALERT_THRESHOLD_RESULT_COUNT = `${ALERT_THRESHOLD_RESULT}.count` as const;
 export const ALERT_NEW_TERMS = `${ALERT_NAMESPACE}.new_terms` as const;
 export const ALERT_NEW_TERMS_FIELDS = `${ALERT_RULE_PARAMETERS}.new_terms_fields` as const;
+/**
+ * @deprecated Use {@link ALERT_HOST_CRITICALITY}
+ */
+export const LEGACY_ALERT_HOST_CRITICALITY = `${ALERT_NAMESPACE}.host.criticality_level` as const;
+/**
+ * @deprecated Use {@link ALERT_USER_CRITICALITY}
+ */
+export const LEGACY_ALERT_USER_CRITICALITY = `${ALERT_NAMESPACE}.user.criticality_level` as const;
+
+export const ALERT_HOST_CRITICALITY = `host.asset.criticality` as const;
+export const ALERT_USER_CRITICALITY = `user.asset.criticality` as const;
+export const ALERT_HOST_RISK_SCORE_CALCULATED_LEVEL = `host.risk.calculated_level` as const;
+export const ALERT_HOST_RISK_SCORE_CALCULATED_SCORE_NORM =
+  `host.risk.calculated_score_norm` as const;
+export const ALERT_USER_RISK_SCORE_CALCULATED_LEVEL = `user.risk.calculated_level` as const;
+export const ALERT_USER_RISK_SCORE_CALCULATED_SCORE_NORM =
+  `user.risk.calculated_score_norm` as const;
 
 export const ALERT_ORIGINAL_EVENT = `${ALERT_NAMESPACE}.original_event` as const;
 export const ALERT_ORIGINAL_EVENT_ACTION = `${ALERT_ORIGINAL_EVENT}.action` as const;

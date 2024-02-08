@@ -28,6 +28,7 @@ describe('createConnectorDocument', () => {
       })
     ).toEqual({
       api_key_id: null,
+      api_key_secret_id: null,
       configuration: {},
       custom_scheduling: {},
       description: null,
