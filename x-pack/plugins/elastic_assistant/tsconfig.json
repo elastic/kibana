@@ -37,6 +37,7 @@
     "@kbn/core-http-router-server-mocks",
     "@kbn/zod-helpers",
     "@kbn/ml-response-stream",
+    "@kbn/data-plugin",
   ],
   "exclude": [
     "target/**/*",
