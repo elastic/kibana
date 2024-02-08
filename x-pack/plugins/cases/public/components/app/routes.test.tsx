@@ -85,7 +85,8 @@ describe('Cases routes', () => {
     );
   });
 
-  describe('Create case', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175229
+  describe.skip('Create case', () => {
     it('navigates to the create case page', () => {
       renderWithRouter(['/cases/create']);
       expect(screen.getByText('Create case')).toBeInTheDocument();
