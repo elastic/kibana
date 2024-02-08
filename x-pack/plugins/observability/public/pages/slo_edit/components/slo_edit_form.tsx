@@ -170,7 +170,7 @@ export function SloEditForm({ slo }: Props) {
             />
           </EuiFlexGroup>
         </EuiFlexGroup>
-        <InspectSLOPortal trigger={trigger} getValues={getValues} slo={slo} />
+        <InspectSLOPortal slo={slo} />
       </FormProvider>
     </>
   );

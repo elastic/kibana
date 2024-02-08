@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { FindSLOResponse, SLOResponse } from '@kbn/slo-schema';
-import { QueryKey, useMutation } from '@tanstack/react-query';
 import { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { CreateSLOInput } from '@kbn/slo-schema';
+import type { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
+import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
-
-type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 interface SLOInspectResponse {
   slo: SLOResponse;
@@ -22,20 +18,43 @@ interface SLOInspectResponse {
   temporaryDoc: Record<string, any>;
 }
 
-export function useInspectSlo() {
+export interface UseInspectSLOResponse {
+  data: SLOInspectResponse | undefined;
+  isLoading: boolean;
+  isSuccess: boolean;
+  isError: boolean;
+}
+
+export function useInspectSlo(slo: CreateSLOInput, shouldInspect: boolean) {
   const { http } = useKibana().services;
 
-  return useMutation<
-    SLOInspectResponse,
-    ServerError,
-    { slo: CreateSLOInput },
-    { previousData?: FindSLOResponse; queryKey?: QueryKey }
-  >(
-    ['inspectSlo'],
-    ({ slo }) => {
-      const body = JSON.stringify(slo);
-      return http.post<SLOInspectResponse>(`/internal/api/observability/slos/_inspect`, { body });
+  const { isLoading, isError, isSuccess, data } = useQuery({
+    queryKey: ['slo', 'inspect'],
+    queryFn: async ({ signal }) => {
+      try {
+        const body = JSON.stringify(slo);
+        const response = await http.post<SLOInspectResponse>(
+          '/internal/api/observability/slos/_inspect',
+          {
+            body,
+            signal,
+          }
+        );
+
+        return response;
+      } catch (error) {
+        // ignore error
+      }
     },
-    {}
-  );
+    enabled: shouldInspect,
+    refetchOnWindowFocus: false,
+    keepPreviousData: true,
+  });
+
+  return {
+    data,
+    isLoading,
+    isSuccess,
+    isError,
+  };
 }

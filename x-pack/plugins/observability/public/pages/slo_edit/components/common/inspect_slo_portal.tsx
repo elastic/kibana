@@ -5,22 +5,20 @@
  * 2.0.
  */
 
+import { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
-import { GetSLOResponse } from '@kbn/slo-schema';
-import { CreateSLOForm } from '../../types';
-import { SLOInspectWrapper } from './slo_inspect';
 import { InspectSLOPortalNode } from '../../slo_edit';
+import { SLOInspectWrapper } from './slo_inspect';
 
-export interface SloInspectPortalProps {
-  getValues: () => CreateSLOForm;
-  trigger: () => Promise<boolean>;
+export interface Props {
   slo?: GetSLOResponse;
 }
-export function InspectSLOPortal(props: SloInspectPortalProps) {
+
+export function InspectSLOPortal({ slo }: Props) {
   return (
     <InPortal node={InspectSLOPortalNode}>
-      <SLOInspectWrapper {...props} />
+      <SLOInspectWrapper slo={slo} />
     </InPortal>
   );
 }
