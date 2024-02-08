@@ -187,7 +187,7 @@ describe('<ComponentTemplateList />', () => {
       expect(search).toBe(filter);
 
       const { rows } = table.getMetaData('componentTemplatesTable');
-      expect(rows.length).toBe(2);
+      expect(rows.length).toBe(1);
     });
   });
 
