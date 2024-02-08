@@ -87,7 +87,7 @@ export function registerRecallFunction({
         messages.filter((message) => message.message.role === MessageRole.User)
       );
 
-      const nonEmptyQueries = queries.filter(Boolean);
+      const nonEmptyQueries = compact(queries);
 
       const queriesOrUserPrompt = nonEmptyQueries.length
         ? nonEmptyQueries
