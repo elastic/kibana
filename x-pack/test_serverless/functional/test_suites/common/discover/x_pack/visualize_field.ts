@@ -37,13 +37,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // TODO: Serverless tests require login first
       // Security project requires admin role, search/oblt project passes with developer/editor.
       await PageObjects.svlCommonPage.loginAsAdmin();
-    });
-
-    beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: 'logstash-*',
+      });
+    });
+
+    beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
       await setDiscoverTimeRange();
     });
@@ -53,6 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.uiSettings.replace({});
     });
 
     it('shows "visualize" field button', async () => {
