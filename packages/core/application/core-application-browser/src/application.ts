@@ -140,7 +140,7 @@ export interface App<HistoryLocationState = unknown> extends AppNavOptions {
    *   start() {
    *      // later, when the navlink needs to be updated
    *      appUpdater.next(() => {
-   *        navLinkStatus: AppNavLinkStatus.disabled,
+   *        visibleIn: ['globalSearch'],
    *      })
    *   }
    * ```
@@ -243,7 +243,7 @@ export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' |
 };
 
 /** The places in the UI where a deepLink can be shown */
-export type AppDeepLinkLocations = 'globalSearch' | 'sideNav';
+export type AppDeepLinkLocations = 'globalSearch' | 'sideNav' | 'kibanaOverview';
 
 /**
  * Input type for registering secondary in-app locations for an application.

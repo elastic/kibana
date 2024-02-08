@@ -207,7 +207,6 @@ export class ApplicationService {
         this.apps.set(app.id, {
           ...appProps,
           status: appStatus,
-          // navLinkStatus: app.navLinkStatus ?? AppNavLinkStatus.default,
           deepLinks: populateDeepLinkDefaults(appStatus, appProps.deepLinks),
         });
         if (updater$) {
@@ -460,6 +459,8 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
     }
     const fields = wrapper.updater(app);
     if (fields) {
+      // status and navLinkStatus enums are ordered by reversed priority
+      // if multiple updaters wants to change these fields, we will always follow the priority order.
       const nextStatus: AppStatus = Math.max(
         changes.status ?? AppStatus.accessible,
         fields.status ?? AppStatus.accessible
@@ -468,13 +469,7 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
       changes = {
         ...changes,
         ...fields,
-        // status and navLinkStatus enums are ordered by reversed priority
-        // if multiple updaters wants to change these fields, we will always follow the priority order.
         status: nextStatus,
-        // navLinkStatus: Math.max(
-        //   changes.navLinkStatus ?? AppNavLinkStatus.default,
-        //   fields.navLinkStatus ?? AppNavLinkStatus.default
-        // ),
         ...(fields.deepLinks
           ? { deepLinks: populateDeepLinkDefaults(nextStatus, fields.deepLinks) }
           : {}),
