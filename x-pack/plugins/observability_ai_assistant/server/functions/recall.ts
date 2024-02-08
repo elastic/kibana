@@ -15,6 +15,7 @@ import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
+import { RespondFunctionResources } from '../service/types';
 
 export function registerRecallFunction({
   client,
@@ -100,10 +101,6 @@ export function registerRecallFunction({
         queries: queriesOrUserPrompt,
       });
 
-      resources.logger.debug(`Received ${suggestions.length} suggestions`);
-
-      resources.logger.debug(JSON.stringify(suggestions, null, 2));
-
       if (suggestions.length === 0) {
         return {
           content: [] as unknown as Serializable,
@@ -117,10 +114,8 @@ export function registerRecallFunction({
         client,
         connectorId,
         signal,
+        resources,
       });
-
-      resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
-      resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
         content: relevantDocuments as unknown as Serializable,
@@ -167,6 +162,7 @@ async function scoreSuggestions({
   client,
   connectorId,
   signal,
+  resources,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   messages: Message[];
@@ -174,6 +170,7 @@ async function scoreSuggestions({
   client: ObservabilityAIAssistantClient;
   connectorId: string;
   signal: AbortSignal;
+  resources: RespondFunctionResources;
 }) {
   const indexedSuggestions = suggestions.map((suggestion, index) => ({ ...suggestion, id: index }));
 
@@ -241,6 +238,7 @@ async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
+<<<<<<< HEAD
   const scores = scoresAsString.split('\n').map((line) => {
     const [index, score] = line
       .split(',')
@@ -249,6 +247,9 @@ async function scoreSuggestions({
 
     return { id: suggestions[index].id, score };
   });
+=======
+  resources.logger.debug(`Scores: ${JSON.stringify(scores, null, 2)}`);
+>>>>>>> 1c3fa24be396176454df3dd3a67c7acdfcea46d4
 
   if (scores.length === 0) {
     return [];
@@ -266,6 +267,11 @@ async function scoreSuggestions({
   const relevantDocuments = suggestions.filter((suggestion) =>
     relevantDocumentIds.includes(suggestion.id)
   );
+
+  resources.logger.debug(
+    `Found ${relevantDocumentIds.length} relevant suggestions from the knowledge base. ${scores.length} suggestions were considered in total.`
+  );
+  resources.logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
   return relevantDocuments;
 }
