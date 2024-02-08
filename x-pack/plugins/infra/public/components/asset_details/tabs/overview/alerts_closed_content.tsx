@@ -6,9 +6,11 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiBadge, EuiIcon, useEuiTheme } from '@elastic/eui';
 
 export const AlertsClosedContent = ({ activeAlertCount }: { activeAlertCount?: number }) => {
   const shouldRenderAlertsClosedContent = typeof activeAlertCount === 'number';
+  const { euiTheme } = useEuiTheme();
 
   if (!shouldRenderAlertsClosedContent) {
     return null;
@@ -16,13 +18,11 @@ export const AlertsClosedContent = ({ activeAlertCount }: { activeAlertCount?: n
 
   if (activeAlertCount > 0) {
     return (
-      <span data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts">
-        {i18n.translate('xpack.infra.assetDetails.activeAlertsContentClosedSection', {
-          defaultMessage:
-            ' {activeAlertCount} {activeAlertCount, plural, one {active alert} other {active alerts}}',
-          values: { activeAlertCount },
-        })}
-      </span>
+      <EuiBadge color={euiTheme.colors.dangerText}>
+        <EuiIcon type="warning" ascent={10} />
+        &nbsp;
+        {activeAlertCount}
+      </EuiBadge>
     );
   }
 

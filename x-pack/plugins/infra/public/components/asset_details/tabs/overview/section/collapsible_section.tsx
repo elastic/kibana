@@ -44,7 +44,7 @@ export const CollapsibleSection = ({
   const Title = title;
   const ButtonContent = () =>
     closedSectionContent && trigger === 'closed' ? (
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
           <Title />
         </EuiFlexItem>
