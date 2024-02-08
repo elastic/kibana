@@ -472,26 +472,31 @@ export const initializeDashboard = async ({
       return;
     }
 
-    const inputFilters$ = dashboardContainer.getInput$()
-      .pipe(
-        startWith(dashboardContainer.getInput()),
-        map((input) => input.filters),
-        distinctUntilChanged((previous, current) => {
-          return compareFilters(previous ?? [], current ?? []);
-        })
-      );
+    const inputFilters$ = dashboardContainer.getInput$().pipe(
+      startWith(dashboardContainer.getInput()),
+      map((input) => input.filters),
+      distinctUntilChanged((previous, current) => {
+        return compareFilters(previous ?? [], current ?? []);
+      })
+    );
 
-      const localFilters = new BehaviorSubject<Filter[] | undefined>(combineDashboardFiltersWithControlGroupFilters(
+    const localFilters = new BehaviorSubject<Filter[] | undefined>(
+      combineDashboardFiltersWithControlGroupFilters(
         dashboardContainer.getInput().filters ?? [],
         dashboardContainer.controlGroup
-      ));
-      dashboardContainer.localFilters = localFilters;
-      combineLatest([inputFilters$, dashboardContainer.controlGroup.onFiltersPublished$]).subscribe(() => {
-        localFilters.next(combineDashboardFiltersWithControlGroupFilters(
-          dashboardContainer.getInput().filters ?? [],
-          dashboardContainer.controlGroup!
-        ));
-      });
+      )
+    );
+    dashboardContainer.localFilters = localFilters;
+    combineLatest([inputFilters$, dashboardContainer.controlGroup.onFiltersPublished$]).subscribe(
+      () => {
+        localFilters.next(
+          combineDashboardFiltersWithControlGroupFilters(
+            dashboardContainer.getInput().filters ?? [],
+            dashboardContainer.controlGroup!
+          )
+        );
+      }
+    );
 
     dashboardContainer.integrationSubscriptions.add(
       startSyncingDashboardDataViews.bind(dashboardContainer)()
