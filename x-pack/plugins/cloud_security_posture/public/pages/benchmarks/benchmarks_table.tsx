@@ -181,12 +181,10 @@ const getBenchmarkTableColumns = (
 
       return (
         <EuiButtonEmpty
-          // onClick={() => navToFindings({ 'rule.benchmark.id': benchmark.id })}
+          flush="left"
           onClick={() => {
-            setQuery();
             navToFindings();
           }}
-          flush="left"
         >
           {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
             defaultMessage: '{benchmarkEvaluation} {resourcePlurals}',
