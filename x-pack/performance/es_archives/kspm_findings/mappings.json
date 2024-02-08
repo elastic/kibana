@@ -1,8 +1,7 @@
 {
   "type": "index",
   "value": {
-    "aliases": {
-    },
+    "aliases": {},
     "index": "logs-cloud_security_posture.findings_latest-default",
     "mappings": {
       "_meta": {
@@ -27,7 +26,6 @@
       ],
       "properties": {
         "@timestamp": {
-          "ignore_malformed": false,
           "type": "date"
         },
         "agent": {
@@ -56,18 +54,6 @@
         },
         "cloud": {
           "properties": {
-            "Organization": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "name": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                }
-              }
-            },
             "account": {
               "properties": {
                 "id": {
@@ -83,25 +69,6 @@
             "provider": {
               "ignore_above": 1024,
               "type": "keyword"
-            },
-            "region": {
-              "ignore_above": 1024,
-              "type": "keyword"
-            }
-          }
-        },
-        "cloud_security_posture": {
-          "properties": {
-            "package_policy": {
-              "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
-                "revision": {
-                  "type": "short"
-                }
-              }
             }
           }
         },
@@ -110,6 +77,9 @@
             "commit_sha": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "commit_time": {
+              "type": "date"
             },
             "kubernetes": {
               "properties": {
@@ -243,11 +213,6 @@
               "type": "keyword"
             },
             "path": {
-              "fields": {
-                "text": {
-                  "type": "match_only_text"
-                }
-              },
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -270,6 +235,9 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "containerized": {
+              "type": "boolean"
+            },
             "hostname": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -287,16 +255,15 @@
             },
             "os": {
               "properties": {
+                "codename": {
+                  "ignore_above": 1024,
+                  "type": "keyword"
+                },
                 "family": {
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
                 "full": {
-                  "fields": {
-                    "text": {
-                      "type": "match_only_text"
-                    }
-                  },
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -305,11 +272,6 @@
                   "type": "keyword"
                 },
                 "name": {
-                  "fields": {
-                    "text": {
-                      "type": "match_only_text"
-                    }
-                  },
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
@@ -336,10 +298,6 @@
           "properties": {
             "cluster": {
               "properties": {
-                "id": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "name": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -358,20 +316,10 @@
               "type": "long"
             },
             "command_line": {
-              "fields": {
-                "text": {
-                  "type": "match_only_text"
-                }
-              },
               "ignore_above": 1024,
               "type": "wildcard"
             },
             "name": {
-              "fields": {
-                "text": {
-                  "type": "match_only_text"
-                }
-              },
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -395,11 +343,6 @@
               "type": "date"
             },
             "title": {
-              "fields": {
-                "text": {
-                  "type": "match_only_text"
-                }
-              },
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -418,6 +361,10 @@
               "ignore_above": 1024,
               "type": "keyword"
             },
+            "raw": {
+              "enabled": false,
+              "type": "object"
+            },
             "sub_type": {
               "ignore_above": 1024,
               "type": "keyword"
@@ -433,6 +380,14 @@
             "evaluation": {
               "ignore_above": 1024,
               "type": "keyword"
+            },
+            "evidence": {
+              "enabled": false,
+              "type": "object"
+            },
+            "expected": {
+              "enabled": false,
+              "type": "object"
             }
           }
         },
@@ -452,10 +407,6 @@
                   "ignore_above": 1024,
                   "type": "keyword"
                 },
-                "rule_number": {
-                  "ignore_above": 1024,
-                  "type": "keyword"
-                },
                 "version": {
                   "ignore_above": 1024,
                   "type": "keyword"
@@ -471,6 +422,10 @@
               "type": "keyword"
             },
             "name": {
+              "ignore_above": 1024,
+              "type": "keyword"
+            },
+            "rule_number": {
               "ignore_above": 1024,
               "type": "keyword"
             },
@@ -493,13 +448,10 @@
     "settings": {
       "index": {
         "codec": "best_compression",
-        "default_pipeline": "cloud_security_posture_latest_index_add_ingest_timestamp_pipeline",
-        "final_pipeline": ".fleet_final_pipeline-1",
         "lifecycle": {
           "name": ""
         },
         "mapping": {
-          "ignore_malformed": "true",
           "total_fields": {
             "limit": "10000"
           }
