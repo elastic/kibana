@@ -15,7 +15,6 @@ export class ToastsService extends FtrService {
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
   private readonly config = this.ctx.getService('config');
-  private readonly log = this.ctx.getService('log');
   private readonly defaultFindTimeout = this.config.get('timeouts.find');
   /**
    * Returns the title and message of a specific error toast.
@@ -89,8 +88,6 @@ export class ToastsService extends FtrService {
 
   public async dismissAllToasts(): Promise<void> {
     const xs = await this.getAllToastElements();
-    this.log.debug(`\nλjs toasts: \n${JSON.stringify(xs, null, 2)}`);
-    this.log.debug(`\nλjs toasts.length: \n  ${xs.length}`);
 
     if (xs.length === 0) return;
 
