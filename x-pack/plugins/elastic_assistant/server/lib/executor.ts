@@ -34,7 +34,6 @@ export const executeAction = async ({
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
     params: request.body.params,
-    consumer: 'it me steph',
     signal: abortSignal,
   });
 
