@@ -5,8 +5,6 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
 import { DataVisualizerTableState } from '../../../../../common/types';
@@ -20,18 +18,17 @@ import {
   ESQLDataVisualizerGridEmbeddableInput,
   ESQLDataVisualizerIndexBasedAppState,
 } from './types';
+import { EmbeddableNoResultsEmptyPrompt } from './embeddable_field_stats_no_results';
 
 const restorableDefaults = getDefaultESQLDataVisualizerListState();
 
-export const ESQLFieldStatsTableWrapper = ({
+export const EmbeddableESQLFieldStatsTableWrapper = ({
   input,
   onOutputChange,
 }: {
   input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableInput;
   onOutputChange?: (ouput: any) => void;
 }) => {
-  // @TODO: remove
-  console.log(`--@@ESQLFieldStatsTableWrapper`, input);
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 
@@ -61,27 +58,7 @@ export const ESQLFieldStatsTableWrapper = ({
   }, [input?.lastReloadRequestTime, setLastRefresh]);
 
   if (progress === 100 && configs.length === 0) {
-    // @TODO: refactor this to common
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          flex: '1 0 100%',
-          textAlign: 'center',
-        }}
-      >
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="visualizeApp" size="m" color="subdued" />
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.dataVisualizer.index.embeddableNoResultsMessage"
-            defaultMessage="No results found"
-          />
-        </EuiText>
-      </div>
-    );
+    return <EmbeddableNoResultsEmptyPrompt />;
   }
   return (
     <DataVisualizerTable<FieldVisConfig>

@@ -19,123 +19,15 @@ import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { DatePickerContextProvider } from '@kbn/ml-date-picker';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { DataVisualizerStartDependencies } from '../../../../plugin';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
-import { DataVisualizerStartDependencies } from '../../../../plugin';
-import {
-  DataVisualizerTable,
-  ItemIdToExpandedRowMap,
-} from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
-import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
-import type { DataVisualizerTableState } from '../../../../../common/types';
-import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
-import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
-import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
-import { ESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
-import {
-  DataVisualizerGridEmbeddableInput,
-  DataVisualizerGridEmbeddableOutput,
-  ESQLDataVisualizerGridEmbeddableInput,
-} from './types';
+import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
+import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
+import { DataVisualizerGridEmbeddableInput, ESQLDataVisualizerGridEmbeddableInput } from './types';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
-
-const restorableDefaults = getDefaultDataVisualizerListState();
-
-// @todo: refactor to a different file
-export const EmbeddableWrapper = ({
-  input,
-  onOutputChange,
-}: {
-  input: Required<DataVisualizerGridEmbeddableInput, 'dataView'>;
-  onOutputChange?: (ouput: any) => void;
-}) => {
-  const [dataVisualizerListState, setDataVisualizerListState] =
-    useState<Required<DataVisualizerIndexBasedAppState>>(restorableDefaults);
-
-  const onTableChange = useCallback(
-    (update: DataVisualizerTableState) => {
-      setDataVisualizerListState({ ...dataVisualizerListState, ...update });
-      if (onOutputChange) {
-        onOutputChange(update);
-      }
-    },
-    [dataVisualizerListState, onOutputChange]
-  );
-
-  const {
-    configs,
-    searchQueryLanguage,
-    searchString,
-    extendedColumns,
-    progress,
-    overallStatsProgress,
-    setLastRefresh,
-  } = useDataVisualizerGridData(input, dataVisualizerListState);
-
-  useEffect(() => {
-    setLastRefresh(Date.now());
-  }, [input?.lastReloadRequestTime, setLastRefresh]);
-
-  const getItemIdToExpandedRowMap = useCallback(
-    function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
-      return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
-        const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
-        if (item !== undefined) {
-          m[fieldName] = (
-            <IndexBasedDataVisualizerExpandedRow
-              item={item}
-              dataView={input.dataView}
-              combinedQuery={{ searchQueryLanguage, searchString }}
-              onAddFilter={input.onAddFilter}
-              totalDocuments={input.totalDocuments}
-            />
-          );
-        }
-        return m;
-      }, {} as ItemIdToExpandedRowMap);
-    },
-    [input, searchQueryLanguage, searchString]
-  );
-
-  if (progress === 100 && configs.length === 0) {
-    return (
-      <div
-        style={{
-          display: 'flex',
-          flexDirection: 'column',
-          justifyContent: 'center',
-          flex: '1 0 100%',
-          textAlign: 'center',
-        }}
-      >
-        <EuiText size="xs" color="subdued">
-          <EuiIcon type="visualizeApp" size="m" color="subdued" />
-          <EuiSpacer size="m" />
-          <FormattedMessage
-            id="xpack.dataVisualizer.index.embeddableNoResultsMessage"
-            defaultMessage="No results found"
-          />
-        </EuiText>
-      </div>
-    );
-  }
-  return (
-    <DataVisualizerTable<FieldVisConfig>
-      items={configs}
-      pageState={dataVisualizerListState}
-      updatePageState={onTableChange}
-      getItemIdToExpandedRowMap={getItemIdToExpandedRowMap}
-      extendedColumns={extendedColumns}
-      showPreviewByDefault={input?.showPreviewByDefault}
-      onChange={onOutputChange}
-      loading={progress < 100}
-      overallStatsRunning={overallStatsProgress.isRunning}
-    />
-  );
-};
 
 function isESQLDataVisualizerEmbeddableInput(
   input: unknown
@@ -145,7 +37,7 @@ function isESQLDataVisualizerEmbeddableInput(
 
 function isDataVisualizerEmbeddableInput(
   input: unknown
-): input is ESQLDataVisualizerGridEmbeddableInput {
+): input is Required<DataVisualizerGridEmbeddableInput, 'dataView'> {
   return isPopulatedObject(input, ['dataView']);
 }
 
@@ -160,15 +52,10 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const input = useObservable(embeddableInput);
 
   if (isESQLDataVisualizerEmbeddableInput(input)) {
-    return <ESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />;
+    return <EmbeddableESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />;
   }
   if (isDataVisualizerEmbeddableInput(input)) {
-    return (
-      <EmbeddableWrapper
-        input={input as Required<DataVisualizerGridEmbeddableInput, 'dataView'>}
-        onOutputChange={onOutputChange}
-      />
-    );
+    return <EmbeddableFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />;
   } else {
     return (
       <EuiEmptyPrompt
