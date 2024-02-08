@@ -271,6 +271,7 @@ export const useESQLDataVisualizerData = (
     overallStatsProgress,
     columns,
     cancelOverallStatsRequest,
+    timeFieldName,
   } = useESQLOverallStatsData(fieldStatsRequest);
 
   const [metricConfigs, setMetricConfigs] = useState(defaults.metricConfigs);
@@ -607,5 +608,6 @@ export const useESQLDataVisualizerData = (
     showEmptyFields,
     fieldsCountStats,
     setFieldStatFieldsToFetch,
+    timeFieldName,
   };
 };

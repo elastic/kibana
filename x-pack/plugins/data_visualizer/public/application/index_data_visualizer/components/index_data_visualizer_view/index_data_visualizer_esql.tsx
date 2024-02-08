@@ -26,6 +26,7 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { isDefined } from '@kbn/ml-is-defined';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -202,10 +203,8 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [currentDataView, query?.esql]
   );
 
-  const hasValidTimeField = useMemo(
-    () => currentDataView && currentDataView.timeFieldName !== '',
-    [currentDataView]
-  );
+  // @TODO: remove
+  console.log(`--@@query`, query);
 
   const dvPageHeader = css({
     [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
@@ -238,7 +237,10 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     showEmptyFields,
     fieldsCountStats,
     setFieldStatFieldsToFetch,
+    timeFieldName,
   } = useESQLDataVisualizerData(input, dataVisualizerListState, setQuery);
+
+  const hasValidTimeField = useMemo(() => timeFieldName !== undefined, [timeFieldName]);
 
   useEffect(
     function resetFieldStatsFieldToFetch() {
@@ -251,6 +253,10 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [totalCount]
   );
 
+  const queryNeedsUpdate = useMemo(
+    () => (JSON.stringify(localQuery) !== JSON.stringify(query) ? true : undefined),
+    [localQuery, query]
+  );
   return (
     <EuiPageTemplate
       offset={0}
@@ -290,14 +296,18 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
             ) : null}
             <EuiFlexItem grow={false}>
               <DatePickerWrapper
-                isAutoRefreshOnly={false}
-                showRefresh={false}
+                isAutoRefreshOnly={!hasValidTimeField}
+                showRefresh={!hasValidTimeField}
                 width="full"
-                // @todo: implement needsUpdate
-                // needsUpdate={
-                //   JSON.stringify(localQuery) !== JSON.stringify(query) ? true : undefined
-                // }
-                // isDisabled={!hasValidTimeField}
+                needsUpdate={queryNeedsUpdate}
+                onRefresh={() => {
+                  if (queryNeedsUpdate) {
+                    // @TODO: remove
+                    console.log(`--@@setting query`);
+                    setQuery(localQuery);
+                  }
+                }}
+                isDisabled={!hasValidTimeField}
               />
             </EuiFlexItem>
           </EuiFlexGroup>

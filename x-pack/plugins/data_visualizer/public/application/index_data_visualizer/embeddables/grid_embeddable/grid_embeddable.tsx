@@ -9,9 +9,9 @@ import { pick } from 'lodash';
 import { Observable, Subject } from 'rxjs';
 import { CoreStart } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
+import React, { Suspense } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { EuiEmptyPrompt, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
 import { Required } from 'utility-types';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
@@ -24,7 +24,11 @@ import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
-import { DataVisualizerGridEmbeddableInput, ESQLDataVisualizerGridEmbeddableInput } from './types';
+import {
+  DataVisualizerGridEmbeddableInput,
+  ESQLDataVisualizerGridEmbeddableInput,
+  DataVisualizerGridEmbeddableOutput,
+} from './types';
 
 export type DataVisualizerGridEmbeddableServices = [CoreStart, DataVisualizerStartDependencies];
 export type IDataVisualizerGridEmbeddable = typeof DataVisualizerGridEmbeddable;
