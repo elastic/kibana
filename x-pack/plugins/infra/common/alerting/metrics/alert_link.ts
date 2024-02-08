@@ -10,6 +10,7 @@ import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { HOST_FIELD } from '../../constants';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
   return Object.entries(params).reduce((acc, [key, field]) => {
@@ -29,7 +30,6 @@ export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unkno
 export const getInventoryViewInAppUrl = (
   fields: ParsedTechnicalFields & Record<string, any>
 ): string => {
-  // console.log('fields', fields);
   let inventoryFields = fields;
 
   /* Temporary Solution -> https://github.com/elastic/kibana/issues/137033
@@ -49,11 +49,12 @@ export const getInventoryViewInAppUrl = (
 
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
+  const hostName = inventoryFields[HOST_FIELD];
   let viewInAppUrl = '/app/metrics/link-to/inventory?';
 
   if (nodeType) {
-    if (inventoryFields['host.name']) {
-      viewInAppUrl = getLinkToHostDetails(inventoryFields['host.name'], inventoryFields[TIMESTAMP]);
+    if (hostName) {
+      viewInAppUrl = getLinkToHostDetails(hostName, inventoryFields[TIMESTAMP]);
     } else {
       const linkToParams: Record<string, any> = {
         nodeType: inventoryFields[nodeTypeField][0],

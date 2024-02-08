@@ -94,7 +94,6 @@ export interface InventoryMetricThresholdParams {
   filterQueryText?: string;
   nodeType: InventoryItemType;
   sourceId?: string;
-  hostName: string;
   alertOnNoData?: boolean;
 }
 

@@ -133,7 +133,7 @@ export const getViewInInventoryAppUrl = ({
   nodeType: string;
   spaceId: string;
   timestamp: string;
-  hostName: string;
+  hostName?: string;
 }) => {
   const { metric, customMetric } = criteria[0];
 
