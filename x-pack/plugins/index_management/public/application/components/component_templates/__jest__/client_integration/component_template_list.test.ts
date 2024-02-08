@@ -177,7 +177,7 @@ describe('<ComponentTemplateList />', () => {
     test('search value is set if url param is set', async () => {
       const filter = 'usedBy=(test_index_template_1)';
       await act(async () => {
-        testBed = await setup(httpSetup, { filter});
+        testBed = await setup(httpSetup, { filter });
       });
 
       testBed.component.update();
