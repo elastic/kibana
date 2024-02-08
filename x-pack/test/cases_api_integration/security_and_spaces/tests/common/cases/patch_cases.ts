@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -53,7 +53,7 @@ import {
   getAlertsByIds,
   createRule,
   getQueryAlertIds,
-} from '../../../../../security_solution_api_integration/test_suites/detections_response/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,

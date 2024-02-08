@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
+import { createRuleWithAuth, getThresholdRuleForAlertTesting } from '../../../utils';
 import {
-  createAlertsIndex,
   deleteAllRules,
+  deleteAllAlerts,
+  createAlertsIndex,
   waitForRulePartialFailure,
   getRuleForAlertTesting,
-  createRuleWithAuth,
-  getThresholdRuleForAlertTesting,
-  deleteAllAlerts,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,

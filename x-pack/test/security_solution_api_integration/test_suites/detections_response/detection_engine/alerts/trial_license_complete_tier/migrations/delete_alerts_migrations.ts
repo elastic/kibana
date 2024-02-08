@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DEFAULT_SIGNALS_INDEX,
@@ -13,12 +13,12 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { getIndexNameFromLoad } from '../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-  getIndexNameFromLoad,
   waitFor,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { createUserAndRole } from '../../../../../../../common/services/security_solution';
 
 interface CreateResponse {

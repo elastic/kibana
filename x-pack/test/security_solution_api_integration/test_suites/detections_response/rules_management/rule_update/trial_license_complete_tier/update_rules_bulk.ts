@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
@@ -19,13 +19,9 @@ import {
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   getSimpleRuleUpdate,
-  createRule,
   getSimpleRule,
   createLegacyRuleAction,
   getLegacyActionSO,
@@ -42,6 +38,12 @@ import {
   getSomeActionsWithFrequencies,
   updateUsername,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  createRule,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

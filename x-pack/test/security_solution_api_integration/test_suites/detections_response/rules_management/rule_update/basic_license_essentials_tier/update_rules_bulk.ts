@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_RULES_BULK_UPDATE,
@@ -13,18 +13,20 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
-  createAlertsIndex,
-  deleteAllRules,
   getSimpleRuleOutput,
   removeServerGeneratedProperties,
   getSimpleRuleOutputWithoutRuleId,
   removeServerGeneratedPropertiesIncludingRuleId,
   getSimpleRuleUpdate,
-  createRule,
   getSimpleRule,
-  deleteAllAlerts,
   updateUsername,
 } from '../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  createRule,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

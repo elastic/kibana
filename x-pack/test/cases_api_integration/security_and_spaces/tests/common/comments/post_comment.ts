@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import {
@@ -49,7 +49,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../security_solution_api_integration/test_suites/detections_response/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   globalRead,
   noKibanaPrivileges,

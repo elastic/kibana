@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
+import { getEqlRuleForAlertTesting } from '../../../utils';
 import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 
 interface Ignore {
   normal_constant?: string;

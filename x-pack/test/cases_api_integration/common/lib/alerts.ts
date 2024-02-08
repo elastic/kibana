@@ -21,7 +21,7 @@ import {
   waitForAlertsToBePresent,
   getAlertsByIds,
   getQueryAlertIds,
-} from '../../../security_solution_api_integration/test_suites/detections_response/utils';
+} from '../../../common/utils/security_solution';
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './api/helpers';

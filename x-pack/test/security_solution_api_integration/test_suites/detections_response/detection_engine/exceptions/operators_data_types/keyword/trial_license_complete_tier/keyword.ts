@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   createListsIndex,
@@ -13,9 +13,9 @@ import {
   deleteListsIndex,
   importFile,
 } from '../../../../../../lists_and_exception_lists/utils';
+import { createRuleWithExceptionEntries } from '../../../../../utils';
 import {
   createRule,
-  createRuleWithExceptionEntries,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
@@ -23,7 +23,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../../../utils';
+} from '../../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

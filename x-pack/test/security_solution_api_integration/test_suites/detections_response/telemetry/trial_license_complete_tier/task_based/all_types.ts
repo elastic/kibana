@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
+import { getSecurityTelemetryStats, removeTimeFieldsFromTelemetryStats } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getSecurityTelemetryStats,
-  removeTimeFieldsFromTelemetryStats,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';

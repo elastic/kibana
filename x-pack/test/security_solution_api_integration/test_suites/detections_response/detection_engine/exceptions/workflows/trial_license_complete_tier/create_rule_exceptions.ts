@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -18,17 +18,19 @@ import {
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import {
   fetchRule,
-  createRule,
   getSimpleRule,
-  createAlertsIndex,
-  deleteAllRules,
   createExceptionList,
-  deleteAllAlerts,
   getRuleSOById,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   checkInvestigationFieldSoValue,
 } from '../../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import {
   deleteAllExceptions,
   removeExceptionListItemServerGeneratedProperties,

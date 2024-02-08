@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DEFAULT_SIGNALS_INDEX,
@@ -16,13 +16,11 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { SIGNALS_TEMPLATE_VERSION } from '@kbn/security-solution-plugin/server/lib/detection_engine/routes/index/get_signals_template';
 import { Signal } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 
+import { deleteMigrations, getIndexNameFromLoad, waitForIndexToPopulate } from '../../../../utils';
 import {
   createAlertsIndex,
-  deleteMigrations,
   deleteAllAlerts,
-  getIndexNameFromLoad,
-  waitForIndexToPopulate,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,

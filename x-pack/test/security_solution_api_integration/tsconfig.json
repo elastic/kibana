@@ -4,7 +4,7 @@
     "outDir": "target/types",
     "types": ["node", "jest", "@kbn/ambient-ftr-types"]
   },
-  "include": ["**/*", "../../../typings/**/*", "../../../packages/kbn-test/types/ftr_globals/**/*"],
+  "include": ["**/*", "../../../typings/**/*", "../../../packages/kbn-test/types/ftr_globals/**/*", "../common/utils/security_solution/detections_response/rules/delete_all_rules.ts", "../common/utils/security_solution/detections_response/alerts/delete_all_alerts.ts", "../common/utils/security_solution/detections_response/alerts/create_alerts_index.ts"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     { "path": "../../test_serverless/tsconfig.json" },

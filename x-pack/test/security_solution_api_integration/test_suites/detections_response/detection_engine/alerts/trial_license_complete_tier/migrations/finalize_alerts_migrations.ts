@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL,
@@ -13,13 +13,12 @@ import {
   DETECTION_ENGINE_SIGNALS_MIGRATION_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { deleteMigrations, getIndexNameFromLoad } from '../../../../utils';
 import {
   createAlertsIndex,
-  deleteMigrations,
   deleteAllAlerts,
-  getIndexNameFromLoad,
   waitFor,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,

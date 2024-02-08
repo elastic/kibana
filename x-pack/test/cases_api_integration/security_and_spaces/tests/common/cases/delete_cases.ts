@@ -67,7 +67,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '../../../../../security_solution_api_integration/test_suites/detections_response/utils';
+} from '../../../../../common/utils/security_solution';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -21,23 +21,25 @@ import {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
+  finalizeAlertsMigration,
+  getEqlRuleForAlertTesting,
+  getSavedQueryRuleForAlertTesting,
+  getThreatMatchRuleForAlertTesting,
+  getThresholdRuleForAlertTesting,
+  startAlertsMigration,
+  removeRandomValuedPropertiesFromAlert,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  finalizeAlertsMigration,
-  getEqlRuleForAlertTesting,
-  getRuleForAlertTesting,
-  getSavedQueryRuleForAlertTesting,
   getAlertsByIds,
-  getThreatMatchRuleForAlertTesting,
-  getThresholdRuleForAlertTesting,
-  startAlertsMigration,
   waitFor,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  removeRandomValuedPropertiesFromAlert,
-} from '../../../utils';
+  getRuleForAlertTesting,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import {
   Alerts,
   createCaseAttachAlertAndDeleteAlert,
@@ -17,7 +17,7 @@ import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-} from '../../../../../security_solution_api_integration/test_suites/detections_response/utils';
+} from '../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import { getPostCaseRequest, postCaseReq, postCommentUserReq } from '../../../../common/lib/mock';

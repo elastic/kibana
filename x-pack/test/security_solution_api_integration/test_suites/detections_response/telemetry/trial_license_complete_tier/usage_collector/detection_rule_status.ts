@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
 import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
@@ -21,19 +21,21 @@ import {
   getInitialSingleEventMetric,
 } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import {
+  getEqlRuleForAlertTesting,
+  getSimpleThreatMatch,
+  getStats,
+  getThresholdRuleForAlertTesting,
+  deleteAllEventLogExecutionEvents,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForAlertTesting,
   getRuleForAlertTesting,
-  getSimpleThreatMatch,
-  getStats,
-  getThresholdRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-  deleteAllEventLogExecutionEvents,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

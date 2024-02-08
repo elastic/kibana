@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { parse as parseCookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
@@ -17,11 +17,10 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { setAlertStatus, getAlertUpdateByQueryEmptyResponse, refreshIndex } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
-  setAlertStatus,
-  getAlertUpdateByQueryEmptyResponse,
   getQueryAlertIds,
   deleteAllRules,
   createRule,
@@ -29,8 +28,7 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-  refreshIndex,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
@@ -13,10 +13,6 @@ import {
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -27,6 +23,12 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

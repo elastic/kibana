@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
@@ -18,16 +18,18 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getWebHookAction,
   getRuleWithWebHookAction,
-  createRule,
   getSimpleRule,
   fetchRule,
   updateRule,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
