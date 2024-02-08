@@ -29,7 +29,7 @@ export async function readCurrentMappings(): Promise<SavedObjectsTypeMappingDefi
   return JSON.parse(currentMappingsJson);
 }
 
-export async function updateCurrentMappings(newMappings: SavedObjectsTypeMappingDefinitions) {
+export async function writeCurrentMappings(newMappings: SavedObjectsTypeMappingDefinitions) {
   await Fsp.writeFile(
     CURRENT_MAPPINGS_FILE_PATH,
     prettyPrintAndSortKeys(newMappings) + '\n',
