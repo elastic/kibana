@@ -86,7 +86,7 @@ describe('AlertDetailsAppSection', () => {
   it('should render rule and alert data', async () => {
     const result = renderComponent();
 
-    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(3);
+    expect((await result.findByTestId('thresholdAlertOverviewSection')).children.length).toBe(6);
     expect(result.getByTestId('thresholdRule-2000-2500')).toBeTruthy();
   });
 
@@ -148,7 +148,30 @@ describe('AlertDetailsAppSection', () => {
       { ['kibana.alert.end']: '2023-03-28T14:40:00.000Z' }
     );
 
-    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(3);
+    expect(alertDetailsAppSectionComponent.getAllByTestId('RuleConditionChart').length).toBe(6);
     expect(mockedRuleConditionChart.mock.calls[0]).toMatchSnapshot();
+  });
+
+  it('should render title on condition charts', async () => {
+    const result = renderComponent();
+
+    expect(result.getByTestId('chartTitle-0').textContent).toBe(
+      'Equation result for count (all documents)'
+    );
+    expect(result.getByTestId('chartTitle-1').textContent).toBe(
+      'Equation result for max (system.cpu.user.pct)'
+    );
+    expect(result.getByTestId('chartTitle-2').textContent).toBe(
+      'Equation result for min (system.memory.used.pct)'
+    );
+    expect(result.getByTestId('chartTitle-3').textContent).toBe(
+      'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct...'
+    );
+    expect(result.getByTestId('chartTitle-4').textContent).toBe(
+      'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct)'
+    );
+    expect(result.getByTestId('chartTitle-5').textContent).toBe(
+      'Equation result for min (system.memory.used.pct) + min (system.memory.used.pct) + min (system.memory.used.pct)'
+    );
   });
 });
