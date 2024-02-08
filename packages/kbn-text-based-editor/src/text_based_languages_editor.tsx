@@ -163,7 +163,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService, application, docLinks } =
+    kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -341,6 +342,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
+      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -679,6 +681,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
                       searchInDescription
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
                       buttonProps={{
                         color: 'text',
                         size: 's',
@@ -814,6 +819,17 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           }
                         });
 
+                        // this is fixing a bug between the EUIPopover and the monaco editor
+                        // when the user clicks the editor, we force it to focus and the onDidFocusEditorText
+                        // to fire, the timeout is needed because otherwise it refocuses on the popover icon
+                        // and the user needs to click again the editor.
+                        // IMPORTANT: The popover needs to be wrapped with the EuiOutsideClickDetector component.
+                        editor.onMouseDown(() => {
+                          setTimeout(() => {
+                            editor.focus();
+                          }, 100);
+                        });
+
                         editor.onDidFocusEditorText(() => {
                           onEditorFocus();
                         });
@@ -901,6 +917,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <LanguageDocumentationPopover
                       language={
                         String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
+                      }
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
                       }
                       searchInDescription
                       sections={documentationSections}

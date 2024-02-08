@@ -46,7 +46,7 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
   };
 
   public couldBecomeCompatible({ embeddable }: EnhancedEmbeddableContext) {
-    return true;
+    return Boolean(!!embeddable.getInput && embeddable.getRoot);
   }
 
   public subscribeToCompatibilityChanges = (
@@ -71,6 +71,7 @@ export class PanelNotificationsAction implements ActionDefinition<EnhancedEmbedd
   };
 
   public readonly isCompatible = async ({ embeddable }: EnhancedEmbeddableContext) => {
+    if (!embeddable?.getInput) return false;
     if (embeddable.getInput().viewMode !== ViewMode.EDIT) return false;
     return this.getEventCount(embeddable) > 0;
   };
