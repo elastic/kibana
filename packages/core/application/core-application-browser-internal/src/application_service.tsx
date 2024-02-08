@@ -482,13 +482,11 @@ const populateDeepLinkDefaults = (deepLinks?: AppDeepLink[]): AppDeepLink[] => {
   if (!deepLinks) {
     return [];
   }
-  return deepLinks.map((deepLink) => {
-    return {
-      ...deepLink,
-      visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
-      deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
-    };
-  });
+  return deepLinks.map((deepLink) => ({
+    ...deepLink,
+    visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
+    deepLinks: populateDeepLinkDefaults(deepLink.deepLinks),
+  }));
 };
 
 const flattenDeepLinks = (deepLinks?: AppDeepLink[]): Record<string, string> => {
