@@ -329,6 +329,10 @@ export class ObservabilityAIAssistantClient {
               },
             };
 
+            this.dependencies.logger.debug(
+              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
+            );
+
             nextMessages = nextMessages.concat(functionResponseMessage);
 
             subscriber.next({
@@ -365,6 +369,8 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages);
           }
+
+          this.dependencies.logger.debug(`Conversation: ${JSON.stringify(nextMessages, null, 2)}`);
 
           if (!persist) {
             subscriber.complete();
@@ -458,6 +464,8 @@ export class ObservabilityAIAssistantClient {
   ): Promise<Observable<ChatCompletionChunkEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
 
+    const spanId = (span?.ids['span.id'] || '').substring(0, 6);
+
     try {
       const connector = await this.dependencies.actionsClient.get({
         id: connectorId,
@@ -493,12 +501,18 @@ export class ObservabilityAIAssistantClient {
       this.dependencies.logger.debug(`Sending conversation to connector`);
       this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
 
+      const now = performance.now();
+
       const executeResult = await this.dependencies.actionsClient.execute({
         actionId: connectorId,
         params: subAction,
       });
 
-      this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+      this.dependencies.logger.debug(
+        `Received action client response: ${executeResult.status} (took: ${Math.round(
+          performance.now() - now
+        )}ms)${spanId ? ` (${spanId})` : ''}`
+      );
 
       if (executeResult.status === 'error' && executeResult?.serviceMessage) {
         const tokenLimitRegex =
