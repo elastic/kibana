@@ -220,7 +220,9 @@ export function parseAndVerifyArchive(
   logger.debug(`Verifying archive - checking manifest file and manifest buffer`);
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(
-      `Package at top-level directory ${toplevelDir} must contain a top-level ${MANIFEST_NAME} file.`
+      !paths.includes(manifestFile)
+        ? `Manifest file ${manifestFile} not found in paths.`
+        : `Manifest buffer is not found in assets map for manifest file ${manifestFile}.`
     );
   }
 

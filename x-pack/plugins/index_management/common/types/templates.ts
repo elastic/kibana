@@ -21,6 +21,7 @@ export interface TemplateSerialized {
     mappings?: Mappings;
     lifecycle?: DataStream['lifecycle'];
   };
+  deprecated?: boolean;
   composed_of?: string[];
   ignore_missing_component_templates?: string[];
   version?: number;
@@ -53,6 +54,7 @@ export interface TemplateDeserialized {
   ilmPolicy?: {
     name: string;
   };
+  deprecated?: boolean;
   _meta?: { [key: string]: any }; // Composable template only
   // Composable template only
   dataStream?: {
@@ -87,9 +89,11 @@ export interface TemplateListItem {
   hasSettings: boolean;
   hasAliases: boolean;
   hasMappings: boolean;
+  deprecated?: boolean;
   ilmPolicy?: {
     name: string;
   };
+  composedOf?: string[];
   _kbnMeta: {
     type: TemplateType;
     hasDatastream: boolean;
@@ -108,6 +112,7 @@ export interface LegacyTemplateSerialized {
   version?: number;
   settings?: IndexSettings;
   aliases?: Aliases;
+  deprecated?: boolean;
   mappings?: Mappings;
   order?: number;
 }

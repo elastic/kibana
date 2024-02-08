@@ -56,6 +56,7 @@ export function deserializeTemplate(
     composed_of: composedOf,
     ignore_missing_component_templates: ignoreMissingComponentTemplates,
     data_stream: dataStream,
+    deprecated,
     allow_auto_create: allowAutoCreate,
   } = templateEs;
   const { settings } = template;
@@ -82,6 +83,7 @@ export function deserializeTemplate(
     dataStream,
     allowAutoCreate,
     _meta,
+    deprecated,
     _kbnMeta: {
       type,
       hasDatastream: Boolean(dataStream),
