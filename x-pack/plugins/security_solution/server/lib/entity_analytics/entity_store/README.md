@@ -4,12 +4,17 @@
 
 this prototype creates a basic entity store which combines data seen in the `logs-*` index pattern with asset criticality data to form basic entities. 
 
+![High Level Flowchart](./readme_images/high_level_flowchart.png)
+
 Some key limitations to start with:
 
 - only extracts host entities
 - very limited field set, only host name, first seen, last seen, an IP history and asset criticality are currently stored
 
 The transform takes log data and uses a scripted metric aggregation to create "composites" these are 1 minute snapshots of an entity, with all IPs seen during that time, here is an example composite document from `.entities.entity-composites.*`
+
+
+
 
 ```
 {
