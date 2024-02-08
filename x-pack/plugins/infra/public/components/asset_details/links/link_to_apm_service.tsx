@@ -35,7 +35,7 @@ export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToAp
       <EuiBadge
         color="hollow"
         href={linkProps.href as string}
-        title={i18n.translate('xpack.infra.logs.alertDetails.chart.chartTitle', {
+        title={i18n.translate('xpack.infra.assetDetails.services.serviceButtonTitle', {
           defaultMessage: '{serviceName} last reported by {agentName}',
           values: { serviceName, agentName },
         })}

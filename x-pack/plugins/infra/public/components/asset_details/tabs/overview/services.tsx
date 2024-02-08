@@ -81,7 +81,7 @@ export const ServicesContent = ({
               apmTutorialLink: (
                 <EuiLink data-test-subj="assetDetailsTooltiAPMTutorialLink" href={linkProps.href}>
                   <FormattedMessage
-                    id="xpack.infra.assetDetails.table.services.tooltip.tutorialLink"
+                    id="xpack.infra.assetDetails.table.services.noServices.tutorialLink"
                     defaultMessage="here"
                   />
                 </EuiLink>
