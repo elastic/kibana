@@ -22,8 +22,9 @@ import type { ITaskMetricsService } from '../task_metrics.types';
 
 export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: number) {
   const taskName = 'Security Solution Detection Rule Lists Telemetry';
+  const taskType = 'security:telemetry-detection-rules';
   return {
-    type: 'security:telemetry-detection-rules',
+    type: taskType,
     title: taskName,
     interval: '24h',
     timeout: '10m',
@@ -40,7 +41,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
 
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
 
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
 
       tlog(
         logger,

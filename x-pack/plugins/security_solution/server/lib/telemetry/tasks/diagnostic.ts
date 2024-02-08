@@ -16,9 +16,11 @@ import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS } from '../constants';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryDiagnosticsTaskConfig() {
+  const taskName = 'Security Solution Telemetry Diagnostics task';
+  const taskType = 'security:endpoint-diagnostics';
   return {
-    type: 'security:endpoint-diagnostics',
-    title: 'Security Solution Telemetry Diagnostics task',
+    type: taskType,
+    title: taskName,
     interval: '5m',
     timeout: '4m',
     version: '1.1.0',
@@ -31,8 +33,13 @@ export function createTelemetryDiagnosticsTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const taskName = 'Security Solution Telemetry Diagnostics task';
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
+
+      tlog(
+        logger,
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         if (!taskExecutionPeriod.last) {
           throw new Error('last execution timestamp is required');

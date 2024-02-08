@@ -17,11 +17,12 @@ import { batchTelemetryRecords, processK8sUsernames, tlog } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
+  const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
   const taskVersion = '1.2.0';
-
+  const taskType = 'security:telemetry-prebuilt-rule-alerts';
   return {
-    type: 'security:telemetry-prebuilt-rule-alerts',
-    title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
+    type: taskType,
+    title: taskName,
     interval: '1h',
     timeout: '15m',
     version: taskVersion,
@@ -33,8 +34,13 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const taskName = 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry';
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
+
+      tlog(
+        logger,
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const [clusterInfoPromise, licenseInfoPromise, packageVersion] = await Promise.allSettled([
           receiver.fetchClusterInfo(),

@@ -15,9 +15,9 @@ import { ranges, TelemetryTimelineFetcher, tlog } from '../helpers';
 
 export function createTelemetryDiagnosticTimelineTaskConfig() {
   const taskName = 'Security Solution Diagnostic Timeline telemetry';
-
+  const taskType = 'security:telemetry-diagnostic-timelines';
   return {
-    type: 'security:telemetry-diagnostic-timelines',
+    type: taskType,
     title: taskName,
     interval: '1h',
     timeout: '15m',
@@ -36,7 +36,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
       );
 
       const fetcher = new TelemetryTimelineFetcher(receiver);
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
 
       try {
         let counter = 0;

@@ -47,9 +47,11 @@ const EmptyFleetAgentResponse = {
 const usageLabelPrefix: string[] = ['security_telemetry', 'endpoint_task'];
 
 export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
+  const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
+  const taskType = 'security:endpoint-meta-telemetry';
   return {
-    type: 'security:endpoint-meta-telemetry',
-    title: 'Security Solution Telemetry Endpoint Metrics and Info task',
+    type: taskType,
+    title: taskName,
     interval: '24h',
     timeout: '5m',
     version: '1.0.0',
@@ -62,8 +64,7 @@ export function createTelemetryEndpointTaskConfig(maxTelemetryBatch: number) {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const taskName = 'Security Solution Telemetry Endpoint Metrics and Info task';
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
       try {
         tlog(
           logger,

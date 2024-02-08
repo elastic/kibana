@@ -361,9 +361,9 @@ const fakeKibanaRequest = {
   },
 } as unknown as KibanaRequest;
 
-export function getTelemetryTaskTitle(task: SecurityTelemetryTask): string {
+export function getTelemetryTaskType(task: SecurityTelemetryTask): string {
   if (task !== null && typeof task === 'object') {
-    return task['config']['title'];
+    return task['config']['type'];
   } else {
     return '';
   }

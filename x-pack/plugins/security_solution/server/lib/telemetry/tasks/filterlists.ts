@@ -17,8 +17,9 @@ import { newTelemetryLogger } from '../helpers';
 
 export function createTelemetryFilterListArtifactTaskConfig() {
   const taskName = 'Security Solution Telemetry Filter List Artifact Task';
+  const taskType = 'security:telemetry-filterlist-artifact';
   return {
-    type: 'security:telemetry-filterlist-artifact',
+    type: taskType,
     title: taskName,
     interval: '45m',
     timeout: '1m',
@@ -35,7 +36,7 @@ export function createTelemetryFilterListArtifactTaskConfig() {
 
       log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
 
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
       try {
         const artifactName = 'telemetry-filterlists-v1';
         const manifest = await artifactService.getArtifact(artifactName);

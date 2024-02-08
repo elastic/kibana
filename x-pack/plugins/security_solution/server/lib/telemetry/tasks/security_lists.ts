@@ -27,9 +27,11 @@ import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 
 export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number) {
+  const taskName = 'Security Solution Lists Telemetry';
+  const taskType = 'security:telemetry-lists';
   return {
-    type: 'security:telemetry-lists',
-    title: 'Security Solution Lists Telemetry',
+    type: taskType,
+    title: taskName,
     interval: '24h',
     timeout: '3m',
     version: '1.0.0',
@@ -45,8 +47,12 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
       const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
 
-      const taskName = 'Security Solution Lists Telemetry';
-      const trace = taskMetricsService.start(taskName);
+      tlog(
+        logger,
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
+      const trace = taskMetricsService.start(taskType);
       try {
         let trustedApplicationsCount = 0;
         let endpointExceptionsCount = 0;

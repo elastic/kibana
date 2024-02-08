@@ -22,7 +22,7 @@ import {
   createMockedExceptionList,
   getAsyncTelemetryEventSender,
   getTelemetryTask,
-  getTelemetryTaskTitle,
+  getTelemetryTaskType,
   getTelemetryTasks,
 } from './lib/telemetry_helpers';
 
@@ -273,7 +273,7 @@ describe('telemetry tasks', () => {
 
       const requests = calls.filter(({ url, body }) => {
         return (
-          body.indexOf(getTelemetryTaskTitle(task)) !== -1 &&
+          body.indexOf(getTelemetryTaskType(task)) !== -1 &&
           url.startsWith(ENDPOINT_STAGING) &&
           url.endsWith('task-metrics')
         );
