@@ -566,7 +566,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       }
       return response.ok({
         body: {
-          connector: connectorResult?.value,
+          connector: connectorResult,
         },
       });
     })
