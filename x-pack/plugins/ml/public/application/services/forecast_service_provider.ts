@@ -19,6 +19,9 @@ export interface AggType {
   min: string;
 }
 
+// TODO Consolidate with legacy code in
+// `x-pack/plugins/ml/public/application/services/forecast_service.js` and
+// `x-pack/plugins/ml/public/application/services/forecast_service.d.ts`.
 export function forecastServiceProvider(mlApiServices: MlApiServices) {
   return {
     // Gets a basic summary of the most recently run forecasts for the specified

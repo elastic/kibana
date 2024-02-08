@@ -12,6 +12,7 @@ import moment from 'moment';
 import { type TimeRangeBounds, type TimeBucketsInterval, TimeBuckets } from './time_buckets';
 import { useMlKibana } from '../contexts/kibana';
 
+// TODO Consolidate with legacy code in `ml/public/application/util/time_buckets.js`.
 export function timeBucketsServiceFactory(uiSettings: IUiSettingsClient) {
   function getTimeBuckets(): InstanceType<typeof TimeBuckets> {
     return new TimeBuckets({

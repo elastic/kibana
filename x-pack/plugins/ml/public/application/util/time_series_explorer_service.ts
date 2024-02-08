@@ -40,6 +40,8 @@ import { forecastServiceProvider } from '../services/forecast_service_provider';
 import { timeSeriesSearchServiceFactory } from '../timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
 import { useMlKibana } from '../contexts/kibana';
 
+// TODO Consolidate with legacy code in
+// `ml/public/application/timeseriesexplorer/timeseriesexplorer_utils/timeseriesexplorer_utils.js`.
 export function timeSeriesExplorerServiceFactory(
   uiSettings: IUiSettingsClient,
   mlApiServices: MlApiServices,

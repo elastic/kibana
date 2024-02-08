@@ -19,8 +19,8 @@ import {
   isModelPlotEnabled,
 } from '../../../../common/util/job_utils';
 
-// Note: This is a duplicated of `timeseries_search_service.ts` updated to move away from dependency cache.
-// The original file will be removed once all references are replaced with references to this file.
+// TODO Consolidate with legacy code in
+// `x-pack/plugins/ml/public/application/timeseriesexplorer/timeseries_search_service.ts`
 export function timeSeriesSearchServiceFactory(
   mlResultsService: MlResultsService,
   mlApiServices: MlApiServices

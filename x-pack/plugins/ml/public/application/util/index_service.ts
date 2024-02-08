@@ -8,6 +8,7 @@
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
 
+// TODO Consolidate with legacy code in `ml/public/application/util/index_utils.ts`.
 export function indexServiceFactory(dataViewsService: DataViewsContract) {
   return {
     /**
