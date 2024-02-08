@@ -26,15 +26,17 @@ export class ToastsService extends FtrService {
    * @param titleOnly If this is true, only the title of the error message is returned. There are error messages that only contain a title, no message.
    * @returns The title and message of the specified error toast.https://github.com/elastic/kibana/issues/17087
    */
-  public async getErrorToast(index: number = 1, titleOnly: boolean = false) {
+  public async getErrorToastByIndex(
+    index: number = 1,
+    titleOnly: boolean = false
+  ): Promise<{ title: string; message?: string }> {
+    const title = await this.getToastTitleByIndex(index);
+    if (titleOnly) return { title };
+
     const toast = await this.getToastElementByIndex(index);
-    const titleElement = await this.testSubjects.findDescendant('euiToastHeader', toast);
-    const title: string = await titleElement.getVisibleText();
-    if (titleOnly) {
-      return { title };
-    }
     const messageElement = await this.testSubjects.findDescendant('errorToastMessage', toast);
     const message: string = await messageElement.getVisibleText();
+
     return { title, message };
   }
 
@@ -138,7 +140,7 @@ export class ToastsService extends FtrService {
     return await elem.getVisibleText();
   }
 
-  public async getAllToastElements() {
+  public async getAllToastElements(): Promise<WebElementWrapper[]> {
     const list = await this.getGlobalToastList();
     return await list.findAllByCssSelector(`.euiToast`);
   }

@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await browser.get(currentUrl, false);
           const resolvedUrl = await browser.getCurrentUrl();
           expect(resolvedUrl).to.match(/discover/);
-          const { title } = await toasts.getErrorToast(1, true);
+          const { title } = await toasts.getErrorToastByIndex(1, true);
           expect(title).to.contain(
             'Unable to completely restore the URL, be sure to use the share functionality.'
           );
