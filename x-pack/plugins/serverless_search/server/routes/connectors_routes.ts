@@ -56,7 +56,7 @@ export const registerConnectorsRoutes = ({ http, router }: RouteDependencies) =>
       return connector
         ? response.ok({
             body: {
-              connector: connector,
+              connector,
             },
             headers: { 'content-type': 'application/json' },
           })

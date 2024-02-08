@@ -1092,6 +1092,12 @@ describe('Response actions', () => {
                   id: '123-456',
                 },
               },
+              agent: {
+                id: '123-456',
+              },
+              host: {
+                hostname: 'test-host',
+              },
             },
           ]),
         });
@@ -1214,6 +1220,12 @@ describe('Response actions', () => {
                 agent: {
                   id: '123-456',
                 },
+              },
+              agent: {
+                id: '123-456',
+              },
+              host: {
+                hostname: 'test-host',
               },
             },
           ]),
