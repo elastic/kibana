@@ -6,6 +6,7 @@
  */
 
 import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiIcon } from '@elastic/eui';
 import { EuiFieldSearch } from '@elastic/eui';
 import { EuiToolTip } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
@@ -34,6 +35,7 @@ import {
   SEARCH_BY_POLICY_ID_PLACEHOLDER,
   TOKEN_TITLE,
   POLICY_NAME_TITLE,
+  EMPTY_POLICY_NAME_HINT,
 } from './translations';
 
 const TextField = ({ text, dataTestSubj }: { text: string; dataTestSubj?: string }) => (
@@ -89,7 +91,22 @@ export const UninstallTokenListPage = () => {
       {
         field: 'policy_name',
         name: POLICY_NAME_TITLE,
-        render: (policyName: string) => <TextField text={policyName} />,
+        render: (policyName: string | null) => {
+          if (policyName === null) {
+            return (
+              <EuiToolTip content={EMPTY_POLICY_NAME_HINT}>
+                <EuiIcon
+                  type="questionInCircle"
+                  color="subdued"
+                  aria-label={EMPTY_POLICY_NAME_HINT}
+                  data-test-subj="emptyPolicyNameHint"
+                />
+              </EuiToolTip>
+            );
+          } else {
+            return <TextField text={policyName} />;
+          }
+        },
       },
       {
         field: 'policy_id',

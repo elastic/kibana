@@ -89,14 +89,14 @@ describe('UninstallTokenList page', () => {
     const uninstallTokenMetadataFixture1: UninstallTokenMetadata = {
       id: 'id-1',
       policy_id: 'policy-id-1',
-      policy_name: 'Policy Name 1',
+      policy_name: 'Dummy Policy Name',
       created_at: '2023-06-19T08:47:31.457Z',
     };
 
     const uninstallTokenMetadataFixture2: UninstallTokenMetadata = {
       id: 'id-2',
       policy_id: 'policy-id-2',
-      policy_name: 'Policy Name 2',
+      policy_name: null,
       created_at: '2023-06-20T08:47:31.457Z',
     };
 
@@ -105,16 +105,16 @@ describe('UninstallTokenList page', () => {
       token: '123456789',
     };
 
-    const getTokensResponseFixture: MockResponseType<GetUninstallTokensMetadataResponse> = {
+    const generateGetUninstallTokensFixture = (items: UninstallTokenMetadata[]) => ({
       isLoading: false,
       error: null,
       data: {
-        items: [uninstallTokenMetadataFixture1, uninstallTokenMetadataFixture2],
-        total: 2,
+        items,
+        total: items.length,
         page: 1,
         perPage: 20,
       },
-    };
+    });
 
     const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
       error: null,
@@ -123,7 +123,12 @@ describe('UninstallTokenList page', () => {
     };
 
     beforeEach(() => {
-      useGetUninstallTokensMock.mockReturnValue(getTokensResponseFixture);
+      useGetUninstallTokensMock.mockReturnValue(
+        generateGetUninstallTokensFixture([
+          uninstallTokenMetadataFixture1,
+          uninstallTokenMetadataFixture2,
+        ])
+      );
     });
 
     it('should render table with token', () => {
@@ -131,7 +136,26 @@ describe('UninstallTokenList page', () => {
 
       expect(renderResult.queryByTestId('uninstallTokenListTable')).toBeInTheDocument();
       expect(renderResult.queryByText('policy-id-1')).toBeInTheDocument();
-      expect(renderResult.queryByText('Policy Name 1')).toBeInTheDocument();
+    });
+
+    it('should NOT show hint if Policy Name is found', () => {
+      useGetUninstallTokensMock.mockReturnValue(
+        generateGetUninstallTokensFixture([uninstallTokenMetadataFixture1])
+      );
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('emptyPolicyNameHint')).not.toBeInTheDocument();
+      expect(renderResult.queryByText('Dummy Policy Name')).toBeInTheDocument();
+    });
+
+    it('should show hint if Policy Name is not found', () => {
+      useGetUninstallTokensMock.mockReturnValue(
+        generateGetUninstallTokensFixture([uninstallTokenMetadataFixture2])
+      );
+      const renderResult = render();
+
+      expect(renderResult.queryByTestId('emptyPolicyNameHint')).toBeInTheDocument();
+      expect(renderResult.queryByText('Dummy Policy Name')).not.toBeInTheDocument();
     });
 
     it('should hide token by default', () => {
