@@ -320,6 +320,10 @@ export class ObservabilityAIAssistantClient {
               },
             };
 
+            this.dependencies.logger.debug(
+              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
+            );
+
             nextMessages = nextMessages.concat(functionResponseMessage);
 
             subscriber.next({
@@ -356,6 +360,8 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages);
           }
+
+          this.dependencies.logger.debug(`Conversation: ${JSON.stringify(nextMessages, null, 2)}`);
 
           if (!persist) {
             subscriber.complete();
