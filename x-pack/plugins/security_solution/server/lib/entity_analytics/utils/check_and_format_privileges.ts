@@ -70,23 +70,21 @@ export async function checkAndFormatPrivileges({
   return {
     privileges: _formatPrivileges(privileges),
     has_all_required: hasAllRequested,
-    ...hasReadWritePermissions(privileges.elasticsearch),
+    ...hasReadWritePermissions(privileges.elasticsearch, ASSET_CRITICALITY_INDEX_PATTERN),
   };
 }
 
-const hasReadWritePermissions = ({
-  index,
-  cluster,
-}: CheckPrivilegesResponse['privileges']['elasticsearch']) => {
+export const hasReadWritePermissions = (
+  { index, cluster }: CheckPrivilegesResponse['privileges']['elasticsearch'],
+  indexKey = ''
+) => {
   const has =
     (type: string) =>
     ({ privilege, authorized }: { privilege: string; authorized: boolean }) =>
       privilege === type && authorized;
   return {
-    has_read_permissions:
-      index[ASSET_CRITICALITY_INDEX_PATTERN].some(has('read')) || cluster.some(has('read')),
+    has_read_permissions: index[indexKey]?.some(has('read')) || cluster.some(has('read')),
 
-    has_write_permissions:
-      index[ASSET_CRITICALITY_INDEX_PATTERN].some(has('write')) || cluster.some(has('write')),
+    has_write_permissions: index[indexKey]?.some(has('write')) || cluster.some(has('write')),
   };
 };
