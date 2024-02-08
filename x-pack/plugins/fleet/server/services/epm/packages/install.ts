@@ -87,6 +87,8 @@ import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 import { optimisticallyAddEsAssetReferences } from './es_assets_reference';
 
+const MAX_ENSURE_INSTALL_TIME = 60 * 1000;
+
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
@@ -100,22 +102,40 @@ export async function isPackageVersionOrLaterInstalled(options: {
   pkgName: string;
   pkgVersion: string;
 }): Promise<{ package: Installation; installType: InstallType } | false> {
-  const { savedObjectsClient, pkgName, pkgVersion } = options;
-  const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
-  const installedPackage = installedPackageObject?.attributes;
-  if (
-    installedPackage &&
-    (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
-  ) {
-    let installType: InstallType;
-    try {
-      installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
-    } catch (e) {
-      installType = 'unknown';
+  return pRetry(
+    async () => {
+      const { savedObjectsClient, pkgName, pkgVersion } = options;
+      const installedPackageObject = await getInstallationObject({ savedObjectsClient, pkgName });
+      const installedPackage = installedPackageObject?.attributes;
+      if (
+        installedPackage &&
+        (installedPackage.version === pkgVersion || semverLt(pkgVersion, installedPackage.version))
+      ) {
+        if (installedPackage.install_status === 'installing') {
+          throw new ConcurrentInstallOperationError(
+            `Package ${pkgName}-${pkgVersion} is currently installing`
+          );
+        }
+
+        let installType: InstallType;
+        try {
+          installType = getInstallType({ pkgVersion, installedPkg: installedPackageObject });
+        } catch (e) {
+          installType = 'unknown';
+        }
+        return { package: installedPackage, installType };
+      }
+      return false;
+    },
+    {
+      maxRetryTime: MAX_ENSURE_INSTALL_TIME,
+      onFailedAttempt: (error) => {
+        if (!(error instanceof ConcurrentInstallOperationError)) {
+          throw error;
+        }
+      },
     }
-    return { package: installedPackage, installType };
-  }
-  return false;
+  );
 }
 
 export async function ensureInstalledPackage(options: {
@@ -147,6 +167,7 @@ export async function ensureInstalledPackage(options: {
     pkgName: pkgKeyProps.name,
     pkgVersion: pkgKeyProps.version,
   });
+
   if (installedPackageResult) {
     return installedPackageResult.package;
   }
