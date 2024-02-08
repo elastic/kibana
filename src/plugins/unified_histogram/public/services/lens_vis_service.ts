@@ -17,6 +17,7 @@ import type {
   LensSuggestionsApi,
   Suggestion,
   TermsIndexPatternColumn,
+  TypedLensByValueInput,
 } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { Filter, getAggregateQueryMode, isOfAggregateQueryType } from '@kbn/es-query';
@@ -629,7 +630,7 @@ export class LensVisService {
         filters,
         suggestion,
         dataView,
-      });
+      }) as TypedLensByValueInput['attributes'];
 
       if (suggestionType === UnifiedHistogramSuggestionType.localHistogramDefault) {
         attributes.references = [
