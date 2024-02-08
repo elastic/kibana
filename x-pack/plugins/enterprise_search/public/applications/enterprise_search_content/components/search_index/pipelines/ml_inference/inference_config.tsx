@@ -25,7 +25,7 @@ export const InferenceConfiguration: React.FC = () => {
     selectedModel,
   } = useValues(MLInferenceLogic);
   if (!selectedModel || configuration.existingPipeline) return null;
-  const modelType = getMLType([selectedModel.type]);
+  const modelType = getMLType(selectedModel.types);
   switch (modelType) {
     case SUPPORTED_PYTORCH_TASKS.ZERO_SHOT_CLASSIFICATION:
       return (

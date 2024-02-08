@@ -613,7 +613,7 @@ export const MLInferenceLogic = kea<
             const sourceFields = fieldMappings?.map((m) => m.sourceField) ?? [];
             const missingSourceFields = sourceFields.filter((f) => !indexFields?.includes(f)) ?? [];
             const mlModel = selectableModels.find((model) => model.modelId === modelId);
-            const modelType = mlModel ? getMLType([mlModel.type]) : '';
+            const modelType = mlModel ? getMLType(mlModel.types) : '';
             const disabledReason =
               missingSourceFields.length > 0
                 ? EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS(missingSourceFields.join(', '))
