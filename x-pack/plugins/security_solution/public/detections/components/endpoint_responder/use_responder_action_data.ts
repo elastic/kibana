@@ -75,6 +75,7 @@ export const useResponderActionData = ({
   tooltip: ReactNode;
 } => {
   const isEndpointHost = agentType === 'endpoint';
+  const isSentinelOneHost = agentType === 'sentinel_one';
   const showResponseActionsConsole = useWithShowResponder();
 
   const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
@@ -89,7 +90,7 @@ export const useResponderActionData = ({
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
     // v8.13 disabled for third-party agent alerts if the feature flag is not enabled
     if (!isEndpointHost) {
-      return [!isSentinelOneV1Enabled, undefined];
+      return [isSentinelOneHost ? !isSentinelOneV1Enabled : true, undefined];
     }
 
     // Still loading host info
@@ -119,7 +120,14 @@ export const useResponderActionData = ({
     }
 
     return [false, undefined];
-  }, [isEndpointHost, isSentinelOneV1Enabled, isFetching, error, hostInfo?.host_status]);
+  }, [
+    isEndpointHost,
+    isSentinelOneHost,
+    isSentinelOneV1Enabled,
+    isFetching,
+    error,
+    hostInfo?.host_status,
+  ]);
 
   const handleResponseActionsClick = useCallback(() => {
     if (!isEndpointHost) {
