@@ -39,7 +39,6 @@ export const executeAction = async ({
         signal: abortSignal,
       },
     },
-    signal: abortSignal,
   });
 
   if (actionResult.status === 'error') {
