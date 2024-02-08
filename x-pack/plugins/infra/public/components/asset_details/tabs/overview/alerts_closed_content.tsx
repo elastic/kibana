@@ -23,7 +23,11 @@ export const AlertsClosedContent = ({ activeAlertCount }: { activeAlertCount?: n
           defaultMessage: 'Active alerts',
         })}
       >
-        <EuiBadge iconType="warning" color="danger">
+        <EuiBadge
+          data-test-subj="infraAssetDetailsAlertsClosedContentWithAlerts"
+          iconType="warning"
+          color="danger"
+        >
           {activeAlertCount}
         </EuiBadge>
       </EuiToolTip>
