@@ -77,6 +77,7 @@ export class DataViewLazy extends AbstractDataView {
   includeUnmapped?: boolean;
   fields?: string[];
   */
+  // sort alphabetically
   async getFields(
     {
       mapped = true,
@@ -105,7 +106,7 @@ export class DataViewLazy extends AbstractDataView {
     }
     // todo double check which field type is given preference
     if (scripted) {
-      scriptedResult = this.getScriptedFieldsInternal({ fieldName });
+      scriptedResult = this.getScriptedFields({ fieldName });
     }
 
     // todo add tests for runtime field on mapped field
@@ -113,11 +114,10 @@ export class DataViewLazy extends AbstractDataView {
       runtimeResult = this.getRuntimeFields({ fieldName });
     }
 
-    // might be better to return a map
     return { ...scriptedResult, ...mappedResult, ...runtimeResult };
   }
 
-  getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
+  private getRuntimeFields = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) =>
     Object.values(this.getRuntimeFieldSpecMap({ fieldName })).reduce((col, field) => {
       let cachedField = this.fieldCache.get(field.name);
       if (cachedField) {
@@ -178,13 +178,11 @@ export class DataViewLazy extends AbstractDataView {
     }
 
     // Make sure no field with the same name already exist
-    /* todo verify that I want to get rid of this
-    if (async this.getFieldByName(name) !== undefined) {
+    if ((await this.getFieldByName(name)) !== undefined) {
       throw new Error(
         `Can't create composite runtime field ["${name}"] as there is already a field with this name`
       );
     }
-    */
 
     // We first remove the runtime composite field with the same name which will remove all of its subFields.
     // This guarantees that we don't leave behind orphan data view fields
@@ -279,18 +277,15 @@ export class DataViewLazy extends AbstractDataView {
     }
 
     // Create the field if it does not exist or update an existing one
-    let createdField: DataViewField | undefined;
-    const existingField = await this.getFieldByName(fieldName);
+    let fld = await this.getFieldByName(fieldName);
 
-    // if (existingField && !existingField.isMapped) {
-    // todo
-    if (existingField) {
-      existingField.runtimeField = runtimeFieldSpec;
-      existingField.spec.type = castEsToKbnFieldTypeName(fieldType);
-      existingField.spec.esTypes = [fieldType];
+    if (fld) {
+      fld.runtimeField = runtimeFieldSpec;
+      fld.spec.type = castEsToKbnFieldTypeName(fieldType);
+      fld.spec.esTypes = [fieldType];
     } else {
       // todo is there a fn that does this?
-      createdField = this.fieldCache.set(
+      fld = this.fieldCache.set(
         fieldName,
         new DataViewField({
           name: fieldName,
@@ -318,7 +313,7 @@ export class DataViewLazy extends AbstractDataView {
       this.deleteFieldFormat(fieldName);
     }
 
-    return createdField ?? existingField!;
+    return fld;
   }
 
   private getRuntimeFieldSpecMap = ({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) => {
@@ -369,17 +364,19 @@ export class DataViewLazy extends AbstractDataView {
     return spec;
   };
 
-  // does this need to be named internal?
-  private getScriptedFieldsInternal({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
+  private getScriptedFields({ fieldName = ['*'] }: Pick<GetFieldsParams, 'fieldName'>) {
     const dataViewFields: Record<string, DataViewField> = {};
 
-    this.scriptedFields.forEach((field) => {
+    Object.values(this.scriptedFields).forEach((field) => {
       if (!fieldMatchesFieldsRequested(field.name, fieldName)) {
         return;
       }
       dataViewFields[field.name] =
         this.fieldCache.get(field.name) ||
-        this.fieldCache.set(field.name, new DataViewField(field as FieldSpec)); // todo try to remove 'as FieldSpec'
+        this.fieldCache.set(
+          field.name,
+          new DataViewField({ ...field, searchable: false, aggregatable: false })
+        );
     });
     return dataViewFields;
   }
@@ -451,7 +448,7 @@ export class DataViewLazy extends AbstractDataView {
   };
 
   getScriptedFieldsForQuery() {
-    return this.getScriptedFields().reduce((scriptFields, field) => {
+    return Object.values(this.scriptedFields).reduce((scriptFields, field) => {
       scriptFields[field.name] = {
         script: {
           source: field.script as string,
@@ -468,14 +465,14 @@ export class DataViewLazy extends AbstractDataView {
   async getComputedFields({ fieldNames = ['*'] }: { fieldNames: string[] }) {
     const scriptFields: Record<string, estypes.ScriptField> = {};
 
-    const docvalueFields = (
-      await this.getFields({
-        fieldName: fieldNames,
-        type: ['date', 'date_nanos'],
-        scripted: false,
-        runtime: false,
-      })
-    ).map((dateField) => {
+    const fieldMap = await this.getFields({
+      fieldName: fieldNames,
+      type: ['date', 'date_nanos'],
+      scripted: false,
+      runtime: false,
+    });
+
+    const docvalueFields = Object.values(fieldMap).map((dateField) => {
       return {
         field: dateField.name,
         format:
@@ -485,7 +482,7 @@ export class DataViewLazy extends AbstractDataView {
       };
     });
 
-    each(this.getScriptedFieldsInternal({ fieldName: fieldNames }), function (field) {
+    each(this.getScriptedFields({ fieldName: fieldNames }), function (field) {
       scriptFields[field.name] = {
         script: {
           source: field.script as string,
@@ -596,18 +593,9 @@ export class DataViewLazy extends AbstractDataView {
     // todo also remove from any lists
   }
 
-  // not implementing, use getFields instead
-  // getNonScriptedFields() {
-  // }
-
-  // todo make sure this returns field instances
-  getScriptedFields() {
-    // return [...this.fields.getAll().filter((field) => field.scripted)];
-    return this.scriptedFields;
-  }
-
+  // todo this might be duplicating work in abstract / internal
   upsertScriptedField(field: FieldSpec) {
-    this.scriptedFields.push(field);
+    this.upsertScriptedFieldInternal(field);
   }
 
   async isTimeBased() {
@@ -622,8 +610,8 @@ export class DataViewLazy extends AbstractDataView {
   getTimeField = () => (this.timeFieldName ? this.getFieldByName(this.timeFieldName) : undefined);
 
   async getFieldByName(name: string, forceRefresh = false) {
-    const fieldArray = await this.getFields({ fieldName: [name], forceRefresh });
-    return fieldArray.length ? fieldArray[0] : undefined;
+    const fieldMap = await this.getFields({ fieldName: [name], forceRefresh });
+    return fieldMap[name];
   }
 
   /**

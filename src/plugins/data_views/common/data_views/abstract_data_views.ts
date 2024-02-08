@@ -12,7 +12,7 @@ import type {
   SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
-import { cloneDeep, findIndex, merge } from 'lodash';
+import { cloneDeep, merge } from 'lodash';
 import type { DataViewFieldBase } from '@kbn/es-query';
 import type {
   DataViewSpec,
@@ -124,7 +124,8 @@ export abstract class AbstractDataView {
    */
   public matchedIndices: string[] = [];
 
-  protected scriptedFields: DataViewFieldBase[];
+  // todo reues type
+  protected scriptedFields: Record<string, DataViewFieldBase>; // DataViewFieldBase[];
 
   private allowHidden: boolean = false;
 
@@ -154,10 +155,15 @@ export abstract class AbstractDataView {
       : [];
 
     this.allowNoIndex = spec?.allowNoIndex || false;
-    // CRUD operations on scripted fields need to be examined
+    // TODO CRUD operations on scripted fields need to be examined
     this.scriptedFields = spec?.fields
-      ? Object.values(spec.fields).filter((field) => field.scripted)
-      : [];
+      ? Object.values(spec.fields)
+          .filter((field) => field.scripted)
+          .reduce((acc, field) => {
+            acc[field.name] = field;
+            return acc;
+          }, {} as Record<string, DataViewFieldBase>)
+      : {};
 
     // set dependencies
     this.fieldFormats = { ...fieldFormats };
@@ -347,29 +353,20 @@ export abstract class AbstractDataView {
     };
   }
 
+  // todo merge with other fn?
   protected upsertScriptedFieldInternal = (field: FieldSpec) => {
-    // search for scriped field with same name
-    const findByName = (f: DataViewFieldBase) => f.name === field.name;
-
-    const fieldIndex = findIndex(this.scriptedFields, findByName);
-
-    const scriptedField: DataViewFieldBase = {
+    this.scriptedFields[field.name] = {
       name: field.name,
       script: field.script,
       lang: field.lang,
       type: field.type,
       scripted: field.scripted,
     };
-
-    if (fieldIndex === -1) {
-      this.scriptedFields.push(scriptedField);
-    } else {
-      this.scriptedFields[fieldIndex] = scriptedField;
-    }
   };
 
+  // todo merge with other fn?
   protected deleteScriptedFieldInternal = (fieldName: string) => {
-    this.scriptedFields = this.scriptedFields.filter((field) => field.name !== fieldName);
+    delete this.scriptedFields[fieldName];
   };
 
   /**

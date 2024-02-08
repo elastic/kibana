@@ -1283,7 +1283,7 @@ export class DataViewsService {
     const metaFields = await this.config.get<string[] | undefined>(META_FIELDS);
 
     const dataView = new DataView({
-      spec: dataViewLazy.toSpec(),
+      spec: await dataViewLazy.toSpec(),
       fieldFormats: this.fieldFormats,
       shortDotsEnable,
       metaFields,

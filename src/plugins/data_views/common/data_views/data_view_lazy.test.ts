@@ -99,7 +99,7 @@ describe('DataViewLazy', () => {
 
   describe('fields', () => {
     test('should have expected properties on fields', async function () {
-      const [field] = await dataViewLazy.getFields({ fieldName: ['bytes'] });
+      const { bytes: field } = await dataViewLazy.getFields({ fieldName: ['bytes'] });
       expect(field).toHaveProperty('displayName');
       expect(field).toHaveProperty('filterable');
       expect(field).toHaveProperty('sortable');
@@ -128,11 +128,13 @@ describe('DataViewLazy', () => {
   });
 
   describe('getScriptedFields', () => {
-    test('should return all scripted fields', () => {
+    test('should return all scripted fields', async () => {
       const scriptedNames = stubLogstashFields
         .filter((item: DataViewField) => item.scripted === true)
         .map((item: DataViewField) => item.name);
-      const respNames = map(dataViewLazy.getScriptedFields(), 'name');
+      const respNames = Object.keys(
+        await dataViewLazy.getFields({ mapped: false, runtime: false })
+      );
 
       expect(respNames).toEqual(scriptedNames);
     });
@@ -197,10 +199,10 @@ describe('DataViewLazy', () => {
 
   describe('add and remove scripted fields', () => {
     test('should append the scripted field', async () => {
-      fieldCapsResponse = [];
-
       // keep a copy of the current scripted field count
-      const oldCount = dataViewLazy.getScriptedFields().length;
+      const oldCount = Object.keys(
+        await dataViewLazy.getFields({ mapped: false, runtime: false })
+      ).length;
 
       // add a new scripted field
       const scriptedField = {
@@ -219,7 +221,9 @@ describe('DataViewLazy', () => {
         searchable: true,
       });
 
-      const scriptedFields = dataViewLazy.getScriptedFields();
+      const scriptedFields = Object.keys(
+        await dataViewLazy.getFields({ mapped: false, runtime: false })
+      );
       expect(scriptedFields).toHaveLength(oldCount + 1);
 
       expect((await dataViewLazy.getFieldByName(scriptedField.name))?.name).toEqual(
@@ -229,13 +233,18 @@ describe('DataViewLazy', () => {
 
     test('should remove scripted field, by name', async () => {
       fieldCapsResponse = [];
-      const scriptedFields = dataViewLazy.getScriptedFields();
+      const scriptedFields = Object.values(
+        await dataViewLazy.getFields({ mapped: false, runtime: false })
+      );
       const oldCount = scriptedFields.length;
       const scriptedField = last(scriptedFields)!;
 
       await dataViewLazy.removeScriptedField(scriptedField.name);
 
-      expect(dataViewLazy.getScriptedFields().length).toEqual(oldCount - 1);
+      expect(
+        Object.keys(await dataViewLazy.getFields({ mapped: false, runtime: false })).length
+      ).toEqual(oldCount - 1);
+
       expect(await dataViewLazy.getFieldByName(scriptedField.name)).toEqual(undefined);
     });
   });
@@ -344,8 +353,9 @@ describe('DataViewLazy', () => {
     });
 
     // todo - mapped fields need to override runtime fields
-    /* I think I'd prefer to skip this as its not where we want to be long term.
-    Might be less work to make it work now
+    // I think I'd prefer to skip this as its not where we want to be long term.
+    // Might be less work to make it work now
+    /*
         test('ignore runtime field mapping if a mapped field exists with the same name', async () => {
       expect(dataViewLazy.getRuntimeMappings()).toEqual({
         runtime_field: { script: { source: "emit('hello world')" }, type: 'keyword' },
@@ -414,13 +424,13 @@ describe('DataViewLazy', () => {
     });
 
     test('add and remove composite runtime field as new fields', async () => {
-      const fieldCount = (await dataViewLazy.getFields({})).length;
+      const fieldCount = Object.values(await dataViewLazy.getFields({})).length;
       await dataViewLazy.addRuntimeField('new_field', runtimeCompositeWithAttrs);
       expect((await dataViewLazy.toSpec()).runtimeFieldMap).toEqual({
         new_field: runtimeComposite,
         runtime_field: runtimeField.runtimeField,
       });
-      expect((await dataViewLazy.getFields({})).length - fieldCount).toEqual(2);
+      expect(Object.values(await dataViewLazy.getFields({})).length - fieldCount).toEqual(2);
       expect(dataViewLazy.getRuntimeField('new_field')).toMatchSnapshot();
       expect((await dataViewLazy.toSpec())!.fields!['new_field.a']).toBeDefined();
       expect((await dataViewLazy.toSpec())!.fields!['new_field.b']).toBeDefined();
