@@ -15,7 +15,7 @@ import { ToggleSLOView } from './toggle_slo_view';
 import { GroupView } from './grouped_slos/group_view';
 
 export function SloList() {
-  const { state, store: storeState } = useUrlSearchState();
+  const { state, onStateChange: storeState } = useUrlSearchState();
   const { view, page, perPage, kqlQuery, filters, tagsFilter, statusFilter, groupBy } = state;
 
   const {

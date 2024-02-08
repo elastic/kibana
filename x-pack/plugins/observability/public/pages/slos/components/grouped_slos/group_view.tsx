@@ -24,7 +24,7 @@ interface Props {
 }
 
 export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props) {
-  const { state, store: storeState } = useUrlSearchState();
+  const { state, onStateChange } = useUrlSearchState();
   const { tagsFilter, statusFilter, filters, page, perPage, lastRefresh } = state;
 
   const { data, isLoading, isError } = useFetchSloGroups({
@@ -39,7 +39,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
   });
   const { results = [], total = 0 } = data ?? {};
   const handlePageClick = (pageNumber: number) => {
-    storeState({ page: pageNumber });
+    onStateChange({ page: pageNumber });
   };
 
   if (isLoading) {
@@ -86,7 +86,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
             itemsPerPage={perPage}
             itemsPerPageOptions={[10, 25, 50, 100]}
             onChangeItemsPerPage={(newPerPage) => {
-              storeState({ perPage: newPerPage });
+              onStateChange({ perPage: newPerPage });
             }}
           />
         </EuiFlexItem>

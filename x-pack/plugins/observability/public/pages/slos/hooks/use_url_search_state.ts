@@ -48,7 +48,7 @@ export const DEFAULT_STATE = {
 
 export function useUrlSearchState(): {
   state: SearchState;
-  store: (state: Partial<SearchState>) => void;
+  onStateChange: (state: Partial<SearchState>) => void;
 } {
   const {
     data: { query },
@@ -94,7 +94,7 @@ export function useUrlSearchState(): {
   }, [query.filterManager, query.queryString, urlStateStorage]);
   return {
     state: deepmerge(DEFAULT_STATE, state),
-    store: (newState: Partial<SearchState>) => {
+    onStateChange: (newState: Partial<SearchState>) => {
       setState((stateN) => ({ ...stateN, ...newState }));
       urlStateStorage.current?.set(
         SLO_LIST_SEARCH_URL_STORAGE_KEY,
