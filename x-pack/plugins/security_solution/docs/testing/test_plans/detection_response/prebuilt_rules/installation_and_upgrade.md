@@ -63,6 +63,11 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
     - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
     - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
+  - [Rule upgrade workflow: viewing rule changes in per-field diff view](#rule-upgrade-workflow-viewing-rule-changes-in-per-field-diff-view)
+    - [**Scenario: User can see changes in a side-by-side per-field diff view**](#scenario-user-can-see-changes-in-a-side-by-side-per-field-diff-view)
+    - [**Scenario: Field groupings should be rendered together in the same accordion panel**](#scenario-field-groupings-should-be-rendered-together-in-the-same-accordion-panel)
+    - [**Scenario: Undefined values are displayed with empty diffs**](#scenario-undefined-values-are-displayed-with-empty-diffs)
+    - [**Scenario: Field diff components have the same grouping and order as in rule details overview**](#scenario-field-diff-components-have-the-same-grouping-and-order-as-in-rule-details-overview)
   - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
     - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
   - [Error handling](#error-handling)
@@ -947,6 +952,86 @@ Then the preview should open
 And visible properties should be sorted alphabetically
 When a user expands all hidden sections
 Then all properties of the rule should be sorted alphabetically
+```
+
+### Rule upgrade workflow: viewing rule changes in per-field diff view
+
+#### **Scenario: User can see changes in a side-by-side per-field diff view**
+
+**Automation**: 1 e2e test
+
+```Gherkin
+Given X prebuilt rules are installed in Kibana
+And for Y of these rules new versions are available
+When user opens the Rule Updates table and selects a rule
+Then the per-field upgrade preview should open
+And rule changes should be displayed in a two-column diff view with each field in its own accordion component
+And all field diff accordions should be open by default
+And correct rule version numbers should be displayed in their respective columns
+When the user selects another rule without closing the preview
+Then the preview should display the changes for the newly selected rule
+```
+
+#### **Scenario: Field groupings should be rendered together in the same accordion panel**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule contains one or more <field> values
+When user opens the upgrade preview
+The <field> diff accordion panel should display its grouped rule properties
+And each property should have its name displayed inside the panel
+
+Examples:
+| field              |
+| data_source        |
+| kql_query          |
+| eql_query          |
+| esql_query         |
+| threat_query       |
+| rule_schedule      |
+| rule_name_override |
+| timestamp_override |
+| timeline_template  |
+| building_block     |
+| threshold          |
+```
+
+#### **Scenario: Undefined values are displayed with empty diffs**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has field in the <version_one> version that didn't exist in the <version_two> version
+When a user opens the upgrade preview
+Then the preview should open
+And the old/new field should render an empty panel
+
+Examples:
+| version_one | version_two |
+| target      | current     |
+| current     | target      |
+```
+
+#### **Scenario: Field diff components have the same grouping and order as in rule details overview**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has multiple fields that are different between the current and target version
+When a user opens the upgrade preview
+Then the multiple field diff accordions should be sorted in the same order as on the rule details overview tab
+And the field diff accordions should be grouped inside its corresponding <section> accordion
+
+Examples:
+| section     |
+| About       |
+| Definition  |
+| Schedule    |
+| Setup Guide |
 ```
 
 ### Rule upgrade workflow: misc cases
