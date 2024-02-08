@@ -15,6 +15,7 @@ import { FunctionRegistrationParameters } from '.';
 import { MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
+import { RespondFunctionResources } from '../service/types';
 
 export function registerRecallFunction({
   client,
@@ -95,10 +96,6 @@ export function registerRecallFunction({
         queries,
       });
 
-      resources.logger.debug(`Received ${suggestions.length} suggestions`);
-
-      resources.logger.debug(JSON.stringify(suggestions, null, 2));
-
       if (suggestions.length === 0) {
         return {
           content: [] as unknown as Serializable,
@@ -113,10 +110,8 @@ export function registerRecallFunction({
         client,
         connectorId,
         signal,
+        resources,
       });
-
-      resources.logger.debug(`Received ${relevantDocuments.length} relevant documents`);
-      resources.logger.debug(JSON.stringify(relevantDocuments, null, 2));
 
       return {
         content: relevantDocuments as unknown as Serializable,
@@ -177,6 +172,7 @@ async function scoreSuggestions({
   client,
   connectorId,
   signal,
+  resources,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   systemMessage: Message;
@@ -185,7 +181,10 @@ async function scoreSuggestions({
   client: ObservabilityAIAssistantClient;
   connectorId: string;
   signal: AbortSignal;
+  resources: RespondFunctionResources;
 }) {
+  resources.logger.debug(`Suggestions: ${JSON.stringify(suggestions, null, 2)}`);
+
   const systemMessageExtension =
     dedent(`You have the function called score available to help you inform the user about how relevant you think a given document is to the conversation.
     Please give a score between 1 and 7, fractions are allowed.
@@ -262,6 +261,8 @@ async function scoreSuggestions({
     scoreFunctionRequest.message.function_call.arguments
   );
 
+  resources.logger.debug(`Scores: ${JSON.stringify(scores, null, 2)}`);
+
   if (scores.length === 0) {
     return [];
   }
@@ -278,6 +279,11 @@ async function scoreSuggestions({
   const relevantDocuments = suggestions.filter((suggestion) =>
     relevantDocumentIds.includes(suggestion.id)
   );
+
+  resources.logger.debug(
+    `Found ${relevantDocumentIds.length} relevant suggestions from the knowledge base. ${scores.length} suggestions were considered in total.`
+  );
+  resources.logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
   return relevantDocuments;
 }
