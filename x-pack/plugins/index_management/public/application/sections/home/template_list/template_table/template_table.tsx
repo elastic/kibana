@@ -85,8 +85,9 @@ export const TemplateTable: React.FunctionComponent<Props> = ({
     {
       field: 'composedOf',
       name: i18n.translate('xpack.idxMgmt.templateList.table.componentsColumnTitle', {
-        defaultMessage: 'Components',
+        defaultMessage: 'Component templates',
       }),
+      width: '100px',
       truncateText: true,
       sortable: (template) => {
         return template.composedOf?.length;
