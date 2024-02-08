@@ -15,6 +15,7 @@ interface QuestionInputProps {
   placeholder: string;
   value: string;
   onChange: (value: string) => void;
+  onEnterPress: () => void;
   button: React.ReactNode;
   isDisabled?: boolean;
 }
@@ -23,10 +24,16 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
   placeholder,
   value,
   onChange,
+  onEnterPress,
   button,
   isDisabled,
 }) => {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => onChange(e.target.value);
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      onEnterPress();
+    }
+  };
 
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" css={{ position: 'relative' }}>
@@ -39,6 +46,7 @@ export const QuestionInput: React.FC<QuestionInputProps> = ({
         placeholder={placeholder}
         value={value}
         onChange={handleChange}
+        onKeyPress={handleKeyPress}
         disabled={isDisabled}
       />
 

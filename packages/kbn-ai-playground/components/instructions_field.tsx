@@ -8,37 +8,41 @@
 import React from 'react';
 
 import { EuiFormRow, EuiIcon, EuiTextArea, EuiToolTip } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 
 interface InstructionsFieldProps {
-  label: string;
-  helpText: string;
-  placeholder: string;
   value?: string;
   onChange: (value: string) => void;
 }
 
-export const InstructionsField: React.FC<InstructionsFieldProps> = ({
-  label,
-  value,
-  onChange,
-  placeholder,
-  helpText,
-}) => {
+export const InstructionsField: React.FC<InstructionsFieldProps> = ({ value, onChange }) => {
   const handlePromptChange = (e: React.ChangeEvent<HTMLTextAreaElement>) =>
     onChange(e.target.value);
 
   return (
     <EuiFormRow
       label={
-        <EuiToolTip content={helpText}>
-          <span>
-            {label} <EuiIcon type="questionInCircle" color="subdued" />
-          </span>
+        <EuiToolTip
+          content={i18n.translate('aiPlayground.sidebar.instructionsField.help', {
+            defaultMessage:
+              'This is the instruction or question you want the AI to respond to. Be clear and specific for the best results.',
+          })}
+        >
+          <>
+            <span>
+              {i18n.translate('aiPlayground.sidebar.instructionsField.label', {
+                defaultMessage: 'Instructions',
+              })}
+            </span>
+            <EuiIcon type="questionInCircle" color="subdued" />
+          </>
         </EuiToolTip>
       }
     >
       <EuiTextArea
-        placeholder={placeholder}
+        placeholder={i18n.translate('aiPlayground.sidebar.instructionsField.placeholder', {
+          defaultMessage: 'Replace me',
+        })}
         value={value}
         onChange={handlePromptChange}
         fullWidth

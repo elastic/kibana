@@ -22,6 +22,18 @@ export interface Message {
   role: MessageRole;
 }
 
+export enum ChatFormFields {
+  question = 'question',
+  citations = 'citations',
+  prompt = 'prompt',
+}
+
+export interface ChatForm {
+  [ChatFormFields.question]: string;
+  [ChatFormFields.prompt]: string;
+  [ChatFormFields.citations]: boolean;
+}
+
 export interface AIPlaygroundPluginStartDeps {
   security: SecurityPluginStart;
 }

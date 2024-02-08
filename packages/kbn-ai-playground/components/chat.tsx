@@ -7,10 +7,12 @@
 
 import React from 'react';
 
+import { Controller, useForm } from 'react-hook-form';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiForm,
   EuiHorizontalRule,
   EuiLink,
   useEuiTheme,
@@ -18,18 +20,23 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { MessageRole } from '../types';
+import { ChatForm, ChatFormFields, MessageRole } from '../types';
 
-import { ChatSidebar } from './chat_sidebar';
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
 
 import { TelegramIcon } from './telegram_icon';
+import { InstructionsField } from '@kbn/ai-playground/components/instructions_field';
+import { IncludeCitationsField } from '@kbn/ai-playground/components/include_citations_field';
 
 export const Chat = () => {
   const { euiTheme } = useEuiTheme();
-  const [question, setQuestion] = React.useState('');
-  const isSendButtonDisabled = !question.trim();
+  const {
+    control,
+    formState: { isValid, isSubmitting },
+    resetField,
+    handleSubmit,
+  } = useForm<ChatForm>();
   const messages = [
     {
       id: 'sfs',
@@ -54,58 +61,92 @@ export const Chat = () => {
       content: 'What is the average response time?',
     },
   ];
+  const onSubmit = (data: ChatForm) => {
+    resetField(ChatFormFields.question);
+  };
 
   return (
-    <EuiFlexGroup gutterSize="none">
-      <EuiFlexItem
-        grow={2}
-        css={{
-          borderRight: euiTheme.border.thin,
-          padding: euiTheme.size.l,
-        }}
-      >
-        <EuiFlexGroup direction="column">
-          <EuiFlexItem grow={1}>
-            <MessageList messages={messages} />
-          </EuiFlexItem>
+    <EuiForm component="form" css={{ display: 'flex' }} onSubmit={handleSubmit(onSubmit)}>
+      <EuiFlexGroup gutterSize="none">
+        <EuiFlexItem
+          grow={2}
+          css={{
+            borderRight: euiTheme.border.thin,
+            padding: euiTheme.size.l,
+          }}
+        >
+          <EuiFlexGroup direction="column">
+            <EuiFlexItem grow={1}>
+              <MessageList messages={messages} />
+            </EuiFlexItem>
 
-          <EuiHorizontalRule margin="none" />
+            <EuiHorizontalRule margin="none" />
 
-          <EuiFlexItem grow={false}>
-            <QuestionInput
-              placeholder={i18n.translate(
-                'aiPlayground.chat.questionInput.askQuestionPlaceholder',
-                {
-                  defaultMessage: 'Ask a question',
-                }
-              )}
-              value={question}
-              onChange={setQuestion}
-              button={
-                <EuiButtonIcon
-                  aria-label={i18n.translate('aiPlayground.chat.sendButtonAriaLabel', {
-                    defaultMessage: 'Send a question',
-                  })}
-                  display={isSendButtonDisabled ? 'empty' : 'base'}
-                  size="s"
-                  type="submit"
-                  isDisabled={isSendButtonDisabled}
-                  iconType={TelegramIcon}
-                />
-              }
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <Controller
+                name={ChatFormFields.question}
+                control={control}
+                defaultValue=""
+                rules={{
+                  required: true,
+                  validate: (rule) => !!rule?.trim(),
+                }}
+                render={({ field }) => (
+                  <QuestionInput
+                    placeholder={i18n.translate(
+                      'aiPlayground.chat.questionInput.askQuestionPlaceholder',
+                      {
+                        defaultMessage: 'Ask a question',
+                      }
+                    )}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onEnterPress={handleSubmit(onSubmit)}
+                    button={
+                      <EuiButtonIcon
+                        aria-label={i18n.translate('aiPlayground.chat.sendButtonAriaLabel', {
+                          defaultMessage: 'Send a question',
+                        })}
+                        display={isValid ? 'base' : 'empty'}
+                        size="s"
+                        type="submit"
+                        isLoading={isSubmitting}
+                        isDisabled={!isValid}
+                        iconType={TelegramIcon}
+                      />
+                    }
+                  />
+                )}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
 
-      <EuiFlexItem
-        grow={1}
-        css={{
-          padding: euiTheme.size.l,
-        }}
-      >
-        <ChatSidebar />
-      </EuiFlexItem>
-    </EuiFlexGroup>
+        <EuiFlexItem
+          grow={1}
+          css={{
+            padding: euiTheme.size.l,
+          }}
+        >
+          <Controller
+            name={ChatFormFields.prompt}
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <InstructionsField value={field.value} onChange={field.onChange} />
+            )}
+          />
+
+          <Controller
+            name={ChatFormFields.citations}
+            control={control}
+            defaultValue={true}
+            render={({ field }) => (
+              <IncludeCitationsField checked={field.value} onChange={field.onChange} />
+            )}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiForm>
   );
 };
