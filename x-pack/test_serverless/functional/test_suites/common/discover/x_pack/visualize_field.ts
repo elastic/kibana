@@ -36,13 +36,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
-    });
-
-    beforeEach(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await PageObjects.common.navigateToApp('discover');
+    });
+
+    beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
       await setDiscoverTimeRange();
     });

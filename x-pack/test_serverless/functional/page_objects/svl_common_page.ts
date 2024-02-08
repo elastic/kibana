@@ -29,12 +29,12 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
     async loginWithRole(role: string) {
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getSessionCookieForRole(role);
-      const bootstrapUrl = deployment.getHostPort() + '/bootstrap.js';
+      const bootstrapUrl = deployment.getHostPort() + '/bootstrap-anonymous.js';
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,
         async () => {
-          log.debug(`Navigate to /bootstrap.js`);
+          log.debug(`Navigate to /bootstrap-anonymous.js`);
           await browser.get(bootstrapUrl);
           // accept alert if it pops up
           const alert = await browser.getAlert();
@@ -51,23 +51,21 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             const cookies = await browser.getCookies();
             return cookies.length === 0;
           });
+          log.debug(`Clearing session & local storages`);
+          await browser.clearSessionStorage();
+          await browser.clearLocalStorage();
           await pageObjects.common.sleep(700);
-          // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
-          log.debug(`Navigate to /bootstrap.js again`);
-          await browser.get(bootstrapUrl);
-          await find.byCssSelector('body > pre', 5000);
           log.debug(`Set the new cookie in the current browser context`);
-          await browser.setCookie('sid', sidCookie);
-          await pageObjects.common.sleep(700);
+          await retry.waitForWithTimeout('Browser cookie is set', 10000, async () => {
+            await browser.setCookie('sid', sidCookie);
+            await pageObjects.common.sleep(1000);
+            const cookies = await browser.getCookies();
+            return cookies.length === 1;
+          });
           // Cookie should be already set in the browsing context, navigating to the Home page
           log.debug(`Navigate to base url`);
-          await browser.get(deployment.getHostPort(), false);
-          // Verifying that we are logged in
-          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
-            log.debug('userMenuButton found, login passed');
-          } else {
-            throw new Error(`Failed to login with cookie for '${role}' role`);
-          }
+          await browser.refresh();
+          await browser.get(deployment.getHostPort());
           // Validating that the new cookie in the browser is set for the correct user
           const browserCookies = await browser.getCookies();
           if (browserCookies.length === 0) {
@@ -82,12 +80,18 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
           // email returned from API call must match the email for the specified role
           if (body.email === userData.email) {
             log.debug(`The new cookie is properly set for  '${role}' role`);
-            return true;
           } else {
             log.debug(`API response body: ${JSON.stringify(body)}`);
             throw new Error(
               `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
             );
+          }
+          // Verifying that we are logged in
+          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
+            log.debug('userMenuButton found, login passed');
+            return true;
+          } else {
+            throw new Error(`Failed to login with cookie for '${role}' role`);
           }
         }
       );
