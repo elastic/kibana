@@ -46,7 +46,7 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     return sortBy([...this.devTools.values()], 'order');
   }
 
-  constructor(private initializerContext: PluginInitializerContext<ConfigSchema>) {}
+  constructor() {}
 
   public setup(coreSetup: CoreSetup, { urlForwarding }: { urlForwarding: UrlForwardingSetup }) {
     const { application: applicationSetup, getStartServices } = coreSetup;
@@ -110,9 +110,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
     if (this.getSortedDevTools().length === 0) {
       this.appStateUpdater.next(() => ({ status: AppStatus.inaccessible }));
     } else {
-      const config = this.initializerContext.config.get();
-      const visibleInSideNavigation = config.deeplinks.navLinkStatus === 'visible';
-
       this.appStateUpdater.next(() => {
         const deepLinks: AppDeepLink[] = [...this.devTools.values()]
           .filter(
@@ -124,7 +121,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
               id: tool.id,
               title: tool.title as string,
               path: `#/${tool.id}`,
-              visibleInSideNavigation,
             };
             if (!devtoolsDeeplinkIds.some((id) => id === deepLink.id)) {
               throw new Error('Deeplink must be registered in package.');
@@ -134,7 +130,6 @@ export class DevToolsPlugin implements Plugin<DevToolsSetup, void> {
 
         return {
           deepLinks,
-          visibleInSideNavigation,
         };
       });
     }

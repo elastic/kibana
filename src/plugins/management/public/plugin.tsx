@@ -20,7 +20,6 @@ import {
   AppMountParameters,
   AppUpdater,
   AppStatus,
-  AppNavLinkStatus,
   AppDeepLink,
 } from '@kbn/core/public';
 import { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
@@ -55,20 +54,15 @@ export class ManagementPlugin
   private readonly managementSections = new ManagementSectionsService();
 
   private readonly appUpdater = new BehaviorSubject<AppUpdater>(() => {
-    const config = this.initializerContext.config.get();
-    const visibleInSideNavigation = config.deeplinks.navLinkStatus === 'visible';
-
     const deepLinks: AppDeepLink[] = Object.values(this.managementSections.definedSections).map(
       (section: ManagementSection) => ({
         id: section.id,
         title: section.title,
-        visibleInSideNavigation,
         deepLinks: section.getAppsEnabled().map((mgmtApp) => ({
           id: mgmtApp.id,
           title: mgmtApp.title,
           path: mgmtApp.basePath,
           keywords: mgmtApp.keywords,
-          visibleInSideNavigation,
         })),
       })
     );
@@ -160,7 +154,7 @@ export class ManagementPlugin
       this.appUpdater.next(() => {
         return {
           status: AppStatus.inaccessible,
-          navLinkStatus: AppNavLinkStatus.hidden,
+          visibleIn: [],
         };
       });
     }

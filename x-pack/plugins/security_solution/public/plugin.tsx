@@ -220,9 +220,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       title: SOLUTION_NAME,
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
-      // Initializing app as visible to make sure it appears on the Kibana home page, it is hidden when deepLinks update
-      // navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
       updater$: this.appUpdater$,
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params: AppMountParameters) => {

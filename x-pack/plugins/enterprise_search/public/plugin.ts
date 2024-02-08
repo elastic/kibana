@@ -16,7 +16,6 @@ import {
   Plugin,
   PluginInitializerContext,
   DEFAULT_APP_CATEGORIES,
-  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
@@ -67,9 +66,9 @@ export interface PluginsStart {
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
+  ml: MlPluginStart;
   security: SecurityPluginStart;
   share: SharePluginStart;
-  ml: MlPluginStart;
 }
 
 export interface ESConfig {
@@ -78,7 +77,6 @@ export interface ESConfig {
 
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
-  private esConfig: ESConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
@@ -86,6 +84,7 @@ export class EnterpriseSearchPlugin implements Plugin {
   }
 
   private data: ClientData = {} as ClientData;
+  private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
     try {
@@ -252,8 +251,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(EnterpriseSearchAISearch, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.hidden,
       title: AI_SEARCH_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
@@ -274,8 +273,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Applications, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
       title: APPLICATIONS_PLUGIN.NAV_TITLE,
     });
 
@@ -297,8 +294,6 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(Analytics, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.default,
-      searchable: true,
       title: ANALYTICS_PLUGIN.NAME,
     });
 
@@ -320,8 +315,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
         return renderApp(SearchExperiences, kibanaDeps, pluginData);
       },
-      navLinkStatus: AppNavLinkStatus.hidden,
       title: SEARCH_EXPERIENCES_PLUGIN.NAME,
+      visibleIn: [],
     });
 
     if (config.canDeployEntSearch) {
@@ -343,8 +338,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(AppSearch, kibanaDeps, pluginData);
         },
-        navLinkStatus: AppNavLinkStatus.hidden,
         title: APP_SEARCH_PLUGIN.NAME,
+        visibleIn: [],
       });
 
       core.application.register({
@@ -368,8 +363,8 @@ export class EnterpriseSearchPlugin implements Plugin {
 
           return renderApp(WorkplaceSearch, kibanaDeps, pluginData);
         },
-        navLinkStatus: AppNavLinkStatus.hidden,
         title: WORKPLACE_SEARCH_PLUGIN.NAME,
+        visibleIn: [],
       });
     }
 

@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { AppNavLinkStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
+import { AppStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId, sloFeatureId } from '../../common';
 
@@ -34,7 +34,7 @@ export function updateGlobalNavigation({
           if (capabilities[casesFeatureId].read_cases && someVisible) {
             return {
               ...link,
-              visibleInSideNavigation: true,
+              visibleIn: ['sideNav', 'globalSearch'],
             };
           }
           return null;
@@ -42,7 +42,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleInSideNavigation: true,
+              visibleIn: ['sideNav', 'globalSearch'],
             };
           }
           return null;
@@ -50,7 +50,7 @@ export function updateGlobalNavigation({
           if (someVisible) {
             return {
               ...link,
-              visibleInSideNavigation: true,
+              visibleIn: ['sideNav', 'globalSearch'],
             };
           }
           return null;
@@ -58,7 +58,7 @@ export function updateGlobalNavigation({
           if (!!capabilities[sloFeatureId]?.read) {
             return {
               ...link,
-              visibleInSideNavigation: true,
+              visibleIn: ['sideNav', 'globalSearch'],
             };
           }
           return null;
@@ -70,9 +70,9 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    navLinkStatus:
+    status:
       someVisible || !!capabilities[sloFeatureId]?.read
-        ? AppNavLinkStatus.visible
-        : AppNavLinkStatus.hidden,
+        ? AppStatus.accessible
+        : AppStatus.inaccessible,
   }));
 }

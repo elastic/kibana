@@ -5,20 +5,29 @@
  * 2.0.
  */
 
+import type { AppDeepLink, AppDeepLinkLocations } from '@kbn/core-application-browser';
 import type { DeepLinksFormatter } from '@kbn/security-solution-plugin/public/common/links/deep_links';
-import { AppNavLinkStatus } from '@kbn/core/public';
 
 export const formatProjectDeepLinks: DeepLinksFormatter = (appLinks) =>
-  appLinks.map((appLink) => ({
-    id: appLink.id,
-    path: appLink.path,
-    title: appLink.title,
-    searchable: !appLink.globalSearchDisabled,
-    navLinkStatus: appLink.sideNavDisabled ? AppNavLinkStatus.hidden : AppNavLinkStatus.visible,
-    ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
-    ...(appLink.links && appLink.links?.length
-      ? {
-          deepLinks: formatProjectDeepLinks(appLink.links),
-        }
-      : {}),
-  }));
+  appLinks.map((appLink) => {
+    const visibleIn: AppDeepLinkLocations[] = [];
+    if (!appLink.globalSearchDisabled) {
+      visibleIn.push('globalSearch');
+    }
+    if (!appLink.sideNavDisabled) {
+      visibleIn.push('sideNav');
+    }
+    const deepLink: AppDeepLink = {
+      id: appLink.id,
+      path: appLink.path,
+      title: appLink.title,
+      visibleIn,
+      ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
+      ...(appLink.links && appLink.links?.length
+        ? {
+            deepLinks: formatProjectDeepLinks(appLink.links),
+          }
+        : {}),
+    };
+    return deepLink;
+  });
