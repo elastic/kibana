@@ -151,7 +151,7 @@ const combineResponse = (
 
   return {
     id: action.EndpointActions.action_id,
-    agents: action.agent.id as string[],
+    agents: Array.isArray(action.agent.id) ? action.agent.id : [action.agent.id],
     agentType: 'endpoint',
     parameters,
     ...(alertId?.length ? { alertIds: alertId } : {}),
@@ -169,7 +169,7 @@ const combineResponse = (
     completedAt: responseData?.completedAt,
     isCompleted: !!responseData?.isCompleted,
     isExpired: !!responseData?.isExpired,
-    wasSuccessful: !!responseData?.isCompleted,
+    wasSuccessful: responseData.status === 'successful',
     status: responseData.status,
     agentState: {},
     errors: action.error ? [action.error.message as string] : undefined,
