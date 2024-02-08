@@ -15,13 +15,11 @@ import {
   AvailableControlPanels,
   availableControlsPanels,
   DatasetSelectionPlain,
-} from '@kbn/logs-explorer-plugin/common';
-import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import {
   CONTENT_FIELD,
   CONTENT_FIELD_CONFIGURATION,
   RESOURCE_FIELD_CONFIGURATION,
-} from '@kbn/logs-explorer-plugin/common/constants';
+} from '@kbn/logs-explorer-plugin/common';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
 import {
   OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
   logsExplorerUrlSchemaV1,

@@ -30,3 +30,9 @@ export type {
   PartialGridDisplayOptions,
   PartialGridRowsDisplayOptions,
 } from './display_options';
+
+export {
+  CONTENT_FIELD,
+  CONTENT_FIELD_CONFIGURATION,
+  RESOURCE_FIELD_CONFIGURATION,
+} from './constants';
