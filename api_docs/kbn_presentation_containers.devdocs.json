@@ -681,12 +681,12 @@
           {
             "parentPluginId": "@kbn/presentation-containers",
             "id": "def-common.PanelPackage.initialState",
-            "type": "Unknown",
+            "type": "Uncategorized",
             "tags": [],
             "label": "initialState",
             "description": [],
             "signature": [
-              "unknown"
+              "object | undefined"
             ],
             "path": "packages/presentation/presentation_containers/interfaces/presentation_container.ts",
             "deprecated": false,
@@ -957,7 +957,15 @@
             "section": "def-common.PublishesLastSavedState",
             "text": "PublishesLastSavedState"
           },
-          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          " & { addNewPanel: <ApiType extends unknown = unknown>(panel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>; registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",
