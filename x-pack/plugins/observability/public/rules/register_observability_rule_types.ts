@@ -7,7 +7,7 @@
 
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import {
   ALERT_REASON,
   ALERT_RULE_PARAMETERS,
@@ -16,11 +16,14 @@ import {
 } from '@kbn/rule-data-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { MetricExpression } from '../components/custom_threshold/types';
-import type { CustomThresholdExpressionMetric } from '../../common/custom_threshold_rule/types';
+import type {
+  CustomMetricExpressionParams,
+  CustomThresholdExpressionMetric,
+} from '../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../common/custom_threshold_rule/get_view_in_app_url';
 import { SLO_ID_FIELD, SLO_INSTANCE_ID_FIELD } from '../../common/field_names/slo';
-import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
@@ -86,8 +89,8 @@ const getDataViewId = (searchConfiguration?: SerializedSearchSourceFields) =>
     : searchConfiguration?.index?.title;
 
 export const registerObservabilityRuleTypes = async (
-  config: ConfigSchema,
   observabilityRuleTypeRegistry: ObservabilityRuleTypeRegistry,
+  uiSettings: IUiSettingsClient,
   logsExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>
 ) => {
   observabilityRuleTypeRegistry.register({
@@ -117,7 +120,13 @@ export const registerObservabilityRuleTypes = async (
     ),
     priority: 100,
   });
-
+  const validateCustomThresholdWithUiSettings = ({
+    criteria,
+    searchConfiguration,
+  }: {
+    criteria: CustomMetricExpressionParams[];
+    searchConfiguration: SerializedSearchSourceFields;
+  }) => validateCustomThreshold({ criteria, searchConfiguration, uiSettings });
   observabilityRuleTypeRegistry.register({
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     description: i18n.translate(
@@ -133,7 +142,7 @@ export const registerObservabilityRuleTypes = async (
     ruleParamsExpression: lazy(
       () => import('../components/custom_threshold/custom_threshold_rule_expression')
     ),
-    validate: validateCustomThreshold,
+    validate: validateCustomThresholdWithUiSettings,
     defaultActionMessage: thresholdDefaultActionMessage,
     defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
     requiresAppContext: false,
