@@ -42,7 +42,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
 
     const [client, cloudStart] = await Promise.all([
       service.getClient({ request }),
-      resources.plugins.cloud?.start() || Promise.resolve(undefined),
+      resources.plugins.cloud?.start(),
     ]);
 
     if (!client) {
