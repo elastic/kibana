@@ -527,12 +527,9 @@ export const uiSettings: Record<string, UiSettings> = {
   [apmEnableTransactionProfiling]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
-      defaultMessage: 'Enable Universal Profiling on Transactions view',
+      defaultMessage: 'Enable Universal Profiling on Transaction view',
     }),
     value: false,
-    description: i18n.translate('xpack.observability.apmEnableTransactionProfilingDescription', {
-      defaultMessage: 'TBD',
-    }),
     schema: schema.boolean(),
     requiresPageReload: true,
   },
