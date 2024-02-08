@@ -13,6 +13,5 @@
     "@kbn/interpreter",
     "@kbn/data-views-plugin",
     "@kbn/es-query",
-    "@kbn/lens-plugin",
   ]
 }
