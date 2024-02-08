@@ -18,10 +18,7 @@ const esTypes = tsEstree.AST_NODE_TYPES;
 
 const ERROR_MSG = 'Unexpected unsafeConsole statement.';
 
-// const disallowedMethods = ['debug', 'error', 'info', 'log', 'trace', 'warn'];
-
 /**
- * @param {any} context
  * @param {CallExpression} node
  */
 const isUnsafeConsoleCall = (node) => {
@@ -30,6 +27,17 @@ const isUnsafeConsoleCall = (node) => {
     node.callee.property.type === esTypes.Identifier &&
     node.callee.object.name === 'unsafeConsole' &&
     node.callee.property.name
+  );
+};
+
+/**
+ * @param {VariableDeclarator} node
+ */
+const isUnsafeConsoleObjectPatternDeclarator = (node) => {
+  return (
+    node.id.type === esTypes.ObjectPattern &&
+    node.init.type === esTypes.Identifier &&
+    node.init.name === 'unsafeConsole'
   );
 };
 
@@ -47,6 +55,16 @@ module.exports = {
         context.report({
           message: ERROR_MSG,
           loc: node.callee.loc,
+        });
+      }
+    },
+    VariableDeclarator(_) {
+      const node = /** @type {VariableDeclarator} */ (_);
+
+      if (isUnsafeConsoleObjectPatternDeclarator(node)) {
+        context.report({
+          message: ERROR_MSG,
+          loc: node.init.loc,
         });
       }
     },

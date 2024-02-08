@@ -30,6 +30,8 @@ function callWithSanitizedArgs(func: Function, ...args: any[]) {
 }
 
 if (process.env.NODE_ENV === 'production') {
+  console.log('Native global console methods have been overridden in production environment.');
+
   console.debug = function (...args) {
     callWithSanitizedArgs(unsafeConsole.debug, ...args);
   };

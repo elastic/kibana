@@ -3,14 +3,11 @@
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
-      "jest",
-      "node",
-      "react"
+      "node"
     ]
   },
   "include": [
     "**/*.ts",
-    "**/*.tsx",
   ],
   "exclude": [
     "target/**/*"

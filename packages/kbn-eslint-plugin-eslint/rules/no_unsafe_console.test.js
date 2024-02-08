@@ -15,9 +15,6 @@ const ruleTester = new RuleTester({
   parserOptions: {
     sourceType: 'module',
     ecmaVersion: 2018,
-    ecmaFeatures: {
-      jsx: true,
-    },
   },
 });
 
@@ -100,6 +97,18 @@ ruleTester.run('@kbn/eslint/no_unsafe_console', rule, {
     {
       code: dedent`
         unsafeConsole.anyOtherMethodName()
+      `,
+      errors: [
+        {
+          line: 1,
+          message: 'Unexpected unsafeConsole statement.',
+        },
+      ],
+    },
+    {
+      code: dedent`
+          const { debug } = unsafeConsole
+          debug('something to debug')
       `,
       errors: [
         {
