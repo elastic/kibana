@@ -21,7 +21,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
 import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
 import { isCommonError } from '../../components/cloud_posture_page';
@@ -34,6 +34,7 @@ import {
   GetBenchmarkDynamicValues,
   useBenchmarkDynamicValues,
 } from '../../common/hooks/use_benchmark_dynamic_values';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
@@ -101,7 +102,8 @@ const ErrorMessageComponent = (error: { error: unknown }) => (
 );
 
 const getBenchmarkTableColumns = (
-  getBenchmarkDynamicValues: GetBenchmarkDynamicValues
+  getBenchmarkDynamicValues: GetBenchmarkDynamicValues,
+  navToFindings: any
 ): Array<EuiBasicTableColumn<Benchmark>> => [
   {
     field: 'id',
@@ -178,7 +180,14 @@ const getBenchmarkTableColumns = (
       }
 
       return (
-        <EuiButtonEmpty href={integrationLink} flush="left">
+        <EuiButtonEmpty
+          // onClick={() => navToFindings({ 'rule.benchmark.id': benchmark.id })}
+          onClick={() => {
+            setQuery();
+            navToFindings();
+          }}
+          flush="left"
+        >
           {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
             defaultMessage: '{benchmarkEvaluation} {resourcePlurals}',
             values: { benchmarkEvaluation, resourcePlurals },
@@ -201,6 +210,7 @@ const getBenchmarkTableColumns = (
         return (
           <ComplianceScoreBar totalPassed={data?.totalPassed} totalFailed={data?.totalFailed} />
         );
+
       return (
         <FormattedMessage
           id="xpack.csp.benchmarks.benchmarksTable.noFindingsScore"
@@ -224,6 +234,7 @@ export const BenchmarksTable = ({
   ...rest
 }: BenchmarksTableProps) => {
   const { getBenchmarkDynamicValues } = useBenchmarkDynamicValues();
+  const navToFindings = useNavigateFindings();
 
   const pagination: Pagination = {
     pageIndex: Math.max(pageIndex - 1, 0),
@@ -249,7 +260,7 @@ export const BenchmarksTable = ({
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
       items={benchmarksSorted}
-      columns={getBenchmarkTableColumns(getBenchmarkDynamicValues)}
+      columns={getBenchmarkTableColumns(getBenchmarkDynamicValues, navToFindings)}
       itemId={(item) => [item.id, item.version].join('/')}
       pagination={pagination}
       onChange={onChange}
