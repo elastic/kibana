@@ -9,7 +9,7 @@ import { ESQL_SEARCH_STRATEGY, KBN_FIELD_TYPES } from '@kbn/data-plugin/common';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateQuery } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useCallback, useEffect, useMemo, useReducer, useRef } from 'react';
 import { type UseCancellableSearch, useCancellableSearch } from '@kbn/ml-cancellable-search';
 import type { estypes } from '@elastic/elasticsearch';
 import type { ISearchOptions } from '@kbn/data-plugin/common';
@@ -66,7 +66,7 @@ const getESQLDocumentCountStats = async (
   intervalMs?: number,
   searchOptions?: ISearchOptions,
   onError?: HandleErrorCallback
-): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number }> => {
+): Promise<{ documentCountStats?: DocumentCountStats; totalCount: number; request?: object }> => {
   if (!isESQLQuery(query)) {
     throw Error(
       i18n.translate('xpack.dataVisualizer.esql.noQueryProvided', {
@@ -116,7 +116,7 @@ const getESQLDocumentCountStats = async (
         buckets: _buckets,
         totalCount,
       };
-      return { documentCountStats: result, totalCount };
+      return { documentCountStats: result, totalCount, request };
     } catch (error) {
       handleError({
         request,
@@ -139,6 +139,7 @@ const getESQLDocumentCountStats = async (
     try {
       const esqlResults = await runRequest(request, { ...(searchOptions ?? {}), strategy: 'esql' });
       return {
+        request,
         documentCountStats: undefined,
         totalCount: esqlResults?.rawResponse.values[0][0],
       };
@@ -198,6 +199,7 @@ export const useESQLOverallStatsData = (
     },
   } = useDataVisualizerKibana();
 
+  const previousDocCountRequest = useRef('');
   const { runRequest, cancelRequest } = useCancellableSearch(data);
 
   const [tableData, setTableData] = useReducer(getReducer<Data>(), getInitialData());
@@ -226,7 +228,6 @@ export const useESQLOverallStatsData = (
           isRunning: true,
           error: undefined,
         });
-        setTableData({ totalCount: undefined, documentCountStats: undefined });
 
         const { searchQuery, intervalMs, filter, limitSize } = fieldStatsRequest;
 
@@ -276,17 +277,38 @@ export const useESQLOverallStatsData = (
 
         setTableData({ columns, timeFieldName });
 
-        const { totalCount, documentCountStats } = await getESQLDocumentCountStats(
-          runRequest,
+        // We don't need to fetch the doc count stats again if only the limit size is changed
+        // so return the previous totalCount, documentCountStats if available
+        const hashedDocCountParams = JSON.stringify({
           searchQuery,
           filter,
           timeFieldName,
           intervalInMs,
-          undefined,
-          onError
-        );
+        });
+        let { totalCount, documentCountStats } = tableData;
+        if (
+          totalCount === undefined ||
+          documentCountStats === undefined ||
+          hashedDocCountParams !== previousDocCountRequest.current
+        ) {
+          setTableData({ totalCount: undefined, documentCountStats: undefined });
 
-        setTableData({ totalCount, documentCountStats });
+          previousDocCountRequest.current = hashedDocCountParams;
+          const results = await getESQLDocumentCountStats(
+            runRequest,
+            searchQuery,
+            filter,
+            timeFieldName,
+            intervalInMs,
+            undefined,
+            onError
+          );
+
+          totalCount = results.totalCount;
+          documentCountStats = results.documentCountStats;
+          setTableData({ totalCount, documentCountStats });
+        }
+
         setOverallStatsProgress({
           loaded: 50,
         });
