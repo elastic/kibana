@@ -38,6 +38,7 @@ import {
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
   enableInfrastructureProfilingIntegration,
+  apmEnableTransactionProfiling,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -522,6 +523,17 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.number({ min: 0, max: 100 }),
     requiresPageReload: true,
+  },
+  [apmEnableTransactionProfiling]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.apmEnableTransactionProfiling', {
+      defaultMessage: 'Enable Universal Profiling on Transactions view',
+    }),
+    value: false,
+    description: i18n.translate('xpack.observability.apmEnableTransactionProfilingDescription', {
+      defaultMessage: 'TBD',
+    }),
+    schema: schema.boolean(),
   },
 };
 
