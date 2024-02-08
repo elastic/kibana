@@ -21,6 +21,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { generatePath } from 'react-router-dom';
+import { FINDINGS_GROUPING_OPTIONS } from '../../common/constants';
 import { useNavigateFindings } from '../../common/hooks/use_navigate_findings';
 import type { BenchmarkScore, Benchmark, BenchmarksCisId } from '../../../common/types/latest';
 import * as TEST_SUBJ from './test_subjects';
@@ -162,7 +163,6 @@ const getBenchmarkTableColumns = (
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
     render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
-      // #################################################################################################
       const { resourcePlurals, integrationLink } = getBenchmarkDynamicValues(
         benchmark.id,
         benchmarkEvaluation
@@ -180,7 +180,9 @@ const getBenchmarkTableColumns = (
       }
 
       const isKspmBenchmark = ['cis_k8s', 'cis_eks'].includes(benchmark.id);
-      const groupByField = isKspmBenchmark ? 'orchestrator.cluster.id' : 'cloud.account.id';
+      const groupByField = isKspmBenchmark
+        ? FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME
+        : FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME;
 
       return (
         <EuiButtonEmpty
