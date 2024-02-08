@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { validateDurationV1, validateHoursV1, validateTimezoneV1 } from '../../../validation';
-import { notifyWhenSchemaV1, notificationDelaySchemaV1 } from '../../../response';
+import { notifyWhenSchemaV1, alertDelaySchemaV1 } from '../../../response';
 import { alertsFilterQuerySchemaV1 } from '../../../../alerts_filter_query';
 
 export const actionFrequencySchema = schema.object({
@@ -68,7 +68,7 @@ export const createBodySchema = schema.object({
   }),
   actions: schema.arrayOf(actionSchema, { defaultValue: [] }),
   notify_when: schema.maybe(schema.nullable(notifyWhenSchemaV1)),
-  notification_delay: schema.maybe(notificationDelaySchemaV1),
+  alert_delay: schema.maybe(alertDelaySchemaV1),
 });
 
 export const createParamsSchema = schema.object({

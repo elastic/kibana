@@ -78,6 +78,6 @@ export const transformRuleDomainToRuleAttributes = ({
     ...(rule.nextRun !== undefined ? { nextRun: rule.nextRun?.toISOString() || null } : {}),
     revision: rule.revision,
     ...(rule.running !== undefined ? { running: rule.running } : {}),
-    ...(rule.notificationDelay !== undefined ? { notificationDelay: rule.notificationDelay } : {}),
+    ...(rule.alertDelay !== undefined ? { alertDelay: rule.alertDelay } : {}),
   };
 };

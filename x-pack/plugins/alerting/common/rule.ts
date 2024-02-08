@@ -167,7 +167,7 @@ export interface MappedParamsProperties {
 
 export type MappedParams = SavedObjectAttributes & MappedParamsProperties;
 
-export interface NotificationDelay {
+export interface AlertDelay extends SavedObjectAttributes {
   active: number;
 }
 
@@ -204,7 +204,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   revision: number;
   running?: boolean | null;
   viewInAppRelativeUrl?: string;
-  notificationDelay?: NotificationDelay;
+  alertDelay?: AlertDelay;
 }
 
 export interface SanitizedAlertsFilter extends AlertsFilter {
@@ -250,6 +250,7 @@ export type SanitizedRuleConfig = Pick<
   | 'muteAll'
   | 'revision'
   | 'snoozeSchedule'
+  | 'alertDelay'
 > & {
   producer: string;
   ruleTypeId: string;

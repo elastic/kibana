@@ -270,10 +270,11 @@ export function MetricIndicator({ indexFields, isLoadingIndex }: MetricIndicator
                 defaultValue={0}
                 render={({ field: { ref, ...field }, fieldState }) => (
                   <EuiFieldNumber
+                    {...field}
+                    data-test-subj="timesliceMetricThreshold"
                     required
                     isInvalid={fieldState.invalid}
-                    data-test-subj="timesliceMetricThreshold"
-                    value={field.value}
+                    value={String(field.value)}
                     style={{ width: 80 }}
                     disabled={!indexPattern}
                     onChange={(event) => field.onChange(Number(event.target.value))}

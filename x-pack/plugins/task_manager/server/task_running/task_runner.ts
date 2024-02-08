@@ -518,7 +518,7 @@ export class TaskManagerRunner implements TaskRunner {
                     error: new Error('Task timeout'),
                     addDuration: this.definition.timeout,
                   })) ?? null,
-            // This is a safe convertion as we're setting the startAt above
+            // This is a safe conversion as we're setting the startAt above
           },
           { validate: false }
         )) as ConcreteTaskInstanceWithStartedAt
