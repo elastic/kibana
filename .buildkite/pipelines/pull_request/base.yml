@@ -14,7 +14,7 @@ steps:
 
   - wait
 
-  - command: echo "skipped" # .buildkite/scripts/steps/build_kibana.sh
+  - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution and Plugins
     agents:
       provider: gcp
@@ -31,7 +31,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: echo "skipped" # .buildkite/scripts/steps/quick_checks.sh
+  - command: .buildkite/scripts/steps/quick_checks.sh
     label: 'Quick Checks'
     agents:
       provider: gcp
@@ -83,7 +83,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: echo "skipped" # .buildkite/scripts/steps/lint.sh
+  - command: .buildkite/scripts/steps/lint.sh
     label: 'Linting'
     agents:
       provider: gcp
@@ -98,7 +98,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: echo "skipped" # .buildkite/scripts/steps/lint_with_types.sh
+  - command: .buildkite/scripts/steps/lint_with_types.sh
     label: 'Linting (with types)'
     agents:
       provider: gcp
@@ -114,7 +114,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: echo "skipped" # .buildkite/scripts/steps/checks.sh
+  - command: .buildkite/scripts/steps/checks.sh
     label: 'Checks'
     agents:
       provider: gcp
@@ -129,7 +129,7 @@ steps:
         - exit_status: '-1'
           limit: 3
 
-  - command: echo "skipped" # .buildkite/scripts/steps/build_api_docs.sh
+  - command: .buildkite/scripts/steps/build_api_docs.sh
     label: 'Check Types and Build API Docs'
     agents:
       queue: n2-4-spot
