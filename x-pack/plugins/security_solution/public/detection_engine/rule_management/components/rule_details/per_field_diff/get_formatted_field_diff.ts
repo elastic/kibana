@@ -12,6 +12,8 @@ import type {
   RuleFieldsDiffWithKqlQuery,
   RuleFieldsDiffWithEqlQuery,
   RuleFieldsDiffWithThreshold,
+  RuleFieldsDiffWithEsqlQuery,
+  RuleFieldsDiffWithThreatQuery,
 } from '../../../../../../common/api/detection_engine';
 import type { FormattedFieldDiff } from '../../../model/rule_details/rule_field_diff';
 import {
@@ -25,6 +27,8 @@ import {
   getFieldDiffsForBuildingBlock,
   sortAndStringifyJson,
   getFieldDiffsForThreshold,
+  getFieldDiffsForEsqlQuery,
+  getFieldDiffsForThreatQuery,
 } from './get_field_diffs_for_grouped_fields';
 
 export const getFormattedFieldDiffGroups = (
@@ -55,6 +59,18 @@ export const getFormattedFieldDiffGroups = (
       return {
         shouldShowSubtitles: true,
         fieldDiffs: getFieldDiffsForEqlQuery(eqlQueryThreeWayDiff),
+      };
+    case 'esql_query':
+      const esqlQueryThreeWayDiff = (fields as RuleFieldsDiffWithEsqlQuery)[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForEsqlQuery(esqlQueryThreeWayDiff),
+      };
+    case 'threat_query':
+      const threatQueryThreeWayDiff = (fields as RuleFieldsDiffWithThreatQuery)[fieldName];
+      return {
+        shouldShowSubtitles: true,
+        fieldDiffs: getFieldDiffsForThreatQuery(threatQueryThreeWayDiff),
       };
     case 'rule_schedule':
       const ruleScheduleThreeWayDiff = fields[fieldName] as AllFieldsDiff['rule_schedule'];

@@ -199,6 +199,76 @@ export const getFieldDiffsForEqlQuery = (eqlQuery: AllFieldsDiff['eql_query']): 
   ];
 };
 
+export const getFieldDiffsForEsqlQuery = (esqlQuery: AllFieldsDiff['esql_query']): FieldDiff[] => {
+  const currentQuery = sortAndStringifyJson(esqlQuery.current_version?.query);
+  const targetQuery = sortAndStringifyJson(esqlQuery.target_version?.query);
+
+  const currentLanguage = sortAndStringifyJson(esqlQuery.current_version?.language);
+  const targetLanguage = sortAndStringifyJson(esqlQuery.target_version?.language);
+  return [
+    ...(currentQuery !== targetQuery
+      ? [
+          {
+            fieldName: 'query',
+            currentVersion: currentQuery,
+            targetVersion: targetQuery,
+          },
+        ]
+      : []),
+    ...(currentLanguage !== targetLanguage
+      ? [
+          {
+            fieldName: 'language',
+            currentVersion: currentLanguage,
+            targetVersion: targetLanguage,
+          },
+        ]
+      : []),
+  ];
+};
+
+export const getFieldDiffsForThreatQuery = (
+  threatQuery: AllFieldsDiff['threat_query']
+): FieldDiff[] => {
+  const currentQuery = sortAndStringifyJson(threatQuery.current_version?.query);
+  const targetQuery = sortAndStringifyJson(threatQuery.target_version?.query);
+
+  const currentLanguage = sortAndStringifyJson(threatQuery.current_version?.language);
+  const targetLanguage = sortAndStringifyJson(threatQuery.target_version?.language);
+
+  const currentFilters = sortAndStringifyJson(threatQuery.current_version?.filters);
+  const targetFilters = sortAndStringifyJson(threatQuery.target_version?.filters);
+  return [
+    ...(currentQuery !== targetQuery
+      ? [
+          {
+            fieldName: 'query',
+            currentVersion: currentQuery,
+            targetVersion: targetQuery,
+          },
+        ]
+      : []),
+    ...(currentLanguage !== targetLanguage
+      ? [
+          {
+            fieldName: 'language',
+            currentVersion: currentLanguage,
+            targetVersion: targetLanguage,
+          },
+        ]
+      : []),
+    ...(currentFilters !== targetFilters
+      ? [
+          {
+            fieldName: 'filters',
+            currentVersion: currentFilters,
+            targetVersion: targetFilters,
+          },
+        ]
+      : []),
+  ];
+};
+
 export const getFieldDiffsForRuleSchedule = (
   ruleScheduleThreeWayDiff: AllFieldsDiff['rule_schedule']
 ): FieldDiff[] => {

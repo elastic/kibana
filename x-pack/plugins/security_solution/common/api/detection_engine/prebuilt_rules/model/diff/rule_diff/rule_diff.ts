@@ -91,4 +91,8 @@ export type RuleFieldsDiffWithKqlQuery =
 
 export type RuleFieldsDiffWithEqlQuery = EqlFieldsDiff;
 
+export type RuleFieldsDiffWithEsqlQuery = EsqlFieldsDiff;
+
+export type RuleFieldsDiffWithThreatQuery = ThreatMatchFieldsDiff;
+
 export type RuleFieldsDiffWithThreshold = ThresholdFieldsDiff;
