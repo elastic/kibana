@@ -9,7 +9,7 @@ import React from 'react';
 
 import { EuiFlexGroup } from '@elastic/eui';
 import { DatasetsQualityIndicators } from './datasets_quality_indicators';
-import { ActiveDatasets } from './active_datasets';
+import { DatasetsActivity } from './datasets_activity';
 import { EstimatedData } from './estimated_data';
 
 // Allow for lazy loading
@@ -19,7 +19,7 @@ export default function SummaryPanel() {
     <EuiFlexGroup gutterSize="m">
       <DatasetsQualityIndicators />
       <EuiFlexGroup gutterSize="m">
-        <ActiveDatasets />
+        <DatasetsActivity />
         <EstimatedData />
       </EuiFlexGroup>
     </EuiFlexGroup>

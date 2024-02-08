@@ -9,20 +9,20 @@ import React from 'react';
 import { useSummaryPanelContext } from '../../../hooks';
 
 import {
-  summaryPanelActiveDatasetsText,
-  summaryPanelActiveDatasetsTooltipText,
+  summaryPanelDatasetsActivityText,
+  summaryPanelDatasetsActivityTooltipText,
   tableSummaryOfText,
 } from '../../../../common/translations';
 import { LastDayDataPlaceholder } from './last_day_data_placeholder';
 
-export function ActiveDatasets() {
+export function DatasetsActivity() {
   const { datasetsActivity, isDatasetsActivityLoading } = useSummaryPanelContext();
   const text = `${datasetsActivity.active} ${tableSummaryOfText} ${datasetsActivity.total}`;
 
   return (
     <LastDayDataPlaceholder
-      title={summaryPanelActiveDatasetsText}
-      tooltip={summaryPanelActiveDatasetsTooltipText}
+      title={summaryPanelDatasetsActivityText}
+      tooltip={summaryPanelDatasetsActivityTooltipText}
       value={text}
       isLoading={isDatasetsActivityLoading}
     />

@@ -130,15 +130,15 @@ export const summaryPanelQualityGoodText = i18n.translate(
   }
 );
 
-export const summaryPanelActiveDatasetsText = i18n.translate(
-  'xpack.datasetQuality.summaryPanelActiveDatasetsText',
+export const summaryPanelDatasetsActivityText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelDatasetsActivityText',
   {
     defaultMessage: 'Active Datasets',
   }
 );
 
-export const summaryPanelActiveDatasetsTooltipText = i18n.translate(
-  'xpack.datasetQuality.summaryPanelQualityTooltipText',
+export const summaryPanelDatasetsActivityTooltipText = i18n.translate(
+  'xpack.datasetQuality.summaryPanelDatasetsActivityTooltipText',
   {
     defaultMessage: 'The number of datasets with activity in the last 24 hours.',
   }
