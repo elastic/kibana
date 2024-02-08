@@ -461,11 +461,11 @@ const updateStatus = (app: App, statusUpdaters: AppUpdaterWrapper[]): App => {
       changes = {
         ...changes,
         ...fields,
-      // status and navLinkStatus enums are ordered by reversed priority
-      // if multiple updaters wants to change these fields, we will always follow the priority order.
+        // status and navLinkStatus enums are ordered by reversed priority
+        // if multiple updaters wants to change these fields, we will always follow the priority order.
         status: Math.max(
-        changes.status ?? AppStatus.accessible,
-        fields.status ?? AppStatus.accessible
+          changes.status ?? AppStatus.accessible,
+          fields.status ?? AppStatus.accessible
         ),
         ...(fields.deepLinks ? { deepLinks: populateDeepLinkDefaults(fields.deepLinks) } : {}),
       };
