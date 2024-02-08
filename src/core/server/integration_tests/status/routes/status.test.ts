@@ -210,6 +210,7 @@ describe('GET /api/status', () => {
         build_number: 1234,
         build_snapshot: true,
         build_date: new Date('2023-05-15T23:12:09.000Z').toISOString(),
+        build_flavor: 'traditional',
       });
       const metricsMockValue = await firstValueFrom(metrics.getOpsMetrics$());
       expect(result.body.metrics).toEqual({
