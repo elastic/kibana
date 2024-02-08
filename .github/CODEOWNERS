@@ -1501,6 +1501,9 @@ x-pack/plugins/security_solution/public/flyout/entity_details @elastic/security-
 x-pack/plugins/security_solution/common/api/entity_analytics @elastic/security-entity-analytics
 x-pack/plugins/security_solution/server/search_strategy/security_solution/factory/risk_score @elastic/security-entity-analytics
 
+## Security Solution sub teams - GenAI
+x-pack/test/security_solution_api_integration/test_suites/genai @elastic/security-generative-ai
+
 # Security Defend Workflows - OSQuery Ownership
 /x-pack/plugins/security_solution/common/api/detection_engine/model/rule_response_actions @elastic/security-defend-workflows
 /x-pack/plugins/security_solution/public/detection_engine/rule_response_actions @elastic/security-defend-workflows
