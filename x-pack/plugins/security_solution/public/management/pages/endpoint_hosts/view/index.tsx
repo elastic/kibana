@@ -20,7 +20,6 @@ import {
   EuiSuperDatePicker,
   EuiText,
   EuiToolTip,
-  EuiCallOut,
 } from '@elastic/eui';
 import { useHistory, useLocation } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +30,6 @@ import type {
   AgentPolicyDetailsDeployAgentAction,
   CreatePackagePolicyRouteState,
 } from '@kbn/fleet-plugin/public';
-import { ManagementPageLoader } from '../../../components/management_page_loader';
 import { TransformFailedCallout } from './components/transform_failed_callout';
 import type { EndpointIndexUIQueryParams } from '../types';
 import { EndpointListNavLink } from './components/endpoint_list_nav_link';
@@ -554,27 +552,13 @@ export const EndpointList = () => {
   const mutableListData = useMemo(() => [...listData], [listData]);
 
   const renderTableOrEmptyState = useMemo(() => {
-    if (loading) {
-      return (
-        <ManagementPageLoader
-          data-test-subj={'endpointListLoadingSpinner'}
-          classname={'essentialAnimation'}
-        />
-      );
-    } else if (listError) {
-      return (
-        <ManagementEmptyStateWrapper>
-          <EuiCallOut color="danger" title={listError.error}>
-            <span data-test-subj="endpointListApiErrorResponse">{listError.message}</span>
-          </EuiCallOut>
-        </ManagementEmptyStateWrapper>
-      );
-    } else if (endpointsExist) {
+    if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
           items={mutableListData}
           columns={columns}
+          error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
@@ -613,25 +597,25 @@ export const EndpointList = () => {
       );
     }
   }, [
-    loading,
-    listError,
-    endpointsExist,
-    canReadEndpointList,
     canAccessFleet,
-    policyItemsLoading,
-    hasPolicyData,
-    mutableListData,
+    canReadEndpointList,
     columns,
-    paginationSetup,
+    endpointsExist,
+    endpointPrivilegesLoading,
+    handleCreatePolicyClick,
+    handleDeployEndpointsClick,
+    handleSelectableOnChange,
+    hasPolicyData,
+    listError?.message,
+    loading,
+    mutableListData,
     onTableChange,
+    paginationSetup,
+    policyItemsLoading,
+    policyItems,
+    selectedPolicyId,
     setTableRowProps,
     sorting,
-    endpointPrivilegesLoading,
-    policyItems,
-    handleDeployEndpointsClick,
-    selectedPolicyId,
-    handleSelectableOnChange,
-    handleCreatePolicyClick,
   ]);
 
   return (
@@ -681,7 +665,7 @@ export const EndpointList = () => {
         </EuiFlexGroup>
         <EuiSpacer size="m" />
       </>
-      {hasListData && !loading && endpointsExist && (
+      {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (

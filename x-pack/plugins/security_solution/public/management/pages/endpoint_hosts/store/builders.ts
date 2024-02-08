@@ -31,7 +31,7 @@ export const initialEndpointPageState = (): Immutable<EndpointState> => {
     endpointPackageInfo: createUninitialisedResourceState(),
     nonExistingPolicies: {},
     agentPolicies: {},
-    endpointsExist: false,
+    endpointsExist: true,
     patterns: [],
     patternsError: undefined,
     isAutoRefreshEnabled: true,

@@ -8,8 +8,8 @@
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { TrackApplicationView } from '@kbn/usage-collection-plugin/public';
-import { ManagementPageLoader } from '../components/management_page_loader';
 import {
   MANAGEMENT_ROUTING_ENDPOINTS_PATH,
   MANAGEMENT_ROUTING_EVENT_FILTERS_PATH,
@@ -89,7 +89,7 @@ export const ManagementContainer = memo(() => {
 
   // Lets wait until we can verify permissions
   if (loading) {
-    return <ManagementPageLoader />;
+    return <EuiLoadingSpinner />;
   }
 
   return (

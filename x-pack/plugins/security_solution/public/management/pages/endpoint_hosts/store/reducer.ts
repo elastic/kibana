@@ -227,6 +227,12 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
         };
       }
     }
+    // otherwise, we are not on an endpoint list or details page
+    return {
+      ...state,
+      ...stateUpdates,
+      endpointsExist: true,
+    };
   } else if (action.type === 'metadataTransformStatsChanged') {
     return handleMetadataTransformStatsChanged(state, action);
   }

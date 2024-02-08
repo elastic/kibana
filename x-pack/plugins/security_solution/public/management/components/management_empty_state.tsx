@@ -77,7 +77,7 @@ const PolicyEmptyState = React.memo<{
       {loading ? (
         <EuiFlexGroup alignItems="center" justifyContent="center">
           <EuiFlexItem grow={false}>
-            <EuiLoadingSpinner size="l" className="essentialAnimation" />
+            <EuiLoadingSpinner size="xl" className="essentialAnimation" />
           </EuiFlexItem>
         </EuiFlexGroup>
       ) : (
