@@ -56,8 +56,6 @@ export async function getTokenCountFromInvokeStream({
   const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
   const parsedResponse = await parser(responseStream, logger, signal);
 
-  console.log('parsedResponse', parsedResponse);
-
   const completionTokens = encode(parsedResponse).length;
   return {
     prompt: promptTokens,

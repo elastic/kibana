@@ -139,7 +139,6 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
     let didEnd = false;
 
     const handleStreamEnd = (finalResponse: string) => {
-      console.log('HANLDE STREAM END finalResponse', finalResponse);
       // @yuliia this would be a good place for pushing the response to the chat history
       streamEnd();
       didEnd = true;

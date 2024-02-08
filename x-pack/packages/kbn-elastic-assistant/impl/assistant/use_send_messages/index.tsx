@@ -63,7 +63,6 @@ export const useSendMessages = (): UseSendMessages => {
           onNewReplacements,
         });
       } finally {
-        console.log('finally??');
         setIsLoading(false);
       }
     },

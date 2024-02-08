@@ -44,10 +44,6 @@ export const postActionsConnectorExecuteRoute = (
       },
     },
     async (context, request, response) => {
-      request.events.aborted$.subscribe(() => {
-        console.log('Request was aborted aborted$');
-      });
-
       const abortSignal = getRequestAbortedSignal(request.events.aborted$);
       const resp = buildResponse(response);
       const assistantContext = await context.elasticAssistant;
