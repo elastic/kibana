@@ -196,6 +196,39 @@ export default function (providerContext: FtrProviderContext) {
         });
       });
 
+      describe('when there are managed policies', () => {
+        let notManagedPolicies: AgentPolicy[];
+        let managedPolicies: AgentPolicy[];
+
+        before(async () => {
+          notManagedPolicies = await generateNPolicies(supertest, 3);
+          managedPolicies = await generateNPolicies(supertest, 4, { is_managed: true });
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+        });
+
+        it('should not return token metadata for managed policies', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(notManagedPolicies.length);
+
+          const returnedPolicyIds = new Set();
+          body.items.forEach((uninstallToken) => returnedPolicyIds.add(uninstallToken.policy_id));
+
+          notManagedPolicies.forEach((notManagedPolicy) => {
+            expect(returnedPolicyIds.has(notManagedPolicy.id)).to.be(true);
+          });
+          managedPolicies.forEach((managedPolicy) => {
+            expect(returnedPolicyIds.has(managedPolicy.id)).to.be(false);
+          });
+        });
+      });
+
       describe('when `policyId` query param is used', () => {
         let generatedPolicyArray: AgentPolicy[];
 
