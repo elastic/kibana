@@ -36,18 +36,14 @@ export function LastDayDataPlaceholder({
       <EuiFlexGroup gutterSize="m" direction="column">
         <EuiFlexGroup direction="column" gutterSize="xs">
           <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{title}</EuiText>
-            </EuiFlexItem>
+            <EuiText size="s">{title}</EuiText>
             <EuiFlexItem grow={false}>
               <EuiIconTip content={tooltip} />
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="xs">
-              {summaryPanelLast24hText}
-            </EuiText>
-          </EuiFlexItem>
+          <EuiText color="subdued" size="xs">
+            {summaryPanelLast24hText}
+          </EuiText>
         </EuiFlexGroup>
         {isLoading ? (
           <EuiSkeletonTitle size="m" />

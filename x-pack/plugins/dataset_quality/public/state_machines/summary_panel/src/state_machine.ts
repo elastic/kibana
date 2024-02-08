@@ -9,7 +9,7 @@ import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
-import { DEFAULT_CONTEXT } from './defaults';
+import { defaultContext, MAX_RETRIES, RETRY_DELAY_IN_MS } from './defaults';
 import {
   DatasetsActivityDetails,
   DatasetsQuality,
@@ -18,6 +18,7 @@ import {
   DatasetSummaryPanelEvent,
   DefaultDatasetsSummaryPanelContext,
   EstimatedDataDetails,
+  Retries,
 } from './types';
 import {
   fetchDatasetsEstimatedDataFailedNotifier,
@@ -28,7 +29,7 @@ import {
 export const createPureDatasetsSummaryPanelStateMachine = (
   initialContext: DatasetsSummaryPanelContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QGUCuBbdBDATgTwAUsA7MAGwDoIsAXLWMG2ARVSzIEsa8KAzRgMYALDsSgBiCAHtSFUQDcpAazAU0mXIRLkqteoxZtO3PoJFiECqQNocZAbQAMAXSfPEoAA5TYXO8Q8QAA9EAGYAJgB2CnCADgA2ABZk+MjwgEYI8IAaEDxEAFZQ+IpI9McATljYioL48NDQgF8m3PVsfCJSSmo6BiZWdi4efhphUQkwHBwpHApPMlpeWfQ1DA6tbt0+g0HjEbMJy2JFGxp-NzdA719zmUCQhAjouKSUtMzwnLzEZMSKRLxUIFWLpCoVSKOGrFFptdaaLo6Xr6JgAQQE53kw1MY3MEmksisKjWGk62h6en6sHRmOxo3GFisZwuLiuSBANz893Zj0ajgoBXSdXKiUckQKkSSBVy+QQsVC-IKr3iNSKmUcBVhIHaCPJ2xR1IxHCxJnpePEUxmcwWSxWJI2iIpOzRRpNB1xRyZtgcrJc1x8XICPLCCoFQviIrFEqlMsQkVCsRioPCEfBoSqKq1OrJWzg52wNEgABE9DiGfiZKoiaps5sdHmOAXi6WzZ6TtZvcRLn72Zy7kHQLyohQwWrU7FHKF0pFYwh0ulEulSg15+nHBrHIlYln4Tn67B87Rm3Qy+bLbN5osaMscKta46KA2mxASyfW4z28yfa4e14A-2HjCYdRyncdJ2nWcRQqAFxUheIKkXYpMhaVoQGIKQIDgQJ73Jf1bn8QCEAAWnCRJZxTaDQUiMoCgKcEgQqUJIh3Uk6ydA09mGPDA0I0jZ2BaIF0cIEong2JEghFiHT1ZEqU401DjEbiAODBA0lnRI6goeICkQ8opwqL5t1QnCtlk3YjGxMgpCwTCIGUgjVLoxNdIQ9N5xBNUNPjChKijeCJLiOjNRM3c2P1KkaWNLje3-RzB0QPifgQHT+VqeV0lE1JEjKKTdTMykDCit1TwmBzuQStTvllcV+Ry9JQXKOJYnCSc8r3djItdKybLs8qB2CRB4k3CgKhVFUqIKMVIjI5LJRKCooUSYoEIjeUQrhViHyfI8Xz0frCKnGJIgSLdQOG9JUmlZKxvCEclVgrclUM5pQq2vUdsLPa30UqADtUyJoKiU6MviC6VUg4SlzB+paIhVNkna8LPuPLAKGs2zIH+yq6KXKIoXAwVAUlSGTpHRxmoaxjaMBlCmiAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QGUCuBbdBDATgTwAUsA7MAGwDoIsAXLWMG2ARVSzIEsa8KAzRgMYALDsSgBiCAHtSFUQDcpAazAU0mXIRLkqteoxZtO3PoJFiECqQNocZAbQAMAXSfPEoAA5TYXO8Q8QAA9EABZQgCYKAHYAVgBmADZQ6IAOUNjQgE5YgEZYgBoQPEQAWlTcilyUx1q6lNSI0IBfZqL1bHwiUkpqOgYmVnYuHn4aYVEJMBwcKRwKTzJaXjn0NQxOrR7dfoMh41GzSctiRRsafzc3QO9fC5lAkIRI1IoK3IrE1LzonMSikoICJZChZL5NUKOTJfZJZFptEAdTTdHR9fSDIwjUzjcxTGZzBZLGgrHBrJFdbS9PQDQzDExjCYWKznS4uey5dxIEC3PwPLlPSKxCjAxJNRzxVKJLJw1IAxAfUIxdK5XLRaK5Rzg2KpVrtDbIyk7dGwACCAgu8ixDNxkhkqisKnWGgp2zRNLNFqtRyZp2stgcbJcNx8vIC-LCsSi2u+EVyEXiWUc0SlhWKiATlWqwNjwNSqSy8VisV1iP1LtR1IMHo4lvp3rxs3mi2WqydmxRVN2TGrtcOOOOzP9xCuQa5PPuYdAAviitCqWi4oSsUThdCcueWUqsca0ay0Xi+9CiRL5K2Fa7pvNNa9-bE4mmjcJLdJbYNrsr3avvexjKgJzOQ5XBywZ3P4jxhDOFBzguhaFiumTrokCRKtUjhgrk0qNNEJ5lmelBwBc2A0JAAAieg-ja0iyA6qinh2FAERwRGkeR1oDr6LIBq4o5eCGE7gc8hYULE0SRAejh5jkBbrvOjjChh+6NOKslZDhzp4QxsCEbQLF0BRkz3viTZEiSZK4fRjHMRAZF6WxPoAROI6crxoF8lOYRJhQiQSvm8TxEm4qJNE67SlEyZ+dUebzokmpqe2hqWTp1msfWhmPs2xKtnRCVaUxSU2Vg+n2X6jlssBY58WB4bPI4ipxvEESpLV6Txn564qhJwkSQeEqOMC0Txq0CLEFIEBwIE2U9CBoYCQuMQJH1EQDbE4qhLk-xpggpQREWMRZI1EQxeteRLTqCKTeexr7CM038dVcZRBUPyajCgXxOupTra8R7Soti3qikcVvpdNLXXWt5QLdVXuQgqpyU9cOJK9STvZteTCUWy6JguBb+ekQPlp2V2YiYOCMPgkxQ25wSIEjclIVk3ypEkS0xcFm25AeFB+b8qr7fmO1NATGlunsJM8GQUhYGNEBU5ONMIGkmZLSJsb5PkRaIXJULZEeUL5MC8TC-Roufp63BywJKogtqMURDtc7AhJG2Av58RvBh+1IZCTRqse53mYapuXubfa-pb91BcJkqLZkjSJpK67ZIkbwneqElznB-t6upJsfiH16k+TeCUxVrny08QXu3k8RxskjUZKEqOAsuKfJHHC7xtqCbG0H+c9likvS5AEcw2kiqFkF+05NU+4u4gK1CoWmqxjFfUHqpAe5zl2nEcldCjwrKqvHE-n28tq3reuaSPWCzP39q2QRL32yJXvBVFZDZczZHKen-9O1L7zwQHuEESYiyJgaJkXIL8dBv10oVMmNAKZiEPk8AaYCkjhBWk3ZMcZ2qamrrUGKQUor5nhDneKr9cpWQ-kPGWaDEDxw9gNcK9sm4HhCmqKC-kPgNTBN5bIQ1mhAA */
   createMachine<DatasetsSummaryPanelContext, DatasetSummaryPanelEvent, DatasetsSummaryPanelState>(
     {
       context: initialContext,
@@ -46,13 +47,30 @@ export const createPureDatasetsSummaryPanelStateMachine = (
                   target: 'loaded',
                   actions: ['storeDatasetsQuality'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchDatasetsQualityFailed'],
-                },
+                onError: [
+                  {
+                    target: 'retrying',
+                    cond: {
+                      type: 'canRetry',
+                      counter: 'datasetsQualityRetries',
+                    },
+                    actions: ['incrementDatasetsQualityRetries'],
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchDatasetsQualityFailed'],
+                  },
+                ],
               },
             },
-            loaded: {},
+            retrying: {
+              after: {
+                [RETRY_DELAY_IN_MS]: 'fetching',
+              },
+            },
+            loaded: {
+              type: 'final',
+            },
           },
         },
         datasetsActivity: {
@@ -65,13 +83,30 @@ export const createPureDatasetsSummaryPanelStateMachine = (
                   target: 'loaded',
                   actions: ['storeDatasetsActivity'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchDatasetsActivityFailed'],
-                },
+                onError: [
+                  {
+                    target: 'retrying',
+                    cond: {
+                      type: 'canRetry',
+                      counter: 'datasetsActivityRetries',
+                    },
+                    actions: ['incrementDatasetsActivityRetries'],
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchDatasetsActivityFailed'],
+                  },
+                ],
               },
             },
-            loaded: {},
+            retrying: {
+              after: {
+                [RETRY_DELAY_IN_MS]: 'fetching',
+              },
+            },
+            loaded: {
+              type: 'final',
+            },
           },
         },
         estimatedData: {
@@ -84,13 +119,30 @@ export const createPureDatasetsSummaryPanelStateMachine = (
                   target: 'loaded',
                   actions: ['storeEstimatedData'],
                 },
-                onError: {
-                  target: 'loaded',
-                  actions: ['notifyFetchEstimatedDataFailed'],
-                },
+                onError: [
+                  {
+                    target: 'retrying',
+                    cond: {
+                      type: 'canRetry',
+                      counter: 'estimatedDataRetries',
+                    },
+                    actions: ['incrementEstimatedDataRetries'],
+                  },
+                  {
+                    target: 'loaded',
+                    actions: ['notifyFetchEstimatedDataFailed'],
+                  },
+                ],
               },
             },
-            loaded: {},
+            retrying: {
+              after: {
+                [RETRY_DELAY_IN_MS]: 'fetching',
+              },
+            },
+            loaded: {
+              type: 'final',
+            },
           },
         },
       },
@@ -110,6 +162,30 @@ export const createPureDatasetsSummaryPanelStateMachine = (
               }
             : {};
         }),
+        incrementDatasetsQualityRetries: assign(({ retries }, _event) => {
+          return {
+            retries: { ...retries, datasetsQualityRetries: retries.datasetsQualityRetries + 1 },
+          };
+        }),
+        incrementDatasetsActivityRetries: assign(({ retries }, _event) => {
+          return {
+            retries: { ...retries, datasetsActivityRetries: retries.datasetsActivityRetries + 1 },
+          };
+        }),
+        incrementEstimatedDataRetries: assign(({ retries }, _event) => {
+          return {
+            retries: { ...retries, estimatedDataRetries: retries.estimatedDataRetries + 1 },
+          };
+        }),
+      },
+      guards: {
+        canRetry: (context, event, { cond }) => {
+          if ('counter' in cond && cond.counter in context.retries) {
+            const retriesKey = cond.counter as keyof Retries;
+            return context.retries[retriesKey] < MAX_RETRIES;
+          }
+          return false;
+        },
       },
     }
   );
@@ -121,7 +197,7 @@ export interface DatasetsSummaryPanelStateMachineDependencies {
 }
 
 export const createDatasetsSummaryPanelStateMachine = ({
-  initialContext = DEFAULT_CONTEXT,
+  initialContext = defaultContext,
   toasts,
   dataStreamStatsClient,
 }: DatasetsSummaryPanelStateMachineDependencies) =>

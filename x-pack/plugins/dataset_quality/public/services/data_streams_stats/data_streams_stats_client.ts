@@ -12,7 +12,6 @@ import {
   getDataStreamsDegradedDocsStatsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamsDetailsResponseRt,
-  DataStreamsEstimatedDataInBytes,
   getDataStreamsEstimatedDataInBytesResponseRt,
 } from '../../../common/api_types';
 import { DEFAULT_DATASET_TYPE } from '../../../common/constants';
@@ -129,6 +128,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         )
     )(response);
 
-    return dataStreamsEstimatedDataInBytes as DataStreamsEstimatedDataInBytes;
+    return dataStreamsEstimatedDataInBytes;
   }
 }

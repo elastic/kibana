@@ -6,10 +6,13 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import {
-  DataStreamDegradedDocsStatServiceResponse,
-  GetDataStreamsEstimatedDataInBytesResponse,
-} from '../../../../common/data_streams_stats';
+import { GetDataStreamsEstimatedDataInBytesResponse } from '../../../../common/data_streams_stats';
+
+export interface Retries {
+  datasetsQualityRetries: number;
+  datasetsActivityRetries: number;
+  estimatedDataRetries: number;
+}
 
 export interface DatasetsQuality {
   percentages: number[];
@@ -36,9 +39,14 @@ export interface WithEstimatedData {
   estimatedData: EstimatedDataDetails;
 }
 
+export interface WithRetries {
+  retries: Retries;
+}
+
 export type DefaultDatasetsSummaryPanelContext = WithDatasetsQuality &
   WithActiveDatasets &
-  WithEstimatedData;
+  WithEstimatedData &
+  WithRetries;
 
 export type DatasetsSummaryPanelState =
   | {
@@ -50,11 +58,19 @@ export type DatasetsSummaryPanelState =
       context: DefaultDatasetsSummaryPanelContext;
     }
   | {
+      value: 'datasetsQuality.retrying';
+      context: DefaultDatasetsSummaryPanelContext;
+    }
+  | {
       value: 'datasetsActivity.fetching';
       context: DefaultDatasetsSummaryPanelContext;
     }
   | {
       value: 'datasetsActivity.loaded';
+      context: DefaultDatasetsSummaryPanelContext;
+    }
+  | {
+      value: 'datasetsActivity.retrying';
       context: DefaultDatasetsSummaryPanelContext;
     }
   | {
@@ -64,12 +80,16 @@ export type DatasetsSummaryPanelState =
   | {
       value: 'estimatedData.loaded';
       context: DefaultDatasetsSummaryPanelContext;
+    }
+  | {
+      value: 'estimatedData.retrying';
+      context: DefaultDatasetsSummaryPanelContext;
     };
 
 export type DatasetSummaryPanelEvent =
+  | DoneInvokeEvent<Retries>
   | DoneInvokeEvent<DatasetsQuality>
   | DoneInvokeEvent<DatasetsActivityDetails>
-  | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<GetDataStreamsEstimatedDataInBytesResponse>
   | DoneInvokeEvent<Error>;
 

@@ -7,7 +7,10 @@
 
 import { DefaultDatasetsSummaryPanelContext } from './types';
 
-export const DEFAULT_CONTEXT: DefaultDatasetsSummaryPanelContext = {
+export const MAX_RETRIES = 1;
+export const RETRY_DELAY_IN_MS = 5000;
+
+export const defaultContext: DefaultDatasetsSummaryPanelContext = {
   datasetsQuality: {
     percentages: [],
   },
@@ -17,5 +20,10 @@ export const DEFAULT_CONTEXT: DefaultDatasetsSummaryPanelContext = {
   },
   estimatedData: {
     estimatedDataInBytes: 0,
+  },
+  retries: {
+    datasetsQualityRetries: 0,
+    datasetsActivityRetries: 0,
+    estimatedDataRetries: 0,
   },
 };

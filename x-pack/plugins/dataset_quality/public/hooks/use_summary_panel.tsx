@@ -31,8 +31,10 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
     summaryPanelStateService,
     (state) => state.context.datasetsQuality
   );
-  const isDatasetsQualityLoading = useSelector(summaryPanelStateService, (state) =>
-    state.matches('datasetsQuality.fetching')
+  const isDatasetsQualityLoading = useSelector(
+    summaryPanelStateService,
+    (state) =>
+      state.matches('datasetsQuality.fetching') || state.matches('datasetsQuality.retrying')
   );
 
   /*
@@ -42,8 +44,10 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
     summaryPanelStateService,
     (state) => state.context.datasetsActivity
   );
-  const isDatasetsActivityLoading = useSelector(summaryPanelStateService, (state) =>
-    state.matches('datasetsActivity.fetching')
+  const isDatasetsActivityLoading = useSelector(
+    summaryPanelStateService,
+    (state) =>
+      state.matches('datasetsActivity.fetching') || state.matches('datasetsActivity.retrying')
   );
 
   /*
@@ -53,8 +57,9 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
     summaryPanelStateService,
     (state) => state.context.estimatedData
   );
-  const isEstimatedDataLoading = useSelector(summaryPanelStateService, (state) =>
-    state.matches('estimatedData.fetching')
+  const isEstimatedDataLoading = useSelector(
+    summaryPanelStateService,
+    (state) => state.matches('estimatedData.fetching') || state.matches('estimatedData.retrying')
   );
 
   return {
