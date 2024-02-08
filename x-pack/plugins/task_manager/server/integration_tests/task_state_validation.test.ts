@@ -6,14 +6,11 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import {
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { schema } from '@kbn/config-schema';
 import { TaskStatus } from '../task';
-import { type TaskPollingLifecycleOpts } from '../polling_lifecycle';
-import { type TaskClaimingOpts } from '../queries/task_claiming';
+import type { TaskPollingLifecycleOpts } from '../polling_lifecycle';
+import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
 
