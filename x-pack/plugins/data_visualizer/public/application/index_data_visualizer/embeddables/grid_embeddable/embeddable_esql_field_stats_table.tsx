@@ -30,6 +30,8 @@ export const ESQLFieldStatsTableWrapper = ({
   input: EmbeddableInput & ESQLDataVisualizerGridEmbeddableInput;
   onOutputChange?: (ouput: any) => void;
 }) => {
+  // @TODO: remove
+  console.log(`--@@ESQLFieldStatsTableWrapper`, input);
   const [dataVisualizerListState, setDataVisualizerListState] =
     useState<Required<ESQLDataVisualizerIndexBasedAppState>>(restorableDefaults);
 

@@ -140,7 +140,7 @@ export const EmbeddableWrapper = ({
 function isESQLDataVisualizerEmbeddableInput(
   input: unknown
 ): input is ESQLDataVisualizerGridEmbeddableInput {
-  return isPopulatedObject(input, ['esql']) && input.esql === 'true';
+  return isPopulatedObject(input, ['esql']) && input.esql === true;
 }
 
 function isDataVisualizerEmbeddableInput(
@@ -158,7 +158,18 @@ export const IndexDataVisualizerViewWrapper = (props: {
   const { embeddableInput, onOutputChange } = props;
 
   const input = useObservable(embeddableInput);
+  console.log(
+    `--@@isESQLDataVisualizerEmbeddableInput(input)`,
+    isESQLDataVisualizerEmbeddableInput(input),
+    input
+  );
+
   if (isESQLDataVisualizerEmbeddableInput(input)) {
+    // @TODO: remove
+    console.log(
+      `--@@isESQLDataVisualizerEmbeddableInput(input)2`,
+      isESQLDataVisualizerEmbeddableInput(input)
+    );
     return <ESQLFieldStatsTableWrapper input={input} onOutputChange={onOutputChange} />;
   }
   if (isDataVisualizerEmbeddableInput(input)) {
