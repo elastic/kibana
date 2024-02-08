@@ -215,14 +215,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
-    await this.retry.try(async () => {
-      expect(
+    await this.retry.waitFor('active save button', async () => {
+      return (
         (
           await this.find.allByCssSelector(
             '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
           )
-        ).length
-      ).to.be(1);
+        ).length === 1
+      );
     });
     return await this.testSubjects.find('saveIndexPatternButton');
   }
