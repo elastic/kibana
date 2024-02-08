@@ -9,12 +9,6 @@ export { validateName } from './validate_name';
 export { validateProxy } from './validate_proxy';
 export { validateSeeds } from './validate_seeds';
 export { validateSeed } from './validate_seed';
-export { validateServerName } from './validate_server_name';
 export type { ClusterErrors } from './validate_cluster';
 export { validateCluster } from './validate_cluster';
-export {
-  isCloudUrlEnabled,
-  validateCloudUrl,
-  convertProxyConnectionToCloudUrl,
-  convertCloudUrlToProxyConnection,
-} from './validate_cloud_url';
+export { convertCloudRemoteAddressToProxy } from './validate_cloud_address';

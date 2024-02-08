@@ -40,13 +40,7 @@ import { skippingDisconnectedClustersUrl } from '../../../services/documentation
 
 import { RequestFlyout } from './request_flyout';
 import { ConnectionMode } from './components';
-import {
-  ClusterErrors,
-  convertCloudUrlToProxyConnection,
-  convertProxyConnectionToCloudUrl,
-  validateCluster,
-  isCloudUrlEnabled,
-} from './validators';
+import { ClusterErrors, validateCluster, convertCloudRemoteAddressToProxy } from './validators';
 
 const defaultClusterValues: ClusterPayload = {
   name: '',
@@ -69,7 +63,10 @@ interface Props {
   cluster?: Cluster;
 }
 
-export type FormFields = ClusterPayload & { cloudUrl: string; cloudUrlEnabled: boolean };
+export type FormFields = ClusterPayload & {
+  cloudRemoteAddress: string;
+  cloudAdvancedOptionsEnabled: boolean;
+};
 
 interface State {
   fields: FormFields;
@@ -99,8 +96,8 @@ export class RemoteClusterForm extends Component<Props, State> {
       {
         ...defaultClusterValues,
         mode: defaultMode,
-        cloudUrl: convertProxyConnectionToCloudUrl(cluster),
-        cloudUrlEnabled: isCloudEnabled && isCloudUrlEnabled(cluster),
+        cloudRemoteAddress: '',
+        cloudAdvancedOptionsEnabled: false,
       },
       cluster
     );
@@ -108,7 +105,7 @@ export class RemoteClusterForm extends Component<Props, State> {
     this.generateId = htmlIdGenerator();
     this.state = {
       fields: fieldsState,
-      fieldsErrors: validateCluster(fieldsState, isCloudEnabled),
+      fieldsErrors: validateCluster(fieldsState, true),
       areErrorsVisible: false,
       isRequestVisible: false,
     };
@@ -124,13 +121,17 @@ export class RemoteClusterForm extends Component<Props, State> {
     const { isCloudEnabled } = this.context;
 
     // when cloudUrl changes, fill proxy address and server name
-    const { cloudUrl } = changedFields;
-    if (cloudUrl) {
-      const { proxyAddress, serverName } = convertCloudUrlToProxyConnection(cloudUrl);
+    const { cloudAdvancedOptionsEnabled, serverName, cloudRemoteAddress } = changedFields;
+    if (cloudAdvancedOptionsEnabled) {
       changedFields = {
         ...changedFields,
-        proxyAddress,
-        serverName,
+        serverName: cloudAdvancedOptionsEnabled ? serverName : '',
+      };
+    }
+    if (cloudRemoteAddress) {
+      changedFields = {
+        ...changedFields,
+        proxyAddress: convertCloudRemoteAddressToProxy(cloudRemoteAddress),
       };
     }
 
@@ -416,13 +417,7 @@ export class RemoteClusterForm extends Component<Props, State> {
   renderErrors = () => {
     const {
       areErrorsVisible,
-      fieldsErrors: {
-        name: errorClusterName,
-        seeds: errorsSeeds,
-        proxyAddress: errorProxyAddress,
-        serverName: errorServerName,
-        cloudUrl: errorCloudUrl,
-      },
+      fieldsErrors: { name: errorClusterName, seeds: errorsSeeds, proxyAddress: errorProxyAddress },
     } = this.state;
 
     const hasErrors = this.hasErrors();
@@ -460,29 +455,6 @@ export class RemoteClusterForm extends Component<Props, State> {
           defaultMessage: 'The "Proxy address" field is invalid.',
         }),
         error: errorProxyAddress,
-      });
-    }
-
-    if (errorServerName) {
-      errorExplanations.push({
-        key: 'serverNameExplanation',
-        field: i18n.translate(
-          'xpack.remoteClusters.remoteClusterForm.inputServerNameErrorMessage',
-          {
-            defaultMessage: 'The "Server name" field is invalid.',
-          }
-        ),
-        error: errorServerName,
-      });
-    }
-
-    if (errorCloudUrl) {
-      errorExplanations.push({
-        key: 'cloudUrlExplanation',
-        field: i18n.translate('xpack.remoteClusters.remoteClusterForm.inputcloudUrlErrorMessage', {
-          defaultMessage: 'The "Elasticsearch endpoint URL" field is invalid.',
-        }),
-        error: errorCloudUrl,
       });
     }
 

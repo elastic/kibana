@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAddressValid, isPortValid } from './validate_address';
 
-export function validateProxy(proxy?: string): null | JSX.Element {
+export function validateProxy(isCloudEnabled: boolean, proxy?: string): null | JSX.Element {
   if (!proxy) {
     return (
       <FormattedMessage
@@ -32,7 +32,7 @@ export function validateProxy(proxy?: string): null | JSX.Element {
     );
   }
 
-  if (!isPortValid(proxy)) {
+  if (!isCloudEnabled && !isPortValid(proxy)) {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.addressError.invalidPortMessage"
