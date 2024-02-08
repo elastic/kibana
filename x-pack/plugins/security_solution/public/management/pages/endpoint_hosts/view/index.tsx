@@ -570,13 +570,23 @@ export const EndpointList = () => {
           />
         </ManagementEmptyStateWrapper>
       );
+    } else if (listError) {
+      return (
+        <ManagementEmptyStateWrapper>
+          <EuiEmptyPrompt
+            color="danger"
+            iconType="error"
+            title={<h2>{listError.error}</h2>}
+            body={<p>{listError.message}</p>}
+          />
+        </ManagementEmptyStateWrapper>
+      );
     } else if (endpointsExist) {
       return (
         <EuiBasicTable
           data-test-subj="endpointListTable"
           items={mutableListData}
           columns={columns}
-          error={listError?.message}
           pagination={paginationSetup}
           onChange={onTableChange}
           loading={loading}
@@ -615,32 +625,32 @@ export const EndpointList = () => {
       );
     }
   }, [
-    canAccessFleet,
-    canReadEndpointList,
-    columns,
+    initialized,
+    listError,
     endpointsExist,
-    endpointPrivilegesLoading,
-    handleCreatePolicyClick,
-    handleDeployEndpointsClick,
-    handleSelectableOnChange,
-    hasPolicyData,
-    listError?.message,
-    loading,
-    mutableListData,
-    onTableChange,
-    paginationSetup,
+    canReadEndpointList,
+    canAccessFleet,
     policyItemsLoading,
-    policyItems,
-    selectedPolicyId,
+    hasPolicyData,
+    mutableListData,
+    columns,
+    paginationSetup,
+    onTableChange,
+    loading,
     setTableRowProps,
     sorting,
-    initialized,
+    endpointPrivilegesLoading,
+    policyItems,
+    handleDeployEndpointsClick,
+    selectedPolicyId,
+    handleSelectableOnChange,
+    handleCreatePolicyClick,
   ]);
 
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!endpointsExist || !initialized}
+      hideHeader={!endpointsExist || !initialized || !!listError}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -656,7 +666,7 @@ export const EndpointList = () => {
       headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {initialized && (
+      {initialized && !listError && (
         <>
           <TransformFailedCallout
             metadataTransformStats={metadataTransformStats}
@@ -686,7 +696,7 @@ export const EndpointList = () => {
           <EuiSpacer size="m" />
         </>
       )}
-      {hasListData && initialized && (
+      {hasListData && initialized && !listError && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (
