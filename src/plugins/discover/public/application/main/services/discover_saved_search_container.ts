@@ -8,6 +8,7 @@
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import { cloneDeep } from 'lodash';
 import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -111,6 +112,11 @@ export interface DiscoverSavedSearchContainer {
    */
   update: (params: UpdateParams) => SavedSearch;
   /**
+   * Passes filter manager filters to saved search filters
+   * @param params
+   */
+  updateWithFilterManagerFilters: () => SavedSearch;
+  /**
    * Updates the current value of visContextJSON in saved search
    * @param params
    */
@@ -179,8 +185,19 @@ export function getSavedSearchContainer({
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);
     savedSearchCurrent$.next(nextSavedSearch);
+  };
 
-    addLog('[savedSearch] assignNextSavedSearch done', nextSavedSearch);
+  const updateWithFilterManagerFilters = () => {
+    const nextSavedSearch: SavedSearch = {
+      ...getState(),
+    };
+
+    nextSavedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
+
+    assignNextSavedSearch({ nextSavedSearch });
+
+    addLog('[savedSearch] updateWithFilterManagerFilters done', nextSavedSearch);
+    return nextSavedSearch;
   };
 
   const update = ({ nextDataView, nextState, useFilterAndQueryServices }: UpdateParams) => {
@@ -245,6 +262,7 @@ export function getSavedSearchContainer({
     persist,
     set,
     update,
+    updateWithFilterManagerFilters,
     updateVisContext,
   };
 }
