@@ -82,15 +82,14 @@ export const collectConnectorStats = async (
 
     if (connector.filtering.length > 0) {
       const filtering = connector.filtering[0];
-
       connectorStats.syncRules = {
         active: {
           withBasicRules: filtering.active.rules.length > 1,
-          withAdvancedRules: !!filtering.active.advanced_snippet.value,
+          withAdvancedRules: Object.keys(filtering.active.advanced_snippet.value).length > 0,
         },
         draft: {
           withBasicRules: filtering.draft.rules.length > 1,
-          withAdvancedRules: !!filtering.draft.advanced_snippet.value,
+          withAdvancedRules: Object.keys(filtering.draft.advanced_snippet.value).length > 0,
         },
       };
     }
