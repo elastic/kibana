@@ -10,6 +10,7 @@ import Fsp from 'fs/promises';
 import Path from 'path';
 
 import type { SavedObjectsTypeMappingDefinitions } from '@kbn/core-saved-objects-base-server-internal';
+import { prettyPrintAndSortKeys } from '@kbn/utils';
 
 export const CURRENT_MAPPINGS_FILE = Path.resolve(__dirname, '../../current_mappings.json');
 
@@ -29,5 +30,5 @@ export async function readCurrentMappings(): Promise<SavedObjectsTypeMappingDefi
 }
 
 export async function updateCurrentMappings(newMappings: SavedObjectsTypeMappingDefinitions) {
-  await Fsp.writeFile(CURRENT_MAPPINGS_FILE, JSON.stringify(newMappings, null, 2) + '\n', 'utf8');
+  await Fsp.writeFile(CURRENT_MAPPINGS_FILE, prettyPrintAndSortKeys(newMappings) + '\n', 'utf8');
 }
