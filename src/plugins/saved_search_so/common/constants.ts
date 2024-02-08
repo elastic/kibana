@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// TODO: extract into a package?
-
 export const MIN_SAVED_SEARCH_SAMPLE_SIZE = 1;
 export const MAX_SAVED_SEARCH_SAMPLE_SIZE = 10000;
 
