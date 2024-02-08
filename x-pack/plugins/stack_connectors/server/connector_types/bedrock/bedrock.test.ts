@@ -72,7 +72,7 @@ describe('BedrockConnector', () => {
               Accept: '*/*',
               'Content-Type': 'application/json',
             },
-            host: 'bedrock.us-east-1.amazonaws.com',
+            host: 'bedrock-runtime.us-east-1.amazonaws.com',
             path: '/model/anthropic.claude-v2/invoke',
             service: 'bedrock',
           },
@@ -136,7 +136,7 @@ describe('BedrockConnector', () => {
               'Content-Type': 'application/json',
               'x-amzn-bedrock-accept': '*/*',
             },
-            host: 'bedrock.us-east-1.amazonaws.com',
+            host: 'bedrock-runtime.us-east-1.amazonaws.com',
             path: '/model/anthropic.claude-v2/invoke-with-response-stream',
             service: 'bedrock',
           },
@@ -319,7 +319,7 @@ describe('BedrockConnector', () => {
         ).toEqual(`API Error: Resource Not Found - Resource not found`);
       });
 
-      it('returns auhtorization error', () => {
+      it('returns authorization error', () => {
         const err = {
           response: {
             headers: {},
@@ -333,7 +333,27 @@ describe('BedrockConnector', () => {
 
         // @ts-expect-error expects an axios error as the parameter
         expect(connector.getResponseErrorMessage(err)).toEqual(
-          `Unauthorized API Error - The api key was invalid.`
+          `Unauthorized API Error: The api key was invalid.`
+        );
+      });
+
+      it('returns endpoint error', () => {
+        const err = {
+          response: {
+            headers: {},
+            status: 400,
+            statusText: 'Bad Request',
+            data: {
+              message: 'The requested operation is not recognized by the service.',
+            },
+          },
+        } as AxiosError<{ message?: string }>;
+
+        // @ts-expect-error expects an axios error as the parameter
+        expect(connector.getResponseErrorMessage(err)).toEqual(
+          `API Error: The requested operation is not recognized by the service.
+
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`
         );
       });
     });

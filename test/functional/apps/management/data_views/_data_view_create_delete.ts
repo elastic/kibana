@@ -20,7 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
-  describe('creating and deleting default data view', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/174066
+  describe.skip('creating and deleting default data view', function describeIndexTests() {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded(
@@ -149,8 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/174066
-    describe.skip('edit index pattern', () => {
+    describe('edit index pattern', () => {
       it('on edit click', async () => {
         await PageObjects.settings.editIndexPattern('logstash-*', '@timestamp', 'Logstash Star');
 

@@ -101,7 +101,7 @@
     "@dnd-kit/utilities": "^2.0.0",
     "@elastic/apm-rum": "^5.16.0",
     "@elastic/apm-rum-react": "^2.0.2",
-    "@elastic/charts": "61.2.0",
+    "@elastic/charts": "63.0.0",
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.9.1-canary.1",
     "@elastic/ems-client": "8.5.1",
@@ -376,6 +376,7 @@
     "@kbn/data-view-field-editor-example-plugin": "link:examples/data_view_field_editor_example",
     "@kbn/data-view-field-editor-plugin": "link:src/plugins/data_view_field_editor",
     "@kbn/data-view-management-plugin": "link:src/plugins/data_view_management",
+    "@kbn/data-view-utils": "link:packages/kbn-data-view-utils",
     "@kbn/data-views-plugin": "link:src/plugins/data_views",
     "@kbn/data-visualizer-plugin": "link:x-pack/plugins/data_visualizer",
     "@kbn/dataset-quality-plugin": "link:x-pack/plugins/dataset_quality",
@@ -832,7 +833,6 @@
     "@kbn/uptime-plugin": "link:x-pack/plugins/uptime",
     "@kbn/url-drilldown-plugin": "link:x-pack/plugins/drilldowns/url_drilldown",
     "@kbn/url-forwarding-plugin": "link:src/plugins/url_forwarding",
-    "@kbn/url-state": "link:packages/kbn-url-state",
     "@kbn/usage-collection-plugin": "link:src/plugins/usage_collection",
     "@kbn/usage-collection-test-plugin": "link:test/plugin_functional/plugins/usage_collection",
     "@kbn/use-tracked-promise": "link:packages/kbn-use-tracked-promise",
@@ -1065,7 +1065,6 @@
     "react-popper-tooltip": "^3.1.1",
     "react-redux": "^7.2.8",
     "react-resizable": "^3.0.4",
-    "react-resize-detector": "^7.1.1",
     "react-reverse-portal": "^2.1.0",
     "react-router": "^5.3.4",
     "react-router-config": "^5.1.1",
@@ -1520,7 +1519,7 @@
     "blob-polyfill": "^7.0.20220408",
     "callsites": "^3.1.0",
     "chance": "1.0.18",
-    "chromedriver": "^120.0.0",
+    "chromedriver": "^121.0.0",
     "clean-webpack-plugin": "^3.0.0",
     "cli-progress": "^3.12.0",
     "cli-table3": "^0.6.1",
@@ -1684,7 +1683,8 @@
     "xml-crypto": "^5.0.0",
     "xmlbuilder": "13.0.2",
     "yargs": "^15.4.1",
-    "yarn-deduplicate": "^6.0.2"
+    "yarn-deduplicate": "^6.0.2",
+    "zod-to-json-schema": "^3.22.3"
   },
   "packageManager": "yarn@1.22.21"
 }

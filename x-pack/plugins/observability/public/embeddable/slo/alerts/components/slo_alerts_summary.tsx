@@ -22,15 +22,22 @@ interface Props {
   slos: SloItem[];
   timeRange: TimeRange;
   onLoaded?: () => void;
+  showAllGroupByInstances?: boolean;
 }
 
-export function SloAlertsSummary({ slos, deps, timeRange, onLoaded }: Props) {
+export function SloAlertsSummary({
+  slos,
+  deps,
+  timeRange,
+  onLoaded,
+  showAllGroupByInstances,
+}: Props) {
   const {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = deps;
 
-  const esQuery = useSloAlertsQuery(slos, timeRange);
+  const esQuery = useSloAlertsQuery(slos, timeRange, showAllGroupByInstances);
   const timeBuckets = useTimeBuckets();
   const bucketSize = useMemo(
     () =>

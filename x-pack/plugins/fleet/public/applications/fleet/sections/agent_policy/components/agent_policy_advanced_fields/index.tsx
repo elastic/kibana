@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, Suspense } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -35,7 +35,13 @@ import {
   DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT,
 } from '../../../../../../../common/constants';
 import type { NewAgentPolicy, AgentPolicy } from '../../../../types';
-import { useStartServices, useConfig, useGetAgentPolicies, useLicense } from '../../../../hooks';
+import {
+  useStartServices,
+  useConfig,
+  useGetAgentPolicies,
+  useLicense,
+  useUIExtension,
+} from '../../../../hooks';
 
 import { AgentPolicyPackageBadge } from '../../../../components';
 import { UninstallCommandFlyout } from '../../../../../../components';
@@ -67,11 +73,16 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   isEditing = false,
 }) => {
   const { docLinks } = useStartServices();
+  const AgentTamperProtectionWrapper = useUIExtension(
+    'endpoint',
+    'endpoint-agent-tamper-protection'
+  );
   const config = useConfig();
   const maxAgentPoliciesWithInactivityTimeout =
     config.developer?.maxAgentPoliciesWithInactivityTimeout ??
     DEFAULT_MAX_AGENT_POLICIES_WITH_INACTIVITY_TIMEOUT;
   const [touchedFields, setTouchedFields] = useState<{ [key: string]: boolean }>({});
+
   const {
     dataOutputOptions,
     monitoringOutputOptions,
@@ -101,6 +112,98 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
+
+  const AgentTamperProtectionSectionContent = useMemo(
+    () => (
+      <EuiDescribedFormGroup
+        title={
+          <h4>
+            <FormattedMessage
+              id="xpack.fleet.agentPolicyForm.tamperingLabel"
+              defaultMessage="Agent tamper protection"
+            />
+          </h4>
+        }
+        description={
+          <FormattedMessage
+            id="xpack.fleet.agentPolicyForm.tamperingDescription"
+            defaultMessage="Prevent agents from being uninstalled locally. When enabled, agents can only be uninstalled using an authorization token in the uninstall command. Click { linkName } for the full command."
+            values={{ linkName: <strong>Get uninstall command</strong> }}
+          />
+        }
+      >
+        <EuiSwitch
+          label={
+            <>
+              <FormattedMessage
+                id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
+                defaultMessage="Prevent agent tampering"
+              />
+              {!policyHasElasticDefend && (
+                <span data-test-subj="tamperMissingIntegrationTooltip">
+                  <EuiIconTip
+                    type="iInCircle"
+                    color="subdued"
+                    content={i18n.translate(
+                      'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
+                      {
+                        defaultMessage:
+                          'Elastic Defend integration is required to enable this feature',
+                      }
+                    )}
+                  />
+                </span>
+              )}
+            </>
+          }
+          checked={agentPolicy.is_protected ?? false}
+          onChange={(e) => {
+            updateAgentPolicy({ is_protected: e.target.checked });
+          }}
+          disabled={!policyHasElasticDefend}
+          data-test-subj="tamperProtectionSwitch"
+        />
+        {agentPolicy.id && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiLink
+              onClick={() => {
+                setIsUninstallCommandFlyoutOpen(true);
+              }}
+              disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
+              data-test-subj="uninstallCommandLink"
+            >
+              {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
+                defaultMessage: 'Get uninstall command',
+              })}
+            </EuiLink>
+          </>
+        )}
+      </EuiDescribedFormGroup>
+    ),
+    [agentPolicy.id, agentPolicy.is_protected, policyHasElasticDefend, updateAgentPolicy]
+  );
+
+  const AgentTamperProtectionSection = useMemo(() => {
+    if (agentTamperProtectionEnabled && licenseService.isPlatinum() && !agentPolicy.is_managed) {
+      if (AgentTamperProtectionWrapper) {
+        return (
+          <Suspense fallback={null}>
+            <AgentTamperProtectionWrapper.Component>
+              {AgentTamperProtectionSectionContent}
+            </AgentTamperProtectionWrapper.Component>
+          </Suspense>
+        );
+      }
+      return AgentTamperProtectionSectionContent;
+    }
+  }, [
+    agentTamperProtectionEnabled,
+    licenseService,
+    agentPolicy.is_managed,
+    AgentTamperProtectionWrapper,
+    AgentTamperProtectionSectionContent,
+  ]);
 
   return (
     <>
@@ -293,73 +396,9 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }}
         />
       </EuiDescribedFormGroup>
-      {agentTamperProtectionEnabled && licenseService.isPlatinum() && !agentPolicy.is_managed && (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.agentPolicyForm.tamperingLabel"
-                defaultMessage="Agent tamper protection"
-              />
-            </h4>
-          }
-          description={
-            <FormattedMessage
-              id="xpack.fleet.agentPolicyForm.tamperingDescription"
-              defaultMessage="Prevent agents from being uninstalled locally. When enabled, agents can only be uninstalled using an authorization token in the uninstall command. Click { linkName } for the full command."
-              values={{ linkName: <strong>Get uninstall command</strong> }}
-            />
-          }
-        >
-          <EuiSwitch
-            label={
-              <>
-                <FormattedMessage
-                  id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
-                  defaultMessage="Prevent agent tampering"
-                />{' '}
-                {!policyHasElasticDefend && (
-                  <span data-test-subj="tamperMissingIntegrationTooltip">
-                    <EuiIconTip
-                      type="iInCircle"
-                      color="subdued"
-                      content={i18n.translate(
-                        'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
-                        {
-                          defaultMessage:
-                            'Elastic Defend integration is required to enable this feature',
-                        }
-                      )}
-                    />
-                  </span>
-                )}
-              </>
-            }
-            checked={agentPolicy.is_protected ?? false}
-            onChange={(e) => {
-              updateAgentPolicy({ is_protected: e.target.checked });
-            }}
-            disabled={!policyHasElasticDefend}
-            data-test-subj="tamperProtectionSwitch"
-          />
-          {agentPolicy.id && (
-            <>
-              <EuiSpacer size="s" />
-              <EuiLink
-                onClick={() => {
-                  setIsUninstallCommandFlyoutOpen(true);
-                }}
-                disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
-                data-test-subj="uninstallCommandLink"
-              >
-                {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
-                  defaultMessage: 'Get uninstall command',
-                })}
-              </EuiLink>
-            </>
-          )}
-        </EuiDescribedFormGroup>
-      )}
+
+      {AgentTamperProtectionSection}
+
       <EuiDescribedFormGroup
         title={
           <h4>
