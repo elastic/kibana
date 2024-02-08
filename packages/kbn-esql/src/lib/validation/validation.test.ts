@@ -661,21 +661,6 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | mv_expand ', [
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
-<<<<<<< HEAD:packages/kbn-esql/src/lib/validation/validation.test.ts
-    testErrorsAndWarnings('from a | mv_expand stringField', [
-      'Mv_expand only supports list type values, found [stringField] of type [string]',
-    ]);
-
-    testErrorsAndWarnings(`from a | mv_expand listField`, []);
-
-    testErrorsAndWarnings('from a | mv_expand listField, b', [
-      'SyntaxError: expected {<EOF>, PIPE} but found ","',
-    ]);
-
-    testErrorsAndWarnings('row a = "a" | mv_expand a', [
-      'Mv_expand only supports list type values, found [a] of type [string]',
-    ]);
-=======
     for (const type of ['string', 'number', 'date', 'boolean', 'ip']) {
       testErrorsAndWarnings(`from a | mv_expand ${type}Field`, []);
     }
@@ -686,7 +671,6 @@ describe('validation logic', () => {
     ]);
 
     testErrorsAndWarnings('row a = "a" | mv_expand a', []);
->>>>>>> upstream/main:packages/kbn-monaco/src/esql/lib/ast/validation/validation.test.ts
     testErrorsAndWarnings('row a = [1, 2, 3] | mv_expand a', []);
     testErrorsAndWarnings('row a = [true, false] | mv_expand a', []);
     testErrorsAndWarnings('row a = ["a", "b"] | mv_expand a', []);
@@ -754,11 +738,7 @@ describe('validation logic', () => {
     // Do not try to validate the dissect pattern string
     testErrorsAndWarnings('from a | dissect stringField "%{a}"', []);
     testErrorsAndWarnings('from a | dissect numberField "%{a}"', [
-<<<<<<< HEAD:packages/kbn-esql/src/lib/validation/validation.test.ts
-      'Dissect only supports string type values, found [numberField] of type [number]',
-=======
-      'DISSECT only supports string type values, found [numberField] of type number',
->>>>>>> upstream/main:packages/kbn-monaco/src/esql/lib/ast/validation/validation.test.ts
+      'DISSECT only supports string type values, found [numberField] of type [number]',
     ]);
     testErrorsAndWarnings('from a | dissect stringField "%{a}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
@@ -798,11 +778,7 @@ describe('validation logic', () => {
     // Do not try to validate the grok pattern string
     testErrorsAndWarnings('from a | grok stringField "%{a}"', []);
     testErrorsAndWarnings('from a | grok numberField "%{a}"', [
-<<<<<<< HEAD:packages/kbn-esql/src/lib/validation/validation.test.ts
-      'Grok only supports string type values, found [numberField] of type [number]',
-=======
-      'GROK only supports string type values, found [numberField] of type number',
->>>>>>> upstream/main:packages/kbn-monaco/src/esql/lib/ast/validation/validation.test.ts
+      'GROK only supports string type values, found [numberField] of type [number]',
     ]);
     // testErrorsAndWarnings('from a | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
@@ -1324,11 +1300,7 @@ describe('validation logic', () => {
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
     ]);
     testErrorsAndWarnings('from a | stats numberField ', [
-<<<<<<< HEAD:packages/kbn-esql/src/lib/validation/validation.test.ts
       'expected an aggregate function or group but got [numberField] of type [FieldAttribute]',
-=======
-      'STATS expects an aggregate function, found [numberField]',
->>>>>>> upstream/main:packages/kbn-monaco/src/esql/lib/ast/validation/validation.test.ts
     ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
