@@ -6,18 +6,28 @@
  * Side Public License, v 1.
  */
 
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 import { BrowserLoggingSystem } from './logging_system';
 
-describe('', () => {
+describe('BrowserLoggingSystem', () => {
   const timestamp = new Date(Date.UTC(2012, 1, 1, 14, 33, 22, 11));
 
   let mockConsoleLog: jest.SpyInstance;
   let loggingSystem: BrowserLoggingSystem;
 
+  const createLoggingConfig = (parts: Partial<BrowserLoggingConfig> = {}): BrowserLoggingConfig => {
+    return {
+      root: {
+        level: 'warn',
+      },
+      ...parts,
+    };
+  };
+
   beforeEach(() => {
     mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
     jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
-    loggingSystem = new BrowserLoggingSystem({ logLevel: 'warn' });
+    loggingSystem = new BrowserLoggingSystem(createLoggingConfig());
   });
 
   afterEach(() => {
