@@ -271,24 +271,46 @@ describe('validation logic', () => {
       function setWrapping(option: string) {
         return isWrapped ? `[${option}]` : option;
       }
-      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id')}`, []);
-      testErrorsAndWarnings(`from index ${setWrapping('metadata _id')}`, []);
+      function addBracketsWarning() {
+        return isWrapped
+          ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+          : [];
+      }
+      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id')}`, [], addBracketsWarning());
+      testErrorsAndWarnings(`from index ${setWrapping('metadata _id')}`, [], addBracketsWarning());
 
-      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id, _source')}`, []);
-      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id, _source2')}`, [
-        'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
-      ]);
+      testErrorsAndWarnings(
+        `from index ${setWrapping('METADATA _id, _source')}`,
+        [],
+        addBracketsWarning()
+      );
+      testErrorsAndWarnings(
+        `from index ${setWrapping('METADATA _id, _source2')}`,
+        [
+          'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
+        ],
+        addBracketsWarning()
+      );
       testErrorsAndWarnings(
         `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
         [
           isWrapped
             ? 'SyntaxError: expected {COMMA, CLOSING_BRACKET} but found "["'
             : 'SyntaxError: expected {<EOF>, PIPE, COMMA} but found "METADATA"',
-        ]
+        ],
+        addBracketsWarning()
       );
 
-      testErrorsAndWarnings(`from remote-ccs:indexes ${setWrapping('METADATA _id')}`, []);
-      testErrorsAndWarnings(`from *:indexes ${setWrapping('METADATA _id')}`, []);
+      testErrorsAndWarnings(
+        `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
+        [],
+        addBracketsWarning()
+      );
+      testErrorsAndWarnings(
+        `from *:indexes ${setWrapping('METADATA _id')}`,
+        [],
+        addBracketsWarning()
+      );
     }
     testErrorsAndWarnings(`from index (metadata _id)`, [
       'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET, METADATA} but found "(metadata"',
