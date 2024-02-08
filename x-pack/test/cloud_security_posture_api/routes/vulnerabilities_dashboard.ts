@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
         vulnerabilitiesMock.map((vulnerabilityDoc) =>
           es.index({
             index: VULNERABILITIES_LATEST_INDEX,
-            body: vulnerabilityDoc,
+            body: { ...vulnerabilityDoc, '@timestamp': new Date().toISOString() },
             refresh: true,
           })
         )
