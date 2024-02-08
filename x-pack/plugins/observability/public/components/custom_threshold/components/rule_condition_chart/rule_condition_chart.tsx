@@ -36,6 +36,11 @@ import {
   LensFieldFormat,
 } from './helpers';
 
+interface ChartOptions {
+  seriesType?: SeriesType;
+  interval?: string;
+}
+
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
   dataView?: DataView;
@@ -44,7 +49,7 @@ interface RuleConditionChartProps {
   error?: IErrorObject;
   timeRange: TimeRange;
   annotations?: EventAnnotationConfig[];
-  seriesType?: SeriesType;
+  chartOptions?: ChartOptions;
 }
 
 export function RuleConditionChart({
@@ -55,7 +60,7 @@ export function RuleConditionChart({
   error,
   annotations,
   timeRange,
-  seriesType,
+  chartOptions: { seriesType, interval } = {},
 }: RuleConditionChartProps) {
   const {
     services: { lens },
@@ -223,7 +228,7 @@ export function RuleConditionChart({
       buckets: {
         type: 'date_histogram',
         params: {
-          interval: `${timeSize}${timeUnit}`,
+          interval: interval || `${timeSize}${timeUnit}`,
         },
       },
       seriesType: seriesType ? seriesType : 'bar',
@@ -287,6 +292,7 @@ export function RuleConditionChart({
     formula,
     formulaAsync.value,
     groupBy,
+    interval,
     metrics,
     threshold,
     thresholdReferenceLine,

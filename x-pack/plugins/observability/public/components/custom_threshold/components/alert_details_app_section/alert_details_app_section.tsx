@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
 import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -21,7 +22,7 @@ import {
   useEuiTheme,
   transparentize,
 } from '@elastic/eui';
-import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
+import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import {
   ALERT_END,
@@ -31,23 +32,18 @@ import {
   TAGS,
 } from '@kbn/rule-data-utils';
 import { DataView } from '@kbn/data-views-plugin/common';
-import chroma from 'chroma-js';
 import type {
   EventAnnotationConfig,
   PointInTimeEventAnnotationConfig,
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
+import { AlertHistoryChart } from './alert_history';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
-import { AlertSummaryField, TopAlert } from '../../../..';
-import {
-  AlertParams,
-  CustomThresholdAlertFields,
-  CustomThresholdRuleTypeParams,
-  MetricExpression,
-} from '../../types';
+import { AlertSummaryField } from '../../../..';
+import { AlertParams, MetricExpression } from '../../types';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
 import { LogRateAnalysis } from './log_rate_analysis';
@@ -55,10 +51,7 @@ import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
 import { getFilterQuery } from './helpers/get_filter_query';
-
-// TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
-export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
-export type CustomThresholdAlert = TopAlert<CustomThresholdAlertFields>;
+import { CustomThresholdRule, CustomThresholdAlert } from './types';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -275,8 +268,11 @@ export default function AlertDetailsAppSection({
                   groupBy={ruleParams.groupBy}
                   annotations={annotations}
                   timeRange={timeRange}
-                  // For alert details page, the series type needs to be changed to 'bar_stacked' due to https://github.com/elastic/elastic-charts/issues/2323
-                  seriesType={'bar_stacked'}
+                  chartOptions={{
+                    // For alert details page, the series type needs to be changed to 'bar_stacked'
+                    // due to https://github.com/elastic/elastic-charts/issues/2323
+                    seriesType: 'bar_stacked',
+                  }}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>
@@ -286,6 +282,7 @@ export default function AlertDetailsAppSection({
       {hasLogRateAnalysisLicense && (
         <LogRateAnalysis alert={alert} dataView={dataView} rule={rule} services={services} />
       )}
+      <AlertHistoryChart alert={alert} dataView={dataView} rule={rule} />
     </EuiFlexGroup>
   ) : null;
 

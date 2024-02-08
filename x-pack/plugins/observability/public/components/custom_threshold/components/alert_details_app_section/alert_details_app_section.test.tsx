@@ -19,7 +19,8 @@ import {
 } from '../../mocks/custom_threshold_rule';
 import { CustomThresholdAlertFields } from '../../types';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import AlertDetailsAppSection, { CustomThresholdAlert } from './alert_details_app_section';
+import AlertDetailsAppSection from './alert_details_app_section';
+import { CustomThresholdAlert } from './types';
 import { Groups } from './groups';
 import { Tags } from './tags';
 

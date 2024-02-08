@@ -13,7 +13,7 @@ import { Aggregators, Comparator } from '../../../../common/custom_threshold_rul
 import {
   CustomThresholdAlert,
   CustomThresholdRule,
-} from '../components/alert_details_app_section/alert_details_app_section';
+} from '../components/alert_details_app_section/types';
 
 export const buildCustomThresholdRule = (
   rule: Partial<CustomThresholdRule> = {}
