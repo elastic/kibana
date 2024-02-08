@@ -216,7 +216,6 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           defaultMessage:
             'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
           values: {
-            setting: out.setting,
             expected: out.expected,
             value: out.value,
             command: out.command,
