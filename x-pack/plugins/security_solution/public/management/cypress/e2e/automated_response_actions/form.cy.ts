@@ -208,7 +208,7 @@ describe(
       it('response actions are disabled', () => {
         fillUpNewRule(ruleName, ruleDescription);
         cy.getByTestSubj('response-actions-wrapper').within(() => {
-          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
             'be.disabled'
           );
         });
@@ -234,7 +234,7 @@ describe(
         cy.getByTestSubj('edit-rule-actions-tab').click();
 
         cy.getByTestSubj('response-actions-wrapper').within(() => {
-          cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
+          cy.getByTestSubj('Elastic Defend-response-action-type-selection-option').should(
             'be.disabled'
           );
         });
