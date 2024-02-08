@@ -53,15 +53,15 @@ const getESQLOverallStatsInChunk = async ({
     const evalQuery =
       aggregatableFieldsToQuery.length > 0
         ? ' | EVAL ' +
-        aggregatableFieldsToQuery
-          .map((field) => {
-            // First, evaluate whether field value is defined, if so, count as 1
-            // Then, sum all the 1s to get the count of rows where field value exists
-            return `${getSafeESQLName(`ne_${field.name}`)} = CASE(${getSafeESQLName(
-              field.name
-            )} is NULL, 0, 1)`;
-          })
-          .join(',')
+          aggregatableFieldsToQuery
+            .map((field) => {
+              // First, evaluate whether field value is defined, if so, count as 1
+              // Then, sum all the 1s to get the count of rows where field value exists
+              return `${getSafeESQLName(`ne_${field.name}`)} = CASE(${getSafeESQLName(
+                field.name
+              )} is NULL, 0, 1)`;
+            })
+            .join(',')
         : '';
 
     let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
