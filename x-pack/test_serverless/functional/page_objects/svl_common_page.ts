@@ -25,46 +25,55 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       setTimeout(resolve, ms);
     });
 
+  /**
+   * Delete browser cookies, clear session and local storages
+   */
+  const cleanBrowserState = async () => {
+    // we need to load kibana host to delete/add cookie
+    const noAuthRequredUrl = deployment.getHostPort() + '/bootstrap-anonymous.js';
+    log.debug(`browser: navigate to /bootstrap-anonymous.js`);
+    await browser.get(noAuthRequredUrl);
+    // previous test might left unsaved changes and alert will show up on url change
+    const alert = await browser.getAlert();
+    if (alert) {
+      log.debug(`browser: closing alert`);
+      await alert.accept();
+    }
+    log.debug(`browser: wait for resource page to be loaded`);
+    await find.byCssSelector('body > pre', 5000);
+    log.debug(`browser: delete all the cookies`);
+    await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
+      await browser.deleteAllCookies();
+      await pageObjects.common.sleep(1000);
+      const cookies = await browser.getCookies();
+      return cookies.length === 0;
+    });
+    log.debug(`browser: clearing session & local storages`);
+    await browser.clearSessionStorage();
+    await browser.clearLocalStorage();
+    await pageObjects.common.sleep(700);
+  };
+
   return {
     async loginWithRole(role: string) {
       log.debug(`Fetch the cookie for '${role}' role`);
       const sidCookie = await svlUserManager.getSessionCookieForRole(role);
-      const bootstrapUrl = deployment.getHostPort() + '/bootstrap-anonymous.js';
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,
         async () => {
-          log.debug(`Navigate to /bootstrap-anonymous.js`);
-          await browser.get(bootstrapUrl);
-          // accept alert if it pops up
-          const alert = await browser.getAlert();
-          if (alert) {
-            log.debug(`Closing alert in browser`);
-            await alert.accept();
-          }
-          log.debug(`Wait for bootstrap page to be loaded`);
-          await find.byCssSelector('body > pre', 5000);
-          log.debug(`Delete all the cookies in the current browser context`);
-          await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
-            await browser.deleteAllCookies();
-            await pageObjects.common.sleep(1000);
-            const cookies = await browser.getCookies();
-            return cookies.length === 0;
-          });
-          log.debug(`Clearing session & local storages`);
-          await browser.clearSessionStorage();
-          await browser.clearLocalStorage();
-          await pageObjects.common.sleep(700);
-          log.debug(`Set the new cookie in the current browser context`);
-          await retry.waitForWithTimeout('Browser cookie is set', 10000, async () => {
+          await cleanBrowserState();
+          log.debug(`browser: set the new cookie`);
+          await retry.waitForWithTimeout('New cookie is added', 10000, async () => {
             await browser.setCookie('sid', sidCookie);
             await pageObjects.common.sleep(1000);
             const cookies = await browser.getCookies();
             return cookies.length === 1;
           });
           // Cookie should be already set in the browsing context, navigating to the Home page
-          log.debug(`Navigate to base url`);
+          log.debug(`browser: refresh the page`);
           await browser.refresh();
+          log.debug(`browser: load base url and validate the cookie`);
           await browser.get(deployment.getHostPort());
           // Validating that the new cookie in the browser is set for the correct user
           const browserCookies = await browser.getCookies();
@@ -121,24 +130,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
         return;
       }
 
-      log.debug(`Navigate to /bootstrap.js`);
-      await browser.get(deployment.getHostPort() + '/bootstrap.js');
-      // accept alert if it pops up
-      const alert = await browser.getAlert();
-      if (alert) {
-        log.debug(`Closing alert in browser`);
-        await alert.accept();
-      }
-
-      log.debug(`Wait for bootstrap page to be loaded`);
-      await find.byCssSelector('body > pre', 5000);
-      log.debug(`Delete all the cookies in the current browser context`);
-      await retry.waitForWithTimeout('Browser cookies are deleted', 10000, async () => {
-        await browser.deleteAllCookies();
-        await pageObjects.common.sleep(1000);
-        const cookies = await browser.getCookies();
-        return cookies.length === 0;
-      });
+      await cleanBrowserState();
 
       log.debug(`Navigating to ${deployment.getHostPort()}/logout to force the logout`);
       await browser.get(deployment.getHostPort() + '/logout');

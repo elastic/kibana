@@ -35,7 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('discover field visualize button', () => {
     before(async () => {
       // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
