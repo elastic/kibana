@@ -185,6 +185,12 @@ export function getRuleType(): GeoContainmentRuleType {
     validate: {
       params: ParamsSchema,
     },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: ParamsSchema,
+      },
+    },
     actionVariables,
     minimumLicenseRequired: 'gold',
     isExportable: true,

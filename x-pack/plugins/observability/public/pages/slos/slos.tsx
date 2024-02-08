@@ -31,7 +31,13 @@ export function SlosPage() {
   const { ObservabilityPageTemplate } = usePluginContext();
   const { hasAtLeast } = useLicense();
 
-  const { isLoading, isError, data: sloList } = useFetchSloList();
+  const {
+    isLoading,
+    isError,
+    data: sloList,
+  } = useFetchSloList({
+    perPage: 0,
+  });
   const { total } = sloList ?? { total: 0 };
 
   useBreadcrumbs([
@@ -58,7 +64,6 @@ export function SlosPage() {
           defaultMessage: 'SLOs',
         }),
         rightSideItems: [<CreateSloBtn />, <FeedbackButton />],
-        bottomBorder: false,
       }}
       topSearchBar={<SloListSearchBar />}
     >

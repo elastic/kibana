@@ -189,6 +189,7 @@ export const LayerActions = (props: LayerActionsProps) => {
       alignItems="center"
       direction="row"
       justifyContent="flexEnd"
+      data-test-subj="lnsLayerActions"
     >
       {outsideListAction && (
         <EuiFlexItem grow={false}>

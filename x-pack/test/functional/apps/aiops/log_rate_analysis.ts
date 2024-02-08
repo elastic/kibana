@@ -36,7 +36,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);
     });
 
-    it(`${testData.suiteTitle} displays index details`, async () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/176387
+    it.skip(`${testData.suiteTitle} displays index details`, async () => {
       await ml.testExecution.logTestStep(`${testData.suiteTitle} displays the time range step`);
       await aiops.logRateAnalysisPage.assertTimeRangeSelectorSectionExists();
 
@@ -274,8 +275,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
   }
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176066
-  describe.skip('log rate analysis', async function () {
+  describe('log rate analysis', async function () {
     for (const testData of logRateAnalysisTestData) {
       describe(`with '${testData.sourceIndexOrSavedSearch}'`, function () {
         before(async () => {
