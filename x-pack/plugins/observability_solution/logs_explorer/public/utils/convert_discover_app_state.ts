@@ -79,11 +79,7 @@ export const getDiscoverColumnsWithFallbackFieldsFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): DiscoverAppState['columns'] =>
   displayOptions.grid.columns.flatMap((column) => {
-    if (column.type === 'document-field') {
-      return column.field;
-    } else {
-      return SMART_FALLBACK_FIELDS[column.name];
-    }
+    return column.type === 'document-field' ? column.field : SMART_FALLBACK_FIELDS[column.name];
   });
 
 export const getDiscoverColumnsFromDisplayOptions = (

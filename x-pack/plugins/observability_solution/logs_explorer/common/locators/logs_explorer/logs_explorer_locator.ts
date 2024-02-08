@@ -29,13 +29,13 @@ export class LogsExplorerLocatorDefinition implements LocatorDefinition<LogsExpl
         }
       : undefined;
 
-    const discoverStyleColumns = columns?.map((column) => {
+    const discoverColumns = columns?.map((column) => {
       return column.type === 'document-field' ? column.field : column.name;
     });
 
     return this.deps.discoverAppLocator?.getLocation({
       ...params,
-      columns: discoverStyleColumns,
+      columns: discoverColumns,
       dataViewId: dataset,
       dataViewSpec,
     })!;
