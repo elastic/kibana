@@ -541,10 +541,7 @@ export class ObservabilityAIAssistantClient {
     const observable = streamIntoObservable(response).pipe(processOpenAiStream(), shareReplay());
 
     firstValueFrom(observable)
-      .then(
-        () => {},
-        () => {}
-      )
+      .catch(noop)
       .finally(() => {
         this.dependencies.logger.debug(
           `Received first value after ${Math.round(performance.now() - now)}ms${
