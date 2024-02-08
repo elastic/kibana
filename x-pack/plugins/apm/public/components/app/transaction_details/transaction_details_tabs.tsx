@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { XYBrushEvent } from '@elastic/charts';
 import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
@@ -27,6 +27,7 @@ import { failedTransactionsCorrelationsTab } from './failed_transactions_correla
 import { latencyCorrelationsTab } from './latency_correlations_tab';
 import { profilingTab } from './profiling_tab';
 import { traceSamplesTab } from './trace_samples_tab';
+import { useTransactionProfilingSetting } from '../../../hooks/use_profiling_integration_setting';
 
 export interface TabContentProps {
   clearChartSelection: () => void;
@@ -37,13 +38,6 @@ export interface TabContentProps {
   traceSamplesFetchResult: TraceSamplesFetchResult;
 }
 
-const tabs = [
-  traceSamplesTab,
-  latencyCorrelationsTab,
-  failedTransactionsCorrelationsTab,
-  profilingTab,
-];
-
 export function TransactionDetailsTabs() {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/transactions/view',
@@ -51,10 +45,24 @@ export function TransactionDetailsTabs() {
   );
 
   const isCriticalPathFeatureEnabled = useCriticalPathFeatureEnabledSetting();
+  const isTransactionProfilingEnabled = useTransactionProfilingSetting();
 
-  const availableTabs = isCriticalPathFeatureEnabled
-    ? tabs.concat(aggregatedCriticalPathTab)
-    : tabs;
+  const availableTabs = useMemo(() => {
+    const tabs = [
+      traceSamplesTab,
+      latencyCorrelationsTab,
+      failedTransactionsCorrelationsTab,
+    ];
+    if (isCriticalPathFeatureEnabled) {
+      tabs.push(aggregatedCriticalPathTab);
+    }
+
+    if (isTransactionProfilingEnabled) {
+      tabs.push(profilingTab);
+    }
+
+    return tabs;
+  }, [isCriticalPathFeatureEnabled, isTransactionProfilingEnabled]);
 
   const { urlParams } = useLegacyUrlParams();
   const history = useHistory();

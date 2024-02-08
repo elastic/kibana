@@ -534,6 +534,7 @@ export const uiSettings: Record<string, UiSettings> = {
       defaultMessage: 'TBD',
     }),
     schema: schema.boolean(),
+    requiresPageReload: true,
   },
 };
 
