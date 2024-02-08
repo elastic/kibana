@@ -328,6 +328,11 @@ export interface TaskInstance {
    * Indicates the number of skipped executions.
    */
   numSkippedRuns?: number;
+
+  /*
+   * Optionally override the timeout defined in the task type for this specific task instance
+   */
+  timeoutOverride?: string;
 }
 
 /**

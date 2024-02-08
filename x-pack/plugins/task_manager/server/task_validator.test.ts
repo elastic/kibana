@@ -394,4 +394,67 @@ describe('TaskValidator', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"[bar]: definition for this key is missing"`);
     });
   });
+
+  describe('test validateTimeoutOverride()', () => {
+    it(`should validate when specifying a valid timeout override field with no schedule`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        timeoutOverride: '1s',
+        state: { foo: 'foo' },
+      });
+      expect(taskValidator.validateTimeoutOverride(task)).toBeUndefined();
+    });
+
+    it(`should validate when specifying a schedule and no timeout override`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        schedule: { interval: '1d' },
+        state: { foo: 'foo' },
+      });
+      expect(taskValidator.validateTimeoutOverride(task)).toBeUndefined();
+    });
+
+    it(`should fail to validate when specifying a valid timeout override field and recurring schedule`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        timeoutOverride: '1s',
+        schedule: { interval: '1d' },
+        state: { foo: 'foo' },
+      });
+      expect(() => taskValidator.validateTimeoutOverride(task)).toThrowErrorMatchingInlineSnapshot(
+        `"[TaskValidator] cannot specify timeout override 1s when scheduling a recurring task"`
+      );
+    });
+
+    it(`should fail to validate when specifying an invalid timeout override field`, () => {
+      const definitions = new TaskTypeDictionary(mockLogger());
+      const taskValidator = new TaskValidator({
+        logger: mockLogger(),
+        definitions,
+        allowReadingInvalidState: false,
+      });
+      const task = taskManagerMock.createTask({
+        timeoutOverride: 'foo',
+        state: { foo: 'foo' },
+      });
+      expect(() => taskValidator.validateTimeoutOverride(task)).toThrowErrorMatchingInlineSnapshot(
+        `"[TaskValidator] Invalid timeout \\"foo\\". Timeout must be of the form \\"{number}{cadance}\\" where number is an integer. Example: 5m."`
+      );
+    });
+  });
 });

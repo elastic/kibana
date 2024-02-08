@@ -25,37 +25,14 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr } from './lib/result_type';
-
-const mockGetValidatedTaskInstanceFromReading = jest.fn();
-const mockGetValidatedTaskInstanceForUpdating = jest.fn();
-jest.mock('./task_validator', () => {
-  return {
-    TaskValidator: jest.fn().mockImplementation(() => {
-      return {
-        getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
-        getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
-      };
-    }),
-  };
-});
+import { TaskValidator } from './task_validator';
+import * as TaskValidatorModule from './task_validator';
 
 const savedObjectsClient = savedObjectsRepositoryMock.create();
 const serializer = savedObjectsServiceMock.createSerializer();
 const adHocTaskCounter = new AdHocTaskCounter();
 
 const randomId = () => `id-${_.random(1, 20)}`;
-
-beforeEach(() => {
-  jest.resetAllMocks();
-  jest.requireMock('./task_validator').TaskValidator.mockImplementation(() => {
-    return {
-      getValidatedTaskInstanceFromReading: mockGetValidatedTaskInstanceFromReading,
-      getValidatedTaskInstanceForUpdating: mockGetValidatedTaskInstanceForUpdating,
-    };
-  });
-  mockGetValidatedTaskInstanceFromReading.mockImplementation((task) => task);
-  mockGetValidatedTaskInstanceForUpdating.mockImplementation((task) => task);
-});
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -94,6 +71,25 @@ taskDefinitions.registerTaskDefinitions({
 });
 
 describe('TaskStore', () => {
+  let getValidatedTaskInstanceFromReadingSpy: jest.SpyInstance;
+  let getValidatedTaskInstanceForUpdatingSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    getValidatedTaskInstanceFromReadingSpy = jest
+      .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceFromReading')
+      .mockImplementation((task) => task);
+    getValidatedTaskInstanceForUpdatingSpy = jest
+      .spyOn(TaskValidator.prototype, 'getValidatedTaskInstanceForUpdating')
+      .mockImplementation((task) => task);
+  });
+
+  afterEach(() => {
+    jest.resetAllMocks();
+    getValidatedTaskInstanceFromReadingSpy.mockRestore();
+    getValidatedTaskInstanceForUpdatingSpy.mockRestore();
+  });
+
   describe('schedule', () => {
     let store: TaskStore;
 
@@ -216,6 +212,20 @@ describe('TaskStore', () => {
     test('errors if the task type is unknown', async () => {
       await expect(testSchedule({ taskType: 'nope', params: {}, state: {} })).rejects.toThrow(
         /Unsupported task type "nope"/i
+      );
+    });
+
+    test('errors when scheduling recurring task with timestamp override', async () => {
+      const task = {
+        params: { hello: 'world' },
+        state: { foo: 'bar' },
+        taskType: 'report',
+        schedule: { interval: '1m' },
+        timeoutOverride: '1m',
+      };
+
+      await expect(testSchedule(task)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"[TaskValidator] cannot specify timeout override 1m when scheduling a recurring task"`
       );
     });
 
@@ -493,12 +503,12 @@ describe('TaskStore', () => {
 
       const result = await store.update(task, { validate: true });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledTimes(1);
-      expect(mockGetValidatedTaskInstanceFromReading).toHaveBeenCalledTimes(1);
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(getValidatedTaskInstanceForUpdatingSpy).toHaveBeenCalledTimes(1);
+      expect(getValidatedTaskInstanceFromReadingSpy).toHaveBeenCalledTimes(1);
+      expect(getValidatedTaskInstanceForUpdatingSpy).toHaveBeenCalledWith(task, {
         validate: true,
       });
-      expect(mockGetValidatedTaskInstanceFromReading).toHaveBeenCalledWith(task, {
+      expect(getValidatedTaskInstanceFromReadingSpy).toHaveBeenCalledWith(task, {
         validate: true,
       });
       expect(savedObjectsClient.update).toHaveBeenCalledWith(
@@ -565,7 +575,7 @@ describe('TaskStore', () => {
 
       await store.update(task, { validate: false });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(getValidatedTaskInstanceForUpdatingSpy).toHaveBeenCalledWith(task, {
         validate: false,
       });
     });
@@ -648,7 +658,7 @@ describe('TaskStore', () => {
 
       await store.bulkUpdate([task], { validate: false });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(getValidatedTaskInstanceForUpdatingSpy).toHaveBeenCalledWith(task, {
         validate: false,
       });
     });
@@ -1140,50 +1150,62 @@ describe('TaskStore', () => {
       expect(adHocTaskCounter.count).toEqual(0);
     });
   });
+});
 
-  describe('TaskValidator', () => {
-    test(`should pass allowReadingInvalidState:false accordingly`, () => {
-      const logger = mockLogger();
+describe('TaskValidator', () => {
+  const mockTaskValidator: TaskValidator = {
+    validateTimeoutOverride: jest.fn(),
+    getValidatedTaskInstanceFromReading: jest.fn(),
+    getValidatedTaskInstanceForUpdating: jest.fn(),
+  } as unknown as TaskValidator;
 
-      new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: false,
-      });
+  test(`should pass allowReadingInvalidState:false accordingly`, () => {
+    const TaskValidatorMock = jest
+      .spyOn(TaskValidatorModule, 'TaskValidator')
+      .mockImplementation(() => mockTaskValidator);
+    const logger = mockLogger();
 
-      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
-        logger,
-        definitions: taskDefinitions,
-        allowReadingInvalidState: false,
-      });
+    new TaskStore({
+      logger,
+      index: 'tasky',
+      taskManagerId: '',
+      serializer,
+      esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+      definitions: taskDefinitions,
+      savedObjectsRepository: savedObjectsClient,
+      adHocTaskCounter,
+      allowReadingInvalidState: false,
     });
 
-    test(`should pass allowReadingInvalidState:true accordingly`, () => {
-      const logger = mockLogger();
+    expect(TaskValidatorMock).toHaveBeenCalledWith({
+      logger,
+      definitions: taskDefinitions,
+      allowReadingInvalidState: false,
+    });
+  });
 
-      new TaskStore({
-        logger,
-        index: 'tasky',
-        taskManagerId: '',
-        serializer,
-        esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
-        definitions: taskDefinitions,
-        savedObjectsRepository: savedObjectsClient,
-        adHocTaskCounter,
-        allowReadingInvalidState: true,
-      });
+  test(`should pass allowReadingInvalidState:true accordingly`, () => {
+    const TaskValidatorMock = jest
+      .spyOn(TaskValidatorModule, 'TaskValidator')
+      .mockImplementation(() => mockTaskValidator);
+    const logger = mockLogger();
 
-      expect(jest.requireMock('./task_validator').TaskValidator).toHaveBeenCalledWith({
-        logger,
-        definitions: taskDefinitions,
-        allowReadingInvalidState: true,
-      });
+    new TaskStore({
+      logger,
+      index: 'tasky',
+      taskManagerId: '',
+      serializer,
+      esClient: elasticsearchServiceMock.createClusterClient().asInternalUser,
+      definitions: taskDefinitions,
+      savedObjectsRepository: savedObjectsClient,
+      adHocTaskCounter,
+      allowReadingInvalidState: true,
+    });
+
+    expect(TaskValidatorMock).toHaveBeenCalledWith({
+      logger,
+      definitions: taskDefinitions,
+      allowReadingInvalidState: true,
     });
   });
 });

@@ -10,6 +10,8 @@ import type { Logger } from '@kbn/core/server';
 import type { ObjectType } from '@kbn/config-schema';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import type { TaskInstance, ConcreteTaskInstance, TaskDefinition } from './task';
+import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { isErr, tryAsResult } from './lib/result_type';
 
 interface TaskValidatorOpts {
   allowReadingInvalidState: boolean;
@@ -124,6 +126,26 @@ export class TaskValidator {
       state: this.getValidatedStateSchema(task.state, task.taskType, latestStateSchema, 'forbid'),
       stateVersion: latestStateSchema?.version,
     };
+  }
+
+  public validateTimeoutOverride<T extends TaskInstance>(task: T) {
+    if (task.timeoutOverride) {
+      if (
+        !isInterval(task.timeoutOverride) ||
+        isErr(tryAsResult(() => parseIntervalAsMillisecond(task.timeoutOverride!)))
+      ) {
+        throw new Error(
+          `[TaskValidator] Invalid timeout "${task.timeoutOverride}". Timeout must be of the form "{number}{cadance}" where number is an integer. Example: 5m.`
+        );
+      }
+    }
+
+    // Only allow timeoutOverride if schedule is not defined
+    if (!!task.timeoutOverride && !!task.schedule) {
+      throw new Error(
+        `[TaskValidator] cannot specify timeout override ${task.timeoutOverride} when scheduling a recurring task`
+      );
+    }
   }
 
   private migrateTaskState(
