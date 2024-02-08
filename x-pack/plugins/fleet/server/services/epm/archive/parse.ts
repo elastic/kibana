@@ -221,10 +221,8 @@ export function parseAndVerifyArchive(
   if (!paths.includes(manifestFile) || !manifestBuffer) {
     throw new PackageInvalidArchiveError(
       !paths.includes(manifestFile)
-        ? `Manifest file ${manifestFile} not found in paths ${paths}`
-        : `manifestBuffer is not found in assetsMap ${Object.keys(
-            assetsMap
-          )} for manifestFile ${manifestFile}`
+        ? `Manifest file ${manifestFile} not found in paths.`
+        : `Manifest buffer is not found in assets map for manifest file ${manifestFile}.`
     );
   }
 
