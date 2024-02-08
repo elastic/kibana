@@ -163,6 +163,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         testData.dataGenerator
       );
 
+      await aiops.logRateAnalysisPage.assertUrlState(
+        testData.expected.globalState,
+        testData.expected.appState
+      );
+
       // The group switch should be disabled by default
       await aiops.logRateAnalysisPage.assertLogRateAnalysisResultsGroupSwitchExists(false);
 
