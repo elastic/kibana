@@ -6,7 +6,9 @@
  */
 
 import type { EuiSuperSelectOption } from '@elastic/eui';
+
 import {
+  EuiSpacer,
   useEuiFontSize,
   EuiButtonIcon,
   useGeneratedHtmlId,
@@ -59,7 +61,10 @@ const AssetCriticalitySelectorComponent: React.FC<{
   return (
     <>
       {criticality.query.isLoading || criticality.mutation.isLoading ? (
-        <EuiLoadingSpinner size="s" data-test-subj="asset-criticality-selector-loading" />
+        <>
+          <EuiSpacer size="s" />
+          <EuiLoadingSpinner size="s" data-test-subj="asset-criticality-selector-loading" />
+        </>
       ) : (
         <EuiFlexGroup
           direction="row"
