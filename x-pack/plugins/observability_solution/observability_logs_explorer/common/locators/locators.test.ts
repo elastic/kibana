@@ -92,7 +92,7 @@ describe('Observability Logs Explorer Locators', () => {
       });
     });
 
-    it('should allow specifiying columns', async () => {
+    it('should allow specifying columns', async () => {
       const params: AllDatasetsLocatorParams = {
         columns: [{ field: '_source', type: 'document-field' }],
       };
