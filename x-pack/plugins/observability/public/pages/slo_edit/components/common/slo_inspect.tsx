@@ -39,10 +39,10 @@ import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
 
-type Props = {
+interface Props {
   slo?: GetSLOResponse;
   disabled: boolean;
-};
+}
 
 export function SLOInspectWrapper({ slo, disabled }: Props) {
   const {
@@ -85,8 +85,8 @@ function SLOInspect({ slo, disabled }: Props) {
   };
 
   const handleInspectButtonClick = async () => {
-    const isFormValid = await trigger();
-    if (!isFormValid) {
+    const valid = await trigger();
+    if (!valid) {
       setFormValid(false);
       return;
     }

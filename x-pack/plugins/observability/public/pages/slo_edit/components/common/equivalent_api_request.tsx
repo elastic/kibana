@@ -23,11 +23,11 @@ import { useFormContext } from 'react-hook-form';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
 
-type Props = {
+interface Props {
   isEditMode: boolean;
   disabled: boolean;
   slo?: GetSLOResponse;
-};
+}
 
 export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
