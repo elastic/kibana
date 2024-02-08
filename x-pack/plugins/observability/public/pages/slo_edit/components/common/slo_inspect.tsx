@@ -42,9 +42,10 @@ import { GetSLOResponse } from '@kbn/slo-schema';
 
 type Props = {
   slo?: GetSLOResponse;
+  disabled: boolean;
 };
 
-export function SLOInspectWrapper({ slo }: Props) {
+export function SLOInspectWrapper({ slo, disabled }: Props) {
   const {
     services: { uiSettings },
   } = useKibana();
@@ -52,10 +53,10 @@ export function SLOInspectWrapper({ slo }: Props) {
   const { isDev } = usePluginContext();
   const isInspectorEnabled = uiSettings?.get<boolean>(enableInspectEsQueries);
 
-  return isDev || isInspectorEnabled ? <SLOInspect slo={slo} /> : null;
+  return isDev || isInspectorEnabled ? <SLOInspect slo={slo} disabled={disabled} /> : null;
 }
 
-function SLOInspect({ slo }: Props) {
+function SLOInspect({ slo, disabled }: Props) {
   const { share, http } = useKibana<ObservabilityPublicPluginsStart>().services;
   const { trigger, getValues } = useFormContext<CreateSLOForm>();
 
@@ -217,6 +218,7 @@ function SLOInspect({ slo }: Props) {
           color="primary"
           data-test-subj="syntheticsMonitorInspectShowFlyoutExampleButton"
           onClick={handleInspectButtonClick}
+          disabled={disabled}
           iconType="inspect"
           iconSide="left"
         >

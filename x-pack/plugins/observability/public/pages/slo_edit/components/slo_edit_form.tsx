@@ -164,11 +164,8 @@ export function SloEditForm({ slo }: Props) {
               })}
             </EuiButtonEmpty>
 
-            <EquivalentApiRequest
-              isCreateSloLoading={isCreateSloLoading}
-              isUpdateSloLoading={isUpdateSloLoading}
-            />
-            <SLOInspectWrapper slo={slo} />
+            <EquivalentApiRequest disabled={isCreateSloLoading || isUpdateSloLoading} />
+            <SLOInspectWrapper slo={slo} disabled={isCreateSloLoading || isUpdateSloLoading} />
           </EuiFlexGroup>
         </EuiFlexGroup>
       </FormProvider>

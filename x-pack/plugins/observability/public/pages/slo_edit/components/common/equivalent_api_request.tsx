@@ -24,13 +24,11 @@ import { CreateSLOInput } from '@kbn/slo-schema';
 import { CreateSLOForm } from '../../types';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 
-export function EquivalentApiRequest({
-  isCreateSloLoading,
-  isUpdateSloLoading,
-}: {
-  isCreateSloLoading: boolean;
-  isUpdateSloLoading: boolean;
-}) {
+type Props = {
+  disabled: boolean;
+};
+
+export function EquivalentApiRequest({ disabled }: Props) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
 
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
@@ -115,7 +113,7 @@ export function EquivalentApiRequest({
         color="primary"
         iconType="copyClipboard"
         data-test-subj="sloFormCopyJsonButton"
-        disabled={isCreateSloLoading || isUpdateSloLoading}
+        disabled={disabled}
         onClick={() => setIsFlyoutVisible(true)}
       >
         {i18n.translate('xpack.observability.slo.sloEdit.equivalentApiRequest', {
