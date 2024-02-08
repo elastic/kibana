@@ -20,7 +20,7 @@ import {
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-interface SLOListParams {
+export interface SLOListParams {
   kqlQuery?: string;
   page?: number;
   sortBy?: string;
@@ -28,7 +28,9 @@ interface SLOListParams {
   perPage?: number;
   filters?: Filter[];
   lastRefresh?: number;
-  tags?: SearchState['tags'];
+  tagsFilter?: SearchState['tagsFilter'];
+  statusFilter?: SearchState['statusFilter'];
+  disabled?: boolean;
 }
 
 export interface UseFetchSloListResponse {
@@ -48,7 +50,9 @@ export function useFetchSloList({
   perPage = DEFAULT_SLO_PAGE_SIZE,
   filters: filterDSL = [],
   lastRefresh,
-  tags,
+  tagsFilter,
+  statusFilter,
+  disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -63,22 +67,26 @@ export function useFetchSloList({
   const filters = useMemo(() => {
     try {
       return JSON.stringify(
-        buildQueryFromFilters(filterDSL, dataView, {
-          ignoreFilterIfFieldNotInIndex: true,
-        })
+        buildQueryFromFilters(
+          [
+            ...filterDSL,
+            ...(statusFilter ? [statusFilter] : []),
+            ...(tagsFilter ? [tagsFilter] : []),
+          ],
+          dataView,
+          {
+            ignoreFilterIfFieldNotInIndex: true,
+          }
+        )
       );
     } catch (e) {
       return '';
     }
-  }, [filterDSL, dataView]);
-
-  const kqlQueryValue = useMemo(() => {
-    return mixKqlWithTags(kqlQuery, tags);
-  }, [kqlQuery, tags]);
+  }, [filterDSL, dataView, tagsFilter, statusFilter]);
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.list({
-      kqlQuery: kqlQueryValue,
+      kqlQuery,
       page,
       perPage,
       sortBy,
@@ -89,16 +97,17 @@ export function useFetchSloList({
     queryFn: async ({ signal }) => {
       return await http.get<FindSLOResponse>(`/api/observability/slos`, {
         query: {
-          ...(kqlQueryValue && { kqlQuery: kqlQueryValue }),
+          ...(kqlQuery && { kqlQuery }),
           ...(sortBy && { sortBy }),
           ...(sortDirection && { sortDirection }),
-          ...(page && { page }),
-          ...(perPage && { perPage }),
+          ...(page !== undefined && { page }),
+          ...(perPage !== undefined && { perPage }),
           ...(filters && { filters }),
         },
         signal,
       });
     },
+    enabled: !disabled,
     cacheTime: 0,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {
@@ -130,28 +139,3 @@ export function useFetchSloList({
     isError,
   };
 }
-
-const mixKqlWithTags = (kqlQuery: string, tags: SearchState['tags']) => {
-  if (!tags) {
-    return kqlQuery;
-  }
-  const tagsKqlIncluded = tags.included?.join(' or ') || '';
-  const excludedTagsKql = tags.excluded?.join(' or ') || '';
-
-  let tagsQuery = '';
-  if (tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `slo.tags: (${excludedTagsKql}) and not slo.tags: (${tagsKqlIncluded})`;
-  }
-  if (!excludedTagsKql && tagsKqlIncluded) {
-    tagsQuery = `slo.tags: (${tagsKqlIncluded})`;
-  }
-  if (!tagsKqlIncluded && excludedTagsKql) {
-    tagsQuery = `not slo.tags: (${excludedTagsKql})`;
-  }
-
-  if (!kqlQuery) {
-    return tagsQuery;
-  }
-
-  return `${kqlQuery} and ${tagsQuery}`;
-};

@@ -11,7 +11,6 @@ import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
 import { createHtmlPortalNode, OutPortal } from 'react-reverse-portal';
-import { FeedbackButton } from '../alert_details/components/feedback_button';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -79,7 +78,7 @@ export function SloEditPage() {
           : i18n.translate('xpack.observability.sloCreatePageTitle', {
               defaultMessage: 'Create new SLO',
             }),
-        rightSideItems: [<FeedbackButton />, <OutPortal node={InspectSLOPortalNode} />],
+        rightSideItems: [<OutPortal node={InspectSLOPortalNode} />],
         bottomBorder: false,
       }}
       data-test-subj="slosEditPage"

@@ -7,6 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const DEFAULT_BAR_TARGET = 75;
+
 export const INDEX_DATA_VISUALIZER_NAME = i18n.translate(
   'xpack.dataVisualizer.chrome.help.appName',
   {

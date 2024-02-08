@@ -77,6 +77,7 @@ import {
   processMetricPlotResults,
   processRecordScoreResults,
   getFocusData,
+  getTimeseriesexplorerDefaultState,
 } from './timeseriesexplorer_utils';
 import { ANOMALY_DETECTION_DEFAULT_TIME_RANGE } from '../../../common/constants/settings';
 import { getControlsForDetector } from './get_controls_for_detector';
@@ -95,46 +96,6 @@ import { getDataViewsAndIndicesWithGeoFields } from '../explorer/explorer_utils'
 const allValuesLabel = i18n.translate('xpack.ml.timeSeriesExplorer.allPartitionValuesLabel', {
   defaultMessage: 'all',
 });
-
-function getTimeseriesexplorerDefaultState() {
-  return {
-    chartDetails: undefined,
-    contextAggregationInterval: undefined,
-    contextChartData: undefined,
-    contextForecastData: undefined,
-    // Not chartable if e.g. model plot with terms for a varp detector
-    dataNotChartable: false,
-    entitiesLoading: false,
-    entityValues: {},
-    focusAnnotationData: [],
-    focusAggregationInterval: {},
-    focusChartData: undefined,
-    focusForecastData: undefined,
-    fullRefresh: true,
-    hasResults: false,
-    // Counter to keep track of what data sets have been loaded.
-    loadCounter: 0,
-    loading: false,
-    modelPlotEnabled: false,
-    // Toggles display of annotations in the focus chart
-    showAnnotations: true,
-    showAnnotationsCheckbox: true,
-    // Toggles display of forecast data in the focus chart
-    showForecast: true,
-    showForecastCheckbox: false,
-    // Toggles display of model bounds in the focus chart
-    showModelBounds: true,
-    showModelBoundsCheckbox: false,
-    svgWidth: 0,
-    tableData: undefined,
-    zoomFrom: undefined,
-    zoomTo: undefined,
-    zoomFromFocusLoaded: undefined,
-    zoomToFocusLoaded: undefined,
-    chartDataError: undefined,
-    sourceIndicesWithGeoFields: {},
-  };
-}
 
 const containerPadding = 34;
 
@@ -265,7 +226,7 @@ export class TimeSeriesExplorer extends React.Component {
   }
 
   /**
-   * Gets focus data for the current component state/
+   * Gets focus data for the current component state
    */
   getFocusData(selection) {
     const { selectedJobId, selectedForecastId, selectedDetectorIndex, functionDescription } =
@@ -745,7 +706,6 @@ export class TimeSeriesExplorer extends React.Component {
         );
       }
     }
-
     // Required to redraw the time series chart when the container is resized.
     this.resizeChecker = new ResizeChecker(this.resizeRef.current);
     this.resizeChecker.on('resize', () => {
@@ -1091,7 +1051,6 @@ export class TimeSeriesExplorer extends React.Component {
               entities={entityControls}
             />
           )}
-
         {arePartitioningFieldsProvided &&
           jobs.length > 0 &&
           (fullRefresh === false || loading === false) &&
@@ -1218,6 +1177,8 @@ export class TimeSeriesExplorer extends React.Component {
                 showForecast={showForecast}
                 showModelBounds={showModelBounds}
                 lastRefresh={lastRefresh}
+                tableData={tableData}
+                sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
               />
               {focusAnnotationError !== undefined && (
                 <>
@@ -1316,7 +1277,7 @@ export class TimeSeriesExplorer extends React.Component {
             bounds={bounds}
             tableData={tableData}
             filter={this.tableFilter}
-            sourceIndicesWithGeoFields={sourceIndicesWithGeoFields}
+            sourceIndicesWithGeoFields={this.state.sourceIndicesWithGeoFields}
             selectedJobs={[
               {
                 id: selectedJob.job_id,

@@ -47,4 +47,14 @@ export interface ConsolePluginStart {
    * render an embeddable version of the developer console on the page.
    */
   renderEmbeddableConsole?: (props?: EmbeddableConsoleProps) => ReactElement | null;
+  /**
+   * isEmbeddedConsoleAvailable is available if the embedded console can be rendered. Returns true when
+   * called if the Embedded Console is currently rendered.
+   */
+  isEmbeddedConsoleAvailable?: () => boolean;
+  /**
+   * openEmbeddedConsole is available if the embedded console can be rendered. Calling
+   * this function will open the embedded console on the page if it is currently rendered.
+   */
+  openEmbeddedConsole?: (content?: string) => void;
 }
