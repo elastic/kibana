@@ -20,20 +20,20 @@ import {
   ObservabilityLogsExplorerLocationState,
 } from '../common/locators';
 
-export interface ObservabilityLogExplorerPluginSetup {
+export interface ObservabilityLogsExplorerPluginSetup {
   locators: ObservabilityLogsExplorerLocators;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface ObservabilityLogExplorerPluginStart {}
+export interface ObservabilityLogsExplorerPluginStart {}
 
-export interface ObservabilityLogExplorerSetupDeps {
+export interface ObservabilityLogsExplorerSetupDeps {
   discover: DiscoverSetup;
   serverless?: ServerlessPluginStart;
   share: SharePluginSetup;
 }
 
-export interface ObservabilityLogExplorerStartDeps {
+export interface ObservabilityLogsExplorerStartDeps {
   data: DataPublicPluginStart;
   discover: DiscoverStart;
   logsExplorer: LogsExplorerPluginStart;
@@ -45,6 +45,7 @@ export interface ObservabilityLogExplorerStartDeps {
   datasetQuality: DatasetQualityPluginStart;
 }
 
-export type ObservabilityLogExplorerHistory = ScopedHistory<ObservabilityLogsExplorerLocationState>;
-export type ObservabilityLogExplorerAppMountParameters =
+export type ObservabilityLogsExplorerHistory =
+  ScopedHistory<ObservabilityLogsExplorerLocationState>;
+export type ObservabilityLogsExplorerAppMountParameters =
   AppMountParameters<ObservabilityLogsExplorerLocationState>;

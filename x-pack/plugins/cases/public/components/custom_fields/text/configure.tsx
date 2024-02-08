@@ -6,27 +6,47 @@
  */
 
 import React from 'react';
-import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import { CheckBoxField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import { UseField, useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { CheckBoxField, TextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { CaseCustomFieldText } from '../../../../common/types/domain';
 import type { CustomFieldType } from '../types';
+import { getTextFieldConfig } from './config';
 import * as i18n from '../translations';
 
 const ConfigureComponent: CustomFieldType<CaseCustomFieldText>['Configure'] = () => {
+  const [{ required }] = useFormData<{ required: boolean }>();
+  const config = getTextFieldConfig({
+    required: false,
+    label: i18n.DEFAULT_VALUE.toLocaleLowerCase(),
+  });
+
   return (
     <>
       <UseField
-        path="options.required"
+        path="required"
         component={CheckBoxField}
         componentProps={{
           label: i18n.FIELD_OPTIONS,
-          'data-test-subj': 'text-custom-field-options-wrapper',
+          'data-test-subj': 'text-custom-field-required-wrapper',
           euiFieldProps: {
             label: i18n.FIELD_OPTION_REQUIRED,
-            'data-test-subj': 'text-custom-field-options',
+            'data-test-subj': 'text-custom-field-required',
           },
         }}
       />
+      {required && (
+        <UseField
+          path="defaultValue"
+          component={TextField}
+          config={config}
+          componentProps={{
+            label: i18n.DEFAULT_VALUE,
+            euiFieldProps: {
+              'data-test-subj': 'text-custom-field-default-value',
+            },
+          }}
+        />
+      )}
     </>
   );
 };
