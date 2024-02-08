@@ -10,7 +10,8 @@ import type { ISearchSource, RefreshInterval, TimeRange } from '@kbn/data-plugin
 import type { SavedObjectReference } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsResolveResponse } from '@kbn/core/server';
 import { VIEW_MODE } from '@kbn/saved-search';
-import { DiscoverGridSettings } from '@kbn/saved-search/types';
+import type { DiscoverGridSettings } from '@kbn/saved-search/types';
+export type { SavedSearchAttributes } from '@kbn/saved-search/types';
 
 /** @internal **/
 export type SortOrder = [string, string];
