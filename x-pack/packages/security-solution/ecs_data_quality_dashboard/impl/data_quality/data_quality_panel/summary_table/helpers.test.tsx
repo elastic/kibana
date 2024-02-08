@@ -143,6 +143,7 @@ describe('helpers', () => {
       pattern: 'auditbeat-*',
       patternDocsCount: 57410,
       sizeInBytes: 103344068,
+      checkedAt: Date.now(),
     };
 
     const hasIncompatible: IndexSummaryTableItem = {
@@ -188,6 +189,7 @@ describe('helpers', () => {
         },
         { field: 'ilmPhase', name: 'ILM Phase', sortable: true, truncateText: false },
         { field: 'sizeInBytes', name: 'Size', sortable: true, truncateText: false },
+        { field: 'checkedAt', name: 'Last check', sortable: true, truncateText: false },
       ]);
     });
 

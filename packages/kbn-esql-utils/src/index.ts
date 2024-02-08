@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-export { getESQLAdHocDataview } from './utils/get_esql_adhoc_dataview';
+export { getESQLAdHocDataview, getIndexForESQLQuery } from './utils/get_esql_adhoc_dataview';
 export {
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
