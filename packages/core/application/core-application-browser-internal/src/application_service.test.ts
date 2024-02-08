@@ -129,7 +129,7 @@ describe('#setup()', () => {
           status: AppStatus.accessible,
           deepLinks: [
             expect.objectContaining({
-              visibleIn: [],
+              visibleIn: ['globalSearch'], // by default deep links are visible in globalSearch
             }),
           ],
         })
@@ -152,7 +152,12 @@ describe('#setup()', () => {
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
           deepLinks: [
-            expect.objectContaining({ id: 'subapp2', title: 'Subapp 2', path: '/subapp2' }),
+            expect.objectContaining({
+              id: 'subapp2',
+              title: 'Subapp 2',
+              path: '/subapp2',
+              visibleIn: [], // not visible in globalSearch anymore as the app is inaccessible
+            }),
           ],
         })
       );
@@ -161,6 +166,11 @@ describe('#setup()', () => {
           id: 'app2',
           visibleIn: linkVisibleEverywhere,
           status: AppStatus.accessible,
+          deepLinks: [
+            expect.objectContaining({
+              visibleIn: ['globalSearch'],
+            }),
+          ],
         })
       );
     });
