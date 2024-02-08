@@ -1299,6 +1299,53 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.TagsList",
+        "type": "Function",
+        "tags": [],
+        "label": "TagsList",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.TagsListProps",
+            "text": "TagsListProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list_lazy.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.TagsListProps",
+                "text": "TagsListProps"
+              }
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list_lazy.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.TechnicalPreviewBadge",
         "type": "Function",
         "tags": [],
@@ -2799,6 +2846,108 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.TagsListProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TagsListProps",
+        "description": [],
+        "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "((tag: string) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.TagsListProps.onClick.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tag",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.numberOfTagsToDisplay",
+            "type": "number",
+            "tags": [],
+            "label": "numberOfTagsToDisplay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.ignoreEmpty",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreEmpty",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.UXMetrics",
         "type": "Interface",
         "tags": [],
@@ -4101,10 +4250,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "id": "def-common.LOGS_EXPLORER_FEEDBACK_LINK",
         "type": "string",
         "tags": [],
-        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "label": "LOGS_EXPLORER_FEEDBACK_LINK",
         "description": [],
         "signature": [
           "\"https://ela.st/explorer-feedback\""

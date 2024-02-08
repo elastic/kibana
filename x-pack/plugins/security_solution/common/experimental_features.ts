@@ -70,6 +70,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   responseActionUploadEnabled: true,
 
+  /*
+   * Enables Automated Endpoint Process actions
+   */
+  automatedProcessActionsEnabled: false,
+
   /**
    * Enables the ability to send Response actions to SentinelOne
    */
@@ -148,6 +153,11 @@ export const allowedExperimentalValues = Object.freeze({
    * and associated callout in the UI
    */
   riskEnginePrivilegesRouteEnabled: true,
+
+  /**
+   * Enables alerts suppression for indicator match rules
+   */
+  alertSuppressionForIndicatorMatchRuleEnabled: false,
 
   /*
    * Enables experimental Entity Analytics Asset Criticality feature
