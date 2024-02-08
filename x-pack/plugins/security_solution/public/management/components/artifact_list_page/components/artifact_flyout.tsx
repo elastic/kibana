@@ -171,7 +171,6 @@ export interface ArtifactFlyoutProps {
   labels?: Partial<typeof ARTIFACT_FLYOUT_LABELS>;
   'data-test-subj'?: string;
   size?: EuiFlyoutSize;
-  // confirmModal?: ArtifactConfirmModalProps;
 }
 
 /**
@@ -190,7 +189,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     labels: _labels = {},
     'data-test-subj': dataTestSubj,
     size = 'm',
-    // confirmModal,
   }) => {
     const {
       docLinks: {
@@ -214,6 +212,18 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
       IHttpFetchError | undefined
     >(undefined);
+    const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
+    /*
+    let confirmModal: EuiModal;
+        const { title, body, confirmButtonText, cancelButtonText } = formState.confirmWarningModal;
+        <ArtifactConfirmModal
+          title={title}
+          body={body}
+          confirmButton={confirmButtonText}
+          cancelButton={cancelButtonText}
+          onSuccess={submitData(formState.item).then(handleSuccess)}
+          onCancel={}
+        />;*/
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
@@ -320,17 +330,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             }
           });
       } else if (formState.confirmWarningModal) {
-        const { title, body } = formState.confirmWarningModal;
-        // show confirm Modal
-        console.log('sent successfully');
-        <ArtifactConfirmModal
-          title={title}
-          body={body}
-          confirmButton="add"
-          cancelButton="cancel"
-          onSuccess={submitData(formState.item).then(handleSuccess)}
-          onCancel={}
-        />;
+        setShowConfirmModal(true);
       } else {
         submitData(formState.item).then(handleSuccess);
       }
@@ -386,7 +386,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             <h2>{isEditFlow ? labels.flyoutEditTitle : labels.flyoutCreateTitle}</h2>
           </EuiTitle>
         </EuiFlyoutHeader>
-
         {!isInitializing && showExpiredLicenseBanner && (
           <EuiCallOut
             title={labels.flyoutDowngradedLicenseTitle}
@@ -398,7 +397,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             {labels.flyoutDowngradedLicenseDocsInfo(securitySolution)}
           </EuiCallOut>
         )}
-
         <EuiFlyoutBody>
           {isInitializing && <ManagementPageLoader data-test-subj={getTestId('loader')} />}
 
@@ -414,7 +412,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             />
           )}
         </EuiFlyoutBody>
-
         {!isInitializing && (
           <EuiFlyoutFooter>
             <EuiFlexGroup justifyContent="spaceBetween">
@@ -443,6 +440,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
             </EuiFlexGroup>
           </EuiFlyoutFooter>
         )}
+        {showConfirmModal && confirmModal}
       </EuiFlyout>
     );
   }

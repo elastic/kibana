@@ -58,6 +58,7 @@ import {
   NAME_LABEL,
   POLICY_SELECT_DESCRIPTION,
   SELECT_OS_LABEL,
+  CONFIRM_WARNING_MODAL_LABELS,
 } from '../translations';
 import { OS_TITLES } from '../../../../common/translations';
 import type { LogicalConditionBuilderProps } from './logical_condition';
@@ -283,7 +284,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
           confirmWarningModal: updatedValidationResult.extraWarning
-            ? { title: 'hi there', body: 'body info here' }
+            ? CONFIRM_WARNING_MODAL_LABELS
             : undefined,
         });
       },
