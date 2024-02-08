@@ -39,7 +39,7 @@ const getThirdPartyAgentInfo = (
       ) as ResponseActionAgentType,
     },
     host: {
-      name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
+      name: getFieldValue({ category: 'host', field: 'host.name' }, eventData),
       os: {
         name: getFieldValue({ category: 'host', field: 'host.os.name' }, eventData),
         family: getFieldValue({ category: 'host', field: 'host.os.family' }, eventData),
