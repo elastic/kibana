@@ -35,9 +35,9 @@ export function getQueryFromSavedSearchObject(savedSearch: SavedSearchSavedObjec
   const parsed =
     typeof search?.searchSourceJSON === 'string'
       ? (JSON.parse(search.searchSourceJSON) as {
-        query: Query;
-        filter: Filter[];
-      })
+          query: Query;
+          filter: Filter[];
+        })
       : undefined;
 
   // Remove indexRefName because saved search might no longer be relevant

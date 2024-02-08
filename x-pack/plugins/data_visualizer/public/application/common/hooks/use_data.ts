@@ -67,79 +67,79 @@ export const useData = (
 
   const docCountRequestParams:
     | {
-      reference: DocumentStatsSearchStrategyParams | undefined;
-      comparison: DocumentStatsSearchStrategyParams | undefined;
-    }
+        reference: DocumentStatsSearchStrategyParams | undefined;
+        comparison: DocumentStatsSearchStrategyParams | undefined;
+      }
     | undefined = useMemo(
-      () => {
-        const searchQuery =
-          searchString !== undefined && searchQueryLanguage !== undefined
-            ? ({ query: searchString, language: searchQueryLanguage } as Query)
-            : undefined;
+    () => {
+      const searchQuery =
+        searchString !== undefined && searchQueryLanguage !== undefined
+          ? ({ query: searchString, language: searchQueryLanguage } as Query)
+          : undefined;
 
-        const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
-        if (timefilterActiveBounds !== undefined) {
-          _timeBuckets.setInterval('auto');
-          _timeBuckets.setBounds(timefilterActiveBounds);
-          _timeBuckets.setBarTarget(barTarget);
-          const query = {
-            earliest: timefilterActiveBounds.min?.valueOf(),
-            latest: timefilterActiveBounds.max?.valueOf(),
-            intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
-            timeFieldName: selectedDataView.timeFieldName,
-            runtimeFieldMap: selectedDataView.getRuntimeMappings(),
-          };
+      const timefilterActiveBounds = timeRange ?? timefilter.getActiveBounds();
+      if (timefilterActiveBounds !== undefined) {
+        _timeBuckets.setInterval('auto');
+        _timeBuckets.setBounds(timefilterActiveBounds);
+        _timeBuckets.setBarTarget(barTarget);
+        const query = {
+          earliest: timefilterActiveBounds.min?.valueOf(),
+          latest: timefilterActiveBounds.max?.valueOf(),
+          intervalMs: _timeBuckets.getInterval()?.asMilliseconds(),
+          timeFieldName: selectedDataView.timeFieldName,
+          runtimeFieldMap: selectedDataView.getRuntimeMappings(),
+        };
 
-          const refQuery = buildEsQuery(
-            selectedDataView,
-            searchQuery ?? [],
-            mapAndFlattenFilters([
-              ...queryManager.filterManager.getFilters(),
-              ...(referenceStateManager.filters ?? []),
-            ]),
-            uiSettings ? getEsQueryConfig(uiSettings) : undefined
-          );
+        const refQuery = buildEsQuery(
+          selectedDataView,
+          searchQuery ?? [],
+          mapAndFlattenFilters([
+            ...queryManager.filterManager.getFilters(),
+            ...(referenceStateManager.filters ?? []),
+          ]),
+          uiSettings ? getEsQueryConfig(uiSettings) : undefined
+        );
 
-          const compQuery = buildEsQuery(
-            selectedDataView,
-            searchQuery ?? [],
-            mapAndFlattenFilters([
-              ...queryManager.filterManager.getFilters(),
-              ...(comparisonStateManager.filters ?? []),
-            ]),
-            uiSettings ? getEsQueryConfig(uiSettings) : undefined
-          );
+        const compQuery = buildEsQuery(
+          selectedDataView,
+          searchQuery ?? [],
+          mapAndFlattenFilters([
+            ...queryManager.filterManager.getFilters(),
+            ...(comparisonStateManager.filters ?? []),
+          ]),
+          uiSettings ? getEsQueryConfig(uiSettings) : undefined
+        );
 
-          return {
-            reference: {
-              ...query,
-              searchQuery: refQuery,
-              index: initialSettings ? initialSettings.reference : selectedDataView.getIndexPattern(),
-            },
-            comparison: {
-              ...query,
-              searchQuery: compQuery,
-              index: initialSettings
-                ? initialSettings.comparison
-                : selectedDataView.getIndexPattern(),
-            },
-          };
-        }
-      },
+        return {
+          reference: {
+            ...query,
+            searchQuery: refQuery,
+            index: initialSettings ? initialSettings.reference : selectedDataView.getIndexPattern(),
+          },
+          comparison: {
+            ...query,
+            searchQuery: compQuery,
+            index: initialSettings
+              ? initialSettings.comparison
+              : selectedDataView.getIndexPattern(),
+          },
+        };
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [
+      lastRefresh,
+      searchString,
+      searchQueryLanguage,
       // eslint-disable-next-line react-hooks/exhaustive-deps
-      [
-        lastRefresh,
-        searchString,
-        searchQueryLanguage,
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        JSON.stringify({
-          timeRange,
-          globalFilters: queryManager.filterManager.getFilters(),
-          compFilters: comparisonStateManager?.filters,
-          refFilters: referenceStateManager?.filters,
-        }),
-      ]
-    );
+      JSON.stringify({
+        timeRange,
+        globalFilters: queryManager.filterManager.getFilters(),
+        compFilters: comparisonStateManager?.filters,
+        refFilters: referenceStateManager?.filters,
+      }),
+    ]
+  );
 
   const documentStats = useDocumentCountStats(
     docCountRequestParams?.reference,
