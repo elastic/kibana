@@ -283,6 +283,49 @@ describe('useAllCasesQueryParams', () => {
     });
   });
 
+  it('does not load the URL from the local storage when the URL is empty on the second run', async () => {
+    const existingLocalStorageValues = {
+      queryParams: {
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      },
+      filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+    };
+
+    localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+    const { rerender } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    rerender();
+
+    expect(mockReplace).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not load the URL from the local storage when the URL is not empty', async () => {
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.HIGH],
+      status: [CaseStatuses.open],
+    });
+
+    const existingLocalStorageValues = {
+      queryParams: {
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      },
+      filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+    };
+
+    localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    expect(mockReplace).toHaveBeenCalledTimes(0);
+  });
+
   it('loads the state from the URL correctly', () => {
     mockLocation.search = stringifyUrlParams({
       severity: [CaseSeverity.HIGH],
@@ -425,6 +468,82 @@ describe('useAllCasesQueryParams', () => {
         status: [CaseStatuses.closed],
       },
     });
+  });
+
+  it('updates the local storage when navigating to a URL and the query params are not empty', () => {
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.HIGH],
+      status: [CaseStatuses['in-progress']],
+    });
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+
+    expect(localStorageState).toEqual({
+      ...DEFAULT_CASES_TABLE_STATE,
+      filterOptions: {
+        ...DEFAULT_CASES_TABLE_STATE.filterOptions,
+        severity: [CaseSeverity.HIGH],
+        status: [CaseStatuses['in-progress']],
+      },
+    });
+  });
+
+  it('does not update the local storage when navigating to an empty URL', () => {
+    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    // first call is the initial call made by useLocalStorage
+    expect(lsSpy).toBeCalledTimes(1);
+  });
+
+  it('does not update the local storage on the second run', () => {
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.HIGH],
+      status: [CaseStatuses['in-progress']],
+    });
+
+    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+
+    const { rerender } = renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    rerender();
+
+    // first call is the initial call made by useLocalStorage
+    expect(lsSpy).toBeCalledTimes(2);
+  });
+
+  it('does not update the local storage when the URL and the local storage are the same', async () => {
+    mockLocation.search = stringifyUrlParams({
+      perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+    });
+
+    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
+
+    const existingLocalStorageValues = {
+      queryParams: {
+        ...DEFAULT_CASES_TABLE_STATE.queryParams,
+        perPage: DEFAULT_CASES_TABLE_STATE.queryParams.perPage + 20,
+      },
+      filterOptions: DEFAULT_CASES_TABLE_STATE.filterOptions,
+    };
+
+    localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    // first call is the initial call made by useLocalStorage
+    expect(lsSpy).toBeCalledTimes(1);
   });
 
   describe('validation', () => {
@@ -605,6 +724,21 @@ describe('useAllCasesQueryParams', () => {
 
       expect(result.current.queryParams).toStrictEqual(DEFAULT_CASES_TABLE_STATE.queryParams);
       expect(result.current.filterOptions).toStrictEqual(DEFAULT_CASES_TABLE_STATE.filterOptions);
+    });
+
+    it('does not update the local storage when navigating to a URL and the query params are not empty', () => {
+      mockLocation.search = stringifyUrlParams({
+        severity: [CaseSeverity.HIGH],
+        status: [CaseStatuses['in-progress']],
+      });
+
+      renderHook(() => useAllCasesState(true), {
+        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+      });
+
+      const localStorageState = JSON.parse(localStorage.getItem(LS_KEY) ?? '{}');
+
+      expect(localStorageState).toEqual(DEFAULT_CASES_TABLE_STATE);
     });
   });
 });

@@ -37,6 +37,7 @@ interface UseAllCasesStateReturn {
 
 export function useAllCasesState(isModalView: boolean = false): UseAllCasesStateReturn {
   const isStateLoadedFromLocalStorage = useRef(false);
+  const isFirstRun = useRef(false);
   const [tableState, setTableState] = useState<AllCasesTableState>(DEFAULT_CASES_TABLE_STATE);
   const [urlState, setUrlState] = useAllCasesUrlState();
   const [localStorageState, setLocalStorageState] = useAllCasesLocalStorage();
@@ -70,13 +71,29 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
       !isStateLoadedFromLocalStorage.current &&
       isURLStateEmpty(urlState) &&
       localStorageState &&
-      !deepEqual(urlState, localStorageState) &&
       !isModalView
     ) {
       setUrlState(localStorageState, 'replace');
       isStateLoadedFromLocalStorage.current = true;
     }
   }, [localStorageState, setUrlState, urlState, isModalView]);
+
+  /**
+   * When navigating for the first time in a URL
+   * we need to persist the state on the local storage.
+   * We need to do it only on the first run and only when the URL is not empty.
+   * Otherwise we may introduce a race condition or loop with the above hook.
+   */
+  if (
+    !isFirstRun.current &&
+    !isURLStateEmpty(urlState) &&
+    localStorageState &&
+    !deepEqual(allCasesTableState, localStorageState) &&
+    !isModalView
+  ) {
+    setLocalStorageState(allCasesTableState);
+    isFirstRun.current = true;
+  }
 
   return {
     ...allCasesTableState,
