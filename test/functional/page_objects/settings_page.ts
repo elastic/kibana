@@ -238,6 +238,9 @@ export class SettingsPageObject extends FtrService {
 
   async clickEditIndexButton() {
     await this.testSubjects.click('editIndexPatternButton');
+    await this.retry.waitFor('flyout', async () => {
+      return await this.testSubjects.exists('indexPatternEditorFlyout');
+    });
   }
 
   async clickDeletePattern() {

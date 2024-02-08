@@ -27,7 +27,7 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
     history,
     customizationContext: {
       displayMode: 'standalone',
-      showLogExplorerTabs: false,
+      showLogsExplorerTabs: false,
     },
   });
   stateContainer.savedSearchState.set(savedSearch);
