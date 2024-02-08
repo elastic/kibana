@@ -117,7 +117,20 @@ const states: Record<StateNames, StateShape> = {
     name: 'Release tag created',
     description: 'The initial step release is completed, follow up jobs will be triggered soon.',
     instruction: `<h3>Deploy tag successfully created!</h3>`,
-    post: async () => {
+    instructionStyle: 'success',
+    display: true,
+  },
+  trigger_gpctl: {
+    name: 'Triggering GPCTL deployment',
+    description: 'Triggering the GPCTL deployment for the release - sit back and relax.',
+    instruction: `GPCTL deployment triggered, follow the trigger step for more info.`,
+    instructionStyle: 'info',
+    display: true,
+  },
+  end: {
+    name: 'End of the release process',
+    description: 'The release process has ended.',
+    pre: async () => {
       // The deployTag here is only for communication, if it's missing, it's not a big deal, but it's an error
       const deployTag =
         buildkite.getMetadata(DEPLOY_TAG_META_KEY) ||
@@ -128,8 +141,7 @@ const states: Record<StateNames, StateShape> = {
       buildkite.setAnnotation(
         WIZARD_CTX_INSTRUCTION,
         'success',
-        `<h3>Deploy tag successfully created!</h3><br/>
-Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}'>here on buildkite.</a>`
+        `<h3>Release successfully initiated!</h3>`
       );
 
       if (!selectedCommit) {
@@ -153,12 +165,6 @@ Your deployment will appear <a href='https://buildkite.com/elastic/kibana-server
         deployTag,
       });
     },
-    instructionStyle: 'success',
-    display: true,
-  },
-  end: {
-    name: 'End of the release process',
-    description: 'The release process has ended.',
     display: false,
   },
   error_generic: {
