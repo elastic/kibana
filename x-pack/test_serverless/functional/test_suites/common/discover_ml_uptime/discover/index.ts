@@ -6,7 +6,7 @@
  */
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
+export default ({ loadTestFile }: FtrProviderContext) => {
   describe('Discover alerting', function () {
     loadTestFile(require.resolve('./search_source_alert'));
   });
