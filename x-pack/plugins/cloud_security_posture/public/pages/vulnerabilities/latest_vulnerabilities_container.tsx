@@ -103,7 +103,7 @@ export const LatestVulnerabilitiesContainer = () => {
     if (level < selectedGroupOptions.length - 1 && !selectedGroupOptions.includes('none')) {
       getChildComponent = (currentGroupFilters: Filter[]) => {
         const nextGroupingLevel = level + 1;
-        return renderChildComponent2({
+        return renderChildComponent({
           level: nextGroupingLevel,
           currentSelectedGroup: selectedGroupOptions[nextGroupingLevel],
           selectedGroupOptions,
