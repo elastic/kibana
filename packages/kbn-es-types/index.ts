@@ -23,4 +23,5 @@ export type {
   ESQLRow,
   ESQLSearchReponse,
   ESQLSearchParams,
+  SubAggregateOf,
 } from './src';

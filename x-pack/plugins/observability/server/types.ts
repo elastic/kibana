@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import type { AlertingApiRequestHandlerContext } from '@kbn/alerting-plugin/server';
 import type { LicensingApiRequestHandlerContext } from '@kbn/licensing-plugin/server';
-import { SavedQueryRouteHandlerContext } from '@kbn/data-plugin/server/query/route_handler_context';
+import { SavedQueryRouteHandlerContext } from '@kbn/data-plugin/server';
 
 export type {
   ObservabilityRouteCreateOptions,
@@ -30,7 +30,7 @@ export type ObservabilityRequestHandlerContext = CustomRequestHandlerContext<{
   licensing: LicensingApiRequestHandlerContext;
   alerting: AlertingApiRequestHandlerContext;
   core: Promise<CoreRequestHandlerContext>;
-  savedQuery: Promise<SavedQueryRouteHandlerContext>;
+  savedQuery: Promise<SavedQueryRouteHandlerContext['savedQuery']>;
 }>;
 
 /**

@@ -10,14 +10,13 @@ import {
   findSLOGroupsResponseSchema,
   Pagination,
 } from '@kbn/slo-schema';
-import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
-import { SavedQueryAttributes } from '@kbn/data-plugin/common';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   AggregationsAggregationContainer,
   QueryDslQueryContainer,
   Sort,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { SubAggregateOf } from '@kbn/es-types/src';
+import { SubAggregateOf } from '@kbn/es-types';
 import { IllegalArgumentError } from '../../errors';
 import { typedSearch } from '../../utils/queries';
 import { ObservabilityRequestHandlerContext } from '../..';
@@ -246,11 +245,9 @@ export class FindSLOGroups {
   async findSavedQueries() {
     const savedQuery = await this.context.savedQuery;
 
-    // @ts-expect-error
     const { savedQueries } = await savedQuery.getAll();
-    const data = savedQueries as Array<SavedObject<SavedQueryAttributes>>;
     const savedQueriesAggs: Record<string, AggregationsAggregationContainer> = {};
-    data.forEach(({ attributes: { title, query } }) => {
+    savedQueries.forEach(({ attributes: { title, query } }) => {
       savedQueriesAggs[title] = {
         filter: {
           bool: {
@@ -263,6 +260,6 @@ export class FindSLOGroups {
         aggs,
       };
     });
-    return { savedQueriesAggs, savedQueries: data.map(({ attributes }) => attributes) };
+    return { savedQueriesAggs, savedQueries: savedQueries.map(({ attributes }) => attributes) };
   }
 }
