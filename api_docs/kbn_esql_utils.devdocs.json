@@ -45,7 +45,7 @@
           },
           ">"
         ],
-        "path": "packages/kbn-esql-utils/src/utils/index.ts",
+        "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-utils/src/utils/index.ts",
+            "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,10 +80,205 @@
                 "text": "DataViewsServicePublic"
               }
             ],
-            "path": "packages/kbn-esql-utils/src/utils/index.ts",
+            "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getIndexForESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexForESQLQuery",
+        "description": [
+          "\nThis can be used to get an initial index for a default ES|QL query.\nCould be used during onboarding when data views to get a better index are not yet available.\nCan be used in combination with {@link getESQLAdHocDataview} to create a dataview for the index."
+        ],
+        "signature": [
+          "(deps: { dataViews: { getIndices: (props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }) => Promise<",
+          {
+            "pluginId": "dataViews",
+            "scope": "public",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-public.MatchedItem",
+            "text": "MatchedItem"
+          },
+          "[]>; }; }) => Promise<string | null>"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getIndexForESQLQuery.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-utils",
+                "id": "def-common.getIndexForESQLQuery.$1.dataViews",
+                "type": "Object",
+                "tags": [],
+                "label": "dataViews",
+                "description": [],
+                "signature": [
+                  "{ getIndices: (props: { pattern: string; showAllIndices?: boolean | undefined; isRollupIndex: (indexName: string) => boolean; }) => Promise<",
+                  {
+                    "pluginId": "dataViews",
+                    "scope": "public",
+                    "docId": "kibDataViewsPluginApi",
+                    "section": "def-public.MatchedItem",
+                    "text": "MatchedItem"
+                  },
+                  "[]>; }"
+                ],
+                "path": "packages/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getIndexPatternFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => string"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getIndexPatternFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getIndexPatternFromSQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getIndexPatternFromSQLQuery",
+        "description": [],
+        "signature": [
+          "(sqlQuery: string | undefined) => string"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getIndexPatternFromSQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "sqlQuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.getLimitFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "getLimitFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string) => number"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getLimitFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-utils",
+        "id": "def-common.removeDropCommandsFromESQLQuery",
+        "type": "Function",
+        "tags": [],
+        "label": "removeDropCommandsFromESQLQuery",
+        "description": [],
+        "signature": [
+          "(esql: string | undefined) => string"
+        ],
+        "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.removeDropCommandsFromESQLQuery.$1",
+            "type": "string",
+            "tags": [],
+            "label": "esql",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],

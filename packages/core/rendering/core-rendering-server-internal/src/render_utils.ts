@@ -22,8 +22,7 @@ export const getSettingValue = <T>(
   return convert(value);
 };
 
-export const getBundlesHref = (baseHref: string, buildNr: string): string =>
-  `${baseHref}/${buildNr}/bundles`;
+export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
 
 export const getStylesheetPaths = ({
   themeVersion,
@@ -36,7 +35,7 @@ export const getStylesheetPaths = ({
   buildNum: number;
   baseHref: string;
 }) => {
-  const bundlesHref = getBundlesHref(baseHref, String(buildNum));
+  const bundlesHref = getBundlesHref(baseHref);
   return [
     ...(darkMode
       ? [

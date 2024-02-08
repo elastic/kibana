@@ -31,7 +31,7 @@ import {
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { QualityIndicator, QualityPercentageIndicator } from '../quality_indicator';
 import { IntegrationIcon } from '../common';
-import { useLinkToLogExplorer } from '../../hooks';
+import { useLinkToLogsExplorer } from '../../hooks';
 import { FlyoutDataset } from '../../state_machines/dataset_quality_controller';
 
 const expandDatasetAriaLabel = i18n.translate('xpack.datasetQuality.expandLabel', {
@@ -63,9 +63,24 @@ const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivity
 const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
   defaultMessage: 'Actions',
 });
+
 const openActionName = i18n.translate('xpack.datasetQuality.openActionName', {
   defaultMessage: 'Open',
 });
+
+const inactiveDatasetActivityColumnDescription = i18n.translate(
+  'xpack.datasetQuality.inactiveDatasetActivityColumnDescription',
+  {
+    defaultMessage: 'No activity in the selected timeframe',
+  }
+);
+
+const inactiveDatasetActivityColumnTooltip = i18n.translate(
+  'xpack.datasetQuality.inactiveDatasetActivityColumnTooltip',
+  {
+    defaultMessage: 'Try expanding the time range above for more results',
+  }
+);
 
 const degradedDocsDescription = (minimimPercentage: number) =>
   i18n.translate('xpack.datasetQuality.degradedDocsQualityDescription', {
@@ -111,11 +126,15 @@ export const getDatasetQualityTableColumns = ({
   selectedDataset,
   openFlyout,
   loadingDegradedStats,
+  showFullDatasetNames,
+  isActiveDataset,
 }: {
   fieldFormats: FieldFormatsStart;
   selectedDataset?: FlyoutDataset;
-  loadingDegradedStats?: boolean;
+  loadingDegradedStats: boolean;
+  showFullDatasetNames: boolean;
   openFlyout: (selectedDataset: FlyoutDataset) => void;
+  isActiveDataset: (lastActivity: number) => boolean;
 }): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
@@ -146,7 +165,7 @@ export const getDatasetQualityTableColumns = ({
       field: 'title',
       sortable: true,
       render: (title: string, dataStreamStat: DataStreamStat) => {
-        const { integration } = dataStreamStat;
+        const { integration, name } = dataStreamStat;
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -154,6 +173,11 @@ export const getDatasetQualityTableColumns = ({
               <IntegrationIcon integration={integration} />
             </EuiFlexItem>
             <EuiText size="s">{title}</EuiText>
+            {showFullDatasetNames && (
+              <EuiText size="xs" color="subdued">
+                <em>{name}</em>
+              </EuiText>
+            )}
           </EuiFlexGroup>
         );
       },
@@ -199,30 +223,42 @@ export const getDatasetQualityTableColumns = ({
     {
       name: lastActivityColumnName,
       field: 'lastActivity',
-      render: (timestamp: number) =>
-        fieldFormats
+      render: (timestamp: number) => {
+        if (!isActiveDataset(timestamp)) {
+          return (
+            <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiText size="s">{inactiveDatasetActivityColumnDescription}</EuiText>
+              <EuiToolTip position="top" content={inactiveDatasetActivityColumnTooltip}>
+                <EuiIcon tabIndex={0} type="iInCircle" size="s" />
+              </EuiToolTip>
+            </EuiFlexGroup>
+          );
+        }
+
+        return fieldFormats
           .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
-          .convert(timestamp),
+          .convert(timestamp);
+      },
       sortable: true,
     },
     {
       name: actionsColumnName,
       render: (dataStreamStat: DataStreamStat) => (
-        <LogExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
+        <LogsExplorerLink dataStreamStat={dataStreamStat} title={openActionName} />
       ),
       width: '100px',
     },
   ];
 };
 
-const LogExplorerLink = ({
+const LogsExplorerLink = ({
   dataStreamStat,
   title,
 }: {
   dataStreamStat: DataStreamStat;
   title: string;
 }) => {
-  const logExplorerLinkProps = useLinkToLogExplorer({ dataStreamStat });
+  const logsExplorerLinkProps = useLinkToLogsExplorer({ dataStreamStat });
 
-  return <EuiLink {...logExplorerLinkProps}>{title}</EuiLink>;
+  return <EuiLink {...logsExplorerLinkProps}>{title}</EuiLink>;
 };

@@ -9,6 +9,7 @@
 import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
+import { getKibanaDir } from '#pipeline-utils';
 
 // TODO - how to generate this dynamically?
 const STORYBOOKS = [
@@ -117,8 +118,12 @@ const upload = () => {
     fs.writeFileSync('index.html', html);
 
     console.log('--- Uploading Storybooks');
+    const activateScript = path.relative(
+      process.cwd(),
+      path.join(getKibanaDir(), '.buildkite', 'scripts', 'common', 'activate_service_account.sh')
+    );
     exec(`
-      gcloud auth activate-service-account --key-file=${process.env.GOOGLE_APPLICATION_CREDENTIALS}
+      ${activateScript} gs://ci-artifacts.kibana.dev
       gsutil -q -m cp -r -z js,css,html,json,map,txt,svg '*' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/${process.env.BUILDKITE_COMMIT}/'
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${STORYBOOK_BUCKET}/${STORYBOOK_DIRECTORY}/latest/'
     `);
