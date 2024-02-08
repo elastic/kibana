@@ -79,12 +79,35 @@ export const getServices = async (
         filter: [
           {
             term: {
-              'metricset.name': 'transaction',
+              'processor.event': 'metric',
             },
           },
           {
-            term: {
-              'metricset.interval': '1m', // make this dynamic if we start returning time series data
+            bool: {
+              should: [
+                {
+                  term: {
+                    'metricset.name': 'app',
+                  },
+                },
+                {
+                  bool: {
+                    must: [
+                      {
+                        term: {
+                          'metricset.name': 'transaction',
+                        },
+                      },
+                      {
+                        term: {
+                          'metricset.interval': '1m', // make this dynamic if we start returning time series data
+                        },
+                      },
+                    ],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
             },
           },
           ...commonFiltersList,
