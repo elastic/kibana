@@ -491,9 +491,7 @@ export class ObservabilityAIAssistantClient {
       function_call: functionCall ? { name: functionCall } : undefined,
     };
 
-    this.dependencies.logger.debug(
-      `Sending conversation to connector (${encode(JSON.stringify(request)).length} tokens)`
-    );
+    this.dependencies.logger.debug(`Sending conversation to connector`);
     this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
     const now = performance.now();
