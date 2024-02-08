@@ -84,6 +84,18 @@ export interface ElasticFlameGraph
  * @returns ElasticFlameGraph
  */
 export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
+  // This loop jumps over the error frames in the graph.
+  // This code is temporary until we decided how to present error frames in the UI.
+  // Error frames only appear as child nodes of the root frame.
+  // Error frames only have a single child node.
+  for (let i = 0; i < base.Edges[0].length; i++) {
+    const childNodeID = base.Edges[0][i];
+    // eslint-disable-next-line no-bitwise
+    if ((base.FrameType[childNodeID] & 0x80) !== 0) {
+      base.Edges[0][i] = base.Edges[childNodeID][0];
+    }
+  }
+
   const graph: ElasticFlameGraph = {
     Size: base.Size,
     SamplingRate: base.SamplingRate,
