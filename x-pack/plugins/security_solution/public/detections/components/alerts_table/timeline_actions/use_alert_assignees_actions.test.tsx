@@ -111,7 +111,6 @@ describe('useAlertAssigneesActions', () => {
           ]
         }
         closePopoverMenu={[MockFunction]}
-        onSubmit={[Function]}
         refresh={[Function]}
         setIsLoading={[Function]}
       />
@@ -169,7 +168,6 @@ describe('useAlertAssigneesActions', () => {
           ]
         }
         closePopoverMenu={[MockFunction]}
-        onSubmit={[Function]}
         refresh={[Function]}
         setIsLoading={[Function]}
       />

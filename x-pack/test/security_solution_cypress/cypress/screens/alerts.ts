@@ -198,7 +198,7 @@ export const ALERT_UNASSIGN_CONTEXT_MENU_ITEM =
   '[data-test-subj="remove-alert-assignees-menu-item"]';
 
 export const ALERT_ASSIGNEES_SELECT_PANEL =
-  '[data-test-subj="securitySolutionAssigneesApplyPanel"]';
+  '[data-test-subj="securitySolutionAssigneesSelectable"]';
 
 export const ALERT_ASSIGNEES_UPDATE_BUTTON =
   '[data-test-subj="securitySolutionAssigneesApplyButton"]';
