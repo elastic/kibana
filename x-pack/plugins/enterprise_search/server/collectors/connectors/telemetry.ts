@@ -7,8 +7,10 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import { collectConnectorStats, ConnectorStats } from '@kbn/search-connectors';
+import { collectConnectorStats } from '@kbn/search-connectors';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
+import { ConnectorStats } from '../../../common/types';
 
 interface Telemetry {
   connectors: ConnectorStats[];
