@@ -231,7 +231,7 @@ export const createThreatSignals = async ({
 
   // alert suppression needs to be performed on results searched in ascending order, so alert's suppression boundaries would be set correctly
   // at the same time, there are concerns on performance of IM rule when sorting is set to asc, as it may lead to longer rule runs, since it will
-  // go through alerts that might ve been processed in earlier executions, when look back interval set to large values(it can't be larger than 24h)
+  // first go through alerts that might ve been processed in earlier executions, when look back interval set to large values (it can't be larger than 24h)
   const sortOrder = isAlertSuppressionConfigured ? 'asc' : 'desc';
 
   if (eventCount < threatListCount) {
