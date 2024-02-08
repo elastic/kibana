@@ -151,14 +151,14 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(patchedCase.customFields).to.eql([
           {
-            key: 'test_custom_field_1',
-            type: CustomFieldTypes.TEXT,
-            value: 'text field value',
-          },
-          {
             key: 'test_custom_field_2',
             type: CustomFieldTypes.TOGGLE,
             value: false,
+          },
+          {
+            key: 'test_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'text field value',
           },
         ]);
       });
