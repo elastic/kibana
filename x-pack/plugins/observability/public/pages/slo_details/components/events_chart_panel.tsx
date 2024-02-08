@@ -62,7 +62,9 @@ export function EventsChartPanel({ slo, range }: Props) {
   const sloIndicator = cloneDeep(slo.indicator);
   if (instanceIdFilter) {
     sloIndicator.params.filter =
-      !!sloIndicator.params.filter && sloIndicator.params.filter.length > 0
+      !!sloIndicator.params.filter &&
+      typeof sloIndicator.params.filter === 'string' &&
+      sloIndicator.params.filter.length > 0
         ? `${sloIndicator.params.filter} and ${instanceIdFilter}`
         : instanceIdFilter;
   }

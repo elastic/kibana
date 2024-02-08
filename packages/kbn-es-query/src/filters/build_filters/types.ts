@@ -80,17 +80,18 @@ export type FilterMeta = {
   isMultiIndex?: boolean;
   type?: string;
   key?: string;
-  params?: any;
+  params?: FilterMetaParams;
   value?: string;
 };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Filter = {
+  $state?: {
+    store: FilterStateStore;
+  };
   meta: FilterMeta;
   query?: Record<string, any>;
 };
-
-type KqlWithFilters = string | { kqlQuery: string; filters: Filter[] };
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type Query = {

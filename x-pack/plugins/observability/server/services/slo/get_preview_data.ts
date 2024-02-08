@@ -6,7 +6,6 @@
  */
 
 import { calculateAuto } from '@kbn/calculate-auto';
-import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALL_VALUE,
   APMTransactionErrorRateIndicator,
@@ -21,10 +20,10 @@ import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import { estypes } from '@elastic/elasticsearch';
+import { getElasticsearchQueryOrThrow } from './transform_generators';
 import { typedSearch } from '../../utils/queries';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
-import { InvalidQueryError } from '../../errors';
 import {
   GetCustomMetricIndicatorAggregation,
   GetHistogramIndicatorAggregation,
@@ -466,13 +465,5 @@ export class GetPreviewData {
     } catch (err) {
       return [];
     }
-  }
-}
-
-function getElasticsearchQueryOrThrow(kuery: string | undefined = '') {
-  try {
-    return toElasticsearchQuery(fromKueryExpression(kuery));
-  } catch (err) {
-    throw new InvalidQueryError(`Invalid kuery: ${kuery}`);
   }
 }

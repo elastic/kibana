@@ -12,6 +12,7 @@ import {
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
 import { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { estypes } from '@elastic/elasticsearch';
 import { getElasticsearchQueryOrThrow, TransformGenerator } from '.';
 import {
   getSLOTransformId,
@@ -22,7 +23,6 @@ import { getSLOTransformTemplate } from '../../../assets/transform_templates/slo
 import { APMTransactionDurationIndicator, SLO } from '../../../domain/models';
 import { InvalidTransformError } from '../../../errors';
 import { parseIndex } from './common';
-import { Query } from './types';
 
 export class ApmTransactionDurationTransformGenerator extends TransformGenerator {
   public getTransformParams(slo: SLO): TransformPutTransformRequest {
@@ -69,7 +69,7 @@ export class ApmTransactionDurationTransformGenerator extends TransformGenerator
   }
 
   private buildSource(slo: SLO, indicator: APMTransactionDurationIndicator) {
-    const queryFilter: Query[] = [
+    const queryFilter: estypes.QueryDslQueryContainer[] = [
       {
         range: {
           '@timestamp': {

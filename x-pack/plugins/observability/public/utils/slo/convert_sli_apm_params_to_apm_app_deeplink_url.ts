@@ -48,7 +48,7 @@ export function convertSliApmParamsToApmAppDeeplinkUrl(slo: SLOResponse): string
   if (transactionName && transactionName !== ALL_VALUE) {
     kueryParams.push(`transaction.name : "${transactionName}"`);
   }
-  if (filter && filter.length > 0) {
+  if (filter && typeof filter === 'string' && filter.length > 0) {
     kueryParams.push(filter);
   }
   if (groupBy !== ALL_VALUE && instanceId !== ALL_VALUE) {
