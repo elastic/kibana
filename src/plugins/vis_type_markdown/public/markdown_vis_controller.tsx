@@ -26,9 +26,12 @@ const MarkdownVisComponent = ({
 
   return (
     <div className="mkdVis" style={{ fontSize: `${fontSize}pt` }}>
-      <Markdown data-test-subj="markdownBody" openLinksInNewTab={openLinksInNewTab} readOnly>
-        {markdown}
-      </Markdown>
+      <Markdown
+        data-test-subj="markdownBody"
+        openLinksInNewTab={openLinksInNewTab}
+        markdownContent={markdown || ` `}
+        readOnly
+      />
     </div>
   );
 };

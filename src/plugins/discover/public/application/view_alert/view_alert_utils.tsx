@@ -107,7 +107,7 @@ export const getAlertUtils = (
       });
       toastNotifications.addDanger({
         title: errorTitle,
-        text: toMountPoint(<Markdown readOnly>{error.message}</Markdown>, {
+        text: toMountPoint(<Markdown markdownContent={error.message} readOnly />, {
           theme: core.theme,
           i18n: core.i18n,
         }),

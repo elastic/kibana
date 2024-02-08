@@ -75,11 +75,7 @@ function AccordionButtonContent({
 
 function InstructionsContent({ markdown }: { markdown: string }) {
   return (
-    <Markdown
-      className="euiText"
-      openLinksInNewTab={true}
-      whiteListedRules={['backticks', 'emphasis', 'link', 'list']}
-    >
+    <Markdown className="euiText" readOnly>
       {markdown}
     </Markdown>
   );
