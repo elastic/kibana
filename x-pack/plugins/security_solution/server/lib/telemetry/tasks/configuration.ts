@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ITelemetryEventsSender } from '../sender';
-import type { TelemetryConfiguration } from '../types';
+import { TelemetryChannel, type TelemetryConfiguration } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
@@ -27,7 +27,7 @@ export function createTelemetryConfigurationTaskConfig() {
       taskId: string,
       logger: Logger,
       _receiver: ITelemetryReceiver,
-      _sender: ITelemetryEventsSender,
+      sender: ITelemetryEventsSender,
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
@@ -63,6 +63,30 @@ export function createTelemetryConfigurationTaskConfig() {
         if (configArtifact.use_async_sender) {
           telemetryConfiguration.use_async_sender = configArtifact.use_async_sender;
         }
+
+        if (configArtifact.sender_channels) {
+          log('Updating sender channels configuration');
+          telemetryConfiguration.sender_channels = configArtifact.sender_channels;
+          const channelsDict = Object.values(TelemetryChannel).reduce(
+            (acc, channel) => acc.set(channel as string, channel),
+            new Map<string, TelemetryChannel>()
+          );
+
+          Object.entries(configArtifact.sender_channels).forEach(([channelName, config]) => {
+            const channel = channelsDict.get(channelName);
+            if (!channel) {
+              log(`Ignoring unknown channel "${channelName}"`);
+            } else {
+              log(`Updating configuration for channel "${channelName}`);
+              sender.updateQueueConfig(channel, {
+                bufferTimeSpanMillis: config.buffer_time_span_millis,
+                inflightEventsThreshold: config.inflight_events_threshold,
+                maxPayloadSizeBytes: config.max_payload_size_bytes,
+              });
+            }
+          });
+        }
+
         taskMetricsService.end(trace);
 
         log(`Updated TelemetryConfiguration: ${JSON.stringify(telemetryConfiguration)}`);

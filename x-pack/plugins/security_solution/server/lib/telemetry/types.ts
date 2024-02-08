@@ -460,6 +460,15 @@ export interface TelemetryConfiguration {
   max_detection_rule_telemetry_batch: number;
   max_detection_alerts_batch: number;
   use_async_sender: boolean;
+  sender_channels?: {
+    [key: string]: TelemetrySenderChannelConfiguration;
+  };
+}
+
+export interface TelemetrySenderChannelConfiguration {
+  buffer_time_span_millis: number;
+  inflight_events_threshold: number;
+  max_payload_size_bytes: number;
 }
 
 export interface TelemetryFilterListArtifact {

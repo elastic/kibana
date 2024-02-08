@@ -185,6 +185,34 @@ describe('telemetry tasks', () => {
         }
       });
     });
+
+    it('should update sender queue config', async () => {
+      const expectedConfig = fakeBufferAndSizesConfigWithQueues.sender_channels['task-metrics'];
+      const configTaskType = 'security:telemetry-configuration';
+      const configTask = getTelemetryTask(tasks, configTaskType);
+
+      mockAxiosGet(fakeBufferAndSizesConfigWithQueues);
+      await eventually(async () => {
+        await taskManagerPlugin.runSoon(configTask.getTaskId());
+      });
+
+      await eventually(async () => {
+        /* eslint-disable dot-notation */
+        const taskMetricsConfigAfter = asyncTelemetryEventSender['queues']?.get(
+          TelemetryChannel.TASK_METRICS
+        );
+
+        expect(taskMetricsConfigAfter?.bufferTimeSpanMillis).toEqual(
+          expectedConfig.buffer_time_span_millis
+        );
+        expect(taskMetricsConfigAfter?.inflightEventsThreshold).toEqual(
+          expectedConfig.inflight_events_threshold
+        );
+        expect(taskMetricsConfigAfter?.maxPayloadSizeBytes).toEqual(
+          expectedConfig.max_payload_size_bytes
+        );
+      });
+    });
   });
 
   async function mockAndScheduleDetectionRulesTask(): Promise<SecurityTelemetryTask> {
@@ -267,4 +295,21 @@ const fakeBufferAndSizesConfigAsyncDisabled = {
 const fakeBufferAndSizesConfigAsyncEnabled = {
   ...fakeBufferAndSizesConfigAsyncDisabled,
   use_async_sender: true,
+};
+
+const fakeBufferAndSizesConfigWithQueues = {
+  ...fakeBufferAndSizesConfigAsyncDisabled,
+  sender_channels: {
+    // should be ignored
+    'invalid-channel': {
+      buffer_time_span_millis: 500,
+      inflight_events_threshold: 10,
+      max_payload_size_bytes: 20,
+    },
+    'task-metrics': {
+      buffer_time_span_millis: 500,
+      inflight_events_threshold: 10,
+      max_payload_size_bytes: 20,
+    },
+  },
 };

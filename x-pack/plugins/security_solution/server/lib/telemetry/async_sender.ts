@@ -6,7 +6,7 @@
  */
 import axios from 'axios';
 import * as rx from 'rxjs';
-import { cloneDeep } from 'lodash';
+import _, { cloneDeep } from 'lodash';
 
 import type { Logger } from '@kbn/core/server';
 import type { TelemetryPluginSetup, TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
@@ -55,7 +55,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   private senderUtils: SenderUtils | undefined;
 
   constructor(logger: Logger) {
-    this.logger = newTelemetryLogger(logger.get('telemetry_events'));
+    this.logger = newTelemetryLogger(logger.get('telemetry_events.async_sender'));
   }
 
   public setup(
@@ -165,7 +165,7 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
       })
     );
 
-    const localSubscription$ = this.queue$(localEvents$, channel, (_, p) => {
+    const localSubscription$ = this.queue$(localEvents$, channel, (_ch, p) => {
       const result = { events: events.length, channel };
       payloads.push(...p);
       return Promise.resolve(result);
@@ -177,15 +177,20 @@ export class AsyncTelemetryEventsSender implements IAsyncTelemetryEventsSender {
   }
 
   public updateQueueConfig(channel: TelemetryChannel, config: QueueConfig): void {
-    this.getQueues().set(channel, cloneDeep(config));
-    // flush the queues to get the new configuration asap
-    this.flush$.next();
+    const currentConfig = this.getQueues().get(channel);
+    if (!_.isEqual(config, currentConfig)) {
+      this.getQueues().set(channel, cloneDeep(config));
+      // flush the queues to get the new configuration asap
+      this.flush$.next();
+    }
   }
 
   public updateDefaultQueueConfig(config: QueueConfig): void {
-    this.fallbackQueueConfig = cloneDeep(config);
-    // flush the queues to get the new configuration asap
-    this.flush$.next();
+    if (!_.isEqual(config, this.fallbackQueueConfig)) {
+      this.fallbackQueueConfig = cloneDeep(config);
+      // flush the queues to get the new configuration asap
+      this.flush$.next();
+    }
   }
 
   // internal methods
