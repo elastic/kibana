@@ -17,8 +17,9 @@ import { newTelemetryLogger } from '../helpers';
 
 export function createTelemetryConfigurationTaskConfig() {
   const taskName = 'Security Solution Telemetry Configuration Task';
+  const taskType = 'security:telemetry-configuration';
   return {
-    type: 'security:telemetry-configuration',
+    type: taskType,
     title: taskName,
     interval: '1h',
     timeout: '1m',
@@ -35,7 +36,7 @@ export function createTelemetryConfigurationTaskConfig() {
 
       log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
 
-      const trace = taskMetricsService.start(taskName);
+      const trace = taskMetricsService.start(taskType);
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const manifest = await artifactService.getArtifact(artifactName);
@@ -73,16 +74,25 @@ export function createTelemetryConfigurationTaskConfig() {
           );
 
           Object.entries(configArtifact.sender_channels).forEach(([channelName, config]) => {
-            const channel = channelsDict.get(channelName);
-            if (!channel) {
-              log(`Ignoring unknown channel "${channelName}"`);
-            } else {
-              log(`Updating configuration for channel "${channelName}`);
-              sender.updateQueueConfig(channel, {
+            if (channelName === 'default') {
+              log('Updating default configuration');
+              sender.updateDefaultQueueConfig({
                 bufferTimeSpanMillis: config.buffer_time_span_millis,
                 inflightEventsThreshold: config.inflight_events_threshold,
                 maxPayloadSizeBytes: config.max_payload_size_bytes,
               });
+            } else {
+              const channel = channelsDict.get(channelName);
+              if (!channel) {
+                log(`Ignoring unknown channel "${channelName}"`);
+              } else {
+                log(`Updating configuration for channel "${channelName}`);
+                sender.updateQueueConfig(channel, {
+                  bufferTimeSpanMillis: config.buffer_time_span_millis,
+                  inflightEventsThreshold: config.inflight_events_threshold,
+                  maxPayloadSizeBytes: config.max_payload_size_bytes,
+                });
+              }
             }
           });
         }
