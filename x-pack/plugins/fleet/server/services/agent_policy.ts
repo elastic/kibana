@@ -1338,7 +1338,7 @@ class AgentPolicyService {
               is_protected: false,
               revision: attributes.revision + 1,
               updated_at: new Date().toISOString(),
-              updated_by: 'elastic',
+              updated_by: 'system',
             },
           };
         })
