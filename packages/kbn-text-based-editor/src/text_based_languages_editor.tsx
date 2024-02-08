@@ -163,7 +163,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const language = getAggregateQueryMode(query);
   const queryString: string = query[language] ?? '';
   const kibana = useKibana<TextBasedEditorDeps>();
-  const { dataViews, expressions, indexManagementApiService, application } = kibana.services;
+  const { dataViews, expressions, indexManagementApiService, application, docLinks } =
+    kibana.services;
   const [code, setCode] = useState(queryString ?? '');
   const [codeOneLiner, setCodeOneLiner] = useState('');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -680,6 +681,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
                       searchInDescription
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
                       buttonProps={{
                         color: 'text',
                         size: 's',
@@ -913,6 +917,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <LanguageDocumentationPopover
                       language={
                         String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
+                      }
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
                       }
                       searchInDescription
                       sections={documentationSections}
