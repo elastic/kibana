@@ -69,7 +69,7 @@ describe('getAppInfo', () => {
         {
           id: 'sub-id',
           title: 'sub-title',
-          visibleIn: [],
+          visibleIn: ['globalSearch'], // default visibleIn added
           keywords: [],
           deepLinks: [
             {
@@ -77,7 +77,7 @@ describe('getAppInfo', () => {
               title: 'sub-sub-title',
               path: '/sub-sub',
               keywords: [],
-              visibleIn: [],
+              visibleIn: ['globalSearch'],
               deepLinks: [], // default empty array added
             },
           ],
@@ -159,14 +159,14 @@ describe('getAppInfo', () => {
         {
           id: 'sub-id',
           title: 'sub-title',
-          visibleIn: [],
+          visibleIn: ['globalSearch'],
           order: 2,
           keywords: [],
           deepLinks: [
             {
               id: 'sub-sub-id',
               title: 'sub-sub-title',
-              visibleIn: [],
+              visibleIn: ['globalSearch'],
               order: 1,
               path: '/sub-sub',
               keywords: ['sub sub'],
@@ -184,7 +184,7 @@ describe('getAppInfo', () => {
         createApp({
           deepLinks: [
             createDeepLink({
-              visibleIn: ['globalSearch'],
+              visibleIn: ['globalSearch', 'sideNav'],
             }),
           ],
         })
@@ -193,7 +193,7 @@ describe('getAppInfo', () => {
       expect.objectContaining({
         deepLinks: [
           expect.objectContaining({
-            visibleIn: ['globalSearch'],
+            visibleIn: ['globalSearch', 'sideNav'],
           }),
         ],
       })
@@ -208,7 +208,7 @@ describe('getAppInfo', () => {
       expect.objectContaining({
         deepLinks: [
           expect.objectContaining({
-            visibleIn: [],
+            visibleIn: ['globalSearch'],
           }),
         ],
       })

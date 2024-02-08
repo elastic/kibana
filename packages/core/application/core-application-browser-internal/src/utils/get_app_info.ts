@@ -32,12 +32,14 @@ export function getAppInfo(app: App): PublicAppInfo {
 function getDeepLinkInfos(deepLinks?: AppDeepLink[]): PublicAppDeepLinkInfo[] {
   if (!deepLinks) return [];
 
-  return deepLinks.map((deepLink): PublicAppDeepLinkInfo => {
-    return {
-      ...deepLink,
-      keywords: deepLink.keywords ?? [],
-      visibleIn: deepLink.visibleIn ?? [],
-      deepLinks: getDeepLinkInfos(deepLink.deepLinks),
-    };
-  });
+  return deepLinks.map(
+    ({ visibleIn = ['globalSearch'], ...rawDeepLink }): PublicAppDeepLinkInfo => {
+      return {
+        ...rawDeepLink,
+        keywords: rawDeepLink.keywords ?? [],
+        visibleIn,
+        deepLinks: getDeepLinkInfos(rawDeepLink.deepLinks),
+      };
+    }
+  );
 }
