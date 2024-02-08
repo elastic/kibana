@@ -6,7 +6,7 @@
  */
 import type { ReactNode } from 'react';
 import React from 'react';
-import { EuiText, EuiTitle, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiText, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EnabledAutomatedResponseActionsCommands } from '../../../../common/endpoint/service/response_actions/constants';
 
@@ -20,11 +20,11 @@ const EndpointActionTextComponent = ({ name, isDisabled }: EndpointActionTextPro
 
   const content = (
     <>
-      <EuiTitle size="xs">
-        <EuiText>{title}</EuiText>
-      </EuiTitle>
+      <EuiText size="s">
+        <b>{title}</b>
+      </EuiText>
       <EuiSpacer size="xs" />
-      <EuiText>{description}</EuiText>
+      <EuiText size="xs">{description}</EuiText>
     </>
   );
   if (isDisabled) {
@@ -59,6 +59,48 @@ const useGetCommandText = (
           <FormattedMessage
             id="xpack.securitySolution.responseActions.endpoint.isolateTooltip"
             defaultMessage="Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
+      };
+    case 'kill-process':
+      return {
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.killProcess"
+            defaultMessage="Kill process"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.killProcessDescription"
+            defaultMessage="Kill/terminate a process"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.killProcessTooltip"
+            defaultMessage="Insufficient privileges to kill process. Contact your Kibana administrator if you think you should have this permission."
+          />
+        ),
+      };
+    case 'suspend-process':
+      return {
+        title: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.suspendProcess"
+            defaultMessage="Suspend process"
+          />
+        ),
+        description: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.suspendProcessDescription"
+            defaultMessage="Temporarily suspend a process"
+          />
+        ),
+        tooltip: (
+          <FormattedMessage
+            id="xpack.securitySolution.responseActions.endpoint.suspendProcessTooltip"
+            defaultMessage="Insufficient privileges to supend process. Contact your Kibana administrator if you think you should have this permission."
           />
         ),
       };
