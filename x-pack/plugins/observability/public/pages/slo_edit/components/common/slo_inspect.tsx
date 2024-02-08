@@ -4,8 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-
 import {
   EuiAccordion,
   EuiButton,
@@ -23,6 +21,7 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import {
   IngestPipelinesListParams,
   INGEST_PIPELINES_APP_LOCATOR,
@@ -30,6 +29,7 @@ import {
 } from '@kbn/ingest-pipelines-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { GetSLOResponse } from '@kbn/slo-schema';
 import React, { ReactNode, useState } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { ObservabilityPublicPluginsStart } from '../../../..';
@@ -38,7 +38,6 @@ import { useFetchSloInspect } from '../../../../hooks/slo/use_fetch_slo_inspect'
 import { usePluginContext } from '../../../../hooks/use_plugin_context';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
 import { CreateSLOForm } from '../../types';
-import { GetSLOResponse } from '@kbn/slo-schema';
 
 type Props = {
   slo?: GetSLOResponse;

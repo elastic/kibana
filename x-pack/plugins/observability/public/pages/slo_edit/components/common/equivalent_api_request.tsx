@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-
-import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -18,11 +15,13 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
-import { CreateSLOForm } from '../../types';
+import React, { useEffect, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
+import { CreateSLOForm } from '../../types';
 
 type Props = {
   isEditMode: boolean;
