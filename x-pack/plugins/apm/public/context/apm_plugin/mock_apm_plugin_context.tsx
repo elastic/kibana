@@ -80,6 +80,7 @@ const mockConfig: ConfigSchema = {
     migrationToFleetAvailable: true,
     sourcemapApiAvailable: true,
     storageExplorerAvailable: true,
+    profilingIntegrationAvailable: false,
   },
   serverless: { enabled: false },
 };
