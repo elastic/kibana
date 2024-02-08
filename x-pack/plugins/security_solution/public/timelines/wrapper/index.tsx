@@ -9,10 +9,10 @@ import { EuiFocusTrap, EuiWindowEvent, keys } from '@elastic/eui';
 import React, { useMemo, useCallback } from 'react';
 import type { AppLeaveHandler } from '@kbn/core/public';
 import { useDispatch } from 'react-redux';
+import { TimelineModal } from '../components/modal';
 import type { TimelineId } from '../../../common/types';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { TimelineBottomBar } from '../components/bottom_bar';
-import { Pane } from '../components/flyout/pane';
 import { getTimelineShowStatusByIdSelector } from '../store/selectors';
 import { useTimelineSavePrompt } from '../../common/hooks/timeline/use_timeline_save_prompt';
 import { timelineActions } from '../store';
@@ -58,7 +58,7 @@ export const TimelineWrapper: React.FC<TimelineWrapperProps> = React.memo(
     return (
       <>
         <EuiFocusTrap disabled={!show}>
-          <Pane timelineId={timelineId} visible={show} />
+          <TimelineModal timelineId={timelineId} visible={show} />
         </EuiFocusTrap>
         <TimelineBottomBar show={show} timelineId={timelineId} />
         <EuiWindowEvent event="keydown" handler={onKeyDown} />

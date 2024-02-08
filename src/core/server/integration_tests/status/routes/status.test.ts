@@ -83,6 +83,7 @@ describe('GET /api/status', () => {
           branch: 'xbranch',
           buildNum: 1234,
           buildSha: 'xsha',
+          buildShaShort: 'x',
           dist: true,
           version: '9.9.9-SNAPSHOT',
           buildDate: new Date('2023-05-15T23:12:09.000Z'),

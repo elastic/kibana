@@ -33,7 +33,8 @@
       "uiActions",
       "unifiedSearch",
       "usageCollection",
-      "visTypeTimeseries"
+      "visTypeTimeseries",
+      "apmDataAccess"
     ],
     "optionalPlugins": ["spaces", "ml", "home", "embeddable", "osquery", "cloud", "profilingDataAccess"],
     "requiredBundles": [

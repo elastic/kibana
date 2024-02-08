@@ -11,6 +11,7 @@ import type {
   RegisterRenderFunctionDefinition,
 } from '../types';
 import { registerLensRenderFunction } from './lens';
+import { registerVisualizeQueryRenderFunction } from './visualize_esql';
 
 export async function registerFunctions({
   registerRenderFunction,
@@ -22,4 +23,5 @@ export async function registerFunctions({
   pluginsStart: ObservabilityAIAssistantPluginStartDependencies;
 }) {
   registerLensRenderFunction({ service, pluginsStart, registerRenderFunction });
+  registerVisualizeQueryRenderFunction({ service, pluginsStart, registerRenderFunction });
 }

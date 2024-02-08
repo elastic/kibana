@@ -7,7 +7,8 @@
 
 import { checkOsqueryResponseActionsPermissions } from '../../tasks/response_actions';
 
-describe(
+// FLAKY: https://github.com/elastic/kibana/issues/170820
+describe.skip(
   'App Features for Security Complete PLI',
   {
     tags: ['@serverless'],
