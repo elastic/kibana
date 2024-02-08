@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { i18n } from '@kbn/i18n';
 import { Plugin, CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 
@@ -20,10 +19,12 @@ import {
   EmbeddableConsoleProps,
   EmbeddableConsoleDependencies,
 } from './types';
-import { AutocompleteInfo, setAutocompleteInfo } from './services';
+import { AutocompleteInfo, setAutocompleteInfo, EmbeddableConsoleInfo } from './services';
 
 export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDependencies> {
   private readonly autocompleteInfo = new AutocompleteInfo();
+  private _embeddableConsole: EmbeddableConsoleInfo = new EmbeddableConsoleInfo();
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
@@ -118,9 +119,16 @@ export class ConsoleUIPlugin implements Plugin<void, void, AppSetupUIPluginDepen
         const consoleDeps: EmbeddableConsoleDependencies = {
           core,
           usageCollection: deps.usageCollection,
+          setDispatch: (d) => {
+            this._embeddableConsole.setDispatch(d);
+          },
         };
         return renderEmbeddableConsole(props, consoleDeps);
       };
+      consoleStart.isEmbeddedConsoleAvailable = () =>
+        this._embeddableConsole.isEmbeddedConsoleAvailable();
+      consoleStart.openEmbeddedConsole = (content?: string) =>
+        this._embeddableConsole.openEmbeddedConsole(content);
     }
 
     return consoleStart;
