@@ -63,7 +63,7 @@ const requeueInvalidTasksConfig = schema.object({
 });
 
 const requestTimeoutsConfig = schema.object({
-  update_by_query: schema.number({ defaultValue: 1000 * 60, min: 1000, max: 1000 * 60 * 10 }),
+  update_by_query: schema.number({ defaultValue: 1000 * 60, min: 1000, max: 1000 * 60 * 15 }),
 });
 
 export const configSchema = schema.object(
