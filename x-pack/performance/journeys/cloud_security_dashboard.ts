@@ -22,7 +22,7 @@ export const journey = new Journey({
     });
   },
   ftrConfigPath: 'x-pack/performance/configs/cloud_security_posture_config.ts',
-  esArchives: ['x-pack/performance/es_archives/cloud_security_posture_findings'],
+  esArchives: ['x-pack/performance/es_archives/kspm_findings'],
   // unskip when https://github.com/elastic/kibana-load-testing/issues/448 is fixed
   // scalabilitySetup: {
   //   warmup: [
