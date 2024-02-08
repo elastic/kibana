@@ -19,6 +19,7 @@ const packageInfo: PackageInfo = {
   branch: 'master',
   buildNum: 1,
   buildSha: '',
+  buildShaShort: '',
   version: '7.0.0-alpha1',
   dist: false,
   buildDate: new Date('2023-05-15T23:12:09.000Z'),

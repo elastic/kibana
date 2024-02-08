@@ -6419,7 +6419,7 @@
           },
           " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
           "MappingTimeSeriesMetricType",
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_views/resolved_log_view.ts",
         "deprecated": false,
