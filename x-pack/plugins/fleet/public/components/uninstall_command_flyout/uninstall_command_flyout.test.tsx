@@ -46,6 +46,7 @@ describe('UninstallCommandFlyout', () => {
   const uninstallTokenMetadataFixture: UninstallTokenMetadata = {
     id: 'id-1',
     policy_id: 'policy_id',
+    policy_name: 'policy_name',
     created_at: '2023-06-19T08:47:31.457Z',
   };
 
