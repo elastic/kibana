@@ -72,13 +72,13 @@ export const initialState: LensAppState = {
 };
 
 export const getPreloadedState = ({
-                                    lensServices: { data },
-                                    initialContext,
-                                    initialStateFromLocator,
-                                    embeddableEditorIncomingState,
-                                    datasourceMap,
-                                    visualizationMap,
-                                  }: LensStoreDeps) => {
+  lensServices: { data },
+  initialContext,
+  initialStateFromLocator,
+  embeddableEditorIncomingState,
+  datasourceMap,
+  visualizationMap,
+}: LensStoreDeps) => {
   const initialDatasourceId = getInitialDatasourceId(datasourceMap);
   const datasourceStates: LensAppState['datasourceStates'] = {};
   // Initialize an empty datasourceStates for each datasource
@@ -123,13 +123,13 @@ export const getPreloadedState = ({
     filters: !initialContext
       ? data.query.filterManager.getGlobalFilters()
       : 'searchFilters' in initialContext && initialContext.searchFilters
-        ? initialContext.searchFilters
-        : data.query.filterManager.getFilters(),
+      ? initialContext.searchFilters
+      : data.query.filterManager.getFilters(),
     searchSessionId: data.search.session.getSessionId() || '',
     resolvedDateRange: getResolvedDateRange(data.query.timefilter.timefilter),
     isLinkedToOriginatingApp: Boolean(
       embeddableEditorIncomingState?.originatingApp ||
-      (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
+        (initialContext && 'isEmbeddable' in initialContext && initialContext?.isEmbeddable)
     ),
     activeDatasourceId: initialDatasourceId,
     datasourceStates,
@@ -209,9 +209,9 @@ export const loadInitial = createAction<{
 export const initEmpty = createAction(
   'initEmpty',
   function prepare({
-                     newState,
-                     initialContext,
-                   }: {
+    newState,
+    initialContext,
+  }: {
     newState: Partial<LensAppState>;
     initialContext?: VisualizeFieldContext | VisualizeEditorContext;
   }) {
@@ -390,14 +390,14 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           (datasourceState, datasourceId) =>
             datasourceId
               ? {
-                ...datasourceState,
-                state: datasourceMap[datasourceId].cloneLayer(
-                  datasourceState.state,
-                  layerId,
-                  newLayerId,
-                  getNewId
-                ),
-              }
+                  ...datasourceState,
+                  state: datasourceMap[datasourceId].cloneLayer(
+                    datasourceState.state,
+                    layerId,
+                    newLayerId,
+                    getNewId
+                  ),
+                }
               : datasourceState
         );
         state.visualization.state = visualizationMap[state.visualization.activeId].cloneLayer!(
@@ -668,12 +668,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           ...state,
           datasourceStates: datasourceId
             ? {
-              ...state.datasourceStates,
-              [datasourceId]: {
-                ...state.datasourceStates[datasourceId],
-                state: datasourceState,
-              },
-            }
+                ...state.datasourceStates,
+                [datasourceId]: {
+                  ...state.datasourceStates[datasourceId],
+                  state: datasourceState,
+                },
+              }
             : state.datasourceStates,
           visualization: {
             ...state.visualization,
@@ -683,10 +683,10 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           stagedPreview: payload.clearStagedPreview
             ? undefined
             : state.stagedPreview || {
-            datasourceStates: state.datasourceStates,
-            visualization: state.visualization,
-            activeData: state.activeData,
-          },
+                datasourceStates: state.datasourceStates,
+                visualization: state.visualization,
+                activeData: state.activeData,
+              },
         };
       })
       .addCase(rollbackSuggestion, (state) => {
@@ -734,8 +734,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         const datasourceState = current(state).datasourceStates[payload.newDatasourceId]
           ? current(state).datasourceStates[payload.newDatasourceId]?.state
           : datasourceMap[payload.newDatasourceId].createEmptyLayer(
-            payload.currentIndexPatternId ?? ''
-          );
+              payload.currentIndexPatternId ?? ''
+            );
         const updatedState = datasourceMap[payload.newDatasourceId].insertLayer(
           datasourceState,
           currentVizId
@@ -889,12 +889,12 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 
         layerIds.forEach((layerId) => {
           const [layerDatasourceId] =
-          Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
-            return (
-              state.datasourceStates[datasourceId] &&
-              datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
-            );
-          }) ?? [];
+            Object.entries(datasourceMap).find(([datasourceId, datasource]) => {
+              return (
+                state.datasourceStates[datasourceId] &&
+                datasource.getLayers(state.datasourceStates[datasourceId].state).includes(layerId)
+              );
+            }) ?? [];
           if (layerDatasourceId) {
             const { newState } = datasourceMap[layerDatasourceId].removeLayer(
               current(state).datasourceStates[layerDatasourceId].state,
@@ -930,9 +930,9 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const framePublicAPI = selectFramePublicAPI({ lens: current(state) }, datasourceMap);
 
           const { noDatasource } =
-          activeVisualization
-            .getSupportedLayers(visualizationState, framePublicAPI)
-            .find(({ type }) => type === layerType) || {};
+            activeVisualization
+              .getSupportedLayers(visualizationState, framePublicAPI)
+              .find(({ type }) => type === layerType) || {};
 
           const layersToLinkTo =
             activeVisualization.getLayersToLinkTo?.(visualizationState, layerId) ?? [];
@@ -940,26 +940,26 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           const datasourceState =
             !noDatasource && activeDatasource
               ? activeDatasource.insertLayer(
-                state.datasourceStates[state.activeDatasourceId].state,
-                layerId,
-                layersToLinkTo
-              )
+                  state.datasourceStates[state.activeDatasourceId].state,
+                  layerId,
+                  layersToLinkTo
+                )
               : state.datasourceStates[state.activeDatasourceId].state;
 
           const { activeDatasourceState, activeVisualizationState } = ignoreInitialValues
             ? {
-              activeDatasourceState: datasourceState,
-              activeVisualizationState: visualizationState,
-            }
+                activeDatasourceState: datasourceState,
+                activeVisualizationState: visualizationState,
+              }
             : addInitialValueIfAvailable({
-              datasourceState,
-              visualizationState,
-              framePublicAPI,
-              activeVisualization,
-              activeDatasource,
-              layerId,
-              layerType,
-            });
+                datasourceState,
+                visualizationState,
+                framePublicAPI,
+                activeVisualization,
+                activeDatasource,
+                layerId,
+                layerType,
+              });
 
           state.visualization.state = activeVisualizationState;
           state.datasourceStates[state.activeDatasourceId].state = activeDatasourceState;
@@ -989,13 +989,13 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
         });
 
         const [layerDatasourceId, layerDatasource] =
-        Object.entries(datasourceMap).find(
-          ([datasourceId, datasource]) =>
-            state.datasourceStates[datasourceId] &&
-            datasource
-              .getLayers(state.datasourceStates[datasourceId].state)
-              .includes(target.layerId)
-        ) || [];
+          Object.entries(datasourceMap).find(
+            ([datasourceId, datasource]) =>
+              state.datasourceStates[datasourceId] &&
+              datasource
+                .getLayers(state.datasourceStates[datasourceId].state)
+                .includes(target.layerId)
+          ) || [];
 
         let newDatasourceState;
 
@@ -1131,16 +1131,16 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
 };
 
 function addInitialValueIfAvailable({
-                                      visualizationState,
-                                      datasourceState,
-                                      activeVisualization,
-                                      activeDatasource,
-                                      framePublicAPI,
-                                      layerType,
-                                      layerId,
-                                      columnId,
-                                      groupId,
-                                    }: {
+  visualizationState,
+  datasourceState,
+  activeVisualization,
+  activeDatasource,
+  framePublicAPI,
+  layerType,
+  layerId,
+  columnId,
+  groupId,
+}: {
   framePublicAPI: FramePublicAPI;
   visualizationState: unknown;
   datasourceState: unknown;
@@ -1152,9 +1152,9 @@ function addInitialValueIfAvailable({
   groupId?: string;
 }) {
   const { initialDimensions, noDatasource } =
-  activeVisualization
-    .getSupportedLayers(visualizationState, framePublicAPI)
-    .find(({ type }) => type === layerType) || {};
+    activeVisualization
+      .getSupportedLayers(visualizationState, framePublicAPI)
+      .find(({ type }) => type === layerType) || {};
 
   if (initialDimensions) {
     const info = groupId
