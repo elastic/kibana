@@ -208,7 +208,7 @@ export class AuthenticationService {
 
           return toolkit.render({
             body: renderUnauthenticatedPage({
-              buildNumber,
+              staticAssets: http.staticAssets,
               basePath: http.basePath,
               originalURL,
               customBranding: customBrandingValue,
