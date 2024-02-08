@@ -60,7 +60,7 @@ export default function ({ getService }: FtrProviderContext) {
           es_point_to_point: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
           es_top_hits: { min: 1, max: 1, total: 2, avg: 0.07142857142857142 },
           es_agg_heatmap: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
-          esql: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
+          esql: { min: 1, max: 1, total: 2, avg: 0.07142857142857142 },
           kbn_tms_raster: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
           ems_basemap: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
           ems_region: { min: 1, max: 1, total: 1, avg: 0.03571428571428571 },
@@ -81,8 +81,8 @@ export default function ({ getService }: FtrProviderContext) {
             min: 0,
           },
           dataSourcesCount: {
-            avg: 1.1785714285714286,
-            max: 6,
+            avg: 1.2142857142857142,
+            max: 7,
             min: 1,
           },
           emsVectorLayersCount: {
@@ -104,8 +104,8 @@ export default function ({ getService }: FtrProviderContext) {
               min: 1,
             },
             GEOJSON_VECTOR: {
-              avg: 0.8214285714285714,
-              max: 5,
+              avg: 0.8571428571428571,
+              max: 6,
               min: 1,
             },
             HEATMAP: {
@@ -125,8 +125,8 @@ export default function ({ getService }: FtrProviderContext) {
             },
           },
           layersCount: {
-            avg: 1.2142857142857142,
-            max: 7,
+            avg: 1.25,
+            max: 8,
             min: 1,
           },
         },

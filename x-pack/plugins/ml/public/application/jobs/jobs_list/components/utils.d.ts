@@ -12,6 +12,7 @@ export function closeJobs(jobs: Array<{ id: string }>, callback?: () => void): P
 export function deleteJobs(
   jobs: Array<{ id: string }>,
   deleteUserAnnotations?: boolean,
+  deleteAlertingRules?: boolean,
   callback?: () => void
 ): Promise<void>;
 export function resetJobs(

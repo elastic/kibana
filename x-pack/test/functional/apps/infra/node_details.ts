@@ -193,6 +193,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(hosts.length).to.equal(12);
           });
 
+          it('should show all section as collapsable', async () => {
+            await pageObjects.assetDetails.metadataSectionCollapsibleExist();
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+          });
+
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
