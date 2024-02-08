@@ -52,7 +52,7 @@ export const getInventoryViewInAppUrl = (
   let viewInAppUrl = '/app/metrics/link-to/inventory?';
 
   if (nodeType) {
-    if (nodeType.includes('host') && inventoryFields['host.name']) {
+    if (inventoryFields['host.name']) {
       viewInAppUrl = getLinkToHostDetails(inventoryFields['host.name'], inventoryFields[TIMESTAMP]);
     } else {
       const linkToParams: Record<string, any> = {
