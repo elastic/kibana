@@ -20,7 +20,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('Layer with invalid descriptor', () => {
       const INVALID_LAYER_NAME = 'fff76ebb-57a6-4067-a373-1d191b9bd1a3';
-      
+
       it('should diplay error icon in legend', async () => {
         await PageObjects.maps.hasErrorIconExistsOrFail(INVALID_LAYER_NAME);
       });
