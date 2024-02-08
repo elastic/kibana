@@ -21,6 +21,7 @@
     "@kbn/core-application-browser",
     "@kbn/share-plugin",
     "@kbn/i18n-react",
-    "@kbn/security-plugin"
+    "@kbn/security-plugin",
+    "@kbn/console-plugin"
   ]
 }

@@ -47,7 +47,11 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import {
+  EmbeddableSetup,
+  EmbeddableStart,
+  registerSavedObjectToPanelMethod,
+} from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -112,8 +116,14 @@ import {
 } from './services';
 import { VisualizeConstants } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
-import { ListingViewRegistry } from './types';
-import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
+import { ListingViewRegistry, SerializedVis } from './types';
+import {
+  LATEST_VERSION,
+  CONTENT_ID,
+  VisualizationSavedObjectAttributes,
+} from '../common/content_management';
+import { SerializedVisData } from '../common';
+import { VisualizeByValueInput } from './embeddable/visualize_embeddable';
 
 /**
  * Interface for this plugin's returned setup/start contracts.
@@ -396,6 +406,37 @@ export class VisualizationsPlugin
       },
       name: 'Visualize Library',
     });
+
+    registerSavedObjectToPanelMethod<VisualizationSavedObjectAttributes, VisualizeByValueInput>(
+      CONTENT_ID,
+      (savedObject) => {
+        const visState = savedObject.attributes.visState;
+
+        // not sure if visState actually is ever undefined, but following the type
+        if (!savedObject.managed || !visState) {
+          return {
+            savedObjectId: savedObject.id,
+          };
+        }
+
+        // data is not always defined, so I added a default value since the extract
+        // routine in the embeddable factory expects it to be there
+        const savedVis = JSON.parse(visState) as Omit<SerializedVis, 'data'> & {
+          data?: SerializedVisData;
+        };
+
+        if (!savedVis.data) {
+          savedVis.data = {
+            searchSource: {},
+            aggs: [],
+          };
+        }
+
+        return {
+          savedVis: savedVis as SerializedVis, // now we're sure we have "data" prop
+        };
+      }
+    );
 
     return {
       ...this.types.setup(),

@@ -28,6 +28,7 @@ import {
 } from '../../../common/conversation_complete';
 import {
   FunctionResponse,
+  FunctionVisibility,
   MessageRole,
   type CompatibleJSONSchema,
   type Conversation,
@@ -205,6 +206,13 @@ export class ObservabilityAIAssistantClient {
                       ? []
                       : functionClient
                           .getFunctions()
+                          .filter((fn) => {
+                            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+                            return (
+                              visibility === FunctionVisibility.All ||
+                              visibility === FunctionVisibility.AssistantOnly
+                            );
+                          })
                           .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
                 }
               )
@@ -312,6 +320,10 @@ export class ObservabilityAIAssistantClient {
               },
             };
 
+            this.dependencies.logger.debug(
+              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
+            );
+
             nextMessages = nextMessages.concat(functionResponseMessage);
 
             subscriber.next({
@@ -348,6 +360,8 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages);
           }
+
+          this.dependencies.logger.debug(`Conversation: ${JSON.stringify(nextMessages, null, 2)}`);
 
           if (!persist) {
             subscriber.complete();

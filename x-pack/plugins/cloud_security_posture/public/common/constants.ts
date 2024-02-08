@@ -230,3 +230,10 @@ export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
 export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
 
 export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
+
+export const FINDINGS_GROUPING_OPTIONS = {
+  RESOURCE_NAME: 'resource.name',
+  RULE_NAME: 'rule.name',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+};
