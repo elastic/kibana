@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import get from 'lodash/get';
 import {
   SavedObjectsType,
   ISavedObjectTypeRegistry,
