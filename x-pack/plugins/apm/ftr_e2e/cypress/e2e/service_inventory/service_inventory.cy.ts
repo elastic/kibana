@@ -115,7 +115,8 @@ describe('Service inventory', () => {
     });
   });
 
-  describe('Table search', () => {
+  // Skipping this until we enable the table search on the Service inventory view
+  describe.skip('Table search', () => {
     beforeEach(() => {
       cy.updateAdvancedSettings({
         'observability:apmEnableTableSearchBar': true,

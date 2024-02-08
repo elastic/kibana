@@ -9,7 +9,15 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { v4 } from 'uuid';
 import { css } from '@emotion/css';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiFlyout, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiPopover,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { ObservabilityAIAssistantMultipaneFlyoutProvider } from '../../context/observability_ai_assistant_multipane_flyout_provider';
 import { useForceUpdate } from '../../hooks/use_force_update';
 import { useCurrentUser } from '../../hooks/use_current_user';
@@ -25,6 +33,8 @@ const CONVERSATIONS_SIDEBAR_WIDTH = 260;
 const CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED = 34;
 
 const SIDEBAR_WIDTH = 400;
+
+export type FlyoutWidthMode = 'side' | 'full';
 
 export function ChatFlyout({
   initialTitle,
@@ -49,24 +59,34 @@ export function ChatFlyout({
 
   const [conversationId, setConversationId] = useState<string | undefined>(undefined);
 
-  const [expanded, setExpanded] = useState(false);
+  const [flyoutWidthMode, setFlyoutWidthMode] = useState<FlyoutWidthMode>('side');
+
+  const [conversationsExpanded, setConversationsExpanded] = useState(false);
+
   const [secondSlotContainer, setSecondSlotContainer] = useState<HTMLDivElement | null>(null);
   const [isSecondSlotVisible, setIsSecondSlotVisible] = useState(false);
 
   const sidebarClass = css`
-    max-width: ${expanded ? CONVERSATIONS_SIDEBAR_WIDTH : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED}px;
-    min-width: ${expanded ? CONVERSATIONS_SIDEBAR_WIDTH : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED}px;
+    max-width: ${conversationsExpanded
+      ? CONVERSATIONS_SIDEBAR_WIDTH
+      : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED}px;
+    min-width: ${conversationsExpanded
+      ? CONVERSATIONS_SIDEBAR_WIDTH
+      : CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED}px;
     border-right: solid 1px ${euiTheme.border.color};
   `;
 
-  const expandButtonClassName = css`
+  const expandButtonContainerClassName = css`
     position: absolute;
     margin-top: 16px;
-    margin-left: ${expanded
+    margin-left: ${conversationsExpanded
       ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
       : 5}px;
-    padding: ${euiTheme.size.s};
     z-index: 1;
+  `;
+
+  const expandButtonClassName = css`
+    color: ${euiTheme.colors.primary};
   `;
 
   const containerClassName = css`
@@ -80,10 +100,9 @@ export function ChatFlyout({
   const newChatButtonClassName = css`
     position: absolute;
     bottom: 31px;
-    margin-left: ${expanded
+    margin-left: ${conversationsExpanded
       ? CONVERSATIONS_SIDEBAR_WIDTH - CONVERSATIONS_SIDEBAR_WIDTH_COLLAPSED
       : 5}px;
-    padding: ${euiTheme.size.s};
     z-index: 1;
   `;
 
@@ -111,6 +130,10 @@ export function ChatFlyout({
     }
   };
 
+  const handleToggleFlyoutWidthMode = (newFlyoutWidthMode: FlyoutWidthMode) => {
+    setFlyoutWidthMode(newFlyoutWidthMode);
+  };
+
   return isOpen ? (
     <ObservabilityAIAssistantMultipaneFlyoutProvider
       value={{
@@ -122,7 +145,11 @@ export function ChatFlyout({
         closeButtonProps={{
           css: { marginRight: `${euiTheme.size.s}`, marginTop: `${euiTheme.size.s}` },
         }}
-        size={getFlyoutWidth({ expanded, isSecondSlotVisible })}
+        size={getFlyoutWidth({
+          expanded: conversationsExpanded,
+          isSecondSlotVisible,
+          flyoutWidthMode,
+        })}
         paddingSize="m"
         onClose={() => {
           onClose();
@@ -134,19 +161,40 @@ export function ChatFlyout({
       >
         <EuiFlexGroup gutterSize="none" className={containerClassName}>
           <EuiFlexItem className={sidebarClass}>
-            <EuiButtonIcon
-              aria-label={i18n.translate(
-                'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.expandConversationListLabel',
-                { defaultMessage: 'Expand conversation list' }
-              )}
-              className={expandButtonClassName}
-              color="text"
-              data-test-subj="observabilityAiAssistantChatFlyoutButton"
-              iconType={expanded ? 'transitionLeftIn' : 'transitionLeftOut'}
-              onClick={() => setExpanded(!expanded)}
+            <EuiPopover
+              anchorPosition="downLeft"
+              className={expandButtonContainerClassName}
+              button={
+                <EuiToolTip
+                  content={
+                    conversationsExpanded
+                      ? i18n.translate(
+                          'xpack.observabilityAiAssistant.chatFlyout.euiToolTip.collapseConversationListLabel',
+                          { defaultMessage: 'Collapse conversation list' }
+                        )
+                      : i18n.translate(
+                          'xpack.observabilityAiAssistant.chatFlyout.euiToolTip.expandConversationListLabel',
+                          { defaultMessage: 'Expand conversation list' }
+                        )
+                  }
+                  display="block"
+                >
+                  <EuiButtonIcon
+                    aria-label={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.expandConversationListLabel',
+                      { defaultMessage: 'Expand conversation list' }
+                    )}
+                    className={expandButtonClassName}
+                    color="text"
+                    data-test-subj="observabilityAiAssistantChatFlyoutButton"
+                    iconType={conversationsExpanded ? 'transitionLeftIn' : 'transitionLeftOut'}
+                    onClick={() => setConversationsExpanded(!conversationsExpanded)}
+                  />
+                </EuiToolTip>
+              }
             />
 
-            {expanded ? (
+            {conversationsExpanded ? (
               <ConversationList
                 selected={conversationId ?? ''}
                 onClickDeleteConversation={handleClickDeleteConversation}
@@ -154,15 +202,28 @@ export function ChatFlyout({
                 onClickNewChat={handleClickNewChat}
               />
             ) : (
-              <EuiButtonIcon
-                aria-label={i18n.translate(
-                  'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
-                  { defaultMessage: 'New chat' }
-                )}
+              <EuiPopover
+                anchorPosition="downLeft"
+                button={
+                  <EuiToolTip
+                    content={i18n.translate(
+                      'xpack.observabilityAiAssistant.chatFlyout.euiToolTip.newChatLabel',
+                      { defaultMessage: 'New chat' }
+                    )}
+                    display="block"
+                  >
+                    <EuiButtonIcon
+                      aria-label={i18n.translate(
+                        'xpack.observabilityAiAssistant.chatFlyout.euiButtonIcon.newChatLabel',
+                        { defaultMessage: 'New chat' }
+                      )}
+                      data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
+                      iconType="plusInCircle"
+                      onClick={handleClickNewChat}
+                    />
+                  </EuiToolTip>
+                }
                 className={newChatButtonClassName}
-                data-test-subj="observabilityAiAssistantNewChatFlyoutButton"
-                iconType="plusInCircle"
-                onClick={handleClickNewChat}
               />
             )}
           </EuiFlexItem>
@@ -171,16 +232,18 @@ export function ChatFlyout({
             <ChatBody
               key={chatBodyKeyRef.current}
               connectors={connectors}
+              currentUser={currentUser}
+              flyoutWidthMode={flyoutWidthMode}
               initialTitle={initialTitle}
               initialMessages={initialMessages}
               initialConversationId={conversationId}
-              currentUser={currentUser}
               knowledgeBase={knowledgeBase}
+              showLinkToConversationsApp
               startedFrom={startedFrom}
               onConversationUpdate={(conversation) => {
                 setConversationId(conversation.conversation.id);
               }}
-              showLinkToConversationsApp
+              onToggleFlyoutWidthMode={handleToggleFlyoutWidthMode}
             />
           </EuiFlexItem>
 
@@ -208,10 +271,15 @@ export function ChatFlyout({
 const getFlyoutWidth = ({
   expanded,
   isSecondSlotVisible,
+  flyoutWidthMode,
 }: {
   expanded: boolean;
   isSecondSlotVisible: boolean;
+  flyoutWidthMode?: FlyoutWidthMode;
 }) => {
+  if (flyoutWidthMode === 'full') {
+    return '100%';
+  }
   if (!expanded && !isSecondSlotVisible) {
     return '40vw';
   }
