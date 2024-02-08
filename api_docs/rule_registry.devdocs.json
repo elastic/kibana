@@ -2059,7 +2059,15 @@
             "section": "def-common.ActionGroup",
             "text": "ActionGroup"
           },
-          "<\"default\">[]; defaultActionGroupId: \"default\"; category: string; producer: string; actionVariables?: { context?: ",
+          "<\"default\">[]; schemas?: { params?: { type: \"zod\"; schema: Zod.ZodObject<Zod.ZodRawShape, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }> | Zod.ZodIntersection<Zod.ZodTypeAny, Zod.ZodTypeAny>; } | { type: \"config-schema\"; schema: ",
+          {
+            "pluginId": "@kbn/config-schema",
+            "scope": "common",
+            "docId": "kibKbnConfigSchemaPluginApi",
+            "section": "def-common.ObjectType",
+            "text": "ObjectType"
+          },
+          "<any>; } | undefined; } | undefined; defaultActionGroupId: \"default\"; category: string; producer: string; actionVariables?: { context?: ",
           {
             "pluginId": "@kbn/alerting-types",
             "scope": "common",
@@ -3579,16 +3587,16 @@
             "description": [],
             "signature": [
               "<T extends ",
-              "SuppressionFields870",
-              ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined) => Promise<Omit<",
+              "SuppressionFields8130",
+              ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined) => Promise<",
               {
                 "pluginId": "ruleRegistry",
                 "scope": "server",
                 "docId": "kibRuleRegistryPluginApi",
-                "section": "def-server.PersistenceAlertServiceResult",
-                "text": "PersistenceAlertServiceResult"
+                "section": "def-server.SuppressedAlertServiceResult",
+                "text": "SuppressedAlertServiceResult"
               },
-              "<T>, \"alertsWereTruncated\">>"
+              "<T>>"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
@@ -3643,6 +3651,20 @@
                 "description": [],
                 "signature": [
                   "Date | undefined"
+                ],
+                "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "ruleRegistry",
+                "id": "def-server.PersistenceServices.alertWithSuppression.$5",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "isRuleExecutionOnly",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
                 ],
                 "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
                 "deprecated": false,
@@ -3828,6 +3850,52 @@
             "label": "isUsingDataStreams",
             "description": [],
             "path": "x-pack/plugins/rule_registry/server/rule_data_client/rule_data_client.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "ruleRegistry",
+        "id": "def-server.SuppressedAlertServiceResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "SuppressedAlertServiceResult",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.SuppressedAlertServiceResult",
+            "text": "SuppressedAlertServiceResult"
+          },
+          "<T> extends Omit<",
+          {
+            "pluginId": "ruleRegistry",
+            "scope": "server",
+            "docId": "kibRuleRegistryPluginApi",
+            "section": "def-server.PersistenceAlertServiceResult",
+            "text": "PersistenceAlertServiceResult"
+          },
+          "<T>, \"alertsWereTruncated\">"
+        ],
+        "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.SuppressedAlertServiceResult.suppressedAlerts",
+            "type": "Array",
+            "tags": [],
+            "label": "suppressedAlerts",
+            "description": [],
+            "signature": [
+              "{ _id: string; _source: T; }[]"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4355,16 +4423,16 @@
         "description": [],
         "signature": [
           "<T extends ",
-          "SuppressionFields870",
-          ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined) => Promise<Omit<",
+          "SuppressionFields8130",
+          ">(alerts: { _id: string; _source: T; }[], suppressionWindow: string, enrichAlerts?: ((alerts: { _id: string; _source: T; }[], params: { spaceId: string; }) => Promise<{ _id: string; _source: T; }[]>) | undefined, currentTimeOverride?: Date | undefined, isRuleExecutionOnly?: boolean | undefined) => Promise<",
           {
             "pluginId": "ruleRegistry",
             "scope": "server",
             "docId": "kibRuleRegistryPluginApi",
-            "section": "def-server.PersistenceAlertServiceResult",
-            "text": "PersistenceAlertServiceResult"
+            "section": "def-server.SuppressedAlertServiceResult",
+            "text": "SuppressedAlertServiceResult"
           },
-          "<T>, \"alertsWereTruncated\">>"
+          "<T>>"
         ],
         "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
         "deprecated": false,
@@ -4419,6 +4487,20 @@
             "description": [],
             "signature": [
               "Date | undefined"
+            ],
+            "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "ruleRegistry",
+            "id": "def-server.SuppressedAlertService.$5",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isRuleExecutionOnly",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/rule_registry/server/utils/persistence_types.ts",
             "deprecated": false,

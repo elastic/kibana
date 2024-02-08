@@ -13,7 +13,7 @@ import { Comparator, Aggregators } from '../../../../../common/custom_threshold_
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
 import { MetricExpression } from '../../types';
-import { getBufferThreshold, RuleConditionChart } from './rule_condition_chart';
+import { RuleConditionChart } from './rule_condition_chart';
 
 jest.mock('../../../../utils/kibana_react');
 
@@ -69,20 +69,5 @@ describe('Rule condition chart', () => {
     };
     const { wrapper } = await setup(expression);
     expect(wrapper.find('[data-test-subj="thresholdRuleNoChartData"]').exists()).toBeTruthy();
-  });
-});
-
-describe('getBufferThreshold', () => {
-  const testData = [
-    { threshold: undefined, buffer: '0.00' },
-    { threshold: 0.1, buffer: '0.12' },
-    { threshold: 0.01, buffer: '0.02' },
-    { threshold: 0.001, buffer: '0.01' },
-    { threshold: 0.00098, buffer: '0.01' },
-    { threshold: 130, buffer: '143.00' },
-  ];
-
-  it.each(testData)('getBufferThreshold($threshold) = $buffer', ({ threshold, buffer }) => {
-    expect(getBufferThreshold(threshold)).toBe(buffer);
   });
 });
