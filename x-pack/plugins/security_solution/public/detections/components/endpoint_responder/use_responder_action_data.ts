@@ -84,7 +84,7 @@ export const useResponderActionData = ({
     data: hostInfo,
     isFetching,
     error,
-  } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId) });
+  } = useGetEndpointDetails(endpointId, { enabled: Boolean(endpointId && isEndpointHost) });
 
   const [isDisabled, tooltip]: [disabled: boolean, tooltip: ReactNode] = useMemo(() => {
     // v8.13 disabled for third-party agent alerts if the feature flag is not enabled
