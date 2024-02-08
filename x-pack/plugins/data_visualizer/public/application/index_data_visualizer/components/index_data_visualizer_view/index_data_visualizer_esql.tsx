@@ -7,7 +7,7 @@
 
 /* eslint-disable react-hooks/exhaustive-deps */
 import { css } from '@emotion/react';
-import React, { FC, useEffect, useMemo, useState } from 'react';
+import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { usePageUrlState } from '@kbn/ml-url-state';
 
 import { FullTimeRangeSelector, DatePickerWrapper } from '@kbn/ml-date-picker';
@@ -26,7 +26,6 @@ import {
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import { isDefined } from '@kbn/ml-is-defined';
 import { getOrCreateDataViewByIndexPattern } from '../../search_strategy/requests/get_data_view_by_index_pattern';
 import { useCurrentEuiTheme } from '../../../common/hooks/use_current_eui_theme';
 import type { FieldVisConfig } from '../../../common/components/stats_table/types';
@@ -47,6 +46,7 @@ import type {
   ESQLDefaultLimitSizeOption,
 } from '../../embeddables/grid_embeddable/types';
 import { OverallStats } from '../../types/overall_stats';
+import { ESQLQuery, isESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 interface DataVisualizerPageState {
   overallStats: OverallStats;
@@ -87,7 +87,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const { data } = services;
   const euiTheme = useCurrentEuiTheme();
 
-  const [query, setQuery] = useState<AggregateQuery>({ esql: '' });
+  const [query, setQuery] = useState<ESQLQuery>({ esql: '' });
   const [currentDataView, setCurrentDataView] = useState<DataView | undefined>();
 
   const toggleShowEmptyFields = () => {
@@ -122,32 +122,11 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   };
 
   // Query that has been typed, but has not submitted with cmd + enter
-  const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: '' });
-
-  // const onQueryUpdate = (q?: AggregateQuery) => {
-  //   // When user submits a new query
-  //   // resets all current requests and other data
-  //   if (cancelOverallStatsRequest) {
-  //     cancelOverallStatsRequest();
-  //   }
-  //   if (cancelFieldStatsRequest) {
-  //     cancelFieldStatsRequest();
-  //   }
-  //   // Reset field stats to fetch state
-  //   setFieldStatFieldsToFetch(undefined);
-  //   setMetricConfigs(defaults.metricConfigs);
-  //   setNonMetricConfigs(defaults.nonMetricConfigs);
-  //   if (q) {
-  //     setQuery(q);
-  //   }
-  // };
+  const [localQuery, setLocalQuery] = useState<ESQLQuery>({ esql: '' });
 
   const indexPattern = useMemo(() => {
     let indexPatternFromQuery = '';
-    if ('sql' in query) {
-      indexPatternFromQuery = getIndexPatternFromESQLQuery(query.sql);
-    }
-    if ('esql' in query) {
+    if (isESQLQuery(query)) {
       indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
     }
     // we should find a better way to work with ESQL queries which dont need a dataview
@@ -186,25 +165,18 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [indexPattern, data.dataViews, currentDataView]
   );
 
-  const input: DataVisualizerGridInput<AggregateQuery> = useMemo(
-    () => {
-      return {
-        dataView: currentDataView,
-        query,
-        savedSearch: undefined,
-        sessionId: undefined,
-        visibleFieldNames: undefined,
-        allowEditDataView: true,
-        id: 'esql_data_visualizer',
-        indexPattern,
-      };
-    },
-    // @ts-expect-error 'esql'' does exist on AggregateQuery type, and we don't care for 'sql''
-    [currentDataView, query?.esql]
-  );
-
-  // @TODO: remove
-  console.log(`--@@query`, query);
+  const input: DataVisualizerGridInput<AggregateQuery> = useMemo(() => {
+    return {
+      dataView: currentDataView,
+      query,
+      savedSearch: undefined,
+      sessionId: undefined,
+      visibleFieldNames: undefined,
+      allowEditDataView: true,
+      id: 'esql_data_visualizer',
+      indexPattern,
+    };
+  }, [currentDataView, query?.esql]);
 
   const dvPageHeader = css({
     [useEuiBreakpoint(['xs', 's', 'm', 'l'])]: {
@@ -254,9 +226,24 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   );
 
   const queryNeedsUpdate = useMemo(
-    () => (JSON.stringify(localQuery) !== JSON.stringify(query) ? true : undefined),
-    [localQuery, query]
+    () => (localQuery.esql !== query.esql ? true : undefined),
+    [localQuery.esql, query.esql]
   );
+
+  const handleRefresh = useCallback(() => {
+    // The page is already autoamtically updating when time range is changed
+    // via the url state
+    // so we just need to force update if the query is outdated
+    if (queryNeedsUpdate) {
+      setQuery(localQuery);
+    }
+  }, [queryNeedsUpdate, localQuery.esql]);
+
+  const onTextLangQueryChange = useCallback((q: AggregateQuery) => {
+    if (isESQLQuery(q)) {
+      setLocalQuery(q);
+    }
+  }, []);
   return (
     <EuiPageTemplate
       offset={0}
@@ -300,13 +287,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                 showRefresh={!hasValidTimeField}
                 width="full"
                 needsUpdate={queryNeedsUpdate}
-                onRefresh={() => {
-                  if (queryNeedsUpdate) {
-                    // @TODO: remove
-                    console.log(`--@@setting query`);
-                    setQuery(localQuery);
-                  }
-                }}
+                onRefresh={handleRefresh}
                 isDisabled={!hasValidTimeField}
               />
             </EuiFlexItem>
@@ -315,7 +296,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
         <EuiSpacer size="m" />
         <TextBasedLangEditor
           query={localQuery}
-          onTextLangQueryChange={setLocalQuery}
+          onTextLangQueryChange={onTextLangQueryChange}
           onTextLangQuerySubmit={onQueryUpdate}
           expandCodeEditor={() => false}
           isCodeEditorExpanded={true}

@@ -31,7 +31,7 @@ import { filterFields } from '../../../common/components/fields_stats_grid/filte
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { useESQLFieldStatsData } from './use_esql_field_stats_data';
 import type { NonAggregatableField } from '../../types/overall_stats';
-import { isESQLQuery } from '../../search_strategy/requests/esql_utils';
+import { ESQLQuery, isESQLQuery } from '../../search_strategy/requests/esql_utils';
 import { DEFAULT_BAR_TARGET } from '../../../common/constants';
 import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_data';
 import { type AggregatableField } from '../../types/esql_data_visualizer';
@@ -81,7 +81,7 @@ export const getDefaultESQLDataVisualizerListState = (
 export const useESQLDataVisualizerData = (
   input: ESQLDataVisualizerGridEmbeddableInput,
   dataVisualizerListState: ESQLDataVisualizerIndexBasedAppState,
-  setQuery?: React.Dispatch<React.SetStateAction<AggregateQuery>>
+  setQuery?: React.Dispatch<React.SetStateAction<ESQLQuery>>
 ) => {
   const [lastRefresh, setLastRefresh] = useState(0);
   const { services } = useDataVisualizerKibana();
@@ -578,7 +578,7 @@ export const useESQLDataVisualizerData = (
     setFieldStatFieldsToFetch(undefined);
     setMetricConfigs(defaults.metricConfigs);
     setNonMetricConfigs(defaults.nonMetricConfigs);
-    if (q && setQuery) {
+    if (isESQLQuery(q) && setQuery) {
       setQuery(q);
     }
   };

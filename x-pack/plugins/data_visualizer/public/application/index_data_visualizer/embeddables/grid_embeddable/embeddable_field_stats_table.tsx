@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import type { Required } from 'utility-types';
 import type { DataVisualizerGridEmbeddableInput } from './types';
 import {
   DataVisualizerTable,
