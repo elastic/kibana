@@ -17,6 +17,3 @@ export type {
   DashboardAttributes,
   SavedDashboardPanel,
 } from './latest';
-
-export * as DashboardV1 from './v1';
-export * as DashboardV2 from './v2';
