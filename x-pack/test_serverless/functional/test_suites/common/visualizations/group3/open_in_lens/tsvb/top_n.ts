@@ -17,7 +17,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
-  const comboBox = getService('comboBox');
 
   describe('Top N', function describeIndexTests() {
     const fixture =

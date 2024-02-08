@@ -22,7 +22,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const panelActions = getService('dashboardPanelActions');
   const kibanaServer = getService('kibanaServer');
-  const comboBox = getService('comboBox');
 
   describe('Table', function describeIndexTests() {
     const fixture =
