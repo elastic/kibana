@@ -19,8 +19,6 @@ export const FieldStatisticsTab: React.FC<Omit<FieldStatisticsTableProps, 'query
       data: services.data,
     });
     const savedSearch = useSavedSearch();
-    // @TODO: remove
-    console.log(`--@@FieldStatisticsTab`, FieldStatisticsTab);
 
     return (
       <FieldStatisticsTable
