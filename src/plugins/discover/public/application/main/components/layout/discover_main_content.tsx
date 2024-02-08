@@ -122,8 +122,7 @@ export const DiscoverMainContent = ({
           data-test-subj="dscMainContent"
         >
           {showChart && isChartAvailable && <EuiHorizontalRule margin="none" />}
-
-          {false ? ( // @todo: re-add viewMode === VIEW_MODE.DOCUMENT_LEVEL
+          {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
               dataView={dataView}
@@ -135,7 +134,6 @@ export const DiscoverMainContent = ({
             <>
               <EuiFlexItem grow={false}>{viewModeToggle}</EuiFlexItem>
               <FieldStatisticsTab
-                esql={isPlainRecord}
                 dataView={dataView}
                 columns={columns}
                 stateContainer={stateContainer}
