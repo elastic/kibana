@@ -80,7 +80,8 @@ export const showCreateDetectionRuleSuccessToast = (
 
 export const showChangeBenchmarkRuleStatesSuccessToast = (
   notifications: NotificationsStart,
-  isBenchmarkRuleMuted: boolean
+  isBenchmarkRuleMuted: boolean,
+  numberOfRules = 1
 ) => {
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
@@ -102,7 +103,8 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
               </EuiText>
               <FormattedMessage
                 id="xpack.csp.flyout.ruleEnabledToast"
-                defaultMessage="Successfully enabled rule"
+                defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}}"
+                values={{ ruleCount: numberOfRules }}
               />
             </>
           ) : (
@@ -117,7 +119,8 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
               </EuiText>
               <FormattedMessage
                 id="xpack.csp.flyout.ruleDisabledToast"
-                defaultMessage="Successfully disabled rule"
+                defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}}"
+                values={{ ruleCount: numberOfRules }}
               />
             </>
           )}

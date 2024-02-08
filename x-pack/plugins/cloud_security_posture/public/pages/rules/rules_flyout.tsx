@@ -23,13 +23,17 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { NotificationsStart } from '@kbn/core/public';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
-import { TakeAction } from '../../components/take_action';
+import {
+  showChangeBenchmarkRuleStatesSuccessToast,
+  TakeAction,
+} from '../../components/take_action';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -37,6 +41,7 @@ interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStates;
   refetchRulesStates: () => void;
+  notifications: NotificationsStart;
 }
 
 const tabs = [
@@ -58,11 +63,15 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
+export const RuleFlyout = ({
+  onClose,
+  rule,
+  refetchRulesStates,
+  notifications,
+}: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStates = useChangeCspRuleState();
   const isRuleMuted = rule?.state === 'muted';
-
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
@@ -74,6 +83,7 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
       await refetchRulesStates();
+      await showChangeBenchmarkRuleStatesSuccessToast(notifications, nextRuleStates !== 'mute');
     }
   };
 

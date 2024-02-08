@@ -25,6 +25,7 @@ import type {
 } from '../../../common/types/latest';
 import { useCspGetRulesStates } from './use_csp_rules_state';
 import { RulesCounters } from './rules_counters';
+import { useKibana } from '../../common/hooks/use_kibana';
 
 export interface CspBenchmarkRulesWithStates {
   metadata: CspBenchmarkRule['metadata'];
@@ -223,6 +224,8 @@ export const RulesContainer = () => {
     },
   };
 
+  const { notifications } = useKibana().services;
+
   return (
     <div data-test-subj={TEST_SUBJECTS.CSP_RULES_CONTAINER}>
       <RulesCounters
@@ -250,6 +253,7 @@ export const RulesContainer = () => {
         enabledDisabledItemsFilterState={enabledDisabledItemsFilter}
         setSelectAllRules={setSelectAllRules}
         setSelectedRules={setSelectedRules}
+        notifications={notifications}
       />
       <EuiSpacer />
       <RulesTable
@@ -271,12 +275,14 @@ export const RulesContainer = () => {
         refetchRulesStates={rulesStates.refetch}
         selectedRules={selectedRules}
         setSelectedRules={setSelectedRules}
+        notifications={notifications}
       />
       {params.ruleId && rulesFlyoutData.metadata && (
         <RuleFlyout
           rule={rulesFlyoutData}
           onClose={navToRulePage}
           refetchRulesStates={rulesStates.refetch}
+          notifications={notifications}
         />
       )}
     </div>

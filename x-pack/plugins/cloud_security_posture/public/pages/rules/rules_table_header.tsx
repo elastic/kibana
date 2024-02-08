@@ -20,6 +20,7 @@ import {
   EuiFilterButton,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
+import { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
@@ -27,6 +28,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
 import { MultiSelectFilter } from '../../common/component/multi_select_filter';
+import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
 
 export const RULES_BULK_ACTION_BUTTON = 'bulk-action-button';
 export const RULES_BULK_ACTION_OPTION_ENABLE = 'bulk-action-option-enable';
@@ -54,6 +56,7 @@ interface RulesTableToolbarProps {
   enabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
+  notifications: NotificationsStart;
 }
 
 interface RuleTableCount {
@@ -63,6 +66,7 @@ interface RuleTableCount {
   refetchRulesStates: () => void;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
+  notifications: NotificationsStart;
 }
 
 export const RulesTableHeader = ({
@@ -81,6 +85,7 @@ export const RulesTableHeader = ({
   enabledDisabledItemsFilterState,
   setSelectAllRules,
   setSelectedRules,
+  notifications,
 }: RulesTableToolbarProps) => {
   const [selectedSection, setSelectedSection] = useState<string[]>([]);
   const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
@@ -116,6 +121,7 @@ export const RulesTableHeader = ({
           refetchRulesStates={refetchRulesStates}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
+          notifications={notifications}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
@@ -213,6 +219,7 @@ const SearchField = ({
   refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
+  notifications,
 }: Pick<
   RulesTableToolbarProps,
   | 'isSearching'
@@ -224,6 +231,7 @@ const SearchField = ({
   | 'refetchRulesStates'
   | 'setSelectAllRules'
   | 'setSelectedRules'
+  | 'notifications'
 >) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
@@ -250,6 +258,7 @@ const SearchField = ({
         refetchRulesStates={refetchRulesStates}
         setSelectAllRules={setSelectAllRules}
         setSelectedRules={setSelectedRules}
+        notifications={notifications}
       />
     </div>
   );
@@ -262,12 +271,12 @@ const CurrentPageOfTotal = ({
   refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
+  notifications,
 }: RuleTableCount) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onPopoverClick = () => {
     setIsPopoverOpen((e) => !e);
   };
-
   const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {
     const bulkSelectedRules: RuleStateAttributesWithoutStates[] = selectedRules.map(
@@ -283,6 +292,11 @@ const CurrentPageOfTotal = ({
       await postRequestChangeRulesState(state, bulkSelectedRules);
       await refetchRulesStates();
       await setIsPopoverOpen(false);
+      await showChangeBenchmarkRuleStatesSuccessToast(
+        notifications,
+        state !== 'mute',
+        bulkSelectedRules.length
+      );
     }
   };
   const changeCspRuleStateMute = async () => {
