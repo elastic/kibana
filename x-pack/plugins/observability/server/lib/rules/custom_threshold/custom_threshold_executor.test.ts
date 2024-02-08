@@ -1056,7 +1056,7 @@ describe('The custom threshold alert type', () => {
       const { action } = mostRecentAction(instanceID);
       const reasons = action.reason;
       expect(reasons).toBe(
-        'Average test.metric.1 is 1, above the threshold of 1; Average test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
+        'Average test.metric.1 is 1, above or equal the threshold of 1; Average test.metric.2 is 3, above or equal the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
       );
     });
   });

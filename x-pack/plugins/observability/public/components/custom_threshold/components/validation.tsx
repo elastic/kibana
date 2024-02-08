@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import { getEsQueryConfig, Query, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { buildEsQuery, fromKueryExpression } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
@@ -20,9 +21,11 @@ export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!
 export function validateCustomThreshold({
   criteria,
   searchConfiguration,
+  uiSettings,
 }: {
   criteria: CustomMetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
+  uiSettings: IUiSettingsClient;
 }): ValidationResult {
   const validationResult = { errors: {} };
   const errors: {
@@ -56,14 +59,17 @@ export function validateCustomThreshold({
       buildEsQuery(
         undefined,
         [{ query: (searchConfiguration.query as Query).query, language: 'kuery' }],
-        []
+        [],
+        getEsQueryConfig(uiSettings)
       );
     } catch (e) {
+      const errorReason = e.shortMessage || '';
       errors.filterQuery = [
         i18n.translate(
           'xpack.observability.customThreshold.rule.alertFlyout.error.invalidFilterQuery',
           {
-            defaultMessage: 'Filter query is invalid.',
+            values: { errorReason },
+            defaultMessage: `Filter query is invalid. {errorReason}`,
           }
         ),
       ];
