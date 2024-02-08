@@ -8,6 +8,7 @@
 import { asyncForEach } from '@kbn/std';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { vulnerabilitiesLatestMock } from '../mocks/vulnerabilities_latest_mock';
+import expect from '@kbn/expect';
 
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
