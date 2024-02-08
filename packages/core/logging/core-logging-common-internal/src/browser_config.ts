@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { LogLevelId } from '@kbn/logging';
+import type { LogLevelId } from '@kbn/logging';
 
 /**
  * @internal
