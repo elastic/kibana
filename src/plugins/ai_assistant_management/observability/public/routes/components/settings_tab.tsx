@@ -205,7 +205,7 @@ export function SettingsTab() {
               </h3>
             }
             description={i18n.translate(
-              'aiAssistantManagementObservability.settingsPage.connectYourElasticAITextLabel',
+              'aiAssistantManagementObservability.settingsPage.selectYourLanguageLabel',
               {
                 defaultMessage:
                   'Select the language you wish the Assistant to use when generating responses.',
