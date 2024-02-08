@@ -23,6 +23,7 @@ const currentConversation = {
 };
 const showAnonymizedValues = false;
 const testProps = {
+  abortStream: jest.fn(),
   amendMessage: jest.fn(),
   regenerateMessage: jest.fn(),
   isEnabledLangChain: false,

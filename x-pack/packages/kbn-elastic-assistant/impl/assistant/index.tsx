@@ -399,6 +399,7 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
+      abortStream,
       amendMessage,
       currentConversation,
       editingSystemPromptId,
