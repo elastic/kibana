@@ -837,6 +837,10 @@
           "panelsJSON": {
             "index": false,
             "type": "text"
+          },
+          "showApplySelections": {
+            "index": false,
+            "type": "boolean"
           }
         }
       },
