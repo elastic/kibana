@@ -115,7 +115,7 @@ export interface DiscoverSavedSearchContainer {
    * Passes filter manager filters to saved search filters
    * @param params
    */
-  updateWithFilterManagerFilters: (params: { savedSearch: SavedSearch }) => SavedSearch;
+  updateWithFilterManagerFilters: () => SavedSearch;
 }
 
 export function getSavedSearchContainer({
@@ -182,9 +182,9 @@ export function getSavedSearchContainer({
     savedSearchCurrent$.next(nextSavedSearch);
   };
 
-  const updateWithFilterManagerFilters = ({ savedSearch }: { savedSearch: SavedSearch }) => {
+  const updateWithFilterManagerFilters = () => {
     const nextSavedSearch: SavedSearch = {
-      ...savedSearch,
+      ...getState(),
     };
 
     nextSavedSearch.searchSource.setField('filter', cloneDeep(services.filterManager.getFilters()));
