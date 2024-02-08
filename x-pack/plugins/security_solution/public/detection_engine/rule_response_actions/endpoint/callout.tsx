@@ -10,6 +10,7 @@ import { EuiCallOut, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useFormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { get } from 'lodash';
+import { CONSOLE_COMMANDS } from '../../../management/common/translations';
 
 interface EndpointCallOutProps {
   basePath: string;
@@ -34,12 +35,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
             />
           }
         >
-          <EuiText size={'xs'}>
-            <FormattedMessage
-              id="xpack.securitySolution.responseActions.endpoint.isolateTooltip"
-              defaultMessage="Insufficient privileges to isolate hosts. Contact your Kibana administrator if you think you should have this permission."
-            />
-          </EuiText>
+          <EuiText size={'xs'}>{CONSOLE_COMMANDS.isolate.privileges}</EuiText>
         </EuiCallOut>
         <EuiSpacer size="s" />
       </>
