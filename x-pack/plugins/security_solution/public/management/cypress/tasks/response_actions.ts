@@ -25,11 +25,19 @@ import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint
 import { ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 export const validateAvailableCommands = () => {
-  cy.get('[data-test-subj^="command-type"]').should(
-    'have.length',
-    ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.length
-  );
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.forEach((command) => {
+  // TODO: TC- use ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS when we go GA with automated process actions
+  const config = Cypress.config();
+  const automatedActionsPAttern = /automatedProcessActionsEnabled/;
+  const automatedProcessActionsEnabled =
+    config.env.ftrConfig.kbnServerArgs[0].match(automatedActionsPAttern);
+
+  const enabledActions = [
+    ...ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS,
+    ...(automatedProcessActionsEnabled ? ['kill-process', 'suspend-process'] : []),
+  ];
+
+  cy.get('[data-test-subj^="command-type"]').should('have.length', enabledActions.length);
+  enabledActions.forEach((command) => {
     cy.getByTestSubj(`command-type-${command}`);
   });
 };
