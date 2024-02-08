@@ -109,7 +109,17 @@ describe('#setup()', () => {
       setup.register(pluginId, createApp({ id: 'app1', updater$ }));
       setup.register(
         pluginId,
-        createApp({ id: 'app2', deepLinks: [{ id: 'subapp1', title: 'Subapp', path: '/subapp' }] })
+        createApp({
+          id: 'app2',
+          deepLinks: [
+            {
+              id: 'subapp1',
+              title: 'Subapp',
+              path: '/subapp',
+              visibleIn: undefined, // not specified
+            },
+          ],
+        })
       );
       const { applications$ } = await service.start(startDeps);
 
@@ -129,7 +139,7 @@ describe('#setup()', () => {
           status: AppStatus.accessible,
           deepLinks: [
             expect.objectContaining({
-              visibleIn: ['globalSearch'], // by default deep links are visible in globalSearch
+              visibleIn: ['globalSearch'], // if not specified, deep links are visible in globalSearch
             }),
           ],
         })
@@ -151,14 +161,7 @@ describe('#setup()', () => {
           status: AppStatus.inaccessible,
           defaultPath: 'foo/bar',
           tooltip: 'App inaccessible due to reason',
-          deepLinks: [
-            expect.objectContaining({
-              id: 'subapp2',
-              title: 'Subapp 2',
-              path: '/subapp2',
-              visibleIn: [], // not visible in globalSearch anymore as the app is inaccessible
-            }),
-          ],
+          deepLinks: [], // deep links are removed when the app is inaccessible
         })
       );
       expect(applications.get('app2')).toEqual(

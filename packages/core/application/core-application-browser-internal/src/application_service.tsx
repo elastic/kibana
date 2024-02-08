@@ -491,11 +491,9 @@ const populateDeepLinkDefaults = (
     return [];
   }
   return deepLinks.map((deepLink) => {
-    const visibleIn = deepLink.visibleIn ?? ['globalSearch']; // by default, deepLinks are only visible in global search.
-
     return {
       ...deepLink,
-      visibleIn: appStatus === AppStatus.inaccessible ? [] : visibleIn,
+      visibleIn: deepLink.visibleIn ?? ['globalSearch'], // by default, deepLinks are only visible in global search.
       deepLinks: populateDeepLinkDefaults(appStatus, deepLink.deepLinks),
     };
   });
