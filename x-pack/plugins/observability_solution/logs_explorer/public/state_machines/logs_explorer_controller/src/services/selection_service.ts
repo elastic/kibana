@@ -9,7 +9,6 @@ import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { InvokeCreator } from 'xstate';
 import { Dataset } from '../../../../../common/datasets';
 import {
-  isDatasetSelection,
   isDataViewSelection,
   isUnresolvedDatasetSelection,
   SingleDatasetSelection,
