@@ -119,7 +119,7 @@ describe(
 
         cy.getByTestSubj(RESPONSE_ACTIONS_ERRORS).within(() => {
           cy.contains(
-            'Custom field name is a required field when process.pid toggle is turned off'
+            'Custom field name selection is required when the process.pid toggle is disabled.'
           );
         });
 

@@ -80,7 +80,7 @@ const FieldNameFieldComponent = ({
                   'xpack.securitySolution.responseActions.endpoint.validations.fieldNameIsRequiredErrorMessage',
                   {
                     defaultMessage:
-                      '{field} is a required field when process.pid toggle is turned off',
+                      '{field} selection is required when the process.pid toggle is disabled.',
                     values: { field: FIELD_LABEL },
                   }
                 ),
