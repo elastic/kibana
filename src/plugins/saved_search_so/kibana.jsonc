@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/saved-search-so-plugin",
+  "owner": "@elastic/kibana-data-discovery",
+  "description": "This plugin contains 'search' SO definition",
+  "plugin": {
+    "id": "savedSearchSo",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": ["data"],
+    "optionalPlugins": ["lens"],
+    "requiredBundles": [],
+    "extraPublicDirs": ["common"]
+  }
+}

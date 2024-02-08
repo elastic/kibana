@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export const SavedSearchType = 'search';
+export const MIN_SAVED_SEARCH_SAMPLE_SIZE = 1;
+export const MAX_SAVED_SEARCH_SAMPLE_SIZE = 10000;
 
-export const LATEST_VERSION = 1;
-
-export type SavedSearchContentType = typeof SavedSearchType;
+export enum VIEW_MODE {
+  DOCUMENT_LEVEL = 'documents',
+  AGGREGATED_LEVEL = 'aggregated',
+}
