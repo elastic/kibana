@@ -320,6 +320,9 @@ export const useESQLOverallStatsData = (
           setTableData({ totalCount, documentCountStats });
         }
 
+        if (totalCount === undefined) {
+          totalCount = 0;
+        }
         setOverallStatsProgress({
           loaded: 50,
         });
