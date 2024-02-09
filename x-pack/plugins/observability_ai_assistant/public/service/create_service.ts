@@ -33,7 +33,7 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
-  let appContexts: Array<ObservabilityAIAssistantAppContext> = [];
+  const appContexts: ObservabilityAIAssistantAppContext[] = [];
 
   return {
     isEnabled: () => {

@@ -41,7 +41,7 @@ import type {
   ObservabilityAIAssistantAppContext,
   PendingMessage,
 } from '../common/types';
-import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
