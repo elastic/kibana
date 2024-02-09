@@ -8,9 +8,6 @@
 /* eslint-disable max-classes-per-file */
 
 import { ElasticsearchClient, Logger, SavedObject } from '@kbn/core/server';
-import archiver from 'archiver';
-import { createWriteStream } from 'fs';
-import { readFile, unlink } from 'fs/promises';
 import {
   ConcreteTaskInstance,
   TaskInstance,
@@ -48,6 +45,7 @@ import {
   formatMonitorConfigFields,
   mixParamsWithGlobalParams,
 } from './formatters/public_formatters/format_configs';
+import { inlineToProjectZip } from '../common/mem_writable';
 
 const SYNTHETICS_SERVICE_SYNC_MONITORS_TASK_TYPE =
   'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects';
@@ -403,43 +401,26 @@ export class SyntheticsService {
         this.locations,
         async (location) => {
           if (bucketsByLocation[location.id].length > perBucket && output) {
-            // [WIP CODE]
-            // TODO: Refactor extract this to a contained function, and encode the monitor
-            // at write time rather than send time
             const locMonitors: any = await Promise.all(
               bucketsByLocation[location.id].splice(0, PER_PAGE).map(async (monitorData) => {
+                // no inline script data, sync without further processing
                 if (!monitorData?.['source.inline.script']) return monitorData;
-                const outPath = `${monitorData.id}.zip`;
-                await new Promise((resolve, reject) => {
-                  const writeStream = createWriteStream(outPath);
-                  const archive = archiver('zip', {
-                    zlib: { level: 9 },
-                  });
-                  archive.on('error', reject);
-                  writeStream.on('close', resolve);
-                  archive.pipe(writeStream);
+                // project content is already defined, this script was zipped at persist time
+                else if (!!monitorData?.[ConfigKey.SOURCE_PROJECT_CONTENT]) {
+                  return {
+                    ...monitorData,
+                    [ConfigKey.SOURCE_INLINE]: undefined,
+                  };
+                }
 
-                  archive.append(
-                    `import { journey, step, expect } from '@elastic/synthetics';
-
-journey('inline', ({ page, context, browser, params, request }) => {
-  ${monitorData?.['source.inline.script']}
-});
-`,
-                    {
-                      name: 'inline.journey.ts',
-                    }
-                  );
-
-                  archive.finalize();
-                });
-
-                const encoded = await readFile(outPath, 'base64');
-                await unlink(outPath);
-
+                // when the inline script has not been zipped, zip it and sync
                 return {
                   ...monitorData,
-                  'source.project.content': encoded,
+                  'source.project.content': await inlineToProjectZip(
+                    monitorData[ConfigKey.SOURCE_INLINE],
+                    monitorData[ConfigKey.CONFIG_ID],
+                    this.logger
+                  ),
                   'source.inline.script': undefined,
                 };
               })

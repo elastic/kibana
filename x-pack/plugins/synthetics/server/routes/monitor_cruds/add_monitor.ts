@@ -24,6 +24,7 @@ import {
   MonitorFields,
   SyntheticsMonitor,
   EncryptedSyntheticsMonitorAttributes,
+  BrowserSensitiveSimpleFields,
 } from '../../../common/runtime_types';
 import { formatKibanaNamespace } from '../../synthetics_service/formatters/private_formatters';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
@@ -38,6 +39,7 @@ import { sendTelemetryEvents, formatTelemetryEvent } from '../telemetry/monitor_
 import { formatSecrets } from '../../synthetics_service/utils/secrets';
 import { deleteMonitor } from './delete_monitor';
 import { mapSavedObjectToMonitor } from './helper';
+import { inlineToProjectZip } from '../../common/mem_writable';
 
 export const addSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'POST',
@@ -137,7 +139,7 @@ export const createNewSavedObjectMonitor = async ({
   );
 };
 
-export const hydrateMonitorFields = ({
+export const hydrateMonitorFields = async ({
   newMonitorId,
   normalizedMonitor,
   routeContext,
@@ -152,6 +154,7 @@ export const hydrateMonitorFields = ({
     string,
     { preserve_namespace?: boolean }
   >;
+
   return {
     ...normalizedMonitor,
     [ConfigKey.MONITOR_QUERY_ID]: normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || newMonitorId,
@@ -159,6 +162,15 @@ export const hydrateMonitorFields = ({
     [ConfigKey.NAMESPACE]: preserveNamespace
       ? normalizedMonitor[ConfigKey.NAMESPACE]
       : getMonitorNamespace(server, request, normalizedMonitor[ConfigKey.NAMESPACE]),
+    [ConfigKey.SOURCE_PROJECT_CONTENT]: !!(normalizedMonitor as BrowserSensitiveSimpleFields)?.[
+      ConfigKey.SOURCE_INLINE
+    ]
+      ? await inlineToProjectZip(
+          (normalizedMonitor as BrowserSensitiveSimpleFields)?.[ConfigKey.SOURCE_INLINE] as string,
+          newMonitorId,
+          server.logger
+        )
+      : '',
   };
 };
 
@@ -177,7 +189,7 @@ export const syncNewMonitor = async ({
   const newMonitorId = id ?? uuidV4();
 
   let monitorSavedObject: SavedObject<EncryptedSyntheticsMonitorAttributes> | null = null;
-  const monitorWithNamespace = hydrateMonitorFields({
+  const monitorWithNamespace = await hydrateMonitorFields({
     normalizedMonitor,
     routeContext,
     newMonitorId,

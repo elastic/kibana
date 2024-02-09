@@ -243,6 +243,8 @@ export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   CommonFieldsCodec,
 ]);
 
+export type BrowserSensitiveSimpleFields = t.TypeOf<typeof BrowserSensitiveSimpleFieldsCodec>;
+
 export const ThrottlingConfigValueCodec = t.interface({
   download: t.string,
   upload: t.string,

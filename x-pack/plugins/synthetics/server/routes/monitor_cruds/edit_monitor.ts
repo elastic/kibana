@@ -21,6 +21,7 @@ import {
   SyntheticsMonitor,
   ConfigKey,
   MonitorLocations,
+  BrowserSensitiveSimpleFields,
 } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { validateMonitor } from './monitor_validation';
@@ -31,6 +32,8 @@ import {
 } from '../telemetry/monitor_upgrade_sender';
 import { formatSecrets, normalizeSecrets } from '../../synthetics_service/utils/secrets';
 import { mapSavedObjectToMonitor } from './helper';
+import { inlineToProjectZip } from '../../common/mem_writable';
+import { SyntheticsServerSetup } from '../../types';
 
 // Simplify return promise type and type it with runtime_types
 export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => ({
@@ -156,6 +159,30 @@ const rollbackUpdate = async ({
   }
 };
 
+export const refreshInlineZip = async (
+  normalizedMonitor: SyntheticsMonitor,
+  previousMonitor: SavedObject<EncryptedSyntheticsMonitorAttributes>,
+  server: SyntheticsServerSetup
+) => {
+  let monitorWithId = {
+    ...normalizedMonitor,
+    [ConfigKey.MONITOR_QUERY_ID]:
+      normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
+    [ConfigKey.CONFIG_ID]: previousMonitor.id,
+  };
+  if (!!(monitorWithId as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE]) {
+    monitorWithId = {
+      ...monitorWithId,
+      [ConfigKey.SOURCE_PROJECT_CONTENT]: await inlineToProjectZip(
+        (monitorWithId as BrowserSensitiveSimpleFields)[ConfigKey.SOURCE_INLINE]!,
+        monitorWithId[ConfigKey.CONFIG_ID],
+        server.logger
+      ),
+    };
+  }
+  return monitorWithId;
+};
+
 export const syncEditedMonitor = async ({
   normalizedMonitor,
   previousMonitor,
@@ -171,12 +198,7 @@ export const syncEditedMonitor = async ({
 }) => {
   const { server, savedObjectsClient, syntheticsMonitorClient } = routeContext;
   try {
-    const monitorWithId = {
-      ...normalizedMonitor,
-      [ConfigKey.MONITOR_QUERY_ID]:
-        normalizedMonitor[ConfigKey.CUSTOM_HEARTBEAT_ID] || previousMonitor.id,
-      [ConfigKey.CONFIG_ID]: previousMonitor.id,
-    };
+    const monitorWithId = await refreshInlineZip(normalizedMonitor, previousMonitor, server);
     const formattedMonitor = formatSecrets(monitorWithId);
 
     const editedSOPromise = savedObjectsClient.update<MonitorFields>(
