@@ -195,7 +195,10 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     playwright_options: rawPlaywrightOptions,
     ...rawConfig
   } = flattenedConfig;
-  if (Object.keys(flattenedConfig).some((key) => key.startsWith('ssl.'))) {
+  if (
+    Object.keys(flattenedConfig).some((key) => key.startsWith('ssl.')) &&
+    monitor.origin !== 'project'
+  ) {
     rawConfig[ConfigKey.METADATA] = {
       is_tls_enabled: true,
       ...((flattenedConfig[ConfigKey.METADATA] as any) ?? {}),
