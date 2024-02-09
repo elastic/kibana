@@ -406,7 +406,7 @@ describe('ApmConfiguration', () => {
     });
   });
 
-  describe('redactUsers', () => {
+  describe('isUsersRedactionEnabled', () => {
     it('defaults to true', () => {
       const kibanaConfig = {
         elastic: {
@@ -415,7 +415,7 @@ describe('ApmConfiguration', () => {
       };
 
       const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-      expect(config.redactUsers()).toEqual(true);
+      expect(config.isUsersRedactionEnabled()).toEqual(true);
     });
 
     it('uses the value defined in the config if specified', () => {
@@ -428,7 +428,7 @@ describe('ApmConfiguration', () => {
       };
 
       const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
-      expect(config.redactUsers()).toEqual(false);
+      expect(config.isUsersRedactionEnabled()).toEqual(false);
     });
   });
 });
