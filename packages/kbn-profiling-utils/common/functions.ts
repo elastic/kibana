@@ -24,6 +24,7 @@ import {
   emptyStackFrame,
   emptyStackTrace,
 } from '..';
+import { isErrorFrame } from './profiling';
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
@@ -105,8 +106,7 @@ export function createTopNFunctions({
 
     // Error frames only appear as first frame in a stacktrace.
     const start =
-      // eslint-disable-next-line no-bitwise
-      !showErrorFrames && lenStackTrace > 0 && (stackTrace.Types[0] & 0x80) !== 0 ? 1 : 0;
+      !showErrorFrames && lenStackTrace > 0 && isErrorFrame(stackTrace.Types[0]) ? 1 : 0;
 
     for (let i = start; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];

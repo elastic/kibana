@@ -8,7 +8,7 @@
 
 import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
-import { createStackFrameMetadata, getCalleeLabel } from './profiling';
+import {createStackFrameMetadata, getCalleeLabel, isErrorFrame} from './profiling';
 import { convertTonsToKgs } from './utils';
 
 /**
@@ -94,8 +94,7 @@ export function createFlameGraph(
     // Error frames only have a single child node.
     for (let i = 0; i < base.Edges[0].length; i++) {
       const childNodeID = base.Edges[0][i];
-      // eslint-disable-next-line no-bitwise
-      if ((base.FrameType[childNodeID] & 0x80) !== 0) {
+      if (isErrorFrame(base.FrameType[childNodeID])) {
         base.Edges[0][i] = base.Edges[childNodeID][0];
       }
     }
