@@ -4,8 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
+import { Query } from '@kbn/es-query';
 import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -43,8 +46,8 @@ interface ChartOptions {
 
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
+  searchConfiguration: SerializedSearchSourceFields;
   dataView?: DataView;
-  filterQuery?: string;
   groupBy?: string | string[];
   error?: IErrorObject;
   timeRange: TimeRange;
@@ -52,10 +55,15 @@ interface RuleConditionChartProps {
   chartOptions?: ChartOptions;
 }
 
+const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
+};
+
 export function RuleConditionChart({
   metricExpression,
+  searchConfiguration,
   dataView,
-  filterQuery,
   groupBy,
   error,
   annotations,
@@ -288,7 +296,7 @@ export function RuleConditionChart({
     comparator,
     dataView,
     equation,
-    filterQuery,
+    searchConfiguration,
     formula,
     formulaAsync.value,
     groupBy,
@@ -343,10 +351,8 @@ export function RuleConditionChart({
         timeRange={timeRange}
         attributes={attributes}
         disableTriggers={true}
-        query={{
-          language: 'kuery',
-          query: filterQuery || '',
-        }}
+        query={(searchConfiguration.query as Query) || defaultQuery}
+        filters={searchConfiguration.filter}
       />
     </div>
   );

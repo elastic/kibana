@@ -31,7 +31,6 @@ Array [
       "seriesType": "bar_stacked",
     },
     "dataView": undefined,
-    "filterQuery": "",
     "groupBy": Array [
       "host.hostname",
     ],
@@ -48,6 +47,13 @@ Array [
       ],
       "timeSize": 15,
       "timeUnit": "m",
+    },
+    "searchConfiguration": Object {
+      "index": "mockedIndex",
+      "query": Object {
+        "language": "kuery",
+        "query": "host.hostname: Users-System.local and service.type: system",
+      },
     },
     "timeRange": Object {
       "from": "2023-03-28T10:43:13.802Z",

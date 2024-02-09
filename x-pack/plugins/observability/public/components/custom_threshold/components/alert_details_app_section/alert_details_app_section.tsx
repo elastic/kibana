@@ -6,7 +6,6 @@
  */
 
 import chroma from 'chroma-js';
-import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
@@ -50,7 +49,6 @@ import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import { getFilterQuery } from './helpers/get_filter_query';
 import { CustomThresholdRule, CustomThresholdAlert } from './types';
 
 interface AppSectionProps {
@@ -111,7 +109,6 @@ export default function AlertDetailsAppSection({
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
-  const [filterQuery, setFilterQuery] = useState<string>('');
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
@@ -198,11 +195,6 @@ export default function AlertDetailsAppSection({
   }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   useEffect(() => {
-    const query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
-    setFilterQuery(getFilterQuery(query, groups));
-  }, [groups, ruleParams.searchConfiguration]);
-
-  useEffect(() => {
     const initDataView = async () => {
       const ruleSearchConfiguration = ruleParams.searchConfiguration;
       try {
@@ -264,7 +256,7 @@ export default function AlertDetailsAppSection({
                 <RuleConditionChart
                   metricExpression={criterion}
                   dataView={dataView}
-                  filterQuery={filterQuery}
+                  searchConfiguration={ruleParams.searchConfiguration}
                   groupBy={ruleParams.groupBy}
                   annotations={annotations}
                   timeRange={timeRange}
