@@ -261,8 +261,7 @@ export type AppDeepLink<Id extends string = string> = {
   /** Optional keywords to match with in deep links search. Omit if this part of the hierarchy does not have a page URL. */
   keywords?: string[];
   /**
-   * Optional list of locations where the deepLink is visible. By default the deepLink is not visible anywhere and can
-   * only be used to navigate to it.
+   * Optional list of locations where the deepLink is visible. By default the deepLink is visible in "globalSearch".
    */
   visibleIn?: AppDeepLinkLocations[];
   /**

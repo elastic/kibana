@@ -195,7 +195,7 @@ export class Plugin
       }),
       order: 8001,
       path: ALERTS_PATH,
-      visibleInSideNavigation: false,
+      visibleIn: [],
       deepLinks: [
         {
           id: 'rules',
@@ -203,7 +203,7 @@ export class Plugin
             defaultMessage: 'Rules',
           }),
           path: RULES_PATH,
-          visibleInSideNavigation: false,
+          visibleIn: [],
         },
       ],
     },
@@ -212,7 +212,7 @@ export class Plugin
       title: i18n.translate('xpack.observability.slosLinkTitle', {
         defaultMessage: 'SLOs',
       }),
-      visibleInSideNavigation: false,
+      visibleIn: [],
       order: 8002,
       path: SLOS_PATH,
     },
@@ -221,15 +221,13 @@ export class Plugin
       extend: {
         [CasesDeepLinkId.cases]: {
           order: 8003,
-          visibleInSideNavigation: false,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesCreate]: {
-          visibleInSideNavigation: false,
-          searchable: false,
+          visibleIn: [],
         },
         [CasesDeepLinkId.casesConfigure]: {
-          visibleInSideNavigation: false,
-          searchable: false,
+          visibleIn: [],
         },
       },
     }),
@@ -314,7 +312,7 @@ export class Plugin
         'user',
         'experience',
       ],
-      searchable: !Boolean(pluginsSetup.serverless),
+      visibleIn: Boolean(pluginsSetup.serverless) ? ['globalSearch'] : [],
     };
 
     coreSetup.application.register(app);
@@ -415,7 +413,7 @@ export class Plugin
           //
           // See https://github.com/elastic/kibana/issues/103325.
           const otherLinks: NavigationEntry[] = deepLinks
-            .filter((link) => link.visibleInSideNavigation === true)
+            .filter((link) => (link.visibleIn ?? []).length > 0)
             .map((link) => ({
               app: observabilityAppId,
               label: link.title,

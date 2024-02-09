@@ -12,6 +12,7 @@ import {
   type AppDeepLink,
   DEFAULT_APP_CATEGORIES,
   PluginInitializerContext,
+  AppDeepLinkLocations,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/public';
@@ -248,6 +249,8 @@ export class Plugin implements InfraClientPluginClass {
       hostsEnabled: boolean;
       metricsExplorerEnabled: boolean;
     }): AppDeepLink[] => {
+      const visibleIn: AppDeepLinkLocations[] = this.isServerlessEnv ? ['globalSearch'] : [];
+
       return [
         {
           id: 'inventory',
@@ -255,6 +258,7 @@ export class Plugin implements InfraClientPluginClass {
             defaultMessage: 'Inventory',
           }),
           path: '/inventory',
+          visibleIn,
         },
         ...(hostsEnabled
           ? [
@@ -264,6 +268,7 @@ export class Plugin implements InfraClientPluginClass {
                   defaultMessage: 'Hosts',
                 }),
                 path: '/hosts',
+                visibleIn,
               },
             ]
           : []),
@@ -323,6 +328,7 @@ export class Plugin implements InfraClientPluginClass {
       id: 'infra',
       appRoute: '/app/infra',
       title: 'infra',
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const { renderApp } = await import('./apps/legacy_app');
 
