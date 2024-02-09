@@ -258,29 +258,5 @@ export async function createChatService({
         shareReplay()
       );
     },
-    async getContextualSuggestions({
-      connectorId,
-      conversationId,
-      signal,
-    }: {
-      connectorId: string;
-      conversationId: string;
-      signal: AbortSignal;
-    }) {
-      return await client(
-        'POST /internal/observability_ai_assistant/conversation/{conversationId}/suggestions',
-        {
-          params: {
-            path: {
-              conversationId,
-            },
-            body: {
-              connectorId,
-            },
-          },
-          signal,
-        }
-      );
-    },
   };
 }

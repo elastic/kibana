@@ -790,36 +790,4 @@ export class ObservabilityAIAssistantClient {
   clearChatContext = () => {
     this.chatContext = {};
   };
-
-  getContextualSuggestions = async ({
-    connectorId,
-    conversationId,
-    signal,
-  }: {
-    connectorId: string;
-    conversationId: string;
-    signal: AbortSignal;
-  }) => {
-    const conversation = await this.get(conversationId);
-
-    const response$ = await this.chat('generate_suggestions', {
-      messages: [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.User,
-            content: conversation.messages.slice(1).reduce((acc, curr) => {
-              return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is a conversation between you and the user. On the basis of this conversation, suggest four things the user can do now. Phrase the suggestions like the user is asking you a follow up question. Return suggestions as an unordered list. Do not use quotes. Here is the content:'),
-          },
-        },
-      ],
-      connectorId,
-      signal,
-    });
-
-    const response = await lastValueFrom(response$.pipe(concatenateChatCompletionChunks()));
-
-    return response.message?.content || '';
-  };
 }

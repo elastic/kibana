@@ -119,11 +119,7 @@ describe('Welcome Message', () => {
   describe('when no connectors are available', () => {
     it('should show a disclaimer', () => {
       const { getByTestId } = render(
-        <WelcomeMessage
-          connectors={emptyConnectors}
-          knowledgeBase={emptyKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
       );
 
       expect(getByTestId('observabilityAiAssistantDisclaimer')).toBeInTheDocument();
@@ -131,11 +127,7 @@ describe('Welcome Message', () => {
 
     it('should show a set up connector button', () => {
       const { getByTestId } = render(
-        <WelcomeMessage
-          connectors={emptyConnectors}
-          knowledgeBase={emptyKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
       );
 
       expect(
@@ -146,11 +138,7 @@ describe('Welcome Message', () => {
     describe('when no triggersactionsUi capabilities are available', () => {
       it('should navigate to stack management', () => {
         const { getByTestId } = render(
-          <WelcomeMessage
-            connectors={emptyConnectors}
-            knowledgeBase={emptyKnowledgeBase}
-            onSelectSuggestion={() => {}}
-          />
+          <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
         );
 
         fireEvent.click(
@@ -192,11 +180,7 @@ describe('Welcome Message', () => {
 
       it('should render a connector flyout when clicking the set up connector button', () => {
         const { getByTestId } = render(
-          <WelcomeMessage
-            connectors={emptyConnectors}
-            knowledgeBase={emptyKnowledgeBase}
-            onSelectSuggestion={() => {}}
-          />
+          <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
         );
 
         fireEvent.click(
@@ -235,11 +219,7 @@ describe('Welcome Message', () => {
   describe('when connectors are available', () => {
     it('should show a disclaimer', () => {
       const { getByTestId } = render(
-        <WelcomeMessage
-          connectors={filledConnectors}
-          knowledgeBase={emptyKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={filledConnectors} knowledgeBase={emptyKnowledgeBase} />
       );
 
       expect(getByTestId('observabilityAiAssistantDisclaimer')).toBeInTheDocument();
@@ -248,11 +228,7 @@ describe('Welcome Message', () => {
     describe('when knowledge base is not installed', () => {
       it('should render the retry and inspect errors buttons', () => {
         const { getByTestId } = render(
-          <WelcomeMessage
-            connectors={filledConnectors}
-            knowledgeBase={emptyKnowledgeBase}
-            onSelectSuggestion={() => {}}
-          />
+          <WelcomeMessage connectors={filledConnectors} knowledgeBase={emptyKnowledgeBase} />
         );
 
         expect(
@@ -266,11 +242,7 @@ describe('Welcome Message', () => {
 
       it('should call kb install when clicking retry', async () => {
         const { getByTestId } = render(
-          <WelcomeMessage
-            connectors={filledConnectors}
-            knowledgeBase={emptyKnowledgeBase}
-            onSelectSuggestion={() => {}}
-          />
+          <WelcomeMessage connectors={filledConnectors} knowledgeBase={emptyKnowledgeBase} />
         );
 
         await act(async () => {
@@ -283,11 +255,7 @@ describe('Welcome Message', () => {
 
       it('should render a popover with installation errors when clicking inspect', async () => {
         const { getByTestId } = render(
-          <WelcomeMessage
-            connectors={filledConnectors}
-            knowledgeBase={emptyKnowledgeBase}
-            onSelectSuggestion={() => {}}
-          />
+          <WelcomeMessage connectors={filledConnectors} knowledgeBase={emptyKnowledgeBase} />
         );
 
         fireEvent.click(getByTestId('observabilityAiAssistantWelcomeMessageInspectErrorsButton'));
@@ -311,11 +279,7 @@ describe('Welcome Message', () => {
 
       it('should navigate to ML when clicking the link in the error popover', async () => {
         const { getByTestId } = render(
-          <WelcomeMessage
-            connectors={filledConnectors}
-            knowledgeBase={emptyKnowledgeBase}
-            onSelectSuggestion={() => {}}
-          />
+          <WelcomeMessage connectors={filledConnectors} knowledgeBase={emptyKnowledgeBase} />
         );
 
         fireEvent.click(getByTestId('observabilityAiAssistantWelcomeMessageInspectErrorsButton'));
@@ -332,11 +296,7 @@ describe('Welcome Message', () => {
   describe('when knowledge base is installing', () => {
     it('should not show a failure message', () => {
       const { queryByTestId } = render(
-        <WelcomeMessage
-          connectors={filledConnectors}
-          knowledgeBase={installingKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={filledConnectors} knowledgeBase={installingKnowledgeBase} />
       );
 
       expect(
@@ -350,11 +310,7 @@ describe('Welcome Message', () => {
 
     it('should show a disclaimer', () => {
       const { getByTestId } = render(
-        <WelcomeMessage
-          connectors={emptyConnectors}
-          knowledgeBase={emptyKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
       );
 
       expect(getByTestId('observabilityAiAssistantDisclaimer')).toBeInTheDocument();
@@ -364,11 +320,7 @@ describe('Welcome Message', () => {
   describe('when knowledge base is loading', () => {
     it('should not show a failure message', () => {
       const { queryByTestId } = render(
-        <WelcomeMessage
-          connectors={filledConnectors}
-          knowledgeBase={loadingKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={filledConnectors} knowledgeBase={loadingKnowledgeBase} />
       );
 
       expect(
@@ -382,11 +334,7 @@ describe('Welcome Message', () => {
 
     it('should show a disclaimer', () => {
       const { getByTestId } = render(
-        <WelcomeMessage
-          connectors={emptyConnectors}
-          knowledgeBase={emptyKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
       );
 
       expect(getByTestId('observabilityAiAssistantDisclaimer')).toBeInTheDocument();
@@ -396,11 +344,7 @@ describe('Welcome Message', () => {
   describe('when knowledge base is installed', () => {
     it('should not show a failure message', () => {
       const { queryByTestId } = render(
-        <WelcomeMessage
-          connectors={filledConnectors}
-          knowledgeBase={installedKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={filledConnectors} knowledgeBase={installedKnowledgeBase} />
       );
 
       expect(
@@ -414,11 +358,7 @@ describe('Welcome Message', () => {
 
     it('should show a disclaimer', () => {
       const { getByTestId } = render(
-        <WelcomeMessage
-          connectors={emptyConnectors}
-          knowledgeBase={emptyKnowledgeBase}
-          onSelectSuggestion={() => {}}
-        />
+        <WelcomeMessage connectors={emptyConnectors} knowledgeBase={emptyKnowledgeBase} />
       );
 
       expect(getByTestId('observabilityAiAssistantDisclaimer')).toBeInTheDocument();

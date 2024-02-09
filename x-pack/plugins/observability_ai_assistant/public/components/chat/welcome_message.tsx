@@ -25,8 +25,6 @@ import { Disclaimer } from './disclaimer';
 import { WelcomeMessageConnectors } from './welcome_message_connectors';
 import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import { useKibana } from '../../hooks/use_kibana';
-import { Suggestions } from '../suggestions/suggestions';
-import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -40,15 +38,10 @@ const centerMaxWidthClassName = css`
 export function WelcomeMessage({
   connectors,
   knowledgeBase,
-  onSelectSuggestion,
 }: {
   connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  onSelectSuggestion: ({ prompt }: { prompt: string }) => void;
 }) {
-  const service = useObservabilityAIAssistant();
-
-  const suggestions = service.getStarterSuggestions();
   const breakpoint = useCurrentEuiBreakpoint();
 
   const {
@@ -97,13 +90,13 @@ export function WelcomeMessage({
 
           <EuiImage
             src={ctaImage}
-            alt="Elastic AI Assistant for Observability"
-            size={breakpoint === 'xl' ? 200 : 100}
+            alt="Elastic AI Assistant"
+            size={breakpoint === 'xl' ? 300 : 'm'}
           />
 
           <EuiSpacer size="m" />
 
-          <EuiTitle size="s">
+          <EuiTitle size={breakpoint === 'xl' ? 'm' : 'l' ? 'm' : 's'}>
             <h2>
               {i18n.translate('xpack.observabilityAiAssistant.disclaimer.title', {
                 defaultMessage: 'Welcome to the AI Assistant for Observability',
@@ -119,12 +112,6 @@ export function WelcomeMessage({
           />
 
           <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
-
-          <EuiSpacer size="m" />
-        </EuiFlexItem>
-
-        <EuiFlexItem grow={false}>
-          <Suggestions suggestions={suggestions} isLoading={false} onSelect={onSelectSuggestion} />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

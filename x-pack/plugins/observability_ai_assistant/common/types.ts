@@ -133,8 +133,3 @@ export interface ChatContext {
     description: string;
   };
 }
-
-export interface Suggestion {
-  app?: string;
-  prompt: string;
-}

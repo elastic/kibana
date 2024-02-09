@@ -40,7 +40,6 @@ import type {
   FunctionResponse,
   Message,
   PendingMessage,
-  Suggestion,
 } from '../common/types';
 import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
@@ -73,11 +72,6 @@ export interface ObservabilityAIAssistantChatService {
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
-  getContextualSuggestions: (options: {
-    connectorId: string;
-    conversationId: string;
-    signal: AbortSignal;
-  }) => Promise<Suggestion[]>;
   hasFunction: (name: string) => boolean;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
@@ -95,10 +89,8 @@ export interface ObservabilityAIAssistantService {
   getCurrentUser: () => Promise<AuthenticatedUser>;
   getLicense: () => Observable<ILicense>;
   getLicenseManagementLocator: () => SharePluginStart;
-  getStarterSuggestions: () => Suggestion[];
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
-  registerStarterSuggestions: (suggestion: Suggestion[]) => void;
   setChatContext: (newChatContext: ChatContext) => void;
   getChatContext: () => ChatContext;
 }

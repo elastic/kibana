@@ -11,7 +11,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
-import type { ChatContext, Suggestion } from '../../common/types';
+import type { ChatContext } from '../../common/types';
 
 export function createService({
   analytics,
@@ -31,7 +31,6 @@ export function createService({
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
   const registrations: ChatRegistrationRenderFunction[] = [];
-  const suggestions: Suggestion[] = [];
 
   let chatContext: ChatContext = {};
 
@@ -42,9 +41,6 @@ export function createService({
     register: (fn) => {
       registrations.push(fn);
     },
-    registerStarterSuggestions(newSuggestions: Suggestion[]) {
-      suggestions.push(...newSuggestions);
-    },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
       return await mod.createChatService({ analytics, client, signal, registrations });
@@ -53,7 +49,6 @@ export function createService({
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
     getLicense: () => licenseStart.license$,
     getLicenseManagementLocator: () => shareStart,
-    getStarterSuggestions: () => suggestions,
     setChatContext: (newChatContext: ChatContext) => {
       chatContext = {
         ...chatContext,

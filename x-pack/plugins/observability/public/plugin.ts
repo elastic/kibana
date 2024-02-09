@@ -458,11 +458,6 @@ export class Plugin
       );
     });
 
-    pluginsStart.observabilityAIAssistant.service.registerStarterSuggestions([
-      { app: 'observability', prompt: 'How are my alerts doing?' },
-      { app: 'observability', prompt: 'Can you help me set up an SLO?' },
-    ]);
-
     pluginsStart.observabilityShared.updateGlobalNavigation({
       capabilities: application.capabilities,
       deepLinks: this.deepLinks,
