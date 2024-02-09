@@ -23,7 +23,7 @@ export class ToastsService extends FtrService {
    *
    * @param index The index of the toast (1-based, NOT 0-based!) of the toast. Use first by default.
    * @param titleOnly If this is true, only the title of the error message is returned. There are error messages that only contain a title, no message.
-   * @returns The title and message of the specified error toast.https://github.com/elastic/kibana/issues/17087
+   * @returns The title and message of the specified error toast.
    */
   public async getErrorToastByIndex(
     index: number = 1,
