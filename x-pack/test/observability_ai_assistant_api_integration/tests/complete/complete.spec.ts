@@ -104,7 +104,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       const chunk = JSON.stringify(createOpenAiChunk('Hello'));
 
       await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
-      await simulator.rawWrite(`${chunk.substring(10)}\n`);
+      await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
@@ -146,15 +146,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const titleInterceptor = proxy.intercept(
           'title',
           (body) =>
-            (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).messages
-              .length === 1
+            (
+              JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+            ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
         );
 
         const conversationInterceptor = proxy.intercept(
           'conversation',
           (body) =>
-            (JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming).messages
-              .length !== 1
+            (
+              JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+            ).functions?.find((fn) => fn.name === 'title_conversation') === undefined
         );
 
         const responsePromise = new Promise<Response>((resolve, reject) => {

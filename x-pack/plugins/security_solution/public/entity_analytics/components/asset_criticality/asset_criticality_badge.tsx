@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { CRITICALITY_LEVEL_TITLE, CRITICALITY_LEVEL_DESCRIPTION } from './translations';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
-const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
+export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
   very_important: '#E7664C',
   important: '#D6BF57',
   normal: '#54B399',
@@ -73,7 +73,7 @@ export const AssetCriticalityBadgeAllowMissing: React.FC<{
     <EuiHealth color="subdued" data-test-subj={dataTestSubj}>
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
-        defaultMessage="No criticality assigned"
+        defaultMessage="Criticality Unassigned"
       />
     </EuiHealth>
   );
