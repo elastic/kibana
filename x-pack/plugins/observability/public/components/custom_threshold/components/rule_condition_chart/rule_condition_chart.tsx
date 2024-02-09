@@ -8,7 +8,7 @@
 import React, { useState, useEffect } from 'react';
 import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { Query } from '@kbn/es-query';
+import { Query, Filter } from '@kbn/es-query';
 import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -53,6 +53,7 @@ interface RuleConditionChartProps {
   timeRange: TimeRange;
   annotations?: EventAnnotationConfig[];
   chartOptions?: ChartOptions;
+  additionalFilters?: Filter[];
 }
 
 const defaultQuery: Query = {
@@ -69,6 +70,7 @@ export function RuleConditionChart({
   annotations,
   timeRange,
   chartOptions: { seriesType, interval } = {},
+  additionalFilters = [],
 }: RuleConditionChartProps) {
   const {
     services: { lens },
@@ -81,6 +83,7 @@ export function RuleConditionChart({
   const [thresholdReferenceLine, setThresholdReferenceLine] = useState<XYReferenceLinesLayer[]>();
   const [alertAnnotation, setAlertAnnotation] = useState<XYByValueAnnotationsLayer>();
   const [chartLoading, setChartLoading] = useState<boolean>(false);
+  const filters = [...(searchConfiguration.filter || []), ...additionalFilters];
   const formulaAsync = useAsync(() => {
     return lens.stateHelperApi();
   }, [lens]);
@@ -342,6 +345,8 @@ export function RuleConditionChart({
       </div>
     );
   }
+  console.log('additionalFilters:', additionalFilters);
+  console.log('filters:', filters);
   return (
     <div>
       <lens.EmbeddableComponent
@@ -352,7 +357,7 @@ export function RuleConditionChart({
         attributes={attributes}
         disableTriggers={true}
         query={(searchConfiguration.query as Query) || defaultQuery}
-        filters={searchConfiguration.filter}
+        filters={filters}
       />
     </div>
   );

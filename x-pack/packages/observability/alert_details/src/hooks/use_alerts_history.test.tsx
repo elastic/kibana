@@ -176,7 +176,7 @@ describe('useAlertsHistory', () => {
           featureIds: [AlertConsumers.APM],
           ruleId,
           dateRange: { from: start, to: end },
-          termQueries: [
+          queries: [
             {
               term: {
                 'kibana.alert.group.value': {

@@ -6,7 +6,7 @@
  */
 
 import { type HttpSetup } from '@kbn/core/public';
-import { Field, FieldValue, QueryDslTermQuery } from '@elastic/elasticsearch/lib/api/types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
@@ -27,7 +27,7 @@ export interface Props {
     from: string;
     to: string;
   };
-  termQueries?: TermQuery[];
+  queries?: QueryDslQueryContainer[];
 }
 
 interface FetchAlertsHistory {
@@ -52,7 +52,7 @@ export function useAlertsHistory({
   ruleId,
   dateRange,
   http,
-  termQueries,
+  queries,
 }: Props): UseAlertsHistory {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
@@ -66,7 +66,7 @@ export function useAlertsHistory({
         ruleId,
         dateRange,
         signal,
-        termQueries,
+        queries,
       });
     },
     refetchOnWindowFocus: false,
@@ -96,16 +96,14 @@ interface AggsESResponse {
     };
   };
 }
-interface TermQuery {
-  term?: Partial<Record<Field, QueryDslTermQuery | FieldValue>>;
-}
+
 export async function fetchTriggeredAlertsHistory({
   featureIds,
   http,
   ruleId,
   dateRange,
   signal,
-  termQueries = [],
+  queries = [],
 }: {
   featureIds: ValidFeatureId[];
   http: HttpSetup;
@@ -115,7 +113,7 @@ export async function fetchTriggeredAlertsHistory({
     to: string;
   };
   signal?: AbortSignal;
-  termQueries?: TermQuery[];
+  queries?: QueryDslQueryContainer[];
 }): Promise<FetchAlertsHistory> {
   try {
     const responseES = await http.post<AggsESResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -131,7 +129,7 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
-              ...termQueries,
+              ...queries,
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,

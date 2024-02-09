@@ -45,11 +45,12 @@ import { AlertSummaryField } from '../../../..';
 import { AlertParams, MetricExpression } from '../../types';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
+import { getGroupFilters } from '../helpers/get_group';
+import { CustomThresholdRule, CustomThresholdAlert } from '../types';
 import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import { CustomThresholdRule, CustomThresholdAlert } from './types';
 
 interface AppSectionProps {
   alert: CustomThresholdAlert;
@@ -254,17 +255,18 @@ export default function AlertDetailsAppSection({
               </EuiFlexItem>
               <EuiFlexItem grow={5}>
                 <RuleConditionChart
-                  metricExpression={criterion}
-                  dataView={dataView}
-                  searchConfiguration={ruleParams.searchConfiguration}
-                  groupBy={ruleParams.groupBy}
+                  additionalFilters={getGroupFilters(groups)}
                   annotations={annotations}
-                  timeRange={timeRange}
                   chartOptions={{
                     // For alert details page, the series type needs to be changed to 'bar_stacked'
                     // due to https://github.com/elastic/elastic-charts/issues/2323
                     seriesType: 'bar_stacked',
                   }}
+                  dataView={dataView}
+                  groupBy={ruleParams.groupBy}
+                  metricExpression={criterion}
+                  searchConfiguration={ruleParams.searchConfiguration}
+                  timeRange={timeRange}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

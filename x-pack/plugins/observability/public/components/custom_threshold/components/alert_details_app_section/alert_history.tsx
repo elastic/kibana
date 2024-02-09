@@ -9,7 +9,6 @@ import moment from 'moment';
 import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { Query } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import {
@@ -28,9 +27,9 @@ import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { convertTo } from '../../../../../common/utils/formatters';
 import { useKibana } from '../../../../utils/kibana_react';
 import { AlertParams } from '../../types';
+import { getGroupFilters, getGroupQueries } from '../helpers/get_group';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import { getFilterQuery } from './helpers/get_filter_query';
-import { CustomThresholdAlert, CustomThresholdRule } from './types';
+import { CustomThresholdAlert, CustomThresholdRule } from '../types';
 
 const DEFAULT_INTERVAL = '1d';
 const SERIES_TYPE = 'bar_stacked';
@@ -51,16 +50,8 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   const { euiTheme } = useEuiTheme();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const criterion = rule.params.criteria[0];
-  const groups: Array<{ field: string; value: string }> = alert.fields[ALERT_GROUP] || [];
+  const groups = alert.fields[ALERT_GROUP];
   const featureIds = [rule.consumer as AlertConsumers];
-  const query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
-  const termQueries = groups.map((group) => ({
-    term: {
-      [ALERT_GROUP_VALUE]: {
-        value: group.value,
-      },
-    },
-  }));
 
   const {
     data: { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts },
@@ -71,7 +62,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
     featureIds,
     ruleId: rule.id,
     dateRange,
-    termQueries,
+    queries: getGroupQueries(groups, ALERT_GROUP_VALUE),
   });
 
   // Only show alert history chart if there is only one condition
@@ -189,18 +180,19 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <RuleConditionChart
-        metricExpression={criterion}
-        dataView={dataView}
-        filterQuery={getFilterQuery(query, groups)}
-        groupBy={ruleParams.groupBy}
+        additionalFilters={getGroupFilters(groups)}
         annotations={annotations}
-        timeRange={dateRange}
         chartOptions={{
           // For alert details page, the series type needs to be changed to 'bar_stacked'
           // due to https://github.com/elastic/elastic-charts/issues/2323
           seriesType: SERIES_TYPE,
           interval: DEFAULT_INTERVAL,
         }}
+        dataView={dataView}
+        groupBy={ruleParams.groupBy}
+        metricExpression={criterion}
+        searchConfiguration={ruleParams.searchConfiguration}
+        timeRange={dateRange}
       />
     </EuiPanel>
   );
