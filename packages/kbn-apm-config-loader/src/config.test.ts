@@ -405,4 +405,30 @@ describe('ApmConfiguration', () => {
       );
     });
   });
+
+  describe('redactUsers', () => {
+    it('defaults to true', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {},
+        },
+      };
+
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      expect(config.redactUsers()).toEqual(true);
+    });
+
+    it('uses the value defined in the config if specified', () => {
+      const kibanaConfig = {
+        elastic: {
+          apm: {
+            redactUsers: false,
+          },
+        },
+      };
+
+      const config = new ApmConfiguration(mockedRootDir, kibanaConfig, false);
+      expect(config.redactUsers()).toEqual(false);
+    });
+  });
 });
