@@ -7,10 +7,11 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
+import { getDatasetQuery, getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import {
   DataStreamDetails,
   DataStreamStatServiceResponse,
+  GetDataStreamsStatsQuery,
 } from '../../../../common/data_streams_stats';
 import { DataStreamType } from '../../../../common/types';
 import { dataStreamPartsToIndexName } from '../../../../common/utils';
@@ -89,6 +90,10 @@ export const createPureDatasetQualityControllerStateMachine = (
             UPDATE_INTEGRATIONS: {
               target: 'datasets.loaded',
               actions: ['storeIntegrations'],
+            },
+            UPDATE_QUERY: {
+              target: 'datasets.loaded',
+              actions: ['storeQuery'],
             },
           },
         },
@@ -217,6 +222,16 @@ export const createPureDatasetQualityControllerStateMachine = (
               }
             : {};
         }),
+        storeQuery: assign((context, event) => {
+          return 'query' in event
+            ? {
+                filters: {
+                  ...context.filters,
+                  query: event.query,
+                },
+              }
+            : {};
+        }),
         storeFlyoutOptions: assign((context, event) => {
           return 'dataset' in event
             ? {
@@ -290,11 +305,17 @@ export const createDatasetQualityControllerStateMachine = ({
         fetchDatasetDetailsFailedNotifier(toasts, event.data),
     },
     services: {
-      loadDataStreamStats: (_context) => dataStreamStatsClient.getDataStreamsStats(),
+      loadDataStreamStats: (context) =>
+        dataStreamStatsClient.getDataStreamsStats({
+          type: context.type as GetDataStreamsStatsQuery['type'],
+          /* datasetQuery: getDatasetQuery(context.filters.query), */
+        }),
       loadDegradedDocs: (context) => {
         const { start, end } = getDateRange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
+          type: context.type as GetDataStreamsStatsQuery['type'],
+          /* datasetQuery: getDatasetQuery(context.filters.query), */
           start,
           end,
         });

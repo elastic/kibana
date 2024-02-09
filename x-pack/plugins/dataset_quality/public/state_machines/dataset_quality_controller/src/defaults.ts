@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { DEFAULT_SORT_DIRECTION, DEFAULT_SORT_FIELD } from '../../../../common/constants';
+import {
+  DEFAULT_DATASET_TYPE,
+  DEFAULT_SORT_DIRECTION,
+  DEFAULT_SORT_FIELD,
+} from '../../../../common/constants';
 import { DefaultDatasetQualityControllerState } from './types';
 
 const ONE_MINUTE_IN_MS = 60000;
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
+  type: DEFAULT_DATASET_TYPE,
   table: {
     page: 0,
     rowsPerPage: 10,
@@ -31,6 +36,7 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       },
     },
     integrations: [],
+    query: '',
   },
   flyout: {},
   datasets: [],

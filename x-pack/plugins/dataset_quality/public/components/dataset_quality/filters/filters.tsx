@@ -12,6 +12,7 @@ import { TimePickerQuickRange } from '@kbn/observability-shared-plugin/public/ho
 import React, { useMemo } from 'react';
 import { useDatasetQualityFilters } from '../../../hooks/use_dataset_quality_filters';
 import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { FilterBar } from './filter_bar';
 import { IntegrationsSelector } from './integrations_selector';
 
 // Allow for lazy loading
@@ -25,6 +26,7 @@ export default function Filters() {
     isLoadingIntegrations,
     integrations,
     onIntegrationsChange,
+    onQueryChange,
   } = useDatasetQualityFilters();
 
   const {
@@ -47,6 +49,9 @@ export default function Filters() {
 
   return (
     <EuiFlexGroup gutterSize="s">
+      <EuiFlexItem>
+        <FilterBar query={''} onQueryChange={onQueryChange} />
+      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <IntegrationsSelector
           isLoading={isLoadingIntegrations}

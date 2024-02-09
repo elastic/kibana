@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-export * from './filter_inactive_datasets';
-export * from './get_dataset_query';
-export * from './get_date_range';
-export * from './merge_degraded_docs_into_datastreams';
-export * from './use_kibana';
+import { Query } from '@kbn/es-query';
+
+export function getDatasetQuery(query: Query['query']) {
+  if (typeof query === 'string') {
+    return query;
+  }
+
+  console.log(query);
+
+  return `${query.data_stream?.dataset}-${query.data_stream?.namespace}`;
+}

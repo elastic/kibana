@@ -6,6 +6,7 @@
  */
 
 import { OnRefreshChangeProps } from '@elastic/eui';
+import { Query } from '@kbn/es-query';
 import { useSelector } from '@xstate/react';
 import { useCallback, useMemo } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
@@ -83,6 +84,16 @@ export const useDatasetQualityFilters = () => {
     [service]
   );
 
+  const onQueryChange = useCallback(
+    (query: Query['query']) => {
+      service.send({
+        type: 'UPDATE_QUERY',
+        query,
+      });
+    },
+    [service]
+  );
+
   return {
     timeRange,
     onTimeChange,
@@ -91,5 +102,6 @@ export const useDatasetQualityFilters = () => {
     integrations: integrationItems,
     onIntegrationsChange,
     isLoadingIntegrations,
+    onQueryChange,
   };
 };
