@@ -17,6 +17,7 @@ import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/co
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { DEFAULT_FILTER_OPTIONS } from '../../containers/constants';
+import type { CasesTableFiltersProps } from './table_filters';
 import { CasesTableFilters } from './table_filters';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
@@ -35,7 +36,7 @@ const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 
 const onFilterChanged = jest.fn();
 
-const props = {
+const props: CasesTableFiltersProps = {
   countClosedCases: 1234,
   countOpenCases: 99,
   countInProgressCases: 54,
@@ -43,7 +44,6 @@ const props = {
   filterOptions: DEFAULT_FILTER_OPTIONS,
   availableSolutions: [],
   isLoading: false,
-  initialFilterOptions: DEFAULT_FILTER_OPTIONS,
   currentUserProfile: undefined,
 };
 
@@ -183,7 +183,29 @@ describe('CasesTableFilters ', () => {
 
     userEvent.type(screen.getByTestId('search-cases'), 'My search{enter}');
 
-    expect(onFilterChanged).toBeCalledWith({ search: 'My search' });
+    await waitFor(() => {
+      expect(onFilterChanged.mock.calls[0][0].search).toEqual('My search');
+    });
+  });
+
+  it('should change the initial value of search when the state changes', async () => {
+    const { rerender } = appMockRender.render(
+      <CasesTableFilters
+        {...props}
+        filterOptions={{ ...props.filterOptions, search: 'My search' }}
+      />
+    );
+
+    await screen.findByDisplayValue('My search');
+
+    rerender(
+      <CasesTableFilters
+        {...props}
+        filterOptions={{ ...props.filterOptions, search: 'My new search' }}
+      />
+    );
+
+    await screen.findByDisplayValue('My new search');
   });
 
   it('should call onFilterChange when changing status', async () => {
