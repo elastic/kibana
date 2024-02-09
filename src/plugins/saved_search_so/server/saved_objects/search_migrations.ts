@@ -175,13 +175,19 @@ export const getAllMigrations = ({
   lensEmbeddableFactory,
 }: {
   searchSourceMigrations: MigrateFunctionsObject;
-  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'];
+  lensEmbeddableFactory: LensServerPluginSetup['lensEmbeddableFactory'] | undefined;
 }): SavedObjectMigrationMap => {
+  const mainMigrations = mergeSavedObjectMigrationMaps(
+    searchMigrations,
+    getSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
+  );
+
+  // in jest integration tests it's not available for some reason
+  if (!lensEmbeddableFactory) {
+    return mainMigrations;
+  }
   return mergeSavedObjectMigrationMaps(
-    mergeSavedObjectMigrationMaps(
-      searchMigrations,
-      getSearchSourceMigrations(searchSourceMigrations) as SavedObjectMigrationMap
-    ),
+    mainMigrations,
     getLensVisContextMigrations(lensEmbeddableFactory)
   );
 };

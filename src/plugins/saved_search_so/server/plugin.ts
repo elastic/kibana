@@ -29,7 +29,7 @@ export class SavedSearchSOServerPlugin implements Plugin<object, object, object>
     core.savedObjects.registerType(
       getSavedSearchObjectType({
         getSearchSourceMigrations,
-        lensEmbeddableFactory: lens.lensEmbeddableFactory,
+        lensEmbeddableFactory: lens?.lensEmbeddableFactory,
       })
     );
 
