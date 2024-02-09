@@ -15,6 +15,7 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   AlertConsumers,
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import {
@@ -22,6 +23,7 @@ import {
   buildEsQuery as kbnBuildEsQuery,
   EsQueryConfig,
   Filter,
+  FILTERS,
   Query,
   TimeRange,
 } from '@kbn/es-query';
@@ -63,11 +65,24 @@ export function buildEsQuery({
   queries = [],
   config = {},
 }: BuildEsQueryArgs) {
-  const timeFilter =
-    timeRange &&
-    getTime(undefined, timeRange, {
-      fieldName: ALERT_TIME_RANGE,
-    });
+  const timeFilter: Filter | undefined = timeRange && {
+    query: {
+      bool: {
+        minimum_should_match: 1,
+        should: [
+          getTime(undefined, timeRange, {
+            fieldName: ALERT_TIME_RANGE,
+          })?.query,
+          getTime(undefined, timeRange, {
+            fieldName: TIMESTAMP,
+          })?.query,
+        ],
+      },
+    },
+    meta: {
+      type: FILTERS.CUSTOM,
+    },
+  };
   const filtersToUse = [...(timeFilter ? [timeFilter] : []), ...filters];
   const kueryFilter = kuery ? [{ query: kuery, language: 'kuery' }] : [];
   const queryToUse = [...kueryFilter, ...queries];
