@@ -218,20 +218,20 @@ export function QueryBarMenuPanels({
   );
 
   const quickFiltersContextMenuData = useMemo(() => {
-    let items = [] as EuiContextMenuPanelItemDescriptor[];
-    const panels = [] as EuiContextMenuPanelDescriptor[];
     if (showFilterBar && quickFilters.length > 0) {
-      let panelsCount = 0;
+      // EuiContextMenu expects a flattened panels structure so here we collect all
+      // the nested panels in a linear list
+      const panels = [] as EuiContextMenuPanelDescriptor[];
       const quickFiltersItemToContextMenuItem = (qf: QuickFiltersMenuItem) => {
         if (isQuickFiltersGroup(qf)) {
-          const panelId = `quick_filter_group_${panelsCount++}`;
+          const panelId = `quick-filters-panel-${panels.length}`;
           panels.push({
             id: panelId,
             title: qf.groupName,
             items: qf.items.map(
               quickFiltersItemToContextMenuItem
             ) as EuiContextMenuPanelItemDescriptor[],
-            'data-test-subj': `quick-filters-panel-${panelsCount}`,
+            'data-test-subj': panelId,
           } as EuiContextMenuPanelDescriptor);
           return {
             name: qf.groupName,
@@ -250,14 +250,18 @@ export function QueryBarMenuPanels({
           };
         }
       };
-      items = quickFilters.map(
-        quickFiltersItemToContextMenuItem
-      ) as EuiContextMenuPanelItemDescriptor[];
+      return {
+        items: quickFilters.map(
+          quickFiltersItemToContextMenuItem
+        ) as EuiContextMenuPanelItemDescriptor[],
+        panels,
+      };
+    } else {
+      return {
+        items: [],
+        panels: [],
+      };
     }
-    return {
-      items,
-      panels,
-    };
   }, [applyQuickFilter, quickFilters, showFilterBar]);
 
   useEffect(() => {
