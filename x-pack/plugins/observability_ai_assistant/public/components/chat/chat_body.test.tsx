@@ -86,8 +86,8 @@ describe('<ChatBody>', () => {
         message: {
           role: 'assistant',
           function_call: {
-            name: 'recall',
-            arguments: '{"queries":[],"categories":[]}',
+            name: 'context',
+            arguments: '{"learnings": { "queries":[],"categories":[]} }',
             trigger: 'assistant',
           },
           content: '',

@@ -11,11 +11,11 @@ import dedent from 'dedent';
 import * as t from 'io-ts';
 import { compact, last, omit } from 'lodash';
 import { lastValueFrom } from 'rxjs';
+import { Logger } from '@kbn/logging';
 import { FunctionRegistrationParameters } from '.';
 import { FunctionVisibility, MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
-import { RespondFunctionResources } from '../service/types';
 
 export function registerContextFunction({
   client,
@@ -97,7 +97,7 @@ export function registerContextFunction({
         client,
         connectorId,
         signal,
-        resources,
+        logger: resources.logger,
       });
 
       return {
@@ -145,7 +145,7 @@ async function scoreSuggestions({
   client,
   connectorId,
   signal,
-  resources,
+  logger,
 }: {
   suggestions: Awaited<ReturnType<typeof retrieveSuggestions>>;
   messages: Message[];
@@ -153,7 +153,7 @@ async function scoreSuggestions({
   client: ObservabilityAIAssistantClient;
   connectorId: string;
   signal: AbortSignal;
-  resources: RespondFunctionResources;
+  logger: Logger;
 }) {
   const indexedSuggestions = suggestions.map((suggestion, index) => ({ ...suggestion, id: index }));
 
@@ -216,6 +216,7 @@ async function scoreSuggestions({
       })
     ).pipe(concatenateChatCompletionChunks())
   );
+
   const scoreFunctionRequest = decodeOrThrow(scoreFunctionRequestRt)(response);
   const { scores: scoresAsString } = decodeOrThrow(jsonRt.pipe(scoreFunctionArgumentsRt))(
     scoreFunctionRequest.message.function_call.arguments
@@ -247,10 +248,7 @@ async function scoreSuggestions({
     relevantDocumentIds.includes(suggestion.id)
   );
 
-  resources.logger.debug(
-    `Found ${relevantDocumentIds.length} relevant suggestions from the knowledge base. ${scores.length} suggestions were considered in total.`
-  );
-  resources.logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
+  logger.debug(`Relevant documents: ${JSON.stringify(relevantDocuments, null, 2)}`);
 
   return relevantDocuments;
 }
