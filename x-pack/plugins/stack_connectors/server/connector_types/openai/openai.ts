@@ -277,6 +277,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
       const teed = stream.tee();
       return teed;
+      // since we do not use the sub action connector request method, we need to do our own error handling
     } catch (e) {
       const errorMessage = this.getResponseErrorMessage(e);
       throw new Error(errorMessage);
