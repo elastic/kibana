@@ -5,6 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
+import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../../config/shared';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllRules,
@@ -138,10 +139,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const initialRuleSoId = firstInstallResponse.results.created[0].id;
 
           const actions = [
-            // Use a preconfigured action connector (see `x-pack/test/security_solution_api_integration/config`)
-            // to simplify and avoid action connector creation
+            // Use a preconfigured action connector to simplify the test and avoid action connector creation
             {
-              id: 'my-test-email',
+              id: PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID,
               action_type_id: '.email',
               group: 'default',
               params: {},
@@ -208,10 +208,9 @@ export default ({ getService }: FtrProviderContext): void => {
           const initialRuleSoId = firstInstallResponse.results.created[0].id;
 
           const actions = [
-            // Use a preconfigured action connector (see `x-pack/test/security_solution_api_integration/config`)
-            // to simplify and avoid action connector creation
+            // Use a preconfigured action connector to simplify the test and avoid action connector creation
             {
-              id: 'my-test-email',
+              id: PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID,
               action_type_id: '.email',
               group: 'default',
               params: {},
