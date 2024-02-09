@@ -113,7 +113,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
                 ) : (
                   <FormattedMessage
                     id="xpack.securitySolution.entityAnalytics.assetCriticality.createButton"
-                    defaultMessage="Create"
+                    defaultMessage="Assign"
                   />
                 )}
               </EuiButtonEmpty>

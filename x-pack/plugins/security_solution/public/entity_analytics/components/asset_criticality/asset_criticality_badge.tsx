@@ -78,7 +78,7 @@ export const AssetCriticalityBadgeAllowMissing: React.FC<{
     <EuiHealth color="subdued" data-test-subj={dataTestSubj} className={className}>
       <FormattedMessage
         id="xpack.securitySolution.entityAnalytics.assetCriticality.noCriticality"
-        defaultMessage="No criticality assigned"
+        defaultMessage="Criticality Unassigned"
       />
     </EuiHealth>
   );
