@@ -77,12 +77,16 @@ export class ToastsService extends FtrService {
     }
   }
 
-  public async dismiss(): Promise<string> {
+  public async dismiss(): Promise<void> {
     const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
     await toast.moveMouseTo();
-    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
-
     await this.testSubjects.click('toastCloseButton');
+  }
+
+  public async getTitleAndDismiss(): Promise<string> {
+    const element = await this.testSubjects.find('euiToastHeader__title');
+    const title = await element.getVisibleText();
+    await this.dismiss();
     return title;
   }
 

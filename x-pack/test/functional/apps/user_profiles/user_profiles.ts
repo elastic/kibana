@@ -25,7 +25,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        let toast = await toasts.closeToast();
+        let toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
 
@@ -33,7 +33,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        toast = await toasts.closeToast();
+        toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
       });
@@ -43,7 +43,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        let toast = await toasts.closeToast();
+        let toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
 
@@ -51,7 +51,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.userProfiles.saveUserProfileChanges();
 
-        toast = await toasts.closeToast();
+        toast = await toasts.getTitleAndDismiss();
 
         expect(toast).to.be('Profile updated');
       });
@@ -73,7 +73,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const submitButton = await pageObjects.userProfiles.getChangePasswordFormSubmitButton();
         await submitButton.click();
 
-        const initialToast = await toasts.closeToast();
+        const initialToast = await toasts.getTitleAndDismiss();
 
         expect(initialToast).to.be('Password successfully changed');
 
@@ -85,7 +85,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await submitButton.click();
 
-        const resetToast = await toasts.closeToast();
+        const resetToast = await toasts.getTitleAndDismiss();
 
         expect(resetToast).to.be('Password successfully changed');
       });

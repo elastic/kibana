@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show toast with error if SSO fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('saml', 'unknown_saml');
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Could not perform login.');
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();
@@ -164,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should show toast with error if anonymous login fails', async () => {
       await PageObjects.security.loginSelector.selectLoginMethod('anonymous', 'anonymous1');
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Could not perform login.');
 
       await PageObjects.security.loginSelector.verifyLoginSelectorIsVisible();

@@ -53,7 +53,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           url: 'https://test.com',
         });
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           token: 'supersecrettoken',
         });
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -167,7 +167,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           },
         ]);
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
 
@@ -184,7 +184,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await testSubjects.click('saveRuleButton');
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Failed to retrieve Slack channels list');
 
         // We are not saving the rule yet as we currently have no way

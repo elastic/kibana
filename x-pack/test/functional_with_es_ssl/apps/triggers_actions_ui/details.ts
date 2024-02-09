@@ -380,7 +380,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
 
         await retry.tryForTime(30 * 1000, async () => {
@@ -467,7 +467,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // Wait to ensure the table is finished loading
@@ -544,7 +544,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
         await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Deleted 1 connector');
 
         // Wait to ensure the table is finished loading
@@ -654,7 +654,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await find.clickByCssSelector('[data-test-subj="saveEditedRuleButton"]:not(disabled)');
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedRuleName}'`);
       });
     });

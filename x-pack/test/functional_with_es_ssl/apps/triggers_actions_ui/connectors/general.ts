@@ -62,7 +62,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         '[data-test-subj="create-connector-flyout-save-btn"]:not(disabled)'
       );
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -103,7 +103,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         '[data-test-subj="edit-connector-flyout-save-btn"]:not(disabled)'
       );
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
       await testSubjects.click('euiFlyoutCloseButton');
@@ -229,7 +229,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -260,7 +260,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('deleteIdsConfirmation > confirmModalConfirmButton');
       await testSubjects.missingOrFail('deleteIdsConfirmation');
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql('Deleted 1 connector');
 
       await pageObjects.triggersActionsUI.searchConnectors(connectorName);

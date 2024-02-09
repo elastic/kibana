@@ -144,7 +144,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await toasts.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.click('notifyWhenSelect');
       await testSubjects.click('onThrottleInterval');
@@ -187,7 +187,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       );
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -215,7 +215,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.setValue('nameInput', slackConnectorName);
       await testSubjects.setValue('slackWebhookUrlInput', 'https://test.com');
       await find.clickByCssSelector('[data-test-subj="saveActionButtonModal"]:not(disabled)');
-      const createdConnectorToastTitle = await toasts.closeToast();
+      const createdConnectorToastTitle = await toasts.getTitleAndDismiss();
       expect(createdConnectorToastTitle).to.eql(`Created '${slackConnectorName}'`);
       await testSubjects.setValue('messageTextArea', 'test message ');
       await (
@@ -237,7 +237,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('addNewActionConnectorActionGroup-1-option-other');
 
       await testSubjects.click('saveRuleButton');
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await pageObjects.triggersActionsUI.searchAlerts(alertName);
       const searchResultsAfterSave = await pageObjects.triggersActionsUI.getAlertsList();
@@ -268,7 +268,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmRuleSaveModal > confirmModalConfirmButton');
       await testSubjects.missingOrFail('confirmRuleSaveModal');
 
-      const toastTitle = await toasts.closeToast();
+      const toastTitle = await toasts.getTitleAndDismiss();
       expect(toastTitle).to.eql(`Created rule "${alertName}"`);
       await new Promise((resolve) => setTimeout(resolve, 1000));
       await pageObjects.triggersActionsUI.searchAlerts(alertName);

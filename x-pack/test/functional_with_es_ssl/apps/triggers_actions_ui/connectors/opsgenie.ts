@@ -46,7 +46,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           apiKey: 'apiKey',
         });
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Created '${connectorName}'`);
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
@@ -81,7 +81,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           apiKey: 'apiKey',
         });
 
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql(`Updated '${updatedConnectorName}'`);
 
         await testSubjects.click('euiFlyoutCloseButton');

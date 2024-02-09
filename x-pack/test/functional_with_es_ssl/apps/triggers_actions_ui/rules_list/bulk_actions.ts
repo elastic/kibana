@@ -61,7 +61,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('linkSnooze1h');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -100,7 +100,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -131,7 +131,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('scheduler-saveSchedule');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -170,7 +170,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated snooze settings for 2 rules.');
       });
 
@@ -202,7 +202,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const toastTitle = await toasts.closeToast();
+        const toastTitle = await toasts.getTitleAndDismiss();
         expect(toastTitle).to.eql('Updated API key for 1 rule.');
       });
     });

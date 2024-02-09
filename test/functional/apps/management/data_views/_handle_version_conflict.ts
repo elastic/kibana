@@ -63,7 +63,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.settings.setFieldFormat('url');
       await PageObjects.settings.clickSaveScriptedField();
       await retry.try(async function () {
-        const message = await toasts.closeToast();
+        const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');
       });
     });
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(response.body.result).to.be('updated');
       await PageObjects.settings.controlChangeSave();
       await retry.try(async function () {
-        const message = await toasts.closeToast();
+        const message = await toasts.getTitleAndDismiss();
         expect(message).to.contain('Unable');
       });
     });
