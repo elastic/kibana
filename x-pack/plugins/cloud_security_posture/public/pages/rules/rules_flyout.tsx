@@ -87,12 +87,10 @@ export const RuleFlyout = ({
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
       await refetchRulesStates();
-      await showChangeBenchmarkRuleStatesSuccessToast(
-        notifications,
-        nextRuleStates !== 'mute',
-        1,
-        rulesData?.total || 0
-      );
+      await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+        numberOfRules: 1,
+        numberOfDetectionRules: rulesData?.total || 0,
+      });
     }
   };
 

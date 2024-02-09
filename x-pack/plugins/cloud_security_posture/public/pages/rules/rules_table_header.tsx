@@ -300,12 +300,10 @@ const CurrentPageOfTotal = ({
       await postRequestChangeRulesState(state, bulkSelectedRules);
       await refetchRulesStates();
       await setIsPopoverOpen(false);
-      await showChangeBenchmarkRuleStatesSuccessToast(
-        notifications,
-        state !== 'mute',
-        bulkSelectedRules.length,
-        rulesData?.total || 0
-      );
+      await showChangeBenchmarkRuleStatesSuccessToast(notifications, state !== 'mute', {
+        numberOfRules: bulkSelectedRules.length,
+        numberOfDetectionRules: rulesData?.total || 0,
+      });
     }
   };
   const changeCspRuleStateMute = async () => {

@@ -275,7 +275,6 @@ export const RulesContainer = () => {
         refetchRulesStates={rulesStates.refetch}
         selectedRules={selectedRules}
         setSelectedRules={setSelectedRules}
-        notifications={notifications}
       />
       {params.ruleId && rulesFlyoutData.metadata && (
         <RuleFlyout

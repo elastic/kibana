@@ -81,8 +81,10 @@ export const showCreateDetectionRuleSuccessToast = (
 export const showChangeBenchmarkRuleStatesSuccessToast = (
   notifications: NotificationsStart,
   isBenchmarkRuleMuted: boolean,
-  numberOfRules = 1,
-  numberOfDetectionRules: number
+  data: {
+    numberOfRules: number;
+    numberOfDetectionRules: number;
+  }
 ) => {
   return notifications.toasts.addSuccess({
     toastLifeTimeMs: 10000,
@@ -102,19 +104,24 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
                   />
                 </strong>
               </EuiText>
-              {numberOfDetectionRules > 0 ? (
-                <FormattedMessage
-                  id="xpack.csp.flyout.ruleEnabledToast"
-                  defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
-                  values={{ ruleCount: numberOfRules, detectionRuleCount: numberOfDetectionRules }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.csp.flyout.ruleEnabledToastNoDetectionRule"
-                  defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}}"
-                  values={{ ruleCount: numberOfRules }}
-                />
-              )}
+              <FormattedMessage
+                id="xpack.csp.flyout.ruleEnabledToastRulesCount"
+                defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} "
+                values={{
+                  ruleCount: data.numberOfRules,
+                }}
+              />
+              {data.numberOfDetectionRules > 0 ? (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.csp.flyout.ruleEnabledToastDetectionRulesCount"
+                    defaultMessage="and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
+                    values={{
+                      detectionRuleCount: data.numberOfDetectionRules,
+                    }}
+                  />
+                </strong>
+              ) : undefined}
             </>
           ) : (
             <>
@@ -126,22 +133,26 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
                   />
                 </strong>
               </EuiText>
-              {numberOfDetectionRules > 0 ? (
-                <FormattedMessage
-                  id="xpack.csp.flyout.ruleDisabledToast"
-                  defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}} and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
-                  values={{
-                    ruleCount: numberOfRules,
-                    detectionRuleCount: numberOfDetectionRules,
-                  }}
-                />
-              ) : (
-                <FormattedMessage
-                  id="xpack.csp.flyout.ruleDisabledToastNoDetectionRule"
-                  defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}}"
-                  values={{ ruleCount: numberOfRules }}
-                />
-              )}
+
+              <FormattedMessage
+                id="xpack.csp.flyout.ruleDisabledToastRulesCount"
+                defaultMessage="Successfully enabled {ruleCount, plural, one {# rule} other {# rules}} "
+                values={{
+                  ruleCount: data.numberOfRules,
+                }}
+              />
+
+              {data.numberOfDetectionRules > 0 ? (
+                <strong>
+                  <FormattedMessage
+                    id="xpack.csp.flyout.ruleDisabledToastDetectionRulesCount"
+                    defaultMessage="and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
+                    values={{
+                      detectionRuleCount: data.numberOfDetectionRules,
+                    }}
+                  />
+                </strong>
+              ) : undefined}
             </>
           )}
         </EuiText>

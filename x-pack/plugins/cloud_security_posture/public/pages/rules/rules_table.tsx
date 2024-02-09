@@ -44,7 +44,6 @@ type RulesTableProps = Pick<
   selectedRules: CspBenchmarkRulesWithStates[];
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
   onSortChange: (value: 'asc' | 'desc') => void;
-  notifications: NotificationsStart;
 };
 
 type GetColumnProps = Pick<
@@ -80,7 +79,6 @@ export const RulesTable = ({
   setSelectedRules,
   onRuleClick,
   onSortChange,
-  notifications,
 }: RulesTableProps) => {
   const { euiTheme } = useEuiTheme();
   const euiPagination: EuiBasicTableProps<CspBenchmarkRulesWithStates>['pagination'] = {
@@ -134,7 +132,7 @@ export const RulesTable = ({
     return true;
   };
 
-  const { http } = useKibana<CoreStart>().services;
+  const { http, notifications } = useKibana<CoreStart>().services;
   useEffect(() => {
     if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
       setIsAllRulesSelectedThisPage(true);
@@ -324,12 +322,10 @@ const getColumns = ({
           ).total;
           await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
           await refetchRulesStates();
-          await showChangeBenchmarkRuleStatesSuccessToast(
-            notifications,
-            nextRuleState !== 'mute',
-            1,
-            detectionRuleCount
-          );
+          await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+            numberOfRules: 1,
+            numberOfDetectionRules: detectionRuleCount || 0,
+          });
         }
       };
       return (
