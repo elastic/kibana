@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import rison from '@kbn/rison';
 import {
   CaseSeverity,
   CaseStatuses,
@@ -599,8 +600,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = await browser.getCurrentUrl();
-        expect(new URL(currentUrl).search).to.be(`?`);
+        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
+        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -610,6 +611,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'assignees',
           customFields[0].key,
         ]);
+
+        const searchBar = await testSubjects.find('search-cases');
+        expect(await searchBar.getAttribute('value')).to.be(casesState.search);
       });
 
       it('loads the state from the URL with filter configuration in local storage', async () => {
@@ -639,8 +643,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = await browser.getCurrentUrl();
-        expect(new URL(currentUrl).search).to.be(`?`);
+        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
+        expect(new URL(currentUrl).search).to.be(`?cases=${rison.encode(casesState)}`);
 
         await cases.casesTable.expectFiltersToBeActive([
           'status',
@@ -650,6 +654,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           'assignees',
           customFields[0].key,
         ]);
+
+        const searchBar = await testSubjects.find('search-cases');
+        expect(await searchBar.getAttribute('value')).to.be(casesState.search);
       });
 
       it('loads the state from a legacy URL', async () => {
@@ -667,7 +674,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await cases.casesTable.validateCasesTableHasNthRows(1);
         await cases.casesTable.verifyCase(theCase.id, 0);
 
-        const currentUrl = await browser.getCurrentUrl();
+        const currentUrl = decodeURIComponent(await browser.getCurrentUrl());
         expect(new URL(currentUrl).search).to.be(`?${search}`);
 
         await cases.casesTable.expectFiltersToBeActive([
