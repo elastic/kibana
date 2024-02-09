@@ -958,7 +958,7 @@ Then all properties of the rule should be sorted alphabetically
 
 #### **Scenario: User can see changes in a side-by-side per-field diff view**
 
-**Automation**: 1 e2e test + 1 UI integration test
+**Automation**: 1 e2e test
 
 ```Gherkin
 Given X prebuilt rules are installed in Kibana
@@ -970,8 +970,18 @@ And all field diff accordions should be open by default
 And correct rule version numbers should be displayed in their respective columns
 When the user selects another rule without closing the preview
 Then the preview should display the changes for the newly selected rule
+```
 
-CASE: Test case should work when target rule version contains a different rule type than current
+#### **Scenario: User can see changes when updated rule is a different rule type**
+
+**Automation**: 1 UI integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available that changes the rule type
+When user opens the upgrade preview
+Then the rule type changes should be displayed in grouped field diffs with corresponding query fields
+And a tooltip is displayed with information about changing rule types
 ```
 
 #### **Scenario: Field groupings should be rendered together in the same accordion panel**
@@ -985,7 +995,7 @@ When user opens the upgrade preview
 The <field> diff accordion panel should display its grouped rule properties
 And each property should have its name displayed inside the panel above its value
 
-Examples:
+CASES:
 | field              |
 | data_source        |
 | kql_query          |
