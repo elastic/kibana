@@ -162,7 +162,10 @@ export class TimeSliderControlEmbeddable
     input: Partial<TimeSliderControlEmbeddableInput>
   ): Promise<ControlTimesliceOutput> => {
     const { timesliceStartAsPercentageOfTimeRange, timesliceEndAsPercentageOfTimeRange } = input;
-    if (!timesliceStartAsPercentageOfTimeRange || !timesliceEndAsPercentageOfTimeRange) {
+    if (
+      timesliceStartAsPercentageOfTimeRange === undefined ||
+      timesliceEndAsPercentageOfTimeRange === undefined
+    ) {
       return { timeslice: undefined };
     }
 
@@ -219,12 +222,10 @@ export class TimeSliderControlEmbeddable
   private syncWithTimeRange() {
     this.prevTimeRange = this.getInput().timeRange;
 
-    this.selectionsToFilters(this.getState().explicitInput).then(({ timeslice }) => {
-      if (timeslice) {
-        this.dispatch.publishValue({ value: timeslice });
-        this.dispatch.setValue({ value: timeslice });
-        this.onRangeChange(timeslice[TO_INDEX] - timeslice[FROM_INDEX]);
-      }
+    this.selectionsToFilters(this.getInput()).then(({ timeslice }) => {
+      this.dispatch.publishValue({ value: timeslice });
+      this.dispatch.setValue({ value: timeslice });
+      if (timeslice) this.onRangeChange(timeslice[TO_INDEX] - timeslice[FROM_INDEX]);
     });
   }
 
