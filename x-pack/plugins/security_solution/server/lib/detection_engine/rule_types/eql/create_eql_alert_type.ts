@@ -11,13 +11,15 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import { SERVER_APP_ID } from '../../../../../common/constants';
 import { EqlRuleParams } from '../../rule_schema';
 import { eqlExecutor } from './eql';
-import type { CreateRuleOptions, SecurityAlertType } from '../types';
+import type { CreateRuleOptions, SecurityAlertType, SignalSourceHit } from '../types';
 import { validateIndexPatterns } from '../utils';
+import type { BuildReasonMessage } from '../utils/reason_formatters';
+import { wrapSuppressedAlerts } from '../utils/wrap_suppressed_alerts';
 
 export const createEqlAlertType = (
   createOptions: CreateRuleOptions
 ): SecurityAlertType<EqlRuleParams, {}, {}, 'default'> => {
-  const { version } = createOptions;
+  const { version, licensing } = createOptions;
   return {
     id: EQL_RULE_TYPE_ID,
     name: 'Event Correlation Rule',
@@ -71,10 +73,34 @@ export const createEqlAlertType = (
           secondaryTimestamp,
           exceptionFilter,
           unprocessedExceptions,
+          mergeStrategy,
+          alertTimestampOverride,
+          publicBaseUrl,
+          alertWithSuppression,
+          experimentalFeatures,
         },
         services,
         state,
+        spaceId,
       } = execOptions;
+
+      const wrapSuppressedHits = (
+        events: SignalSourceHit[],
+        buildReasonMessage: BuildReasonMessage
+      ) =>
+        wrapSuppressedAlerts({
+          events,
+          spaceId,
+          completeRule,
+          mergeStrategy,
+          indicesToQuery: inputIndex,
+          buildReasonMessage,
+          alertTimestampOverride,
+          ruleExecutionLogger,
+          publicBaseUrl: publicBaseUrl,
+          primaryTimestamp,
+          secondaryTimestamp,
+        });
       const result = await eqlExecutor({
         completeRule,
         tuple,
@@ -90,6 +116,11 @@ export const createEqlAlertType = (
         secondaryTimestamp,
         exceptionFilter,
         unprocessedExceptions,
+        wrapSuppressedHits,
+        experimentalFeatures,
+        licensing,
+        alertTimestampOverride,
+        alertWithSuppression,
       });
       return { ...result, state };
     },
