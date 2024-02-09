@@ -20,7 +20,7 @@ import { RegisterServicesParams } from '../register_services';
 export interface FetchFlamechartParams {
   esClient: ElasticsearchClient;
   core: CoreRequestHandlerContext;
-  indices?: string;
+  indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;

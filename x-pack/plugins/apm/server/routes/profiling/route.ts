@@ -9,10 +9,12 @@ import { isoToEpochSecsRt, toNumberRt } from '@kbn/io-ts-utils';
 import type { BaseFlameGraph, TopNFunctions } from '@kbn/profiling-utils';
 import * as t from 'io-ts';
 import { kqlQuery, termQuery } from '@kbn/observability-plugin/server';
+import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import {
   HOST_NAME,
   SERVICE_NAME,
   TRANSACTION_NAME,
+  TRANSACTION_PROFILER_STACK_TRACE_IDS,
   TRANSACTION_TYPE,
 } from '../../../common/es_fields/apm';
 import {
@@ -219,10 +221,12 @@ const transactionsFlamegraphRoute = createApmServerRoute({
   handler: async (resources): Promise<BaseFlameGraph | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
-    const [esClient, profilingDataAccessStart] = await Promise.all([
-      core.elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
-    ]);
+    const [esClient, profilingDataAccessStart, apmEventClient] =
+      await Promise.all([
+        core.elasticsearch.client,
+        await plugins.profilingDataAccess?.start(),
+        getApmEventClient(resources),
+      ]);
     if (profilingDataAccessStart) {
       const { serviceName } = params.path;
       const {
@@ -234,12 +238,17 @@ const transactionsFlamegraphRoute = createApmServerRoute({
         environment,
       } = params.query;
 
+      // TODO: This will be used once the ES bug is fixed
+      const indices = apmEventClient.getIndexFromProcessorEvent(
+        ProcessorEvent.transaction
+      );
+      console.log('### caue  handler:  index:', indices);
+
       return await profilingDataAccessStart?.services.fetchFlamechartData({
         core,
         esClient: esClient.asCurrentUser,
-        // TODO: caue fix this
-        indices: '.ds-traces-apm-default-2024.02.02-000001',
-        stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+        indices: ['traces-apm-default'],
+        stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
         totalSeconds: end - start,
         query: {
           bool: {
@@ -289,10 +298,13 @@ const transactionsFunctionsRoute = createApmServerRoute({
   handler: async (resources): Promise<TopNFunctions | undefined> => {
     const { context, plugins, params } = resources;
     const core = await context.core;
-    const [esClient, profilingDataAccessStart] = await Promise.all([
-      core.elasticsearch.client,
-      await plugins.profilingDataAccess?.start(),
-    ]);
+
+    const [esClient, profilingDataAccessStart, apmEventClient] =
+      await Promise.all([
+        core.elasticsearch.client,
+        await plugins.profilingDataAccess?.start(),
+        getApmEventClient(resources),
+      ]);
     if (profilingDataAccessStart) {
       const {
         start,
@@ -306,14 +318,19 @@ const transactionsFunctionsRoute = createApmServerRoute({
       } = params.query;
       const { serviceName } = params.path;
 
+      // TODO: This will be used once the ES bug is fixed
+      const indices = apmEventClient.getIndexFromProcessorEvent(
+        ProcessorEvent.transaction
+      );
+      console.log('### caue  handler:  index:', indices);
+
       return profilingDataAccessStart?.services.fetchFunction({
         core,
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
-        // TODO: caue fix this
-        indices: '.ds-traces-apm-default-2024.02.02-000001',
-        stacktraceIdsField: 'transaction.profiler_stack_trace_ids',
+        indices: ['traces-apm-default'],
+        stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
         totalSeconds: end - start,
         query: {
           bool: {

@@ -32,7 +32,7 @@ export async function searchStackTraces({
   pervCPUWattArm64: number;
   awsCostDiscountRate: number;
   costPervCPUPerHour: number;
-  indices?: string;
+  indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
 }) {

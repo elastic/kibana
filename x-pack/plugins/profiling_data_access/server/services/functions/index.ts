@@ -25,7 +25,7 @@ export interface FetchFunctionsParams {
   esClient: ElasticsearchClient;
   startIndex: number;
   endIndex: number;
-  indices?: string;
+  indices?: string[];
   stacktraceIdsField?: string;
   query: QueryDslQueryContainer;
   totalSeconds: number;
