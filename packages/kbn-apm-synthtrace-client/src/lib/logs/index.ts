@@ -36,6 +36,9 @@ export type LogDocument = Fields &
     'cloud.availability_zone'?: string;
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
+    'error.stack_trace'?: string;
+    'error.exception.stacktrace'?: string;
+    'error.log.stacktrace'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

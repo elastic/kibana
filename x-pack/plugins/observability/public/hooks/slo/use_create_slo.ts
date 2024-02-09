@@ -10,7 +10,6 @@ import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { v4 as uuidv4 } from 'uuid';
 import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -37,46 +36,17 @@ export function useCreateSlo() {
       return http.post<CreateSLOResponse>(`/api/observability/slos`, { body });
     },
     {
-      onMutate: async ({ slo }) => {
-        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
-
-        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
-          queryKey: sloKeys.lists(),
-          exact: false,
-        });
-
-        const [queryKey, previousData] = queriesData?.at(0) ?? [];
-
-        const newItem = { ...slo, id: uuidv4(), summary: undefined };
-
-        const optimisticUpdate = {
-          page: previousData?.page ?? 1,
-          perPage: previousData?.perPage ?? 25,
-          total: previousData?.total ? previousData.total + 1 : 1,
-          results: [...(previousData?.results ?? []), newItem],
-        };
-
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
-
-        return { queryKey, previousData };
-      },
       onSuccess: (_data, { slo }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.create.successNotification', {
             defaultMessage: 'Successfully created {name}',
             values: { name: slo.name },
           })
         );
-
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
       },
       onError: (error, { slo }, context) => {
-        if (context?.previousData && context?.queryKey) {
-          queryClient.setQueryData(context.queryKey, context.previousData);
-        }
-
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.create.errorNotification', {
             defaultMessage: 'Something went wrong while creating {name}',
