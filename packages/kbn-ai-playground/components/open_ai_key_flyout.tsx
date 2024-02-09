@@ -1,14 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
 import { EuiButton, EuiButtonEmpty, EuiFieldText, EuiFlexGroup, EuiFlexItem, EuiFlyout, EuiFlyoutBody, EuiFlyoutFooter, EuiFlyoutHeader, EuiFormRow, EuiLink, EuiSpacer, EuiText, EuiTitle } from "@elastic/eui";
 import { i18n } from "@kbn/i18n";
 import React, { useState } from "react";
 
 export interface OpenAIKeyFlyOutProps {
+  openAPIKey: string;
   onClose: () => void;
-  setOpenAIKey: (key: string) => void;
+  onSave: (key: string) => void;
 }
 
-export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({ onClose, setOpenAIKey }: OpenAIKeyFlyOutProps) => {
-  const [apiKey, setApiKey] = useState<string>('');
+export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({ openAPIKey, onClose, onSave }) => {
+  const [apiKey, setApiKey] = useState<string>(openAPIKey);
+
+  const handleSave = () => {
+    onSave(apiKey);
+    onClose();
+  }
 
   return (
     <EuiFlyout onClose={onClose} size="m">
@@ -72,10 +85,7 @@ export const OpenAIKeyFlyOut: React.FC<OpenAIKeyFlyOutProps> = ({ onClose, setOp
               isDisabled={!apiKey.trim()}
               data-telemetry-id="entSearchAIPlayground-addingOpenAIKey-save"
               fill
-              onClick={() => {
-                setOpenAIKey(apiKey.trim());
-                onClose();
-              }}
+              onClick={handleSave}
             >
               {i18n.translate(
                 'aiPlayground.sidebar.openAIFlyOut.saveButtonLabel',

@@ -24,6 +24,7 @@ import { ChatForm, ChatFormFields, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
+import { OpenAIKey } from './open_ai_key';
 
 import { TelegramIcon } from './telegram_icon';
 import { InstructionsField } from '@kbn/ai-playground/components/instructions_field';
@@ -122,6 +123,15 @@ export const Chat = () => {
             padding: euiTheme.size.l,
           }}
         >
+          <Controller
+            name={ChatFormFields.openAIKey}
+            control={control}
+            defaultValue=""
+            render={({ field }) => (
+              <OpenAIKey apiKey={field.value} onSave={field.onChange} />
+            )}
+          />
+
           <Controller
             name={ChatFormFields.prompt}
             control={control}

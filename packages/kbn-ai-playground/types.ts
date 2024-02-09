@@ -26,12 +26,14 @@ export enum ChatFormFields {
   question = 'question',
   citations = 'citations',
   prompt = 'prompt',
+  openAIKey = 'openAIKey',
 }
 
 export interface ChatForm {
   [ChatFormFields.question]: string;
   [ChatFormFields.prompt]: string;
   [ChatFormFields.citations]: boolean;
+  [ChatFormFields.openAIKey]: string;
 }
 
 export interface AIPlaygroundPluginStartDeps {
