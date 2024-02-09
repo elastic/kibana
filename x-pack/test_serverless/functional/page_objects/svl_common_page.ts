@@ -30,7 +30,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
    */
   const cleanBrowserState = async () => {
     // we need to load kibana host to delete/add cookie
-    const noAuthRequredUrl = deployment.getHostPort() + '/bootstrap-anonymous.js';
+    const noAuthRequiredUrl = deployment.getHostPort() + '/bootstrap-anonymous.js';
     log.debug(`browser: navigate to /bootstrap-anonymous.js`);
     await browser.get(noAuthRequredUrl);
     // previous test might left unsaved changes and alert will show up on url change
