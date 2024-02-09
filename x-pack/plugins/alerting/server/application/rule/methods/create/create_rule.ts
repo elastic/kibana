@@ -59,9 +59,9 @@ export async function createRule<Params extends RuleParams = never>(
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
   const actionsClient = await context.getActionsClient();
 
-  const systemActions = initialData.actions.filter(
-    (action): action is RuleSystemAction => action.type === RuleActionTypes.SYSTEM
-  );
+  const systemActions = initialData.actions
+    .filter((action) => !!action.actionTypeId && actionsClient.isSystemAction(action.actionTypeId))
+    .map((action) => ({ ...action, type: RuleActionTypes.SYSTEM } as RuleSystemAction));
 
   // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
   const data = {
