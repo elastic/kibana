@@ -436,7 +436,7 @@ export const uiSettings: Record<string, UiSettings> = {
   [profilingShowErrorFrames]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.profilingShowErrorFramesSettingName', {
-      defaultMessage: 'Show error frames in the profiling views',
+      defaultMessage: 'Show error frames in the Universal Profiling views',
     }),
     value: false,
     schema: schema.boolean(),
