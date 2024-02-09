@@ -18,6 +18,7 @@ import {
   ALERT_STATUS_UNTRACKED,
   ALERT_TIME_RANGE,
   ALERT_UUID,
+  AlertStatus,
 } from '@kbn/rule-data-utils';
 
 export interface SetAlertsToUntrackedOpts {
@@ -39,20 +40,15 @@ interface ConsumersAndRuleTypesAggregation {
   };
 }
 
-export async function setAlertsToUntracked({
-  logger,
-  esClient,
-  indices,
+const getQuery = ({
   ruleIds = [],
-  alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
-  ensureAuthorized,
+  alertUuids = [],
+  alertStatus,
 }: {
-  logger: Logger;
-  esClient: ElasticsearchClient;
-} & SetAlertsToUntrackedOpts): Promise<UntrackedAlertsResult> {
-  if (isEmpty(ruleIds) && isEmpty(alertUuids))
-    throw new Error('Must provide either ruleIds or alertUuids');
-
+  ruleIds?: string[];
+  alertUuids?: string[];
+  alertStatus: AlertStatus;
+}) => {
   const shouldMatchRules: Array<{ term: Record<string, { value: string }> }> = ruleIds.map(
     (ruleId) => ({
       term: {
@@ -71,12 +67,12 @@ export async function setAlertsToUntracked({
   const statusTerms: Array<{ term: Record<string, { value: string }> }> = [
     {
       term: {
-        [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
+        [ALERT_STATUS]: { value: alertStatus },
       },
     },
   ];
 
-  const must = [
+  return [
     ...statusTerms,
     {
       bool: {
@@ -90,6 +86,21 @@ export async function setAlertsToUntracked({
       },
     },
   ];
+};
+
+export async function setAlertsToUntracked({
+  logger,
+  esClient,
+  indices,
+  ruleIds = [],
+  alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
+  ensureAuthorized,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+} & SetAlertsToUntrackedOpts): Promise<UntrackedAlertsResult> {
+  if (isEmpty(ruleIds) && isEmpty(alertUuids))
+    throw new Error('Must provide either ruleIds or alertUuids');
 
   if (ensureAuthorized) {
     // Fetch all rule type IDs and rule consumers, then run the provided ensureAuthorized check for each of them
@@ -100,7 +111,11 @@ export async function setAlertsToUntracked({
         size: 0,
         query: {
           bool: {
-            must,
+            must: getQuery({
+              ruleIds,
+              alertUuids,
+              alertStatus: ALERT_STATUS_ACTIVE,
+            }),
           },
         },
         aggs: {
@@ -141,7 +156,11 @@ export async function setAlertsToUntracked({
           },
           query: {
             bool: {
-              must,
+              must: getQuery({
+                ruleIds,
+                alertUuids,
+                alertStatus: ALERT_STATUS_ACTIVE,
+              }),
             },
           },
         },
@@ -169,7 +188,11 @@ export async function setAlertsToUntracked({
         size: total,
         query: {
           bool: {
-            must,
+            must: getQuery({
+              ruleIds,
+              alertUuids,
+              alertStatus: ALERT_STATUS_UNTRACKED,
+            }),
           },
         },
       },
