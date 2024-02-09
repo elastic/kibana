@@ -227,7 +227,10 @@ const PageContent = () => {
           />
           <Suspense fallback={<EuiLoadingSpinner />}>
             <AlertsTable
-              id="rule-detail-alerts-table"
+              // Here we force a rerender when switching feature ids to prevent the data grid
+              // columns alignment from breaking after a change in the number of columns
+              key={featureIds.join()}
+              id="global-alerts-page-table"
               configurationId={tableConfigurationId}
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               featureIds={featureIds}
