@@ -314,9 +314,7 @@ const getColumns = ({
       const nextRuleState = isRuleMuted ? 'unmute' : 'mute';
       const changeCspRuleStateFn = async () => {
         if (rule?.metadata.benchmark.rule_number) {
-          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
-          await refetchRulesStates();
-          // Calling this function this way to make sure it didn't get called on every single row render
+          // Calling this function this way to make sure it didn't get called on every single row render, its only being called when user click on the switch button
           const detectionRuleCount = (
             await fetchDetectionRulesByTags(
               getFindingsDetectionRuleSearchTags(rule.metadata),
@@ -324,6 +322,8 @@ const getColumns = ({
               http
             )
           ).total;
+          await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
+          await refetchRulesStates();
           await showChangeBenchmarkRuleStatesSuccessToast(
             notifications,
             nextRuleState !== 'mute',
