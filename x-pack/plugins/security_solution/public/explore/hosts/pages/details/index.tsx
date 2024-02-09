@@ -176,7 +176,7 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
 
   const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
-  const canReadAssetCriticality = privileges.data?.has_read_permissions;
+  const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
   const criticality = useAssetCriticalityData({
     entity,
     enabled: canReadAssetCriticality,
