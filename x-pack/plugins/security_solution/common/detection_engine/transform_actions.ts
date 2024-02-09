@@ -48,7 +48,7 @@ export const transformAlertToRuleAction = ({
   id,
   params,
   action_type_id: actionTypeId,
-  ...(alertsFilter && { alerts_filter: alertsFilter }),
+  // ...(alertsFilter && { alerts_filter: alertsFilter }),
   ...(uuid && { uuid }),
   ...(frequency && { frequency }),
 });

@@ -17,6 +17,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getConnectorType as getSlackConnectorType } from './slack';
 import { getSlackApiConnectorType } from '../slack_api';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { RuleActionTypes } from '@kbn/alerting-plugin/common';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -169,6 +170,7 @@ describe('ActionForm - Slack API Connector', () => {
           throttle: null,
           summary: false,
         },
+        type: RuleActionTypes.DEFAULT,
       },
     ];
 

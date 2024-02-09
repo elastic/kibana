@@ -23,6 +23,7 @@ import {
   RawAlertInstance,
   SanitizedRule,
   AlertInstanceContext,
+  RuleActionTypes,
 } from '@kbn/alerting-plugin/common';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common';
@@ -170,19 +171,22 @@ export class BaseRule {
       if (!action) {
         continue;
       }
-      ruleActions.push({
-        group: 'default',
-        id: actionData.id,
-        params: {
-          message: '{{context.internalShortMessage}}',
-          ...actionData.config,
-        },
-        frequency: {
-          summary: false,
-          notifyWhen: RuleNotifyWhen.THROTTLE,
-          throttle,
-        },
-      });
+      if (!action.isSystemAction) {
+        ruleActions.push({
+          group: 'default',
+          id: actionData.id,
+          params: {
+            message: '{{context.internalShortMessage}}',
+            ...actionData.config,
+          },
+          frequency: {
+            summary: false,
+            notifyWhen: RuleNotifyWhen.THROTTLE,
+            throttle,
+          },
+          type: RuleActionTypes.DEFAULT,
+        });
+      }
     }
 
     return await rulesClient.create<RuleTypeParams>({

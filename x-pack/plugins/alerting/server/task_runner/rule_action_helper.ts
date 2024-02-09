@@ -16,7 +16,7 @@ import {
 } from '../../common';
 import { isSystemAction } from '../../common/system_actions/is_system_action';
 
-export const isSummaryAction = (action?: RuleAction) => {
+export const isSummaryAction = (action?: RuleAction<'withSystemAction'>) => {
   if (action != null && isSystemAction(action)) {
     return false;
   }
@@ -24,7 +24,7 @@ export const isSummaryAction = (action?: RuleAction) => {
   return action?.frequency?.summary || false;
 };
 
-export const isActionOnInterval = (action?: RuleAction) => {
+export const isActionOnInterval = (action?: RuleAction<'withSystemAction'>) => {
   if (action != null && isSystemAction(action)) {
     return false;
   }
@@ -38,7 +38,7 @@ export const isActionOnInterval = (action?: RuleAction) => {
   );
 };
 
-export const isSummaryActionOnInterval = (action: RuleAction) => {
+export const isSummaryActionOnInterval = (action: RuleAction<'withSystemAction'>) => {
   if (action != null && isSystemAction(action)) {
     return false;
   }
@@ -51,7 +51,7 @@ export const isSummaryActionThrottled = ({
   throttledSummaryActions,
   logger,
 }: {
-  action?: RuleAction;
+  action?: RuleAction<'withSystemAction'>;
   throttledSummaryActions?: ThrottledActions;
   logger: Logger;
 }) => {
@@ -91,7 +91,7 @@ export const isSummaryActionThrottled = ({
   return throttled;
 };
 
-export const generateActionHash = (action?: RuleAction) => {
+export const generateActionHash = (action?: RuleAction<'withSystemAction'>) => {
   if (action != null && isSystemAction(action)) {
     return `system-action:${action?.actionTypeId || 'no-action-type-id'}:summary`;
   }
@@ -105,7 +105,7 @@ export const getSummaryActionsFromTaskState = ({
   actions,
   summaryActions = {},
 }: {
-  actions: RuleAction[];
+  actions: Array<RuleAction<'withSystemAction'>>;
   summaryActions?: ThrottledActions;
 }) => {
   const actionsWithoutSystemActions = actions.filter(
@@ -127,7 +127,7 @@ export const getSummaryActionsFromTaskState = ({
 };
 
 export const getSummaryActionTimeBounds = (
-  action: RuleAction,
+  action: RuleAction<'withSystemAction'>,
   ruleSchedule: IntervalSchedule,
   previousStartedAt: Date | null
 ): { start?: number; end?: number } => {
