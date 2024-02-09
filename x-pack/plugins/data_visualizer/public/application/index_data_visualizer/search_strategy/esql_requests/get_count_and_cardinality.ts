@@ -42,47 +42,72 @@ const getESQLOverallStatsInChunk = async ({
   onError?: HandleErrorCallback;
 }) => {
   if (fields.length > 0) {
-    // @TODO: SKIP query if aggregatableFieldsToQuery.length = 0
-    const aggregatableFieldsToQuery = fields.filter((f) => f.aggregatable);
+    const aggToIndex = { count: 0, cardinality: 1 };
+    // Track what's the starting index for the next field
+    // For aggregatable field, we are getting count(EVAL MV_MIN()) and count_disticnt
+    // For non-aggregatable field, we are getting only count()
+    let startIndex = 0;
+    /** Example query:
+     * from {indexPattern} | LIMIT {limitSize}
+     * | EVAL  `ne_{aggregableField}` = MV_MIN({aggregableField}),
+     * | STATs `{aggregableField}_count` = COUNT(`ne_{aggregableField}`),
+     * `{aggregableField}_cardinality` = COUNT_DISTINCT({aggregableField}),
+     * `{nonAggregableField}_count` = COUNT({nonAggregableField})
+     */
+    const fieldsToFetch: Array<Field & { evalQuery?: string; query: string; startIndex: number }> =
+      fields.map((field) => {
+        if (field.aggregatable) {
+          const result = {
+            ...field,
+            startIndex,
+            // Field values can be an array of values (fieldName = ['a', 'b', 'c'])
+            // and count(fieldName) will count all the field values in the array
+            // Ex: for 2 docs, count(fieldName) might return 5
+            // So we need to do count(EVAL(MV_MIN(fieldName))) instead
+            // to get accurate % of rows where field value exists
+            evalQuery: `${getSafeESQLName(`ne_${field.name}`)} = MV_MIN(${getSafeESQLName(
+              `${field.name}`
+            )})`,
+            query: `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
+              `ne_${field.name}`
+            )}),
+        ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
+              field.name
+            )})`,
+          };
+          // +2 for count, and count_dictinct
+          startIndex += 2;
+          return result;
+        } else {
+          const result = {
+            ...field,
+            startIndex,
+            query: `${getSafeESQLName(`${field.name}_count`)} = COUNT(${getSafeESQLName(
+              field.name
+            )})`,
+          };
+          // +1 for count for non-aggregatable field
+          startIndex += 1;
+          return result;
+        }
+      });
 
-    // Field values can be an array of values ['a', 'b', 'c']
-    // and count() will count all the field values in the array
-    // Ex: for 2 docs, count(field) might return 5
-    // So we need to check if field value is empty or not, and then sum them
-    // to get accurate % of rows where field value exists
-    const evalQuery =
-      aggregatableFieldsToQuery.length > 0
-        ? ' | EVAL ' +
-          aggregatableFieldsToQuery
-            .map((field) => {
-              // First, evaluate whether field value is defined, if so, count as 1
-              // Then, sum all the 1s to get the count of rows where field value exists
-              return `${getSafeESQLName(`ne_${field.name}`)} = CASE(${getSafeESQLName(
-                field.name
-              )} is NULL, 0, 1)`;
-            })
-            .join(',')
-        : '';
-
-    let countQuery = aggregatableFieldsToQuery.length > 0 ? '| STATS ' : '';
-    countQuery += aggregatableFieldsToQuery
-      .map((field) => {
-        // count idx = 0, cardinality idx = 1
-        return `${getSafeESQLName(`${field.name}_count`)} = SUM(${getSafeESQLName(
-          `ne_${field.name}`
-        )}),
-      ${getSafeESQLName(`${field.name}_cardinality`)} = COUNT_DISTINCT(${getSafeESQLName(
-          field.name
-        )})`;
-      })
+    const evalQuery = fieldsToFetch
+      .map((field) => field.evalQuery)
+      .filter(isDefined)
       .join(',');
 
+    let countQuery = fieldsToFetch.length > 0 ? '| STATS ' : '';
+    countQuery += fieldsToFetch.map((field) => field.query).join(',');
+
+    const query = esqlBaseQueryWithLimit + (evalQuery ? ' | EVAL ' + evalQuery : '') + countQuery;
     const request = {
       params: {
-        query: esqlBaseQueryWithLimit + evalQuery + countQuery,
+        query,
         ...(filter ? { filter } : {}),
       },
     };
+
     try {
       const esqlResults = await runRequest(request, { strategy: ESQL_SEARCH_STRATEGY });
       const stats = {
@@ -99,11 +124,14 @@ const getESQLOverallStatsInChunk = async ({
 
       const sampleCount =
         limitSize === 'none' || !isDefined(limitSize) ? totalCount : parseInt(limitSize, 10);
-      aggregatableFieldsToQuery.forEach((field, idx) => {
-        const count = esqlResultsResp.values[0][idx * 2] as number;
-        const cardinality = esqlResultsResp.values[0][idx * 2 + 1] as number;
+      fieldsToFetch.forEach((field, idx) => {
+        const count = esqlResultsResp.values[0][field.startIndex + aggToIndex.count] as number;
 
         if (field.aggregatable === true) {
+          const cardinality = esqlResultsResp.values[0][
+            field.startIndex + aggToIndex.cardinality
+          ] as number;
+
           if (count > 0) {
             stats.aggregatableExistsFields.push({
               ...field,
@@ -124,14 +152,20 @@ const getESQLOverallStatsInChunk = async ({
             });
           }
         } else {
-          const fieldData = {
-            fieldName: field.name,
-            existsInDocs: true,
-          };
           if (count > 0) {
-            stats.nonAggregatableExistsFields.push(fieldData);
+            stats.nonAggregatableExistsFields.push({
+              fieldName: field.name,
+              existsInDocs: true,
+              stats: {
+                sampleCount,
+                count,
+              },
+            });
           } else {
-            stats.nonAggregatableNotExistsFields.push(fieldData);
+            stats.nonAggregatableNotExistsFields.push({
+              fieldName: field.name,
+              existsInDocs: false,
+            });
           }
         }
       });
@@ -145,8 +179,8 @@ const getESQLOverallStatsInChunk = async ({
           defaultMessage:
             'Unable to fetch count & cardinality for {count} {count, plural, one {field} other {fields}}: {fieldNames}',
           values: {
-            count: aggregatableFieldsToQuery.length,
-            fieldNames: aggregatableFieldsToQuery.map((r) => r.name).join(),
+            count: fieldsToFetch.length,
+            fieldNames: fieldsToFetch.map((r) => r.name).join(),
           },
         }),
       });
