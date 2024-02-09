@@ -555,7 +555,23 @@
       "error": false
     },
     {
-      "query": "row var = cidr_match(\"a\", 5)",
+      "query": "row var = cidr_match(5, 5)",
+      "error": true
+    },
+    {
+      "query": "row var = cidr_match(\"a\", \"a\")",
+      "error": false
+    },
+    {
+      "query": "row cidr_match(\"a\", \"a\")",
+      "error": false
+    },
+    {
+      "query": "row var = cidr_match(to_string(\"a\"), to_string(\"a\"))",
+      "error": false
+    },
+    {
+      "query": "row var = cidr_match(5, 5)",
       "error": true
     },
     {
@@ -887,20 +903,12 @@
       "error": false
     },
     {
-      "query": "row var = mv_max(5)",
-      "error": false
-    },
-    {
-      "query": "row mv_max(5)",
-      "error": false
-    },
-    {
-      "query": "row var = mv_max(to_integer(\"a\"))",
-      "error": false
-    },
-    {
       "query": "row var = mv_max(\"a\")",
-      "error": true
+      "error": false
+    },
+    {
+      "query": "row mv_max(\"a\")",
+      "error": false
     },
     {
       "query": "row var = mv_median(5)",
@@ -919,20 +927,12 @@
       "error": true
     },
     {
-      "query": "row var = mv_min(5)",
-      "error": false
-    },
-    {
-      "query": "row mv_min(5)",
-      "error": false
-    },
-    {
-      "query": "row var = mv_min(to_integer(\"a\"))",
-      "error": false
-    },
-    {
       "query": "row var = mv_min(\"a\")",
-      "error": true
+      "error": false
+    },
+    {
+      "query": "row mv_min(\"a\")",
+      "error": false
     },
     {
       "query": "row var = mv_sum(5)",
@@ -3587,7 +3587,7 @@
       "error": false
     },
     {
-      "query": "from a_index | where log(stringField) > 0",
+      "query": "from a_index | where log(stringField, stringField) > 0",
       "error": true
     },
     {
@@ -3623,27 +3623,11 @@
       "error": true
     },
     {
-      "query": "from a_index | where mv_max(numberField) > 0",
-      "error": false
-    },
-    {
-      "query": "from a_index | where mv_max(stringField) > 0",
-      "error": true
-    },
-    {
       "query": "from a_index | where mv_median(numberField) > 0",
       "error": false
     },
     {
       "query": "from a_index | where mv_median(stringField) > 0",
-      "error": true
-    },
-    {
-      "query": "from a_index | where mv_min(numberField) > 0",
-      "error": false
-    },
-    {
-      "query": "from a_index | where mv_min(stringField) > 0",
       "error": true
     },
     {
@@ -3691,7 +3675,7 @@
       "error": false
     },
     {
-      "query": "from a_index | where round(stringField) > 0",
+      "query": "from a_index | where round(stringField, stringField) > 0",
       "error": true
     },
     {
@@ -4611,7 +4595,23 @@
       "error": false
     },
     {
-      "query": "from a_index | eval cidr_match(stringField, numberField)",
+      "query": "from a_index | eval cidr_match(numberField, numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = cidr_match(stringField, stringField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval cidr_match(stringField, stringField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval var = cidr_match(to_string(stringField), to_string(stringField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval cidr_match(numberField, numberField)",
       "error": true
     },
     {
@@ -5067,24 +5067,12 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = mv_max(numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval mv_max(numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval var = mv_max(to_integer(stringField))",
+      "query": "from a_index | eval var = mv_max(stringField)",
       "error": false
     },
     {
       "query": "from a_index | eval mv_max(stringField)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval mv_max(numberField, extraArg)",
-      "error": true
+      "error": false
     },
     {
       "query": "from a_index | eval var = mv_max(*)",
@@ -5115,24 +5103,12 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = mv_min(numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval mv_min(numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval var = mv_min(to_integer(stringField))",
+      "query": "from a_index | eval var = mv_min(stringField)",
       "error": false
     },
     {
       "query": "from a_index | eval mv_min(stringField)",
-      "error": true
-    },
-    {
-      "query": "from a_index | eval mv_min(numberField, extraArg)",
-      "error": true
+      "error": false
     },
     {
       "query": "from a_index | eval var = mv_min(*)",
