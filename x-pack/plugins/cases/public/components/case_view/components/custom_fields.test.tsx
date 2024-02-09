@@ -227,6 +227,10 @@ describe('Case View Page files tab', () => {
       await screen.findByTestId(`case-text-custom-field-edit-button-${customFieldsMock[0].key}`)
     );
 
+    expect(
+      await screen.findByText('This field is populated with the default value.')
+    ).toBeInTheDocument();
+
     userEvent.paste(
       await screen.findByTestId('case-text-custom-field-form-field-test_key_1'),
       ' updated!!'
