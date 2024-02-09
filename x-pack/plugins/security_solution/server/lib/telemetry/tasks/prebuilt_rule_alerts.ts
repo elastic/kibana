@@ -13,7 +13,7 @@ import type { ITaskMetricsService } from '../task_metrics.types';
 import type { ESClusterInfo, ESLicense, TelemetryEvent } from '../types';
 import type { TaskExecutionPeriod } from '../task';
 import { TELEMETRY_CHANNEL_DETECTION_ALERTS } from '../constants';
-import { batchTelemetryRecords, processK8sUsernames, tlog } from '../helpers';
+import { batchTelemetryRecords, processK8sUsernames, newTelemetryLogger } from '../helpers';
 import { copyAllowlistedFields, filterList } from '../filterlists';
 
 export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: number) {
@@ -34,10 +34,10 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const log = newTelemetryLogger(logger.get('prebuilt_rule_alerts')).l;
       const trace = taskMetricsService.start(taskType);
 
-      tlog(
-        logger,
+      log(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -61,7 +61,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
         const index = receiver.getAlertsIndex();
 
         if (index === undefined) {
-          tlog(logger, `alerts index is not ready yet, skipping telemetry task`);
+          log(`alerts index is not ready yet, skipping telemetry task`);
           taskMetricsService.end(trace);
           return 0;
         }
@@ -104,7 +104,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
             })
           );
 
-          tlog(logger, `sending ${enrichedAlerts.length} elastic prebuilt alerts`);
+          log(`sending ${enrichedAlerts.length} elastic prebuilt alerts`);
           const batches = batchTelemetryRecords(enrichedAlerts, maxTelemetryBatch);
 
           const promises = batches.map(async (batch) => {

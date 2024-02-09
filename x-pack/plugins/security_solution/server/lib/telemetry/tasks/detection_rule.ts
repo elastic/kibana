@@ -11,7 +11,7 @@ import { LIST_DETECTION_RULE_EXCEPTION, TELEMETRY_CHANNEL_LISTS } from '../const
 import {
   batchTelemetryRecords,
   templateExceptionList,
-  tlog,
+  newTelemetryLogger,
   createUsageCounterLabel,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
@@ -37,14 +37,12 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const log = newTelemetryLogger(logger.get('detection_rule')).l;
       const usageCollector = sender.getTelemetryUsageCluster();
-
       const usageLabelPrefix: string[] = ['security_telemetry', 'detection-rules'];
-
       const trace = taskMetricsService.start(taskType);
 
-      tlog(
-        logger,
+      log(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -68,7 +66,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         const { body: prebuiltRules } = await receiver.fetchDetectionRules();
 
         if (!prebuiltRules) {
-          tlog(logger, 'no prebuilt rules found');
+          log('no prebuilt rules found');
           taskMetricsService.end(trace);
           return 0;
         }
@@ -110,7 +108,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
           licenseInfo,
           LIST_DETECTION_RULE_EXCEPTION
         );
-        tlog(logger, `Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
+        log(`Detection rule exception json length ${detectionRuleExceptionsJson.length}`);
 
         usageCollector?.incrementCounter({
           counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -127,8 +125,7 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
         }
         taskMetricsService.end(trace);
 
-        tlog(
-          logger,
+        log(
           `Task: ${taskId} executed.  Processed ${detectionRuleExceptionsJson.length} exceptions`
         );
 

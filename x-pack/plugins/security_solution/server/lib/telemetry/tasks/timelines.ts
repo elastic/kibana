@@ -11,7 +11,7 @@ import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
 import type { ITaskMetricsService } from '../task_metrics.types';
 import { TELEMETRY_CHANNEL_TIMELINE } from '../constants';
-import { ranges, TelemetryTimelineFetcher, tlog } from '../helpers';
+import { ranges, TelemetryTimelineFetcher, newTelemetryLogger } from '../helpers';
 
 export function createTelemetryTimelineTaskConfig() {
   const taskName = 'Security Solution Timeline telemetry';
@@ -30,13 +30,13 @@ export function createTelemetryTimelineTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      tlog(
-        logger,
-        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
-      );
-
+      const log = newTelemetryLogger(logger.get('timelines')).l;
       const fetcher = new TelemetryTimelineFetcher(receiver);
       const trace = taskMetricsService.start(taskType);
+
+      log(
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
 
       try {
         let counter = 0;
@@ -49,7 +49,7 @@ export function createTelemetryTimelineTaskConfig() {
         }
         const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
 
-        tlog(logger, `found ${alerts.length} alerts to process`);
+        log(`found ${alerts.length} alerts to process`);
 
         for (const alert of alerts) {
           const result = await fetcher.fetchTimeline(alert);
@@ -70,11 +70,11 @@ export function createTelemetryTimelineTaskConfig() {
             sender.sendOnDemand(TELEMETRY_CHANNEL_TIMELINE, [result.timeline]);
             counter += 1;
           } else {
-            tlog(logger, 'no events in timeline');
+            log('no events in timeline');
           }
         }
 
-        tlog(logger, `sent ${counter} timelines. Concluding timeline task.`);
+        log(`sent ${counter} timelines. Concluding timeline task.`);
 
         taskMetricsService.end(trace);
 

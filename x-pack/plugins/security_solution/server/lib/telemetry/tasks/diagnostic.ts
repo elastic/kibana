@@ -6,7 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { tlog, getPreviousDiagTaskTimestamp } from '../helpers';
+import { newTelemetryLogger, getPreviousDiagTaskTimestamp } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
@@ -33,10 +33,10 @@ export function createTelemetryDiagnosticsTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
+      const log = newTelemetryLogger(logger.get('diagnostic')).l;
       const trace = taskMetricsService.start(taskType);
 
-      tlog(
-        logger,
+      log(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
@@ -57,13 +57,13 @@ export function createTelemetryDiagnosticsTaskConfig() {
           );
 
           if (alerts.length === 0) {
-            tlog(logger, 'no diagnostic alerts retrieved');
+            log('no diagnostic alerts retrieved');
             taskMetricsService.end(trace);
             return alertCount;
           }
 
           alertCount += alerts.length;
-          tlog(logger, `Sending ${alerts.length} diagnostic alerts`);
+          log(`Sending ${alerts.length} diagnostic alerts`);
           await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, processedAlerts);
         }
 

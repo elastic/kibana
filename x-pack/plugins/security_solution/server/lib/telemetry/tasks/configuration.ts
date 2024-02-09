@@ -33,10 +33,12 @@ export function createTelemetryConfigurationTaskConfig() {
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const log = newTelemetryLogger(logger.get('configuration')).l;
-
-      log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
-
       const trace = taskMetricsService.start(taskType);
+
+      log(
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const artifactName = 'telemetry-buffer-and-batch-sizes-v1';
         const manifest = await artifactService.getArtifact(artifactName);

@@ -32,11 +32,13 @@ export function createTelemetryFilterListArtifactTaskConfig() {
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const log = newTelemetryLogger(logger.get('filterlist')).l;
-
-      log(`Running task ${taskId} with execution period ${JSON.stringify(taskExecutionPeriod)}`);
-
+      const log = newTelemetryLogger(logger.get('filterlists')).l;
       const trace = taskMetricsService.start(taskType);
+
+      log(
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const artifactName = 'telemetry-filterlists-v1';
         const manifest = await artifactService.getArtifact(artifactName);

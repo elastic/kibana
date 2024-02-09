@@ -19,7 +19,7 @@ import {
   templateExceptionList,
   formatValueListMetaData,
   createUsageCounterLabel,
-  tlog,
+  newTelemetryLogger,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -43,16 +43,15 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
       taskMetricsService: ITaskMetricsService,
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
-      const usageCollector = sender.getTelemetryUsageCluster();
+      const log = newTelemetryLogger(logger.get('security_lists')).l;
+      const trace = taskMetricsService.start(taskType);
 
-      const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
-
-      tlog(
-        logger,
+      log(
         `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
       );
 
-      const trace = taskMetricsService.start(taskType);
+      const usageCollector = sender.getTelemetryUsageCluster();
+      const usageLabelPrefix: string[] = ['security_telemetry', 'lists'];
       try {
         let trustedApplicationsCount = 0;
         let endpointExceptionsCount = 0;
@@ -83,7 +82,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_TRUSTED_APPLICATION
           );
           trustedApplicationsCount = trustedAppsJson.length;
-          tlog(logger, `Trusted Apps: ${trustedApplicationsCount}`);
+          log(`Trusted Apps: ${trustedApplicationsCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -108,7 +107,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EXCEPTION
           );
           endpointExceptionsCount = epExceptionsJson.length;
-          tlog(logger, `EP Exceptions: ${endpointExceptionsCount}`);
+          log(`EP Exceptions: ${endpointExceptionsCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
@@ -133,7 +132,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             LIST_ENDPOINT_EVENT_FILTER
           );
           endpointEventFiltersCount = epFiltersJson.length;
-          tlog(logger, `EP Event Filters: ${endpointEventFiltersCount}`);
+          log(`EP Event Filters: ${endpointEventFiltersCount}`);
 
           usageCollector?.incrementCounter({
             counterName: createUsageCounterLabel(usageLabelPrefix),
