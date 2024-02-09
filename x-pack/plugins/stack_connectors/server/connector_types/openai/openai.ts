@@ -124,6 +124,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
+    if (error.message === '404 Unrecognized request argument supplied: functions') {
+      // add information for known Azure error
+      return `API Error: ${error.message}
+        \n\nFunction support with Azure OpenAI API was added in 2023-07-01-preview. Update the API version of the Azure OpenAI connector in use
+      `;
+    }
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
@@ -246,32 +252,35 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 
   /**
    * Streamed security solution AI Assistant requests (langchain)
-   * Responsible for invoking the streamApi method with the provided body and
-   * stream parameters set to true. It then returns an array of
-   * Stream<ChatCompletionChunk>, an extension of AsyncIterator,
-   * meant to be read/transformed on the server and sent to the client via Server Sent Events
+   * Uses the official OpenAI Node library, which handles Server-sent events for you.
    * @param body - the OpenAI Invoke request body
    * @returns a Stream<ChatCompletionChunk> array "teed", teed[0] is used for the UI and teed[1] for token tracking
+   * the result is meant to be read/transformed on the server and sent to the client via Server Sent Events
    */
   public async invokeAsyncIterator(
     body: InvokeAIActionParams
   ): Promise<Array<Stream<ChatCompletionChunk>>> {
-    const { signal, ...rest } = body;
-    const messages = rest.messages as unknown as ChatCompletionMessageParam[];
-    const requestBody: ChatCompletionCreateParamsStreaming = {
-      ...rest,
-      stream: true,
-      messages,
-      model:
-        rest.model ??
-        ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
-    };
-    const stream = await this.openAI.chat.completions.create(requestBody, {
-      signal,
-    });
-    // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
-    const teed = stream.tee();
-    return teed;
+    try {
+      const { signal, ...rest } = body;
+      const messages = rest.messages as unknown as ChatCompletionMessageParam[];
+      const requestBody: ChatCompletionCreateParamsStreaming = {
+        ...rest,
+        stream: true,
+        messages,
+        model:
+          rest.model ??
+          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+      };
+      const stream = await this.openAI.chat.completions.create(requestBody, {
+        signal,
+      });
+      // splits the stream in two, teed[0] is used for the UI and teed[1] for token tracking
+      const teed = stream.tee();
+      return teed;
+    } catch (e) {
+      const errorMessage = this.getResponseErrorMessage(e);
+      throw new Error(errorMessage);
+    }
   }
 
   /**

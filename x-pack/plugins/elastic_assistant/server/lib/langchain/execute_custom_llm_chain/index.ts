@@ -185,21 +185,8 @@ export const callAgentExecutor: AgentExecutor<true | false> = async ({
           return handleStreamEnd(message);
         }
         logger.error(`Error streaming from LangChain: ${error.message}`);
-        const errorMessages = [
-          `An error occurred while streaming from LangChain:\n\n`,
-          error.message,
-          // add extra error message for known Azure Functions error
-          ...(error.message.includes(`Unrecognized request argument supplied: functions`)
-            ? [
-                '\n\nFunction support with Azure OpenAI API was added in 2023-07-01-preview. Update the API version of the Azure OpenAI connector in use',
-              ]
-            : []),
-        ];
-
-        errorMessages.forEach((payload) => {
-          push({ payload, type: 'content' });
-        });
-        handleStreamEnd(errorMessages.join());
+        push({ payload: error.message, type: 'content' });
+        handleStreamEnd(error.message);
       });
 
     // TODO before merge to main
