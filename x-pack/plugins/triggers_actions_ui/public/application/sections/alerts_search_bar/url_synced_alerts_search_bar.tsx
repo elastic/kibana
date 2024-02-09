@@ -62,7 +62,7 @@ export const UrlSyncedAlertsSearchBar = ({
     clearSavedQuery,
   } = useAlertSearchBarStateContainer(ALERTS_URL_STORAGE_KEY);
 
-  const syncEsQuery = useCallback(() => {
+  useEffect(() => {
     try {
       onActiveFeatureFiltersChange?.([
         ...new Set(
@@ -98,10 +98,6 @@ export const UrlSyncedAlertsSearchBar = ({
     toasts,
   ]);
 
-  useEffect(() => {
-    syncEsQuery();
-  }, [syncEsQuery]);
-
   const onQueryChange = useCallback<NonNullable<AlertsSearchBarProps['onQueryChange']>>(
     ({ query, dateRange }) => {
       setSavedQuery(undefined);
@@ -109,17 +105,8 @@ export const UrlSyncedAlertsSearchBar = ({
       onKueryChange(query ?? '');
       onRangeFromChange(dateRange.from);
       onRangeToChange(dateRange.to);
-
-      syncEsQuery();
     },
-    [
-      onKueryChange,
-      onRangeFromChange,
-      onRangeToChange,
-      setSavedQuery,
-      syncEsQuery,
-      timeFilterService,
-    ]
+    [onKueryChange, onRangeFromChange, onRangeToChange, setSavedQuery, timeFilterService]
   );
 
   return (
