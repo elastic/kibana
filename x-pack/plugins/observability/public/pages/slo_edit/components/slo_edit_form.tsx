@@ -156,7 +156,7 @@ export function SloEditForm({ slo }: Props) {
             <EuiButtonEmpty
               color="primary"
               data-test-subj="sloFormCancelButton"
-              disabled={isCreateSloLoading || isUpdateSloLoading}
+              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
               onClick={() => navigateToUrl(basePath.prepend(paths.observability.slos))}
             >
               {i18n.translate('xpack.observability.slo.sloEdit.cancelButton', {
@@ -166,10 +166,13 @@ export function SloEditForm({ slo }: Props) {
 
             <EquivalentApiRequest
               slo={slo}
-              disabled={isCreateSloLoading || isUpdateSloLoading}
+              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
               isEditMode={isEditMode}
             />
-            <SLOInspectWrapper slo={slo} disabled={isCreateSloLoading || isUpdateSloLoading} />
+            <SLOInspectWrapper
+              slo={slo}
+              disabled={isCreateSloLoading || isUpdateSloLoading || isCreateBurnRateRuleLoading}
+            />
           </EuiFlexGroup>
         </EuiFlexGroup>
       </FormProvider>
