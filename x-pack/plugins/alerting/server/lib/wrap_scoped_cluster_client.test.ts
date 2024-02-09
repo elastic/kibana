@@ -60,7 +60,6 @@ describe('wrapScopedClusterClient', () => {
         abortController,
         requestTimeout: 5000,
       }).client();
-
       await wrappedSearchClient.asInternalUser.search(esQuery);
 
       expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
@@ -393,7 +392,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
         expect(logger.debug).toHaveBeenCalledWith(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_esql","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
       });
 
@@ -418,7 +417,7 @@ describe('wrapScopedClusterClient', () => {
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
         expect(logger.debug).toHaveBeenCalledWith(
-          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_esql","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_query","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
         );
       });
 

@@ -163,9 +163,9 @@ function getWrappedTransportRequestFn(opts: WrapEsClientOpts) {
     // No wrap
     return (await originalRequestFn.call(opts.esClient.transport, params, {
       ...options,
-      ...(opts.requestTimeout
+      ...(requestTimeout
         ? {
-            requestTimeout: opts.requestTimeout,
+            requestTimeout,
           }
         : {}),
     })) as Promise<TResponse>;
