@@ -8,7 +8,7 @@
 
 import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
-import {createStackFrameMetadata, getCalleeLabel, isErrorFrame} from './profiling';
+import { createStackFrameMetadata, getCalleeLabel, isErrorFrame } from './profiling';
 import { convertTonsToKgs } from './utils';
 
 /**

@@ -19,7 +19,6 @@ export type StackFrameID = string;
  */
 export type FileID = string;
 
-
 /**
  * Frame type
  */
@@ -244,7 +243,7 @@ function getExeFileName(metadata: StackFrameMetadata) {
 export function getCalleeLabel(metadata: StackFrameMetadata) {
   const inlineLabel = metadata.Inline ? '-> ' : '';
   if (metadata.FrameType === FrameType.Error) {
-    return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`
+    return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`;
   } else if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
