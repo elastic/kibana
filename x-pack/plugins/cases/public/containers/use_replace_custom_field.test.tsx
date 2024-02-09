@@ -18,7 +18,7 @@ jest.mock('./api');
 jest.mock('../common/lib/kibana');
 
 describe('useReplaceCustomField', () => {
-  const sampleUpdate = {
+  const sampleData = {
     caseId: basicCase.id,
     customFieldId: 'test_key_1',
     customFieldValue: 'this is an updated custom field',
@@ -44,7 +44,7 @@ describe('useReplaceCustomField', () => {
     });
 
     act(() => {
-      result.current.mutate(sampleUpdate);
+      result.current.mutate(sampleData);
     });
 
     await waitForNextUpdate();
@@ -60,17 +60,17 @@ describe('useReplaceCustomField', () => {
     });
 
     act(() => {
-      result.current.mutate(sampleUpdate);
+      result.current.mutate(sampleData);
     });
 
     await waitForNextUpdate();
 
     expect(patchCustomFieldSpy).toHaveBeenCalledWith({
-      caseId: sampleUpdate.caseId,
-      customFieldId: sampleUpdate.customFieldId,
+      caseId: sampleData.caseId,
+      customFieldId: sampleData.customFieldId,
       request: {
-        value: sampleUpdate.customFieldValue,
-        caseVersion: sampleUpdate.caseVersion,
+        value: sampleData.customFieldValue,
+        caseVersion: sampleData.caseVersion,
       },
     });
   });
@@ -141,7 +141,7 @@ describe('useReplaceCustomField', () => {
     });
 
     act(() => {
-      result.current.mutate(sampleUpdate);
+      result.current.mutate(sampleData);
     });
 
     await waitForNextUpdate();

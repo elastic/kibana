@@ -84,7 +84,7 @@ export const getCasesDeleteFileAttachmentsUrl = (id: string): string => {
   return INTERNAL_DELETE_FILE_ATTACHMENTS_URL.replace('{case_id}', id);
 };
 
-export const getCustomFieldUpdateUrl = (caseId: string, customFieldId: string): string => {
+export const getCustomFieldReplaceUrl = (caseId: string, customFieldId: string): string => {
   return INTERNAL_PUT_CUSTOM_FIELDS_URL.replace('{case_id}', caseId).replace(
     '{custom_field_id}',
     customFieldId

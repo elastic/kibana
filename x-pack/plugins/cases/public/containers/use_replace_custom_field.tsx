@@ -32,7 +32,7 @@ export const useReplaceCustomField = () => {
         request: { value: customFieldValue, caseVersion },
       }),
     {
-      mutationKey: casesMutationsKeys.updateCustomField,
+      mutationKey: casesMutationsKeys.replaceCustomField,
       onSuccess: () => {
         refreshCaseViewPage();
       },

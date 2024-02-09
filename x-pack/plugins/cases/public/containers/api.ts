@@ -49,7 +49,7 @@ import {
   getCaseConnectorsUrl,
   getCaseUsersUrl,
   getCaseUserActionStatsUrl,
-  getCustomFieldUpdateUrl,
+  getCustomFieldReplaceUrl,
 } from '../../common/api';
 import {
   CASE_REPORTERS_URL,
@@ -382,7 +382,7 @@ export const replaceCustomField = async ({
   signal?: AbortSignal;
 }): Promise<CaseUICustomField> => {
   const response = await KibanaServices.get().http.fetch<CaseCustomField>(
-    getCustomFieldUpdateUrl(caseId, customFieldId),
+    getCustomFieldReplaceUrl(caseId, customFieldId),
     {
       method: 'PUT',
       body: JSON.stringify(request),

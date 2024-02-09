@@ -149,7 +149,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('updates an existing toggle field correctly', async () => {
+  it('replaces an existing toggle field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -170,7 +170,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('updates new toggle field correctly', async () => {
+  it('replaces new toggle field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -191,7 +191,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('updates existing text field correctly', async () => {
+  it('replaces existing text field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
