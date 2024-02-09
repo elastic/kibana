@@ -14,22 +14,26 @@ import { ACTION_DETAILS_ROUTE } from '../../../../common/endpoint/constants';
 import type {
   ActionDetailsApiResponse,
   EndpointActionDataParameterTypes,
+  EndpointActionResponseDataOutput,
 } from '../../../../common/endpoint/types';
 
 export const useGetActionDetails = <
-  TOutputType extends object = object,
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput,
   TParameters extends EndpointActionDataParameterTypes = EndpointActionDataParameterTypes
 >(
   actionId: string,
-  options: UseQueryOptions<ActionDetailsApiResponse<TOutputType, TParameters>, IHttpFetchError> = {}
-): UseQueryResult<ActionDetailsApiResponse<TOutputType, TParameters>, IHttpFetchError> => {
+  options: UseQueryOptions<
+    ActionDetailsApiResponse<TOutputContent, TParameters>,
+    IHttpFetchError
+  > = {}
+): UseQueryResult<ActionDetailsApiResponse<TOutputContent, TParameters>, IHttpFetchError> => {
   const http = useHttp();
 
-  return useQuery<ActionDetailsApiResponse<TOutputType, TParameters>, IHttpFetchError>({
+  return useQuery<ActionDetailsApiResponse<TOutputContent, TParameters>, IHttpFetchError>({
     queryKey: ['get-action-details', actionId],
     ...options,
     queryFn: () => {
-      return http.get<ActionDetailsApiResponse<TOutputType, TParameters>>(
+      return http.get<ActionDetailsApiResponse<TOutputContent, TParameters>>(
         resolvePathVariables(ACTION_DETAILS_ROUTE, { action_id: actionId.trim() || 'undefined' }),
         {
           version: '2023-10-31',

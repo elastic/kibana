@@ -108,8 +108,8 @@ describe('useRulesListColumnSelector', () => {
       { field: 'schedule.interval', name: 'Interval' },
     ]);
 
-    const { getByText } = render(<>{ColumnSelector}</>);
-    expect(getByText('1 column hidden')).toBeInTheDocument();
+    const { getByLabelText } = render(<>{ColumnSelector}</>);
+    expect(getByLabelText('- Active: 5 out of 6')).toBeInTheDocument();
   });
 
   it('Lets hide last lastExecutionDate, Interval and duration columns', () => {
@@ -127,7 +127,7 @@ describe('useRulesListColumnSelector', () => {
       { field: 'notify', name: 'Html Notify' },
     ]);
 
-    const { getByText } = render(<>{ColumnSelector}</>);
-    expect(getByText('3 columns hidden')).toBeInTheDocument();
+    const { getByLabelText } = render(<>{ColumnSelector}</>);
+    expect(getByLabelText('- Active: 3 out of 6')).toBeInTheDocument();
   });
 });

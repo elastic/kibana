@@ -14,7 +14,16 @@ import type { AssetCriticalityRecord } from '../../../../common/api/entity_analy
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
 import type { AssetCriticality } from '../../api/api';
 import { useEntityAnalyticsRoutes } from '../../api/api';
-import { buildCriticalityQueryKeys } from './common';
+
+// SUGGESTION: @tiansivive Move this to some more general place within Entity Analytics
+export const buildCriticalityQueryKeys = (id: string) => {
+  const ASSET_CRITICALITY = 'ASSET_CRITICALITY';
+  const PRIVILEGES = 'PRIVILEGES';
+  return {
+    doc: [ASSET_CRITICALITY, id],
+    privileges: [ASSET_CRITICALITY, PRIVILEGES, id],
+  };
+};
 
 export const useAssetCriticalityData = (entity: Entity, modal: ModalState): State => {
   const QC = useQueryClient();
@@ -31,7 +40,7 @@ export const useAssetCriticalityData = (entity: Entity, modal: ModalState): Stat
     queryKey: QUERY_KEYS.doc,
     queryFn: () => fetchAssetCriticality({ idField: `${entity.type}.name`, idValue: entity.name }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
-    enabled: privileges.data?.has_all_required,
+    enabled: !!privileges.data?.has_read_permissions,
   });
 
   const mutation = useMutation({

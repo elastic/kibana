@@ -45,18 +45,15 @@ import { installTransforms } from '../elasticsearch/transform/install';
 import { installMlModel } from '../elasticsearch/ml_model';
 import { installIlmForDataStream } from '../elasticsearch/datastream_ilm/install';
 import { saveArchiveEntriesFromAssetsMap } from '../archive/storage';
-import { ConcurrentInstallOperationError } from '../../../errors';
+import { ConcurrentInstallOperationError, PackageSavedObjectConflictError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import {
-  createInstallation,
-  restartInstallation,
-  installIndexTemplatesAndPipelines,
-} from './install';
+import { createInstallation, restartInstallation } from './install';
 import { withPackageSpan } from './utils';
 import { clearLatestFailedAttempts } from './install_errors_helpers';
+import { installIndexTemplatesAndPipelines } from './install_index_template_pipeline';
 
 // this is only exported for testing
 // use a leading underscore to indicate it's not the supported path
@@ -348,7 +345,7 @@ export async function _installPackage({
       savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
     });
     logger.debug(`Package install - Updating install status`);
-    const updatedPackage = await withPackageSpan('Update install status', () =>
+    await withPackageSpan('Update install status', () =>
       savedObjectsClient.update<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
         version: pkgVersion,
         install_version: pkgVersion,
@@ -361,8 +358,13 @@ export async function _installPackage({
         ),
       })
     );
-    logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
 
+    // Need to refetch the installation again to retrieve all the attributes
+    const updatedPackage = await savedObjectsClient.get<Installation>(
+      PACKAGES_SAVED_OBJECT_TYPE,
+      pkgName
+    );
+    logger.debug(`Package install - Install status ${updatedPackage?.attributes?.install_status}`);
     // If the package is flagged with the `keep_policies_up_to_date` flag, upgrade its
     // associated package policies after installation
     if (updatedPackage.attributes.keep_policies_up_to_date) {
@@ -382,10 +384,12 @@ export async function _installPackage({
     return [...installedKibanaAssetsRefs, ...esReferences];
   } catch (err) {
     if (SavedObjectsErrorHelpers.isConflictError(err)) {
-      throw new ConcurrentInstallOperationError(
-        `Concurrent installation or upgrade of ${pkgName || 'unknown'}-${
+      throw new PackageSavedObjectConflictError(
+        `Saved Object conflict encountered while installing ${pkgName || 'unknown'}-${
           pkgVersion || 'unknown'
-        } detected, aborting. Original error: ${err.message}`
+        }. There may be a conflicting Saved Object saved to another Space. Original error: ${
+          err.message
+        }`
       );
     } else {
       throw err;

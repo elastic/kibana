@@ -5,10 +5,10 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TimeRange } from '@kbn/es-query';
-import { ChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfig, LensDataviewDataset } from '@kbn/lens-embeddable-utils/config_builder';
+import { useDataView } from '../../../../../hooks/use_data_view';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../lens';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
@@ -19,15 +19,17 @@ export const Kpi = ({
   height,
   assetName,
   dateRange,
-  dataView,
   ...chartProps
-}: ChartModel & {
+}: LensConfig & {
+  id: string;
   height: number;
   dataView?: DataView;
   assetName: string;
   dateRange: TimeRange;
 }) => {
   const { searchSessionId } = useLoadingStateContext();
+  const { dataView } = useDataView({ index: (chartProps.dataset as LensDataviewDataset)?.index });
+
   const filters = useMemo(() => {
     return [
       buildCombinedHostsFilter({
@@ -50,7 +52,6 @@ export const Kpi = ({
     <LensChart
       {...chartProps}
       id={`infraAssetDetailsKPI${id}`}
-      dataView={dataView}
       dateRange={dateRange}
       height={height}
       filters={filters}

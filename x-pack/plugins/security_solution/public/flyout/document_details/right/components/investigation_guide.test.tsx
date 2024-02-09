@@ -16,12 +16,15 @@ import {
   INVESTIGATION_GUIDE_TEST_ID,
 } from './test_ids';
 import { mockContextValue } from '../mocks/mock_context';
-import { mockFlyoutContextValue } from '../../shared/mocks/mock_flyout_context';
-import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import type { ExpandableFlyoutApi } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { LeftPanelInvestigationTab, DocumentDetailsLeftPanelKey } from '../../left';
 
 jest.mock('../../shared/hooks/use_investigation_guide');
+jest.mock('@kbn/expandable-flyout', () => ({ useExpandableFlyoutApi: jest.fn() }));
+
+const mockFlyoutContextValue = { openLeftPanel: jest.fn() };
 
 const NO_DATA_MESSAGE = 'Investigation guideThere’s no investigation guide for this rule.';
 const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.';
@@ -29,15 +32,19 @@ const PREVIEW_MESSAGE = 'Investigation guide is not available in alert preview.'
 const renderInvestigationGuide = () =>
   render(
     <IntlProvider locale="en">
-      <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-        <RightPanelContext.Provider value={mockContextValue}>
-          <InvestigationGuide />
-        </RightPanelContext.Provider>
-      </ExpandableFlyoutContext.Provider>
+      <RightPanelContext.Provider value={mockContextValue}>
+        <InvestigationGuide />
+      </RightPanelContext.Provider>
     </IntlProvider>
   );
 
 describe('<InvestigationGuide />', () => {
+  beforeAll(() => {
+    jest.mocked(useExpandableFlyoutApi).mockReturnValue({
+      openLeftPanel: mockFlyoutContextValue.openLeftPanel,
+    } as unknown as ExpandableFlyoutApi);
+  });
+
   it('should render investigation guide button correctly', () => {
     (useInvestigationGuide as jest.Mock).mockReturnValue({
       loading: false,
@@ -101,11 +108,9 @@ describe('<InvestigationGuide />', () => {
   it('should render preview message when flyout is in preview', () => {
     const { queryByTestId, getByTestId } = render(
       <IntlProvider locale="en">
-        <ExpandableFlyoutContext.Provider value={mockFlyoutContextValue}>
-          <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
-            <InvestigationGuide />
-          </RightPanelContext.Provider>
-        </ExpandableFlyoutContext.Provider>
+        <RightPanelContext.Provider value={{ ...mockContextValue, isPreview: true }}>
+          <InvestigationGuide />
+        </RightPanelContext.Provider>
       </IntlProvider>
     );
 

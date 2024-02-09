@@ -91,8 +91,6 @@ export const ATTACH_ALERT_TO_CASE_BUTTON = '[data-test-subj="add-to-existing-cas
 
 export const ATTACH_TO_NEW_CASE_BUTTON = '[data-test-subj="add-to-new-case-action"]';
 
-export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
-
 export const HOST_RISK_HEADER_COLUMN =
   '[data-test-subj="dataGridHeaderCell-host.risk.calculated_level"]';
 
@@ -228,3 +226,6 @@ export const ALERT_DETAILS_ASSIGN_BUTTON =
   '[data-test-subj="securitySolutionFlyoutHeaderAssigneesAddButton"]';
 
 export const ALERT_DETAILS_TAKE_ACTION_BUTTON = '[data-test-subj="take-action-dropdown-btn"]';
+
+export const USER_COLUMN = '[data-gridcell-column-id="user.name"]';
+export const TOOLTIP = '[data-test-subj="message-tool-tip"]';

@@ -73,8 +73,10 @@ export function OverviewPage() {
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
     buildEsQuery({
-      from: relativeStart,
-      to: relativeEnd,
+      timeRange: {
+        from: relativeStart,
+        to: relativeEnd,
+      },
     })
   );
 
@@ -108,8 +110,10 @@ export function OverviewPage() {
   useEffect(() => {
     setEsQuery(
       buildEsQuery({
-        from: relativeStart,
-        to: relativeEnd,
+        timeRange: {
+          from: relativeStart,
+          to: relativeEnd,
+        },
       })
     );
   }, [relativeEnd, relativeStart]);
@@ -117,8 +121,10 @@ export function OverviewPage() {
   const handleTimeRangeRefresh = useCallback(() => {
     setEsQuery(
       buildEsQuery({
-        from: relativeStart,
-        to: relativeEnd,
+        timeRange: {
+          from: relativeStart,
+          to: relativeEnd,
+        },
       })
     );
   }, [relativeEnd, relativeStart]);

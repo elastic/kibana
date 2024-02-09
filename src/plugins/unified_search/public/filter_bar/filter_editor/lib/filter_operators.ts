@@ -32,6 +32,14 @@ export const strings = {
     i18n.translate('unifiedSearch.filter.filterEditor.isBetweenOperatorOptionLabel', {
       defaultMessage: 'is between',
     }),
+  getIsGreaterOrEqualOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.greaterThanOrEqualOptionLabel', {
+      defaultMessage: 'greater or equal',
+    }),
+  getLessThanOperatorOptionLabel: () =>
+    i18n.translate('unifiedSearch.filter.filterEditor.lessThanOrEqualOptionLabel', {
+      defaultMessage: 'less than',
+    }),
   getIsNotBetweenOperatorOptionLabel: () =>
     i18n.translate('unifiedSearch.filter.filterEditor.isNotBetweenOperatorOptionLabel', {
       defaultMessage: 'is not between',
@@ -46,10 +54,24 @@ export const strings = {
     }),
 };
 
+export enum OPERATORS {
+  LESS = 'less',
+  GREATER_OR_EQUAL = 'greater_or_equal',
+  BETWEEN = 'between',
+  IS = 'is',
+  NOT_BETWEEN = 'not_between',
+  IS_NOT = 'is_not',
+  IS_ONE_OF = 'is_one_of',
+  IS_NOT_ONE_OF = 'is_not_one_of',
+  EXISTS = 'exists',
+  DOES_NOT_EXIST = 'does_not_exist',
+}
+
 export interface Operator {
   message: string;
   type: FILTERS;
   negate: boolean;
+  id: OPERATORS;
 
   /**
    * KbnFieldTypes applicable for operator
@@ -67,12 +89,14 @@ export const isOperator = {
   message: strings.getIsOperatorOptionLabel(),
   type: FILTERS.PHRASE,
   negate: false,
+  id: OPERATORS.IS,
 };
 
 export const isNotOperator = {
   message: strings.getIsNotOperatorOptionLabel(),
   type: FILTERS.PHRASE,
   negate: true,
+  id: OPERATORS.IS_NOT,
 };
 
 export const isOneOfOperator = {
@@ -80,6 +104,7 @@ export const isOneOfOperator = {
   type: FILTERS.PHRASES,
   negate: false,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  id: OPERATORS.IS_ONE_OF,
 };
 
 export const isNotOneOfOperator = {
@@ -87,46 +112,61 @@ export const isNotOneOfOperator = {
   type: FILTERS.PHRASES,
   negate: true,
   fieldTypes: ['string', 'number', 'date', 'ip', 'geo_point', 'geo_shape'],
+  id: OPERATORS.IS_NOT_ONE_OF,
+};
+
+const rangeOperatorsSharedProps = {
+  type: FILTERS.RANGE,
+  field: (field: DataViewField) => {
+    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
+      return true;
+
+    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
+
+    return false;
+  },
 };
 
 export const isBetweenOperator = {
+  ...rangeOperatorsSharedProps,
   message: strings.getIsBetweenOperatorOptionLabel(),
-  type: FILTERS.RANGE,
+  id: OPERATORS.BETWEEN,
   negate: false,
-  field: (field: DataViewField) => {
-    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
-      return true;
+};
 
-    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
+export const isLessThanOperator = {
+  ...rangeOperatorsSharedProps,
+  message: strings.getLessThanOperatorOptionLabel(),
+  id: OPERATORS.LESS,
+  negate: false,
+};
 
-    return false;
-  },
+export const isGreaterOrEqualOperator = {
+  ...rangeOperatorsSharedProps,
+  message: strings.getIsGreaterOrEqualOperatorOptionLabel(),
+  id: OPERATORS.GREATER_OR_EQUAL,
+  negate: false,
 };
 
 export const isNotBetweenOperator = {
+  ...rangeOperatorsSharedProps,
   message: strings.getIsNotBetweenOperatorOptionLabel(),
-  type: FILTERS.RANGE,
   negate: true,
-  field: (field: DataViewField) => {
-    if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
-      return true;
-
-    if (field.type === 'string' && field.esTypes?.includes(ES_FIELD_TYPES.VERSION)) return true;
-
-    return false;
-  },
+  id: OPERATORS.NOT_BETWEEN,
 };
 
 export const existsOperator = {
   message: strings.getExistsOperatorOptionLabel(),
   type: FILTERS.EXISTS,
   negate: false,
+  id: OPERATORS.EXISTS,
 };
 
 export const doesNotExistOperator = {
   message: strings.getDoesNotExistOperatorOptionLabel(),
   type: FILTERS.EXISTS,
   negate: true,
+  id: OPERATORS.DOES_NOT_EXIST,
 };
 
 export const FILTER_OPERATORS: Operator[] = [
@@ -134,6 +174,8 @@ export const FILTER_OPERATORS: Operator[] = [
   isNotOperator,
   isOneOfOperator,
   isNotOneOfOperator,
+  isGreaterOrEqualOperator,
+  isLessThanOperator,
   isBetweenOperator,
   isNotBetweenOperator,
   existsOperator,

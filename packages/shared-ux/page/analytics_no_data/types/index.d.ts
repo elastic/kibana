@@ -5,11 +5,14 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { Observable } from 'rxjs';
+
+import { NoDataPagePluginSetup } from '@kbn/no-data-page-plugin/public';
 import {
   KibanaNoDataPageServices,
   KibanaNoDataPageKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-no-data-types';
-import { Observable } from 'rxjs';
 
 /**
  * A list of services that are consumed by this component.
@@ -18,6 +21,7 @@ export interface Services {
   kibanaGuideDocLink: string;
   customBranding: { hasCustomBranding$: Observable<boolean> };
   prependBasePath: (path: string) => string;
+  getHttp: <T>(path: string) => Promise<T>;
   pageFlavor: AnalyticsNoDataPageFlavor;
 }
 
@@ -44,11 +48,10 @@ export interface KibanaDependencies {
       basePath: {
         prepend: (path: string) => string;
       };
+      get: <T>(path: string, options?: object) => Promise<T>;
     };
   };
-  noDataPage?: {
-    getAnalyticsNoDataPageFlavor: () => AnalyticsNoDataPageFlavor;
-  };
+  noDataPage?: NoDataPagePluginSetup;
 }
 
 /**
@@ -66,4 +69,6 @@ export interface AnalyticsNoDataPageProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** Handler for when try ES|QL is clicked and user has been navigated to try ES|QL in discover. */
+  onESQLNavigationComplete?: () => void;
 }

@@ -131,6 +131,7 @@ export function AddCisIntegrationFormPageProvider({
       'integrations/cloud_security_posture/add-integration/cspm',
       { shouldUseHashForSubUrl: false }
     );
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const navigateToAddIntegrationCnvmPage = async () => {
@@ -139,6 +140,7 @@ export function AddCisIntegrationFormPageProvider({
       'integrations/cloud_security_posture/add-integration/vuln_mgmt',
       { shouldUseHashForSubUrl: false }
     );
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const navigateToIntegrationCspList = async () => {
@@ -150,6 +152,7 @@ export function AddCisIntegrationFormPageProvider({
         shouldLoginIfPrompted: false,
       }
     );
+    await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
   const clickPolicyToBeEdited = async (name: string) => {

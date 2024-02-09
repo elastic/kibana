@@ -14,7 +14,7 @@ import {
   StreamingChatResponseEvent,
   StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import { CreateChatCompletionRequest } from 'openai';
+import type OpenAI from 'openai';
 import { createLlmProxy, LlmProxy } from '../../common/create_llm_proxy';
 import { createOpenAiChunk } from '../../common/create_openai_chunk';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
@@ -103,8 +103,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       await simulator.status(200);
       const chunk = JSON.stringify(createOpenAiChunk('Hello'));
 
-      await simulator.write(`data: ${chunk.substring(0, 10)}`);
-      await simulator.write(`${chunk.substring(10)}\n`);
+      await simulator.rawWrite(`data: ${chunk.substring(0, 10)}`);
+      await simulator.rawWrite(`${chunk.substring(10)}\n\n`);
       await simulator.complete();
 
       await new Promise<void>((resolve) => passThrough.on('end', () => resolve()));
@@ -145,12 +145,18 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       before(async () => {
         const titleInterceptor = proxy.intercept(
           'title',
-          (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length === 1
+          (body) =>
+            (
+              JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+            ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
         );
 
         const conversationInterceptor = proxy.intercept(
           'conversation',
-          (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length !== 1
+          (body) =>
+            (
+              JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+            ).functions?.find((fn) => fn.name === 'title_conversation') === undefined
         );
 
         const responsePromise = new Promise<Response>((resolve, reject) => {

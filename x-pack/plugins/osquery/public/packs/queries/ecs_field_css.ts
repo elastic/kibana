@@ -38,6 +38,7 @@ export const fieldIconCss = {
 export const fieldSpanCss = {
   paddingTop: '0 !important',
   paddingBottom: '0 !important',
+  paddingLeft: '5px',
 };
 
 export const descriptionWrapperCss = {

@@ -16,6 +16,8 @@ const createServiceMock = (): ExtensionsSetupMock => ({
   addBanner: jest.fn(),
   addFilter: jest.fn(),
   addToggle: jest.fn(),
+  addColumn: jest.fn(),
+  setEmptyListContent: jest.fn(),
   addIndexDetailsTab: jest.fn(),
   setIndexOverviewContent: jest.fn(),
   setIndexMappingsContent: jest.fn(),

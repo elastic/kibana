@@ -111,7 +111,6 @@ export function AddDataView() {
                 {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHost}" \\
---set "version=${stackVersion}" \\
 --version=${stackVersion} \\
 elastic/pf-host-agent`}
               </EuiCodeBlock>

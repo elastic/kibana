@@ -479,7 +479,7 @@ export const Expressions: React.FC<Props> = (props) => {
             </EuiToolTip>
           </>
         }
-        disabled={disableNoData || !hasGroupBy}
+        disabled={!hasGroupBy}
         checked={Boolean(hasGroupBy && ruleParams.alertOnGroupDisappear)}
         onChange={(e) => setRuleParams('alertOnGroupDisappear', e.target.checked)}
       />

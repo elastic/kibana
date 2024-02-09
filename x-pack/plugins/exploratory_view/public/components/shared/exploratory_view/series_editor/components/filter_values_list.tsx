@@ -15,10 +15,12 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FilterValueButton } from '../columns/filter_value_btn';
 import { FilterProps, NestedFilterOpen } from '../columns/filter_expanded';
 import { UrlFilter } from '../../types';
-import { ListItem } from '../../../../../hooks/use_values_list';
 
 interface Props extends FilterProps {
-  values: ListItem[];
+  values: Array<{
+    label: string;
+    count: number;
+  }>;
   field: string;
   query: string;
   loading?: boolean;

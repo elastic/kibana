@@ -46,6 +46,7 @@ export interface ExpressionWrapperProps {
   executionContext?: KibanaExecutionContext;
   lensInspector: LensInspector;
   noPadding?: boolean;
+  abortController?: AbortController;
 }
 
 export function ExpressionWrapper({
@@ -71,6 +72,7 @@ export function ExpressionWrapper({
   executionContext,
   lensInspector,
   noPadding,
+  abortController,
 }: ExpressionWrapperProps) {
   if (!expression) return null;
   return (
@@ -92,6 +94,7 @@ export function ExpressionWrapper({
           syncTooltips={syncTooltips}
           syncCursor={syncCursor}
           executionContext={executionContext}
+          abortController={abortController}
           renderError={(errorMessage, error) => {
             const messages = getOriginalRequestErrorMessages(error || null);
             addUserMessages(messages);

@@ -47,6 +47,7 @@ export function processCategoryResults(
       subFieldExamples:
         b.sub_time_range?.buckets[0].examples.hits.hits.map((h) => get(h._source, field)) ??
         undefined,
+      regex: b.regex,
     };
   });
   return {

@@ -64,6 +64,8 @@ export const config: PluginConfigDescriptor<CloudFullStoryConfigType> = {
           { path: 'xpack.cloud.full_story.enabled' },
           { path: 'xpack.cloud.full_story.org_id' },
           { path: 'xpack.cloud.full_story.eventTypesAllowlist' },
+          { path: 'xpack.cloud_integrations.gain_sight.org_id' },
+          { path: 'xpack.cloud_integrations.gain_sight.enabled' },
         ],
       };
     },

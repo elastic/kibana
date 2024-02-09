@@ -282,7 +282,7 @@ describe('handles errors during migrations', () => {
         migration800(taskInstance, migrationContext);
       }).toThrowError();
       expect(migrationContext.log.error).toHaveBeenCalledWith(
-        `savedObject 8.0.0 migration failed for task instance ${taskInstance.id} with error: Unexpected token s in JSON at position 2`,
+        `savedObject 8.0.0 migration failed for task instance ${taskInstance.id} with error: Expected property name or '}' in JSON at position 2`,
         {
           migrations: {
             taskInstanceDocument: {

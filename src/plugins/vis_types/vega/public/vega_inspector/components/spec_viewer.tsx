@@ -18,7 +18,7 @@ import {
   EuiSpacer,
   CommonProps,
 } from '@elastic/eui';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { VegaAdapter } from '../vega_adapter';
 
 interface SpecViewerProps extends CommonProps {

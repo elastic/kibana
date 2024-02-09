@@ -71,6 +71,7 @@ export interface ControlEditorProps<T extends ControlInput = ControlInput> {
   initialInput?: Partial<T>;
   fieldType: string;
   onChange: (partial: Partial<T>) => void;
+  setControlEditorValid: (isValid: boolean) => void;
 }
 
 export interface DataControlField {

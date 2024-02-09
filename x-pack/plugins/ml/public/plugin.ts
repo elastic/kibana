@@ -242,6 +242,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
               registerMlAlerts(
                 pluginsSetup.triggersActionsUi,
                 core.getStartServices,
+                mlCapabilities,
                 pluginsSetup.alerting
               );
             }

@@ -11,6 +11,7 @@ import {
   SavedObjectsServiceStart,
   PluginInitializerContext,
   ISavedObjectsRepository,
+  CoreStart,
 } from '@kbn/core/server';
 import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import {
@@ -48,6 +49,7 @@ export interface RulesClientFactoryOpts {
   maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   getAlertIndicesAlias: GetAlertIndicesAlias;
   alertsService: AlertsService | null;
+  uiSettings: CoreStart['uiSettings'];
 }
 
 export class RulesClientFactory {
@@ -70,6 +72,7 @@ export class RulesClientFactory {
   private maxScheduledPerMinute!: AlertingRulesConfig['maxScheduledPerMinute'];
   private getAlertIndicesAlias!: GetAlertIndicesAlias;
   private alertsService!: AlertsService | null;
+  private uiSettings!: CoreStart['uiSettings'];
 
   public initialize(options: RulesClientFactoryOpts) {
     if (this.isInitialized) {
@@ -94,6 +97,7 @@ export class RulesClientFactory {
     this.maxScheduledPerMinute = options.maxScheduledPerMinute;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
     this.alertsService = options.alertsService;
+    this.uiSettings = options.uiSettings;
   }
 
   public create(request: KibanaRequest, savedObjects: SavedObjectsServiceStart): RulesClient {
@@ -124,6 +128,8 @@ export class RulesClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       getAlertIndicesAlias: this.getAlertIndicesAlias,
       alertsService: this.alertsService,
+      uiSettings: this.uiSettings,
+
       async getUserName() {
         if (!securityPluginStart) {
           return null;

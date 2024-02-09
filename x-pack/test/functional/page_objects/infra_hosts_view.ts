@@ -6,7 +6,7 @@
  */
 
 import { AlertStatus } from '@kbn/rule-data-utils';
-import { WebElementWrapper } from '../../../../test/functional/services/lib/web_element_wrapper';
+import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
@@ -49,11 +49,11 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
     // Table
 
     async getHostsTable() {
-      return testSubjects.find('hostsView-table');
+      return testSubjects.find('hostsView-table-loaded');
     },
 
-    async isHostTableLoading() {
-      return !(await testSubjects.exists('tbody[class*=euiBasicTableBodyLoading]'));
+    async isHostTableLoaded() {
+      return !(await testSubjects.exists('hostsView-table-loading'));
     },
 
     async getHostsTableData() {

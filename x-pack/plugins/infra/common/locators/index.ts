@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { LogsLocator } from './logs_locator';
-import type { NodeLogsLocator } from './node_logs_locator';
+import type { InfraLogsLocator } from './logs_locator';
+import type { InfraNodeLogsLocator } from './node_logs_locator';
 
 export * from './logs_locator';
 export * from './node_logs_locator';
 
 export interface InfraLocators {
-  logsLocator: LogsLocator;
-  nodeLogsLocator: NodeLogsLocator;
+  logsLocator?: InfraLogsLocator;
+  nodeLogsLocator?: InfraNodeLogsLocator;
 }

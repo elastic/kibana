@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-/* eslint-disable max-classes-per-file*/
+
 import { i18n } from '@kbn/i18n';
 import { Message } from './types';
 
@@ -13,7 +13,8 @@ export enum StreamingChatResponseEventType {
   ConversationCreate = 'conversationCreate',
   ConversationUpdate = 'conversationUpdate',
   MessageAdd = 'messageAdd',
-  ConversationCompletionError = 'conversationCompletionError',
+  ChatCompletionError = 'chatCompletionError',
+  BufferFlush = 'bufferFlush',
 }
 
 type StreamingChatResponseEventBase<
@@ -23,7 +24,7 @@ type StreamingChatResponseEventBase<
   type: TEventType;
 } & TData;
 
-type ChatCompletionChunkEvent = StreamingChatResponseEventBase<
+export type ChatCompletionChunkEvent = StreamingChatResponseEventBase<
   StreamingChatResponseEventType.ChatCompletionChunk,
   {
     id: string;
@@ -64,9 +65,23 @@ export type MessageAddEvent = StreamingChatResponseEventBase<
   { message: Message; id: string }
 >;
 
-export type ConversationCompletionErrorEvent = StreamingChatResponseEventBase<
-  StreamingChatResponseEventType.ConversationCompletionError,
-  { error: { message: string; stack?: string; code?: ChatCompletionErrorCode } }
+export type ChatCompletionErrorEvent = StreamingChatResponseEventBase<
+  StreamingChatResponseEventType.ChatCompletionError,
+  {
+    error: {
+      message: string;
+      stack?: string;
+      code?: ChatCompletionErrorCode;
+      meta?: Record<string, any>;
+    };
+  }
+>;
+
+export type BufferFlushEvent = StreamingChatResponseEventBase<
+  StreamingChatResponseEventType.BufferFlush,
+  {
+    data?: string;
+  }
 >;
 
 export type StreamingChatResponseEvent =
@@ -74,36 +89,74 @@ export type StreamingChatResponseEvent =
   | ConversationCreateEvent
   | ConversationUpdateEvent
   | MessageAddEvent
-  | ConversationCompletionErrorEvent;
+  | ChatCompletionErrorEvent;
+
+export type StreamingChatResponseEventWithoutError = Exclude<
+  StreamingChatResponseEvent,
+  ChatCompletionErrorEvent
+>;
 
 export enum ChatCompletionErrorCode {
   InternalError = 'internalError',
-  NotFound = 'notFound',
+  NotFoundError = 'notFoundError',
+  TokenLimitReachedError = 'tokenLimitReachedError',
 }
 
-export class ConversationCompletionError extends Error {
-  code: ChatCompletionErrorCode;
+interface ErrorMetaAttributes {
+  [ChatCompletionErrorCode.InternalError]: {};
+  [ChatCompletionErrorCode.NotFoundError]: {};
+  [ChatCompletionErrorCode.TokenLimitReachedError]: {
+    tokenLimit?: number;
+    tokenCount?: number;
+  };
+}
 
-  constructor(code: ChatCompletionErrorCode, message: string) {
+export class ChatCompletionError<T extends ChatCompletionErrorCode> extends Error {
+  constructor(public code: T, message: string, public meta?: ErrorMetaAttributes[T]) {
     super(message);
-    this.code = code;
   }
 }
 
-export class ConversationNotFoundError extends ConversationCompletionError {
-  constructor() {
-    super(
-      ChatCompletionErrorCode.NotFound,
-      i18n.translate(
-        'xpack.observabilityAiAssistant.conversationCompletionError.conversationNotFound',
-        {
-          defaultMessage: 'Conversation not found',
-        }
-      )
-    );
-  }
+export function createTokenLimitReachedError(tokenLimit?: number, tokenCount?: number) {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.TokenLimitReachedError,
+    i18n.translate('xpack.observabilityAiAssistant.chatCompletionError.tokenLimitReachedError', {
+      defaultMessage: `Token limit reached. Token limit is {tokenLimit}, but the current conversation has {tokenCount} tokens.`,
+      values: { tokenLimit, tokenCount },
+    }),
+    { tokenLimit, tokenCount }
+  );
 }
 
-export function isChatCompletionError(error: Error): error is ConversationCompletionError {
-  return error instanceof ConversationCompletionError;
+export function createConversationNotFoundError() {
+  return new ChatCompletionError(
+    ChatCompletionErrorCode.NotFoundError,
+    i18n.translate('xpack.observabilityAiAssistant.chatCompletionError.conversationNotFoundError', {
+      defaultMessage: 'Conversation not found',
+    })
+  );
+}
+
+export function createInternalServerError(
+  originalErrorMessage: string = i18n.translate(
+    'xpack.observabilityAiAssistant.chatCompletionError.internalServerError',
+    {
+      defaultMessage: 'An internal server error occurred',
+    }
+  )
+) {
+  return new ChatCompletionError(ChatCompletionErrorCode.InternalError, originalErrorMessage);
+}
+
+export function isTokenLimitReachedError(
+  error: Error
+): error is ChatCompletionError<ChatCompletionErrorCode.TokenLimitReachedError> {
+  return (
+    error instanceof ChatCompletionError &&
+    error.code === ChatCompletionErrorCode.TokenLimitReachedError
+  );
+}
+
+export function isChatCompletionError(error: Error): error is ChatCompletionError<any> {
+  return error instanceof ChatCompletionError;
 }

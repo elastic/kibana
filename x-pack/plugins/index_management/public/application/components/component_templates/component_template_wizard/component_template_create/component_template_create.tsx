@@ -5,15 +5,19 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { RouteComponentProps } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection, EuiSpacer, EuiPageHeader } from '@elastic/eui';
 
+import { useRedirectPath } from '../../../../hooks/redirect_path';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { ComponentTemplateDeserialized } from '../../shared_imports';
 import { useComponentTemplatesContext } from '../../component_templates_context';
 import { ComponentTemplateForm } from '../component_template_form';
+import { useStepFromQueryString } from '../use_step_from_query_string';
+import { useDatastreamsRollover } from '../component_template_datastreams_rollover/use_datastreams_rollover';
+import { MANAGED_BY_FLEET } from '../../constants';
 
 interface Props {
   /**
@@ -28,8 +32,35 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
 }) => {
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [saveError, setSaveError] = useState<any>(null);
+  const redirectTo = useRedirectPath(history);
+
+  const { activeStep: defaultActiveStep, updateStep } = useStepFromQueryString(history);
+
+  const locationSearchParams = useMemo(() => {
+    return new URLSearchParams(history.location.search);
+  }, [history.location.search]);
+
+  const defaultValue = useMemo(() => {
+    if (sourceComponentTemplate) {
+      return sourceComponentTemplate;
+    }
+
+    const name = locationSearchParams.get('name') ?? '';
+    const managedBy = locationSearchParams.get('managed_by');
+
+    return {
+      name,
+      template: {},
+      _meta: managedBy ? { managed_by: managedBy } : {},
+      _kbnMeta: {
+        usedBy: [],
+        isManaged: false,
+      },
+    };
+  }, [locationSearchParams, sourceComponentTemplate]);
 
   const { api } = useComponentTemplatesContext();
+  const { showDatastreamRolloverModal } = useDatastreamsRollover();
 
   const onSave = async (componentTemplate: ComponentTemplateDeserialized) => {
     const { name } = componentTemplate;
@@ -45,10 +76,11 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
       setSaveError(error);
       return;
     }
+    if (componentTemplate._meta?.managed_by === MANAGED_BY_FLEET) {
+      await showDatastreamRolloverModal(componentTemplate.name);
+    }
 
-    history.push({
-      pathname: encodeURI(`/component_templates/${encodeURIComponent(name)}`),
-    });
+    redirectTo(encodeURI(`/component_templates/${encodeURIComponent(name)}`));
   };
 
   const clearSaveError = () => {
@@ -88,7 +120,9 @@ export const ComponentTemplateCreate: React.FunctionComponent<RouteComponentProp
       <EuiSpacer size="l" />
 
       <ComponentTemplateForm
-        defaultValue={sourceComponentTemplate}
+        defaultActiveWizardSection={defaultActiveStep}
+        onStepChange={updateStep}
+        defaultValue={defaultValue}
         onSave={onSave}
         isSaving={isSaving}
         saveError={saveError}

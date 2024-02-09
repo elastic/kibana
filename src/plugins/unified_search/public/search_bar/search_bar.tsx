@@ -86,6 +86,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   onClearSavedQuery?: () => void;
 
   onRefresh?: (payload: { dateRange: TimeRange }) => void;
+  onCancel?: () => void;
   // Autorefresh
   onRefreshChange?: (options: { isPaused: boolean; refreshInterval: number }) => void;
   indicateNoData?: boolean;
@@ -120,6 +121,8 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   isDisabled?: boolean;
 
   submitOnBlur?: boolean;
+
+  renderQueryInputAppend?: () => React.ReactNode;
 }
 
 export type SearchBarProps<QT extends Query | AggregateQuery = Query> = SearchBarOwnProps<QT> &
@@ -524,6 +527,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
             : undefined
         }
         suggestionsAbstraction={this.props.suggestionsAbstraction}
+        renderQueryInputAppend={this.props.renderQueryInputAppend}
       />
     ) : undefined;
 
@@ -579,6 +583,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           isDisabled={this.props.isDisabled}
           onRefresh={this.props.onRefresh}
           onRefreshChange={this.props.onRefreshChange}
+          onCancel={this.props.onCancel}
           onChange={this.onQueryBarChange}
           isDirty={this.isDirty()}
           customSubmitButton={
@@ -610,6 +615,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
           onTextLangQueryChange={this.onTextLangQueryChange}
           submitOnBlur={this.props.submitOnBlur}
           suggestionsAbstraction={this.props.suggestionsAbstraction}
+          renderQueryInputAppend={this.props.renderQueryInputAppend}
         />
       </div>
     );

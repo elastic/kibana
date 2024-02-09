@@ -30,9 +30,10 @@ export interface LlmResponseSimulator {
           function_call?: { name: string; arguments: string };
         }
   ) => Promise<void>;
-  error: (error: Error) => Promise<void>;
+  error: (error: any) => Promise<void>;
   complete: () => Promise<void>;
-  write: (chunk: string) => Promise<void>;
+  rawWrite: (chunk: string) => Promise<void>;
+  rawEnd: () => Promise<void>;
 }
 
 export class LlmProxy {
@@ -64,7 +65,8 @@ export class LlmProxy {
           }
         }
 
-        throw new Error('No interceptors found to handle request');
+        response.writeHead(500, 'No interceptors found to handle request: ' + request.url);
+        response.end();
       })
       .listen(port);
   }
@@ -110,17 +112,20 @@ export class LlmProxy {
               }),
               next: (msg) => {
                 const chunk = createOpenAiChunk(msg);
-                return write(`data: ${JSON.stringify(chunk)}\n`);
+                return write(`data: ${JSON.stringify(chunk)}\n\n`);
               },
-              write: (chunk: string) => {
+              rawWrite: (chunk: string) => {
                 return write(chunk);
               },
+              rawEnd: async () => {
+                await end();
+              },
               complete: async () => {
-                await write('data: [DONE]');
+                await write('data: [DONE]\n\n');
                 await end();
               },
               error: async (error) => {
-                await write(`data: ${JSON.stringify({ error })}`);
+                await write(`data: ${JSON.stringify({ error })}\n\n`);
                 await end();
               },
             };

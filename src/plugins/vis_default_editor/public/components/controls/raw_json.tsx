@@ -11,7 +11,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { XJsonLang } from '@kbn/monaco';
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 
 import { AggParamEditorProps } from '../agg_param_props';

@@ -7,8 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isColumnItem } from '../shared/helpers';
-import { ESQLColumn, ESQLCommand, ESQLMessage } from '../types';
+import {
+  getFunctionDefinition,
+  isAssignment,
+  isAssignmentComplete,
+  isColumnItem,
+  isFunctionItem,
+} from '../shared/helpers';
+import type { ESQLColumn, ESQLCommand, ESQLAstItem, ESQLMessage } from '../types';
+import { enrichModes } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -33,6 +40,7 @@ export const commandDefinitions: CommandDefinition[] = [
       params: [{ name: 'assignment', type: 'any' }],
     },
     options: [],
+    modes: [],
   },
   {
     name: 'from',
@@ -42,6 +50,7 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['from logs', 'from logs-*', 'from logs_*, events-*'],
     options: [metadataOption],
+    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'index', type: 'source', wildcards: true }],
@@ -54,6 +63,7 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['show functions', 'show info'],
     options: [],
+    modes: [],
     signature: {
       multipleParams: false,
       params: [{ name: 'functions', type: 'function' }],
@@ -65,12 +75,85 @@ export const commandDefinitions: CommandDefinition[] = [
       defaultMessage:
         'Calculates aggregate statistics, such as average, count, and sum, over the incoming search results set. Similar to SQL aggregation, if the stats command is used without a BY clause, only one row is returned, which is the aggregation over the entire incoming search results set. When you use a BY clause, one row is returned for each distinct value in the field specified in the BY clause. The stats command returns only the fields in the aggregation, and you can use a wide range of statistical functions with the stats command. When you perform more than one aggregation, separate each aggregation with a comma.',
     }),
-    examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b'],
+    examples: ['… | stats avg = avg(a)', '… | stats sum(b) by b', '… | stats sum(b) by b % 2'],
     signature: {
       multipleParams: true,
-      params: [{ name: 'expression', type: 'function' }],
+      params: [{ name: 'expression', type: 'function', optional: true }],
     },
     options: [byOption],
+    modes: [],
+    validate: (command: ESQLCommand) => {
+      const messages: ESQLMessage[] = [];
+      if (!command.args.length) {
+        messages.push({
+          location: command.location,
+          text: i18n.translate('monaco.esql.validation.statsNoArguments', {
+            defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
+          }),
+          type: 'error',
+          code: 'statsNoArguments',
+        });
+      }
+
+      // now that all functions are supported, there's a specific check to perform
+      // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
+      // until an agg function is detected
+      // in the long run this might be integrated into the validation function
+      const fnArg = command.args.filter(isFunctionItem);
+      if (fnArg.length) {
+        function isAggFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+        }
+        function isOtherFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+        }
+        function isOtherFunctionWithAggInside(arg: ESQLAstItem) {
+          return (
+            isFunctionItem(arg) &&
+            isOtherFunction(arg) &&
+            arg.args.filter(isFunctionItem).some(
+              // this is recursive as builtin fns can be wrapped one withins another
+              (subArg): boolean =>
+                isAggFunction(subArg) ||
+                (isOtherFunction(subArg) ? isOtherFunctionWithAggInside(subArg) : false)
+            )
+          );
+        }
+        // which is the presence of at least one agg type function at root level
+        const hasAggFunction = fnArg.some(isAggFunction);
+        // or as builtin function arg with an agg function as sub arg
+        const hasAggFunctionWithinBuiltin = fnArg
+          .filter((arg) => !isAssignment(arg))
+          .some(isOtherFunctionWithAggInside);
+
+        // assignment requires a special handling
+        const hasAggFunctionWithinAssignment = fnArg
+          .filter((arg) => isAssignment(arg) && isAssignmentComplete(arg))
+          // extract the right hand side of the assignments
+          .flatMap((arg) => arg.args[1])
+          .filter(isFunctionItem)
+          // now check that they are either agg functions
+          // or builtin functions with an agg function as sub arg
+          .some((arg) => isAggFunction(arg) || isOtherFunctionWithAggInside(arg));
+
+        if (!hasAggFunction && !hasAggFunctionWithinBuiltin && !hasAggFunctionWithinAssignment) {
+          messages.push({
+            location: command.location,
+            text: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
+              defaultMessage:
+                "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
+              values: {
+                name: fnArg[0].name,
+                argType: getFunctionDefinition(fnArg[0].name)?.signatures[0].returnType,
+              },
+            }),
+            type: 'error',
+            code: 'noNestedArgumentSupport',
+          });
+        }
+      }
+      return messages;
+    },
   },
   {
     name: 'eval',
@@ -89,6 +172,7 @@ export const commandDefinitions: CommandDefinition[] = [
       params: [{ name: 'expression', type: 'any' }],
     },
     options: [],
+    modes: [],
   },
   {
     name: 'rename',
@@ -101,6 +185,7 @@ export const commandDefinitions: CommandDefinition[] = [
       params: [{ name: 'renameClause', type: 'column' }],
     },
     options: [asOption],
+    modes: [],
   },
   {
     name: 'limit',
@@ -114,6 +199,7 @@ export const commandDefinitions: CommandDefinition[] = [
       params: [{ name: 'size', type: 'number', literalOnly: true }],
     },
     options: [],
+    modes: [],
   },
   {
     name: 'keep',
@@ -122,24 +208,10 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | keep a', '… | keep a,b'],
     options: [],
+    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
-    },
-    validate: (command: ESQLCommand) => {
-      // the command name is automatically converted into KEEP by the ast_walker
-      // so validate the actual text
-      const messages: ESQLMessage[] = [];
-      if (/^project/.test(command.text.toLowerCase())) {
-        messages.push({
-          location: command.location,
-          text: i18n.translate('monaco.esql.validation.projectCommandDeprecated', {
-            defaultMessage: 'PROJECT command is no longer supported, please use KEEP instead',
-          }),
-          type: 'warning',
-        });
-      }
-      return messages;
     },
   },
   {
@@ -149,6 +221,7 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | drop a', '… | drop a,b'],
     options: [],
+    modes: [],
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
@@ -164,6 +237,7 @@ export const commandDefinitions: CommandDefinition[] = [
               defaultMessage: 'Removing all fields is not allowed [*]',
             }),
             type: 'error' as const,
+            code: 'dropAllColumnsError',
           }))
         );
       }
@@ -177,6 +251,7 @@ export const commandDefinitions: CommandDefinition[] = [
             defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
           }),
           type: 'warning',
+          code: 'dropTimestampWarning',
         });
       }
       return messages;
@@ -194,6 +269,7 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | sort c asc nulls first',
     ],
     options: [],
+    modes: [],
     signature: {
       multipleParams: true,
       params: [
@@ -215,6 +291,7 @@ export const commandDefinitions: CommandDefinition[] = [
       params: [{ name: 'expression', type: 'boolean' }],
     },
     options: [],
+    modes: [],
   },
   {
     name: 'dissect',
@@ -224,6 +301,7 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | dissect a "%{b} %{c}"'],
     options: [appendSeparatorOption],
+    modes: [],
     signature: {
       multipleParams: false,
       params: [
@@ -240,6 +318,7 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | grok a "%{IP:b} %{NUMBER:c}"'],
     options: [],
+    modes: [],
     signature: {
       multipleParams: false,
       params: [
@@ -255,9 +334,10 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['row a=[1,2,3] | mv_expand a'],
     options: [],
+    modes: [],
     signature: {
       multipleParams: false,
-      params: [{ name: 'column', type: 'column', innerType: 'list' }],
+      params: [{ name: 'column', type: 'column', innerType: 'any' }],
     },
   },
   {
@@ -272,6 +352,7 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
     options: [onOption, withOption],
+    modes: [enrichModes],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],

@@ -56,7 +56,7 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
         queries: t.array(nonEmptyStringRt),
       }),
       t.partial({
-        contexts: t.array(t.string),
+        categories: t.array(t.string),
       }),
     ]),
   }),
@@ -71,14 +71,14 @@ const functionRecallRoute = createObservabilityAIAssistantServerRoute({
     const client = await resources.service.getClient({ request: resources.request });
 
     const {
-      body: { queries, contexts },
+      body: { queries, categories },
     } = resources.params;
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.recall({ queries, contexts });
+    return client.recall({ queries, categories });
   },
 });
 

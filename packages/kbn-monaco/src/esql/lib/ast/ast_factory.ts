@@ -116,11 +116,12 @@ export class AstListener implements ESQLParserListener {
     this.ast.push(commandAst);
     commandAst.args.push(...collectAllSourceIdentifiers(ctx));
     const metadataContext = ctx.metadata();
-    if (metadataContext) {
-      const option = createOption(metadataContext.METADATA().text.toLowerCase(), metadataContext);
+    const metadataContent =
+      metadataContext?.deprecated_metadata()?.metadataOption() || metadataContext?.metadataOption();
+    if (metadataContent) {
+      const option = createOption(metadataContent.METADATA().text.toLowerCase(), metadataContent);
       commandAst.args.push(option);
-      // skip for the moment as there's no easy way to get meta fields right now
-      // option.args.push(...collectAllColumnIdentifiers(metadataContext));
+      option.args.push(...collectAllColumnIdentifiers(metadataContent));
     }
   }
 
@@ -141,7 +142,14 @@ export class AstListener implements ESQLParserListener {
   exitStatsCommand(ctx: StatsCommandContext) {
     const command = createCommand('stats', ctx);
     this.ast.push(command);
-    command.args.push(...collectAllFieldsStatements(ctx.fields()), ...visitByOption(ctx));
+    const fields = ctx.fields();
+    // STATS expression is optional
+    if (ctx._stats) {
+      command.args.push(...collectAllFieldsStatements(fields[0]));
+    }
+    if (ctx._grouping) {
+      command.args.push(...visitByOption(ctx, ctx._stats ? fields[1] : fields[0]));
+    }
   }
 
   /**

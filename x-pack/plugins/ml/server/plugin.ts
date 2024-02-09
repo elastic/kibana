@@ -132,7 +132,7 @@ export class MlServerPlugin
       app: [PLUGIN_ID, 'kibana'],
       catalogue: [PLUGIN_ID, `${PLUGIN_ID}_file_data_visualizer`],
       management: {
-        insightsAndAlerting: ['jobsListLink'],
+        insightsAndAlerting: ['jobsListLink', 'triggersActions'],
       },
       alerting: Object.values(ML_ALERT_TYPES),
       privileges: {
