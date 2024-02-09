@@ -14,53 +14,45 @@ import { screen, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { SeverityFilter } from './severity_filter';
 
-for (let i = 0; i <= 200; i = i + 1) {
-  describe('Severity form field', () => {
-    const onChange = jest.fn();
-    let appMockRender: AppMockRenderer;
-    const props = {
-      selectedOptionKeys: [],
-      onChange,
-    };
+describe('Severity form field', () => {
+  const onChange = jest.fn();
+  let appMockRender: AppMockRenderer;
+  const props = {
+    selectedOptionKeys: [],
+    onChange,
+  };
 
-    beforeEach(() => {
-      appMockRender = createAppMockRenderer();
-    });
+  beforeEach(() => {
+    appMockRender = createAppMockRenderer();
+  });
 
-    it('renders', async () => {
-      appMockRender.render(<SeverityFilter {...props} />);
-      expect(
-        await screen.findByTestId('options-filter-popover-button-severity')
-      ).toBeInTheDocument();
-      expect(
-        await screen.findByTestId('options-filter-popover-button-severity')
-      ).not.toBeDisabled();
+  it('renders', async () => {
+    appMockRender.render(<SeverityFilter {...props} />);
+    expect(await screen.findByTestId('options-filter-popover-button-severity')).toBeInTheDocument();
+    expect(await screen.findByTestId('options-filter-popover-button-severity')).not.toBeDisabled();
 
-      userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
-      await waitForEuiPopoverOpen();
+    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    await waitForEuiPopoverOpen();
 
-      expect(await screen.findByRole('option', { name: CaseSeverity.LOW })).toBeInTheDocument();
-      expect(await screen.findByRole('option', { name: CaseSeverity.MEDIUM })).toBeInTheDocument();
-      expect(await screen.findByRole('option', { name: CaseSeverity.HIGH })).toBeInTheDocument();
-      expect(
-        await screen.findByRole('option', { name: CaseSeverity.CRITICAL })
-      ).toBeInTheDocument();
-      expect((await screen.findAllByRole('option')).length).toBe(4);
-    });
+    expect(await screen.findByRole('option', { name: CaseSeverity.LOW })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: CaseSeverity.MEDIUM })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: CaseSeverity.HIGH })).toBeInTheDocument();
+    expect(await screen.findByRole('option', { name: CaseSeverity.CRITICAL })).toBeInTheDocument();
+    expect((await screen.findAllByRole('option')).length).toBe(4);
+  });
 
-    it('selects the correct value when changed', async () => {
-      appMockRender.render(<SeverityFilter {...props} />);
+  it('selects the correct value when changed', async () => {
+    appMockRender.render(<SeverityFilter {...props} />);
 
-      userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
-      await waitForEuiPopoverOpen();
-      userEvent.click(await screen.findByRole('option', { name: 'high' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Severity' }));
+    await waitForEuiPopoverOpen();
+    userEvent.click(await screen.findByRole('option', { name: 'high' }));
 
-      await waitFor(() => {
-        expect(onChange).toHaveBeenCalledWith({
-          filterId: 'severity',
-          selectedOptionKeys: ['high'],
-        });
+    await waitFor(() => {
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'severity',
+        selectedOptionKeys: ['high'],
       });
     });
   });
-}
+});
