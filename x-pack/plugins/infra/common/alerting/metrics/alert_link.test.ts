@@ -7,7 +7,11 @@
 
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
-import { getInventoryViewInAppUrl, flatAlertRuleParams } from './alert_link';
+import {
+  getInventoryViewInAppUrl,
+  flatAlertRuleParams,
+  getMetricsViewInAppUrl,
+} from './alert_link';
 
 describe('Inventory Threshold Rule', () => {
   describe('flatAlertRuleParams', () => {
@@ -165,6 +169,29 @@ describe('Inventory Threshold Rule', () => {
       expect(url).toEqual(
         '/app/metrics/link-to/inventory?customMetric=&metric=%28type%3Acpu%29&nodeType=host&timestamp=1640995200000'
       );
+    });
+  });
+});
+
+describe('Metrics Rule', () => {
+  describe('getMetricsViewInAppUrl', () => {
+    it('should point to host-details when host.name is present', () => {
+      const fields = {
+        [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
+        [`host.name`]: ['my-host'],
+      } as unknown as ParsedTechnicalFields & Record<string, any>;
+      const url = getMetricsViewInAppUrl(fields);
+      expect(url).toEqual(
+        '/app/metrics/link-to/host-detail/my-host?from=1640995200000&to=1640996100000'
+      );
+    });
+
+    it('should point to metrics explorer', () => {
+      const fields = {
+        [TIMESTAMP]: '2022-01-01T00:00:00.000Z',
+      } as unknown as ParsedTechnicalFields & Record<string, any>;
+      const url = getMetricsViewInAppUrl(fields);
+      expect(url).toEqual('/app/metrics/explorer');
     });
   });
 });
