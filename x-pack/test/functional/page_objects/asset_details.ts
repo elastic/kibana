@@ -44,7 +44,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       );
     },
 
-    async getAssetDetailsServicesWithIconsAndNames(): Promise<ServiceWithIconAndName[]> {
+    async getAssetDetailsServicesWithIconsAndNames() {
       await testSubjects.existOrFail('infraAssetDetailsServicesContainer');
       const container = await testSubjects.find('infraAssetDetailsServicesContainer');
       const serviceLinks = await container.findAllByCssSelector('[data-test-subj="serviceLink"]');

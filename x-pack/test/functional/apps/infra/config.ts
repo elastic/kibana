@@ -15,7 +15,7 @@ import {
 import url from 'url';
 import { FtrConfigProviderContext, kbnTestConfig } from '@kbn/test';
 import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
-import { InheritedServices } from './types';
+import { InheritedServices, InheritedPageObjects } from './types';
 
 interface MetricsUIConfig {
   services: InheritedServices & {
@@ -24,7 +24,7 @@ interface MetricsUIConfig {
       context: InheritedFtrProviderContext
     ) => Promise<InfraSynthtraceEsClient>;
   };
-  pageObjects: any;
+  pageObjects: InheritedPageObjects;
 }
 export default async function createTestConfig({
   readConfigFile,

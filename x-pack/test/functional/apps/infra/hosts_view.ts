@@ -244,7 +244,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const parsedUrl = new URL(currentUrl);
             const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
 
-            services.forEach((service: ServiceWithIconAndName, index: number) => {
+            services.forEach((service, index) => {
               expect(service.serviceName).to.equal(`service-${index}`);
               expect(service.iconSrc).to.not.be.empty();
               const expectedUrlPattern = `${baseUrl}/app/apm/services/service-${index}/overview?rangeFrom=${DATES.metricsAndLogs.hosts.processesDataStartDate}&rangeTo=${DATES.metricsAndLogs.hosts.processesDataEndDate}`;

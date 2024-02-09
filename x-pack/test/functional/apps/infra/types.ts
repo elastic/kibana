@@ -15,5 +15,10 @@ export type InheritedServices = InheritedFtrProviderContext extends GenericFtrPr
 >
   ? TServices
   : {};
-
+export type InheritedPageObjects = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  infer TPageObjects
+>
+  ? TPageObjects
+  : {};
 export type FtrProviderContext = GenericFtrProviderContext<MetricsUIServices, MetricsUIPageObjects>;
