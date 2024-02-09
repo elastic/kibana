@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { Query } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
@@ -17,6 +16,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
+  useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { Rule, RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
@@ -35,7 +37,6 @@ import type {
   RangeEventAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import moment from 'moment';
-import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLicense } from '../../../../hooks/use_license';
 import { useKibana } from '../../../../utils/kibana_react';
 import { metricValueFormatter } from '../../../../../common/custom_threshold_rule/metric_value_formatter';
@@ -44,6 +45,7 @@ import {
   AlertParams,
   CustomThresholdAlertFields,
   CustomThresholdRuleTypeParams,
+  MetricExpression,
 } from '../../types';
 import { TIME_LABELS } from '../criterion_preview_chart/criterion_preview_chart';
 import { Threshold } from '../custom_threshold';
@@ -51,7 +53,6 @@ import { LogRateAnalysis } from './log_rate_analysis';
 import { Groups } from './groups';
 import { Tags } from './tags';
 import { RuleConditionChart } from '../rule_condition_chart/rule_condition_chart';
-import { getFilterQuery } from './helpers/get_filter_query';
 
 // TODO Use a generic props for app sections https://github.com/elastic/kibana/issues/152690
 export type CustomThresholdRule = Rule<CustomThresholdRuleTypeParams>;
@@ -63,6 +64,44 @@ interface AppSectionProps {
   ruleLink: string;
   setAlertSummaryFields: React.Dispatch<React.SetStateAction<AlertSummaryField[] | undefined>>;
 }
+
+const CHART_TITLE_LIMIT = 120;
+
+const equationResultText = i18n.translate('xpack.observability.customThreshold.alertChartTitle', {
+  defaultMessage: 'Equation result for ',
+});
+
+const generateChartTitleAndTooltip = (criterion: MetricExpression) => {
+  const metricNameResolver: Record<string, string> = {};
+
+  criterion.metrics.forEach(
+    (metric) =>
+      (metricNameResolver[metric.name] = `${metric.aggType} (${
+        metric.field ? metric.field : metric.filter ? metric.filter : 'all documents'
+      })`)
+  );
+
+  let equation = criterion.equation
+    ? criterion.equation
+    : criterion.metrics.map((m) => m.name).join(' + ');
+
+  Object.keys(metricNameResolver)
+    .sort()
+    .reverse()
+    .forEach((metricName) => {
+      equation = equation.replaceAll(metricName, metricNameResolver[metricName]);
+    });
+
+  const chartTitle =
+    equation.length > CHART_TITLE_LIMIT
+      ? `${equation.substring(0, CHART_TITLE_LIMIT)}...`
+      : equation;
+
+  return {
+    tooltip: `${equationResultText}${equation}`,
+    title: `${equationResultText}${chartTitle}`,
+  };
+};
 
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsAppSection({
@@ -77,7 +116,6 @@ export default function AlertDetailsAppSection({
   const { euiTheme } = useEuiTheme();
   const hasLogRateAnalysisLicense = hasAtLeast('platinum');
   const [dataView, setDataView] = useState<DataView>();
-  const [filterQuery, setFilterQuery] = useState<string>('');
   const [, setDataViewError] = useState<Error>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const chartProps = {
@@ -88,6 +126,12 @@ export default function AlertDetailsAppSection({
   const timeRange = getPaddedAlertTimeRange(alertStart!, alertEnd);
   const groups = alert.fields[ALERT_GROUP];
   const tags = alert.fields[TAGS];
+
+  const chartTitleAndTooltip: Array<{ title: string; tooltip: string }> = [];
+
+  ruleParams.criteria.forEach((criterion) => {
+    chartTitleAndTooltip.push(generateChartTitleAndTooltip(criterion));
+  });
 
   const alertStartAnnotation: PointInTimeEventAnnotationConfig = {
     label: 'Alert',
@@ -158,11 +202,6 @@ export default function AlertDetailsAppSection({
   }, [groups, tags, rule, ruleLink, setAlertSummaryFields]);
 
   useEffect(() => {
-    const query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
-    setFilterQuery(getFilterQuery(query, groups));
-  }, [groups, ruleParams.searchConfiguration]);
-
-  useEffect(() => {
     const initDataView = async () => {
       const ruleSearchConfiguration = ruleParams.searchConfiguration;
       try {
@@ -182,9 +221,11 @@ export default function AlertDetailsAppSection({
       {ruleParams.criteria.map((criterion, index) => (
         <EuiFlexItem key={`criterion-${index}`}>
           <EuiPanel hasBorder hasShadow={false}>
-            <EuiTitle size="xs">
-              <h4>{criterion.label || 'CUSTOM'} </h4>
-            </EuiTitle>
+            <EuiToolTip content={chartTitleAndTooltip[index].tooltip}>
+              <EuiTitle size="xs">
+                <h4 data-test-subj={`chartTitle-${index}`}>{chartTitleAndTooltip[index].title}</h4>
+              </EuiTitle>
+            </EuiToolTip>
             <EuiText size="s" color="subdued">
               <FormattedMessage
                 id="xpack.observability.customThreshold.rule.alertDetailsAppSection.criterion.subtitle"
@@ -222,7 +263,7 @@ export default function AlertDetailsAppSection({
                 <RuleConditionChart
                   metricExpression={criterion}
                   dataView={dataView}
-                  filterQuery={filterQuery}
+                  searchConfiguration={ruleParams.searchConfiguration}
                   groupBy={ruleParams.groupBy}
                   annotations={annotations}
                   timeRange={timeRange}

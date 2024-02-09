@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { v4 } from 'uuid';
 import { omit } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
@@ -20,6 +21,8 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import {
   Container,
+  EmbeddableFactoryNotFoundError,
+  isExplicitInputWithAttributes,
   DefaultEmbeddableApi,
   PanelNotFoundError,
   ReactEmbeddableParentContext,
@@ -30,8 +33,9 @@ import {
   type EmbeddableOutput,
   type IEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { I18nProvider } from '@kbn/i18n-react';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { PanelPackage } from '@kbn/presentation-containers';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
@@ -40,7 +44,13 @@ import { ExitFullScreenButtonKibanaProvider } from '@kbn/shared-ux-button-exit-f
 
 import { DashboardLocatorParams, DASHBOARD_CONTAINER_TYPE } from '../..';
 import { DashboardContainerInput, DashboardPanelState } from '../../../common';
-import { DASHBOARD_APP_ID, DASHBOARD_LOADED_EVENT } from '../../dashboard_constants';
+import {
+  DASHBOARD_APP_ID,
+  DASHBOARD_LOADED_EVENT,
+  DASHBOARD_UI_METRIC_ID,
+  DEFAULT_PANEL_HEIGHT,
+  DEFAULT_PANEL_WIDTH,
+} from '../../dashboard_constants';
 import { DashboardAnalyticsService } from '../../services/analytics/types';
 import { DashboardCapabilitiesService } from '../../services/dashboard_capabilities/types';
 import { pluginServices } from '../../services/plugin_services';
@@ -70,6 +80,8 @@ import {
   dashboardTypeDisplayLowercase,
   dashboardTypeDisplayName,
 } from './dashboard_container_factory';
+import { dashboardReplacePanelActionStrings } from '../../dashboard_actions/_dashboard_actions_strings';
+import { panelPlacementStrategies } from '../component/panel_placement/place_new_panel_strategies';
 
 export interface InheritedChildInput {
   filters: Filter[];
@@ -142,6 +154,9 @@ export class DashboardContainer
   private chrome;
   private customBranding;
 
+  private trackPanelAddMetric:
+    | ((type: string, eventNames: string | string[], count?: number | undefined) => void)
+    | undefined;
   // new embeddable framework
   public reactEmbeddableChildren: BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }> =
     new BehaviorSubject<{ [key: string]: DefaultEmbeddableApi }>({});
@@ -156,9 +171,9 @@ export class DashboardContainer
     initialComponentState?: DashboardPublicState
   ) {
     const {
+      usageCollection,
       embeddable: { getEmbeddableFactory },
     } = pluginServices.getServices();
-
     super(
       {
         ...initialInput,
@@ -166,6 +181,11 @@ export class DashboardContainer
       { embeddableLoaded: {} },
       getEmbeddableFactory,
       parent
+    );
+
+    this.trackPanelAddMetric = usageCollection.reportUiCounter?.bind(
+      usageCollection,
+      DASHBOARD_UI_METRIC_ID
     );
 
     ({
@@ -394,6 +414,88 @@ export class DashboardContainer
     }
     this.setHighlightPanelId(newId);
     return newId;
+  }
+
+  public async addNewPanel<ApiType extends unknown = unknown>(
+    panelPackage: PanelPackage,
+    displaySuccessMessage?: boolean
+  ) {
+    const {
+      notifications: { toasts },
+      embeddable: { getEmbeddableFactory },
+    } = pluginServices.getServices();
+
+    const onSuccess = (id?: string, title?: string) => {
+      if (!displaySuccessMessage) return;
+      toasts.addSuccess({
+        title: dashboardReplacePanelActionStrings.getSuccessMessage(title),
+        'data-test-subj': 'addEmbeddableToDashboardSuccess',
+      });
+      this.setScrollToPanelId(id);
+      this.setHighlightPanelId(id);
+    };
+
+    if (this.trackPanelAddMetric) {
+      this.trackPanelAddMetric(METRIC_TYPE.CLICK, panelPackage.panelType);
+    }
+    if (reactEmbeddableRegistryHasKey(panelPackage.panelType)) {
+      const newId = v4();
+      const { newPanelPlacement, otherPanels } = panelPlacementStrategies.findTopLeftMostOpenSpace({
+        currentPanels: this.getInput().panels,
+        height: DEFAULT_PANEL_HEIGHT,
+        width: DEFAULT_PANEL_WIDTH,
+      });
+      const newPanel: DashboardPanelState = {
+        type: panelPackage.panelType,
+        gridData: {
+          ...newPanelPlacement,
+          i: newId,
+        },
+        explicitInput: {
+          ...panelPackage.initialState,
+          id: newId,
+        },
+      };
+      this.updateInput({ panels: { ...otherPanels, [newId]: newPanel } });
+      onSuccess(newId, newPanel.explicitInput.title);
+      return;
+    }
+
+    const embeddableFactory = getEmbeddableFactory(panelPackage.panelType);
+    if (!embeddableFactory) {
+      throw new EmbeddableFactoryNotFoundError(panelPackage.panelType);
+    }
+    const initialInput = panelPackage.initialState as Partial<EmbeddableInput>;
+
+    let explicitInput: Partial<EmbeddableInput>;
+    let attributes: unknown;
+    try {
+      if (initialInput) {
+        explicitInput = initialInput;
+      } else {
+        const explicitInputReturn = await embeddableFactory.getExplicitInput(undefined, this);
+        if (isExplicitInputWithAttributes(explicitInputReturn)) {
+          explicitInput = explicitInputReturn.newInput;
+          attributes = explicitInputReturn.attributes;
+        } else {
+          explicitInput = explicitInputReturn;
+        }
+      }
+    } catch (e) {
+      // error likely means user canceled embeddable creation
+      return;
+    }
+
+    const newEmbeddable = await this.addNewEmbeddable(
+      embeddableFactory.type,
+      explicitInput,
+      attributes
+    );
+
+    if (newEmbeddable) {
+      onSuccess(newEmbeddable.id, newEmbeddable.getTitle());
+    }
+    return newEmbeddable as ApiType;
   }
 
   public getDashboardPanelFromId = async (panelId: string) => {
