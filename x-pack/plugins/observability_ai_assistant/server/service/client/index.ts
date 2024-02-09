@@ -14,7 +14,15 @@ import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
 import { compact, isEmpty, last, merge, noop, omit, pick, take } from 'lodash';
 import type OpenAI from 'openai';
-import { filter, isObservable, lastValueFrom, Observable, shareReplay, toArray } from 'rxjs';
+import {
+  filter,
+  firstValueFrom,
+  isObservable,
+  lastValueFrom,
+  Observable,
+  shareReplay,
+  toArray,
+} from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
 import {
@@ -455,6 +463,8 @@ export class ObservabilityAIAssistantClient {
   ): Promise<Observable<ChatCompletionChunkEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
 
+    const spanId = (span?.ids['span.id'] || '').substring(0, 6);
+
     const messagesForOpenAI: Array<
       Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
         role: MessageRole;
@@ -490,6 +500,8 @@ export class ObservabilityAIAssistantClient {
     this.dependencies.logger.debug(`Sending conversation to connector`);
     this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
+    const now = performance.now();
+
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
@@ -501,7 +513,11 @@ export class ObservabilityAIAssistantClient {
       },
     });
 
-    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
+    this.dependencies.logger.debug(
+      `Received action client response: ${executeResult.status} (took: ${Math.round(
+        performance.now() - now
+      )}ms)${spanId ? ` (${spanId})` : ''}`
+    );
 
     if (executeResult.status === 'error' && executeResult?.serviceMessage) {
       const tokenLimitRegex =
@@ -524,20 +540,34 @@ export class ObservabilityAIAssistantClient {
 
     const observable = streamIntoObservable(response).pipe(processOpenAiStream(), shareReplay());
 
-    if (span) {
-      lastValueFrom(observable)
-        .then(
-          () => {
-            span.setOutcome('success');
-          },
-          () => {
-            span.setOutcome('failure');
-          }
-        )
-        .finally(() => {
-          span.end();
-        });
-    }
+    firstValueFrom(observable)
+      .catch(noop)
+      .finally(() => {
+        this.dependencies.logger.debug(
+          `Received first value after ${Math.round(performance.now() - now)}ms${
+            spanId ? ` (${spanId})` : ''
+          }`
+        );
+      });
+
+    lastValueFrom(observable)
+      .then(
+        () => {
+          span?.setOutcome('success');
+        },
+        () => {
+          span?.setOutcome('failure');
+        }
+      )
+      .finally(() => {
+        this.dependencies.logger.debug(
+          `Completed response in ${Math.round(performance.now() - now)}ms${
+            spanId ? ` (${spanId})` : ''
+          }`
+        );
+
+        span?.end();
+      });
 
     return observable;
   };
