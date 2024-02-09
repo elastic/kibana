@@ -15,7 +15,6 @@ import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { UserAtSpaceScenarios, Superuser, SuperuserAtSpace1 } from '../../../scenarios';
-import { UserAtSpaceScenarios, Superuser } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   getUrlPrefix,

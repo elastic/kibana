@@ -10,7 +10,11 @@ import { SavedObject, SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { validateSystemActions } from '../../../../lib/validate_system_actions';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
-import { parseDuration, getRuleCircuitBreakerErrorMessage } from '../../../../../common';
+import {
+  parseDuration,
+  getRuleCircuitBreakerErrorMessage,
+  RuleDefaultAction,
+} from '../../../../../common';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../../../authorization';
 import {
   validateRuleTypeParams,
@@ -25,7 +29,7 @@ import {
 } from '../../../../rules_client/lib';
 import { generateAPIKeyName, apiKeyAsRuleDomainProperties } from '../../../../rules_client/common';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
-import { RulesClientContext, NormalizedAlertAction } from '../../../../rules_client/types';
+import { RulesClientContext } from '../../../../rules_client/types';
 import { RuleDomain, RuleParams } from '../../types';
 import { RuleActionTypes, RuleSystemAction, SanitizedRule } from '../../../../types';
 import {
@@ -59,17 +63,22 @@ export async function createRule<Params extends RuleParams = never>(
   const { data: initialData, options, allowMissingConnectorSecrets } = createParams;
   const actionsClient = await context.getActionsClient();
 
-  const systemActions = initialData.actions
-    .filter((action) => !!action.actionTypeId && actionsClient.isSystemAction(action.actionTypeId))
-    .map((action) => ({ ...action, type: RuleActionTypes.SYSTEM } as RuleSystemAction));
+  const actionsWithTypes = initialData.actions.map((action) =>
+    !!action.actionTypeId && actionsClient.isSystemAction(action.actionTypeId)
+      ? ({
+          ...action,
+          type: RuleActionTypes.SYSTEM,
+        } as RuleSystemAction)
+      : ({ ...action, type: RuleActionTypes.DEFAULT } as RuleDefaultAction)
+  );
 
-  // TODO (http-versioning): Remove this cast when we fix addGeneratedActionValues
+  const systemActions = actionsWithTypes.filter(
+    (action) => action.type === RuleActionTypes.SYSTEM
+  ) as RuleSystemAction[];
+
   const data = {
     ...initialData,
-    actions: await addGeneratedActionValues(
-      initialData.actions as NormalizedAlertAction[],
-      context
-    ),
+    actions: await addGeneratedActionValues(actionsWithTypes, context),
   };
 
   const id = options?.id || SavedObjectsUtils.generateId();

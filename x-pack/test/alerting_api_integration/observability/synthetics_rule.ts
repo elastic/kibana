@@ -122,8 +122,10 @@ const compareRules = (rule1: SanitizedRule, rule2: SanitizedRule) => {
 
 const getActionById = (rule: SanitizedRule, id: string) => {
   const actions = rule.actions.filter((action) => action.id === id);
-  const recoveredAction = actions.find((action) => action.group === 'recovered');
-  const firingAction = actions.find((action) => action.group !== 'recovered');
+  const recoveredAction = actions.find(
+    (action) => 'group' in action && action.group === 'recovered'
+  );
+  const firingAction = actions.find((action) => 'group' in action && action.group !== 'recovered');
   return {
     recoveredAction: omit(recoveredAction, ['uuid']),
     firingAction: omit(firingAction, ['uuid']),

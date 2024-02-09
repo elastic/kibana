@@ -6,11 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { RuleActionTypes } from '../../../../../../common';
 import { validateDuration } from '../../../validation';
 import { notifyWhenSchema, actionAlertsFilterSchema, alertDelaySchema } from '../../../schemas';
 
-const actionSchema = schema.object({
-  group: schema.maybe(schema.string()),
+const defaultActionSchema = schema.object({
+  group: schema.string(),
   id: schema.string(),
   actionTypeId: schema.maybe(schema.string()),
   params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
@@ -23,6 +24,16 @@ const actionSchema = schema.object({
   ),
   uuid: schema.maybe(schema.string()),
   alertsFilter: schema.maybe(actionAlertsFilterSchema),
+  type: schema.literal(RuleActionTypes.DEFAULT),
+  useAlertDataForTemplate: schema.maybe(schema.boolean()),
+});
+
+export const systemActionSchema = schema.object({
+  id: schema.string(),
+  actionTypeId: schema.maybe(schema.string()),
+  params: schema.recordOf(schema.string(), schema.maybe(schema.any()), { defaultValue: {} }),
+  uuid: schema.maybe(schema.string()),
+  type: schema.literal(RuleActionTypes.SYSTEM),
   useAlertDataForTemplate: schema.maybe(schema.boolean()),
 });
 
@@ -37,7 +48,7 @@ export const createRuleDataSchema = schema.object({
   schedule: schema.object({
     interval: schema.string({ validate: validateDuration }),
   }),
-  actions: schema.arrayOf(actionSchema, {
+  actions: schema.arrayOf(schema.oneOf([defaultActionSchema, systemActionSchema]), {
     defaultValue: [],
   }),
   notifyWhen: schema.maybe(schema.nullable(notifyWhenSchema)),

@@ -159,12 +159,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                   message: 'something important happened!',
                 },
               },
-              {
-                id: 'system-connector-test.system-action',
-                actionTypeId: 'test.system-action',
-                uuid: '123',
-                params: {},
-              },
             ],
           })
         );
@@ -193,12 +187,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
               message: 'something important happened!',
             },
             uuid: response.body.actions[1].uuid,
-          },
-          {
-            id: 'system-connector-test.system-action',
-            connector_type_id: 'test.system-action',
-            params: {},
-            uuid: '123',
           },
         ],
         enabled: true,
@@ -253,12 +241,6 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
             message: 'something important happened!',
           },
           uuid: rawActions[1].uuid,
-        },
-        {
-          actionRef: 'system_action:system-connector-test.system-action',
-          actionTypeId: 'test.system-action',
-          params: {},
-          uuid: '123',
         },
       ]);
 
