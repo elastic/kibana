@@ -37,13 +37,9 @@ export const ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS: ResponseActionsApiComma
   // TODO: TC- Uncomment these when we go GA with automated process actions
   // 'kill-process',
   // 'suspend-process'
+  // 'execute',
+  // 'get-file',
 ];
-if (allowedExperimentalValues.automatedExecuteActionEnabled) {
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.push('execute');
-}
-if (allowedExperimentalValues.automatedGetFileActionEnabled) {
-  ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS.push('get-file');
-}
 
 export type EnabledAutomatedResponseActionsCommands =
   typeof ENABLED_AUTOMATED_RESPONSE_ACTION_COMMANDS[number];

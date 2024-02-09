@@ -28,7 +28,6 @@ import {
   getGetFileAlerts,
 } from './utils';
 
-
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
@@ -44,6 +43,11 @@ export const endpointResponseAction = (
     rule_name: alerts[0][ALERT_RULE_NAME],
     agent_type: 'endpoint' as const,
   };
+  const {
+    automatedProcessActionsEnabled,
+    automatedExecuteActionEnabled,
+    automatedGetFileActionEnabled,
+  } = experimentalFeatures;
 
   if (isIsolateAction(responseAction.params)) {
     const alertsPerAgent = getIsolateAlerts(alerts);
@@ -58,35 +62,37 @@ export const endpointResponseAction = (
     });
   }
 
-  if (isExecuteAction(responseAction.params)) {
-    const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
+  if (automatedExecuteActionEnabled) {
+    if (isExecuteAction(responseAction.params)) {
+      const actionAlerts = getExecuteAlerts(alerts, responseAction.params.config);
 
-    return each(actionAlerts, (actionPayload) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          ...actionPayload,
-          ...commonData,
-        },
-        actionPayload.endpoint_ids
-      );
-    });
+      return each(actionAlerts, (actionPayload) => {
+        return endpointAppContextService.getActionCreateService().createActionFromAlert(
+          {
+            ...actionPayload,
+            ...commonData,
+          },
+          actionPayload.endpoint_ids
+        );
+      });
+    }
   }
 
-  if (isGetFileAction(responseAction.params)) {
-    const actionAlerts = getGetFileAlerts(alerts);
+  if (automatedGetFileActionEnabled) {
+    if (isGetFileAction(responseAction.params)) {
+      const actionAlerts = getGetFileAlerts(alerts);
 
-    return each(actionAlerts, (actionPayload) => {
-      return endpointAppContextService.getActionCreateService().createActionFromAlert(
-        {
-          ...actionPayload,
-          ...commonData,
-        },
-        actionPayload.endpoint_ids
-      );
-    });
+      return each(actionAlerts, (actionPayload) => {
+        return endpointAppContextService.getActionCreateService().createActionFromAlert(
+          {
+            ...actionPayload,
+            ...commonData,
+          },
+          actionPayload.endpoint_ids
+        );
+      });
+    }
   }
-
-  const automatedProcessActionsEnabled = experimentalFeatures?.automatedProcessActionsEnabled;
 
   if (automatedProcessActionsEnabled) {
     const createProcessActionFromAlerts = (

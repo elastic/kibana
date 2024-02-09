@@ -73,7 +73,7 @@ export const allowedExperimentalValues = Object.freeze({
   /*
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: false,
+  automatedProcessActionsEnabled: true,
 
   /*
    * Enables Automated Endpoint Execute action
