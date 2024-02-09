@@ -80,6 +80,7 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         pervCPUWattArm64,
         awsCostDiscountRate: percentToFactor(awsCostDiscountRate),
         costPervCPUPerHour,
+        showErrorFrames,
       }
     );
 

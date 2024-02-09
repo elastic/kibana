@@ -59,8 +59,8 @@ export class EmbeddableFlamegraph extends Embeddable<
 
 function Flamegraph({ isLoading, data }: EmbeddableFlamegraphEmbeddableInput) {
   const { core } = useProfilingDependencies().start;
-  const showErrorFrame = core.uiSettings.get<boolean>(profilingShowErrorFrames);
-  const flamegraph = !isLoading && data ? createFlameGraph(data, showErrorFrame) : undefined;
+  const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+  const flamegraph = !isLoading && data ? createFlameGraph(data, showErrorFrames) : undefined;
   return (
     <AsyncEmbeddableComponent isLoading={isLoading}>
       <>
