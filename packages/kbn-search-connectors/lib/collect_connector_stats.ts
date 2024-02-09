@@ -37,7 +37,7 @@ export const collectConnectorStats = async (
   let from = 0;
   do {
     const result = await fetchSyncJobs(client, undefined, from);
-    syncJobs.concat(result.data);
+    syncJobs.push(...result.data);
     hasMore = result._meta.page.has_more_hits_than_total;
     from += result._meta.page.size;
   } while (hasMore);
@@ -84,12 +84,18 @@ export const collectConnectorStats = async (
       const filtering = connector.filtering[0];
       connectorStats.syncRules = {
         active: {
-          withBasicRules: filtering.active.rules.length > 1,
-          withAdvancedRules: Object.keys(filtering.active.advanced_snippet.value).length > 0,
+          withBasicRules:
+            Array.isArray(filtering?.active?.rules) && filtering.active.rules.length > 1,
+          withAdvancedRules:
+            !!filtering?.active?.advanced_snippet?.value &&
+            Object.keys(filtering.active.advanced_snippet.value).length > 0,
         },
         draft: {
-          withBasicRules: filtering.draft.rules.length > 1,
-          withAdvancedRules: Object.keys(filtering.draft.advanced_snippet.value).length > 0,
+          withBasicRules:
+            Array.isArray(filtering?.draft?.rules) && filtering.draft.rules.length > 1,
+          withAdvancedRules:
+            !!filtering?.draft?.advanced_snippet?.value &&
+            Object.keys(filtering.draft.advanced_snippet.value).length > 0,
         },
       };
     }
@@ -300,11 +306,18 @@ function syncJobsStats(syncJobs: ConnectorSyncJob[]): SyncJobStats {
 }
 
 function syncJobsStatsDetails(syncJobs: ConnectorSyncJob[]): SyncJobStatsDetails {
-  return {
+  const stats: SyncJobStatsDetails = {
     total: syncJobs.length,
-    last30Days: syncJobsStatsByType(recentSyncJobs(30, syncJobs)),
-    last7Days: syncJobsStatsByType(recentSyncJobs(7, syncJobs)),
-  } as SyncJobStatsDetails;
+  };
+  const last30DaysSyncJobs = recentSyncJobs(30, syncJobs);
+  if (last30DaysSyncJobs.length > 0) {
+    stats.last30Days = syncJobsStatsByType(last30DaysSyncJobs);
+  }
+  const last7DaysSyncJobs = recentSyncJobs(7, syncJobs);
+  if (last7DaysSyncJobs.length > 0) {
+    stats.last7Days = syncJobsStatsByType(last7DaysSyncJobs);
+  }
+  return stats;
 }
 
 function recentSyncJobs(days: number, syncJobs: ConnectorSyncJob[]): ConnectorSyncJob[] {
@@ -327,13 +340,13 @@ function syncJobsStatsByType(syncJobs: ConnectorSyncJob[]): SyncJobStatsByType {
   const incrementalSyncJobs = syncJobs.filter(
     (syncJob) => syncJob.job_type === SyncJobType.INCREMENTAL
   );
-  if (fullSyncJobs.length > 0) {
+  if (incrementalSyncJobs.length > 0) {
     stats.incremental = syncJobsStatsByState(incrementalSyncJobs);
   }
   const accessControlSyncJobs = syncJobs.filter(
     (syncJob) => syncJob.job_type === SyncJobType.ACCESS_CONTROL
   );
-  if (fullSyncJobs.length > 0) {
+  if (accessControlSyncJobs.length > 0) {
     stats.accessControl = syncJobsStatsByState(accessControlSyncJobs);
   }
   return stats;

@@ -14,7 +14,6 @@ import { ConnectorStats } from '../../../common/types';
 
 import { registerTelemetryUsageCollector } from './telemetry';
 
-
 jest.mock('@kbn/search-connectors', () => ({
   collectConnectorStats: jest.fn(),
 }));
