@@ -27,6 +27,9 @@ Array [
         "type": "manual",
       },
     ],
+    "chartOptions": Object {
+      "seriesType": "bar_stacked",
+    },
     "dataView": undefined,
     "filterQuery": "",
     "groupBy": Array [
@@ -46,7 +49,6 @@ Array [
       "timeSize": 15,
       "timeUnit": "m",
     },
-    "seriesType": "bar_stacked",
     "timeRange": Object {
       "from": "2023-03-28T10:43:13.802Z",
       "to": "2023-03-29T13:14:09.581Z",

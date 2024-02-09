@@ -23,7 +23,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ALERT_GROUP, type AlertConsumers } from '@kbn/rule-data-utils';
+import { ALERT_GROUP, ALERT_GROUP_VALUE, type AlertConsumers } from '@kbn/rule-data-utils';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { convertTo } from '../../../../../common/utils/formatters';
 import { useKibana } from '../../../../utils/kibana_react';
@@ -41,18 +41,26 @@ interface Props {
   dataView?: DataView;
 }
 
+const dateRange = {
+  from: 'now-30d',
+  to: 'now',
+};
+
 export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   const { http, notifications } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
   const criterion = rule.params.criteria[0];
-  const groups = alert.fields[ALERT_GROUP];
+  const groups: Array<{ field: string; value: string }> = alert.fields[ALERT_GROUP] || [];
   const featureIds = [rule.consumer as AlertConsumers];
   const query = `${(ruleParams.searchConfiguration?.query as Query)?.query as string}`;
-  const dateRange = {
-    from: 'now-30d',
-    to: 'now',
-  };
+  const termQueries = groups.map((group) => ({
+    term: {
+      [ALERT_GROUP_VALUE]: {
+        value: group.value,
+      },
+    },
+  }));
 
   const {
     data: { histogramTriggeredAlerts, avgTimeToRecoverUS, totalTriggeredAlerts },
@@ -63,6 +71,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
     featureIds,
     ruleId: rule.id,
     dateRange,
+    termQueries,
   });
 
   // Only show alert history chart if there is only one condition
@@ -73,12 +82,12 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
   if (isError) {
     notifications?.toasts.addDanger({
       title: i18n.translate('xpack.observability.customThreshold.alertHistory.error.toastTitle', {
-        defaultMessage: 'Logs alerts history chart error',
+        defaultMessage: 'Alerts history chart error',
       }),
       text: i18n.translate(
         'xpack.observability.customThreshold.alertHistory.error.toastDescription',
         {
-          defaultMessage: `An error occurred when fetching logs alert history chart data`,
+          defaultMessage: `An error occurred when fetching alert history chart data`,
         }
       ),
     });
@@ -110,7 +119,8 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
           <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.observability.customThreshold.alertHistory.chartTitle', {
-                defaultMessage: 'Logs threshold alerts history',
+                defaultMessage: '{ruleName} alerts history',
+                values: { ruleName: rule.name },
               })}
             </h2>
           </EuiTitle>

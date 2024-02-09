@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { type HttpSetup } from '@kbn/core/public';
+import { Field, FieldValue, QueryDslTermQuery } from '@elastic/elasticsearch/lib/api/types';
+import { AggregationsDateHistogramBucketKeys } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import {
   ALERT_DURATION,
   ALERT_RULE_UUID,
@@ -26,6 +27,7 @@ export interface Props {
     from: string;
     to: string;
   };
+  termQueries?: TermQuery[];
 }
 
 interface FetchAlertsHistory {
@@ -45,7 +47,13 @@ export const EMPTY_ALERTS_HISTORY = {
   histogramTriggeredAlerts: [] as AggregationsDateHistogramBucketKeys[],
   avgTimeToRecoverUS: 0,
 };
-export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props): UseAlertsHistory {
+export function useAlertsHistory({
+  featureIds,
+  ruleId,
+  dateRange,
+  http,
+  termQueries,
+}: Props): UseAlertsHistory {
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: ['useAlertsHistory'],
     queryFn: async ({ signal }) => {
@@ -58,6 +66,7 @@ export function useAlertsHistory({ featureIds, ruleId, dateRange, http }: Props)
         ruleId,
         dateRange,
         signal,
+        termQueries,
       });
     },
     refetchOnWindowFocus: false,
@@ -87,12 +96,16 @@ interface AggsESResponse {
     };
   };
 }
+interface TermQuery {
+  term?: Partial<Record<Field, QueryDslTermQuery | FieldValue>>;
+}
 export async function fetchTriggeredAlertsHistory({
   featureIds,
   http,
   ruleId,
   dateRange,
   signal,
+  termQueries = [],
 }: {
   featureIds: ValidFeatureId[];
   http: HttpSetup;
@@ -102,6 +115,7 @@ export async function fetchTriggeredAlertsHistory({
     to: string;
   };
   signal?: AbortSignal;
+  termQueries?: TermQuery[];
 }): Promise<FetchAlertsHistory> {
   try {
     const responseES = await http.post<AggsESResponse>(`${BASE_RAC_ALERTS_API_PATH}/find`, {
@@ -117,6 +131,7 @@ export async function fetchTriggeredAlertsHistory({
                   [ALERT_RULE_UUID]: ruleId,
                 },
               },
+              ...termQueries,
               {
                 range: {
                   [ALERT_TIME_RANGE]: dateRange,
