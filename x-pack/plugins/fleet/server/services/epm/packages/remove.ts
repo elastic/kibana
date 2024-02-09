@@ -191,10 +191,10 @@ async function deleteAssets(
   // must delete ingestPipelines first, or ml models referenced in them cannot be deleted.
   // separate the assets into Index Templates and other assets.
   type Tuple = [EsAssetReference[], EsAssetReference[], EsAssetReference[]];
-  const [indexTemplatesAndPipelines, indexAssets, otherAssets, transformAssets] =
+  const [indexTemplatesAndPipelines, indexAssets, transformAssets, otherAssets] =
     installedEs.reduce<Tuple>(
       (
-        [indexTemplateAndPipelineTypes, indexAssetTypes, otherAssetTypes, transformAssetTypes],
+        [indexTemplateAndPipelineTypes, indexAssetTypes, transformAssetTypes, otherAssetTypes],
         asset
       ) => {
         if (
@@ -213,8 +213,8 @@ async function deleteAssets(
         return [
           indexTemplateAndPipelineTypes,
           indexAssetTypes,
-          otherAssetTypes,
           transformAssetTypes,
+          otherAssetTypes,
         ];
       },
       [[], [], [], []]
@@ -227,12 +227,11 @@ async function deleteAssets(
       indexAssets.map((asset) => updateIndexSettings(esClient, asset.id, { default_pipeline: '' }))
     );
 
-    // @TODO: remove
-    console.log(`--@@transformAssets`, transformAssets);
-    // must delete transforms and any indices associated with the transforms first
+    // in case transform's destination index contains any pipline,
+    // we should delete the transforms first
     await Promise.all(deleteESAssets(transformAssets, esClient));
 
-    // must delete index templates and pipelines first
+    // then delete index templates and pipelines
     await Promise.all(deleteESAssets(indexTemplatesAndPipelines, esClient));
     // then the other asset types
     await Promise.all([
