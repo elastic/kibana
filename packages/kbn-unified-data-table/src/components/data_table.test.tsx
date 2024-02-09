@@ -426,9 +426,7 @@ describe('UnifiedDataTable', () => {
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
-          "showDisplaySelector": Object {
-            "allowRowHeight": false,
-          },
+          "showDisplaySelector": undefined,
           "showFullScreenSelector": true,
           "showSortSelector": true,
         }
