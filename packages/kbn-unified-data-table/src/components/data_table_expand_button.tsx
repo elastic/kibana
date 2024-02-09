@@ -8,7 +8,6 @@
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
 import { EuiButtonIcon, EuiDataGridCellValueElementProps, EuiToolTip } from '@elastic/eui';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';
 
@@ -30,9 +29,7 @@ export const ExpandButton = ({ rowIndex, setCellProps }: EuiDataGridCellValueEle
       });
     } else if (expanded && current && expanded.id === current.id) {
       setCellProps({
-        style: {
-          backgroundColor: isDarkMode ? themeDark.euiColorHighlight : themeLight.euiColorHighlight,
-        },
+        className: 'dscDocsGrid__cell--expanded',
       });
     } else {
       setCellProps({ style: undefined });

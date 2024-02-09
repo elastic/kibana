@@ -8,7 +8,6 @@
 
 import React, { useContext, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import { euiLightVars as themeLight, euiDarkVars as themeDark } from '@kbn/ui-theme';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import {
   EuiDataGridCellValueElementProps,
@@ -62,32 +61,22 @@ export const getRenderCellValueFn = ({
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
-      if (!externalCustomRenderers) {
-        if (row?.isAnchor) {
-          setCellProps({
-            className: 'dscDocsGrid__cell--highlight',
-          });
-        } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
-          setCellProps({
-            style: {
-              backgroundColor: ctx.isDarkMode
-                ? themeDark.euiColorHighlight
-                : themeLight.euiColorHighlight,
-            },
-          });
-        } else {
-          setCellProps({ style: undefined });
-        }
+      if (row?.isAnchor) {
+        setCellProps({
+          className: 'dscDocsGrid__cell--highlight',
+        });
+      } else if (ctx.expanded && row && ctx.expanded.id === row.id) {
+        setCellProps({
+          className: 'dscDocsGrid__cell--expanded',
+        });
+      } else {
+        setCellProps({ style: undefined });
       }
     }, [ctx, row, setCellProps]);
 
-    if (typeof row === 'undefined') {
-      return <span className={CELL_CLASS}>-</span>;
-    }
-
     if (!!externalCustomRenderers && !!externalCustomRenderers[columnId]) {
       return (
-        <>
+        <span className={CELL_CLASS}>
           {externalCustomRenderers[columnId]({
             rowIndex,
             columnId,
@@ -101,8 +90,12 @@ export const getRenderCellValueFn = ({
             fieldFormats,
             closePopover,
           })}
-        </>
+        </span>
       );
+    }
+
+    if (typeof row === 'undefined') {
+      return <span className={CELL_CLASS}>-</span>;
     }
 
     /**

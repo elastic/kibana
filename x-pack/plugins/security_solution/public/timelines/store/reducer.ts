@@ -63,6 +63,9 @@ import {
   setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
   setChanged,
+  updateRowHeight,
+  updateSampleSize,
+  updateColumnWidth,
 } from './actions';
 
 import {
@@ -102,6 +105,7 @@ import {
   applyDeltaToTableColumnWidth,
   updateTimelinePerPageOptions,
   updateTimelineItemsPerPage,
+  updateTimelineColumnWidth,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -572,6 +576,37 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         changed,
+      },
+    },
+  }))
+  .case(updateColumnWidth, (state, { id, columnId, width }) => ({
+    ...state,
+    timelineById: updateTimelineColumnWidth({
+      columnId,
+      id,
+      timelineById: state.timelineById,
+      width,
+    }),
+  }))
+
+  .case(updateSampleSize, (state, { id, sampleSize }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        sampleSize,
+      },
+    },
+  }))
+
+  .case(updateRowHeight, (state, { id, rowHeight }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        rowHeight,
       },
     },
   }))

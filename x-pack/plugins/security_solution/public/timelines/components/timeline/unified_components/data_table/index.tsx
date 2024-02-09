@@ -76,7 +76,7 @@ interface CommonDataTableProps {
 }
 
 interface DataTableProps extends CommonDataTableProps {
-  dataView: DataView
+  dataView: DataView;
 }
 
 /* eslint-disable react/display-name */
@@ -133,12 +133,13 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const { browserFields, runtimeMappings } = useSourcererDataView(SourcererScopeName.timeline);
 
     const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
+
     const tableSettings = useMemo(() => {
-      const columnSettings = columns.reduce((memo, item) => {
+      const columnSettings = columns.reduce((acc, item) => {
         if (item.initialWidth) {
-          memo[item.id] = { width: item.initialWidth };
+          acc[item.id] = { width: item.initialWidth };
         }
-        return memo;
+        return acc;
       }, {} as Record<string, UnifiedDataTableSettingsColumn>);
 
       return {
@@ -151,13 +152,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
     const trGroupRef = useRef<HTMLDivElement | null>(null);
 
     const {
-      timeline: {
-        filterManager,
-        excludedRowRendererIds,
-        rowHeight,
-        sampleSize,
-        notesMap,
-      } = timelineDefaults,
+      timeline: { filterManager, excludedRowRendererIds, rowHeight, sampleSize } = timelineDefaults,
     } = useSelector((state: State) => timelineBodySelector(state, timelineId));
 
     // const { activeStep, isTourShown, incrementStep } = useTourContext();
@@ -215,7 +210,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [events, dataView]
     );
 
-    ///////////// ROW RENDERERS START ///////////////
+    // /////////// ROW RENDERERS START ///////////////
 
     const enabledRowRenderers = useMemo(() => {
       if (!excludedRowRendererIds) return rowRenderers;
@@ -255,7 +250,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       trGroupRef,
     });
 
-    //////////////// START FLYOUT DETAILS ////////////////
+    // ////////////// START FLYOUT DETAILS ////////////////
 
     const handleOnEventDetailPanelOpened = useCallback(
       (eventData: DataTableRecord & TimelineItem) => {
@@ -308,7 +303,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       [tableRows, handleOnEventDetailPanelOpened, handleOnPanelClosed]
     );
 
-    //////////////// START SORTING ////////////////
+    // ////////////// START SORTING ////////////////
 
     const sortingColumns: SortOrder[] = useMemo(() => {
       return sort ? sort.map((sortingCol) => [sortingCol.columnId, sortingCol.sortDirection]) : [];
@@ -331,7 +326,7 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
           })
         );
       },
-      [dispatch, timelineId]
+      [dispatch, timelineId, columns]
     );
 
     // Columns management
@@ -388,7 +383,9 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
     const onChangeItemsPerPage = useCallback(
       (itemsChangedPerPage) =>
-        dispatch(timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })),
+        dispatch(
+          timelineActions.updateItemsPerPage({ id: timelineId, itemsPerPage: itemsChangedPerPage })
+        ),
       [dispatch, timelineId]
     );
 
@@ -455,8 +452,6 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
       dataViewFieldEditor,
       dataPluginContract,
     ]);
-
-    console.log("TABLE ROWS: ", tableRows, dataView);
 
     if (!dataView) {
       return null;
@@ -532,9 +527,12 @@ export const TimelineDataTableComponent: React.FC<DataTableProps> = memo(
 
 export const TimelineDataTable: React.FC<CommonDataTableProps> = memo((props) => {
   const dataView = useGetScopedSourcererDataView({ sourcererScope: SourcererScopeName.timeline });
-  return  dataView ? <TimelineDataTableComponent dataView={dataView} {...props} /> : <div>{'TO DO: SHOW ERROR COMPONENT'}</div>
-})
+  return dataView ? (
+    <TimelineDataTableComponent dataView={dataView} {...props} />
+  ) : (
+    <div>{'TO DO: SHOW ERROR COMPONENT'}</div>
+  );
+});
 
-
-
-export { TimelineDataTable as default };
+// eslint-disable-next-line import/no-default-export
+export default TimelineDataTable;
