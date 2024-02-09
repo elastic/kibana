@@ -14,8 +14,6 @@ import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { createCategorizeQuery } from './create_categorize_query';
 
-type Tokenizer = 'standard' | 'ml_standard';
-
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 4;
 
@@ -34,7 +32,7 @@ export function createCategoryRequest(
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
-  tokenizer?: Tokenizer
+  useStandardTokenizer?: boolean
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
@@ -42,7 +40,7 @@ export function createCategoryRequest(
       categorize_text: {
         field,
         size: CATEGORY_LIMIT,
-        ...(tokenizer === 'ml_standard' ? {} : { categorization_analyzer: categorizationAnalyzer }),
+        ...(useStandardTokenizer ? { categorization_analyzer: categorizationAnalyzer } : {}),
       },
       aggs: {
         examples: {
