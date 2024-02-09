@@ -370,11 +370,14 @@ describe('OpenAIConnector', () => {
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeAsyncIterator(sampleOpenAiBody);
         expect(mockRequest).toBeCalledTimes(0);
-        expect(mockCreate).toHaveBeenCalledWith({
-          ...sampleOpenAiBody,
-          stream: true,
-          model: DEFAULT_OPENAI_MODEL,
-        });
+        expect(mockCreate).toHaveBeenCalledWith(
+          {
+            ...sampleOpenAiBody,
+            stream: true,
+            model: DEFAULT_OPENAI_MODEL,
+          },
+          { signal: undefined }
+        );
         expect(mockTee).toBeCalledTimes(1);
       });
 
