@@ -21,3 +21,17 @@ export const isAnonymized = ({
   allowReplacementSet: Set<string>;
   field: string;
 }): boolean => allowReplacementSet.has(field);
+
+export const getMessageContentWithoutReplacements = ({
+  messageContent,
+  replacements,
+}: {
+  messageContent: string;
+  replacements: Record<string, string> | undefined;
+}): string =>
+  replacements != null
+    ? Object.keys(replacements).reduce(
+        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
+        messageContent
+      )
+    : messageContent;

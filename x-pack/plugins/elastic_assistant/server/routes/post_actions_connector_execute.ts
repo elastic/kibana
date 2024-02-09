@@ -13,8 +13,7 @@ import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   ExecuteConnectorRequestBody,
   Message,
-  getAnonymizedValue,
-  transformRawData,
+  getMessageContentWithoutReplacements,
 } from '@kbn/elastic-assistant-common';
 import {
   INVOKE_ASSISTANT_ERROR_EVENT,
@@ -36,24 +35,6 @@ import {
   getPluginNameFromRequest,
 } from './helpers';
 import { buildRouteValidationWithZod } from './route_validation';
-
-export const SYSTEM_PROMPT_CONTEXT_NON_I18N = (context: string) => {
-  return `CONTEXT:\n"""\n${context}\n"""`;
-};
-
-export const getMessageContentWithReplacements = ({
-  messageContent,
-  replacements,
-}: {
-  messageContent: string;
-  replacements: Record<string, string> | undefined;
-}): string =>
-  replacements != null
-    ? Object.keys(replacements).reduce(
-        (acc, replacement) => acc.replaceAll(replacement, replacements[replacement]),
-        messageContent
-      )
-    : messageContent;
 
 export const postActionsConnectorExecuteRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -105,53 +86,49 @@ export const postActionsConnectorExecuteRoute = (
             });
           }
 
-          let replacements: Record<string, string> | undefined;
-          const onNewReplacementsFunc = async (newReplacements: Record<string, string>) => {
-            const res = await dataClient?.updateConversation({
+          if (request.body.replacements) {
+            await dataClient?.updateConversation({
               existingConversation: conversation,
               conversationUpdateProps: {
                 id: request.body.conversationId,
-                replacements: newReplacements,
+                replacements: request.body.replacements,
               },
             });
-            replacements = res?.replacements as Record<string, string> | undefined;
-            return res?.replacements as Record<string, string> | undefined;
-          };
-
-          const promptContext = await transformRawData({
-            allow: request.body.params.subActionParams.messages[0].allow ?? [],
-            allowReplacement:
-              request.body.params.subActionParams.messages[0].allowReplacement ?? [],
-            currentReplacements: conversation.replacements as Record<string, string> | undefined,
-            getAnonymizedValue,
-            onNewReplacements: onNewReplacementsFunc,
-            rawData: request.body.params.subActionParams.messages[0].rawData as Record<
-              string,
-              unknown[]
-            >,
-          });
-
-          const messageContentWithReplacements = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
-
-          const anonymizedContent = `${request.body.params.subActionParams.messages[0].content}${messageContentWithReplacements}
-
-            ${request.body.params.subActionParams.messages[0].promptText}`;
+          }
 
           const dateTimeString = new Date().toLocaleString();
-          const updatedConversation = await dataClient?.appendConversationMessages({
-            existingConversation: conversation,
-            messages: request.body.params.subActionParams.messages.map((m) => ({
-              content: getMessageContentWithReplacements({
-                messageContent: anonymizedContent,
-                replacements,
-              }),
-              role: m.role,
-              timestamp: dateTimeString,
-            })),
+
+          const appendMessageFuncs = request.body.params.subActionParams.messages.map(
+            (userMessage) => async () => {
+              const res = await dataClient?.appendConversationMessages({
+                existingConversation: conversation,
+                messages: request.body.params.subActionParams.messages.map((m) => ({
+                  content: getMessageContentWithoutReplacements({
+                    messageContent: userMessage.content,
+                    replacements: request.body.replacements as Record<string, string> | undefined,
+                  }),
+                  role: m.role,
+                  timestamp: dateTimeString,
+                })),
+              });
+              if (res == null) {
+                return response.badRequest({
+                  body: `conversation id: "${request.body.conversationId}" not updated`,
+                });
+              }
+            }
+          );
+
+          await Promise.all(appendMessageFuncs.map((appendMessageFunc) => appendMessageFunc()));
+
+          const updatedConversation = await dataClient?.getConversation({
+            id: request.body.conversationId,
+            authenticatedUser,
           });
+
           if (updatedConversation == null) {
-            return response.badRequest({
-              body: `conversation id: "${request.body.conversationId}" not updated`,
+            return response.notFound({
+              body: `conversation id: "${request.body.conversationId}" not found`,
             });
           }
 
@@ -172,9 +149,11 @@ export const postActionsConnectorExecuteRoute = (
                   existingConversation: updatedConversation,
                   messages: [
                     getMessageFromRawResponse({
-                      rawContent: getMessageContentWithReplacements({
+                      rawContent: getMessageContentWithoutReplacements({
                         messageContent: content,
-                        replacements,
+                        replacements: request.body.replacements as
+                          | Record<string, string>
+                          | undefined,
                       }),
                     }),
                   ],
@@ -192,10 +171,7 @@ export const postActionsConnectorExecuteRoute = (
                       role: c.role,
                       content: c.content,
                     })) ?? []),
-                    {
-                      role: request.body.params.subActionParams.messages[0].role,
-                      content: anonymizedContent,
-                    },
+                    ...request.body.params.subActionParams.messages,
                   ],
                 },
               },
@@ -232,10 +208,7 @@ export const postActionsConnectorExecuteRoute = (
                 role: c.role,
                 content: c.content,
               })) ?? []),
-              {
-                role: request.body.params.subActionParams.messages[0].role,
-                content: anonymizedContent,
-              },
+              request.body.params.subActionParams.messages,
             ] ?? []) as unknown as Array<Pick<Message, 'content' | 'role'>>
           );
 

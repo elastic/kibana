@@ -7,10 +7,11 @@
 
 import React, { useCallback } from 'react';
 import { HttpSetup } from '@kbn/core-http-browser';
+import { getMessageContentWithoutReplacements } from '@kbn/elastic-assistant-common';
 import { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessages } from '../use_send_messages';
 import { useConversation } from '../use_conversation';
-import { getCombinedRawMessages } from '../prompt/helpers';
+import { getCombinedMessage } from '../prompt/helpers';
 import { Conversation, Message, Prompt } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 import { getDefaultSystemPrompt } from '../use_conversation/helpers';
@@ -69,31 +70,38 @@ export const useChatSend = ({
   // Handles sending latest user prompt to API
   const handleSendMessage = useCallback(
     async (promptText: string) => {
+      let replacements: Record<string, string> | undefined;
+      const onNewReplacements = (newReplacements: Record<string, string>) => {
+        replacements = { ...(currentConversation.replacements ?? {}), ...newReplacements };
+        setCurrentConversation({
+          ...currentConversation,
+          replacements,
+        });
+      };
+
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
-      const messagesWithRawData = getCombinedRawMessages({
+      const userMessages = getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
+        currentReplacements: currentConversation.replacements,
         promptText,
         selectedPromptContexts,
         selectedSystemPrompt: systemPrompt,
+        onNewReplacements,
       });
 
-      const updatedMessages = [
-        ...currentConversation.messages,
-        ...messagesWithRawData.map((m) => ({
-          content: `${
-            currentConversation.messages.length === 0 ? `${systemPrompt?.content ?? ''}\n\n` : ''
-          } 
-          ${m.promptText}`,
-          timestamp: new Date().toLocaleString(),
-          role: m.role,
-        })),
-      ];
-
+      const updatedMessages = [...currentConversation.messages, ...userMessages];
       setCurrentConversation({
         ...currentConversation,
-        messages: updatedMessages,
+        messages: updatedMessages.map((m) => ({
+          ...m,
+          content: getMessageContentWithoutReplacements({
+            messageContent: m.content ?? '',
+            replacements,
+          }),
+        })),
       });
+
       // Reset prompt context selection and preview before sending:
       setSelectedPromptContexts({});
       setPromptTextPreview('');
@@ -101,8 +109,9 @@ export const useChatSend = ({
       const rawResponse = await sendMessages({
         apiConfig: currentConversation.apiConfig,
         http,
-        messages: messagesWithRawData,
+        messages: userMessages,
         conversationId: currentConversation.id,
+        replacements,
       });
 
       const responseMessage: Message = getMessageFromRawResponse(rawResponse);

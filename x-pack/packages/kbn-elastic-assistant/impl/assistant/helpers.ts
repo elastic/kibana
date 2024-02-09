@@ -116,20 +116,17 @@ export const getOptionalRequestParams = ({
   alertsIndexPattern,
   allow,
   allowReplacement,
-  replacements,
   size,
 }: {
   isEnabledRAGAlerts: boolean;
   alertsIndexPattern?: string;
   allow?: string[];
   allowReplacement?: string[];
-  replacements?: Record<string, string>;
   size?: number;
 }): OptionalRequestParams => {
   const optionalAlertsIndexPattern = alertsIndexPattern ? { alertsIndexPattern } : undefined;
   const optionalAllow = allow ? { allow } : undefined;
   const optionalAllowReplacement = allowReplacement ? { allowReplacement } : undefined;
-  const optionalReplacements = replacements ? { replacements } : undefined;
   const optionalSize = size ? { size } : undefined;
 
   // the settings toggle must be enabled:
@@ -141,7 +138,6 @@ export const getOptionalRequestParams = ({
     ...optionalAlertsIndexPattern,
     ...optionalAllow,
     ...optionalAllowReplacement,
-    ...optionalReplacements,
     ...optionalSize,
   };
 };

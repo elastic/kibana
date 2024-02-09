@@ -9,7 +9,7 @@ import { mockGetAnonymizedValue } from '../../mock/get_anonymized_value';
 import { transformRawData } from '.';
 
 describe('transformRawData', () => {
-  it('returns non-anonymized data when rawData is a string', async () => {
+  it('returns non-anonymized data when rawData is a string', () => {
     const inputRawData = {
       allow: ['field1'],
       allowReplacement: ['field1', 'field2'],
@@ -17,7 +17,7 @@ describe('transformRawData', () => {
       rawData: 'this will not be anonymized',
     };
 
-    const result = await transformRawData({
+    const result = transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},
@@ -29,7 +29,7 @@ describe('transformRawData', () => {
     expect(result).toEqual('this will not be anonymized');
   });
 
-  it('calls onNewReplacements with the expected replacements', async () => {
+  it('calls onNewReplacements with the expected replacements', () => {
     const inputRawData = {
       allow: ['field1'],
       allowReplacement: ['field1'],
@@ -39,7 +39,7 @@ describe('transformRawData', () => {
 
     const onNewReplacements = jest.fn();
 
-    await transformRawData({
+    transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},
@@ -51,7 +51,7 @@ describe('transformRawData', () => {
     expect(onNewReplacements).toHaveBeenCalledWith({ '1eulav': 'value1' });
   });
 
-  it('returns the expected mix of anonymized and non-anonymized data as a CSV string', async () => {
+  it('returns the expected mix of anonymized and non-anonymized data as a CSV string', () => {
     const inputRawData = {
       allow: ['field1', 'field2'],
       allowReplacement: ['field1'], // only field 1 will be anonymized
@@ -59,7 +59,7 @@ describe('transformRawData', () => {
       rawData: { field1: ['value1', 'value2'], field2: ['value3', 'value4'] },
     };
 
-    const result = await transformRawData({
+    const result = transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},
@@ -71,7 +71,7 @@ describe('transformRawData', () => {
     expect(result).toEqual('field1,1eulav,2eulav\nfield2,value3,value4'); // only field 1 is anonymized
   });
 
-  it('omits fields that are not included in the `allow` list, even if they are members of `allowReplacement`', async () => {
+  it('omits fields that are not included in the `allow` list, even if they are members of `allowReplacement`', () => {
     const inputRawData = {
       allow: ['field1', 'field2'], // field3 is NOT allowed
       allowReplacement: ['field1', 'field3'], // field3 is requested to be anonymized
@@ -83,7 +83,7 @@ describe('transformRawData', () => {
       },
     };
 
-    const result = await transformRawData({
+    const result = transformRawData({
       allow: inputRawData.allow,
       allowReplacement: inputRawData.allowReplacement,
       currentReplacements: {},

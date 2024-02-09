@@ -21,5 +21,9 @@ export {
 } from './impl/data_anonymization/helpers';
 
 export { transformRawData } from './impl/data_anonymization/transform_raw_data';
+export { getAnonymizedData } from './impl/data_anonymization/get_anonymized_data';
+export { getAnonymizedValues } from './impl/data_anonymization/get_anonymized_values';
+export { getCsvFromData } from './impl/data_anonymization/get_csv_from_data';
+export { getMessageContentWithoutReplacements } from './impl/data_anonymization/helpers';
 
 export * from './constants';

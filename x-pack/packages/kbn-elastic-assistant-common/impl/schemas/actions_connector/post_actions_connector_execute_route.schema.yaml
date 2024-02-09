@@ -118,18 +118,6 @@ components:
                   - role
                   - content
                 properties:
-                  promptText:
-                    type: string
-                  allow:
-                    type: array
-                    items:
-                      type: string
-                  allowReplacement:
-                    type: array
-                    items:
-                      type: string
-                  rawData:
-                    $ref: '#/components/schemas/RawMessageData'
                   role:
                     type: string
                     description: Message role.

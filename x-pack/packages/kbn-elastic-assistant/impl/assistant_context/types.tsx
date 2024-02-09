@@ -14,14 +14,6 @@ export interface MessagePresentation {
   stream?: boolean;
 }
 
-export interface RawMessage {
-  role: ConversationRole;
-  content: string;
-  allow?: string[];
-  allowReplacement?: string[];
-  rawData?: string | Record<string, string[]>;
-  promptText?: string;
-}
 export interface Message {
   role: ConversationRole;
   reader?: ReadableStreamDefaultReader<Uint8Array>;

@@ -29,10 +29,6 @@ export const ConnectorExecutionParams = z.object({
   subActionParams: z.object({
     messages: z.array(
       z.object({
-        promptText: z.string().optional(),
-        allow: z.array(z.string()).optional(),
-        allowReplacement: z.array(z.string()).optional(),
-        rawData: RawMessageData.optional(),
         /**
          * Message role.
          */
