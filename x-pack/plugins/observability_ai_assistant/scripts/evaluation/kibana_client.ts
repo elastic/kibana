@@ -12,7 +12,9 @@ import { format, parse, UrlObject } from 'url';
 import { ToolingLog } from '@kbn/tooling-log';
 import pRetry from 'p-retry';
 import { Message, MessageRole } from '../../common';
+import { isSupportedConnectorType } from '../../common/connectors';
 import {
+  BufferFlushEvent,
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
@@ -217,7 +219,17 @@ export class KibanaClient {
           )
         ).data
       ).pipe(
-        map((line) => JSON.parse(line) as ChatCompletionChunkEvent | ChatCompletionErrorEvent),
+        map(
+          (line) =>
+            JSON.parse(line) as
+              | ChatCompletionChunkEvent
+              | ChatCompletionErrorEvent
+              | BufferFlushEvent
+        ),
+        filter(
+          (line): line is ChatCompletionChunkEvent | ChatCompletionErrorEvent =>
+            line.type !== StreamingChatResponseEventType.BufferFlush
+        ),
         throwSerializedChatCompletionErrors(),
         concatenateChatCompletionChunks()
       );
@@ -270,13 +282,13 @@ export class KibanaClient {
             )
           ).data
         ).pipe(
-          map((line) => JSON.parse(line) as StreamingChatResponseEvent),
-          throwSerializedChatCompletionErrors(),
+          map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
           filter(
             (event): event is MessageAddEvent | ConversationCreateEvent =>
               event.type === StreamingChatResponseEventType.MessageAdd ||
               event.type === StreamingChatResponseEventType.ConversationCreate
           ),
+          throwSerializedChatCompletionErrors(),
           toArray()
         );
 
@@ -427,6 +439,8 @@ export class KibanaClient {
       })
     );
 
-    return connectors.data.filter((connector) => connector.connector_type_id === '.gen-ai');
+    return connectors.data.filter((connector) =>
+      isSupportedConnectorType(connector.connector_type_id)
+    );
   }
 }
