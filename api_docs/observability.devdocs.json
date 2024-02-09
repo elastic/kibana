@@ -8417,7 +8417,45 @@
         "label": "ObservabilityAPIReturnType",
         "description": [],
         "signature": [
-          "{ \"POST /api/observability/slos/{id}/_reset 2023-10-31\": { endpoint: \"POST /api/observability/slos/{id}/_reset 2023-10-31\"; params?: ",
+          "{ \"GET /internal/api/observability/slos/_groups\": { endpoint: \"GET /internal/api/observability/slos/_groups\"; params?: ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; groupBy: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ungrouped\">, ",
+          "LiteralC",
+          "<\"slo.tags\">, ",
+          "LiteralC",
+          "<\"status\">, ",
+          "LiteralC",
+          "<\"slo.indicator.type\">]>; kqlQuery: ",
+          "StringC",
+          "; filters: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params?: { query?: { page?: string | undefined; perPage?: string | undefined; groupBy?: \"status\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\" | undefined; kqlQuery?: string | undefined; filters?: string | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: { group: string; groupBy: string; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/slos/{id}/_reset 2023-10-31\": { endpoint: \"POST /api/observability/slos/{id}/_reset 2023-10-31\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -10725,7 +10763,45 @@
         "label": "ObservabilityServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /api/observability/slos/{id}/_reset 2023-10-31\": { endpoint: \"POST /api/observability/slos/{id}/_reset 2023-10-31\"; params?: ",
+          "{ \"GET /internal/api/observability/slos/_groups\": { endpoint: \"GET /internal/api/observability/slos/_groups\"; params?: ",
+          "PartialC",
+          "<{ query: ",
+          "PartialC",
+          "<{ page: ",
+          "StringC",
+          "; perPage: ",
+          "StringC",
+          "; groupBy: ",
+          "UnionC",
+          "<[",
+          "LiteralC",
+          "<\"ungrouped\">, ",
+          "LiteralC",
+          "<\"slo.tags\">, ",
+          "LiteralC",
+          "<\"status\">, ",
+          "LiteralC",
+          "<\"slo.indicator.type\">]>; kqlQuery: ",
+          "StringC",
+          "; filters: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteHandlerResources",
+            "text": "ObservabilityRouteHandlerResources"
+          },
+          " & { params?: { query?: { page?: string | undefined; perPage?: string | undefined; groupBy?: \"status\" | \"ungrouped\" | \"slo.tags\" | \"slo.indicator.type\" | undefined; kqlQuery?: string | undefined; filters?: string | undefined; } | undefined; } | undefined; }) => Promise<{ page: number; perPage: number; total: number; results: { group: string; groupBy: string; summary: { total: number; worst: { sliValue: number; status: string; slo: { id: string; instanceId: string; name: string; }; }; violated: number; healthy: number; degrading: number; noData: number; }; }[]; }>; } & ",
+          {
+            "pluginId": "observability",
+            "scope": "server",
+            "docId": "kibObservabilityPluginApi",
+            "section": "def-server.ObservabilityRouteCreateOptions",
+            "text": "ObservabilityRouteCreateOptions"
+          },
+          "; \"POST /api/observability/slos/{id}/_reset 2023-10-31\": { endpoint: \"POST /api/observability/slos/{id}/_reset 2023-10-31\"; params?: ",
           "TypeC",
           "<{ path: ",
           "TypeC",
@@ -14315,6 +14391,90 @@
           },
           {
             "parentPluginId": "observability",
+            "id": "def-server.uiSettings.enableInfrastructureHostsCustomDashboards",
+            "type": "Object",
+            "tags": [],
+            "label": "[enableInfrastructureHostsCustomDashboards]",
+            "description": [],
+            "path": "x-pack/plugins/observability/server/ui_settings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsCustomDashboards.category",
+                "type": "Array",
+                "tags": [],
+                "label": "category",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsCustomDashboards.name",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsCustomDashboards.value",
+                "type": "boolean",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "false"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsCustomDashboards.description",
+                "type": "string",
+                "tags": [],
+                "label": "description",
+                "description": [],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "observability",
+                "id": "def-server.uiSettings.enableInfrastructureHostsCustomDashboards.schema",
+                "type": "Object",
+                "tags": [],
+                "label": "schema",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/config-schema",
+                    "scope": "common",
+                    "docId": "kibKbnConfigSchemaPluginApi",
+                    "section": "def-common.Type",
+                    "text": "Type"
+                  },
+                  "<boolean>"
+                ],
+                "path": "x-pack/plugins/observability/server/ui_settings.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "observability",
             "id": "def-server.uiSettings.enableAwsLambdaMetrics",
             "type": "Object",
             "tags": [],
@@ -17346,6 +17506,21 @@
         "description": [],
         "signature": [
           "\"observability:apmEnableCriticalPath\""
+        ],
+        "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observability",
+        "id": "def-common.enableInfrastructureHostsCustomDashboards",
+        "type": "string",
+        "tags": [],
+        "label": "enableInfrastructureHostsCustomDashboards",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureHostsCustomDashboards\""
         ],
         "path": "x-pack/plugins/observability/common/ui_settings_keys.ts",
         "deprecated": false,
