@@ -1097,7 +1097,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({
     ...def,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     type: 'eval',
   }));

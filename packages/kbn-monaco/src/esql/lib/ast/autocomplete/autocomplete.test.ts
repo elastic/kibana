@@ -563,40 +563,52 @@ describe('autocomplete', () => {
     const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
       agg: true,
     });
-    testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
+    const allEvaFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
+      evalMath: true,
+    });
+    testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a ', ['= $0']);
-    testSuggestions('from a | stats a=', [...allAggFunctions]);
+    testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
     testSuggestions('from a | stats a=max(b) BY ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
     testSuggestions('from a | stats a=c by d ', ['|', ',']);
     testSuggestions('from a | stats a=c by d, ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
-    testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
+    testSuggestions('from a | stats a=max(b), ', [
+      'var0 =',
+      ...allAggFunctions,
+      ...allEvaFunctions,
+    ]);
     testSuggestions('from a | stats a=min()', getFieldNamesByType('number'), '(');
     testSuggestions('from a | stats a=min(b) ', ['by $0', '|', ',']);
     testSuggestions('from a | stats a=min(b) by ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
-    testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
-    testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
+    testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
+    testSuggestions('from a | stats var0=min(b),var1=c,', [
+      'var2 =',
+      ...allAggFunctions,
+      ...allEvaFunctions,
+    ]);
     testSuggestions('from a | stats a=min(b), b=max()', getFieldNamesByType('number'));
     // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', [
       'var2 =',
       ...allAggFunctions,
+      ...allEvaFunctions,
       'var0',
       'var1',
     ]);

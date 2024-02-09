@@ -104,18 +104,18 @@ export const commandDefinitions: CommandDefinition[] = [
         function isAggFunction(arg: ESQLAstItem) {
           return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
         }
-        function isBuiltinFunction(arg: ESQLAstItem) {
-          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'builtin';
+        function isOtherFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
         }
-        function isBuiltinFunctionWithAggInside(arg: ESQLAstItem) {
+        function isOtherFunctionWithAggInside(arg: ESQLAstItem) {
           return (
             isFunctionItem(arg) &&
-            isBuiltinFunction(arg) &&
+            isOtherFunction(arg) &&
             arg.args.filter(isFunctionItem).some(
               // this is recursive as builtin fns can be wrapped one withins another
               (subArg): boolean =>
                 isAggFunction(subArg) ||
-                (isBuiltinFunction(subArg) ? isBuiltinFunctionWithAggInside(subArg) : false)
+                (isOtherFunction(subArg) ? isOtherFunctionWithAggInside(subArg) : false)
             )
           );
         }
@@ -124,7 +124,7 @@ export const commandDefinitions: CommandDefinition[] = [
         // or as builtin function arg with an agg function as sub arg
         const hasAggFunctionWithinBuiltin = fnArg
           .filter((arg) => !isAssignment(arg))
-          .some(isBuiltinFunctionWithAggInside);
+          .some(isOtherFunctionWithAggInside);
 
         // assignment requires a special handling
         const hasAggFunctionWithinAssignment = fnArg
@@ -134,7 +134,7 @@ export const commandDefinitions: CommandDefinition[] = [
           .filter(isFunctionItem)
           // now check that they are either agg functions
           // or builtin functions with an agg function as sub arg
-          .some((arg) => isAggFunction(arg) || isBuiltinFunctionWithAggInside(arg));
+          .some((arg) => isAggFunction(arg) || isOtherFunctionWithAggInside(arg));
 
         if (!hasAggFunction && !hasAggFunctionWithinBuiltin && !hasAggFunctionWithinAssignment) {
           messages.push({

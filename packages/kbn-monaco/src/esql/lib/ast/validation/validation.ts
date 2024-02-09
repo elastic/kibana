@@ -257,16 +257,8 @@ function validateFunction(
     return messages;
   }
   const fnDefinition = getFunctionDefinition(astFunction.name)!;
-  const supportNestedFunctions =
-    fnDefinition?.signatures.some(({ params }) =>
-      params.some(({ noNestingFunctions }) => !noNestingFunctions)
-    ) || true;
 
-  const isFnSupported = isSupportedFunction(
-    astFunction.name,
-    isNested && !supportNestedFunctions ? 'eval' : parentCommand,
-    parentOption
-  );
+  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
