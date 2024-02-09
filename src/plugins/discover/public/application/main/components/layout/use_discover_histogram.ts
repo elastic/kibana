@@ -39,7 +39,6 @@ import { addLog } from '../../../../utils/add_log';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import type { DiscoverAppState } from '../../services/discover_app_state_container';
 import type { DataDocumentsMsg } from '../../services/discover_data_state_container';
-import { RecordRawType } from '../../services/discover_data_state_container';
 
 export interface UseDiscoverHistogramProps {
   stateContainer: DiscoverStateContainer;
@@ -226,7 +225,6 @@ export const useDiscoverHistogram = ({
     getUnifiedHistogramPropsForTextBased({
       documentsValue: savedSearchData$.documents$.getValue(),
       savedSearch: stateContainer.savedSearchState.getState(),
-      stateContainer,
     })
   );
 
@@ -235,7 +233,6 @@ export const useDiscoverHistogram = ({
     query: textBasedQuery,
     externalVisContextJSON: textBasedExternalVisContextJSON,
     columns: textBasedColumns,
-    table: textBasedTable,
   } = useObservable(textBasedFetchComplete$, initialTextBasedProps);
 
   useEffect(() => {
@@ -354,7 +351,6 @@ export const useDiscoverHistogram = ({
     timeRange: timeRangeMemoized,
     relativeTimeRange,
     columns: isPlainRecord ? textBasedColumns : undefined,
-    table: isPlainRecord ? textBasedTable : undefined,
     onFilter: histogramCustomization?.onFilter,
     onBrushEnd: histogramCustomization?.onBrushEnd,
     withDefaultActions: histogramCustomization?.withDefaultActions,
@@ -442,7 +438,6 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
         return getUnifiedHistogramPropsForTextBased({
           documentsValue: stateContainer.dataState.data$.documents$.getValue(),
           savedSearch,
-          stateContainer,
         });
       })
     ),
@@ -453,7 +448,6 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
         return getUnifiedHistogramPropsForTextBased({
           documentsValue,
           savedSearch: stateContainer.savedSearchState.getState(),
-          stateContainer,
         });
       })
     )
@@ -478,30 +472,17 @@ const EMPTY_TEXT_BASED_COLUMNS: DatatableColumn[] = [];
 function getUnifiedHistogramPropsForTextBased({
   documentsValue,
   savedSearch,
-  stateContainer,
 }: {
   documentsValue: DataDocumentsMsg | undefined;
   savedSearch: SavedSearch;
-  stateContainer: DiscoverStateContainer;
 }) {
   const columns = documentsValue?.textBasedQueryColumns || EMPTY_TEXT_BASED_COLUMNS;
-  const result = documentsValue?.result;
 
   const nextProps = {
     dataView: savedSearch.searchSource.getField('index')!,
     query: savedSearch.searchSource.getField('query'),
     externalVisContextJSON: savedSearch.visContextJSON,
     columns,
-    table:
-      documentsValue?.recordRawType === RecordRawType.PLAIN &&
-      stateContainer.dataState.data$.main$.getValue().fetchStatus === FetchStatus.COMPLETE &&
-      documentsValue.fetchStatus === FetchStatus.COMPLETE
-        ? {
-            type: 'datatable' as 'datatable',
-            rows: (result || []).map((r) => r.raw),
-            columns,
-          }
-        : undefined,
   };
 
   addLog('[UnifiedHistogram] delayed next props for text-based', nextProps);
