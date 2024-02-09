@@ -451,8 +451,6 @@ export class ObservabilityAIAssistantClient {
     this.dependencies.logger.debug(`Sending conversation to connector`);
     this.dependencies.logger.trace(JSON.stringify(request, null, 2));
 
-    const now = performance.now();
-
     const executeResult = await this.dependencies.actionsClient.execute({
       actionId: connectorId,
       params: {
