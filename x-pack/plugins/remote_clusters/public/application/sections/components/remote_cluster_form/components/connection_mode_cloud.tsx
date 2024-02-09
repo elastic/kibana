@@ -121,13 +121,13 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
             }
             helpText={
               <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText"
+                id="xpack.remoteClusters.remoteClusterForm.fieldTLSServerNameHelpText"
                 defaultMessage="If the remote cluster certificate has a different server name, specify it here. {learnMoreLink}"
                 values={{
                   learnMoreLink: (
                     <EuiLink href={proxySettingsUrl} target="_blank">
                       <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.fieldServerNameHelpText.learnMoreLinkLabel"
+                        id="xpack.remoteClusters.remoteClusterForm.fieldTLSServerNameHelpText.learnMoreLinkLabel"
                         defaultMessage="Learn more."
                       />
                     </EuiLink>
