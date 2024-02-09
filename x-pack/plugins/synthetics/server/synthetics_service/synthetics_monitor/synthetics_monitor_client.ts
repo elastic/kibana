@@ -117,7 +117,11 @@ export class SyntheticsMonitorClient {
         configId: editedMonitor.id,
       };
 
-      const editedConfig = formatHeartbeatRequest(configData, paramsString);
+      const editedConfig = await formatHeartbeatRequest(
+        configData,
+        this.server.logger,
+        paramsString
+      );
       const { publicLocations, privateLocations } = this.parseLocations(editedConfig);
       if (publicLocations.length > 0) {
         publicConfigs.push(configData);
@@ -288,7 +292,7 @@ export class SyntheticsMonitorClient {
       spaceId,
     });
 
-    for (const monitor of monitors) {
+    for (const monitor of await monitors) {
       const { publicLocations, privateLocations } = this.parseLocations(monitor);
       if (publicLocations.length > 0) {
         publicConfigs.push({ spaceId, monitor, configId: monitor.config_id, params: {} });
@@ -358,7 +362,7 @@ export class SyntheticsMonitorClient {
     return monitors;
   }
 
-  mixParamsWithMonitors(
+  async mixParamsWithMonitors(
     spaceId: string,
     monitors: Array<SavedObjectsFindResult<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>
@@ -373,12 +377,13 @@ export class SyntheticsMonitorClient {
       );
 
       heartbeatConfigs.push(
-        formatHeartbeatRequest(
+        await formatHeartbeatRequest(
           {
             spaceId,
             monitor: normalizedMonitor,
             configId: monitor.id,
           },
+          this.server.logger,
           paramsString
         )
       );
@@ -405,7 +410,7 @@ export class SyntheticsMonitorClient {
       monitor
     );
 
-    const formattedConfig = formatHeartbeatRequest(config, paramsString);
+    const formattedConfig = await formatHeartbeatRequest(config, this.server.logger, paramsString);
     return { formattedConfig, params, config };
   }
 

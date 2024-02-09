@@ -315,7 +315,7 @@ export class SyntheticsService {
     if (!config) {
       return null;
     }
-    const monitors = this.formatConfigs(config);
+    const monitors = await this.formatConfigs(config);
     const license = await this.getLicense();
 
     const output = await this.getOutput();
@@ -335,7 +335,7 @@ export class SyntheticsService {
         return;
       }
 
-      const monitors = this.formatConfigs(configs);
+      const monitors = await this.formatConfigs(configs);
       const license = await this.getLicense();
 
       const output = await this.getOutput();
@@ -360,7 +360,7 @@ export class SyntheticsService {
         return;
       }
       const license = await this.getLicense();
-      const monitors = this.formatConfigs(monitorConfig);
+      const monitors = await this.formatConfigs(monitorConfig);
 
       const output = await this.getOutput();
       if (output) {
@@ -463,7 +463,7 @@ export class SyntheticsService {
           }
 
           const monitors = result.saved_objects.filter(({ error }) => !error);
-          const formattedConfigs = this.normalizeConfigs(monitors, paramsBySpace);
+          const formattedConfigs = await this.normalizeConfigs(monitors, paramsBySpace);
 
           this.logger.debug(
             `${formattedConfigs.length} monitors will be pushed to synthetics service.`
@@ -502,7 +502,7 @@ export class SyntheticsService {
     if (!configs) {
       return;
     }
-    const monitors = this.formatConfigs(configs);
+    const monitors = await this.formatConfigs(configs);
     if (monitors.length === 0) {
       return;
     }
@@ -543,7 +543,7 @@ export class SyntheticsService {
 
         const data = {
           output,
-          monitors: this.formatConfigs(configs),
+          monitors: await this.formatConfigs(configs),
           license,
         };
         return await this.apiClient.delete(data);
@@ -563,7 +563,7 @@ export class SyntheticsService {
     }
 
     for await (const result of finder.find()) {
-      const monitors = this.normalizeConfigs(result.saved_objects, paramsBySpace);
+      const monitors = await this.normalizeConfigs(result.saved_objects, paramsBySpace);
       const hasPublicLocations = monitors.some((config) =>
         config.locations.some(({ isServiceManaged }) => isServiceManaged)
       );
@@ -631,27 +631,29 @@ export class SyntheticsService {
     return paramsBySpace;
   }
 
-  formatConfigs(configData: ConfigData[] | ConfigData) {
+  async formatConfigs(configData: ConfigData[] | ConfigData) {
     const configDataList = Array.isArray(configData) ? configData : [configData];
 
-    return configDataList.map((config) => {
-      const { str: paramsString, params } = mixParamsWithGlobalParams(
-        config.params,
-        config.monitor
-      );
+    return Promise.all(
+      configDataList.map(async (config) => {
+        const { str: paramsString, params } = mixParamsWithGlobalParams(
+          config.params,
+          config.monitor
+        );
 
-      const asHeartbeatConfig = formatHeartbeatRequest(config, paramsString);
+        const asHeartbeatConfig = await formatHeartbeatRequest(config, this.logger, paramsString);
 
-      return formatMonitorConfigFields(
-        Object.keys(asHeartbeatConfig) as ConfigKey[],
-        asHeartbeatConfig as Partial<MonitorFields>,
-        this.logger,
-        params ?? {}
-      );
-    });
+        return formatMonitorConfigFields(
+          Object.keys(asHeartbeatConfig) as ConfigKey[],
+          asHeartbeatConfig as Partial<MonitorFields>,
+          this.logger,
+          params ?? {}
+        );
+      })
+    );
   }
 
-  normalizeConfigs(
+  async normalizeConfigs(
     monitors: Array<SavedObject<SyntheticsMonitorWithSecretsAttributes>>,
     paramsBySpace: Record<string, Record<string, string>>
   ) {
@@ -670,7 +672,7 @@ export class SyntheticsService {
       };
     });
 
-    return this.formatConfigs(configDataList) as MonitorFields[];
+    return this.formatConfigs(configDataList) as Promise<MonitorFields[]>;
   }
 }
 
