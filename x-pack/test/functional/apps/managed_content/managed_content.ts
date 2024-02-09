@@ -16,12 +16,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'discover',
     'maps',
+    'visualize',
     'dashboard',
   ]);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
+  const listingTable = getService('listingTable');
+  const log = getService('log');
 
   describe('Managed Content', () => {
     before(async () => {
@@ -32,6 +35,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/managed_content');
+      kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
     });
 
     describe('preventing the user from overwriting managed content', () => {
@@ -119,6 +123,43 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.maps.waitForLayerAddPanelClosed();
 
         await expectManagedContentSignifiers(false, 'mapSaveButton');
+      });
+    });
+
+    describe('library views', () => {
+      const assertInspectorReadonly = async (name: string) => {
+        log.debug(`making sure table list inspector for ${name} is read-only`);
+        await listingTable.searchForItemWithName(name);
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.inspectVisualization();
+        expect(await listingTable.inspectorFieldsReadonly()).to.be(true);
+        await listingTable.closeInspector();
+      };
+
+      it('visualize library: managed content is read-only', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([
+          'Unmanaged lens vis',
+          'Unmanaged legacy visualization',
+          'Unmanaged map',
+        ]);
+
+        await assertInspectorReadonly('Managed lens vis');
+        await assertInspectorReadonly('Managed legacy visualization');
+        await assertInspectorReadonly('Managed map');
+      });
+
+      it('dashboard library: managed content is read-only', async () => {
+        await PageObjects.dashboard.gotoDashboardListingURL();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([]);
+
+        await assertInspectorReadonly('Managed dashboard');
       });
     });
 
