@@ -189,6 +189,7 @@ export const UninstallTokenListPage = () => {
           onSearch={handleSearch}
           incremental
           fullWidth
+          maxLength={50}
           placeholder={SEARCH_BY_POLICY_ID_OR_NAME_PLACEHOLDER}
           data-test-subj="uninstallTokensPolicyIdSearchInput"
         />
