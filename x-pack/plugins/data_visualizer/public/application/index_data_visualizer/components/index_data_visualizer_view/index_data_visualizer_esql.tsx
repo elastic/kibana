@@ -675,7 +675,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   // Query that has been typed, but has not submitted with cmd + enter
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: '' });
 
-  const onQueryUpdate = (q?: AggregateQuery) => {
+  const onQueryUpdate = async (q?: AggregateQuery) => {
     // When user submits a new query
     // resets all current requests and other data
     if (cancelOverallStatsRequest) {
