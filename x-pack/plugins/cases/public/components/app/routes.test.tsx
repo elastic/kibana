@@ -8,7 +8,7 @@
 import React from 'react';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import type { MemoryRouterProps } from 'react-router';
-import { render, screen, waitFor } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import {
   noCasesSettingsPermission,
@@ -46,70 +46,62 @@ const renderWithRouter = (
   );
 };
 
-describe('Cases routes', () => {
-  describe('All cases', () => {
-    it('navigates to the all cases page', () => {
-      renderWithRouter();
-      expect(screen.getByText('All cases')).toBeInTheDocument();
+for (let i = 0; i <= 200; i = i + 1) {
+  describe('Cases routes', () => {
+    describe('All cases', () => {
+      it('navigates to the all cases page', async () => {
+        renderWithRouter();
+        expect(await screen.findByText('All cases')).toBeInTheDocument();
+      });
+
+      // User has read only privileges
+      it('user can navigate to the all cases page with only read permissions', async () => {
+        renderWithRouter(['/cases'], readCasesPermissions());
+        expect(await screen.findByText('All cases')).toBeInTheDocument();
+      });
     });
 
-    // User has read only privileges
-    it('user can navigate to the all cases page with only read permissions', () => {
-      renderWithRouter(['/cases'], readCasesPermissions());
-      expect(screen.getByText('All cases')).toBeInTheDocument();
-    });
-  });
+    describe('Case view', () => {
+      it.each(getCaseViewPaths())(
+        'navigates to the cases view page for path: %s',
+        async (path: string) => {
+          renderWithRouter([path]);
+          expect(await screen.findByTestId('case-view-loading')).toBeInTheDocument();
+          // User has read only privileges
+        }
+      );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/163263
-  describe.skip('Case view', () => {
-    it.each(getCaseViewPaths())(
-      'navigates to the cases view page for path: %s',
-      async (path: string) => {
-        renderWithRouter([path]);
-        await waitFor(() => {
-          expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
-        });
-
-        // User has read only privileges
-      }
-    );
-
-    it.each(getCaseViewPaths())(
-      'user can navigate to the cases view page with read permissions and path: %s',
-      async (path: string) => {
-        renderWithRouter([path], readCasesPermissions());
-        await waitFor(() => {
-          expect(screen.getByTestId('case-view-loading')).toBeInTheDocument();
-        });
-      }
-    );
-  });
-
-  // FLAKY: https://github.com/elastic/kibana/issues/175229
-  // FLAKY: https://github.com/elastic/kibana/issues/175230
-  describe.skip('Create case', () => {
-    it('navigates to the create case page', () => {
-      renderWithRouter(['/cases/create']);
-      expect(screen.getByText('Create case')).toBeInTheDocument();
+      it.each(getCaseViewPaths())(
+        'user can navigate to the cases view page with read permissions and path: %s',
+        async (path: string) => {
+          renderWithRouter([path], readCasesPermissions());
+          expect(await screen.findByTestId('case-view-loading')).toBeInTheDocument();
+        }
+      );
     });
 
-    it('shows the no privileges page if the user does not have create privileges', () => {
-      renderWithRouter(['/cases/create'], noCreateCasesPermissions());
-      expect(screen.getByText('Privileges required')).toBeInTheDocument();
-    });
-  });
+    describe('Create case', () => {
+      it('navigates to the create case page', async () => {
+        renderWithRouter(['/cases/create']);
+        expect(await screen.findByText('Create case')).toBeInTheDocument();
+      });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/175231
-  // FLAKY: https://github.com/elastic/kibana/issues/175232
-  describe.skip('Cases settings', () => {
-    it('navigates to the cases settings page', () => {
-      renderWithRouter(['/cases/configure']);
-      expect(screen.getByText('Settings')).toBeInTheDocument();
+      it('shows the no privileges page if the user does not have create privileges', () => {
+        renderWithRouter(['/cases/create'], noCreateCasesPermissions());
+        expect(screen.getByText('Privileges required')).toBeInTheDocument();
+      });
     });
 
-    it('shows the no privileges page if the user does not have settings privileges', () => {
-      renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
-      expect(screen.getByText('Privileges required')).toBeInTheDocument();
+    describe('Cases settings', () => {
+      it('navigates to the cases settings page', async () => {
+        renderWithRouter(['/cases/configure']);
+        expect(await screen.findByText('Settings')).toBeInTheDocument();
+      });
+
+      it('shows the no privileges page if the user does not have settings privileges', async () => {
+        renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
+        expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+      });
     });
   });
-});
+}
