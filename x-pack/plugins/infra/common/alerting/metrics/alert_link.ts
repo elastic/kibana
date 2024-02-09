@@ -10,8 +10,12 @@ import { encode } from '@kbn/rison';
 import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { HOST_FIELD } from '../../constants';
-import { LINK_TO_METRICS_EXPLORER } from '.';
+import {
+  fifteenMinutesInMilliseconds,
+  HOST_FIELD,
+  LINK_TO_INVENTORY,
+  METRICS_EXPLORER_URL,
+} from '../../constants';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
   return Object.entries(params).reduce((acc, [key, field]) => {
@@ -51,16 +55,16 @@ export const getInventoryViewInAppUrl = (
   const nodeTypeField = `${ALERT_RULE_PARAMETERS}.nodeType`;
   const nodeType = inventoryFields[nodeTypeField] as InventoryItemType;
   const hostName = inventoryFields[HOST_FIELD];
-  let viewInAppUrl = '/app/metrics/link-to/inventory?';
 
   if (nodeType) {
     if (hostName) {
-      viewInAppUrl = getLinkToHostDetails(hostName, inventoryFields[TIMESTAMP]);
+      return getLinkToHostDetails({ hostName: hostName, timestamp: inventoryFields[TIMESTAMP] });
     } else {
-      const linkToParams: Record<string, any> = {
+      const linkToParams = {
         nodeType: inventoryFields[nodeTypeField][0],
         timestamp: Date.parse(inventoryFields[TIMESTAMP]),
         customMetric: '',
+        metric: '',
       };
 
       // We always pick the first criteria metric for the URL
@@ -84,25 +88,27 @@ export const getInventoryViewInAppUrl = (
       } else {
         linkToParams.metric = encode({ type: criteriaMetric });
       }
-      viewInAppUrl += stringify(linkToParams);
+      return `${LINK_TO_INVENTORY}?${stringify(linkToParams)}`;
     }
   }
 
-  return viewInAppUrl;
+  return LINK_TO_INVENTORY;
 };
 
 export const getMetricsViewInAppUrl = (fields: ParsedTechnicalFields & Record<string, any>) => {
   const hostName = fields[HOST_FIELD];
   const timestamp = fields[TIMESTAMP];
 
-  if (hostName) {
-    return getLinkToHostDetails(hostName, timestamp);
-  }
-  return LINK_TO_METRICS_EXPLORER;
+  return hostName ? getLinkToHostDetails({ hostName, timestamp }) : METRICS_EXPLORER_URL;
 };
 
-export function getLinkToHostDetails(hostName: string, timestamp: string): string {
-  const fifteenMinutesInMilliseconds = 15 * 60 * 1000;
+export function getLinkToHostDetails({
+  hostName,
+  timestamp,
+}: {
+  hostName: string;
+  timestamp: string;
+}): string {
   const queryParams = {
     from: Date.parse(timestamp),
     to: Date.parse(timestamp) + fifteenMinutesInMilliseconds,
