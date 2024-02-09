@@ -9,18 +9,18 @@ import { validateProxy } from './validate_proxy';
 
 describe('validateProxy', () => {
   test(`rejects proxy address when there's no input`, () => {
-    expect(validateProxy(undefined)).toMatchSnapshot();
+    expect(validateProxy(false, undefined)).toMatchSnapshot();
   });
 
   test(`rejects proxy address when the address is invalid`, () => {
-    expect(validateProxy('___')).toMatchSnapshot();
+    expect(validateProxy(false, '___')).toMatchSnapshot();
   });
 
   test(`rejects proxy address when the port is invalid`, () => {
-    expect(validateProxy('noport')).toMatchSnapshot();
+    expect(validateProxy(false, 'noport')).toMatchSnapshot();
   });
 
   test(`accepts valid proxy address`, () => {
-    expect(validateProxy('localhost:3000')).toBe(null);
+    expect(validateProxy(false, 'localhost:3000')).toBe(null);
   });
 });

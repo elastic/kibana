@@ -15,7 +15,7 @@ import { Props } from './connection_mode';
 export const ProxyConnection: FunctionComponent<Props> = (props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;
   const { proxyAddress, serverName, proxySocketConnections } = fields;
-  const { proxyAddress: proxyAddressError, serverName: serverNameError } = fieldsErrors;
+  const { proxyAddress: proxyAddressError } = fieldsErrors;
 
   return (
     <>
@@ -55,8 +55,6 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
 
         <EuiFormRow
           data-test-subj="remoteClusterFormServerNameFormRow"
-          isInvalid={Boolean(areErrorsVisible && serverNameError)}
-          error={serverNameError}
           label={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.fieldServerNameOptionalLabel"
@@ -84,7 +82,6 @@ export const ProxyConnection: FunctionComponent<Props> = (props) => {
           <EuiFieldText
             value={serverName}
             onChange={(e) => onFieldsChange({ serverName: e.target.value })}
-            isInvalid={Boolean(areErrorsVisible && serverNameError)}
             fullWidth
           />
         </EuiFormRow>
