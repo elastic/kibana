@@ -84,6 +84,9 @@ describe('wrapSearchSourceClient', () => {
         requestTimeout: 5000,
       },
     });
+    expect(logger.debug).toHaveBeenCalledWith(
+      `executing query for rule .test-rule-type:abcdefg in space my-space - with options {} and 5000ms requestTimeout`
+    );
   });
 
   test('uses search options when specified', async () => {
@@ -103,7 +106,7 @@ describe('wrapSearchSourceClient', () => {
     expect(searchSourceMock.fetch$).toHaveBeenCalledWith({
       isStored: true,
       abortSignal: abortController.signal,
-      transport: { requestTimeout: 10000 },
+      transport: { requestTimeout: 5000 },
     });
   });
 

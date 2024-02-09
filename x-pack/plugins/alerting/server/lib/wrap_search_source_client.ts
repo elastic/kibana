@@ -150,17 +150,19 @@ function wrapFetch$({
     logger.debug(
       `executing query for rule ${rule.alertTypeId}:${rule.id} in space ${
         rule.spaceId
-      } - with options ${JSON.stringify(searchOptions)}`
+      } - with options ${JSON.stringify(searchOptions)}${
+        requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
+      }`
     );
 
     return pureSearchSource
       .fetch$({
+        ...searchOptions,
         ...(requestTimeout
           ? {
               transport: { requestTimeout },
             }
           : {}),
-        ...searchOptions,
         abortSignal: abortController.signal,
       })
       .pipe(
