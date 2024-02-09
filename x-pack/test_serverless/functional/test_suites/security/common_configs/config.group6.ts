@@ -15,7 +15,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [
       require.resolve('../../common/discover/embeddable'),
       require.resolve('../../common/discover/x_pack'),
-      // this test suite is failing for Security project after switch to SAML admin role
+      // flaky for Security project, should be checked with Admin role permissions.
+      // https://github.com/elastic/kibana/issues/172365
       // require.resolve('../../common/discover_ml_uptime/discover'),
       require.resolve('../../common/context'),
     ],
