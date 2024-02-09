@@ -14,7 +14,6 @@ export default function ({ getPageObjects }: FtrProviderContext) {
   // Failing - should be fixed with https://github.com/elastic/kibana/pull/164052
   describe.skip('Sample data in serverless', function () {
     before(async () => {
-      // TODO: Serverless tests require login first
       await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 

@@ -344,7 +344,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginAsAdmin();
 
       log.debug('create source indices');

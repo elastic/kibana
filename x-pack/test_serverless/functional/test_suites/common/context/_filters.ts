@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         'discover:rowHeightOption': 0, // to have more grid rows visible at once
       });
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithRole('viewer');
       await PageObjects.common.navigateToApp('discover');
     });

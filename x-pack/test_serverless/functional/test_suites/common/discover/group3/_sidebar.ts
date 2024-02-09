@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginAsAdmin();
     });
 

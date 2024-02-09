@@ -41,7 +41,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();

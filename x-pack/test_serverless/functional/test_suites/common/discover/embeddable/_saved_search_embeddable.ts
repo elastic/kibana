@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover saved search embeddable', () => {
     before(async () => {
       await browser.setWindowSize(1300, 800);
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/dashboard/current/data');

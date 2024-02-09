@@ -42,7 +42,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 

@@ -63,7 +63,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Discover CSV Export', () => {
     describe('Check Available', () => {
       before(async () => {
-        // TODO: Serverless tests require login first
         await PageObjects.svlCommonPage.loginAsAdmin();
         // TODO: emptyKibanaIndex fails in Serverless with
         // "index_not_found_exception: no such index [.kibana_ingest]",

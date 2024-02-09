@@ -36,7 +36,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 

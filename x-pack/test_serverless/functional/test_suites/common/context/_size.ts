@@ -29,7 +29,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'context:defaultSize': `${TEST_DEFAULT_CONTEXT_SIZE}`,
         'context:step': `${TEST_STEP_SIZE}`,
       });
-      // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.loginWithRole('viewer');
       await PageObjects.context.navigateTo(TEST_INDEX_PATTERN, TEST_ANCHOR_ID);
     });

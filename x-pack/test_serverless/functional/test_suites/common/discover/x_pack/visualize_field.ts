@@ -34,7 +34,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('discover field visualize button', () => {
     before(async () => {
-      // TODO: Serverless tests require login first
       // Security project requires admin role, search/oblt project passes with developer/editor.
       await PageObjects.svlCommonPage.loginAsAdmin();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
