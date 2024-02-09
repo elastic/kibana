@@ -831,15 +831,14 @@ export const UnifiedDataTable = ({
   );
 
   const showDisplaySelector = useMemo(() => {
-    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {
-      allowRowHeight: false,
-    };
+    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {};
 
     if (onUpdateRowHeight) {
       options.allowDensity = false;
     }
 
     if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
+      options.allowRowHeight = false;
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <UnifiedDataTableAdditionalDisplaySettings
