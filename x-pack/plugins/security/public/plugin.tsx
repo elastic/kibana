@@ -6,7 +6,6 @@
  */
 
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { BuildFlavor } from '@kbn/config';
 import type {
   CoreSetup,
   CoreStart,
@@ -80,15 +79,12 @@ export class SecurityPlugin
   private readonly analyticsService = new AnalyticsService();
   private authc!: AuthenticationServiceSetup;
   private securityApiClients!: SecurityApiClients;
-  private buildFlavor: BuildFlavor;
-
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.config = this.initializerContext.config.get<ConfigType>();
     this.securityCheckupService = new SecurityCheckupService(this.config, localStorage);
     this.navControlService = new SecurityNavControlService(
       initializerContext.env.packageInfo.buildFlavor
     );
-    this.buildFlavor = this.initializerContext.env.packageInfo.buildFlavor;
   }
 
   public setup(
