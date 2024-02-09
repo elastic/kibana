@@ -122,6 +122,7 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.track_total_hits).toBe(true);
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
@@ -253,6 +254,7 @@ describe('fetchSearchSourceQuery', () => {
         dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
+      expect(searchRequest.track_total_hits).toBeUndefined();
       expect(searchRequest.size).toMatchInlineSnapshot(`0`);
       expect(searchRequest.query).toMatchInlineSnapshot(`
         Object {
