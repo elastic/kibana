@@ -11,7 +11,7 @@ import { createAppMockRenderer } from '../../../common/mock';
 import { EditTagsSelectable } from './edit_tags_selectable';
 import { basicCase } from '../../../containers/mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import { waitFor, screen } from '@testing-library/react';
 
 describe('EditTagsSelectable', () => {
   let appMock: AppMockRenderer;
@@ -48,33 +48,33 @@ describe('EditTagsSelectable', () => {
   });
 
   it('renders correctly', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
-    expect(result.getByTestId('cases-actions-tags-edit-selectable')).toBeInTheDocument();
-    expect(result.getByPlaceholderText('Search')).toBeInTheDocument();
-    expect(result.getByText(`Total tags: ${props.tags.length}`)).toBeInTheDocument();
-    expect(result.getByText('Selected: 2')).toBeInTheDocument();
-    expect(result.getByText('Select all')).toBeInTheDocument();
-    expect(result.getByText('Select none')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-actions-tags-edit-selectable')).toBeInTheDocument();
+    expect(await screen.findByPlaceholderText('Search')).toBeInTheDocument();
+    expect(await screen.findByText(`Total tags: ${props.tags.length}`)).toBeInTheDocument();
+    expect(await screen.findByText('Selected: 2')).toBeInTheDocument();
+    expect(await screen.findByText('Select all')).toBeInTheDocument();
+    expect(await screen.findByText('Select none')).toBeInTheDocument();
 
     for (const tag of props.tags) {
-      expect(result.getByText(tag)).toBeInTheDocument();
+      expect(await screen.findByText(tag)).toBeInTheDocument();
     }
   });
 
   it('renders the selected tags label correctly', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
-    expect(result.getByText('Total tags: 5')).toBeInTheDocument();
-    expect(result.getByText('Selected: 4')).toBeInTheDocument();
+    expect(await screen.findByText('Total tags: 5')).toBeInTheDocument();
+    expect(await screen.findByText('Selected: 4')).toBeInTheDocument();
 
     for (const tag of props.tags) {
-      expect(result.getByText(tag)).toBeInTheDocument();
+      expect(await screen.findByText(tag)).toBeInTheDocument();
     }
   });
 
   it('renders the tags icons correctly', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const [tag, icon] of [
       ['one', 'check'],
@@ -84,15 +84,15 @@ describe('EditTagsSelectable', () => {
       ['pepsi', 'asterisk'],
     ]) {
       const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
-      expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+      expect(await screen.findByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
   });
 
   it('selects and unselects correctly tags with one case', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
     for (const tag of props.tags) {
-      userEvent.click(result.getByText(tag));
+      userEvent.click(await screen.findByText(tag));
     }
 
     expect(props.onChangeTags).toBeCalledTimes(props.tags.length);
@@ -103,10 +103,10 @@ describe('EditTagsSelectable', () => {
   });
 
   it('selects and unselects correctly tags with multiple cases', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const tag of propsMultipleCases.tags) {
-      userEvent.click(result.getByText(tag));
+      userEvent.click(await screen.findByText(tag));
     }
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
@@ -117,10 +117,10 @@ describe('EditTagsSelectable', () => {
   });
 
   it('renders the icons correctly after selecting and deselecting tags', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     for (const tag of propsMultipleCases.tags) {
-      userEvent.click(result.getByText(tag));
+      userEvent.click(await screen.findByText(tag));
     }
 
     for (const [tag, icon] of [
@@ -131,7 +131,7 @@ describe('EditTagsSelectable', () => {
       ['pepsi', 'check'],
     ]) {
       const iconDataTestSubj = `cases-actions-tags-edit-selectable-tag-${tag}-icon-${icon}`;
-      expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+      expect(await screen.findByTestId(iconDataTestSubj)).toBeInTheDocument();
     }
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(propsMultipleCases.tags.length);
@@ -142,17 +142,17 @@ describe('EditTagsSelectable', () => {
   });
 
   it('adds a new tag correctly', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
+    await userEvent.type(await screen.findByPlaceholderText('Search'), 'not-exist', { delay: 1 });
 
-    await waitFor(() => {
-      expect(
-        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+    ).toBeInTheDocument();
 
-    const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
+    const addNewTagButton = await screen.findByTestId(
+      'cases-actions-tags-edit-selectable-add-new-tag'
+    );
 
     userEvent.click(addNewTagButton);
 
@@ -164,10 +164,10 @@ describe('EditTagsSelectable', () => {
   });
 
   it('selects all tags correctly', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
-    expect(result.getByText('Select all')).toBeInTheDocument();
-    userEvent.click(result.getByText('Select all'));
+    expect(await screen.findByText('Select all')).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Select all'));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -177,10 +177,10 @@ describe('EditTagsSelectable', () => {
   });
 
   it('unselects all tags correctly', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
-    expect(result.getByText('Select all')).toBeInTheDocument();
-    userEvent.click(result.getByText('Select none'));
+    expect(await screen.findByText('Select all')).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Select none'));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -190,24 +190,22 @@ describe('EditTagsSelectable', () => {
   });
 
   it('unselects correctly with the new item presented', async () => {
-    const result = appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
+    appMock.render(<EditTagsSelectable {...propsMultipleCases} />);
 
     /**
      * Tag with label "one" exist. Searching for "on" will show both the
      * "add new tag" item and the "one" tag
      */
-    await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
+    await userEvent.type(await screen.findByPlaceholderText('Search'), 'on', { delay: 1 });
 
-    await waitFor(() => {
-      expect(
-        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+    ).toBeInTheDocument();
 
     const iconDataTestSubj = 'cases-actions-tags-edit-selectable-tag-one-icon-check';
-    expect(result.getByTestId(iconDataTestSubj)).toBeInTheDocument();
+    expect(await screen.findByTestId(iconDataTestSubj)).toBeInTheDocument();
 
-    userEvent.click(result.getByTestId(iconDataTestSubj));
+    userEvent.click(await screen.findByTestId(iconDataTestSubj));
 
     expect(propsMultipleCases.onChangeTags).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeTags).nthCalledWith(1, {
@@ -217,25 +215,25 @@ describe('EditTagsSelectable', () => {
   });
 
   it('adds a partial match correctly and does not show the no match label', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
     /**
      * Tag with label "one" exist. Searching for "on" will show both the
      * "add new tag" item and the "one" tag
      */
-    await userEvent.type(result.getByPlaceholderText('Search'), 'on', { delay: 1 });
-
-    await waitFor(() => {
-      expect(
-        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
-      ).toBeInTheDocument();
-    });
+    await userEvent.type(await screen.findByPlaceholderText('Search'), 'on', { delay: 1 });
 
     expect(
-      result.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      await screen.findByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+    ).toBeInTheDocument();
+
+    expect(
+      screen.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
     ).not.toBeInTheDocument();
 
-    const addNewTagButton = result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag');
+    const addNewTagButton = await screen.findByTestId(
+      'cases-actions-tags-edit-selectable-add-new-tag'
+    );
 
     userEvent.click(addNewTagButton);
 
@@ -247,46 +245,44 @@ describe('EditTagsSelectable', () => {
   });
 
   it('do not show the new item option on exact match', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'one', { delay: 1 });
+    await userEvent.type(await screen.findByPlaceholderText('Search'), 'one', { delay: 1 });
 
     expect(
-      result.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+      screen.queryByTestId('cases-actions-tags-edit-selectable-add-new-tag')
     ).not.toBeInTheDocument();
   });
 
   it('does not show the no match label when the initial tags are empty', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} tags={[]} />);
+    appMock.render(<EditTagsSelectable {...props} tags={[]} />);
 
     expect(
-      result.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      screen.queryByTestId('cases-actions-tags-edit-selectable-no-match-label')
     ).not.toBeInTheDocument();
   });
 
   it('shows the no match label when there is no match', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'not-exist', { delay: 1 });
+    await userEvent.type(await screen.findByPlaceholderText('Search'), 'not-exist', { delay: 1 });
 
     expect(
-      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      await screen.findByTestId('cases-actions-tags-edit-selectable-no-match-label')
     ).toBeInTheDocument();
   });
 
   it('shows the no match label and the add new item when there is space in the search term', async () => {
-    const result = appMock.render(<EditTagsSelectable {...props} />);
+    appMock.render(<EditTagsSelectable {...props} />);
 
-    await userEvent.type(result.getByPlaceholderText('Search'), 'test tag', { delay: 1 });
-
-    await waitFor(() => {
-      expect(
-        result.getByTestId('cases-actions-tags-edit-selectable-add-new-tag')
-      ).toBeInTheDocument();
-    });
+    await userEvent.type(await screen.findByPlaceholderText('Search'), 'test tag', { delay: 1 });
 
     expect(
-      result.getByTestId('cases-actions-tags-edit-selectable-no-match-label')
+      await screen.findByTestId('cases-actions-tags-edit-selectable-add-new-tag')
+    ).toBeInTheDocument();
+
+    expect(
+      await screen.findByTestId('cases-actions-tags-edit-selectable-no-match-label')
     ).toBeInTheDocument();
   });
 });

@@ -65,23 +65,23 @@ describe('AddComment ', () => {
     sessionStorage.removeItem(draftKey);
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     appMockRender.render(<AddComment {...addCommentProps} />);
 
-    expect(screen.getByTestId('add-comment')).toBeInTheDocument();
+    expect(await screen.findByTestId('add-comment')).toBeInTheDocument();
   });
 
   it('should render spinner and disable submit when loading', async () => {
     appMockRender.render(<AddComment {...{ ...addCommentProps, showLoading: true }} />);
 
-    fireEvent.change(screen.getByLabelText('caseComment'), {
+    fireEvent.change(await screen.findByLabelText('caseComment'), {
       target: { value: sampleData.comment },
     });
 
-    fireEvent.click(screen.getByTestId('submit-comment'));
+    fireEvent.click(await screen.findByTestId('submit-comment'));
 
     expect(await screen.findByTestId('loading-spinner')).toBeInTheDocument();
-    expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
+    expect(await screen.findByTestId('submit-comment')).toHaveAttribute('disabled');
   });
 
   it('should hide the component when the user does not have create permissions', () => {
@@ -102,10 +102,10 @@ describe('AddComment ', () => {
   it('should post comment on submit click', async () => {
     appMockRender.render(<AddComment {...addCommentProps} />);
 
-    const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+    const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
     userEvent.type(markdown, sampleData.comment);
 
-    userEvent.click(screen.getByTestId('submit-comment'));
+    userEvent.click(await screen.findByTestId('submit-comment'));
 
     await waitFor(() => expect(onCommentSaving).toBeCalled());
     await waitFor(() =>
@@ -120,9 +120,7 @@ describe('AddComment ', () => {
         ],
       })
     );
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('');
-    });
+    expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toHaveTextContent('');
   });
 
   it('should insert a quote', async () => {
@@ -171,29 +169,25 @@ describe('AddComment ', () => {
     it('shows an error when comment is empty', async () => {
       appMockRender.render(<AddComment {...addCommentProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+      const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
 
       userEvent.type(markdown, 'test');
       userEvent.clear(markdown);
 
-      await waitFor(() => {
-        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
-        expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
-      });
+      expect(await screen.findByText('Empty comments are not allowed.')).toBeInTheDocument();
+      expect(await screen.findByTestId('submit-comment')).toHaveAttribute('disabled');
     });
 
     it('shows an error when comment is of empty characters', async () => {
       appMockRender.render(<AddComment {...addCommentProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+      const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
 
       userEvent.clear(markdown);
       userEvent.type(markdown, '  ');
 
-      await waitFor(() => {
-        expect(screen.getByText('Empty comments are not allowed.')).toBeInTheDocument();
-        expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
-      });
+      expect(await screen.findByText('Empty comments are not allowed.')).toBeInTheDocument();
+      expect(await screen.findByTestId('submit-comment')).toHaveAttribute('disabled');
     });
 
     it('shows an error when comment is too long', async () => {
@@ -201,18 +195,16 @@ describe('AddComment ', () => {
 
       appMockRender.render(<AddComment {...addCommentProps} />);
 
-      const markdown = screen.getByTestId('euiMarkdownEditorTextArea');
+      const markdown = await screen.findByTestId('euiMarkdownEditorTextArea');
 
       userEvent.paste(markdown, longComment);
 
-      await waitFor(() => {
-        expect(
-          screen.getByText(
-            'The length of the comment is too long. The maximum length is 30000 characters.'
-          )
-        ).toBeInTheDocument();
-        expect(screen.getByTestId('submit-comment')).toHaveAttribute('disabled');
-      });
+      expect(
+        await screen.findByText(
+          'The length of the comment is too long. The maximum length is 30000 characters.'
+        )
+      ).toBeInTheDocument();
+      expect(await screen.findByTestId('submit-comment')).toHaveAttribute('disabled');
     });
   });
 });
@@ -240,7 +232,7 @@ describe('draft comment ', () => {
   it('should clear session storage on submit', async () => {
     appMockRenderer.render(<AddComment {...addCommentProps} />);
 
-    fireEvent.change(screen.getByLabelText('caseComment'), {
+    fireEvent.change(await screen.findByLabelText('caseComment'), {
       target: { value: sampleData.comment },
     });
 
@@ -248,11 +240,11 @@ describe('draft comment ', () => {
       jest.advanceTimersByTime(1000);
     });
 
-    await waitFor(() => {
-      expect(screen.getByLabelText('caseComment')).toHaveValue(sessionStorage.getItem(draftKey));
-    });
+    expect(await screen.findByLabelText('caseComment')).toHaveValue(
+      sessionStorage.getItem(draftKey)
+    );
 
-    fireEvent.click(screen.getByTestId('submit-comment'));
+    fireEvent.click(await screen.findByTestId('submit-comment'));
 
     await waitFor(() => {
       expect(onCommentSaving).toBeCalled();
@@ -268,8 +260,9 @@ describe('draft comment ', () => {
       });
     });
 
+    expect((await screen.findByLabelText('caseComment')).textContent).toBe('');
+
     await waitFor(() => {
-      expect(screen.getByLabelText('caseComment').textContent).toBe('');
       expect(sessionStorage.getItem(draftKey)).toBe('');
     });
   });
@@ -286,7 +279,7 @@ describe('draft comment ', () => {
     it('should have draft comment same as existing session storage', async () => {
       appMockRenderer.render(<AddComment {...addCommentProps} />);
 
-      expect(screen.getByLabelText('caseComment')).toHaveValue('value set in storage');
+      expect(await screen.findByLabelText('caseComment')).toHaveValue('value set in storage');
     });
   });
 });

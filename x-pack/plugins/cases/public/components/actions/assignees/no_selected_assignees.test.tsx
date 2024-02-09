@@ -10,17 +10,17 @@ import { NoSelectedAssignees } from './no_selected_assignees';
 import { render, screen } from '@testing-library/react';
 
 describe('NoSelectedAssignees', () => {
-  it('renders the no matches messages with one selected case correctly', () => {
+  it('renders the no matches messages with one selected case correctly', async () => {
     render(<NoSelectedAssignees totalSelectedCases={1} />);
 
-    expect(screen.getByText('The selected case does not have any assigned users'));
-    expect(screen.getByText('Search to assign users.'));
+    expect(await screen.findByText('The selected case does not have any assigned users'));
+    expect(await screen.findByText('Search to assign users.'));
   });
 
-  it('renders the no matches messages with multiple selected case correctly', () => {
+  it('renders the no matches messages with multiple selected case correctly', async () => {
     render(<NoSelectedAssignees totalSelectedCases={2} />);
 
-    expect(screen.getByText('The selected cases do not have any assigned users'));
-    expect(screen.getByText('Search to assign users.'));
+    expect(await screen.findByText('The selected cases do not have any assigned users'));
+    expect(await screen.findByText('Search to assign users.'));
   });
 });

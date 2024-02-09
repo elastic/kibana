@@ -27,10 +27,10 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByText('4 options')).toBeInTheDocument();
+    expect(await screen.findByText('4 options')).toBeInTheDocument();
   });
 
   it('hides the limit reached warning when a selected tag is removed', async () => {
@@ -50,12 +50,12 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByText('Limit reached')).toBeInTheDocument();
+    expect(await screen.findByText('Limit reached')).toBeInTheDocument();
 
-    userEvent.click(screen.getByRole('option', { name: 'tag a' }));
+    userEvent.click(await screen.findByRole('option', { name: 'tag a' }));
 
     expect(onChange).toHaveBeenCalledWith({ filterId: 'tags', selectedOptionKeys: [] });
     rerender(<MultiSelectFilter {...props} selectedOptionKeys={[]} />);
@@ -80,12 +80,12 @@ describe('multi select filter', () => {
 
     const { rerender } = render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
     await waitForEuiPopoverOpen();
 
     expect(screen.queryByText('Limit reached')).not.toBeInTheDocument();
 
-    userEvent.click(screen.getByRole('option', { name: 'tag b' }));
+    userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
 
     expect(onChange).toHaveBeenCalledWith({
       filterId: 'tags',
@@ -93,7 +93,7 @@ describe('multi select filter', () => {
     });
     rerender(<MultiSelectFilter {...props} selectedOptionKeys={['tag a', 'tag b']} />);
 
-    expect(screen.getByText('Limit reached')).toBeInTheDocument();
+    expect(await screen.findByText('Limit reached')).toBeInTheDocument();
   });
 
   it('should not call onChange when the limit has been reached', async () => {
@@ -113,12 +113,12 @@ describe('multi select filter', () => {
 
     render(<MultiSelectFilter {...props} />);
 
-    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
     await waitForEuiPopoverOpen();
 
-    expect(screen.getByText('Limit reached')).toBeInTheDocument();
+    expect(await screen.findByText('Limit reached')).toBeInTheDocument();
 
-    userEvent.click(screen.getByRole('option', { name: 'tag b' }));
+    userEvent.click(await screen.findByRole('option', { name: 'tag b' }));
 
     expect(onChange).not.toHaveBeenCalled();
   });
@@ -157,9 +157,9 @@ describe('multi select filter', () => {
     };
 
     render(<MultiSelectFilter {...props} />);
-    userEvent.click(screen.getByRole('button', { name: 'Tags' }));
+    userEvent.click(await screen.findByRole('button', { name: 'Tags' }));
     await waitForEuiPopoverOpen();
-    expect(screen.getAllByTestId(TEST_ID).length).toBe(2);
+    expect((await screen.findAllByTestId(TEST_ID)).length).toBe(2);
   });
 
   it('should not show the amount of options if hideActiveOptionsNumber is active', () => {
