@@ -105,7 +105,7 @@
     "@elastic/datemath": "5.0.3",
     "@elastic/elasticsearch": "npm:@elastic/elasticsearch-canary@8.9.1-canary.1",
     "@elastic/ems-client": "8.5.1",
-    "@elastic/eui": "92.2.1",
+    "@elastic/eui": "93.0.0",
     "@elastic/filesaver": "1.1.2",
     "@elastic/node-crypto": "1.2.1",
     "@elastic/numeral": "^2.5.1",
