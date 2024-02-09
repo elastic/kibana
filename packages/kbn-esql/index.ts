@@ -29,6 +29,7 @@ export {
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
+  buildQueryUntilPreviousCommand,
 } from './src/lib/shared/resources_helpers';
 export {
   columnExists,
@@ -43,12 +44,18 @@ export {
   isIncompleteItem,
   isLiteralItem,
   isOptionItem,
+  isSettingItem,
   isRestartingExpression,
   isSourceItem,
   isTimeIntervalItem,
   monacoPositionToOffset,
   isBuiltinFunction,
   buildFunctionsLookupMap,
+  getLastCharFromTrimmed,
+  isArrayType,
+  isComma,
+  isMathFunction,
+  isSourceCommand,
 } from './src/lib/shared/helpers';
 export { excludeVariablesFromCurrentCommand, collectVariables } from './src/lib/shared/variables';
 export { getAstContext, removeMarkerArgFromArgsList } from './src/lib/shared/context';

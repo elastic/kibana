@@ -8,7 +8,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isLiteralItem } from '../shared/helpers';
-import { ESQLFunction } from '../types';
+import { ESQLFunction } from '../ast/types';
 import { FunctionDefinition } from './types';
 
 const validateLogFunctions = (fnDef: ESQLFunction) => {
