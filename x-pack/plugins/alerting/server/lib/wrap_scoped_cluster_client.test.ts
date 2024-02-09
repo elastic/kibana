@@ -69,6 +69,9 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000 ms requestTimeout`
+      );
     });
 
     test('uses asCurrentUser when specified', async () => {
@@ -91,6 +94,9 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000 ms requestTimeout`
+      );
     });
 
     test('uses search options when specified', async () => {
@@ -113,7 +119,7 @@ describe('wrapScopedClusterClient', () => {
       expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esQuery, {
         ignore: [404],
         signal: abortController.signal,
-        requestTimeout: 10000,
+        requestTimeout: 5000,
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
@@ -236,6 +242,9 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000 ms requestTimeout'
+      );
     });
 
     test('uses asCurrentUser when specified', async () => {
@@ -258,6 +267,9 @@ describe('wrapScopedClusterClient', () => {
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000 ms requestTimeout'
+      );
     });
 
     test('uses search options when specified', async () => {
@@ -280,7 +292,7 @@ describe('wrapScopedClusterClient', () => {
       expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(eqlQuery, {
         ignore: [404],
         signal: abortController.signal,
-        requestTimeout: 10000,
+        requestTimeout: 5000,
       });
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
@@ -380,6 +392,9 @@ describe('wrapScopedClusterClient', () => {
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_esql","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
+        );
       });
 
       test('uses asCurrentUser when specified', async () => {
@@ -402,6 +417,9 @@ describe('wrapScopedClusterClient', () => {
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          'executing ES|QL query for rule .test-rule-type:abcdefg in space my-space - {"method":"POST","path":"/_esql","body":{"query":"from .kibana_task_manager"}} - with options {} and 5000ms requestTimeout'
+        );
       });
 
       test('uses search options when specified', async () => {
@@ -424,7 +442,7 @@ describe('wrapScopedClusterClient', () => {
         expect(asInternalUserWrappedSearchFn).toHaveBeenCalledWith(esqlQueryRequest, {
           ignore: [404],
           signal: abortController.signal,
-          requestTimeout: 10000,
+          requestTimeout: 5000,
         });
         expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
         expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
@@ -574,7 +592,7 @@ describe('wrapScopedClusterClient', () => {
         { method: '', path: '' },
         {
           ignore: [404],
-          requestTimeout: 10000,
+          requestTimeout: 5000,
         }
       );
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
