@@ -42,30 +42,30 @@ describe('EditCategory ', () => {
     });
   });
 
-  it('Shows the category header', () => {
+  it('Shows the category header', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    expect(screen.getByText('Category')).toBeInTheDocument();
+    expect(await screen.findByText('Category')).toBeInTheDocument();
   });
 
-  it('renders no categories', () => {
+  it('renders no categories', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    expect(screen.getByTestId('cases-categories')).toBeInTheDocument();
-    expect(screen.getByTestId('no-categories')).toBeInTheDocument();
+    expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
+    expect(await screen.findByTestId('no-categories')).toBeInTheDocument();
   });
 
-  it('renders category value', () => {
+  it('renders category value', async () => {
     appMockRender.render(<EditCategory {...defaultProps} category="sample" />);
 
-    expect(screen.getByText('sample')).toBeInTheDocument();
+    expect(await screen.findByText('sample')).toBeInTheDocument();
     expect(screen.queryByTestId('no-categories')).not.toBeInTheDocument();
   });
 
-  it('renders loading state', () => {
+  it('renders loading state', async () => {
     appMockRender.render(<EditCategory {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByTestId('category-loading')).toBeInTheDocument();
+    expect(await screen.findByTestId('category-loading')).toBeInTheDocument();
     expect(screen.queryByTestId('category-edit-button')).not.toBeInTheDocument();
   });
 
@@ -77,7 +77,7 @@ describe('EditCategory ', () => {
 
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    expect(screen.getByTestId('category-loading')).toBeInTheDocument();
+    expect(await screen.findByTestId('category-loading')).toBeInTheDocument();
 
     await waitFor(() =>
       expect(screen.queryByTestId('category-edit-button')).not.toBeInTheDocument()
@@ -87,29 +87,23 @@ describe('EditCategory ', () => {
   it('shows combo box on edit', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
   });
 
   it('should select category from list', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.type(screen.getByRole('combobox'), `${categories[0]}{enter}`);
+    userEvent.type(await screen.findByRole('combobox'), `${categories[0]}{enter}`);
 
-    await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
-    });
+    expect(await screen.findByTestId('edit-category-submit')).not.toBeDisabled();
 
-    userEvent.click(screen.getByTestId('edit-category-submit'));
+    userEvent.click(await screen.findByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(categories[0]));
   });
@@ -117,19 +111,15 @@ describe('EditCategory ', () => {
   it('should add new category', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'new{enter}');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
-    });
+    expect(await screen.findByTestId('edit-category-submit')).not.toBeDisabled();
 
-    userEvent.click(screen.getByTestId('edit-category-submit'));
+    userEvent.click(await screen.findByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith('new'));
   });
@@ -137,19 +127,15 @@ describe('EditCategory ', () => {
   it('should trim category', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.type(screen.getByRole('combobox'), 'category-with-space            {enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'category-with-space            {enter}');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
-    });
+    expect(await screen.findByTestId('edit-category-submit')).not.toBeDisabled();
 
-    userEvent.click(screen.getByTestId('edit-category-submit'));
+    userEvent.click(await screen.findByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith('category-with-space'));
   });
@@ -157,44 +143,36 @@ describe('EditCategory ', () => {
   it('should not save category on cancel click', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'new{enter}');
 
-    await waitFor(() => {
-      expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('new');
-    });
+    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('new');
 
-    userEvent.click(screen.getByTestId('edit-category-cancel'));
+    userEvent.click(await screen.findByTestId('edit-category-cancel'));
 
+    expect(await screen.findByTestId('no-categories')).toBeInTheDocument();
     await waitFor(() => {
       expect(onSubmit).not.toBeCalled();
-      expect(screen.getByTestId('no-categories')).toBeInTheDocument();
     });
   });
 
   it('should be able to remove category', async () => {
     appMockRender.render(<EditCategory {...defaultProps} category={'My category'} />);
 
-    expect(screen.getByText('My category')).toBeInTheDocument();
+    expect(await screen.findByText('My category')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('comboBoxClearButton'));
+    userEvent.click(await screen.findByTestId('comboBoxClearButton'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('edit-category-submit')).not.toBeDisabled();
-    });
+    expect(await screen.findByTestId('edit-category-submit')).not.toBeDisabled();
 
-    userEvent.click(screen.getByTestId('edit-category-submit'));
+    userEvent.click(await screen.findByTestId('edit-category-submit'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(null));
   });
@@ -204,48 +182,40 @@ describe('EditCategory ', () => {
 
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.type(screen.getByRole('combobox'), `${bigCategory}{enter}`);
+    userEvent.type(await screen.findByRole('combobox'), `${bigCategory}{enter}`);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          'The length of the category is too long. The maximum length is 50 characters.'
-        )
-      ).toBeInTheDocument();
-    });
+    expect(
+      await screen.findByText(
+        'The length of the category is too long. The maximum length is 50 characters.'
+      )
+    ).toBeInTheDocument();
 
-    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+    expect(await screen.findByTestId('edit-category-submit')).toBeDisabled();
   });
 
   it('should disabled the save button on empty state', async () => {
     appMockRender.render(<EditCategory {...defaultProps} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+    expect(await screen.findByTestId('edit-category-submit')).toBeDisabled();
   });
 
   it('should disabled the save button when not changing category', async () => {
     appMockRender.render(<EditCategory {...defaultProps} category={'My category'} />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('My category');
 
-    expect(screen.getByTestId('edit-category-submit')).toBeDisabled();
+    expect(await screen.findByTestId('edit-category-submit')).toBeDisabled();
   });
 
   it('does not show edit button when the user does not have update permissions', () => {
@@ -261,33 +231,27 @@ describe('EditCategory ', () => {
       <EditCategory {...defaultProps} category={'My category'} />
     );
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('My category');
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('My category');
 
-    userEvent.click(screen.getByTestId('edit-category-cancel'));
+    userEvent.click(await screen.findByTestId('edit-category-cancel'));
 
     rerender(<EditCategory {...defaultProps} category="category from the API" />);
 
-    userEvent.click(screen.getByTestId('category-edit-button'));
+    userEvent.click(await screen.findByTestId('category-edit-button'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-      expect(screen.getByTestId('comboBoxSearchInput')).toHaveValue('category from the API');
-    });
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('comboBoxSearchInput')).toHaveValue('category from the API');
   });
 
   it('removes the category correctly using the cross button', async () => {
     appMockRender.render(<EditCategory {...defaultProps} category="My category" />);
 
-    await waitFor(() => {
-      expect(screen.getByText('My category')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('My category')).toBeInTheDocument();
 
-    userEvent.click(screen.getByTestId('category-remove-button'));
+    userEvent.click(await screen.findByTestId('category-remove-button'));
 
     await waitFor(() => expect(onSubmit).toBeCalledWith(null));
   });

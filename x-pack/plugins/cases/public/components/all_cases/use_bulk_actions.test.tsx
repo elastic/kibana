@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiContextMenu } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/react';
+import { screen } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks/dom';
 
 import type { AppMockRenderer } from '../../common/mock';
@@ -198,24 +198,26 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      const res = appMockRender.render(
+      appMockRender.render(
         <>
           <EuiContextMenu initialPanelId={0} panels={panels} />
           {modals}
         </>
       );
 
-      userEvent.click(res.getByTestId('case-bulk-action-status'));
+      userEvent.click(await screen.findByTestId('case-bulk-action-status'));
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-status-in-progress')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cases-bulk-action-status-open')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-bulk-action-status-in-progress')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-bulk-action-status-closed')).toBeInTheDocument();
 
-      userEvent.click(res.getByTestId('cases-bulk-action-status-in-progress'), undefined, {
-        skipPointerEventsCheck: true,
-      });
+      userEvent.click(
+        await screen.findByTestId('cases-bulk-action-status-in-progress'),
+        undefined,
+        {
+          skipPointerEventsCheck: true,
+        }
+      );
 
       await waitForHook(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
@@ -235,23 +237,21 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      const res = appMockRender.render(
+      appMockRender.render(
         <>
           <EuiContextMenu initialPanelId={0} panels={panels} />
           {modals}
         </>
       );
 
-      userEvent.click(res.getByTestId('case-bulk-action-severity'));
+      userEvent.click(await screen.findByTestId('case-bulk-action-severity'));
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-severity-medium')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cases-bulk-action-severity-low')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-bulk-action-severity-medium')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-bulk-action-severity-high')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-bulk-action-severity-critical')).toBeInTheDocument();
 
-      userEvent.click(res.getByTestId('cases-bulk-action-severity-medium'), undefined, {
+      userEvent.click(await screen.findByTestId('cases-bulk-action-severity-medium'), undefined, {
         skipPointerEventsCheck: true,
       });
 
@@ -281,7 +281,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+        userEvent.click(await screen.findByTestId('cases-bulk-action-delete'));
 
         modals = result.current.modals;
         res.rerender(
@@ -291,11 +291,9 @@ describe('useBulkActions', () => {
           </>
         );
 
-        await waitFor(() => {
-          expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
-        });
+        expect(await screen.findByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
-        userEvent.click(res.getByTestId('confirmModalConfirmButton'));
+        userEvent.click(await screen.findByTestId('confirmModalConfirmButton'));
 
         await waitForHook(() => {
           expect(deleteSpy).toHaveBeenCalled();
@@ -320,7 +318,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        userEvent.click(res.getByTestId('cases-bulk-action-delete'));
+        userEvent.click(await screen.findByTestId('cases-bulk-action-delete'));
 
         modals = result.current.modals;
         res.rerender(
@@ -330,11 +328,9 @@ describe('useBulkActions', () => {
           </>
         );
 
-        await waitFor(() => {
-          expect(res.getByTestId('confirm-delete-case-modal')).toBeInTheDocument();
-        });
+        expect(await screen.findByTestId('confirm-delete-case-modal')).toBeInTheDocument();
 
-        userEvent.click(res.getByTestId('confirmModalCancelButton'));
+        userEvent.click(await screen.findByTestId('confirmModalCancelButton'));
 
         modals = result.current.modals;
         res.rerender(
@@ -344,7 +340,7 @@ describe('useBulkActions', () => {
           </>
         );
 
-        expect(res.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
+        expect(screen.queryByTestId('confirm-delete-case-modal')).toBeFalsy();
       });
     });
   });
@@ -370,7 +366,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('cases-bulk-action-tags'));
+      userEvent.click(await screen.findByTestId('cases-bulk-action-tags'));
 
       flyouts = result.current.flyouts;
 
@@ -381,16 +377,12 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cases-edit-tags-flyout')).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(res.getByText('coke')).toBeInTheDocument();
-      });
+      expect(await screen.findByText('coke')).toBeInTheDocument();
 
-      userEvent.click(res.getByText('coke'));
-      userEvent.click(res.getByTestId('cases-edit-tags-flyout-submit'));
+      userEvent.click(await screen.findByText('coke'));
+      userEvent.click(await screen.findByTestId('cases-edit-tags-flyout-submit'));
 
       await waitForHook(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
@@ -417,7 +409,7 @@ describe('useBulkActions', () => {
         </>
       );
 
-      userEvent.click(res.getByTestId('cases-bulk-action-assignees'));
+      userEvent.click(await screen.findByTestId('cases-bulk-action-assignees'));
 
       flyouts = result.current.flyouts;
 
@@ -428,16 +420,12 @@ describe('useBulkActions', () => {
         </>
       );
 
-      await waitFor(() => {
-        expect(res.getByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('cases-edit-assignees-flyout')).toBeInTheDocument();
 
-      await waitFor(() => {
-        expect(res.getByText('Damaged Raccoon')).toBeInTheDocument();
-      });
+      expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
 
-      userEvent.click(res.getByText('Damaged Raccoon'));
-      userEvent.click(res.getByTestId('cases-edit-assignees-flyout-submit'));
+      userEvent.click(await screen.findByText('Damaged Raccoon'));
+      userEvent.click(await screen.findByTestId('cases-edit-assignees-flyout-submit'));
 
       await waitForHook(() => {
         expect(updateCasesSpy).toHaveBeenCalled();
@@ -448,7 +436,7 @@ describe('useBulkActions', () => {
   describe('Permissions', () => {
     it('shows the correct actions with all permissions', async () => {
       appMockRender = createAppMockRenderer({ permissions: allCasesPermissions() });
-      const { result, waitFor: waitForHook } = renderHook(
+      const { result } = renderHook(
         () => useBulkActions({ onAction, onActionSuccess, selectedCases: [basicCase] }),
         {
           wrapper: appMockRender.AppWrapper,
@@ -458,18 +446,16 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      const res = appMockRender.render(
+      appMockRender.render(
         <>
           <EuiContextMenu initialPanelId={0} panels={panels} />
           {modals}
         </>
       );
 
-      await waitForHook(() => {
-        expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
-        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-        expect(res.getByTestId('bulk-actions-separator')).toBeInTheDocument();
-      });
+      expect(await screen.findByTestId('case-bulk-action-status')).toBeInTheDocument();
+      expect(await screen.findByTestId('cases-bulk-action-delete')).toBeInTheDocument();
+      expect(await screen.findByTestId('bulk-actions-separator')).toBeInTheDocument();
     });
 
     it('shows the correct actions with no delete permissions', async () => {
@@ -484,17 +470,18 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      const res = appMockRender.render(
+      appMockRender.render(
         <>
           <EuiContextMenu initialPanelId={0} panels={panels} />
           {modals}
         </>
       );
 
+      expect(await screen.findByTestId('case-bulk-action-status')).toBeInTheDocument();
+
       await waitForHook(() => {
-        expect(res.getByTestId('case-bulk-action-status')).toBeInTheDocument();
-        expect(res.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
-        expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
+        expect(screen.queryByTestId('cases-bulk-action-delete')).toBeFalsy();
+        expect(screen.queryByTestId('bulk-actions-separator')).toBeFalsy();
       });
     });
 
@@ -510,17 +497,17 @@ describe('useBulkActions', () => {
       const modals = result.current.modals;
       const panels = result.current.panels;
 
-      const res = appMockRender.render(
+      appMockRender.render(
         <>
           <EuiContextMenu initialPanelId={0} panels={panels} />
           {modals}
         </>
       );
 
+      expect(await screen.findByTestId('cases-bulk-action-delete')).toBeInTheDocument();
       await waitForHook(() => {
-        expect(res.queryByTestId('case-bulk-action-status')).toBeFalsy();
-        expect(res.getByTestId('cases-bulk-action-delete')).toBeInTheDocument();
-        expect(res.queryByTestId('bulk-actions-separator')).toBeFalsy();
+        expect(screen.queryByTestId('case-bulk-action-status')).toBeFalsy();
+        expect(screen.queryByTestId('bulk-actions-separator')).toBeFalsy();
       });
     });
   });
