@@ -10,7 +10,7 @@ import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { ExistsFilter, Filter, FILTERS, PhrasesFilter } from '@kbn/es-query';
 import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 import { cloneDeep } from 'lodash';
-import { SMART_FALLBACK_FIELDS } from '../../common/constants';
+import { CONTENT_FIELD, RESOURCE_FIELD, SMART_FALLBACK_FIELDS } from '../../common/constants';
 import {
   ChartDisplayOptions,
   DisplayOptions,
@@ -23,13 +23,14 @@ export const getGridColumnDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
 ): GridColumnDisplayOptions[] | undefined =>
   discoverAppState.columns?.map((field) => {
-    return (
-      SMART_FALLBACK_FIELDS[field] ?? {
-        type: 'document-field',
-        field,
-        width: discoverAppState.grid?.columns?.[field]?.width,
-      }
-    );
+    if (field === CONTENT_FIELD || field === RESOURCE_FIELD) {
+      return SMART_FALLBACK_FIELDS[field];
+    }
+    return {
+      type: 'document-field',
+      field,
+      width: discoverAppState.grid?.columns?.[field]?.width,
+    };
   });
 
 export const getGridRowsDisplayOptionsFromDiscoverAppState = (
