@@ -55,6 +55,22 @@ export type LogsExplorerControllerTypeState =
         WithDiscoverStateContainer;
     }
   | {
+      value: 'initializingDataset';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
+    }
+  | {
+      value: 'initializingDataView';
+      context: WithDatasetSelection &
+        WithControlPanels &
+        WithQueryState &
+        WithDisplayOptions &
+        WithDiscoverStateContainer;
+    }
+  | {
       value: 'initializingControlPanels';
       context: WithDatasetSelection &
         WithControlPanels &
@@ -64,14 +80,6 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initialized';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.validatingSelection';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -96,14 +104,6 @@ export type LogsExplorerControllerTypeState =
     }
   | {
       value: 'initialized.datasetSelection.creatingAdHocDataView';
-      context: WithDatasetSelection &
-        WithControlPanels &
-        WithQueryState &
-        WithDisplayOptions &
-        WithDiscoverStateContainer;
-    }
-  | {
-      value: 'initialized.datasetSelection.updatingStateContainer';
       context: WithDatasetSelection &
         WithControlPanels &
         WithQueryState &
@@ -147,6 +147,9 @@ export type LogsExplorerControllerEvent =
       discoverStateContainer: DiscoverStateContainer;
     }
   | {
+      type: 'DATASET_SELECTION_RESTORE_FAILURE';
+    }
+  | {
       type: 'INITIALIZE_DATA_VIEW';
     }
   | {
@@ -154,14 +157,8 @@ export type LogsExplorerControllerEvent =
       data?: SingleDatasetSelection;
     }
   | {
-      type: 'LISTEN_TO_CHANGES';
-    }
-  | {
       type: 'UPDATE_DATASET_SELECTION';
       data: DatasetSelection | DataViewSelection;
-    }
-  | {
-      type: 'DATASET_SELECTION_RESTORE_FAILURE';
     }
   | {
       type: 'INITIALIZE_CONTROL_GROUP_API';
