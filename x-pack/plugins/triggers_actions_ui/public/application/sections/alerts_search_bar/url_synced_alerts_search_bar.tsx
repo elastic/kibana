@@ -8,6 +8,7 @@
 import React, { useCallback, useEffect } from 'react';
 import { BoolQuery } from '@kbn/es-query';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { i18n } from '@kbn/i18n';
 import { AlertsFeatureIdsFilter } from '../../lib/search_filters';
 import { useKibana } from '../../..';
 import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_container';
@@ -16,6 +17,13 @@ import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
 import { buildEsQuery } from '../global_alerts_page/global_alerts_page';
 import { nonNullable } from '../../../../common/utils';
+
+const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.invalidQueryTitle',
+  {
+    defaultMessage: 'Invalid query string',
+  }
+);
 
 export type UrlSyncedAlertsSearchBarProps = Omit<
   AlertsSearchBarProps,
@@ -35,6 +43,7 @@ export const UrlSyncedAlertsSearchBar = ({
 }: UrlSyncedAlertsSearchBarProps) => {
   const {
     data: { query: queryService },
+    notifications: { toasts },
   } = useKibana().services;
   const {
     timefilter: { timefilter: timeFilterService },
@@ -62,19 +71,32 @@ export const UrlSyncedAlertsSearchBar = ({
             .filter(nonNullable)
         ),
       ]);
-      const newQuery = buildEsQuery({
-        timeRange: {
-          to: rangeTo,
-          from: rangeFrom,
-        },
-        kuery,
-        filters,
+      onEsQueryChange(
+        buildEsQuery({
+          timeRange: {
+            to: rangeTo,
+            from: rangeFrom,
+          },
+          kuery,
+          filters,
+        })
+      );
+    } catch (error) {
+      toasts.addError(error, {
+        title: INVALID_QUERY_STRING_TOAST_TITLE,
       });
-      onEsQueryChange(newQuery);
-    } catch (e) {
-      // TODO show error message?
+      onKueryChange('');
     }
-  }, [filters, kuery, onActiveFeatureFiltersChange, onEsQueryChange, rangeFrom, rangeTo]);
+  }, [
+    filters,
+    kuery,
+    onActiveFeatureFiltersChange,
+    onEsQueryChange,
+    onKueryChange,
+    rangeFrom,
+    rangeTo,
+    toasts,
+  ]);
 
   useEffect(() => {
     syncEsQuery();
