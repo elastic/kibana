@@ -9,6 +9,7 @@ import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { aggregationTypeTransform } from '@kbn/ml-anomaly-utils';
+import { MlAnomalyRecordDoc } from '@kbn/ml-anomaly-utils';
 import { ml } from '../../services/ml_api_service';
 import { ANNOTATIONS_TABLE_DEFAULT_QUERY_SIZE } from '../../../../common/constants/search';
 import { mlTimeSeriesSearchService } from '../timeseries_search_service';
@@ -30,11 +31,18 @@ export interface Interval {
   expression: string;
 }
 
+export interface ChartDataPoint {
+  date: Date;
+  value: number | null;
+  upper?: number | null;
+  lower?: number | null;
+}
+
 export interface FocusData {
-  focusChartData: any;
-  anomalyRecords: any;
+  focusChartData: ChartDataPoint[];
+  anomalyRecords: MlAnomalyRecordDoc[];
   scheduledEvents: any;
-  showForecastCheckbox?: any;
+  showForecastCheckbox?: boolean;
   focusAnnotationError?: string;
   focusAnnotationData?: any[];
   focusForecastData?: any;

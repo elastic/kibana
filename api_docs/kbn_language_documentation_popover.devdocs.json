@@ -27,7 +27,7 @@
         "label": "LanguageDocumentationPopover",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, }: DocumentationPopoverProps) => JSX.Element; }"
+          "React.NamedExoticComponent<DocumentationPopoverProps> & { readonly type: ({ language, sections, buttonProps, searchInDescription, linkToDocumentation, }: DocumentationPopoverProps) => JSX.Element; }"
         ],
         "path": "packages/kbn-language-documentation-popover/src/components/documentation_popover.tsx",
         "deprecated": false,
@@ -59,7 +59,7 @@
         "label": "LanguageDocumentationPopoverContent",
         "description": [],
         "signature": [
-          "React.NamedExoticComponent<DocumentationProps> & { readonly type: ({ language, sections, searchInDescription }: DocumentationProps) => JSX.Element; }"
+          "React.NamedExoticComponent<DocumentationProps> & { readonly type: ({ language, sections, searchInDescription, linkToDocumentation, }: DocumentationProps) => JSX.Element; }"
         ],
         "path": "packages/kbn-language-documentation-popover/src/components/documentation_content.tsx",
         "deprecated": false,
