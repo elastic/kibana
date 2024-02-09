@@ -12,10 +12,9 @@ import { AppUpdater } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
 
-import { PluginInitializerContext, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import { deepLinkIds as devtoolsDeeplinkIds } from '@kbn/deeplinks-devtools';
-import { ConfigSchema } from './types';
 import { CreateDevToolArgs, DevToolApp, createDevToolApp } from './dev_tool';
 import { DocTitleService, BreadcrumbService } from './services';
 
