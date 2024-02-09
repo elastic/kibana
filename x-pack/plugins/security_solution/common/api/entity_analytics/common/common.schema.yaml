@@ -41,8 +41,6 @@ components:
             - elasticsearch
       required:
         - has_all_required
-        - has_read_permissions
-        - has_write_permissions
         - privileges
     AfterKeys:
       type: object
