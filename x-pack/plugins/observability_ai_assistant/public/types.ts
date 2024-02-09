@@ -34,11 +34,11 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
-  ChatContext,
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
   Message,
+  ObservabilityAIAssistantAppContext,
   PendingMessage,
 } from '../common/types';
 import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
@@ -50,7 +50,6 @@ import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 export type { CreateChatCompletionResponseChunk } from '../common/types';
 export type { PendingMessage };
-
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
   chat: (
@@ -63,7 +62,7 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    chatContext: ChatContext;
+    appContexts: ObservabilityAIAssistantAppContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
@@ -91,8 +90,8 @@ export interface ObservabilityAIAssistantService {
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
-  setChatContext: (newChatContext: ChatContext) => void;
-  getChatContext: () => ChatContext;
+  setApplicationContext: (appContext: ObservabilityAIAssistantAppContext) => () => void;
+  getApplicationContexts: () => ObservabilityAIAssistantAppContext[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
@@ -146,5 +145,4 @@ export interface ObservabilityAIAssistantPluginStart {
       RefAttributes<{}>
   > | null;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
-  useObservabilityAIAssistantChatContext: () => {};
 }

@@ -67,6 +67,9 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
+
+        You have access to data on the screen by calling the "get_data_on_screen" function if it is available. Use it to help the user understand what they are looking at.
+        A short summary of what they are looking at is available in the return of the "context" function.
         `
     );
 

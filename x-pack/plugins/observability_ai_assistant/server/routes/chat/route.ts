@@ -10,7 +10,7 @@ import { toBooleanRt } from '@kbn/io-ts-utils';
 import type OpenAI from 'openai';
 import { Readable } from 'stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import { messageRt, chatContextRt } from '../runtime_types';
+import { messageRt, appContextRt } from '../runtime_types';
 import { observableIntoStream } from '../../service/util/observable_into_stream';
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
@@ -41,8 +41,6 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });
-
-    client.setChatContext(params.body.chatContext);
 
     if (!client) {
       throw notImplemented();
@@ -83,7 +81,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     body: t.intersection([
       t.type({
         messages: t.array(messageRt),
-        chatContext: chatContextRt,
+        appContexts: t.array(appContextRt),
         connectorId: t.string,
         persist: toBooleanRt,
       }),
@@ -103,7 +101,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, conversationId, title, persist },
+      body: { messages, connectorId, conversationId, title, persist, appContexts },
     } = params;
 
     const controller = new AbortController();
@@ -116,9 +114,8 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       signal: controller.signal,
       resources,
       client,
+      appContexts,
     });
-
-    client.setChatContext(params.body.chatContext);
 
     const response$ = client.complete({
       messages,

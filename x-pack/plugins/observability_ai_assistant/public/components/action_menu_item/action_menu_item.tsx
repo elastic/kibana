@@ -44,16 +44,19 @@ export function ObservabilityAIAssistantActionMenuItem() {
     };
   }, []);
 
+  useEffect(() => {
+    const unregister = service.setApplicationContext({
+      description: 'The user is looking at ' + window.location.href,
+    });
+
+    return () => {
+      unregister();
+    };
+  }, []);
+
   if (!service.isEnabled()) {
     return null;
   }
-
-  service.setChatContext({
-    url: {
-      value: window.location.href,
-      description: 'The URL that the user is currently looking at',
-    },
-  });
 
   return (
     <>

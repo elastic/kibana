@@ -38,7 +38,6 @@ import {
   FunctionResponse,
   FunctionVisibility,
   MessageRole,
-  type ChatContext,
   type CompatibleJSONSchema,
   type Conversation,
   type ConversationCreateRequest,
@@ -60,8 +59,6 @@ import { getAccessQuery } from '../util/get_access_query';
 import { streamIntoObservable } from '../util/stream_into_observable';
 
 export class ObservabilityAIAssistantClient {
-  chatContext: ChatContext = {};
-
   constructor(
     private readonly dependencies: {
       actionsClient: PublicMethodsOf<ActionsClient>;
@@ -203,6 +200,20 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages.concat(addedMessage));
           } else if (isUserMessage) {
+            const functions =
+              numFunctionsCalled >= MAX_FUNCTION_CALLS
+                ? []
+                : functionClient
+                    .getFunctions()
+                    .filter((fn) => {
+                      const visibility = fn.definition.visibility ?? FunctionVisibility.All;
+                      return (
+                        visibility === FunctionVisibility.All ||
+                        visibility === FunctionVisibility.AssistantOnly
+                      );
+                    })
+                    .map((fn) => pick(fn.definition, 'name', 'description', 'parameters'));
+
             const response$ = (
               await this.chat(
                 lastMessage.message.name && lastMessage.message.name !== 'recall'
@@ -212,19 +223,7 @@ export class ObservabilityAIAssistantClient {
                   messages: nextMessages,
                   connectorId,
                   signal,
-                  functions:
-                    numFunctionsCalled >= MAX_FUNCTION_CALLS
-                      ? []
-                      : functionClient
-                          .getFunctions()
-                          .filter((fn) => {
-                            const visibility = fn.definition.visibility ?? FunctionVisibility.All;
-                            return (
-                              visibility === FunctionVisibility.All ||
-                              visibility === FunctionVisibility.AssistantOnly
-                            );
-                          })
-                          .map((fn) => pick(fn.definition, 'name', 'description', 'parameters')),
+                  functions,
                 }
               )
             ).pipe(emitWithConcatenatedMessage(), shareReplay());
@@ -777,17 +776,5 @@ export class ObservabilityAIAssistantClient {
 
   deleteKnowledgeBaseEntry = async (id: string) => {
     return this.dependencies.knowledgeBaseService.deleteEntry({ id });
-  };
-
-  setChatContext = (newContext: ChatContext) => {
-    this.chatContext = { ...this.chatContext, ...newContext };
-  };
-
-  getChatContext = async () => {
-    return this.chatContext;
-  };
-
-  clearChatContext = () => {
-    this.chatContext = {};
   };
 }

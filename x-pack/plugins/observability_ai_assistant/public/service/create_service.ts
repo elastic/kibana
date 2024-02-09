@@ -9,9 +9,10 @@ import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { remove } from 'lodash';
+import { ObservabilityAIAssistantAppContext } from '../../common/types';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
-import type { ChatContext } from '../../common/types';
 
 export function createService({
   analytics,
@@ -32,7 +33,7 @@ export function createService({
 
   const registrations: ChatRegistrationRenderFunction[] = [];
 
-  let chatContext: ChatContext = {};
+  let appContexts: Array<ObservabilityAIAssistantAppContext> = [];
 
   return {
     isEnabled: () => {
@@ -49,12 +50,14 @@ export function createService({
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
     getLicense: () => licenseStart.license$,
     getLicenseManagementLocator: () => shareStart,
-    setChatContext: (newChatContext: ChatContext) => {
-      chatContext = {
-        ...chatContext,
-        ...newChatContext,
+    setApplicationContext: (context: ObservabilityAIAssistantAppContext) => {
+      appContexts.push(context);
+      return () => {
+        remove(appContexts, context);
       };
     },
-    getChatContext: () => chatContext,
+    getApplicationContexts: () => {
+      return appContexts;
+    },
   };
 }

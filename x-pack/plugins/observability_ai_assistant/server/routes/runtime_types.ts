@@ -7,13 +7,13 @@
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import {
-  Conversation,
-  ConversationCreateRequest,
-  ConversationRequestBase,
-  ConversationUpdateRequest,
-  Message,
+  type Conversation,
+  type ConversationCreateRequest,
+  type ConversationRequestBase,
+  type ConversationUpdateRequest,
+  type Message,
   MessageRole,
-  ChatContext,
+  type ObservabilityAIAssistantAppContext,
 } from '../../common/types';
 
 const serializeableRt = t.any;
@@ -94,10 +94,13 @@ export const conversationRt: t.Type<Conversation> = t.intersection([
   }),
 ]);
 
-export const chatContextRt: t.Type<ChatContext> = t.record(
-  t.string,
-  t.type({
-    value: t.union([t.string, t.number]),
-    description: t.string,
-  })
-);
+export const appContextRt: t.Type<ObservabilityAIAssistantAppContext> = t.partial({
+  description: t.string,
+  data: t.array(
+    t.type({
+      name: t.string,
+      description: t.string,
+      value: t.any,
+    })
+  ),
+});

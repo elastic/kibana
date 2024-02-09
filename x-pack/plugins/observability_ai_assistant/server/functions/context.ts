@@ -58,14 +58,12 @@ export function registerContextFunction({
         required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: { queries, categories }, messages, connectorId }, signal) => {
+    async ({ arguments: { queries, categories }, messages, connectorId, appContexts }, signal) => {
       const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
 
       if (!systemMessage) {
         throw new Error('No system message found');
       }
-
-      const chatContext = await client.getChatContext();
 
       const userMessage = last(
         messages.filter((message) => message.message.role === MessageRole.User)
@@ -84,9 +82,11 @@ export function registerContextFunction({
         queries: queriesOrUserPrompt,
       });
 
+      const screenDescription = appContexts.map((context) => context.description).join('\n\n');
+
       if (suggestions.length === 0) {
         return {
-          content: { learnings: [] as unknown as Serializable, chatContext },
+          content: { learnings: [] as unknown as Serializable, screenDescription },
         };
       }
 
@@ -101,7 +101,7 @@ export function registerContextFunction({
       });
 
       return {
-        content: { learnings: relevantDocuments as unknown as Serializable, chatContext },
+        content: { learnings: relevantDocuments as unknown as Serializable, screenDescription },
       };
     }
   );

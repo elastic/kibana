@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { APIReturnType } from '../../../services/rest/create_call_apm_api';
 import { useStateDebounced } from '../../../hooks/use_debounce';
@@ -29,6 +29,7 @@ import { isTimeComparison } from '../../shared/time_comparison/get_comparison_op
 import { ServiceList } from './service_list';
 import { orderServiceItems } from './service_list/order_service_items';
 import { SortFunction } from '../../shared/managed_table';
+import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 type MainStatisticsApiResponse = APIReturnType<'GET /internal/apm/services'>;
 
@@ -264,6 +265,34 @@ export function ServiceInventory() {
     },
     [tiebreakerField]
   );
+
+  const setApplicationContext =
+    useApmPluginContext().observabilityAIAssistant.service
+      .setApplicationContext;
+
+  useEffect(() => {
+    if (mainStatisticsStatus === FETCH_STATUS.FAILURE) {
+      return setApplicationContext({
+        description: 'The services have failed to load',
+      });
+    }
+
+    if (mainStatisticsStatus === FETCH_STATUS.LOADING) {
+      return setApplicationContext({
+        description: 'The services are still loading',
+      });
+    }
+
+    return setApplicationContext({
+      data: [
+        {
+          name: 'services',
+          description: 'The list of services that the user is looking at',
+          value: mainStatisticsData.items,
+        },
+      ],
+    });
+  }, [mainStatisticsStatus, mainStatisticsData.items]);
 
   return (
     <>

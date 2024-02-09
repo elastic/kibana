@@ -21,7 +21,6 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import { createService } from './service/create_service';
 import { useGenAIConnectorsWithoutContext } from './hooks/use_genai_connectors';
-import { useObservabilityAIAssistantChatContext } from './hooks/use_observability_ai_assistant_chat_context';
 import type {
   ConfigSchema,
   ObservabilityAIAssistantPluginSetup,
@@ -147,7 +146,6 @@ export class ObservabilityAIAssistantPlugin
     return {
       service,
       useGenAIConnectors: () => useGenAIConnectorsWithoutContext(service),
-      useObservabilityAIAssistantChatContext: () => useObservabilityAIAssistantChatContext(service),
       ObservabilityAIAssistantContextualInsight: isEnabled
         ? withSuspense(
             withProviders(

@@ -11,6 +11,7 @@ import type {
   FunctionDefinition,
   FunctionResponse,
   Message,
+  ObservabilityAIAssistantAppContext,
   RegisterContextDefinition,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
@@ -26,6 +27,7 @@ type RespondFunction<TArguments, TResponse extends FunctionResponse> = (
     arguments: TArguments;
     messages: Message[];
     connectorId: string;
+    appContexts: ObservabilityAIAssistantAppContext[];
   },
   signal: AbortSignal
 ) => Promise<TResponse>;
