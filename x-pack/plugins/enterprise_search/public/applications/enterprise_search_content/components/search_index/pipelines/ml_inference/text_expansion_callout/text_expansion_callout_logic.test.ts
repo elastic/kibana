@@ -10,9 +10,12 @@ import { LogicMounter } from '../../../../../../__mocks__/kea_logic';
 import { HttpResponse } from '@kbn/core/public';
 
 import { ErrorResponse, HttpError, Status } from '../../../../../../../../common/types/api';
-import { MlModelDeploymentState } from '../../../../../../../../common/types/ml';
+import {
+  MlModelDeploymentState,
+  MlModelDeploymentStatus,
+} from '../../../../../../../../common/types/ml';
 import { CreateModelApiLogic } from '../../../../../api/ml_models/create_model_api_logic';
-import { FetchTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import { FetchModelApiLogic } from '../../../../../api/ml_models/fetch_model_api_logic';
 import { StartModelApiLogic } from '../../../../../api/ml_models/start_model_api_logic';
 
 import {
@@ -25,7 +28,7 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   createModelError: undefined,
   createModelStatus: Status.IDLE,
   createdModel: undefined,
-  fetchTextExpansionModelError: undefined,
+  fetchModelError: undefined,
   isCreateButtonDisabled: false,
   isModelDownloadInProgress: false,
   isModelDownloaded: false,
@@ -41,17 +44,22 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   elserModelId: '.elser_model_2',
 };
 
+const DEFAULT_MODEL_STATUS: MlModelDeploymentStatus = {
+  deploymentState: MlModelDeploymentState.NotDeployed,
+  modelId: 'mock-model-id',
+  targetAllocationCount: 1,
+  nodeAllocationCount: 1,
+  threadsPerAllocation: 1,
+  startTime: 123456,
+};
+
 jest.useFakeTimers();
 
 describe('TextExpansionCalloutLogic', () => {
   const { mount } = new LogicMounter(TextExpansionCalloutLogic);
   const { mount: mountCreateModelApiLogic } = new LogicMounter(CreateModelApiLogic);
-  const { mount: mountFetchTextExpansionModelApiLogic } = new LogicMounter(
-    FetchTextExpansionModelApiLogic
-  );
-  const { mount: mountStartModelApiLogic } = new LogicMounter(
-    StartModelApiLogic
-  );
+  const { mount: mountFetchTextExpansionModelApiLogic } = new LogicMounter(FetchModelApiLogic);
+  const { mount: mountStartModelApiLogic } = new LogicMounter(StartModelApiLogic);
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -138,21 +146,16 @@ describe('TextExpansionCalloutLogic', () => {
     });
 
     describe('fetchTextExpansionModelSuccess', () => {
-      const data = {
-        deploymentState: MlModelDeploymentState.Downloading,
-        modelId: 'mock-model-id',
-        targetAllocationCount: 1,
-        nodeAllocationCount: 1,
-        threadsPerAllocation: 1,
-      };
-
       it('starts polling when the model is downloading and polling is not active', () => {
         mount({
           ...DEFAULT_VALUES,
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'startPollingTextExpansionModel');
 
-        TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess(data);
+        TextExpansionCalloutLogic.actions.fetchModelSuccess({
+          ...DEFAULT_MODEL_STATUS,
+          deploymentState: MlModelDeploymentState.Downloading,
+        });
 
         expect(TextExpansionCalloutLogic.actions.startPollingTextExpansionModel).toHaveBeenCalled();
       });
@@ -163,7 +166,10 @@ describe('TextExpansionCalloutLogic', () => {
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
-        TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess(data);
+        TextExpansionCalloutLogic.actions.fetchModelSuccess({
+          ...DEFAULT_MODEL_STATUS,
+          deploymentState: MlModelDeploymentState.Downloading,
+        });
 
         expect(
           TextExpansionCalloutLogic.actions.createTextExpansionModelPollingTimeout
@@ -176,12 +182,9 @@ describe('TextExpansionCalloutLogic', () => {
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'stopPollingTextExpansionModel');
 
-        TextExpansionCalloutLogic.actions.fetchTextExpansionModelSuccess({
+        TextExpansionCalloutLogic.actions.fetchModelSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.Downloaded,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
         });
 
         expect(TextExpansionCalloutLogic.actions.stopPollingTextExpansionModel).toHaveBeenCalled();
@@ -196,7 +199,7 @@ describe('TextExpansionCalloutLogic', () => {
         });
         jest.spyOn(TextExpansionCalloutLogic.actions, 'createTextExpansionModelPollingTimeout');
 
-        TextExpansionCalloutLogic.actions.fetchTextExpansionModelError({
+        TextExpansionCalloutLogic.actions.fetchModelError({
           body: {
             error: '',
             message: 'some error',
@@ -309,7 +312,7 @@ describe('TextExpansionCalloutLogic', () => {
 
       it('returns null when there are no errors', () => {
         CreateModelApiLogic.actions.apiReset();
-        FetchTextExpansionModelApiLogic.actions.apiReset();
+        FetchModelApiLogic.actions.apiReset();
         StartModelApiLogic.actions.apiReset();
         expect(TextExpansionCalloutLogic.values.textExpansionError).toBe(null);
       });
@@ -321,7 +324,7 @@ describe('TextExpansionCalloutLogic', () => {
         });
       });
       it('returns extracted error for fetch', () => {
-        FetchTextExpansionModelApiLogic.actions.apiError(error);
+        FetchModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
           title: 'Error fetching ELSER model',
           message: 'Mocked error message',
@@ -338,22 +341,16 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('isModelDownloadInProgress', () => {
       it('is set to true if the model is downloading', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.Downloading,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(true);
       });
       it('is set to false if the model is downloading', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.Started,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloadInProgress).toBe(false);
       });
@@ -361,54 +358,39 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('isModelDownloaded', () => {
       it('is set to true if the model is downloaded', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.Downloaded,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(true);
       });
       it('is set to false if the model is not downloaded', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: MlModelDeploymentState.NotDeployed,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
-        });
+        FetchModelApiLogic.actions.apiSuccess(DEFAULT_MODEL_STATUS);
         expect(TextExpansionCalloutLogic.values.isModelDownloaded).toBe(false);
       });
     });
 
     describe('isModelRunningSingleThreaded', () => {
       it('is set to true if the model has 1 target allocation and 1 thread', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.FullyAllocated,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(true);
       });
       it('is set to false if the model has multiple target allocations', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.FullyAllocated,
-          modelId: 'mock-model-id',
           targetAllocationCount: 2,
           nodeAllocationCount: 2,
-          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
       });
       it('is set to false if the model runs on multiple threads', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.FullyAllocated,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
           threadsPerAllocation: 4,
         });
         expect(TextExpansionCalloutLogic.values.isModelRunningSingleThreaded).toBe(false);
@@ -417,23 +399,14 @@ describe('TextExpansionCalloutLogic', () => {
 
     describe('isModelStarted', () => {
       it('is set to true if the model is started', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
+        FetchModelApiLogic.actions.apiSuccess({
+          ...DEFAULT_MODEL_STATUS,
           deploymentState: MlModelDeploymentState.FullyAllocated,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
         });
         expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(true);
       });
       it('is set to false if the model is not started', () => {
-        FetchTextExpansionModelApiLogic.actions.apiSuccess({
-          deploymentState: MlModelDeploymentState.NotDeployed,
-          modelId: 'mock-model-id',
-          targetAllocationCount: 1,
-          nodeAllocationCount: 1,
-          threadsPerAllocation: 1,
-        });
+        FetchModelApiLogic.actions.apiSuccess(DEFAULT_MODEL_STATUS);
         expect(TextExpansionCalloutLogic.values.isModelStarted).toBe(false);
       });
     });

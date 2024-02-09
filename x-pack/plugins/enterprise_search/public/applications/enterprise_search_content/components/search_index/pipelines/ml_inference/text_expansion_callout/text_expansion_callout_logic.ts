@@ -21,10 +21,10 @@ import {
   CreateModelResponse,
 } from '../../../../../api/ml_models/create_model_api_logic';
 import {
-  FetchTextExpansionModelApiLogic,
-  FetchTextExpansionModelApiLogicActions,
-  FetchTextExpansionModelResponse,
-} from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+  FetchModelApiLogic,
+  FetchModelApiLogicActions,
+  FetchModelResponse,
+} from '../../../../../api/ml_models/fetch_model_api_logic';
 import {
   StartModelApiLogic,
   StartModelApiLogicActions,
@@ -39,10 +39,10 @@ interface TextExpansionCalloutActions {
   createModelSuccess: CreateModelApiLogicActions['apiSuccess'];
   createTextExpansionModel: () => void;
   createTextExpansionModelPollingTimeout: (duration: number) => { duration: number };
+  fetchModelMakeRequest: FetchModelApiLogicActions['makeRequest'];
+  fetchModelError: FetchModelApiLogicActions['apiError'];
+  fetchModelSuccess: FetchModelApiLogicActions['apiSuccess'];
   fetchTextExpansionModel: () => void;
-  fetchTextExpansionModelMakeRequest: FetchTextExpansionModelApiLogicActions['makeRequest'];
-  fetchTextExpansionModelError: FetchTextExpansionModelApiLogicActions['apiError'];
-  fetchTextExpansionModelSuccess: FetchTextExpansionModelApiLogicActions['apiSuccess'];
   setTextExpansionModelPollingId: (pollTimeoutId: ReturnType<typeof setTimeout>) => {
     pollTimeoutId: ReturnType<typeof setTimeout>;
   };
@@ -51,7 +51,7 @@ interface TextExpansionCalloutActions {
   startPollingTextExpansionModel: () => void;
   startTextExpansionModel: () => void;
   stopPollingTextExpansionModel: () => void;
-  textExpansionModel: FetchTextExpansionModelApiLogicActions['apiSuccess'];
+  textExpansionModel: FetchModelApiLogicActions['apiSuccess'];
   setElserModelId: (elserModelId: string) => { elserModelId: string };
 }
 
@@ -65,7 +65,7 @@ export interface TextExpansionCalloutValues {
   createModelError: HttpError | undefined;
   createModelStatus: Status;
   createdModel: CreateModelResponse | undefined;
-  fetchTextExpansionModelError: HttpError | undefined;
+  fetchModelError: HttpError | undefined;
   isCreateButtonDisabled: boolean;
   isModelDownloadInProgress: boolean;
   isModelDownloaded: boolean;
@@ -75,7 +75,7 @@ export interface TextExpansionCalloutValues {
   isStartButtonDisabled: boolean;
   startModelError: HttpError | undefined;
   startModelStatus: Status;
-  textExpansionModel: FetchTextExpansionModelResponse | undefined;
+  textExpansionModel: FetchModelResponse | undefined;
   textExpansionModelPollTimeoutId: null | ReturnType<typeof setTimeout>;
   textExpansionError: TextExpansionCalloutError | null;
 }
@@ -149,11 +149,11 @@ export const TextExpansionCalloutLogic = kea<
         'apiSuccess as createModelSuccess',
         'apiError as createModelError',
       ],
-      FetchTextExpansionModelApiLogic,
+      FetchModelApiLogic,
       [
-        'makeRequest as fetchTextExpansionModelMakeRequest',
-        'apiSuccess as fetchTextExpansionModelSuccess',
-        'apiError as fetchTextExpansionModelError',
+        'makeRequest as fetchModelMakeRequest',
+        'apiSuccess as fetchModelSuccess',
+        'apiError as fetchModelError',
       ],
       StartModelApiLogic,
       [
@@ -165,8 +165,8 @@ export const TextExpansionCalloutLogic = kea<
     values: [
       CreateModelApiLogic,
       ['data as createdModel', 'status as createModelStatus', 'error as createModelError'],
-      FetchTextExpansionModelApiLogic,
-      ['data as textExpansionModel', 'error as fetchTextExpansionModelError'],
+      FetchModelApiLogic,
+      ['data as textExpansionModel', 'error as fetchModelError'],
       StartModelApiLogic,
       ['status as startModelStatus', 'error as startModelError'],
     ],
@@ -201,16 +201,15 @@ export const TextExpansionCalloutLogic = kea<
       }, duration);
       actions.setTextExpansionModelPollingId(timeoutId);
     },
-    fetchTextExpansionModel: () =>
-      actions.fetchTextExpansionModelMakeRequest({ modelId: values.elserModelId }),
-    fetchTextExpansionModelError: () => {
+    fetchTextExpansionModel: () => actions.fetchModelMakeRequest({ modelId: values.elserModelId }),
+    fetchModelError: () => {
       if (values.isPollingTextExpansionModelActive) {
         actions.createTextExpansionModelPollingTimeout(
           FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION_ON_FAILURE
         );
       }
     },
-    fetchTextExpansionModelSuccess: (data) => {
+    fetchModelSuccess: (data) => {
       if (data?.deploymentState === MlModelDeploymentState.Downloading) {
         if (!values.isPollingTextExpansionModelActive) {
           actions.startPollingTextExpansionModel();
@@ -235,8 +234,7 @@ export const TextExpansionCalloutLogic = kea<
       }
       actions.createTextExpansionModelPollingTimeout(FETCH_TEXT_EXPANSION_MODEL_POLLING_DURATION);
     },
-    startTextExpansionModel: () =>
-      actions.startModelMakeRequest({ modelId: values.elserModelId }),
+    startTextExpansionModel: () => actions.startModelMakeRequest({ modelId: values.elserModelId }),
     stopPollingTextExpansionModel: () => {
       if (values.textExpansionModelPollTimeoutId !== null) {
         clearTimeout(values.textExpansionModelPollTimeoutId);
@@ -267,17 +265,15 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelDownloadInProgress: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) =>
-        data?.deploymentState === MlModelDeploymentState.Downloading,
+      (data: FetchModelResponse) => data?.deploymentState === MlModelDeploymentState.Downloading,
     ],
     isModelDownloaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) =>
-        data?.deploymentState === MlModelDeploymentState.Downloaded,
+      (data: FetchModelResponse) => data?.deploymentState === MlModelDeploymentState.Downloaded,
     ],
     isModelStarted: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) =>
+      (data: FetchModelResponse) =>
         data?.deploymentState === MlModelDeploymentState.Starting ||
         data?.deploymentState === MlModelDeploymentState.Started ||
         data?.deploymentState === MlModelDeploymentState.FullyAllocated,
@@ -288,21 +284,12 @@ export const TextExpansionCalloutLogic = kea<
         pollingTimeoutId !== null,
     ],
     textExpansionError: [
-      () => [
-        selectors.createModelError,
-        selectors.fetchTextExpansionModelError,
-        selectors.startModelError,
-      ],
+      () => [selectors.createModelError, selectors.fetchModelError, selectors.startModelError],
       (
-        createTextExpansionError: TextExpansionCalloutValues['createModelError'],
-        fetchTextExpansionError: TextExpansionCalloutValues['fetchTextExpansionModelError'],
-        startTextExpansionError: TextExpansionCalloutValues['startModelError']
-      ) =>
-        getTextExpansionError(
-          createTextExpansionError,
-          fetchTextExpansionError,
-          startTextExpansionError
-        ),
+        createError: TextExpansionCalloutValues['createModelError'],
+        fetchError: TextExpansionCalloutValues['fetchModelError'],
+        startError: TextExpansionCalloutValues['startModelError']
+      ) => getTextExpansionError(createError, fetchError, startError),
     ],
     isStartButtonDisabled: [
       () => [selectors.startModelStatus],
@@ -310,7 +297,7 @@ export const TextExpansionCalloutLogic = kea<
     ],
     isModelRunningSingleThreaded: [
       () => [selectors.textExpansionModel],
-      (data: FetchTextExpansionModelResponse) =>
+      (data: FetchModelResponse) =>
         // Running single threaded if model has max 1 deployment on 1 node with 1 thread
         data?.targetAllocationCount * data?.threadsPerAllocation <= 1,
     ],
