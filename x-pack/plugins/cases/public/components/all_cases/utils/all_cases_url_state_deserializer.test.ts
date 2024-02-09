@@ -9,7 +9,6 @@ import { CustomFieldTypes } from '../../../../common/types/domain';
 import { DEFAULT_CASES_TABLE_STATE } from '../../../containers/constants';
 
 import { allCasesUrlStateDeserializer } from './all_cases_url_state_deserializer';
-import { parseUrlParams } from './parse_url_params';
 
 describe('allCasesUrlStateDeserializer', () => {
   const { customFields, ...filterOptionsWithoutCustomFields } =
@@ -82,21 +81,19 @@ describe('allCasesUrlStateDeserializer', () => {
   });
 
   it('sets the defaults to page and perPage correctly if they are not numbers', () => {
-    const url = 'page=foo&perPage=bar';
+    // @ts-expect-error: testing integer conversion
+    expect(allCasesUrlStateDeserializer({ page: 'foo', perPage: 'bar' }).queryParams.page).toBe(
+      DEFAULT_CASES_TABLE_STATE.queryParams.page
+    );
 
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.page
-    ).toBe(DEFAULT_CASES_TABLE_STATE.queryParams.page);
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.perPage
-    ).toBe(DEFAULT_CASES_TABLE_STATE.queryParams.perPage);
+    // @ts-expect-error: testing integer conversion
+    expect(allCasesUrlStateDeserializer({ page: 'foo', perPage: 'bar' }).queryParams.perPage).toBe(
+      DEFAULT_CASES_TABLE_STATE.queryParams.perPage
+    );
   });
 
   it('does not return the page and perPage if they are not defined', () => {
-    const url = 'page=&perPage=';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
+    expect(allCasesUrlStateDeserializer({})).toMatchInlineSnapshot(`
       Object {
         "filterOptions": Object {},
         "queryParams": Object {},
@@ -105,23 +102,7 @@ describe('allCasesUrlStateDeserializer', () => {
   });
 
   it('sets the sortOrder correctly', () => {
-    const url = 'sortOrder=asc';
-
-    expect(
-      allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))).queryParams.sortOrder
-    ).toBe('asc');
-  });
-
-  it('ignores the customFields keyword in the URL', () => {
-    const url = 'customFields=foo';
-
-    expect(allCasesUrlStateDeserializer(parseUrlParams(new URLSearchParams(url))))
-      .toMatchInlineSnapshot(`
-      Object {
-        "filterOptions": Object {},
-        "queryParams": Object {},
-      }
-    `);
+    expect(allCasesUrlStateDeserializer({ sortOrder: 'asc' }).queryParams.sortOrder).toBe('asc');
   });
 
   it('parses custom fields correctly', () => {
