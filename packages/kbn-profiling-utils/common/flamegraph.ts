@@ -10,8 +10,6 @@ import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
 import { convertTonsToKgs } from './utils';
-import {CoreRequestHandlerContext} from "@kbn/core-http-request-handler-context-server";
-import {profilingShowErrorFrames} from "@kbn/observability-plugin/common";
 
 /**
  * Base Flamegraph
@@ -85,9 +83,8 @@ export interface ElasticFlameGraph
  * @param base BaseFlameGraph
  * @returns ElasticFlameGraph
  */
-export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
-  const show = CoreRequestHandlerContext.uiSettings.client.get<number>(profilingShowErrorFrames);
-  if (!show) {
+export function createFlameGraph(base: BaseFlameGraph, showErrorFrame: boolean): ElasticFlameGraph {
+  if (!showErrorFrame) {
     // This loop jumps over the error frames in the graph.
     // This code is temporary until we decided how to present error frames in the UI.
     // Error frames only appear as child nodes of the root frame.
