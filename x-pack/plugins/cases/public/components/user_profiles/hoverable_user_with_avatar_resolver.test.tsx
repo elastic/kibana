@@ -21,8 +21,8 @@ describe('HoverableUserWithAvatarResolver', () => {
 
     render(<HoverableUserWithAvatarResolver user={user} />);
 
-    expect(screen.getByText('Some Super User')).toBeInTheDocument();
-    expect(screen.getByText('SS')).toBeInTheDocument();
+    expect(await screen.findByText('Some Super User')).toBeInTheDocument();
+    expect(await screen.findByText('SS')).toBeInTheDocument();
   });
 
   it('renders the avatar and display name using the username when the profile uid is not found', async () => {
@@ -35,8 +35,8 @@ describe('HoverableUserWithAvatarResolver', () => {
 
     render(<HoverableUserWithAvatarResolver user={user} />);
 
-    expect(screen.getByText('some_user')).toBeInTheDocument();
-    expect(screen.getByText('s')).toBeInTheDocument();
+    expect(await screen.findByText('some_user')).toBeInTheDocument();
+    expect(await screen.findByText('s')).toBeInTheDocument();
   });
 
   it('renders the avatar and display name using the profile', async () => {
@@ -49,8 +49,8 @@ describe('HoverableUserWithAvatarResolver', () => {
 
     render(<HoverableUserWithAvatarResolver user={user} userProfiles={userProfilesMap} />);
 
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.getByText('DR')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('DR')).toBeInTheDocument();
   });
 
   it('renders display name bolded by default', async () => {
@@ -63,8 +63,8 @@ describe('HoverableUserWithAvatarResolver', () => {
 
     render(<HoverableUserWithAvatarResolver user={user} userProfiles={userProfilesMap} />);
 
-    expect(screen.getByTestId('user-profile-username-bolded')).toBeInTheDocument();
-    expect(screen.getByText('Damaged Raccoon')).toBeInTheDocument();
-    expect(screen.getByText('DR')).toBeInTheDocument();
+    expect(await screen.findByTestId('user-profile-username-bolded')).toBeInTheDocument();
+    expect(await screen.findByText('Damaged Raccoon')).toBeInTheDocument();
+    expect(await screen.findByText('DR')).toBeInTheDocument();
   });
 });

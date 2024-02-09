@@ -620,13 +620,13 @@ describe('ConfigureCases', () => {
       }));
     });
 
-    it('renders custom field group when no custom fields available', () => {
+    it('renders custom field group when no custom fields available', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
 
-    it('renders custom field when available', () => {
+    it('renders custom field when available', async () => {
       const customFieldsMock: CustomFieldsConfiguration = [
         {
           key: 'random_custom_key',
@@ -647,11 +647,13 @@ describe('ConfigureCases', () => {
       appMockRender.render(<ConfigureCases />);
 
       expect(
-        screen.getByTestId(`custom-field-${customFieldsMock[0].key}-${customFieldsMock[0].type}`)
+        await screen.findByTestId(
+          `custom-field-${customFieldsMock[0].key}-${customFieldsMock[0].type}`
+        )
       ).toBeInTheDocument();
     });
 
-    it('renders multiple custom field when available', () => {
+    it('renders multiple custom field when available', async () => {
       useGetCaseConfigurationMock.mockImplementation(() => ({
         ...useCaseConfigureResponse,
         data: {
@@ -662,7 +664,7 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       for (const field of customFieldsConfigurationMock) {
         expect(
@@ -682,7 +684,7 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-delete`)
@@ -690,7 +692,7 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('confirm-delete-custom-field-modal')).toBeInTheDocument();
 
-      userEvent.click(screen.getByText('Delete'));
+      userEvent.click(await screen.findByText('Delete'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -723,7 +725,7 @@ describe('ConfigureCases', () => {
 
       appMockRender.render(<ConfigureCases />);
 
-      const list = screen.getByTestId('custom-fields-list');
+      const list = await screen.findByTestId('custom-fields-list');
 
       userEvent.click(
         within(list).getByTestId(`${customFieldsConfigurationMock[0].key}-custom-field-edit`)
@@ -731,9 +733,9 @@ describe('ConfigureCases', () => {
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
-      userEvent.click(screen.getByTestId('text-custom-field-required'));
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), '!!');
+      userEvent.click(await screen.findByTestId('text-custom-field-required'));
+      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -765,7 +767,7 @@ describe('ConfigureCases', () => {
     it('opens fly out for when click on add field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      userEvent.click(await screen.findByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
     });
@@ -773,11 +775,11 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on cancel', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      userEvent.click(await screen.findByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-cancel'));
+      userEvent.click(await screen.findByTestId('custom-field-flyout-cancel'));
 
       expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
@@ -786,13 +788,13 @@ describe('ConfigureCases', () => {
     it('closes fly out for when click on save field', async () => {
       appMockRender.render(<ConfigureCases />);
 
-      userEvent.click(screen.getByTestId('add-custom-field'));
+      userEvent.click(await screen.findByTestId('add-custom-field'));
 
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
-      userEvent.paste(screen.getByTestId('custom-field-label-input'), 'Summary');
+      userEvent.paste(await screen.findByTestId('custom-field-label-input'), 'Summary');
 
-      userEvent.click(screen.getByTestId('custom-field-flyout-save'));
+      userEvent.click(await screen.findByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
         expect(persistCaseConfigure).toHaveBeenCalledWith({
@@ -817,7 +819,7 @@ describe('ConfigureCases', () => {
         });
       });
 
-      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
       expect(screen.queryByTestId('custom-field-flyout')).not.toBeInTheDocument();
     });
   });
@@ -848,9 +850,9 @@ describe('ConfigureCases', () => {
       expect(screen.queryByTestId('closure-options-radio-group')).not.toBeInTheDocument();
     });
 
-    it('should render custom field section', () => {
+    it('should render custom field section', async () => {
       appMockRender.render(<ConfigureCases />);
-      expect(screen.getByTestId('custom-fields-form-group')).toBeInTheDocument();
+      expect(await screen.findByTestId('custom-fields-form-group')).toBeInTheDocument();
     });
 
     describe('when the previously selected connector doesnt appear due to license downgrade or because it was deleted', () => {

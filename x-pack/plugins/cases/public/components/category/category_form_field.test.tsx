@@ -25,14 +25,14 @@ describe('Category', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders the category field correctly', () => {
+  it('renders the category field correctly', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={false} availableCategories={categories} />
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
   });
 
   it('can submit without setting a category', async () => {
@@ -42,8 +42,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(screen.getByText('Submit'));
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -58,8 +58,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(screen.getByText('Submit'));
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -74,8 +74,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
-    userEvent.click(screen.getByText('Submit'));
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -90,16 +90,16 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith({}, false);
     });
 
-    expect(screen.getByText('Empty category is not allowed'));
+    expect(await screen.findByText('Empty category is not allowed'));
   });
 
   it(`cannot submit if the category is more than ${MAX_CATEGORY_LENGTH}`, async () => {
@@ -111,9 +111,9 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
 
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -121,7 +121,7 @@ describe('Category', () => {
     });
 
     expect(
-      screen.getByText(
+      await screen.findByText(
         'The length of the category is too long. The maximum length is 50 characters.'
       )
     );
@@ -134,8 +134,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), `${categories[1]}{enter}`);
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.type(await screen.findByRole('combobox'), `${categories[1]}{enter}`);
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -150,8 +150,8 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), 'my new category{enter}');
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.type(await screen.findByRole('combobox'), 'my new category{enter}');
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -166,13 +166,13 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.type(await screen.findByRole('combobox'), ' {enter}');
+    userEvent.click(await screen.findByText('Submit'));
 
+    expect(await screen.findByText('Empty category is not allowed'));
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith({}, false);
-      expect(screen.getByText('Empty category is not allowed'));
     });
   });
 
@@ -183,16 +183,16 @@ describe('Category', () => {
       </FormTestComponent>
     );
 
-    userEvent.type(screen.getByRole('combobox'), ' {enter}');
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.type(await screen.findByRole('combobox'), ' {enter}');
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith({}, false);
     });
 
-    userEvent.click(screen.getByTestId('comboBoxClearButton'));
-    userEvent.click(screen.getByText('Submit'));
+    userEvent.click(await screen.findByTestId('comboBoxClearButton'));
+    userEvent.click(await screen.findByText('Submit'));
 
     await waitFor(() => {
       // data, isValid
@@ -200,13 +200,13 @@ describe('Category', () => {
     });
   });
 
-  it('disables the component correctly when it is loading', () => {
+  it('disables the component correctly when it is loading', async () => {
     appMockRender.render(
       <FormTestComponent onSubmit={onSubmit}>
         <CategoryFormField isLoading={true} availableCategories={categories} />
       </FormTestComponent>
     );
 
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(await screen.findByRole('combobox')).toBeDisabled();
   });
 });

@@ -20,32 +20,32 @@ describe('SortActivity ', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders correctly', () => {
+  it('renders correctly', async () => {
     appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    expect(screen.getByTestId('user-actions-sort-select')).toBeInTheDocument();
+    expect(await screen.findByTestId('user-actions-sort-select')).toBeInTheDocument();
   });
 
-  it('renders loading state correctly', () => {
+  it('renders loading state correctly', async () => {
     appMockRender.render(
       <SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} isLoading />
     );
 
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument();
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Loading')).toBeInTheDocument();
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
   });
 
   it('renders options when opened', async () => {
     appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    expect(screen.getByText(`${SortOptions[0].text}`)).toBeInTheDocument();
-    expect(screen.getByText(`${SortOptions[1].text}`)).toBeInTheDocument();
+    expect(await screen.findByText(`${SortOptions[0].text}`)).toBeInTheDocument();
+    expect(await screen.findByText(`${SortOptions[1].text}`)).toBeInTheDocument();
   });
 
   it('onChange is called with asc value', async () => {
     appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    const sortSelect = screen.getByTestId('user-actions-sort-select');
+    const sortSelect = await screen.findByTestId('user-actions-sort-select');
 
     fireEvent.change(sortSelect, { target: { value: SortOptions[1].value } });
 
@@ -55,7 +55,7 @@ describe('SortActivity ', () => {
   it('onChange is called with desc value', async () => {
     appMockRender.render(<SortActivity sortOrder="asc" onOrderChange={onSortActivityChange} />);
 
-    const sortSelect = screen.getByTestId('user-actions-sort-select');
+    const sortSelect = await screen.findByTestId('user-actions-sort-select');
 
     fireEvent.change(sortSelect, { target: { value: SortOptions[0].value } });
 

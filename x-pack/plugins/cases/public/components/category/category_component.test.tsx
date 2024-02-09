@@ -25,79 +25,79 @@ describe('Category ', () => {
     jest.clearAllMocks();
   });
 
-  it('renders list correctly', () => {
+  it('renders list correctly', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    expect(screen.getByTestId('categories-list')).toBeInTheDocument();
+    expect(await screen.findByTestId('categories-list')).toBeInTheDocument();
   });
 
-  it('renders loading correctly', () => {
+  it('renders loading correctly', async () => {
     render(<CategoryComponent {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByRole('progressbar')).toBeInTheDocument();
-    expect(screen.getByLabelText('Loading')).toBeInTheDocument();
+    expect(await screen.findByRole('progressbar')).toBeInTheDocument();
+    expect(await screen.findByLabelText('Loading')).toBeInTheDocument();
   });
 
-  it('is disabled when loading', () => {
+  it('is disabled when loading', async () => {
     render(<CategoryComponent {...defaultProps} isLoading={true} />);
 
-    expect(screen.getByRole('combobox')).toBeDisabled();
+    expect(await screen.findByRole('combobox')).toBeDisabled();
   });
 
-  it('renders category correctly', () => {
+  it('renders category correctly', async () => {
     render(<CategoryComponent {...defaultProps} category="new-category" />);
 
-    expect(screen.getByRole('combobox')).toHaveValue('new-category');
+    expect(await screen.findByRole('combobox')).toHaveValue('new-category');
   });
 
   it('renders allow to add new category option', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByRole('combobox'), 'new{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'new{enter}');
 
     expect(onChange).toBeCalledWith('new');
-    expect(screen.getByRole('combobox')).toHaveValue('new');
+    expect(await screen.findByRole('combobox')).toHaveValue('new');
   });
 
   it('renders current option list', async () => {
     render(<CategoryComponent {...defaultProps} />);
     await showEuiComboBoxOptions();
 
-    expect(screen.getByText('foo')).toBeInTheDocument();
-    expect(screen.getByText('bar')).toBeInTheDocument();
+    expect(await screen.findByText('foo')).toBeInTheDocument();
+    expect(await screen.findByText('bar')).toBeInTheDocument();
   });
 
   it('should call onChange when changing an option', async () => {
     render(<CategoryComponent {...defaultProps} />);
     await showEuiComboBoxOptions();
 
-    userEvent.click(screen.getByText('foo'));
+    userEvent.click(await screen.findByText('foo'));
 
     expect(onChange).toHaveBeenCalledWith('foo');
-    expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('foo');
+    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('foo');
   });
 
   it('should call onChange when adding new category', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'hi{enter}');
 
+    expect(await screen.findByTestId('comboBoxInput')).toHaveTextContent('hi');
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');
-      expect(screen.getByTestId('comboBoxInput')).toHaveTextContent('hi');
     });
   });
 
   it('should add case sensitive text', async () => {
     render(<CategoryComponent {...defaultProps} />);
 
-    userEvent.type(screen.getByRole('combobox'), 'hi{enter}');
+    userEvent.type(await screen.findByRole('combobox'), 'hi{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi');
     });
 
-    userEvent.type(screen.getByRole('combobox'), ' there{enter}');
+    userEvent.type(await screen.findByRole('combobox'), ' there{enter}');
 
     await waitFor(() => {
       expect(onChange).toHaveBeenCalledWith('hi there');

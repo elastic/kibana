@@ -27,13 +27,19 @@ describe('FilterActivity ', () => {
     appMockRender = createAppMockRenderer();
   });
 
-  it('renders filters correctly', () => {
+  it('renders filters correctly', async () => {
     appMockRender.render(<FilterActivity type="all" onFilterChange={onFilterActivityChange} />);
 
-    expect(screen.getByTestId('user-actions-filter-activity-group')).toBeInTheDocument();
-    expect(screen.getByTestId('user-actions-filter-activity-button-all')).toBeInTheDocument();
-    expect(screen.getByTestId('user-actions-filter-activity-button-comments')).toBeInTheDocument();
-    expect(screen.getByTestId('user-actions-filter-activity-button-history')).toBeInTheDocument();
+    expect(await screen.findByTestId('user-actions-filter-activity-group')).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('user-actions-filter-activity-button-all')
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('user-actions-filter-activity-button-comments')
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByTestId('user-actions-filter-activity-button-history')
+    ).toBeInTheDocument();
   });
 
   it('renders loading state correctly', () => {
@@ -45,26 +51,24 @@ describe('FilterActivity ', () => {
     expect(screen.getAllByRole('progressbar')).toHaveLength(3);
   });
 
-  it('renders all as active filter by default', () => {
+  it('renders all as active filter by default', async () => {
     appMockRender.render(<FilterActivity type="all" onFilterChange={onFilterActivityChange} />);
 
     expect(
-      screen
-        .getByTestId('user-actions-filter-activity-button-all')
-        .classList.contains('euiFilterButton-hasActiveFilters')
+      (await screen.findByTestId('user-actions-filter-activity-button-all')).classList.contains(
+        'euiFilterButton-hasActiveFilters'
+      )
     );
   });
 
   it('renders comments as active filter', async () => {
     appMockRender.render(<FilterActivity type="user" onFilterChange={onFilterActivityChange} />);
 
-    await waitFor(() => {
-      expect(
-        screen
-          .getByTestId('user-actions-filter-activity-button-comments')
-          .classList.contains('euiFilterButton-hasActiveFilters')
-      );
-    });
+    expect(
+      (
+        await screen.findByTestId('user-actions-filter-activity-button-comments')
+      ).classList.contains('euiFilterButton-hasActiveFilters')
+    );
   });
 
   it('renders user actions stats correctly', async () => {
@@ -76,19 +80,23 @@ describe('FilterActivity ', () => {
       />
     );
 
-    expect(screen.getByLabelText(`${userActionsStats.total} active filters`)).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalComments} available filters`)
+      await screen.findByLabelText(`${userActionsStats.total} active filters`)
     ).toBeInTheDocument();
     expect(
-      screen.getByLabelText(`${userActionsStats.totalOtherActions} available filters`)
+      await screen.findByLabelText(`${userActionsStats.totalComments} available filters`)
+    ).toBeInTheDocument();
+    expect(
+      await screen.findByLabelText(`${userActionsStats.totalOtherActions} available filters`)
     ).toBeInTheDocument();
   });
 
   it('onChange is called with user filter type', async () => {
     appMockRender.render(<FilterActivity type="all" onFilterChange={onFilterActivityChange} />);
 
-    const commentsFilter = screen.getByTestId('user-actions-filter-activity-button-comments');
+    const commentsFilter = await screen.findByTestId(
+      'user-actions-filter-activity-button-comments'
+    );
 
     userEvent.click(commentsFilter);
 
@@ -98,34 +106,30 @@ describe('FilterActivity ', () => {
   it('onChange is called with action filter type', async () => {
     appMockRender.render(<FilterActivity type="user" onFilterChange={onFilterActivityChange} />);
 
-    const actionsFilter = screen.getByTestId('user-actions-filter-activity-button-history');
+    const actionsFilter = await screen.findByTestId('user-actions-filter-activity-button-history');
 
     userEvent.click(actionsFilter);
 
     await waitFor(() => expect(onFilterActivityChange).toHaveBeenCalledWith('action'));
-    await waitFor(() => {
-      expect(
-        screen
-          .getByTestId('user-actions-filter-activity-button-history')
-          .classList.contains('euiFilterButton-hasActiveFilters')
-      );
-    });
+    expect(
+      (await screen.findByTestId('user-actions-filter-activity-button-history')).classList.contains(
+        'euiFilterButton-hasActiveFilters'
+      )
+    );
   });
 
   it('onChange is called with all filter type', async () => {
     appMockRender.render(<FilterActivity type="action" onFilterChange={onFilterActivityChange} />);
 
-    const actionsFilter = screen.getByTestId('user-actions-filter-activity-button-all');
+    const actionsFilter = await screen.findByTestId('user-actions-filter-activity-button-all');
 
     userEvent.click(actionsFilter);
 
     await waitFor(() => expect(onFilterActivityChange).toHaveBeenCalledWith('all'));
-    await waitFor(() => {
-      expect(
-        screen
-          .getByTestId('user-actions-filter-activity-button-all')
-          .classList.contains('euiFilterButton-hasActiveFilters')
-      );
-    });
+    expect(
+      (await screen.findByTestId('user-actions-filter-activity-button-all')).classList.contains(
+        'euiFilterButton-hasActiveFilters'
+      )
+    );
   });
 });

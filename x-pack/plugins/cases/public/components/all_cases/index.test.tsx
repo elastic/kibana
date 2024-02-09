@@ -129,9 +129,9 @@ describe('AllCases', () => {
   it('should render the loading spinner when loading stats', async () => {
     appMockRender.render(<AllCases />);
 
-    expect(await screen.findByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
-    expect(await screen.findByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
-    expect(await screen.findByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
+    expect(screen.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
   });
 
   it('should render the case callouts', async () => {
