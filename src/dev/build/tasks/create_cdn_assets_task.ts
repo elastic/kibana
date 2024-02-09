@@ -23,10 +23,10 @@ export const CreateCdnAssets: Task = {
 
   async run(config, log, build) {
     const buildSource = build.resolvePath();
-    const buildNum = config.getBuildNumber();
+    const buildSha = config.getBuildShaShort();
     const buildVersion = config.getBuildVersion();
     const assets = config.resolveFromRepo('build', 'cdn-assets');
-    const bundles = resolve(assets, String(buildNum), 'bundles');
+    const bundles = resolve(assets, buildSha, 'bundles');
 
     await del(assets);
     await mkdirp(assets);
@@ -83,7 +83,7 @@ export const CreateCdnAssets: Task = {
     // packages/core/apps/core-apps-server-internal/src/core_app.ts
     await copyAll(
       resolve(buildSource, 'node_modules/@kbn/core-apps-server-internal/assets'),
-      resolve(assets, 'ui')
+      resolve(assets, buildSha, 'ui')
     );
 
     await compressTar({
