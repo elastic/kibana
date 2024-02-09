@@ -61,7 +61,12 @@ export const ServicesContent = ({
       ) : loading ? (
         <EuiLoadingSpinner size="m" />
       ) : hasServices ? (
-        <EuiFlexGroup wrap responsive={false} gutterSize="xs">
+        <EuiFlexGroup
+          wrap
+          responsive={false}
+          gutterSize="xs"
+          data-test-subj="infraAssetDetailsServicesContainer"
+        >
           {services.map((service, index) => (
             <EuiFlexItem grow={false} key={index}>
               <LinkToApmService

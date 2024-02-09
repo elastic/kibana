@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { EuiBadge } from '@elastic/eui';
+import { EuiBadge, EuiText } from '@elastic/eui';
 import { AgentIcon } from '@kbn/custom-icons';
 import { AgentName } from '@kbn/elastic-agent-utils';
 import { i18n } from '@kbn/i18n';
@@ -32,19 +32,22 @@ export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToAp
   });
   return (
     <RedirectAppLinks coreStart={services}>
-      <EuiBadge
-        color="hollow"
-        href={linkProps.href as string}
-        title={i18n.translate('xpack.infra.assetDetails.services.serviceButtonTitle', {
-          defaultMessage: '{serviceName} last reported by {agentName}',
-          values: { serviceName, agentName },
-        })}
-      >
-        {agentName ? (
-          <AgentIcon agentName={agentName as AgentName} size="l" css={{ marginRight: '2px' }} />
-        ) : null}
-        {serviceName}
-      </EuiBadge>
+      <EuiText>
+        <EuiBadge
+          data-test-subj="serviceLink"
+          color="hollow"
+          href={linkProps.href as string}
+          title={i18n.translate('xpack.infra.assetDetails.services.serviceButtonTitle', {
+            defaultMessage: '{serviceName} last reported by {agentName}',
+            values: { serviceName, agentName },
+          })}
+        >
+          {agentName ? (
+            <AgentIcon agentName={agentName as AgentName} size="l" css={{ marginRight: '2px' }} />
+          ) : null}
+          <span data-test-subj={`serviceNameText-${serviceName}`}>{serviceName}</span>
+        </EuiBadge>
+      </EuiText>
     </RedirectAppLinks>
   );
 };

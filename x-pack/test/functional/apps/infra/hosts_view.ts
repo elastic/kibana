@@ -10,13 +10,15 @@ import expect from '@kbn/expect';
 import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from './types';
 import {
   DATES,
   HOSTS_LINK_LOCAL_STORAGE_KEY,
   HOSTS_VIEW_PATH,
   DATE_PICKER_FORMAT,
 } from './constants';
+import { generateAddServicesToExistingHost } from './helpers';
+import { ServiceWithIconAndName } from '../../page_objects/types';
 
 const START_DATE = moment.utc(DATES.metricsAndLogs.hosts.min);
 const END_DATE = moment.utc(DATES.metricsAndLogs.hosts.max);
@@ -94,6 +96,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const observability = getService('observability');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const synthtraceApmClient = getService('apmSynthtraceEsClient');
   const pageObjects = getPageObjects([
     'assetDetails',
     'common',
@@ -128,6 +131,14 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Hosts View', function () {
     before(async () => {
       await Promise.all([
+        synthtraceApmClient.index(
+          generateAddServicesToExistingHost({
+            from: DATES.metricsAndLogs.hosts.processesDataStartDate,
+            to: DATES.metricsAndLogs.hosts.processesDataEndDate,
+            hostName: 'Jennys-MBP.fritz.box',
+            servicesPerHost: 3,
+          })
+        ),
         esArchiver.load('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
@@ -138,6 +149,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     after(async () => {
       await Promise.all([
+        synthtraceApmClient.clean(),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/alerts'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_and_logs'),
         esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_hosts_processes'),
@@ -208,15 +220,36 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(hosts.length).to.equal(9);
           });
 
-          it('should show all section as collapsable', async () => {
+          it('should show all section as collapsible', async () => {
             await pageObjects.assetDetails.metadataSectionCollapsibleExist();
             await pageObjects.assetDetails.alertsSectionCollapsibleExist();
             await pageObjects.assetDetails.metricsSectionCollapsibleExist();
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {
             await pageObjects.header.waitUntilLoadingHasFinished();
             await pageObjects.assetDetails.overviewAlertsTitleExists();
+          });
+
+          it('should show 3 services each with an icon, service name, and url', async () => {
+            await pageObjects.assetDetails.servicesSectionCollapsibleExist();
+
+            const services =
+              await pageObjects.assetDetails.getAssetDetailsServicesWithIconsAndNames();
+
+            expect(services.length).to.equal(3);
+
+            const currentUrl = await browser.getCurrentUrl();
+            const parsedUrl = new URL(currentUrl);
+            const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
+
+            services.forEach((service: ServiceWithIconAndName, index: number) => {
+              expect(service.serviceName).to.equal(`service-${index}`);
+              expect(service.iconSrc).to.not.be.empty();
+              const expectedUrlPattern = `${baseUrl}/app/apm/services/service-${index}/overview?rangeFrom=${DATES.metricsAndLogs.hosts.processesDataStartDate}&rangeTo=${DATES.metricsAndLogs.hosts.processesDataEndDate}`;
+              expect(service.serviceUrl).to.equal(expectedUrlPattern);
+            });
           });
         });
 
