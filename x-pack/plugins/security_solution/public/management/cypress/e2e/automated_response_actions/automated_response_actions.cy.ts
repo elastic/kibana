@@ -24,6 +24,15 @@ describe(
   'Automated Response Actions',
   {
     tags: ['@ess', '@serverless'],
+    env: {
+      ftrConfig: {
+        kbnServerArgs: [
+          `--xpack.securitySolution.enableExperimental=${JSON.stringify([
+            'automatedProcessActionsEnabled',
+          ])}`,
+        ],
+      },
+    },
   },
   () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
@@ -95,12 +104,9 @@ describe(
         cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
         cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
 
-        cy.getByTestSubj(`response-results-${createdHost.hostname}-details-tray`).should(
-          'contain',
-          createdHost.hostname
-        );
         cy.contains(/isolate is pending|isolate completed successfully/g);
         cy.contains(/kill-process is pending|kill-process completed successfully/g);
+        cy.contains('The action was called with a non-existing event field name: entity_id');
       });
     });
   }

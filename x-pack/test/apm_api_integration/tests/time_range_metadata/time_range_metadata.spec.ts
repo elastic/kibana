@@ -11,8 +11,13 @@ import { omit, sortBy } from 'lodash';
 import moment, { Moment } from 'moment';
 import { ApmDocumentType } from '@kbn/apm-plugin/common/document_type';
 import { RollupInterval } from '@kbn/apm-plugin/common/rollup';
-import { deleteSummaryFieldTransform } from '@kbn/apm-synthtrace';
+import {
+  addObserverVersionTransform,
+  ApmSynthtraceEsClient,
+  deleteSummaryFieldTransform,
+} from '@kbn/apm-synthtrace';
 import { Readable, pipeline } from 'stream';
+import { ToolingLog } from '@kbn/tooling-log';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -85,27 +90,21 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         const withSummaryFieldEnd = moment(withoutSummaryFieldEnd).add(2, 'hours');
 
         before(async () => {
-          const previousTxEvents = getTransactionEvents(
-            withoutSummaryFieldStart,
-            withoutSummaryFieldEnd
-          );
+          await getTransactionEvents({
+            start: withoutSummaryFieldStart,
+            end: withoutSummaryFieldEnd,
+            isLegacy: true,
+            synthtrace: synthtraceEsClient,
+            logger: log,
+          });
 
-          const apmPipeline = (base: Readable) => {
-            // @ts-expect-error
-            const defaultPipeline: NodeJS.ReadableStream =
-              synthtraceEsClient.getDefaultPipeline()(base);
-
-            return pipeline(defaultPipeline, deleteSummaryFieldTransform(), (err) => {
-              if (err) {
-                log.error(err);
-              }
-            });
-          };
-
-          await synthtraceEsClient.index(previousTxEvents, apmPipeline);
-
-          const txEvents = getTransactionEvents(withSummaryFieldStart, withSummaryFieldEnd);
-          await synthtraceEsClient.index(txEvents);
+          await getTransactionEvents({
+            start: withSummaryFieldStart,
+            end: withSummaryFieldEnd,
+            isLegacy: false,
+            synthtrace: synthtraceEsClient,
+            logger: log,
+          });
         });
 
         after(() => {
@@ -123,7 +122,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               response.sources.filter(
                 (source) =>
                   source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField === true
+                  source.hasDurationSummaryField
               ).length
             ).to.eql(3);
           });
@@ -138,9 +137,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               response.sources.filter(
                 (source) =>
                   source.documentType === ApmDocumentType.TransactionMetric &&
-                  source.hasDurationSummaryField === false
+                  !source.hasDurationSummaryField
               ).length
-            ).to.eql(3);
+            ).to.eql(2);
           });
         });
       });
@@ -494,7 +493,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               documentType: ApmDocumentType.TransactionMetric,
               rollupInterval: RollupInterval.OneMinute,
               hasDocs: false,
-              hasDurationSummaryField: false,
+              hasDurationSummaryField: true,
             },
             {
               documentType: ApmDocumentType.TransactionMetric,
@@ -513,7 +512,19 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   );
 }
 
-function getTransactionEvents(start: Moment, end: Moment) {
+function getTransactionEvents({
+  start,
+  end,
+  synthtrace,
+  logger,
+  isLegacy = false,
+}: {
+  start: Moment;
+  end: Moment;
+  synthtrace: ApmSynthtraceEsClient;
+  logger: ToolingLog;
+  isLegacy?: boolean;
+}) {
   const serviceName = 'synth-go';
   const transactionName = 'GET /api/product/list';
   const GO_PROD_RATE = 15;
@@ -523,7 +534,7 @@ function getTransactionEvents(start: Moment, end: Moment) {
     .service({ name: serviceName, environment: 'production', agentName: 'go' })
     .instance('instance-a');
 
-  return [
+  const events = [
     timerange(start, end)
       .interval('1m')
       .rate(GO_PROD_RATE)
@@ -546,4 +557,23 @@ function getTransactionEvents(start: Moment, end: Moment) {
           .failure()
       ),
   ];
+
+  const apmPipeline = (base: Readable) => {
+    const defaultPipeline = synthtrace.getDefaultPipeline()(
+      base
+    ) as unknown as NodeJS.ReadableStream;
+
+    return pipeline(
+      defaultPipeline,
+      addObserverVersionTransform('8.5.0'),
+      deleteSummaryFieldTransform(),
+      (err) => {
+        if (err) {
+          logger.error(err);
+        }
+      }
+    );
+  };
+
+  return synthtrace.index(events, isLegacy ? apmPipeline : undefined);
 }

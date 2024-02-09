@@ -25,7 +25,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
@@ -83,6 +83,7 @@ import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -92,6 +93,7 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 /**
@@ -149,6 +151,7 @@ export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
   getComponents$: GetComponents$;
   upselling: UpsellingService;
+  onboarding: OnboardingPageService;
 }
 
 export type StartServices = CoreStart &
@@ -188,15 +191,13 @@ export interface PluginStart {
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
-}
-
-export interface AppObservableLibs {
-  kibana: CoreStart;
+  setOnboardingPageSettings: OnboardingPageService;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
+
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;

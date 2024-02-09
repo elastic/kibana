@@ -52,13 +52,15 @@ export const CategoryExampleMessage: React.FunctionComponent<{
   const openMenu = useCallback(() => setIsMenuOpen(true), []);
   const closeMenu = useCallback(() => setIsMenuOpen(false), []);
 
+  const time = moment(timestamp).toISOString();
+
   const viewInStreamLinkProps = useLinkProps({
     app: 'logs',
     pathname: 'stream',
     search: {
       logPosition: encode({
         end: moment(timeRange.endTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
-        position: { tiebreaker, time: moment(timestamp).toISOString() },
+        position: { tiebreaker, time },
         start: moment(timeRange.startTime).format('YYYY-MM-DDTHH:mm:ss.SSSZ'),
         streamLive: false,
       }),
@@ -79,7 +81,7 @@ export const CategoryExampleMessage: React.FunctionComponent<{
       onMouseLeave={setNotHovered}
     >
       <LogEntryColumn {...columnWidths[timestampColumnId]}>
-        <LogEntryTimestampColumn format={exampleTimestampFormat} time={timestamp} />
+        <LogEntryTimestampColumn format={exampleTimestampFormat} time={time} />
       </LogEntryColumn>
       <LogEntryColumn {...columnWidths[messageColumnId]}>
         <LogEntryMessageColumn

@@ -4110,6 +4110,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
               },
               {
@@ -4659,6 +4663,14 @@
               {
                 "plugin": "visTypeTimelion",
                 "path": "src/plugins/vis_types/timelion/server/routes/functions.ts"
+              },
+              {
+                "plugin": "mockIdpPlugin",
+                "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -6379,10 +6391,6 @@
                 "path": "x-pack/plugins/elastic_assistant/server/routes/knowledge_base/post_knowledge_base.ts"
               },
               {
-                "plugin": "elasticAssistant",
-                "path": "x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts"
-              },
-              {
                 "plugin": "globalSearch",
                 "path": "x-pack/plugins/global_search/server/routes/find.ts"
               },
@@ -7037,6 +7045,10 @@
               {
                 "plugin": "mockIdpPlugin",
                 "path": "packages/kbn-mock-idp-plugin/server/plugin.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -8342,6 +8354,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/router.ts"
               },
               {
@@ -9146,6 +9162,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_crawl_rules.ts"
               },
               {
@@ -9761,6 +9781,42 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IStaticAssets.prependPublicUrl",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "prependPublicUrl",
+            "description": [
+              "\nWill return an href, either a path for or full URL with the provided path\nappended to the static assets public base path.\n\nUseful for instances were you need to render your own HTML page and link to\ncertain static assets.\n"
+            ],
+            "signature": [
+              "(pathname: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server/src/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.IStaticAssets.prependPublicUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pathname",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server/src/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -10141,6 +10197,79 @@
                     "text": "ResponseError"
                   },
                   ">"
+                ],
+                "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.KibanaNotModifiedResponseFactory",
+        "type": "Interface",
+        "tags": [],
+        "label": "KibanaNotModifiedResponseFactory",
+        "description": [],
+        "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.KibanaNotModifiedResponseFactory.notModified",
+            "type": "Function",
+            "tags": [],
+            "label": "notModified",
+            "description": [
+              "\nContent not modified.\nStatus code: `304`."
+            ],
+            "signature": [
+              "(options: ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.HttpResponseOptions",
+                "text": "HttpResponseOptions"
+              },
+              "<any>) => ",
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IKibanaResponse",
+                "text": "IKibanaResponse"
+              },
+              "<any>"
+            ],
+            "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.KibanaNotModifiedResponseFactory.notModified.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [
+                  "- {@link HttpResponseOptions } configures HTTP response body & headers."
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-http-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreHttpServerPluginApi",
+                    "section": "def-common.HttpResponseOptions",
+                    "text": "HttpResponseOptions"
+                  },
+                  "<any>"
                 ],
                 "path": "packages/core/http/core-http-server/src/router/response_factory.ts",
                 "deprecated": false,
@@ -12179,10 +12308,10 @@
               ", responseToolkit: ",
               "ResponseToolkit",
               ") => Promise<",
-              "ResponseObject",
-              " | ",
               "Boom",
-              "<any>>"
+              "<any> | ",
+              "ResponseObject",
+              ">"
             ],
             "path": "packages/core/http/core-http-server/src/router/router.ts",
             "deprecated": false,
@@ -13062,6 +13191,10 @@
                 "path": "src/plugins/data_views/server/rest_api_routes/internal/has_data_views.ts"
               },
               {
+                "plugin": "dataViews",
+                "path": "src/plugins/data_views/server/rest_api_routes/internal/fields.ts"
+              },
+              {
                 "plugin": "bfetch",
                 "path": "src/plugins/bfetch/server/plugin.ts"
               },
@@ -13406,8 +13539,16 @@
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_ilm_explain.ts"
               },
               {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/get_results.ts"
+              },
+              {
                 "plugin": "elasticAssistant",
                 "path": "x-pack/plugins/elastic_assistant/server/routes/capabilities/get_capabilities_route.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/evaluate/get_evaluate.ts"
               },
               {
                 "plugin": "logsShared",
@@ -13863,6 +14004,10 @@
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.test.ts"
               },
               {
@@ -14183,6 +14328,10 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",
@@ -14712,12 +14861,28 @@
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
               },
               {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
+              },
+              {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/get_unallowed_field_values.ts"
               },
               {
+                "plugin": "ecsDataQualityDashboard",
+                "path": "x-pack/plugins/ecs_data_quality_dashboard/server/routes/results/post_results.ts"
+              },
+              {
+                "plugin": "elasticAssistant",
+                "path": "x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts"
+              },
+              {
                 "plugin": "logsShared",
                 "path": "x-pack/plugins/logs_shared/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "fileUpload",
+                "path": "x-pack/plugins/file_upload/server/routes.ts"
               },
               {
                 "plugin": "fileUpload",
@@ -15106,6 +15271,10 @@
               {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
+              },
+              {
+                "plugin": "@kbn/core-http-router-server-internal",
+                "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_route.test.ts"
               },
               {
                 "plugin": "@kbn/core-http-router-server-internal",
@@ -16038,7 +16207,7 @@
             "section": "def-common.HandlerFunction",
             "text": "HandlerFunction"
           },
-          "<infer U> ? U : never"
+          "<infer U extends object> ? U : never"
         ],
         "path": "packages/core/http/core-http-server/src/router/context_provider.ts",
         "deprecated": false,
@@ -16348,6 +16517,14 @@
             "docId": "kibKbnCoreHttpServerPluginApi",
             "section": "def-common.KibanaRedirectionResponseFactory",
             "text": "KibanaRedirectionResponseFactory"
+          },
+          " & ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.KibanaNotModifiedResponseFactory",
+            "text": "KibanaNotModifiedResponseFactory"
           },
           " & ",
           {
@@ -17208,7 +17385,15 @@
             "section": "def-common.HttpResponseOptions",
             "text": "HttpResponseOptions"
           },
-          "<any> & { headers: { location: string; }; }"
+          "<any> & { headers?: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.ResponseHeaders",
+            "text": "ResponseHeaders"
+          },
+          " | undefined; }"
         ],
         "path": "packages/core/http/core-http-server/src/router/response.ts",
         "deprecated": false,

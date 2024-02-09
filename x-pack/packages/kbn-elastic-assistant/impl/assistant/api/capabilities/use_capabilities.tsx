@@ -10,7 +10,8 @@ import { useQuery } from '@tanstack/react-query';
 import type { HttpSetup, IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import type { IToasts } from '@kbn/core-notifications-browser';
 import { i18n } from '@kbn/i18n';
-import { getCapabilities, GetCapabilitiesResponse } from './capabilities';
+import type { GetCapabilitiesResponse } from '@kbn/elastic-assistant-common';
+import { getCapabilities } from './capabilities';
 
 const CAPABILITIES_QUERY_KEY = ['elastic-assistant', 'capabilities'];
 

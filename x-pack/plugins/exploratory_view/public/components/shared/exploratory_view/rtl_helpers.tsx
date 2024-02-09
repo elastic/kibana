@@ -30,6 +30,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { DataViewSpec } from '@kbn/data-views-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
+import * as useValuesListHook from '@kbn/observability-shared-plugin/public/hooks/use_values_list';
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
@@ -42,12 +43,10 @@ import {
 } from './hooks/use_series_storage';
 
 import * as useSeriesFilterHook from './hooks/use_series_filters';
-import * as useValuesListHook from '../../../hooks/use_values_list';
 
 import dataViewData from './configurations/test_data/test_data_view.json';
 
 import { AppDataType, SeriesUrl, UrlFilter } from './types';
-import { ListItem } from '../../../hooks/use_values_list';
 import { TRANSACTION_DURATION } from './configurations/constants/elasticsearch_fieldnames';
 import { dataTypes, obsvReportConfigMap, reportTypesList } from './obsv_exploratory_view';
 import { ExploratoryViewContextProvider } from './contexts/exploratory_view_config';
@@ -258,7 +257,12 @@ export const mockAppDataView = (props?: Partial<DataViewContext>) => {
   return { spy, loadDataView };
 };
 
-export const mockUseValuesList = (values?: ListItem[]) => {
+export const mockUseValuesList = (
+  values?: Array<{
+    label: string;
+    count: number;
+  }>
+) => {
   const onRefreshTimeRange = jest.fn();
   const spy = jest.spyOn(useValuesListHook, 'useValuesList').mockReturnValue({
     values: values ?? [],

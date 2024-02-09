@@ -40,7 +40,6 @@ import { navigateFromHeaderTo } from '../../../tasks/security_header';
 import {
   ALERTS_URL,
   CASES_URL,
-  hostsUrl,
   KIBANA_HOME,
   ENDPOINTS_URL,
   TRUSTED_APPS_URL,
@@ -71,6 +70,7 @@ import {
   ASSETS_URL,
   FLEET_URL,
   CLOUD_DEFEND_URL,
+  HOSTS_URL,
 } from '../../../urls/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
@@ -146,7 +146,7 @@ describe('top-level navigation common to all pages in the Security app', { tags:
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(HOSTS);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {
@@ -364,7 +364,7 @@ describe('Serverless side navigation links', { tags: '@serverless' }, () => {
 
   it('navigates to the Hosts page', () => {
     navigateFromHeaderTo(ServerlessHeaders.HOSTS, true);
-    cy.url().should('include', hostsUrl('allHosts'));
+    cy.url().should('include', HOSTS_URL);
   });
 
   it('navigates to the Network page', () => {

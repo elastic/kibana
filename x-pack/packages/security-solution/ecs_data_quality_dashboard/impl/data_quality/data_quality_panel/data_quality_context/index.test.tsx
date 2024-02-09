@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
 
@@ -13,6 +14,7 @@ import { DataQualityProvider, useDataQualityContext } from '.';
 const mockReportDataQualityIndexChecked = jest.fn();
 const mockReportDataQualityCheckAllClicked = jest.fn();
 const mockHttpFetch = jest.fn();
+const { toasts } = notificationServiceMock.createSetupContract();
 const mockTelemetryEvents = {
   reportDataQualityIndexChecked: mockReportDataQualityIndexChecked,
   reportDataQualityCheckAllCompleted: mockReportDataQualityCheckAllClicked,
@@ -22,6 +24,7 @@ const ContextWrapper: React.FC = ({ children }) => (
     httpFetch={mockHttpFetch}
     telemetryEvents={mockTelemetryEvents}
     isILMAvailable={true}
+    toasts={toasts}
   >
     {children}
   </DataQualityProvider>

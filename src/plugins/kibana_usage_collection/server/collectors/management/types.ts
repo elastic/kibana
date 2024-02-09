@@ -47,6 +47,7 @@ export interface UsageStats {
   'observability:apmAWSLambdaRequestCostPerMillion': number;
   'observability:enableInfrastructureHostsView': boolean;
   'observability:enableInfrastructureProfilingIntegration': boolean;
+  'observability:enableInfrastructureHostsCustomDashboards': boolean;
   'observability:apmAgentExplorerView': boolean;
   'observability:apmEnableTableSearchBar': boolean;
   'visualization:heatmap:maxBuckets': number;
@@ -81,6 +82,7 @@ export interface UsageStats {
   'doc_table:highlight': boolean;
   'discover:searchOnPageLoad': boolean;
   'doc_table:hideTimeColumn': boolean;
+  'data_views:cache_max_age': number;
   'discover:sampleSize': number;
   'discover:sampleRowsPerPage': number;
   defaultColumns: string[];
@@ -163,4 +165,6 @@ export interface UsageStats {
   'observability:profilingDatacenterPUE': number;
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
+  'data_views:fields_excluded_data_tiers': string;
+  'devTools:enableDockedConsole': boolean;
 }

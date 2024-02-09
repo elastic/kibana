@@ -51,6 +51,7 @@ import {
   ValueToStringConverter,
   DataTableColumnTypes,
   CustomCellRenderer,
+  CustomGridColumnsConfiguration,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
@@ -330,6 +331,10 @@ export interface UnifiedDataTableProps {
    */
   externalCustomRenderers?: CustomCellRenderer;
   /**
+   * An optional settings for customising the column
+   */
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  /**
    * Name of the UnifiedDataTable consumer component or application
    */
   consumer?: string;
@@ -406,6 +411,7 @@ export const UnifiedDataTable = ({
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
+  customGridColumnsConfiguration,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -668,6 +674,7 @@ export const UnifiedDataTable = ({
         columnTypes,
         showColumnTokens,
         headerRowHeight,
+        customGridColumnsConfiguration,
       }),
     [
       onFilter,
@@ -688,6 +695,7 @@ export const UnifiedDataTable = ({
       columnTypes,
       showColumnTokens,
       headerRowHeight,
+      customGridColumnsConfiguration,
     ]
   );
 

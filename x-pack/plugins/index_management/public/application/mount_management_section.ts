@@ -103,6 +103,7 @@ export async function mountManagementSection({
       isFleetEnabled,
       share: startDependencies.share,
       cloud,
+      console: startDependencies.console,
     },
     services: {
       httpService,

@@ -15,11 +15,7 @@
     "public/**/*.json",
     "../../../typings/**/*"
   ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
-  ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -187,6 +183,7 @@
     "@kbn/stack-connectors-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
-    "@kbn/lens-embeddable-utils"
+    "@kbn/lens-embeddable-utils",
+    "@kbn/esql-utils"
   ]
 }

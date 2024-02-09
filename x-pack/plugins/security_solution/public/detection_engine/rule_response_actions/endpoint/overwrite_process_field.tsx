@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useMemo } from 'react';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { ToggleField } from '@kbn/es-ui-shared-plugin/static/forms/components';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 
 interface OverwriteFieldProps {
   path: string;
@@ -15,27 +15,20 @@ interface OverwriteFieldProps {
   readDefaultValueOnForm: boolean;
 }
 
-const CONFIG = {
-  defaultValue: true,
-  label: (
-    <p>
-      <FormattedMessage
-        id="xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel"
-        defaultMessage="Use {pid} as process identifier"
-        values={{
-          // eslint-disable-next-line react/jsx-no-literals
-          pid: <strong>process.pid</strong>,
-        }}
-      />
-    </p>
-  ) as unknown as string,
-};
-
 const OverwriteFieldComponent = ({
   path,
   disabled,
   readDefaultValueOnForm,
 }: OverwriteFieldProps) => {
+  const CONFIG = useMemo(() => {
+    return {
+      defaultValue: true,
+      label: i18n.translate('xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel', {
+        defaultMessage: 'Use process.pid as process identifier',
+      }),
+    };
+  }, []);
+
   return (
     <UseField
       component={ToggleField}

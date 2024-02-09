@@ -29,6 +29,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
 import type { AlertActionsProps } from './types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
@@ -61,6 +62,8 @@ import type {
   RuleAddProps,
   RuleEditProps,
   RuleTypeModel,
+  RuleTypeParams,
+  RuleTypeMetaData,
   AlertsTableProps,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
@@ -114,12 +117,18 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddRuleFlyout: (
-    props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleAddProps>;
-  getEditRuleFlyout: (
-    props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleEditProps>;
+  getAddRuleFlyout: <
+    Params extends RuleTypeParams = RuleTypeParams,
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  >(
+    props: Omit<RuleAddProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleAddProps<Params, MetaData>>;
+  getEditRuleFlyout: <
+    Params extends RuleTypeParams = RuleTypeParams,
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  >(
+    props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleEditProps<Params, MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
     props: P
@@ -174,6 +183,7 @@ interface PluginsStart {
   licensing: LicensingPluginStart;
   serverless?: ServerlessPluginStart;
   fieldFormats: FieldFormatsRegistry;
+  lens: LensPublicStart;
 }
 
 export class Plugin
@@ -301,6 +311,7 @@ export class Plugin
           expressions: pluginsStart.expressions,
           isServerless: !!pluginsStart.serverless,
           fieldFormats: pluginsStart.fieldFormats,
+          lens: pluginsStart.lens,
         });
       },
     });
@@ -400,7 +411,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      getAddRuleFlyout: (props) => {
         return getAddRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
@@ -408,9 +419,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getEditRuleFlyout: (
-        props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-      ) => {
+      getEditRuleFlyout: (props) => {
         return getEditRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,

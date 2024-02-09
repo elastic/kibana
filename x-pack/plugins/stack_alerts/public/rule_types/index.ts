@@ -11,14 +11,19 @@ import { getRuleType as getGeoContainmentRuleType } from './geo_containment';
 import { getRuleType as getThresholdRuleType } from './threshold';
 import { getRuleType as getEsQueryRuleType } from './es_query';
 
-export function registerRuleTypes({
-  ruleTypeRegistry,
-  alerting,
-}: {
-  ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
-  alerting: AlertingSetup;
-}) {
-  ruleTypeRegistry.register(getGeoContainmentRuleType());
+export function registerRuleTypes(
+  {
+    ruleTypeRegistry,
+    alerting,
+  }: {
+    ruleTypeRegistry: TriggersAndActionsUIPublicPluginSetup['ruleTypeRegistry'];
+    alerting: AlertingSetup;
+  },
+  isServerless: boolean
+) {
+  if (!isServerless) {
+    ruleTypeRegistry.register(getGeoContainmentRuleType());
+  }
   ruleTypeRegistry.register(getThresholdRuleType());
   ruleTypeRegistry.register(getEsQueryRuleType(alerting));
 }

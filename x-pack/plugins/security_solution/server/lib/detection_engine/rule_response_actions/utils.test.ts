@@ -8,56 +8,60 @@
 import { getErrorProcessAlerts, getIsolateAlerts, getProcessAlerts } from './utils';
 import type { AlertWithAgent } from './types';
 
-const alert = {
-  _id: 'alert1',
-  process: {
-    pid: 1,
-  },
-  agent: {
-    name: 'jammy-1',
-    id: 'agent-id-1',
-  },
-};
-const alert2 = {
-  _id: 'alert2',
-  process: {
-    pid: 2,
-  },
-  agent: {
-    name: 'jammy-2',
-    id: 'agent-id-2',
-  },
-};
-const alert3 = {
-  _id: 'alert3',
-  process: {
-    pid: 2,
-  },
-  agent: {
-    name: 'jammy-1',
-    id: 'agent-id-1',
-  },
-};
-const alert4 = {
-  _id: 'alert4',
-  agent: {
-    name: 'jammy-1',
-    id: 'agent-id-1',
-  },
-};
-const alert5 = {
-  _id: 'alert5',
-  process: {
-    entity_id: 2,
-  },
-  agent: {
-    name: 'jammy-1',
-    id: 'agent-id-1',
-  },
+const getSampleAlerts = (): AlertWithAgent[] => {
+  const alert = {
+    _id: 'alert1',
+    process: {
+      pid: 1,
+    },
+    agent: {
+      name: 'jammy-1',
+      id: 'agent-id-1',
+    },
+  };
+  const alert2 = {
+    _id: 'alert2',
+    process: {
+      pid: 2,
+    },
+    agent: {
+      name: 'jammy-2',
+      id: 'agent-id-2',
+    },
+  };
+  const alert3 = {
+    _id: 'alert3',
+    process: {
+      pid: 2,
+    },
+    agent: {
+      name: 'jammy-1',
+      id: 'agent-id-1',
+    },
+  };
+  const alert4 = {
+    _id: 'alert4',
+    agent: {
+      name: 'jammy-1',
+      id: 'agent-id-1',
+    },
+  };
+  const alert5 = {
+    _id: 'alert5',
+    process: {
+      entity_id: 2,
+    },
+    agent: {
+      name: 'jammy-1',
+      id: 'agent-id-1',
+    },
+  };
+  // Casted as unknown first because we do not need all the data to test the functionality
+  return [alert, alert2, alert3, alert4, alert5] as unknown as AlertWithAgent[];
 };
 describe('EndpointResponseActionsUtils', () => {
   describe('getIsolateAlerts', () => {
-    const alerts = [alert, alert2, alert3, alert4, alert5] as unknown as AlertWithAgent[];
+    const alerts = getSampleAlerts();
     it('should return proper number of actions divided per agents with specified alert_ids', async () => {
       const isolateAlerts = getIsolateAlerts(alerts);
 
@@ -87,8 +91,7 @@ describe('EndpointResponseActionsUtils', () => {
     });
   });
   describe('getProcessAlerts', () => {
-    // Casted as unknown first because we do not need all the data to test the functionality
-    const alerts = [alert, alert2, alert3, alert4, alert5] as unknown as AlertWithAgent[];
+    const alerts = getSampleAlerts();
 
     it('should return actions that are valid based on default field (pid)', async () => {
       const processAlerts = getProcessAlerts(alerts, {
@@ -171,8 +174,7 @@ describe('EndpointResponseActionsUtils', () => {
     });
   });
   describe('getErrorProcessAlerts', () => {
-    // Casted as unknown first because we do not need all the data to test the functionality
-    const alerts = [alert, alert2, alert3, alert4, alert5] as unknown as AlertWithAgent[];
+    const alerts = getSampleAlerts();
 
     it('should return actions that do not have value from default field (pid)', async () => {
       const processAlerts = getErrorProcessAlerts(alerts, {
@@ -192,9 +194,7 @@ describe('EndpointResponseActionsUtils', () => {
                 name: 'jammy-1',
               },
             },
-            parameters: {
-              pid: 'process.pid not found',
-            },
+            parameters: {},
           },
         },
       };
@@ -218,9 +218,7 @@ describe('EndpointResponseActionsUtils', () => {
                 name: 'jammy-1',
               },
             },
-            parameters: {
-              entity_id: 'process.entity_id not found',
-            },
+            parameters: {},
           },
         },
         'agent-id-2': {
@@ -234,9 +232,7 @@ describe('EndpointResponseActionsUtils', () => {
                 name: 'jammy-2',
               },
             },
-            parameters: {
-              entity_id: 'process.entity_id not found',
-            },
+            parameters: {},
           },
         },
       };

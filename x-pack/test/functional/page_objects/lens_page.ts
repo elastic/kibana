@@ -1173,7 +1173,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-row-index="${rowIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
       );
     },
 
@@ -1934,8 +1934,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
       await testSubjects.click('lns_colorEditing_trigger');
-      // disable autoAssign
-      await testSubjects.setEuiSwitch('lns-colorMapping-autoAssignSwitch', 'uncheck');
+
+      // assign all
+      await testSubjects.click('lns-colorMapping-assignmentsPromptAddAll');
 
       await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
 

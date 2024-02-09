@@ -31,7 +31,7 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPNGV2,
   PNG_JOB_TYPE_V2,
@@ -83,6 +83,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   public runTask = (
     jobId: string,
     payload: TaskPayloadPNGV2,
+    taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
     stream: Writable
   ) => {
@@ -106,13 +107,9 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
-        const options = {
-          headers,
-          browserTimezone: payload.browserTimezone,
-          layout: { ...payload.layout, id: 'preserve_layout' as const },
-        };
 
-        if (!options.layout?.dimensions) {
+        const layout = { ...payload.layout, id: 'preserve_layout' as const };
+        if (!layout.dimensions) {
           throw new Error(`LayoutParams.Dimensions is undefined.`);
         }
 
@@ -122,9 +119,12 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         return this.startDeps
           .screenshotting!.getScreenshots({
             format: 'png',
+            browserTimezone: payload.browserTimezone,
             headers,
-            layout: { ...payload.layout, id: 'preserve_layout' },
+            layout,
             urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
+            taskInstanceFields,
+            logger,
           })
           .pipe(
             tap(({ metrics }) => {

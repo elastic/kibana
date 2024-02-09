@@ -52,7 +52,7 @@ interface Props {
   sortField: keyof Agent;
   sortOrder: 'asc' | 'desc';
   onSelectionChange: (agents: Agent[]) => void;
-  tableRef?: React.Ref<any>;
+  selected: Agent[];
   showUpgradeable: boolean;
   totalAgents?: number;
   pagination: Pagination;
@@ -77,9 +77,9 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
     renderActions,
     sortField,
     sortOrder,
-    tableRef,
     onTableChange,
     onSelectionChange,
+    selected,
     totalAgents = 0,
     showUpgradeable,
     pagination,
@@ -215,7 +215,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
                 content={
                   <FormattedMessage
                     id="xpack.fleet.agentList.cpuTooltip"
-                    defaultMessage="Average CPU usage in the last 5 minutes"
+                    defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
                   />
                 }
               >
@@ -318,7 +318,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
 
   return (
     <EuiBasicTable<Agent>
-      ref={tableRef}
       className="fleet__agentList__table"
       data-test-subj="fleetAgentListTable"
       loading={isLoading}
@@ -341,6 +340,7 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
       }}
       isSelectable={true}
       selection={{
+        selected,
         onSelectionChange,
         selectable: isAgentSelectable,
         selectableMessage: (selectable, agent) => {

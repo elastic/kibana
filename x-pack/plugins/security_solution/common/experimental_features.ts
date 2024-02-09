@@ -73,7 +73,7 @@ export const allowedExperimentalValues = Object.freeze({
   /*
    * Enables Automated Endpoint Process actions
    */
-  automatedProcessActionsEnabled: true,
+  automatedProcessActionsEnabled: false,
 
   /*
    * Enables Automated Endpoint Execute action
@@ -119,6 +119,13 @@ export const allowedExperimentalValues = Object.freeze({
   newUserDetailsFlyout: false,
 
   /*
+   * Enables the Managed User section inside the new user details flyout.
+   * To see this section you also need newUserDetailsFlyout flag enabled.
+   *
+   **/
+  newUserDetailsFlyoutManagedUser: false,
+
+  /*
    * Enables the new host details flyout displayed on the Alerts table.
    *
    **/
@@ -156,6 +163,11 @@ export const allowedExperimentalValues = Object.freeze({
    */
   riskEnginePrivilegesRouteEnabled: true,
 
+  /**
+   * Enables alerts suppression for indicator match rules
+   */
+  alertSuppressionForIndicatorMatchRuleEnabled: false,
+
   /*
    * Enables experimental Entity Analytics Asset Criticality feature
    */
@@ -169,7 +181,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables SentinelOne manual host manipulation actions
    */
-  sentinelOneManualHostActionsEnabled: false,
+  sentinelOneManualHostActionsEnabled: true,
 
   /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.

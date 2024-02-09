@@ -61,11 +61,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await esArchiver.unload('x-pack/test/functional/es_archives/infra/metrics_anomalies');
       });
       it('renders the anomaly table with anomalies', async () => {
+        // if the input value is unchanged the save button won't be available
+        // after the change of the settings action added in
+        // https://github.com/elastic/kibana/pull/175024
+        // to avoid the mentioned issue we can change the value and put it back to 50
+        await pageObjects.infraHome.goToSettings();
+        await pageObjects.infraHome.setAnomaliesThreshold('51');
+        await infraSourceConfigurationForm.saveInfraSettings();
         // default threshold should already be 50 but trying to prevent unknown flakiness by setting it
         // https://github.com/elastic/kibana/issues/100445
         await pageObjects.infraHome.goToSettings();
         await pageObjects.infraHome.setAnomaliesThreshold('50');
-        await infraSourceConfigurationForm.saveConfiguration();
+        await infraSourceConfigurationForm.saveInfraSettings();
         await pageObjects.infraHome.goToInventory();
         await pageObjects.infraHome.openAnomalyFlyout();
         await pageObjects.infraHome.goToAnomaliesTab();
@@ -91,7 +98,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('renders more anomalies on threshold change', async () => {
         await pageObjects.infraHome.goToSettings();
         await pageObjects.infraHome.setAnomaliesThreshold('25');
-        await infraSourceConfigurationForm.saveConfiguration();
+        await infraSourceConfigurationForm.saveInfraSettings();
         await pageObjects.infraHome.goToInventory();
         await pageObjects.infraHome.openAnomalyFlyout();
         await pageObjects.infraHome.goToAnomaliesTab();

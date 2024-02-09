@@ -30,6 +30,7 @@ import type { Moment } from 'moment';
 import moment from 'moment';
 import { cloneDeep } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useGetProtectionUpdatesUnavailableComponent } from './hooks/use_get_protection_updates_unavailable_component';
 import { ProtectionUpdatesBottomBar } from './components/protection_updates_bottom_bar';
 import { useCreateProtectionUpdatesNote } from './hooks/use_post_protection_updates_note';
 import { useGetProtectionUpdatesNote } from './hooks/use_get_protection_updates_note';
@@ -400,6 +401,12 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         </>
       );
     };
+
+    const ProtectionUpdatesUpsellingComponent = useGetProtectionUpdatesUnavailableComponent();
+
+    if (ProtectionUpdatesUpsellingComponent) {
+      return <ProtectionUpdatesUpsellingComponent />;
+    }
 
     return (
       <>

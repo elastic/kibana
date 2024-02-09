@@ -30,7 +30,7 @@ export type TestSubjects =
   | 'indexContextMenu'
   | 'indexManagementHeaderContent'
   | 'indexTable'
-  | 'indexTableIncludeHiddenIndicesToggle'
+  | 'checkboxToggles-includeHiddenIndices'
   | 'indexTableIndexNameLink'
   | 'indicesList'
   | 'indicesTab'
@@ -113,4 +113,5 @@ export type TestSubjects =
   | 'createIndexMessage'
   | 'indicesSearch'
   | 'noIndicesMessage'
-  | 'clearIndicesSearch';
+  | 'clearIndicesSearch'
+  | 'componentTemplatesLink';

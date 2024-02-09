@@ -10,6 +10,7 @@
 
 Review important information about the {kib} 8.x releases.
 
+* <<release-notes-8.12.1>>
 * <<release-notes-8.12.0>>
 * <<release-notes-8.11.4>>
 * <<release-notes-8.11.3>>
@@ -58,6 +59,51 @@ Review important information about the {kib} 8.x releases.
 * <<release-notes-8.0.0-alpha1>>
 
 --
+[[release-notes-8.12.1]]
+== {kib} 8.12.1
+
+The 8.12.1 release includes the following enhancements and bug fixes.
+
+[float]
+[[enhancement-v8.12.1]]
+=== Enhancements
+
+Elastic Security::
+For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_]. 
+Observability::
+* Adds `defer_validation: true` to transforms on creation to stop errors when the destination index doesn't exist yet ({kibana-pull}174463[#174463]).
+
+[float]
+[[fixes-v8.12.1]]
+=== Bug Fixes
+Alerting::
+* Fixes context variables not being passed in to the action parameters when an alert- as-data document is available ({kibana-pull}175682[#175682]).
+* Fixes the Rules page loosing user selections when navigating back ({kibana-pull}174954[#174954]).
+* Fixes the custom threshold rendering in the create rule flyout ({kibana-pull}174982[#174982]).
+APM::
+* Fixes a transactions error link for mobile ({kibana-pull}174655[#174655]).
+* Increases the number of maximum function calls from 3 to 5 ({kibana-pull}175588[#175588]).
+Dashboard::
+* Fixes a caching issue that caused problems updating dashboard information ({kibana-pull}175635[#175635]).
+Elastic Security::
+For the Elastic Security 8.12.1 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
+Fleet::
+* Fixes the display of category label on the Integration overview page ({kibana-pull}176141[#176141]).
+* Fixes conflicting dynamic template mappings for intermediate objects ({kibana-pull}175970[#175970]).
+* Fixes reserved keys for Elasticsearch output YAML box ({kibana-pull}175901[#175901]).
+* Prevent deletion of agent policies with inactive agents from UI ({kibana-pull}175815[#175815]).
+* Fixes incorrect count of agents in bulk actions ({kibana-pull}175318[#175318]).
+* Fixes a custom integrations not displaying on the Installed integrations page ({kibana-pull}174804[#174804]).
+Lens & Visualizations::
+* Fixes a validation error for invalid formula and math columns in *Lens* ({kibana-pull}175644[#175644]).
+Machine Learning::
+* Fixes Allocation rendering for failed deployments ({kibana-pull}174882[#174882]).
+* Fixes an issue where a user could create an anomaly rule but couldn't see it or interact with the rule via stack management ({kibana-pull}174791[#174791]).
+Security::
+* Fixes API Key table sorting ({kibana-pull}175813[#175813]).
+* Ensures all API Keys have a defined name ({kibana-pull}175721[#175721]).
+* Fixes an issue with `@kbn-handlebars`, where nested inputs were not being escaped properly ({kibana-pull}175490[#175490]).
+
 [[release-notes-8.12.0]]
 == {kib} 8.12.0
 
@@ -108,11 +154,11 @@ Roles with at least a sub-feature privilege configured will not have access to t
 === Features
 {kib} 8.12.0 adds the following new and notable features.
 
-Alerting::
-* The case list filter bar is now customizable, filters are removable and custom fields can be used as filters ({kibana-pull}172276[#172276]).
 APM::
 * Adds viewInApp URL to the custom threshold rule type ({kibana-pull}171985[#171985]).
 * Adds back the mobile crashes & errors tab ({kibana-pull}165892[#165892]).
+Cases::
+* The case list filter bar is now customizable, filters are removable and custom fields can be used as filters ({kibana-pull}172276[#172276]).
 Elastic Security::
 For the Elastic Security 8.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elastic Search::
@@ -187,7 +233,7 @@ Discover::
 Elastic Security::
 For the Elastic Security 8.12.0 release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
 Elastic Search::
-*  Split details panel from model selection list ({kibana-pull}173434[#173434]).
+*  Trained models can now be deployed and started directly from the Machine Learning inference pipeline configuration flyout ({kibana-pull}173434[#173434]).
 Fleet::
 * Adds support for Elasticsearch output performance presets ({kibana-pull}172359[#172359]).
 * Adds a new `keep_monitoring_alive` flag to agent policies ({kibana-pull}168865[#168865]).
@@ -324,7 +370,6 @@ Presentation::
 [[fixes-v8.11.4]]
 === Bug fixes and enhancements
 There are no user-facing changes in the 8.11.4 release.
-
 
 [[release-notes-8.11.3]]
 == {kib} 8.11.3
@@ -825,17 +870,80 @@ Before you upgrade to 8.10.0, review the breaking changes, then mitigate the imp
 
 [discrete]
 [[breaking-162665]]
-.New summary search capabilities
+.New summary search capabilities cause existing SLOs to stop working
 [%collapsible]
 ====
 *Details* +
-New summary search capabilities introduce breaking changes in various places, and we have decided to not handle backward compatibility:
+New summary search capabilities introduce breaking changes in various places, and we have decided not to handle backward compatibility:
 
-* SLO find API body parameters have changed
-* The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search
-* The rollup transform have been updated, but existing SLO with their transform won't be updated.
+* SLO find API body parameters have changed.
+* The index mapping used by the rollup data has changed, and we have added a summary index that becomes the new source of truth for search.
+* The rollup transforms have been updated, but existing SLO with their transforms won't be updated.
 
-If some SLOs have been installed in a prior version at 8.10, the user will need to remove them manually from the UI, or by deleting the Saved Object and the associated Transform.
+If some SLOs have been installed in a prior version at 8.10, they won't work after migrating to 8.10. There are two approaches to handle this breaking change. The recommended route is to delete all SLOs before migrating to 8.10. The alternative is to migrate to 8.10 and manually remove the SLOs.
+
+*Removing SLOs before migrating to 8.10*
+
+Use the SLO UI or the SLO delete API to delete all existing SLOs. This takes care of the Saved Object, Transform and rollup data. When all SLOs have been deleted, then delete the residual rollup indices: `.slo-observability.sli-v1*`. Note that this is v1. 
+
+*Removing SLOs after migrating to 8.10*
+
+After migrating to 8.10, the previously created SLOs won’t appear in the UI because the API is using a new index. The previously created SLOs still exist, and associated transforms are still rolling up data into the previous index `.slo-observability.sli-v1*`. The SLO delete API can't be used now, so remove the resources resources manually:
+
+. Find all existing transforms
+All SLO related transforms start with the `slo-` prefix, this request returns them all:
++
+[source, bash]
+----
+GET _transform/slo-*
+----
++
+Make a note of all the transforms IDs for later.
+
+. Stop all transforms
++
+[source, bash]
+----
+POST _transform/slo-*/_stop?force=true
+----
+
+. Remove all transforms
++
+From the list of transforms returned during the first step, now delete them one by one:
++
+[source, bash]
+----
+DELETE _transform/{transform_id}?force=true
+----
+
+. Find the SLO saved objects
++
+This request lists all the SLO saved objects. The SLO IDs and the saved object IDs are not the same.
++
+[source, bash]
+----
+GET kbn:/api/saved_objects/_find?type=slo
+----
++
+Make a note of all the saved object IDs from the response.
+
+. Remove the SLO saved objects
++
+For each saved object ID, run the following:
++
+[source, bash]
+----
+DELETE kbn:/api/saved_objects/slo/{Saved_Object_Id}
+----
+
+. Delete the rollup indices v1
++
+Note that this is v1.
++
+[source, bash]
+----
+DELETE .slo-observability.sli-v1*
+----
 ====
 
 [discrete]
@@ -918,7 +1026,7 @@ Alerting::
 APM::
 * Adds KQL filtering in APM rules ({kibana-pull}163825[#163825]).
 * Make service group saved objects exportable ({kibana-pull}163569[#163569]).
-* Added ability to manage Cross-Cluster API keys ({kibana-pull}162363[#162363]).
+* Added ability to manage cross-cluster API keys ({kibana-pull}162363[#162363]).
 * Enable Trace Explorer by default ({kibana-pull}162308[#162308]).
 * Adds error.grouping_name to group alerts in Error Count rule ({kibana-pull}161810[#161810]).
 * Adds query to check for overflow bucket in service groups ({kibana-pull}159990[#159990]).
@@ -946,7 +1054,6 @@ Observability::
 
 For more information about the features introduced in 8.10.0, refer to <<whats-new,What's new in 8.10>>.
 
-[discrete]
 [[enhancements-and-bug-fixes-v8.10.0-revised]]
 === Enhancements and bug fixes
 
@@ -5733,7 +5840,7 @@ conditions are true:
 
 In 8.0.0 and later, weak links break because <<saved-object-ids-impact-when-using-import-and-copy,saved object IDs can change during import or copy>>.
 This applies to both the UI and the API.
-This issue will be fixed 8.0.1 and 8.1.0. For more information, refer to {kibana-issue}123550[#123550].
+For more information, refer to {kibana-issue}123550[#123550].
 
 *Impact* +
 Saved objects in 7.x that are migrated during upgrade are **not** impacted.

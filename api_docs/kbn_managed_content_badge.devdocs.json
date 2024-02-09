@@ -1,0 +1,63 @@
+{
+  "id": "@kbn/managed-content-badge",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/managed-content-badge",
+        "id": "def-public.getManagedContentBadge",
+        "type": "Function",
+        "tags": [],
+        "label": "getManagedContentBadge",
+        "description": [],
+        "signature": [
+          "(tooltipText: string) => { 'data-test-subj': string; badgeText: string; title: string; color: string; iconType: string; toolTipProps: ",
+          "EuiToolTipProps",
+          "; }"
+        ],
+        "path": "packages/kbn-managed-content-badge/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/managed-content-badge",
+            "id": "def-public.getManagedContentBadge.$1",
+            "type": "string",
+            "tags": [],
+            "label": "tooltipText",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-managed-content-badge/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

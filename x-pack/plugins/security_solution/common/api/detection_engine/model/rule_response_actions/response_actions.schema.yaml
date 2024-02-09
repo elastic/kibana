@@ -152,30 +152,30 @@ components:
         - command
         - config
 
-    ExecuteParams:
-      type: object
-      properties:
-        command:
-          type: string
-          enum:
-            - execute
-        comment:
-          type: string
-        config:
-          required:
-            - command
+     ExecuteParams:
           type: object
           properties:
             command:
               type: string
-              description: Command to execute on the host
-              minLength: 1  # Minimum length of 1 (non-empty string) command:
-            timeout:
-              type: number
-              description: Timeout for execute on the host
-      required:
-        - command
-        - config
+              enum:
+                - execute
+            comment:
+              type: string
+            config:
+              required:
+                - command
+              type: object
+              properties:
+                command:
+                  type: string
+                  description: Command to execute on the host
+                  minLength: 1  # Minimum length of 1 (non-empty string) command:
+                timeout:
+                  type: number
+                  description: Timeout for execute on the host
+          required:
+            - command
+            - config
 
     EndpointResponseAction:
       type: object

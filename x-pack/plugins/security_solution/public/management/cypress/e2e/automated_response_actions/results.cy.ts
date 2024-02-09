@@ -63,31 +63,22 @@ describe('Results', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains(/isolate is pending|isolate completed successfully/g);
     });
   });
-  describe(
-    'do not see results results when does not have RBAC',
-    // Not supported in serverless!
-    // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
-    // `internal/kibana/settings` is not accessible in serverless
-    {
-      tags: ['@brokenInServerless'],
-    },
-    () => {
-      before(() => {
-        login(ROLE.endpoint_response_actions_no_access);
-      });
+  describe('do not see results results when does not have RBAC', () => {
+    before(() => {
+      login(ROLE.t1_analyst);
+    });
 
-      it('show the permission denied callout', () => {
-        navigateToAlertsList(`query=(language:kuery,query:'_id: ${alertData?.alerts[0]._id}')`);
-        closeAllToasts();
+    it('show the permission denied callout', () => {
+      navigateToAlertsList(`query=(language:kuery,query:'_id: ${alertData?.alerts[0]._id}')`);
+      closeAllToasts();
 
-        cy.getByTestSubj('expand-event').first().click();
-        cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
-        cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
-        cy.contains('Permission denied');
-        cy.contains(
-          'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
-        );
-      });
-    }
-  );
+      cy.getByTestSubj('expand-event').first().click();
+      cy.getByTestSubj('securitySolutionFlyoutNavigationExpandDetailButton').click();
+      cy.getByTestSubj('securitySolutionFlyoutResponseTab').click();
+      cy.contains('Permission denied');
+      cy.contains(
+        'To access these results, ask your administrator for Elastic Defend Kibana privileges.'
+      );
+    });
+  });
 });

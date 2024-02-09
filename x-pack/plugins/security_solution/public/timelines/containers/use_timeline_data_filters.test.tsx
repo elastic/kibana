@@ -6,15 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import {
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  TestProviders,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../common/mock';
+import { mockGlobalState, TestProviders, createMockStore } from '../../common/mock';
 import { useTimelineDataFilters } from './use_timeline_data_filters';
-import { createStore } from '../../common/store';
 import React from 'react';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 
@@ -27,29 +20,23 @@ const defaultDataViewPattern = 'test-dataview-patterns';
 const timelinePattern = 'test-timeline-patterns';
 const alertsPagePatterns = '.siem-signals-spacename';
 const pathname = '/alerts';
-const { storage } = createSecuritySolutionStorageMock();
-const store = createStore(
-  {
-    ...mockGlobalState,
-    sourcerer: {
-      ...mockGlobalState.sourcerer,
-      defaultDataView: {
-        ...mockGlobalState.sourcerer.defaultDataView,
-        patternList: [defaultDataViewPattern],
-      },
-      sourcererScopes: {
-        ...mockGlobalState.sourcerer.sourcererScopes,
-        [SourcererScopeName.timeline]: {
-          ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
-          selectedPatterns: [timelinePattern],
-        },
+const store = createMockStore({
+  ...mockGlobalState,
+  sourcerer: {
+    ...mockGlobalState.sourcerer,
+    defaultDataView: {
+      ...mockGlobalState.sourcerer.defaultDataView,
+      patternList: [defaultDataViewPattern],
+    },
+    sourcererScopes: {
+      ...mockGlobalState.sourcerer.sourcererScopes,
+      [SourcererScopeName.timeline]: {
+        ...mockGlobalState.sourcerer.sourcererScopes[SourcererScopeName.timeline],
+        selectedPatterns: [timelinePattern],
       },
     },
   },
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  storage
-);
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TestProviders store={store}>{children}</TestProviders>

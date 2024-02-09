@@ -9,13 +9,20 @@ import { get } from 'lodash';
 import type { AlertAgent, AlertWithAgent, AlertsAction } from './types';
 import type { ProcessesParams } from '../../../../common/api/detection_engine';
 
-export const getProcessAlerts = (alerts: AlertWithAgent[], config: ProcessesParams['config']) => {
+interface ProcessAlertsAcc {
+  [key: string]: Record<string, AlertsAction>;
+}
+
+export const getProcessAlerts = (
+  alerts: AlertWithAgent[],
+  config: ProcessesParams['config']
+): ProcessAlertsAcc => {
   if (!config) {
     return {};
   }
   const { overwrite, field } = config;
 
-  return alerts.reduce((acc: Record<string, Record<string, AlertsAction>>, alert) => {
+  return alerts.reduce((acc: ProcessAlertsAcc, alert) => {
     const valueFromAlert: number = overwrite ? alert.process?.pid : get(alert, field);
 
     if (valueFromAlert) {
@@ -52,18 +59,16 @@ export const getProcessAlerts = (alerts: AlertWithAgent[], config: ProcessesPara
 export const getErrorProcessAlerts = (
   alerts: AlertWithAgent[],
   config: ProcessesParams['config']
-) => {
+): ProcessAlertsAcc => {
   if (!config) {
     return {};
   }
   const { overwrite, field } = config;
 
-  return alerts.reduce((acc: Record<string, Record<string, AlertsAction>>, alert) => {
+  return alerts.reduce((acc: ProcessAlertsAcc, alert) => {
     const valueFromAlert: number = overwrite ? alert.process?.pid : get(alert, field);
 
     if (!valueFromAlert) {
-      const isEntityId = !overwrite && field.includes('entity_id');
-      const paramKey = isEntityId ? 'entity_id' : 'pid';
       const { _id, agent } = alert;
       const { id: agentId, name } = agent as AlertAgent;
       const hostName = alert.host?.name;
@@ -79,11 +84,11 @@ export const getErrorProcessAlerts = (
           [errorField]: {
             ...(currentValue || {}),
             alert_ids: [...(currentValue?.alert_ids || []), _id],
-            parameters: { [paramKey]: `${field || 'process.pid'} not found` },
+            parameters: {},
             endpoint_ids: [agentId],
             hosts: {
               ...currentValue?.hosts,
-              [agentId]: { name: name || hostName, id: agentId },
+              [agentId]: { name: name || hostName || '', id: agentId },
             },
             error: errorField,
           },
@@ -94,8 +99,8 @@ export const getErrorProcessAlerts = (
   }, {});
 };
 
-export const getIsolateAlerts = (alerts: AlertWithAgent[]) =>
-  alerts.reduce((acc, alert) => {
+export const getIsolateAlerts = (alerts: AlertWithAgent[]): Record<string, AlertsAction> =>
+  alerts.reduce((acc: Record<string, AlertsAction>, alert) => {
     const { id: agentId, name: agentName } = alert.agent || {};
 
     const hostName = alert.host?.name;
@@ -115,7 +120,7 @@ export const getIsolateAlerts = (alerts: AlertWithAgent[]) =>
         alert_ids: [...(acc[agentId]?.alert_ids || []), alert._id],
       },
     };
-  }, {} as Record<string, AlertsAction>);
+  }, {});
 
 export const getExecuteAlerts = (
   alerts: AlertWithAgent[],

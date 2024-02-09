@@ -40,6 +40,7 @@ export interface FleetConfigType {
   };
   setup?: {
     agentPolicySchemaUpgradeBatchSize?: number;
+    uninstallTokenVerificationBatchSize?: number;
   };
   developer?: {
     maxAgentPoliciesWithInactivityTimeout?: number;
@@ -50,7 +51,6 @@ export interface FleetConfigType {
   };
   internal?: {
     disableILMPolicies: boolean;
-    disableProxies: boolean;
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;

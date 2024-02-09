@@ -295,13 +295,13 @@ export class KnowledgeBaseService {
 
   private async recallFromKnowledgeBase({
     queries,
-    contexts,
+    categories,
     namespace,
     user,
     modelId,
   }: {
     queries: string[];
-    contexts?: string[];
+    categories?: string[];
     namespace: string;
     user: { name: string };
     modelId: string;
@@ -321,7 +321,7 @@ export class KnowledgeBaseService {
             user,
             namespace,
           }),
-          ...getCategoryQuery({ contexts }),
+          ...getCategoryQuery({ categories }),
         ],
       },
     };
@@ -424,25 +424,26 @@ export class KnowledgeBaseService {
   recall = async ({
     user,
     queries,
-    contexts,
+    categories,
     namespace,
     asCurrentUser,
   }: {
     queries: string[];
-    contexts?: string[];
+    categories?: string[];
     user: { name: string };
     namespace: string;
     asCurrentUser: ElasticsearchClient;
   }): Promise<{
     entries: RecalledEntry[];
   }> => {
+    this.dependencies.logger.debug(`Recalling entries from KB for queries: "${queries}"`);
     const modelId = await this.dependencies.getModelId();
 
     const [documentsFromKb, documentsFromConnectors] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
         queries,
-        contexts,
+        categories,
         namespace,
         modelId,
       }).catch((error) => {
@@ -482,10 +483,9 @@ export class KnowledgeBaseService {
       }
     }
 
-    if (returnedEntries.length <= sortedEntries.length) {
-      this.dependencies.logger.debug(
-        `Dropped ${sortedEntries.length - returnedEntries.length} entries because of token limit`
-      );
+    const droppedEntries = sortedEntries.length - returnedEntries.length;
+    if (droppedEntries > 0) {
+      this.dependencies.logger.info(`Dropped ${droppedEntries} entries because of token limit`);
     }
 
     return {

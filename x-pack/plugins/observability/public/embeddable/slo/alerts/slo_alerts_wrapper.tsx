@@ -14,6 +14,7 @@ import { IEmbeddable, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { Subject } from 'rxjs';
 import styled from 'styled-components';
+import { SloIncludedCount } from './components/slo_included_count';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
 import type { SloItem } from './types';
@@ -29,6 +30,7 @@ interface Props {
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
   onRenderComplete?: () => void;
   reloadSubject: Subject<SloAlertsEmbeddableInput | undefined>;
+  showAllGroupByInstances?: boolean;
 }
 
 export function SloAlertsWrapper({
@@ -38,6 +40,7 @@ export function SloAlertsWrapper({
   timeRange: initialTimeRange,
   onRenderComplete,
   reloadSubject,
+  showAllGroupByInstances: initialShowAllGroupByInstances,
 }: Props) {
   const {
     application: { navigateToUrl },
@@ -46,6 +49,9 @@ export function SloAlertsWrapper({
 
   const [timeRange, setTimeRange] = useState<TimeRange>(initialTimeRange);
   const [slos, setSlos] = useState<SloItem[]>(initialSlos);
+  const [showAllGroupByInstances, setShowAllGroupByInstances] = useState<boolean | undefined>(
+    initialShowAllGroupByInstances
+  );
 
   const [lastRefreshTime, setLastRefreshTime] = useState<number | undefined>(undefined);
 
@@ -59,6 +65,7 @@ export function SloAlertsWrapper({
         if (nTimeRange && (nTimeRange.from !== timeRange.from || nTimeRange.to !== timeRange.to)) {
           setTimeRange(nTimeRange);
         }
+        setShowAllGroupByInstances(input.showAllGroupByInstances);
       }
       setLastRefreshTime(Date.now());
     });
@@ -74,10 +81,7 @@ export function SloAlertsWrapper({
   const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
   const [isTableLoaded, setIsTableLoaded] = useState(false);
   useEffect(() => {
-    if (!onRenderComplete) {
-      return;
-    }
-    if (isSummaryLoaded && isTableLoaded) {
+    if (isSummaryLoaded && isTableLoaded && onRenderComplete) {
       onRenderComplete();
     }
   }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
@@ -117,10 +121,17 @@ export function SloAlertsWrapper({
             }}
             data-test-subj="o11ySloAlertsWrapperSlOsIncludedLink"
           >
-            {i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
-              defaultMessage: '{numOfSlos} SLOs included',
-              values: { numOfSlos: slos.length },
-            })}
+            {showAllGroupByInstances ? (
+              <SloIncludedCount slos={slos} />
+            ) : (
+              i18n.translate('xpack.observability.sloAlertsWrapper.sLOsIncludedFlexItemLabel', {
+                defaultMessage:
+                  '{numOfSlos, number} {numOfSlos, plural, one {SLO} other {SLOs}} included',
+                values: {
+                  numOfSlos: slos.length,
+                },
+              })
+            )}
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
@@ -143,6 +154,7 @@ export function SloAlertsWrapper({
             deps={deps}
             timeRange={timeRange}
             onLoaded={() => setIsSummaryLoaded(true)}
+            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
         <EuiFlexItem grow={true}>
@@ -152,6 +164,7 @@ export function SloAlertsWrapper({
             timeRange={timeRange}
             onLoaded={() => setIsTableLoaded(true)}
             lastReloadRequestTime={lastRefreshTime}
+            showAllGroupByInstances={showAllGroupByInstances}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

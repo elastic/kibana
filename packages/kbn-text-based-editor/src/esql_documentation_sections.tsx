@@ -585,9 +585,12 @@ FROM employees
               defaultMessage: `### STATS ... BY
 Use \`STATS ... BY\` to group rows according to a common value and calculate one or more aggregated values over the grouped rows.
 
+**Examples**:
+
 \`\`\`
 FROM employees
-| STATS count = COUNT(languages) BY languages
+| STATS count = COUNT(emp_no) BY languages
+| SORT languages
 \`\`\`
 
 If \`BY\` is omitted, the output table contains exactly one row with the aggregations applied over the entire dataset:
@@ -615,6 +618,40 @@ FROM employees
 \`\`\`
 
 Refer to **Aggregation functions** for a list of functions that can be used with \`STATS ... BY\`.
+
+Both the aggregating functions and the grouping expressions accept other functions. This is useful for using \`STATS...BY\` on multivalue columns. For example, to calculate the average salary change, you can use \`MV_AVG\` to first average the multiple values per employee, and use the result with the \`AVG\` function:
+
+\`\`\`
+FROM employees
+| STATS avg_salary_change = AVG(MV_AVG(salary_change))
+\`\`\`
+
+An example of grouping by an expression is grouping employees on the first letter of their last name:
+
+\`\`\`
+FROM employees
+| STATS my_count = COUNT() BY LEFT(last_name, 1)
+| SORT \`LEFT(last_name, 1)\`
+\`\`\`
+
+Specifying the output column name is optional. If not specified, the new column name is equal to the expression. The following query returns a column named \`AVG(salary)\`:
+
+\`\`\`
+FROM employees
+| STATS AVG(salary)
+\`\`\`
+
+Because this name contains special characters, it needs to be quoted with backticks (\`) when using it in subsequent commands:
+
+\`\`\`
+FROM employees
+| STATS AVG(salary)
+| EVAL avg_salary_rounded = ROUND(\`AVG(salary)\`)
+\`\`\`
+
+**Note**: \`STATS\` without any groups is much faster than adding a group.
+
+**Note**: Grouping on a single expression is currently much more optimized than grouping on many expressions.
             `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -934,7 +971,7 @@ ROW a=1.8
 | EVAL a=CEIL(a)
 \`\`\`
 
-Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the the closest \`double\` value to the integer similar to Java's \`Math.ceil\`.
+Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Java's \`Math.ceil\`.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1083,6 +1120,33 @@ ROW a=1.8
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateDiffFunction',
+        {
+          defaultMessage: 'DATE_DIFF',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateDiffFunction.markdown',
+            {
+              defaultMessage: `### DATE_DIFF
+Subtracts the \`startTimestamp\` from the \`endTimestamp\` and returns the difference in multiples of unit. If \`startTimestamp\` is later than the \`endTimestamp\`, negative values are returned.
+  
+\`\`\`
+ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-12-02T11:00:00.001Z")
+| EVAL dd_ms = DATE_DIFF("microseconds", date1, date2)
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateExtractFunction',
         {
           defaultMessage: 'DATE_EXTRACT',
@@ -1099,6 +1163,13 @@ Extracts parts of a date, like year, month, day, hour. The supported field types
 \`\`\`
 ROW date = DATE_PARSE("yyyy-MM-dd", "2022-05-06")
 | EVAL year = DATE_EXTRACT("year", date)
+\`\`\`
+
+For example, to find all events that occurred outside of business hours (before 9 AM or after 5 PM), on any given date:
+
+\`\`\`
+FROM sample_data
+| WHERE DATE_EXTRACT("hour_of_day", @timestamp) < 9 AND DATE_EXTRACT("hour_of_day", @timestamp) >= 17
 \`\`\`
               `,
               description:
@@ -1145,12 +1216,13 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateParseFunction.markdown',
             {
               defaultMessage: `### DATE_PARSE
-Converts a string to a date, in the provided format. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
-
+Returns a date by parsing the second argument using the format specified in the first argument. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
+Refer to [\`DateTimeFormatter\` documentation](https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/time/format/DateTimeFormatter.html) for syntax.
 \`\`\`
 ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
@@ -1201,6 +1273,15 @@ Timespan literals are not whitespace sensitive. These expressions are all valid:
 * \`1day\`
 * \`1 day\`
 * \`1      day\`
+
+Combine \`DATE_TRUNC\` with \`STATS ... BY\` to create date histograms. For example, to return the number of hires per year:
+
+\`\`\`
+FROM employees
+| EVAL year = DATE_TRUNC(1 year, hire_date)
+| STATS hires = COUNT(emp_no) BY year
+| SORT year
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1237,6 +1318,34 @@ ROW E()
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.endsWithFunction',
+        {
+          defaultMessage: 'ENDS_WITH',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.endsWithFunction.markdown',
+            {
+              defaultMessage: `### ENDS_WITH
+Returns a boolean that indicates whether a keyword string ends with another string:
+
+\`\`\`
+FROM employees
+| KEEP last_name
+| EVAL ln_E = ENDS_WITH(last_name, "d")
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floorFunction',
         {
           defaultMessage: 'FLOOR',
@@ -1255,7 +1364,7 @@ ROW a=1.8
 | EVAL a=FLOOR(a)
 \`\`\`
 
-Note: this is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the the closest \`double\` value to the integer similar to Java's \`Math.floor\`.
+Note: this is a noop for \`long\` (including unsigned) and \`integer\`. For \`double\` this picks the closest \`double\` value to the integer similar to Java's \`Math.floor\`.
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -1592,6 +1701,44 @@ NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction',
+        {
+          defaultMessage: 'MV_FIRST',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction.markdown',
+            {
+              defaultMessage: `### MV_FIRST
+Converts a multivalued field into a single valued field containing the first value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`.
+
+For example:
+
+\`\`\`
+ROW a="foo;bar;baz" 
+| EVAL first_a = MV_FIRST(SPLIT(a, ";"))
+\`\`\`
+
+Returning:
+
+\`\`\`
+foo;bar;baz | foo
+\`\`\`
+
+The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like \`SPLIT\`.
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction',
         {
           defaultMessage: 'MV_MAX',
@@ -1764,6 +1911,39 @@ NOTE: The input type can be any number and the output type is the same as the in
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction',
+        {
+          defaultMessage: 'MV_LAST',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
+            {
+              defaultMessage: `### MV_LAST
+Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
+  
+\`\`\`
+ROW a="foo;bar;baz" 
+| EVAL first_a = MV_LAST(SPLIT(a, ";"))
+\`\`\`
+
+Returning:
+
+\`\`\`
+foo;bar;baz | baz
+\`\`\`
+            `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction',
         {
           defaultMessage: 'NOW',
@@ -1827,42 +2007,11 @@ ROW PI()
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.powFunction.markdown',
             {
               defaultMessage: `### POW
-Returns the the value of a base (first argument) raised to a power (second argument). Both arguments must be numeric.
+Returns the value of a base (first argument) raised to the power of an exponent (second argument). Both arguments must be numeric. The output is always a double. Note that it is still possible to overflow a double result here; in that case, \`null\` will be returned.
 
 \`\`\`
 ROW base = 2.0, exponent = 2.0 
 | EVAL s = POW(base, exponent)
-\`\`\`
-
-#### Type rules
-
-The type of the returned value is determined by the types of the base and exponent. The following rules are applied to determine the result type:
-
-* If either of the base or exponent are of a floating point type, the result will be a double
-* Otherwise, if either the base or the exponent are 64-bit (long or unsigned long), the result will be a long
-* Otherwise, the result will be a 32-bit integer (this covers all other numeric types, including int, short and byte)
-
-For example, using simple integers as arguments will lead to an integer result:
-
-\`\`\`
-ROW base = 2, exponent = 2
-| EVAL s = POW(base, exponent)
-\`\`\`
-
-Note: the actual power function is performed using double precision values for all cases. This means that for very large non-floating point values there is a small chance that the operation can lead to slightly different answers than expected. However, a more likely outcome of very large non-floating point values is numerical overflow.
-
-#### Arithmetic errors
-
-Arithmetic errors and numeric overflow do not result in an error. Instead, the result will be \`null\` and a warning for the \`ArithmeticException\` added. For example:
-
-\`\`\`
-ROW x = POW(9223372036854775808, 2)
-\`\`\`
-
-If it is desired to protect against numerical overruns, use \`TO_DOUBLE\` on either of the arguments:
-
-\`\`\`
-ROW x = POW(9223372036854775808, TO_DOUBLE(1))
 \`\`\`
 
 #### Fractional exponents
@@ -2282,6 +2431,73 @@ Alias: TO_BOOL
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianpointFunction',
+        {
+          defaultMessage: 'TO_CARTESIANPOINT',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianpointFunction.markdown',
+            {
+              defaultMessage: `### TO_CARTESIANPOINT
+Converts an input value to a \`point\` value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a cartesian point.
+
+A string will only be successfully converted if it respects the [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
+
+\`\`\`
+ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
+| MV_EXPAND wkt
+| EVAL pt = TO_CARTESIANPOINT(wkt)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction',
+        {
+          defaultMessage: 'TO_CARTESIANSHAPE',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction.markdown',
+            {
+              defaultMessage: `### TO_CARTESIANSHAPE
+Converts an input value to a \`cartesian_shape\` value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`cartesian_shape\`.
+              
+A string will only be successfully converted if it respects the [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
+    
+For example:
+    
+\`\`\`
+ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
+| MV_EXPAND wkt
+| EVAL geom = TO_CARTESIANSHAPE(wkt)
+\`\`\`
+                        `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDatetimeFunction',
         {
           defaultMessage: 'TO_DATETIME',
@@ -2400,6 +2616,78 @@ If the input parameter is of a date type, its value will be interpreted as milli
 Boolean **true** will be converted to double **1.0**, **false** to **0.0**.
 
 Alias: TO_DBL
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeopointFunction',
+        {
+          defaultMessage: 'TO_GEOPOINT',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeopointFunction.markdown',
+            {
+              defaultMessage: `### TO_GEOPOINT
+Converts an input value to a \`geo_point\` value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_point\`.
+
+A string will only be successfully converted if it respects the [WKT Point](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
+
+\`\`\`
+ROW wkt = "POINT(42.97109630194 14.7552534413725)"
+| EVAL pt = TO_GEOPOINT(wkt)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction',
+        {
+          defaultMessage: 'TO_GEOSHAPE',
+        }
+      ),
+      description: (
+        <Markdown
+          openLinksInNewTab={true}
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction.markdown',
+            {
+              defaultMessage: `### TO_GEOSHAPE
+Converts an input value to a \`geo_shape\` value.
+
+The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`geo_shape\`.
+
+A string will only be successfully converted if it respects the [WKT format](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry).
+
+For example:
+
+\`\`\`
+ROW wkt = "POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))"
+| EVAL geom = TO_GEOSHAPE(wkt)
+\`\`\`
+
+Returning:
+
+\`\`\`
+POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)) | POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2538,6 +2826,40 @@ Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction',
+        {
+          defaultMessage: 'TO_LOWER',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction.markdown',
+            {
+              defaultMessage: `### TO_LOWER
+Returns a new string representing the input string converted to lower case.
+For example:
+    
+\`\`\`
+ROW message = "Some Text" 
+| EVAL message_lower = TO_LOWER(message)
+\`\`\`
+
+Returning:
+
+\`\`\`
+Some Text | some text
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction',
         {
           defaultMessage: 'TO_RADIANS',
@@ -2648,6 +2970,41 @@ Alias: TO_ULONG, TO_UL
     },
     {
       label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction',
+        {
+          defaultMessage: 'TO_UPPER',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction.markdown',
+            {
+              defaultMessage: `### TO_UPPER
+Returns a new string representing the input string converted to upper case.
+
+For example:
+
+\`\`\`
+ROW message = "Some Text" 
+| EVAL message_upper = TO_UPPER(message)
+\`\`\`
+
+Returning:
+
+\`\`\`
+Some Text | SOME TEXT
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
         'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toVersionFunction',
         {
           defaultMessage: 'TO_VERSION',
@@ -2735,11 +3092,18 @@ export const aggregationFunctions = {
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.avgFunction.markdown',
             {
               defaultMessage: `### AVG
-The average of a numeric field.
+Returns the average of a numeric field.
 
 \`\`\`
 FROM employees
 | STATS AVG(height)
+\`\`\`
+
+The expression can use inline functions. For example, to calculate the average over a multivalued column, first use \`MV_AVG\` to average the multiple values per row, and use the result with the \`AVG\` function:
+
+\`\`\`
+FROM employees
+| STATS avg_salary_change = AVG(MV_AVG(salary_change))
 \`\`\`
               `,
               description:
@@ -2762,16 +3126,29 @@ FROM employees
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countFunction.markdown',
             {
               defaultMessage: `### COUNT
-Counts field values.
+Returns the total number (count) of input values.
 
 \`\`\`
 FROM employees
 | STATS COUNT(height)
 \`\`\`
 
-Can take any field type as input and the result is always a \`long\` no matter the input type.
+Can take any field type as input.
 
-NOTE: There isn’t yet a \`COUNT(*)\`. Please count a single valued field if you need a count of rows.
+To count the number of rows, use \`COUNT()\` or \`COUNT(*)\`:
+
+\`\`\`
+FROM employees
+| STATS count = COUNT(*) BY languages
+| SORT languages DESC
+\`\`\`
+
+The expression can use inline functions. This example splits a string into multiple values using the \`SPLIT\` function and counts the values:
+
+\`\`\`
+ROW words="foo;bar;baz;qux;quux;foo"
+| STATS word_count = COUNT(SPLIT(words, ";"))
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2794,19 +3171,26 @@ NOTE: There isn’t yet a \`COUNT(*)\`. Please count a single valued field if yo
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction.markdown',
             {
               defaultMessage: `### COUNT_DISTINCT
-  The approximate number of distinct values.
+Counts the approximate number of distinct values.
 
-  \`\`\`
-  FROM hosts
-  | STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
-  \`\`\`
+\`\`\`
+FROM hosts
+| STATS COUNT_DISTINCT(ip0), COUNT_DISTINCT(ip1)
+\`\`\`
 
-  The \`COUNT_DISTINCT\` function is approximate, based on the HyperLogLog++ algorithm. Refer to the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate) for more information. The precision is configurable, using an optional second parameter:
+The \`COUNT_DISTINCT\` function is approximate, based on the HyperLogLog++ algorithm. Refer to the [documentation](https://www.elastic.co/guide/en/elasticsearch/reference/current/search-aggregations-metrics-cardinality-aggregation.html#_counts_are_approximate) for more information. The precision is configurable, using an optional second parameter. The maximum supported value is 40000. Thresholds above this number will have the same effect as a threshold of 40000. The default value is 3000.
 
-  \`\`\`
-  FROM hosts
-  | STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
-  \`\`\`
+\`\`\`
+FROM hosts
+| STATS COUNT_DISTINCT(ip0, 80000), COUNT_DISTINCT(ip1, 5)
+\`\`\`
+
+The expression can use inline functions. This example splits a string into multiple values using the \`SPLIT\` function and counts the unique values:
+
+\`\`\`
+ROW words="foo;bar;baz;qux;quux;foo"
+| STATS distinct_word_count = COUNT_DISTINCT(SPLIT(words, ";"))
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2828,11 +3212,18 @@ NOTE: There isn’t yet a \`COUNT(*)\`. Please count a single valued field if yo
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.maxFunction.markdown',
             {
               defaultMessage: `### MAX
-The maximum value of a numeric field.
+Returns the maximum value of a numeric expression.
 
 \`\`\`
 FROM employees
 | STATS MAX(languages)
+\`\`\`
+
+The expression can use inline functions. For example, to calculate the maximum over an average of a multivalued column, use \`MV_AVG\` to first average the multiple values per row, and use the result with the \`MAX\` function:
+
+\`\`\`
+FROM employees
+| STATS max_avg_salary_change = MAX(MV_AVG(salary_change))
 \`\`\`
               `,
               description:
@@ -2851,18 +3242,30 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianFunction.markdown',
             {
               defaultMessage: `### MEDIAN
-The value that is greater than half of all values and less than half of all values, also known as the 50% percentile.
+Returns the value that is greater than half of all values and less than half of all values, also known as the 50% \`PERCENTILE\`.
+
+**NOTE:** Like \`PERCENTILE\`, \`MEDIAN\` is usually approximate, based on the TDigest algorithm.
+
+**WARNING:** \`MEDIAN\` is also [non-deterministic](https://en.wikipedia.org/wiki/Nondeterministic_algorithm). This means you can get slightly different results using the same data.
+
+Example:
 
 \`\`\`
 FROM employees
-| STATS MEDIAN(salary)
+| STATS MEDIAN(salary), PERCENTILE(salary, 50)
 \`\`\`
 
-NOTE: Like \`PERCENTILE\`, \`MEDIAN\` is usually approximate, based on the TDigest algorithm. \`MEDIAN\` is also non-deterministic. This means you can get slightly different results using the same data.
+The expression can use inline functions. For example, to calculate the median of the maximum values of a multivalued column, first use \`MV_MAX\` to get the maximum value per row, and use the result with the \`MEDIAN\` function:
+
+\`\`\`
+FROM employees
+| STATS median_max_salary_change = MEDIAN(MV_MAX(salary_change))
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2884,9 +3287,9 @@ NOTE: Like \`PERCENTILE\`, \`MEDIAN\` is usually approximate, based on the TDige
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianAbsoluteDeviationFunction.markdown',
             {
               defaultMessage: `### MEDIAN_ABSOLUTE_DEVIATION
-The median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than standard deviation.
+Returns the median absolute deviation, a measure of variability. It is a robust statistic, meaning that it is useful for describing data that may have outliers, or may not be normally distributed. For such data it can be more descriptive than the standard deviation.
 
-It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable X, the median absolute deviation is \`median(|median(X) - Xi|)\`.
+It is calculated as the median of each data point’s deviation from the median of the entire sample. That is, for a random variable X, the median absolute deviation is \`median(|median(X) - X|)\`.
 
 \`\`\`
 FROM employees
@@ -2894,7 +3297,15 @@ FROM employees
 \`\`\`
 
 NOTE: Like \`PERCENTILE\`, \`MEDIAN_ABSOLUTE_DEVIATION\` is usually approximate, based on the TDigest algorithm. \`MEDIAN_ABSOLUTE_DEVIATION\` is also non-deterministic. This means you can get slightly different results using the same data.
-              `,
+
+The expression can use inline functions. For example, to calculate the median absolute deviation of the maximum values of a multivalued column, first use \`MV_MAX\` to get the maximum value per row, and use the result with the \`MEDIAN_ABSOLUTE_DEVIATION\` function:
+
+\`\`\`
+FROM employees
+| STATS m_a_d_max_salary_change = MEDIAN_ABSOLUTE_DEVIATION(MV_MAX(salary_change))
+\`\`\`
+
+`,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
@@ -2915,11 +3326,18 @@ NOTE: Like \`PERCENTILE\`, \`MEDIAN_ABSOLUTE_DEVIATION\` is usually approximate,
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.minFunction.markdown',
             {
               defaultMessage: `### MIN
-The minimum value of a numeric field.
+Returns the minimum value of a numeric field.
 
 \`\`\`
 FROM employees
 | STATS MIN(languages)
+\`\`\`
+
+The expression can use inline functions. For example, to calculate the minimum over an average of a multivalued column, use \`MV_AVG\` to first average the multiple values per row, and use the result with the \`MIN\` function:
+
+\`\`\`
+FROM employees
+| STATS min_avg_salary_change = MIN(MV_AVG(salary_change))
 \`\`\`
               `,
               description:
@@ -2938,6 +3356,7 @@ FROM employees
       ),
       description: (
         <Markdown
+          openLinksInNewTab={true}
           markdown={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.percentileFunction.markdown',
             {
@@ -2951,7 +3370,43 @@ FROM employees
      , p99 = PERCENTILE(salary, 99)
 \`\`\`
 
-NOTE: \`PERCENTILE\` is usually approximate, based on the TDigest algorithm. \`PERCENTILE\` is also non-deterministic. This means you can get slightly different results using the same data.
+**NOTE**: \`PERCENTILE\` is usually approximate, based on the TDigest algorithm. 
+
+**WARNING:** \`PERCENTILE\` is also [non-deterministic](https://en.wikipedia.org/wiki/Nondeterministic_algorithm). This means you can get slightly different results using the same data.
+
+The expression can use inline functions. For example, to calculate a percentile of the maximum values of a multivalued column, first use \`MV_MAX\` to get the maximum value per row, and use the result with the \`PERCENTILE\` function:
+
+\`\`\`
+FROM employees
+| STATS p80_max_salary_change = PERCENTILE(MV_MAX(salary_change), 80)
+\`\`\`
+              `,
+              description:
+                'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+            }
+          )}
+        />
+      ),
+    },
+    {
+      label: i18n.translate(
+        'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction',
+        {
+          defaultMessage: 'ST_CENTROID',
+        }
+      ),
+      description: (
+        <Markdown
+          markdown={i18n.translate(
+            'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction.markdown',
+            {
+              defaultMessage: `### ST_CENTROID
+Calculates the spatial centroid over a field with spatial point geometry type.
+
+\`\`\`
+FROM airports
+| STATS centroid=ST_CENTROID(location)
+\`\`\`
               `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
@@ -2973,11 +3428,18 @@ NOTE: \`PERCENTILE\` is usually approximate, based on the TDigest algorithm. \`P
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sumFunction.markdown',
             {
               defaultMessage: `### SUM
-The sum of a numeric field.
+Returns the sum of a numeric field.
 
 \`\`\`
 FROM employees
 | STATS SUM(languages)
+\`\`\`
+
+The expression can use inline functions. For example, to calculate the sum of each employee’s maximum salary changes, apply the \`MV_MAX\` function to each row and then \`SUM\` the results:
+
+\`\`\`
+FROM employees
+| STATS total_salary_changes = SUM(MV_MAX(salary_change))
 \`\`\`
               `,
               description:
@@ -3017,6 +3479,7 @@ export const operators = {
 These binary comparison operators are supported:
 
 * equality: \`==\`
+* case insensitive equality \`=~\`
 * inequality: \`!=\`
 * less than: \`<\`
 * less than or equal: \`<=\`

@@ -8,6 +8,8 @@
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { each } from 'lodash';
 
+import type { ExperimentalFeatures } from '../../../../common';
+
 import {
   isExecuteAction,
   isGetFileAction,
@@ -16,6 +18,8 @@ import {
 } from './endpoint_params_type_guards';
 import type { RuleResponseEndpointAction } from '../../../../common/api/detection_engine';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
+
+import type { ResponseActionAlerts, AlertsAction } from './types';
 import {
   getProcessAlerts,
   getIsolateAlerts,
@@ -24,12 +28,12 @@ import {
   getGetFileAlerts,
 } from './utils';
 
-import type { ResponseActionAlerts, AlertsAction } from './types';
 
 export const endpointResponseAction = (
   responseAction: RuleResponseEndpointAction,
   endpointAppContextService: EndpointAppContextService,
-  { alerts }: ResponseActionAlerts
+  { alerts }: ResponseActionAlerts,
+  experimentalFeatures: ExperimentalFeatures
 ) => {
   const { comment, command } = responseAction.params;
 
@@ -38,6 +42,7 @@ export const endpointResponseAction = (
     command,
     rule_id: alerts[0][ALERT_RULE_UUID],
     rule_name: alerts[0][ALERT_RULE_NAME],
+    agent_type: 'endpoint' as const,
   };
 
   if (isIsolateAction(responseAction.params)) {
@@ -81,37 +86,41 @@ export const endpointResponseAction = (
     });
   }
 
-  const createProcessActionFromAlerts = (
-    actionAlerts: Record<string, Record<string, AlertsAction>>
-  ) => {
-    const createAction = async (alert: AlertsAction) => {
-      const { hosts, parameters, error } = alert;
+  const automatedProcessActionsEnabled = experimentalFeatures?.automatedProcessActionsEnabled;
 
-      const actionData = {
-        hosts,
-        endpoint_ids: alert.endpoint_ids,
-        alert_ids: alert.alert_ids,
-        error,
-        parameters,
-        ...commonData,
+  if (automatedProcessActionsEnabled) {
+    const createProcessActionFromAlerts = (
+      actionAlerts: Record<string, Record<string, AlertsAction>>
+    ) => {
+      const createAction = async (alert: AlertsAction) => {
+        const { hosts, parameters, error } = alert;
+
+        const actionData = {
+          hosts,
+          endpoint_ids: alert.endpoint_ids,
+          alert_ids: alert.alert_ids,
+          error,
+          parameters,
+          ...commonData,
+        };
+
+        return endpointAppContextService
+          .getActionCreateService()
+          .createActionFromAlert(actionData, alert.endpoint_ids);
       };
-
-      return endpointAppContextService
-        .getActionCreateService()
-        .createActionFromAlert(actionData, alert.endpoint_ids);
+      return each(actionAlerts, (actionPerAgent) => {
+        return each(actionPerAgent, createAction);
+      });
     };
-    return each(actionAlerts, (actionPerAgent) => {
-      return each(actionPerAgent, createAction);
-    });
-  };
 
-  if (isProcessesAction(responseAction.params)) {
-    const foundFields = getProcessAlerts(alerts, responseAction.params.config);
-    const notFoundField = getErrorProcessAlerts(alerts, responseAction.params.config);
+    if (isProcessesAction(responseAction.params)) {
+      const foundFields = getProcessAlerts(alerts, responseAction.params.config);
+      const notFoundField = getErrorProcessAlerts(alerts, responseAction.params.config);
 
-    const processActions = createProcessActionFromAlerts(foundFields);
-    const processActionsWithError = createProcessActionFromAlerts(notFoundField);
+      const processActions = createProcessActionFromAlerts(foundFields);
+      const processActionsWithError = createProcessActionFromAlerts(notFoundField);
 
-    return Promise.all([processActions, processActionsWithError]);
+      return Promise.all([processActions, processActionsWithError]);
+    }
   }
 };
