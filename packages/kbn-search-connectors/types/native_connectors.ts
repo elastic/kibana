@@ -1793,7 +1793,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.INTEGER,
         ui_restrictions: [],
         validations: [],
-        value: 9090,
+        value: 1433,
       },
       username: {
         default_value: '',
@@ -2681,7 +2681,7 @@ export const NATIVE_CONNECTOR_DEFINITIONS: Record<string, NativeConnector | unde
         type: FieldType.INTEGER,
         ui_restrictions: [],
         validations: [],
-        value: 9090,
+        value: 5432,
       },
       username: {
         default_value: '',
