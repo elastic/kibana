@@ -71,7 +71,7 @@ export function useCategorizeRequest() {
       query: QueryDslQueryContainer,
       intervalMs?: number,
       additionalFilter?: CategorizationAdditionalFilter
-    ): Promise<{ categories: Category[] }> => {
+    ): Promise<{ categories: Category[]; hasExamples: boolean }> => {
       const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
       return new Promise((resolve, reject) => {
@@ -101,7 +101,7 @@ export function useCategorizeRequest() {
             },
             error: (error) => {
               if (error.name === 'AbortError') {
-                return resolve({ categories: [] });
+                return resolve({ categories: [], hasExamples: false });
               }
               reject(error);
             },

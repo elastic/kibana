@@ -51,6 +51,7 @@ import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CreateCategorizationJobButton } from './create_categorization_job';
+import { FieldAliasWarning } from './field_alias_warning';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -110,6 +111,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [data, setData] = useState<{
     categories: Category[];
     categoriesInBucket: Category[] | null;
+    displayExamples: boolean;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -191,7 +193,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
 
       if (mounted.current === true) {
         setFieldValidationResult(validationResult);
-        const { categories } = categorizationResult;
+        const { categories, hasExamples } = categorizationResult;
 
         const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
         let categoriesInBucket: any | null = null;
@@ -210,6 +212,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         setData({
           categories,
           categoriesInBucket,
+          displayExamples: hasExamples,
         });
 
         setShowTabs(hasBucketCategories);
@@ -388,6 +391,14 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 <EuiSpacer size="s" />
               </>
             ) : null}
+
+            {data.displayExamples === false ? (
+              <FieldAliasWarning
+                selectedField={selectedField.name}
+                index={dataView.getIndexPattern()}
+              />
+            ) : null}
+
             <CategoryTable
               categories={
                 selectedTab === SELECTED_TAB.BUCKET && data.categoriesInBucket !== null
@@ -412,6 +423,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                   : undefined
               }
               navigateToDiscover={additionalFilter !== undefined}
+              displayExamples={data.displayExamples}
             />
           </>
         ) : null}

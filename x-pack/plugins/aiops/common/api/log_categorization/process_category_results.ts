@@ -28,6 +28,8 @@ export function processCategoryResults(
     aggregations as unknown as Record<string, estypes.AggregationsAggregate>
   ) as CategoriesAgg;
 
+  let hasExamples = false;
+
   const categories: Category[] = buckets.map((b) => {
     const sparkline =
       b.sparkline === undefined
@@ -37,10 +39,17 @@ export function processCategoryResults(
             return acc2;
           }, {});
 
+    const examples = b.examples.hits.hits.map((h) => {
+      const example = get(h._source, field);
+      if (hasExamples === false && example !== undefined) {
+        hasExamples = true;
+      }
+      return example;
+    });
     return {
       key: b.key,
       count: b.doc_count,
-      examples: b.examples.hits.hits.map((h) => get(h._source, field)),
+      examples,
       sparkline,
       subTimeRangeCount: b.sub_time_range?.buckets[0].doc_count ?? undefined,
       subFieldCount: b.sub_time_range?.buckets[0].sub_field?.doc_count ?? undefined,
@@ -50,7 +59,9 @@ export function processCategoryResults(
       regex: b.regex,
     };
   });
+
   return {
     categories,
+    hasExamples,
   };
 }

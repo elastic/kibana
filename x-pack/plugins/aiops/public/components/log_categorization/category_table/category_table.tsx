@@ -42,7 +42,7 @@ import type { EventRate } from '../use_categorize_request';
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
 import { ExpandedRow } from './expanded_row';
-import { FormattedPatternExamples } from '../format_category';
+import { FormattedPatternExamples, FormattedTokens } from '../format_category';
 
 interface Props {
   categories: Category[];
@@ -60,6 +60,7 @@ interface Props {
   enableRowActions?: boolean;
   additionalFilter?: CategorizationAdditionalFilter;
   navigateToDiscover?: boolean;
+  displayExamples?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -78,6 +79,7 @@ export const CategoryTable: FC<Props> = ({
   enableRowActions = true,
   additionalFilter,
   navigateToDiscover = true,
+  displayExamples = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -142,11 +144,13 @@ export const CategoryTable: FC<Props> = ({
       if (itemIdToExpandedRowMapValues[category.key]) {
         delete itemIdToExpandedRowMapValues[category.key];
       } else {
-        itemIdToExpandedRowMapValues[category.key] = <ExpandedRow category={category} />;
+        itemIdToExpandedRowMapValues[category.key] = (
+          <ExpandedRow category={category} displayExamples={displayExamples} />
+        );
       }
       setItemIdToExpandedRowMap(itemIdToExpandedRowMapValues);
     },
-    [itemIdToExpandedRowMap]
+    [displayExamples, itemIdToExpandedRowMap]
   );
 
   const columns: Array<EuiBasicTableColumn<Category>> = [
@@ -185,11 +189,7 @@ export const CategoryTable: FC<Props> = ({
         defaultMessage: 'Examples',
       }),
       sortable: true,
-      render: (item: Category) => (
-        <>
-          <FormattedPatternExamples category={item} count={1} />
-        </>
-      ),
+      render: (item: Category) => <FormattedPatternExamples category={item} count={1} />,
     },
     {
       name: i18n.translate('xpack.aiops.logCategorization.column.actions', {
@@ -217,6 +217,16 @@ export const CategoryTable: FC<Props> = ({
       ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
+
+  if (displayExamples === false) {
+    // on the rare occasion that examples are not available, replace the examples column with tokens
+    columns.splice(2, 1, {
+      name: i18n.translate('xpack.aiops.logCategorization.column.tokens', {
+        defaultMessage: 'Tokens',
+      }),
+      render: (item: Category) => <FormattedTokens category={item} count={1} />,
+    });
+  }
 
   if (showSparkline === true) {
     columns.splice(2, 0, {
