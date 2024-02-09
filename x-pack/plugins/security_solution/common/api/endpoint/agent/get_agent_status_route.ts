@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../endpoint/service/response_actions/constants';
+import { AgentTypeSchemaLiteral } from '..';
 
 const AgentStatusAgentIdSchema = schema.string({
   minLength: 1,
@@ -27,7 +27,7 @@ export const EndpointAgentStatusRequestSchema = {
     agentType: schema.maybe(
       schema.oneOf(
         // @ts-expect-error TS2769: No overload matches this call
-        RESPONSE_ACTION_AGENT_TYPE.map((agentType) => schema.literal(agentType)),
+        AgentTypeSchemaLiteral,
         {
           defaultValue: 'endpoint',
         }
