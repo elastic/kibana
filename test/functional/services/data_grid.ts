@@ -15,9 +15,11 @@ export interface TabbedGridData {
   columns: string[];
   rows: string[][];
 }
+
 interface SelectOptions {
   isAnchorRow?: boolean;
   rowIndex?: number;
+  columnIndex?: number;
   renderMoreRows?: boolean;
 }
 
@@ -242,13 +244,14 @@ export class DataGridService extends FtrService {
   }
 
   public async clickRowToggle(
-    options: SelectOptions = { isAnchorRow: false, rowIndex: 0 }
+    options: SelectOptions = { isAnchorRow: false, rowIndex: 0, columnIndex: 0 }
   ): Promise<void> {
-    const row = await this.getRow(options);
+    const rowColumns = await this.getRow(options);
     const testSubj = options.isAnchorRow
       ? '~docTableExpandToggleColumnAnchor'
       : '~docTableExpandToggleColumn';
-    const toggle = await row[0].findByTestSubject(testSubj);
+
+    const toggle = await rowColumns[options.columnIndex ?? 0].findByTestSubject(testSubj);
 
     await toggle.scrollIntoViewIfNecessary();
     await toggle.click();
@@ -272,7 +275,20 @@ export class DataGridService extends FtrService {
       const cellText = await cell.getVisibleText();
       textArr.push(cellText.trim());
     }
-    return Promise.resolve(textArr);
+    return textArr;
+  }
+
+  public async getControlColumnHeaderFields(): Promise<string[]> {
+    const result = await this.find.allByCssSelector(
+      '.euiDataGridHeaderCell--controlColumn > .euiDataGridHeaderCell__content'
+    );
+
+    const textArr = [];
+    for (const cell of result) {
+      const cellText = await cell.getVisibleText();
+      textArr.push(cellText.trim());
+    }
+    return textArr;
   }
 
   public async getRowActions(
@@ -393,6 +409,7 @@ export class DataGridService extends FtrService {
     const detailRows = await this.getDetailsRows();
     return detailRows[0];
   }
+
   public async addInclusiveFilter(detailsRow: WebElementWrapper, fieldName: string): Promise<void> {
     const tableDocViewRow = await this.getTableDocViewRow(detailsRow, fieldName);
     const addInclusiveFilterButton = await this.getAddInclusiveFilterButton(tableDocViewRow);
