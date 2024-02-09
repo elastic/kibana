@@ -36,6 +36,7 @@ node scripts/build \
   --docker-tag="$KIBANA_IMAGE_TAG" \
   --skip-docker-ubuntu \
   --skip-docker-ubi \
+  --skip-docker-fips \
   --skip-docker-cloud \
   --skip-docker-contexts
 
