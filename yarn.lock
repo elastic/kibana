@@ -1739,10 +1739,10 @@
   resolved "https://registry.yarnpkg.com/@elastic/eslint-plugin-eui/-/eslint-plugin-eui-0.0.2.tgz#56b9ef03984a05cc213772ae3713ea8ef47b0314"
   integrity sha512-IoxURM5zraoQ7C8f+mJb9HYSENiZGgRVcG4tLQxE61yHNNRDXtGDWTZh8N1KIHcsqN1CEPETjuzBXkJYF/fDiQ==
 
-"@elastic/eui@92.2.1":
-  version "92.2.1"
-  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-92.2.1.tgz#172b5122e1025307bbb8e2c6a115c3feb3a16f42"
-  integrity sha512-FujsbJtuh8mxG5mbqclQBdPoW1kn9kXd/hpaMXUJa7bb0bmqlJRmagULPTZ+5e60Q6PEQt+e7MFDsaq4elSthQ==
+"@elastic/eui@93.0.0":
+  version "93.0.0"
+  resolved "https://registry.yarnpkg.com/@elastic/eui/-/eui-93.0.0.tgz#43ba256d94f3d3acddee23427c9fa5285a43d7e4"
+  integrity sha512-Q5gY9roWZsB1At0rxG5d9M5P7+J4hfv8fzvuqNHoVjIxbeibHRCSq2TtOQcSUjhKE5Tu/BIZijzuYX8vITGaSQ==
   dependencies:
     "@hello-pangea/dnd" "^16.3.0"
     "@types/lodash" "^4.14.198"
