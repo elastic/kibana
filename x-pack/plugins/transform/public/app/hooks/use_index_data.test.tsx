@@ -15,10 +15,9 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { CoreSetup } from '@kbn/core/public';
 import { DataGrid, type UseIndexDataReturnType } from '@kbn/ml-data-grid';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SimpleQuery } from '@kbn/ml-query-utils';
 
 import { getMlSharedImports } from '../../shared_imports';
-
-import { SimpleQuery } from '../common';
 
 import { SearchItems } from './use_search_items';
 import { useIndexData } from './use_index_data';

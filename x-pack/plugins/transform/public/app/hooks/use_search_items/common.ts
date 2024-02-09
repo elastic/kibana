@@ -9,12 +9,9 @@ import { buildEsQuery } from '@kbn/es-query';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataView, DataViewsContract } from '@kbn/data-views-plugin/public';
-
-import { matchAllQuery } from '../../common';
+import { matchAllQuery } from '@kbn/ml-query-utils';
 
 import { isDataView } from '../../../../common/types/data_view';
-
-export type SavedSearchQuery = object;
 
 let dataViewCache: DataView[] = [];
 

@@ -11,6 +11,7 @@ import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { TIME_SERIES_METRIC_TYPES } from '@kbn/ml-agg-utils';
 import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SavedSearchQuery } from '@kbn/ml-query-utils';
 
 import { EsFieldName } from '../../../../../../../common/types/fields';
 
@@ -19,7 +20,6 @@ import {
   PivotGroupByConfigDict,
   PivotGroupByConfigWithUiSupportDict,
 } from '../../../../../common';
-import { SavedSearchQuery } from '../../../../../hooks/use_search_items';
 
 import { QUERY_LANGUAGE } from './constants';
 import { TransformFunction } from '../../../../../../../common/constants';

@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export type { SearchItems } from './common';
-export { useSearchItems } from './use_search_items';
+import { SearchQueryVariant } from '../types';
+
+export const simpleQueryMock: SearchQueryVariant = { query_string: { query: 'airline:AAL' } };

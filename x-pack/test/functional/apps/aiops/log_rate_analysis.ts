@@ -296,6 +296,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
+          await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });
 

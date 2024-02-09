@@ -119,7 +119,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
       ]);
     });
 
@@ -142,7 +141,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         { term: { 'meta.cloud.instance_id.keyword': '1234' } },
       ]);
     });
@@ -167,7 +165,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         { bool: { must_not: [{ term: { 'meta.cloud.instance_id.keyword': '1234' } }] } },
       ]);
     });
@@ -193,7 +190,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         {
           term: {
             'error.message': 'rate limit exceeded',
@@ -248,7 +244,6 @@ describe('query_utils', () => {
             },
           },
         },
-        { match_all: {} },
         {
           bool: {
             must_not: [
