@@ -465,12 +465,14 @@ export function collectBooleanExpression(ctx: BooleanExpressionContext | undefin
   if (!ctx) {
     return ast;
   }
-  return ast.concat(
-    collectLogicalExpression(ctx),
-    collectRegexExpression(ctx),
-    collectIsNullExpression(ctx),
-    collectDefaultExpression(ctx)
-  );
+  return ast
+    .concat(
+      collectLogicalExpression(ctx),
+      collectRegexExpression(ctx),
+      collectIsNullExpression(ctx),
+      collectDefaultExpression(ctx)
+    )
+    .flat();
 }
 
 export function visitField(ctx: FieldContext) {
