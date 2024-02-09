@@ -34,6 +34,14 @@ export const ORCHESTRATOR_NAMESPACE_FIELD = 'orchestrator.namespace';
 export const CONTAINER_NAME_FIELD = 'container.name';
 export const CONTAINER_ID_FIELD = 'container.id';
 
+// Malformed Docs
+export const MALFORMED_DOCS_FIELD = 'ignored_field_values';
+
+// Error Stacktrace
+export const ERROR_STACK_TRACE = 'error.stack_trace';
+export const ERROR_EXCEPTION_STACKTRACE = 'error.exception.stacktrace';
+export const ERROR_LOG_STACKTRACE = 'error.log.stacktrace';
+
 // Virtual column fields
 export const CONTENT_FIELD = 'content';
 export const RESOURCE_FIELD = 'resource';
@@ -41,7 +49,7 @@ export const RESOURCE_FIELD = 'resource';
 // Sizing
 export const DATA_GRID_COLUMN_WIDTH_SMALL = 240;
 export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
-
+export const ACTIONS_COLUMN_WIDTH = 80;
 // UI preferences
 export const DEFAULT_COLUMNS = [
   {
