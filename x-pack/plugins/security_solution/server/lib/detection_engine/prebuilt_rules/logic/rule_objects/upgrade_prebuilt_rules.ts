@@ -80,6 +80,8 @@ const upgradeRule = async (
         enabled: existingRule.enabled,
         exceptions_list: existingRule.params.exceptionsList,
         actions: existingRule.actions.map(transformAlertToRuleAction),
+        timeline_id: existingRule.params.timelineId,
+        timeline_title: existingRule.params.timelineTitle,
       },
     });
   }
@@ -91,7 +93,6 @@ const upgradeRule = async (
       ...rule,
       // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
       enabled: undefined,
-      actions: undefined,
     },
   });
 
