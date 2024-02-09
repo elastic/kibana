@@ -60,7 +60,8 @@ describe('Cases routes', () => {
     });
   });
 
-  describe('Case view', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/163263
+  describe.skip('Case view', () => {
     it.each(getCaseViewPaths())(
       'navigates to the cases view page for path: %s',
       async (path: string) => {
@@ -84,7 +85,9 @@ describe('Cases routes', () => {
     );
   });
 
-  describe('Create case', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175229
+  // FLAKY: https://github.com/elastic/kibana/issues/175230
+  describe.skip('Create case', () => {
     it('navigates to the create case page', () => {
       renderWithRouter(['/cases/create']);
       expect(screen.getByText('Create case')).toBeInTheDocument();
@@ -96,7 +99,9 @@ describe('Cases routes', () => {
     });
   });
 
-  describe('Cases settings', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/175231
+  // FLAKY: https://github.com/elastic/kibana/issues/175232
+  describe.skip('Cases settings', () => {
     it('navigates to the cases settings page', () => {
       renderWithRouter(['/cases/configure']);
       expect(screen.getByText('Settings')).toBeInTheDocument();

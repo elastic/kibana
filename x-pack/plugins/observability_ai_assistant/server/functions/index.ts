@@ -53,7 +53,6 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than "query".
 
-        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
 
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
@@ -65,6 +64,8 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
         If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
+
+        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
         `
