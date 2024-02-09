@@ -153,7 +153,7 @@ export class UptimePlugin
             defaultMessage: 'Overview',
           }),
           path: '/',
-          visibleInSideNavigation: true,
+          visibleIn: ['globalSearch', 'sideNav'],
         },
         {
           id: 'management',
@@ -161,7 +161,7 @@ export class UptimePlugin
             defaultMessage: 'Management',
           }),
           path: '/monitors',
-          visibleInSideNavigation: true,
+          visibleIn: ['globalSearch', 'sideNav'],
         },
       ],
       mount: async (params: AppMountParameters) => {
