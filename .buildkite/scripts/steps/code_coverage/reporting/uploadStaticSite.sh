@@ -18,6 +18,7 @@ uploadRest_old() {
     gsutil -m -q cp -r -a public-read -z js,css,html "target/kibana-coverage/${x}-combined" "${uploadPrefixWithTimeStamp_old}"
   done
 }
+.buildkite/scripts/common/activate_service_account.sh --logout-gcloud
 uploadBase_old
 uploadRest_old
 
