@@ -7,27 +7,22 @@
 
 import React, { lazy, Suspense, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexGroup, EuiLoadingSpinner, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiLoadingSpinner,
+  EuiPageTemplate,
+  EuiSpacer,
+} from '@elastic/eui';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
-  ALERT_TIME_RANGE,
   AlertConsumers,
-  TIMESTAMP,
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
-import {
-  BoolQuery,
-  buildEsQuery as kbnBuildEsQuery,
-  EsQueryConfig,
-  Filter,
-  FILTERS,
-  Query,
-  TimeRange,
-} from '@kbn/es-query';
-import { getTime } from '@kbn/data-plugin/common';
+import { BoolQuery } from '@kbn/es-query';
 import { QuickFiltersMenuItem } from '@kbn/unified-search-plugin/public/query_string_input/quick_filters';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
@@ -49,45 +44,6 @@ import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../common/utils';
 import { useRuleTypeIdsByFeatureId } from './hooks/use_rule_type_ids_by_feature_id';
 const AlertsTable = lazy(() => import('../alerts_table/alerts_table_state'));
-
-interface BuildEsQueryArgs {
-  timeRange?: TimeRange;
-  kuery?: string;
-  queries?: Query[];
-  config?: EsQueryConfig;
-  filters?: Filter[];
-}
-
-export function buildEsQuery({
-  timeRange,
-  kuery,
-  filters = [],
-  queries = [],
-  config = {},
-}: BuildEsQueryArgs) {
-  const timeFilter: Filter | undefined = timeRange && {
-    query: {
-      bool: {
-        minimum_should_match: 1,
-        should: [
-          getTime(undefined, timeRange, {
-            fieldName: ALERT_TIME_RANGE,
-          })?.query,
-          getTime(undefined, timeRange, {
-            fieldName: TIMESTAMP,
-          })?.query,
-        ],
-      },
-    },
-    meta: {
-      type: FILTERS.CUSTOM,
-    },
-  };
-  const filtersToUse = [...(timeFilter ? [timeFilter] : []), ...filters];
-  const kueryFilter = kuery ? [{ query: kuery, language: 'kuery' }] : [];
-  const queryToUse = [...kueryFilter, ...queries];
-  return kbnBuildEsQuery(undefined, queryToUse, filtersToUse, config);
-}
 
 /**
  * A unified view for all types of alerts
@@ -211,6 +167,14 @@ const PageContent = () => {
           </span>
         }
         rightSideItems={ruleStats}
+        description={
+          <EuiBadge color="hollow">
+            <FormattedMessage
+              id="xpack.triggersActionsUI.managementSection.alerts.technicalPreview"
+              defaultMessage="Technical preview"
+            />
+          </EuiBadge>
+        }
       />
       <EuiSpacer size="l" />
       {!isInitialLoadingRuleTypes && !authorizedToReadAnyRules ? (

@@ -15,8 +15,8 @@ import { useAlertSearchBarStateContainer } from './use_alert_search_bar_state_co
 import { ALERTS_URL_STORAGE_KEY } from './constants';
 import { AlertsSearchBarProps } from './types';
 import AlertsSearchBar from './alerts_search_bar';
-import { buildEsQuery } from '../global_alerts_page/global_alerts_page';
 import { nonNullable } from '../../../../common/utils';
+import { buildEsQuery } from './build_es_query';
 
 const INVALID_QUERY_STRING_TOAST_TITLE = i18n.translate(
   'xpack.triggersActionsUI.urlSyncedAlertsSearchBar.invalidQueryTitle',
