@@ -69,7 +69,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000 ms requestTimeout`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
     });
 
@@ -94,7 +94,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000 ms requestTimeout`
+        `executing query for rule .test-rule-type:abcdefg in space my-space - {\"body\":{\"query\":{\"bool\":{\"filter\":{\"range\":{\"@timestamp\":{\"gte\":0}}}}}}} - with options {} and 5000ms requestTimeout`
       );
     });
 
@@ -242,7 +242,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000 ms requestTimeout'
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000ms requestTimeout'
       );
     });
 
@@ -267,7 +267,7 @@ describe('wrapScopedClusterClient', () => {
       expect(scopedClusterClient.asInternalUser.search).not.toHaveBeenCalled();
       expect(scopedClusterClient.asCurrentUser.search).not.toHaveBeenCalled();
       expect(logger.debug).toHaveBeenCalledWith(
-        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000 ms requestTimeout'
+        'executing eql query for rule .test-rule-type:abcdefg in space my-space - {"index":"foo","query":"process where process.name == \\"regsvr32.exe\\""} - with options {} and 5000ms requestTimeout'
       );
     });
 

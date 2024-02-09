@@ -202,7 +202,7 @@ function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
         `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
           opts.rule.spaceId
         } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-          requestTimeout ? ` and ${requestTimeout} ms requestTimeout` : ''
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
         }`
       );
       const result = (await originalEqlSearch.call(opts.esClient, params, {
@@ -283,7 +283,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
         `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
           opts.rule.spaceId
         } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}${
-          requestTimeout ? ` and ${requestTimeout} ms requestTimeout` : ''
+          requestTimeout ? ` and ${requestTimeout}ms requestTimeout` : ''
         }`
       );
       const result = (await originalSearch.call(opts.esClient, params, {
