@@ -73,39 +73,10 @@ import {
 } from '../../constants/random_sampler';
 import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
-interface DataVisualizerPageState {
-  overallStats: OverallStats;
-  metricConfigs: FieldVisConfig[];
-  totalMetricFieldCount: number;
-  populatedMetricFieldCount: number;
-  metricsLoaded: boolean;
-  nonMetricConfigs: FieldVisConfig[];
-  nonMetricsLoaded: boolean;
-  documentCountStats?: FieldVisConfig;
-}
-
 const defaultSearchQuery = {
   match_all: {},
 };
 
-export function getDefaultPageState(): DataVisualizerPageState {
-  return {
-    overallStats: {
-      totalCount: 0,
-      aggregatableExistsFields: [],
-      aggregatableNotExistsFields: [],
-      nonAggregatableExistsFields: [],
-      nonAggregatableNotExistsFields: [],
-    },
-    metricConfigs: [],
-    totalMetricFieldCount: 0,
-    populatedMetricFieldCount: 0,
-    metricsLoaded: false,
-    nonMetricConfigs: [],
-    nonMetricsLoaded: false,
-    documentCountStats: undefined,
-  };
-}
 export const getDefaultDataVisualizerListState = (
   overrides?: Partial<DataVisualizerIndexBasedAppState>
 ): Required<DataVisualizerIndexBasedAppState> => ({

@@ -37,11 +37,11 @@ import { type Column, useESQLOverallStatsData } from './use_esql_overall_stats_d
 import { type AggregatableField } from '../../types/esql_data_visualizer';
 import { useDataVisualizerKibana } from '../../../kibana_context';
 import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from '../../embeddables/grid_embeddable/constants';
-import { getDefaultPageState } from '../../components/index_data_visualizer_view/index_data_visualizer_esql';
 import type {
   ESQLDataVisualizerGridEmbeddableInput,
   ESQLDataVisualizerIndexBasedAppState,
 } from '../../embeddables/grid_embeddable/types';
+import { getDefaultPageState } from '../../constants/index_data_visualizer_viewer';
 
 const defaultSearchQuery = {
   match_all: {},
@@ -54,7 +54,6 @@ const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   probability: 0,
 };
 
-// @TODO: refactor to common */
 const defaults = getDefaultPageState();
 
 export const getDefaultESQLDataVisualizerListState = (
@@ -339,6 +338,23 @@ export const useESQLDataVisualizerData = (
     limitSize: fieldStatsRequest?.limitSize,
   });
 
+  useEffect(
+    function resetFieldStatsFieldToFetch() {
+      // If query returns 0 document, no need to do more work here
+      if (totalCount === undefined) {
+        setFieldStatFieldsToFetch(undefined);
+      }
+
+      if (totalCount === 0) {
+        setMetricConfigs(defaults.metricConfigs);
+        setNonMetricConfigs(defaults.nonMetricConfigs);
+        setMetricsStats(undefined);
+        setFieldStatFieldsToFetch(undefined);
+      }
+    },
+    [totalCount]
+  );
+
   const createMetricCards = useCallback(
     () => {
       if (!columns || !overallStats) return;
@@ -538,6 +554,10 @@ export const useESQLDataVisualizerData = (
       dataVisualizerListState.pageSize,
     ]
   );
+  // @TODO: remove
+  console.log(`--@@configs`, configs);
+  console.log(`--@@nonMetricConfigs`, nonMetricConfigs);
+  console.log(`--@@metricConfigs`, metricConfigs);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
@@ -561,11 +581,14 @@ export const useESQLDataVisualizerData = (
   );
 
   const combinedProgress = useMemo(
-    () => overallStatsProgress.loaded * 0.3 + fieldStatsProgress.loaded * 0.7,
-    [overallStatsProgress.loaded, fieldStatsProgress.loaded]
+    () =>
+      totalCount === 0
+        ? overallStatsProgress.loaded
+        : overallStatsProgress.loaded * 0.3 + fieldStatsProgress.loaded * 0.7,
+    [totalCount, overallStatsProgress.loaded, fieldStatsProgress.loaded]
   );
 
-  const onQueryUpdate = (q?: AggregateQuery) => {
+  const onQueryUpdate = async (q?: AggregateQuery) => {
     // When user submits a new query
     // resets all current requests and other data
     if (cancelOverallStatsRequest) {
@@ -588,10 +611,6 @@ export const useESQLDataVisualizerData = (
     progress: combinedProgress,
     overallStatsProgress,
     configs,
-    // queryOrAggregateQuery,
-    // searchQueryLanguage,
-    // searchString,
-    // searchQuery,
     // Column with action to lens, data view editor, etc
     // set to nothing for now
     extendedColumns: undefined,
@@ -607,7 +626,6 @@ export const useESQLDataVisualizerData = (
     limitSize,
     showEmptyFields,
     fieldsCountStats,
-    setFieldStatFieldsToFetch,
     timeFieldName,
   };
 };

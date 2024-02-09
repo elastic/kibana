@@ -45,38 +45,7 @@ import type {
   ESQLDataVisualizerIndexBasedPageUrlState,
   ESQLDefaultLimitSizeOption,
 } from '../../embeddables/grid_embeddable/types';
-import { OverallStats } from '../../types/overall_stats';
 import { ESQLQuery, isESQLQuery } from '../../search_strategy/requests/esql_utils';
-
-interface DataVisualizerPageState {
-  overallStats: OverallStats;
-  metricConfigs: FieldVisConfig[];
-  totalMetricFieldCount: number;
-  populatedMetricFieldCount: number;
-  metricsLoaded: boolean;
-  nonMetricConfigs: FieldVisConfig[];
-  nonMetricsLoaded: boolean;
-  documentCountStats?: FieldVisConfig;
-}
-
-export function getDefaultPageState(): DataVisualizerPageState {
-  return {
-    overallStats: {
-      totalCount: 0,
-      aggregatableExistsFields: [],
-      aggregatableNotExistsFields: [],
-      nonAggregatableExistsFields: [],
-      nonAggregatableNotExistsFields: [],
-    },
-    metricConfigs: [],
-    totalMetricFieldCount: 0,
-    populatedMetricFieldCount: 0,
-    metricsLoaded: false,
-    nonMetricConfigs: [],
-    nonMetricsLoaded: false,
-    documentCountStats: undefined,
-  };
-}
 
 export interface IndexDataVisualizerESQLProps {
   getAdditionalLinks?: GetAdditionalLinks;
@@ -188,41 +157,23 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   const isWithinLargeBreakpoint = useIsWithinMaxBreakpoint('l');
 
   const {
-    // @TODO: verify commented out items
     totalCount,
     progress: combinedProgress,
     overallStatsProgress,
     configs,
-    // queryOrAggregateQuery,
-    // searchQueryLanguage,
-    // searchString,
-    // searchQuery,
-    // extendedColumns,
     documentCountStats,
     metricsStats,
-    // overallStats,
     timefilter,
-    // setLastRefresh,
     getItemIdToExpandedRowMap,
     onQueryUpdate,
     limitSize,
     showEmptyFields,
     fieldsCountStats,
-    setFieldStatFieldsToFetch,
-    timeFieldName,
   } = useESQLDataVisualizerData(input, dataVisualizerListState, setQuery);
 
-  const hasValidTimeField = useMemo(() => timeFieldName !== undefined, [timeFieldName]);
-
-  useEffect(
-    function resetFieldStatsFieldToFetch() {
-      // If query returns 0 document, no need to do more work here
-      if (totalCount === undefined || totalCount === 0) {
-        setFieldStatFieldsToFetch(undefined);
-        return;
-      }
-    },
-    [totalCount]
+  const hasValidTimeField = useMemo(
+    () => currentDataView?.timeFieldName !== undefined,
+    [currentDataView?.timeFieldName]
   );
 
   const queryNeedsUpdate = useMemo(

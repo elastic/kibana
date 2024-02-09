@@ -179,18 +179,18 @@ const fieldStatsErrorTitle = i18n.translate(
 export const useESQLOverallStatsData = (
   fieldStatsRequest:
     | {
-        earliest: number | undefined;
-        latest: number | undefined;
-        aggInterval: TimeBucketsInterval;
-        intervalMs: number;
-        searchQuery: AggregateQuery;
-        indexPattern: string | undefined;
-        timeFieldName: string | undefined;
-        lastRefresh: number;
-        filter?: QueryDslQueryContainer;
-        limitSize?: ESQLDefaultLimitSizeOption;
-        totalCount?: number;
-      }
+      earliest: number | undefined;
+      latest: number | undefined;
+      aggInterval: TimeBucketsInterval;
+      intervalMs: number;
+      searchQuery: AggregateQuery;
+      indexPattern: string | undefined;
+      timeFieldName: string | undefined;
+      lastRefresh: number;
+      filter?: QueryDslQueryContainer;
+      limitSize?: ESQLDefaultLimitSizeOption;
+      totalCount?: number;
+    }
     | undefined
 ) => {
   const {
@@ -233,7 +233,7 @@ export const useESQLOverallStatsData = (
         const {
           searchQuery,
           intervalMs,
-          filter,
+          filter: filter,
           limitSize,
           totalCount: knownTotalCount,
         } = fieldStatsRequest;
@@ -258,10 +258,10 @@ export const useESQLOverallStatsData = (
         );
         const columns = columnsResp?.rawResponse
           ? // @ts-expect-error ES types need to be updated with columns for ESQL queries
-            (columnsResp.rawResponse.columns.map((c) => ({
-              ...c,
-              secondaryType: getSupportedFieldType(c.type),
-            })) as Column[])
+          (columnsResp.rawResponse.columns.map((c) => ({
+            ...c,
+            secondaryType: getSupportedFieldType(c.type),
+          })) as Column[])
           : [];
 
         const timeFields = columns.filter((d) => d.type === 'date');
@@ -377,7 +377,25 @@ export const useESQLOverallStatsData = (
         // to safeguard against huge datasets
         const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
 
+        // @TODO: remove
+        console.log(`--@@totalCount`, totalCount);
         if (totalCount === 0) {
+          console.log(`--@@setTableData`, {
+            aggregatableFields: undefined,
+            nonAggregatableFields: undefined,
+            overallStats: undefined,
+            columns: undefined,
+            timeFieldName: undefined,
+          });
+
+          setTableData({
+            aggregatableFields: undefined,
+            nonAggregatableFields: undefined,
+            overallStats: undefined,
+            columns: undefined,
+            timeFieldName: undefined,
+          });
+
           setOverallStatsProgress({
             loaded: 100,
             isRunning: false,
