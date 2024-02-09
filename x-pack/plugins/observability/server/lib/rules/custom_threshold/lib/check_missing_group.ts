@@ -6,11 +6,13 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/logging';
 import { isString, get, identity } from 'lodash';
+import { SearchConfigurationType } from '../types';
 import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import type { BucketKey } from './get_data';
-import { calculateCurrentTimeframe, createBaseFilters } from './metric_query';
+import { calculateCurrentTimeFrame, createBoolQuery } from './metric_query';
 
 export interface MissingGroupsRecord {
   key: string;
@@ -23,7 +25,7 @@ export const checkMissingGroups = async (
   indexPattern: string,
   timeFieldName: string,
   groupBy: string | undefined | string[],
-  filterQuery: string | undefined,
+  searchConfiguration: SearchConfigurationType,
   logger: Logger,
   timeframe: { start: number; end: number },
   missingGroups: MissingGroupsRecord[] = []
@@ -31,29 +33,32 @@ export const checkMissingGroups = async (
   if (missingGroups.length === 0) {
     return missingGroups;
   }
-  const currentTimeframe = calculateCurrentTimeframe(metricParams, timeframe);
-  const baseFilters = createBaseFilters(metricParams, currentTimeframe, timeFieldName, filterQuery);
+  const currentTimeFrame = calculateCurrentTimeFrame(metricParams, timeframe);
   const groupByFields = isString(groupBy) ? [groupBy] : groupBy ? groupBy : [];
 
   const searches = missingGroups.flatMap((group) => {
-    const groupByFilters = Object.values(group.bucketKey).map((key, index) => {
-      return {
-        match: {
-          [groupByFields[index]]: key,
-        },
-      };
-    });
+    const groupByQueries: QueryDslQueryContainer[] = Object.values(group.bucketKey).map(
+      (key, index) => {
+        return {
+          match: {
+            [groupByFields[index]]: key,
+          },
+        };
+      }
+    );
+    const query = createBoolQuery(
+      currentTimeFrame,
+      timeFieldName,
+      searchConfiguration,
+      groupByQueries
+    );
     return [
       { index: indexPattern },
       {
         size: 0,
         terminate_after: 1,
         track_total_hits: true,
-        query: {
-          bool: {
-            filter: [...baseFilters, ...groupByFilters],
-          },
-        },
+        query,
       },
     ];
   });
