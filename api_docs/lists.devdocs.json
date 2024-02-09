@@ -2802,6 +2802,42 @@
           },
           {
             "parentPluginId": "lists",
+            "id": "def-server.ListClient.getImportFilename",
+            "type": "Function",
+            "tags": [],
+            "label": "getImportFilename",
+            "description": [
+              "\nGets the filename of the imported file"
+            ],
+            "signature": [
+              "({ stream }: ",
+              "GetImportFilename",
+              ") => Promise<string | undefined>"
+            ],
+            "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "lists",
+                "id": "def-server.ListClient.getImportFilename.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ stream }",
+                "description": [],
+                "signature": [
+                  "GetImportFilename"
+                ],
+                "path": "x-pack/plugins/lists/server/services/lists/list_client.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "lists",
             "id": "def-server.ListClient.importListItemsToStream",
             "type": "Function",
             "tags": [],

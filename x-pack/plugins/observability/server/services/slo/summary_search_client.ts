@@ -84,6 +84,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
               getElastichsearchQueryOrThrow(kqlQuery),
               ...(parsedFilters.filter ?? []),
             ],
+            must_not: [...(parsedFilters.must_not ?? [])],
           },
         },
         sort: {

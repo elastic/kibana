@@ -40,21 +40,21 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // clicking on the toggle button
     it('adv settings - toggle ', async () => {
-      await testSubjects.click('advancedSetting-editField-csv:quoteValues');
+      await testSubjects.click('management-settings-editField-csv:quoteValues');
       await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });
 
     // clicking on editor panel
     it('adv settings - edit ', async () => {
-      await testSubjects.click('advancedSetting-editField-csv:separator');
+      await testSubjects.click('management-settings-editField-csv:separator');
       await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });
 
     // clicking on save button
     it('adv settings - save', async () => {
-      await testSubjects.click('advancedSetting-saveButton');
+      await testSubjects.click('settings-save-button');
       await toasts.dismissAllToasts();
       await a11y.testAppSnapshot();
     });

@@ -18,8 +18,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { instances: 2000 } }) => {
   const numInstances = scenarioOpts.instances;
   const agentVersions = ['2.1.0', '2.0.0', '1.15.0', '1.14.0', '1.13.1'];
-  const language = 'go';
-  const serviceName = 'synth-many-instances';
+  const language = 'java';
   const transactionName = 'GET /order/{id}';
 
   return {
@@ -29,7 +28,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { instance
         const randomName = getRandomNameForIndex(index);
         return apm
           .service({
-            name: serviceName,
+            name: 'synthtrace-high-cardinality-0',
             environment: ENVIRONMENT,
             agentName: language,
           })
@@ -51,13 +50,15 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts = { instance
 
           return !generateError
             ? span.success()
-            : span
-                .failure()
-                .errors(
-                  instance
-                    .error({ message: `No handler for ${transactionName}` })
-                    .timestamp(timestamp + 50)
-                );
+            : span.failure().errors(
+                instance
+                  .error({
+                    message: `No handler for ${transactionName}`,
+                    type: 'No handler',
+                    culprit: 'request',
+                  })
+                  .timestamp(timestamp + 50)
+              );
         });
 
         const cpuPct = random(0, 1);

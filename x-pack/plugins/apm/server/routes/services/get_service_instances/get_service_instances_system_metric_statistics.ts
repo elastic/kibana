@@ -52,7 +52,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   end,
   serviceNodeIds,
   numBuckets,
-  isComparisonSearch,
+  includeTimeseries,
   offset,
 }: {
   apmEventClient: APMEventClient;
@@ -64,7 +64,7 @@ export async function getServiceInstancesSystemMetricStatistics<
   environment: string;
   kuery: string;
   size?: number;
-  isComparisonSearch: T;
+  includeTimeseries: T;
   offset?: string;
 }): Promise<Array<ServiceInstanceSystemMetricStatistics<T>>> {
   const { startWithOffset, endWithOffset } = getOffsetInMs({
@@ -85,7 +85,7 @@ export async function getServiceInstancesSystemMetricStatistics<
     agg: TParams
   ) {
     return {
-      ...(isComparisonSearch
+      ...(includeTimeseries
         ? {
             avg: { avg: agg },
             timeseries: {
@@ -136,7 +136,7 @@ export async function getServiceInstancesSystemMetricStatistics<
               ...rangeQuery(startWithOffset, endWithOffset),
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
-              ...(isComparisonSearch && serviceNodeIds
+              ...(serviceNodeIds?.length
                 ? [{ terms: { [SERVICE_NODE_NAME]: serviceNodeIds } }]
                 : []),
               {
@@ -158,7 +158,7 @@ export async function getServiceInstancesSystemMetricStatistics<
               field: SERVICE_NODE_NAME,
               missing: SERVICE_NODE_NAME_MISSING,
               ...(size ? { size } : {}),
-              ...(isComparisonSearch ? { include: serviceNodeIds } : {}),
+              ...(serviceNodeIds?.length ? { include: serviceNodeIds } : {}),
             },
             aggs: subAggs,
           },
@@ -179,7 +179,7 @@ export async function getServiceInstancesSystemMetricStatistics<
           : 'memory_usage_system';
 
         const cpuUsage =
-          // Timeseries is available when isComparisonSearch is true
+          // Timeseries is available when includeTimeseries is true
           'timeseries' in serviceNodeBucket.cpu_usage
             ? serviceNodeBucket.cpu_usage.timeseries.buckets.map(
                 (dateBucket) => ({
@@ -191,7 +191,7 @@ export async function getServiceInstancesSystemMetricStatistics<
 
         const memoryUsageValue = serviceNodeBucket[memoryMetricsKey];
         const memoryUsage =
-          // Timeseries is available when isComparisonSearch is true
+          // Timeseries is available when includeTimeseries is true
           'timeseries' in memoryUsageValue
             ? memoryUsageValue.timeseries.buckets.map((dateBucket) => ({
                 x: dateBucket.key,

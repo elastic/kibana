@@ -16,6 +16,7 @@ import {
 export const getSyntheticsEnablementRoute: SyntheticsRestApiRouteFactory = () => ({
   method: 'PUT',
   path: SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT,
+  writeAccessOverride: true,
   validate: {},
   handler: async ({ savedObjectsClient, request, server }): Promise<any> => {
     try {

@@ -100,7 +100,7 @@ export function createLiteralString(token: Token): ESQLLiteral {
   };
 }
 
-function isMissingText(text: string) {
+export function isMissingText(text: string) {
   return /<missing /.test(text);
 }
 
@@ -180,6 +180,13 @@ export function computeLocationExtends(fn: ESQLFunction) {
     location.min = walkFunctionStructure(fn.args, location, 'min', () => 0);
     // get max location navigating in depth keeping the right/last arg
     location.max = walkFunctionStructure(fn.args, location, 'max', (args) => args.length - 1);
+    // in case of empty array as last arg, bump the max location by 3 chars (empty brackets)
+    if (
+      Array.isArray(fn.args[fn.args.length - 1]) &&
+      !(fn.args[fn.args.length - 1] as ESQLAstItem[]).length
+    ) {
+      location.max += 3;
+    }
   }
   return location;
 }
@@ -191,15 +198,15 @@ export function computeLocationExtends(fn: ESQLFunction) {
 
 /* SCRIPT_MARKER_START */
 function getQuotedText(ctx: ParserRuleContext) {
-  return [66 /* esql_parser.QUOTED_IDENTIFIER */]
+  return [67 /* esql_parser.QUOTED_IDENTIFIER */]
     .map((keyCode) => ctx.tryGetToken(keyCode, 0))
     .filter(nonNullable)[0];
 }
 
 function getUnquotedText(ctx: ParserRuleContext) {
   return [
-    65 /* esql_parser.UNQUOTED_IDENTIFIER */, 71 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
-    75 /* esql_parser.UNQUOTED_ID_PATTERN */,
+    66 /* esql_parser.UNQUOTED_IDENTIFIER */, 72 /* esql_parser.FROM_UNQUOTED_IDENTIFIER */,
+    76 /* esql_parser.UNQUOTED_ID_PATTERN */,
   ]
     .map((keyCode) => ctx.tryGetToken(keyCode, 0))
     .filter(nonNullable)[0];

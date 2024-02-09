@@ -45,7 +45,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
 
   return deepFreeze({
     settings: `${ELASTIC_WEBSITE_URL}guide/en/kibana/${DOC_LINK_VERSION}/settings.html`,
-    elasticStackGetStarted: `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
+    elasticStackGetStarted: isServerless
+      ? `${SERVERLESS_DOCS}`
+      : `${ELASTIC_WEBSITE_URL}guide/en/index.html`,
     upgrade: {
       upgradingStackOnPrem: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrading-elastic-stack-on-prem.html`,
       upgradingStackOnCloud: `${ELASTIC_WEBSITE_URL}guide/en/elastic-stack/current/upgrade-elastic-stack-for-elastic-cloud.html`,
@@ -900,6 +902,7 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       integrationsLogstash: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-logstash`,
       integrationsBeats: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-beats`,
       integrationsConnectorClient: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client`,
+      integrationsConnectorClientAvailableConnectors: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client#available-connectors`,
       integrationsConnectorClientRunFromSource: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client#run-from-source`,
       integrationsConnectorClientRunWithDocker: `${SERVERLESS_ELASTICSEARCH_DOCS}ingest-data-through-integrations-connector-client#run-with-docker`,
       gettingStartedExplore: `${SERVERLESS_ELASTICSEARCH_DOCS}get-started`,

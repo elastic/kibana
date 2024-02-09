@@ -63,6 +63,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
   }) => {
     const { data } = useKibana().services;
     const [dataView, setDataView] = useState<DataView>();
+    const [searchBarFilters, setSearchBarFilters] = useState<Filter[]>(filters);
     const onQuerySubmit = useCallback(
       (payload: { dateRange: TimeRange; query?: Query | AggregateQuery }) => {
         if (payload.query != null && !deepEqual(payload.query, filterQuery)) {
@@ -133,7 +134,9 @@ export const QueryBar = memo<QueryBarComponentProps>(
            * We update filters and set new data view id to make sure that SearchBar does not show data view picker
            * More details in https://github.com/elastic/kibana/issues/174026
            */
-          filters.forEach((filter) => (filter.meta.index = indexPattern.title));
+          const updatedFilters = [...filters];
+          updatedFilters.forEach((filter) => (filter.meta.index = indexPattern.title));
+          setSearchBarFilters(updatedFilters);
         };
         createDataView();
       }
@@ -151,7 +154,7 @@ export const QueryBar = memo<QueryBarComponentProps>(
         showSubmitButton={false}
         dateRangeFrom={dateRangeFrom}
         dateRangeTo={dateRangeTo}
-        filters={filters}
+        filters={searchBarFilters}
         indexPatterns={arrDataView}
         isLoading={isLoading}
         isRefreshPaused={isRefreshPaused}

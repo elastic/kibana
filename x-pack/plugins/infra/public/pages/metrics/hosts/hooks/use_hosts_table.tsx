@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiBasicTableColumn,
-  CriteriaWithPagination,
-  EuiTableSelectionType,
-  type EuiBasicTable,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBasicTableColumn, CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
 import createContainer from 'constate';
 import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
@@ -142,8 +137,6 @@ export const useHostsTable = () => {
   } = useKibanaContextForPlugin();
   const { dataView } = useMetricsDataViewContext();
 
-  const tableRef = useRef<EuiBasicTable | null>(null);
-
   const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
 
   const onSelectionChange = (newSelectedItems: HostNodeRow[]) => {
@@ -163,7 +156,6 @@ export const useHostsTable = () => {
 
     filterManagerService.addFilters(newFilter);
     setSelectedItems([]);
-    tableRef.current?.setSelection([]);
   }, [dataView, filterManagerService, selectedItems]);
 
   const reportHostEntryClick = useCallback(
@@ -358,6 +350,7 @@ export const useHostsTable = () => {
   const selection: EuiTableSelectionType<HostNodeRow> = {
     onSelectionChange,
     selectable: (item: HostNodeRow) => !!item.name,
+    selected: selectedItems,
   };
 
   return {
@@ -373,9 +366,6 @@ export const useHostsTable = () => {
     selection,
     selectedItemsCount: selectedItems.length,
     filterSelectedHosts,
-    refs: {
-      tableRef,
-    },
   };
 };
 

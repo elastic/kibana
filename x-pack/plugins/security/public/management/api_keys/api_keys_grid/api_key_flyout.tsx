@@ -282,7 +282,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       title={
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.readonlyOwnedByOtherUserWarning"
-                          defaultMessage="You cannot update this API key, since it is owned by another user."
+                          defaultMessage="You can’t update this API key. It belongs to another user."
                         />
                       }
                     />
@@ -295,7 +295,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                       title={
                         <FormattedMessage
                           id="xpack.security.accountManagement.apiKeyFlyout.readonlyExpiredWarning"
-                          defaultMessage="You cannot update this API key, since it has already expired."
+                          defaultMessage="This API key has expired. You can no longer update it."
                         />
                       }
                     />
@@ -451,7 +451,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                     <h2>
                                       <FormattedMessage
                                         id="xpack.security.accountManagement.apiKeyFlyout.restTypeLabel"
-                                        defaultMessage="Personal API key"
+                                        defaultMessage="User API key"
                                       />
                                     </h2>
                                   </EuiTitle>
@@ -477,7 +477,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                     <h2>
                                       <FormattedMessage
                                         id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeLabel"
-                                        defaultMessage="Cross-Cluster API key"
+                                        defaultMessage="Cross-cluster API key"
                                       />
                                     </h2>
                                   </EuiTitle>
@@ -485,7 +485,7 @@ export const ApiKeyFlyout: FunctionComponent<ApiKeyFlyoutProps> = ({
                                   <EuiText size="s">
                                     <FormattedMessage
                                       id="xpack.security.accountManagement.apiKeyFlyout.crossClusterTypeDescription"
-                                      defaultMessage="Allow remote clusters to connect to your local cluster."
+                                      defaultMessage="Allow other clusters to connect to this cluster."
                                     />
                                   </EuiText>
                                 </>

@@ -32,6 +32,7 @@ describe('TimelineBottomBar', () => {
     expect(getByTestId('timeline-event-count-badge')).toBeInTheDocument();
     expect(getByTestId('timeline-save-status')).toBeInTheDocument();
     expect(getByTestId('timeline-favorite-empty-star')).toBeInTheDocument();
+    expect(getByTestId('timeline-favorite-empty-star')).toHaveProperty('id', '');
   });
 
   test('should not render the event count badge if timeline is open', () => {
