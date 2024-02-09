@@ -15,7 +15,11 @@ import type { LensPluginStartDependencies } from '../../../plugin';
 import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { suggestionsApi } from '../../../lens_suggestions_api';
 
-export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginStartDependencies) => {
+export const getQueryColumns = async (
+  query: AggregateQuery,
+  deps: LensPluginStartDependencies,
+  abortController?: AbortController
+) => {
   // Fetching only columns for ES|QL for performance reasons with limit 0
   // Important note: ES doesnt return the warnings for 0 limit,
   // I am skipping them in favor of performance now
@@ -24,7 +28,12 @@ export const getQueryColumns = async (query: AggregateQuery, deps: LensPluginSta
   if ('esql' in performantQuery && performantQuery.esql) {
     performantQuery.esql = `${performantQuery.esql} | limit 0`;
   }
-  const table = await fetchFieldsFromESQL(performantQuery, deps.expressions);
+  const table = await fetchFieldsFromESQL(
+    performantQuery,
+    deps.expressions,
+    undefined,
+    abortController
+  );
   return table?.columns;
 };
 
@@ -34,7 +43,8 @@ export const getSuggestions = async (
   datasourceMap: DatasourceMap,
   visualizationMap: VisualizationMap,
   adHocDataViews: DataViewSpec[],
-  setErrors: (errors: Error[]) => void
+  setErrors: (errors: Error[]) => void,
+  abortController?: AbortController
 ) => {
   try {
     let indexPattern = '';
@@ -55,7 +65,7 @@ export const getSuggestions = async (
     if (dataView.fields.getByName('@timestamp')?.type === 'date' && !dataViewSpec) {
       dataView.timeFieldName = '@timestamp';
     }
-    const columns = await getQueryColumns(query, deps);
+    const columns = await getQueryColumns(query, deps, abortController);
     const context = {
       dataViewSpec: dataView?.toSpec(),
       fieldName: '',
