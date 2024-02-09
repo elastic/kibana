@@ -25,7 +25,7 @@ type ControlGroupAttributesV2 = Pick<
 >;
 
 export type DashboardAttributes = Omit<DashboardAttributesV1, 'controlGroupInput'> & {
-  controlGroupInput: ControlGroupAttributesV2;
+  controlGroupInput?: ControlGroupAttributesV2;
 };
 
 export type DashboardCrudTypes = ContentManagementCrudTypes<
