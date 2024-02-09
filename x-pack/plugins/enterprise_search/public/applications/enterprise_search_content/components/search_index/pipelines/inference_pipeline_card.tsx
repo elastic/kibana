@@ -222,7 +222,7 @@ export const InferencePipelineCard: React.FC<InferencePipeline> = (pipeline) => 
                 </EuiFlexGroup>
               </EuiFlexItem>
             )}
-            {pipeline.sourceFields && (
+            {pipeline.sourceFields && pipeline.sourceFields.length > 0 && (
               <EuiFlexItem>
                 <EuiText size="s">{pipeline.sourceFields.join(', ')}</EuiText>
               </EuiFlexItem>
