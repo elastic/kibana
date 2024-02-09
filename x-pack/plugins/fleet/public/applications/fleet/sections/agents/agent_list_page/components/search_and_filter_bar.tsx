@@ -21,7 +21,6 @@ import { useIsFirstTimeAgentUserQuery } from '../../../../../integrations/sectio
 import type { Agent, AgentPolicy } from '../../../../types';
 import { SearchBar } from '../../../../components';
 import { AGENTS_INDEX, AGENTS_PREFIX } from '../../../../constants';
-import { useFleetServerStandalone } from '../../../../hooks';
 
 import { AgentBulkActions } from './bulk_actions';
 import type { SelectionMode } from './types';
@@ -49,6 +48,7 @@ export interface SearchAndFilterBarProps {
   inactiveShownAgents: number;
   totalInactiveAgents: number;
   totalManagedAgentIds: string[];
+  inactiveManagedAgentIds: string[];
   selectionMode: SelectionMode;
   currentQuery: string;
   selectedAgents: Agent[];
@@ -78,6 +78,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   inactiveShownAgents,
   totalInactiveAgents,
   totalManagedAgentIds,
+  inactiveManagedAgentIds,
   selectionMode,
   currentQuery,
   selectedAgents,
@@ -88,10 +89,8 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
   onClickAgentActivity,
   showAgentActivityTour,
 }) => {
-  const { isFleetServerStandalone } = useFleetServerStandalone();
   const { isFirstTimeAgentUser, isLoading: isFirstTimeAgentUserLoading } =
     useIsFirstTimeAgentUserQuery();
-  const showAddFleetServerBtn = !isFleetServerStandalone;
 
   return (
     <>
@@ -108,25 +107,23 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                 showAgentActivityTour={showAgentActivityTour}
               />
             </EuiFlexItem>
-            {showAddFleetServerBtn && (
-              <EuiFlexItem grow={false}>
-                <EuiToolTip
-                  content={
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addFleetServerButton.tooltip"
-                      defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
-                    />
-                  }
-                >
-                  <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
-                    <FormattedMessage
-                      id="xpack.fleet.agentList.addFleetServerButton"
-                      defaultMessage="Add Fleet Server"
-                    />
-                  </EuiButton>
-                </EuiToolTip>
-              </EuiFlexItem>
-            )}
+            <EuiFlexItem grow={false}>
+              <EuiToolTip
+                content={
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addFleetServerButton.tooltip"
+                    defaultMessage="Fleet Server is a component of the Elastic Stack used to centrally manage Elastic Agents"
+                  />
+                }
+              >
+                <EuiButton onClick={onClickAddFleetServer} data-test-subj="addFleetServerButton">
+                  <FormattedMessage
+                    id="xpack.fleet.agentList.addFleetServerButton"
+                    defaultMessage="Add Fleet Server"
+                  />
+                </EuiButton>
+              </EuiToolTip>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 content={
@@ -202,6 +199,7 @@ export const SearchAndFilterBar: React.FunctionComponent<SearchAndFilterBarProps
                   shownAgents={shownAgents}
                   inactiveShownAgents={inactiveShownAgents}
                   totalManagedAgentIds={totalManagedAgentIds}
+                  inactiveManagedAgentIds={inactiveManagedAgentIds}
                   selectionMode={selectionMode}
                   currentQuery={currentQuery}
                   selectedAgents={selectedAgents}

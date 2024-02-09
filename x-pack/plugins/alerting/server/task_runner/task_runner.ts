@@ -258,6 +258,7 @@ export class TaskRunner<
       revision: rule.revision,
       spaceId,
       tags: rule.tags,
+      alertDelay: rule.alertDelay?.active ?? 0,
     };
   }
 
@@ -312,6 +313,7 @@ export class TaskRunner<
       muteAll,
       revision,
       snoozeSchedule,
+      alertDelay,
     } = rule;
     const {
       params: { alertId: ruleId, spaceId },
@@ -528,6 +530,7 @@ export class TaskRunner<
                 notifyWhen,
                 muteAll,
                 snoozeSchedule,
+                alertDelay,
               },
               logger: this.logger,
               flappingSettings,
@@ -585,6 +588,7 @@ export class TaskRunner<
           notifyWhen === RuleNotifyWhen.CHANGE ||
           some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds: maintenanceWindowsWithoutScopedQueryIds,
+        alertDelay: alertDelay?.active ?? 0,
       });
     });
 

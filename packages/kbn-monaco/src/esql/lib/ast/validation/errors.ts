@@ -59,15 +59,20 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.wrongArgumentNumber', {
           defaultMessage:
-            'Error building [{fn}]: expects exactly {numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
-          values: { fn: out.fn, numArgs: out.numArgs, passedArgs: out.passedArgs },
+            'Error building [{fn}]: expects {canHaveMoreArgs, plural, =0 {exactly } other {}}{numArgs, plural, one {one argument} other {{numArgs} arguments}}, passed {passedArgs} instead.',
+          values: {
+            fn: out.fn,
+            numArgs: out.numArgs,
+            passedArgs: out.passedArgs,
+            canHaveMoreArgs: out.exactly,
+          },
         }),
       };
     case 'noNestedArgumentSupport':
       return {
         message: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
           defaultMessage:
-            "Aggregate function's parameters must be an attribute or literal; found [{name}] of type [{argType}]",
+            "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
           values: { name: out.name, argType: out.argType },
         }),
       };
@@ -104,12 +109,23 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
           },
         }),
       };
-    case 'unsupportedFunction':
+    case 'unsupportedFunctionForCommand':
       return {
-        message: i18n.translate('monaco.esql.validation.unsupportedFunction', {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionForCommand', {
           defaultMessage: '{command} does not support function {name}',
           values: {
             command: out.command,
+            name: out.name,
+          },
+        }),
+      };
+    case 'unsupportedFunctionForCommandOption':
+      return {
+        message: i18n.translate('monaco.esql.validation.unsupportedFunctionforCommandOption', {
+          defaultMessage: '{command} {option} does not support function {name}',
+          values: {
+            command: out.command,
+            option: out.option,
             name: out.name,
           },
         }),
@@ -198,9 +214,8 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
       return {
         message: i18n.translate('monaco.esql.validation.unsupportedSettingValue', {
           defaultMessage:
-            'Unrecognized value [{value}], {command} [{setting}] needs to be one of [{expected}]',
+            'Unrecognized value [{value}] for {command}, mode needs to be one of [{expected}]',
           values: {
-            setting: out.setting,
             expected: out.expected,
             value: out.value,
             command: out.command,
@@ -221,13 +236,19 @@ export function getMessageFromId<K extends ErrorTypes>({
   locations: ESQLLocation;
 }): ESQLMessage {
   const { message, type = 'error' } = getMessageAndTypeFromId(payload);
-  return createMessage(type, message, locations);
+  return createMessage(type, message, locations, payload.messageId);
 }
 
-export function createMessage(type: 'error' | 'warning', message: string, location: ESQLLocation) {
+export function createMessage(
+  type: 'error' | 'warning',
+  message: string,
+  location: ESQLLocation,
+  messageId: string
+) {
   return {
     type,
     text: message,
     location,
+    code: messageId,
   };
 }

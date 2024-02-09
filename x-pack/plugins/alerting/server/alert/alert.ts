@@ -255,6 +255,7 @@ export class Alert<
             flappingHistory: this.meta.flappingHistory,
             flapping: this.meta.flapping,
             uuid: this.meta.uuid,
+            activeCount: this.meta.activeCount,
           },
         }
       : {
@@ -326,5 +327,20 @@ export class Alert<
 
   getMaintenanceWindowIds() {
     return this.meta.maintenanceWindowIds ?? [];
+  }
+
+  incrementActiveCount() {
+    if (!this.meta.activeCount) {
+      this.meta.activeCount = 0;
+    }
+    this.meta.activeCount++;
+  }
+
+  getActiveCount() {
+    return this.meta.activeCount || 0;
+  }
+
+  resetActiveCount() {
+    this.meta.activeCount = 0;
   }
 }

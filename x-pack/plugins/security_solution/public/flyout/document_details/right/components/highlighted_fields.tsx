@@ -10,17 +10,11 @@ import React, { useMemo } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiInMemoryTable, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { getSourcererScopeId } from '../../../../helpers';
 import { convertHighlightedFieldsToTableRow } from '../../shared/utils/highlighted_fields_helpers';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { HighlightedFieldsCell } from './highlighted_fields_cell';
-import { SecurityCellActionType } from '../../../../actions/constants';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
+import { CellActions } from './cell_actions';
 import { HIGHLIGHTED_FIELDS_DETAILS_TEST_ID, HIGHLIGHTED_FIELDS_TITLE_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 import { useHighlightedFields } from '../../shared/hooks/use_highlighted_fields';
@@ -83,28 +77,13 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       scopeId: string;
       isPreview: boolean;
     }) => (
-      <SecurityCellActions
-        data={{
-          field: description.field,
-          value: description.values,
-        }}
-        mode={CellActionsMode.HOVER_RIGHT}
-        triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-        visibleCellActions={6}
-        sourcererScopeId={getSourcererScopeId(description.scopeId)}
-        metadata={{ scopeId: description.scopeId }}
-        disabledActionTypes={
-          description.isPreview
-            ? [SecurityCellActionType.FILTER, SecurityCellActionType.TOGGLE_COLUMN]
-            : []
-        }
-      >
+      <CellActions field={description.field} value={description.values}>
         <HighlightedFieldsCell
           values={description.values}
           field={description.field}
           originalField={description.originalField}
         />
-      </SecurityCellActions>
+      </CellActions>
     ),
   },
 ];

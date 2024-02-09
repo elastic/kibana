@@ -25,7 +25,10 @@ import type {
   EndpointPrivileges,
   ResponseActionGetFileOutputContent,
 } from '../../../../../../common/endpoint/types';
-import { INSUFFICIENT_PRIVILEGES_FOR_COMMAND } from '../../../../../common/translations';
+import {
+  INSUFFICIENT_PRIVILEGES_FOR_COMMAND,
+  UPGRADE_AGENT_FOR_RESPONDER,
+} from '../../../../../common/translations';
 import type { HttpFetchOptionsWithPath } from '@kbn/core-http-browser';
 import { endpointActionResponseCodes } from '../../lib/endpoint_action_response_codes';
 
@@ -57,6 +60,7 @@ describe('When using get-file action from response actions console', () => {
               consoleProps: {
                 'data-test-subj': 'test',
                 commands: getEndpointConsoleCommands({
+                  agentType: 'endpoint',
                   endpointAgentId: 'a.b.c',
                   endpointCapabilities: [...capabilities],
                   endpointPrivileges,
@@ -81,7 +85,7 @@ describe('When using get-file action from response actions console', () => {
     enterConsoleCommand(renderResult, 'get-file --path="one/two"');
 
     expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-      'The current version of the Agent does not support this feature. Upgrade your Agent through Fleet to use this feature and new response actions such as killing and suspending processes.'
+      UPGRADE_AGENT_FOR_RESPONDER('endpoint', 'get-file')
     );
   });
 

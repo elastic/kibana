@@ -326,10 +326,12 @@ export class SecurityPageObject extends FtrService {
           await alert.accept();
         }
 
-        await this.retry.waitFor('URL redirects to finish', async () => {
+        // Timeout has been doubled here in attempt to quiet the flakiness
+        await this.retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
           const urlBefore = await this.browser.getCurrentUrl();
           await this.delay(1000);
           const urlAfter = await this.browser.getCurrentUrl();
+          this.log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
           return urlAfter === urlBefore;
         });
 
@@ -616,7 +618,11 @@ export class SecurityPageObject extends FtrService {
 
     if (roleObj.elasticsearch.indices[0].query) {
       await this.testSubjects.click('restrictDocumentsQuery0');
-      await this.monacoEditor.setCodeEditorValue(roleObj.elasticsearch.indices[0].query);
+
+      await this.monacoEditor.typeCodeEditorValue(
+        roleObj.elasticsearch.indices[0].query,
+        'kibanaCodeEditor'
+      );
     }
 
     await this.testSubjects.click('addSpacePrivilegeButton');

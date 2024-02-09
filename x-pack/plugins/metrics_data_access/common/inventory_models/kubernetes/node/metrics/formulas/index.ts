@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import { nodeCpuCapacity } from './node_cpu_capacity';
-import { nodeCpuUsed } from './node_cpu_used';
-import { nodeDiskCapacity } from './node_disk_capacity';
-import { nodeDiskUsed } from './node_disk_used';
-import { nodeMemoryCapacity } from './node_memory_capacity';
-import { nodeMemoryUsed } from './node_memory_used';
-import { nodePodCapacity } from './node_pod_capacity';
-import { nodePodUsed } from './node_pod_used';
+import { nodeCpuCapacity, nodeCpuUsed } from './cpu';
+import { nodeDiskCapacity, nodeDiskUsed } from './disk';
+import { nodeMemoryCapacity, nodeMemoryUsed } from './memory';
+import { nodePodCapacity, nodePodUsed } from './pod_capacity';
 
 export const formulas = {
   nodeCpuCapacity,

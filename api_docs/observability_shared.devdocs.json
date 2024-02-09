@@ -522,7 +522,7 @@
         "label": "FeatureFeedbackButton",
         "description": [],
         "signature": [
-          "({ formUrl, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, surveyButtonText, }: FeatureFeedbackButtonProps) => JSX.Element"
+          "({ formUrl, formConfig, \"data-test-subj\": dts, onClickCapture, defaultButton, kibanaVersion, isCloudEnv, isServerlessEnv, sanitizedPath, surveyButtonText, }: FeatureFeedbackButtonProps) => JSX.Element"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
         "deprecated": false,
@@ -533,12 +533,82 @@
             "id": "def-public.FeatureFeedbackButton.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  formUrl,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  surveyButtonText = (\n    <FormattedMessage\n      id=\"xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink\"\n      defaultMessage=\"Tell us what you think!\"\n    />\n  ),\n}",
+            "label": "{\n  formUrl,\n  formConfig,\n  'data-test-subj': dts,\n  onClickCapture,\n  defaultButton,\n  kibanaVersion,\n  isCloudEnv,\n  isServerlessEnv,\n  sanitizedPath,\n  surveyButtonText = (\n    <FormattedMessage\n      id=\"xpack.observabilityShared.featureFeedbackButton.tellUsWhatYouThinkLink\"\n      defaultMessage=\"Tell us what you think!\"\n    />\n  ),\n}",
             "description": [],
             "signature": [
               "FeatureFeedbackButtonProps"
             ],
             "path": "x-pack/plugins/observability_shared/public/components/feature_feedback_button/feature_feedback_button.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSelection",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSelection",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSelectionProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSelection.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSelectionProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.FieldValueSuggestions",
+        "type": "Function",
+        "tags": [],
+        "label": "FieldValueSuggestions",
+        "description": [],
+        "signature": [
+          "(props: ",
+          "FieldValueSuggestionsProps",
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.FieldValueSuggestions.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "FieldValueSuggestionsProps"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1229,6 +1299,53 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.TagsList",
+        "type": "Function",
+        "tags": [],
+        "label": "TagsList",
+        "description": [],
+        "signature": [
+          "(props: ",
+          {
+            "pluginId": "observabilityShared",
+            "scope": "public",
+            "docId": "kibObservabilitySharedPluginApi",
+            "section": "def-public.TagsListProps",
+            "text": "TagsListProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list_lazy.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityShared",
+                "scope": "public",
+                "docId": "kibObservabilitySharedPluginApi",
+                "section": "def-public.TagsListProps",
+                "text": "TagsListProps"
+              }
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list_lazy.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.TechnicalPreviewBadge",
         "type": "Function",
         "tags": [],
@@ -1276,7 +1393,15 @@
             "section": "def-common.ChromeBreadcrumb",
             "text": "ChromeBreadcrumb"
           },
-          "[], app?: { id: string; label: string; } | undefined) => void"
+          "[], app?: { id: string; label: string; } | undefined, breadcrumbsAppendExtension?: ",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumbsAppendExtension",
+            "text": "ChromeBreadcrumbsAppendExtension"
+          },
+          " | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
         "deprecated": false,
@@ -1338,6 +1463,28 @@
                 "trackAdoption": false
               }
             ]
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useBreadcrumbs.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "breadcrumbsAppendExtension",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumbsAppendExtension",
+                "text": "ChromeBreadcrumbsAppendExtension"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2006,6 +2153,43 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-public.useValuesList",
+        "type": "Function",
+        "tags": [],
+        "label": "useValuesList",
+        "description": [],
+        "signature": [
+          "({ sourceField, dataViewTitle, query, filters, time, label, keepHistory, cardinalityField, }: ",
+          "Props",
+          ") => { values: ",
+          "ListItem",
+          "[]; loading?: boolean | undefined; }"
+        ],
+        "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.useValuesList.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  sourceField,\n  dataViewTitle,\n  query = '',\n  filters,\n  time,\n  label,\n  keepHistory,\n  cardinalityField,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/hooks/use_values_list.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -2662,6 +2846,108 @@
       },
       {
         "parentPluginId": "observabilityShared",
+        "id": "def-public.TagsListProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TagsListProps",
+        "description": [],
+        "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.onClick",
+            "type": "Function",
+            "tags": [],
+            "label": "onClick",
+            "description": [],
+            "signature": [
+              "((tag: string) => void) | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "observabilityShared",
+                "id": "def-public.TagsListProps.onClick.$1",
+                "type": "string",
+                "tags": [],
+                "label": "tag",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.tags",
+            "type": "Array",
+            "tags": [],
+            "label": "tags",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.numberOfTagsToDisplay",
+            "type": "number",
+            "tags": [],
+            "label": "numberOfTagsToDisplay",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.color",
+            "type": "string",
+            "tags": [],
+            "label": "color",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityShared",
+            "id": "def-public.TagsListProps.ignoreEmpty",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignoreEmpty",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/observability_shared/public/components/tags_list/tags_list.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
         "id": "def-public.UXMetrics",
         "type": "Interface",
         "tags": [],
@@ -2986,7 +3272,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; }"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3055,7 +3341,7 @@
           "EuiPageSectionProps",
           " | undefined; bottomBar?: React.ReactNode; bottomBarProps?: ",
           "_EuiPageBottomBarProps",
-          " | undefined; }"
+          " | undefined; topSearchBar?: React.ReactNode; }"
         ],
         "path": "x-pack/plugins/observability_shared/public/components/page_template/page_template.tsx",
         "deprecated": false,
@@ -3964,10 +4250,10 @@
       },
       {
         "parentPluginId": "observabilityShared",
-        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "id": "def-common.LOGS_EXPLORER_FEEDBACK_LINK",
         "type": "string",
         "tags": [],
-        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "label": "LOGS_EXPLORER_FEEDBACK_LINK",
         "description": [],
         "signature": [
           "\"https://ela.st/explorer-feedback\""

@@ -26,6 +26,7 @@ import {
   type Accessor,
   type Dictionary,
   type SetUrlState,
+  UrlStateProvider,
 } from '@kbn/ml-url-state';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getCoreStart, getPluginsStart } from '../../kibana_services';
@@ -33,6 +34,8 @@ import {
   type IndexDataVisualizerViewProps,
   IndexDataVisualizerView,
 } from './components/index_data_visualizer_view';
+import { IndexDataVisualizerESQL } from './components/index_data_visualizer_view/index_data_visualizer_esql';
+
 import { useDataVisualizerKibana } from '../kibana_context';
 import type { GetAdditionalLinks } from '../common/components/results_links';
 import { DATA_VISUALIZER_APP_LOCATOR, type IndexDataVisualizerLocatorParams } from './locator';
@@ -80,7 +83,15 @@ export const getLocatorParams = (params: {
   return locatorParams;
 };
 
-export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
+const DataVisualizerESQLStateContextProvider = () => {
+  return (
+    <UrlStateProvider>
+      <IndexDataVisualizerESQL />
+    </UrlStateProvider>
+  );
+};
+
+const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextProviderProps> = ({
   IndexDataVisualizerComponent,
   getAdditionalLinks,
 }) => {
@@ -256,9 +267,7 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
           currentSessionId={currentSessionId}
           getAdditionalLinks={getAdditionalLinks}
         />
-      ) : (
-        <div />
-      )}
+      ) : null}
     </UrlStateContextProvider>
   );
 };
@@ -266,11 +275,13 @@ export const DataVisualizerStateContextProvider: FC<DataVisualizerStateContextPr
 interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   showFrozenDataTierChoice?: boolean;
+  esql?: boolean;
 }
 
 export const IndexDataVisualizer: FC<Props> = ({
   getAdditionalLinks,
   showFrozenDataTierChoice = true,
+  esql,
 }) => {
   const coreStart = getCoreStart();
   const {
@@ -320,10 +331,14 @@ export const IndexDataVisualizer: FC<Props> = ({
       <KibanaContextProvider services={{ ...services }}>
         <StorageContextProvider storage={localStorage} storageKeys={DV_STORAGE_KEYS}>
           <DatePickerContextProvider {...datePickerDeps}>
-            <DataVisualizerStateContextProvider
-              IndexDataVisualizerComponent={IndexDataVisualizerView}
-              getAdditionalLinks={getAdditionalLinks}
-            />
+            {!esql ? (
+              <DataVisualizerStateContextProvider
+                IndexDataVisualizerComponent={IndexDataVisualizerView}
+                getAdditionalLinks={getAdditionalLinks}
+              />
+            ) : (
+              <DataVisualizerESQLStateContextProvider />
+            )}
           </DatePickerContextProvider>
         </StorageContextProvider>
       </KibanaContextProvider>

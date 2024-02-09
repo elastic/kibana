@@ -10,8 +10,17 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { AggregateQuery, compareFilters, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { PhaseEvent, PhaseEventType } from '@kbn/presentation-publishing';
 import deepEqual from 'fast-deep-equal';
-import { BehaviorSubject, Subscription } from 'rxjs';
+import { isNil } from 'lodash';
+import {
+  BehaviorSubject,
+  map,
+  Subscription,
+  distinct,
+  combineLatest,
+  distinctUntilChanged,
+} from 'rxjs';
 import { embeddableStart } from '../../../kibana_services';
 import { isFilterableEmbeddable } from '../../filterable_embeddable';
 import {
@@ -29,7 +38,7 @@ import {
 import { canLinkLegacyEmbeddable, linkLegacyEmbeddable } from './link_legacy_embeddable';
 import { canUnlinkLegacyEmbeddable, unlinkLegacyEmbeddable } from './unlink_legacy_embeddable';
 
-export type CommonLegacyInput = EmbeddableInput & { timeRange: TimeRange };
+export type CommonLegacyInput = EmbeddableInput & { savedObjectId?: string; timeRange: TimeRange };
 export type CommonLegacyOutput = EmbeddableOutput & { indexPatterns: DataView[] };
 export type CommonLegacyEmbeddable = IEmbeddable<CommonLegacyInput, CommonLegacyOutput>;
 
@@ -39,6 +48,18 @@ function isVisualizeEmbeddable(
 ): embeddable is VisualizeEmbeddable {
   return embeddable.type === 'visualization';
 }
+
+const getEventStatus = (output: EmbeddableOutput): PhaseEventType => {
+  if (!isNil(output.error)) {
+    return 'error';
+  } else if (output.rendered === true) {
+    return 'rendered';
+  } else if (output.loading === false) {
+    return 'loaded';
+  } else {
+    return 'loading';
+  }
+};
 
 export const legacyEmbeddableToApi = (
   embeddable: CommonLegacyEmbeddable
@@ -67,6 +88,42 @@ export const legacyEmbeddableToApi = (
   const isEditingEnabled = () => canEditEmbeddable(embeddable);
 
   /**
+   * Performance tracking
+   */
+  const onPhaseChange = new BehaviorSubject<PhaseEvent | undefined>(undefined);
+
+  let loadingStartTime = 0;
+  subscriptions.add(
+    embeddable
+      .getOutput$()
+      .pipe(
+        // Map loaded event properties
+        map((output) => {
+          if (output.loading === true) {
+            loadingStartTime = performance.now();
+          }
+          return {
+            id: embeddable.id,
+            status: getEventStatus(output),
+            error: output.error,
+          };
+        }),
+        // Dedupe
+        distinct((output) => loadingStartTime + output.id + output.status + !!output.error),
+        // Map loaded event properties
+        map((output): PhaseEvent => {
+          return {
+            ...output,
+            timeToEvent: performance.now() - loadingStartTime,
+          };
+        })
+      )
+      .subscribe((statusOutput) => {
+        onPhaseChange.next(statusOutput);
+      })
+  );
+
+  /**
    * Publish state for Presentation panel
    */
   const viewMode = viewModeToSubject(subscriptions, embeddable);
@@ -85,6 +142,25 @@ export const legacyEmbeddableToApi = (
   const defaultPanelTitle = outputKeyToSubject<string>('defaultTitle');
   const disabledActionIds = inputKeyToSubject<string[] | undefined>('disabledActions');
 
+  function getSavedObjectId(input: { savedObjectId?: string }, output: { savedObjectId?: string }) {
+    return output.savedObjectId ?? input.savedObjectId;
+  }
+  const savedObjectId = new BehaviorSubject<string | undefined>(
+    getSavedObjectId(embeddable.getInput(), embeddable.getOutput())
+  );
+  subscriptions.add(
+    combineLatest([embeddable.getInput$(), embeddable.getOutput$()])
+      .pipe(
+        map(([input, output]) => {
+          return getSavedObjectId(input, output);
+        }),
+        distinctUntilChanged()
+      )
+      .subscribe((nextSavedObjectId) => {
+        savedObjectId.next(nextSavedObjectId);
+      })
+  );
+
   const blockingError = new BehaviorSubject<ErrorLike | undefined>(undefined);
   subscriptions.add(
     embeddable.getOutput$().subscribe({
@@ -95,6 +171,7 @@ export const legacyEmbeddableToApi = (
 
   const uuid = embeddable.id;
   const parentApi = embeddable.parent;
+  const disableTriggers = embeddable.getInput().disableTriggers;
 
   /**
    * We treat all legacy embeddable types as if they can support local unified search state, because there is no programmatic way
@@ -151,9 +228,12 @@ export const legacyEmbeddableToApi = (
     api: {
       parentApi: parentApi as LegacyEmbeddableAPI['parentApi'],
       uuid,
+      disableTriggers: disableTriggers ?? false,
       viewMode,
       dataLoading,
       blockingError,
+
+      onPhaseChange,
 
       onEdit,
       isEditingEnabled,
@@ -184,6 +264,8 @@ export const legacyEmbeddableToApi = (
 
       canUnlinkFromLibrary: () => canUnlinkLegacyEmbeddable(embeddable),
       unlinkFromLibrary: () => unlinkLegacyEmbeddable(embeddable),
+
+      savedObjectId,
     },
     destroyAPI: () => {
       subscriptions.unsubscribe();

@@ -182,10 +182,10 @@ export const vulnerabilitiesLatestMock = [
       },
     },
     cloud: {
-      provider: 'aws',
+      provider: 'gcp',
       region: 'eu-west-1',
       account: {
-        name: 'elastic-security-cloud-security-dev',
+        name: 'elastic-security-cloud-security-gcp',
         id: '704479110758',
       },
     },

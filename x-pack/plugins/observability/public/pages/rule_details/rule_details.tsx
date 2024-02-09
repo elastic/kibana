@@ -103,7 +103,7 @@ export function RuleDetailsPage() {
 
     return urlTabId && [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB].includes(urlTabId)
       ? (urlTabId as TabId)
-      : RULE_DETAILS_EXECUTION_TAB;
+      : RULE_DETAILS_ALERTS_TAB;
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();

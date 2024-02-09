@@ -7,6 +7,10 @@
  */
 
 export interface EmbeddableApiContext {
+  /**
+   * TODO: once all actions are entirely decoupled from the embeddable system, this key should be renamed to "api"
+   * to reflect the fact that this context could contain any api.
+   */
   embeddable: unknown;
 }
 
@@ -18,11 +22,11 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export {
-  apiFiresPhaseEvents,
-  type FiresPhaseEvents,
+  apiPublishesPhaseEvents,
+  type PublishesPhaseEvents,
   type PhaseEvent,
   type PhaseEventType,
-} from './interfaces/fires_phase_events';
+} from './interfaces/publishes_phase_events';
 export { hasEditCapabilities, type HasEditCapabilities } from './interfaces/has_edit_capabilities';
 export { apiHasParentApi, type HasParentApi } from './interfaces/has_parent_api';
 export {
@@ -84,6 +88,7 @@ export {
   type PublishesSavedObjectId,
 } from './interfaces/publishes_saved_object_id';
 export { apiHasUniqueId, type HasUniqueId } from './interfaces/has_uuid';
+export { apiHasDisableTriggers, type HasDisableTriggers } from './interfaces/has_disable_triggers';
 export {
   apiPublishesViewMode,
   apiPublishesWritableViewMode,
@@ -92,6 +97,11 @@ export {
   type PublishesWritableViewMode,
   type ViewMode,
 } from './interfaces/publishes_view_mode';
+export {
+  type PublishesUnsavedChanges,
+  apiPublishesUnsavedChanges,
+  useUnsavedChanges,
+} from './interfaces/publishes_unsaved_changes';
 export {
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,

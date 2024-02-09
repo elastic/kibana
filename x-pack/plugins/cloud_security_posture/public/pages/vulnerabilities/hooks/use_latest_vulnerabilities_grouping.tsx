@@ -16,7 +16,10 @@ import {
 import { useMemo } from 'react';
 import { LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY } from '../../../common/constants';
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
-import { LATEST_VULNERABILITIES_RETENTION_POLICY } from '../../../../common/constants';
+import {
+  LATEST_VULNERABILITIES_RETENTION_POLICY,
+  VULNERABILITIES_SEVERITY,
+} from '../../../../common/constants';
 import {
   VulnerabilitiesGroupingAggregation,
   VulnerabilitiesRootGroupingAggregation,
@@ -48,12 +51,45 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
           field,
         },
       },
+      critical: {
+        filter: {
+          term: {
+            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.CRITICAL },
+          },
+        },
+      },
+      high: {
+        filter: {
+          term: {
+            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.HIGH },
+          },
+        },
+      },
+      medium: {
+        filter: {
+          term: {
+            'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.MEDIUM },
+          },
+        },
+      },
+      low: {
+        filter: {
+          term: { 'vulnerability.severity': { value: VULNERABILITIES_SEVERITY.LOW } },
+        },
+      },
     },
   ];
 
   switch (field) {
     case GROUPING_OPTIONS.RESOURCE_NAME:
       return [...aggMetrics, getTermAggregation('resourceId', VULNERABILITY_FIELDS.RESOURCE_ID)];
+    case GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+      return [
+        ...aggMetrics,
+        getTermAggregation('cloudProvider', VULNERABILITY_FIELDS.CLOUD_PROVIDER),
+      ];
+    case GROUPING_OPTIONS.CVE:
+      return [...aggMetrics, getTermAggregation('description', VULNERABILITY_FIELDS.DESCRIPTION)];
   }
   return aggMetrics;
 };
@@ -103,6 +139,7 @@ export const useLatestVulnerabilitiesGrouping = ({
     groupPanelRenderer,
     groupStatsRenderer,
     groupingLocalStorageKey: LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY,
+    maxGroupingLevels: 1,
   });
 
   const groupingQuery = getGroupingQuery({

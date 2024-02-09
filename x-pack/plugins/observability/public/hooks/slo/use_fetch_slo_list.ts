@@ -10,6 +10,7 @@ import { FindSLOResponse } from '@kbn/slo-schema';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import { buildQueryFromFilters, Filter } from '@kbn/es-query';
+import { SearchState } from '../../pages/slos/hooks/use_url_search_state';
 import { useCreateDataView } from '../use_create_data_view';
 import {
   DEFAULT_SLO_PAGE_SIZE,
@@ -19,7 +20,7 @@ import {
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-interface SLOListParams {
+export interface SLOListParams {
   kqlQuery?: string;
   page?: number;
   sortBy?: string;
@@ -27,6 +28,9 @@ interface SLOListParams {
   perPage?: number;
   filters?: Filter[];
   lastRefresh?: number;
+  tagsFilter?: SearchState['tagsFilter'];
+  statusFilter?: SearchState['statusFilter'];
+  disabled?: boolean;
 }
 
 export interface UseFetchSloListResponse {
@@ -46,6 +50,9 @@ export function useFetchSloList({
   perPage = DEFAULT_SLO_PAGE_SIZE,
   filters: filterDSL = [],
   lastRefresh,
+  tagsFilter,
+  statusFilter,
+  disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -60,14 +67,22 @@ export function useFetchSloList({
   const filters = useMemo(() => {
     try {
       return JSON.stringify(
-        buildQueryFromFilters(filterDSL, dataView, {
-          ignoreFilterIfFieldNotInIndex: true,
-        })
+        buildQueryFromFilters(
+          [
+            ...filterDSL,
+            ...(statusFilter ? [statusFilter] : []),
+            ...(tagsFilter ? [tagsFilter] : []),
+          ],
+          dataView,
+          {
+            ignoreFilterIfFieldNotInIndex: true,
+          }
+        )
       );
     } catch (e) {
       return '';
     }
-  }, [filterDSL, dataView]);
+  }, [filterDSL, dataView, tagsFilter, statusFilter]);
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
     queryKey: sloKeys.list({
@@ -85,13 +100,14 @@ export function useFetchSloList({
           ...(kqlQuery && { kqlQuery }),
           ...(sortBy && { sortBy }),
           ...(sortDirection && { sortDirection }),
-          ...(page && { page }),
-          ...(perPage && { perPage }),
+          ...(page !== undefined && { page }),
+          ...(perPage !== undefined && { perPage }),
           ...(filters && { filters }),
         },
         signal,
       });
     },
+    enabled: !disabled,
     cacheTime: 0,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {

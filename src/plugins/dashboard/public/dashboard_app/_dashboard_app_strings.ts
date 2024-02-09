@@ -26,10 +26,6 @@ export const dashboardReadonlyBadge = {
 };
 
 export const dashboardManagedBadge = {
-  getText: () =>
-    i18n.translate('dashboard.badge.managed.text', {
-      defaultMessage: 'Managed',
-    }),
   getTooltip: () =>
     i18n.translate('dashboard.badge.managed.tooltip', {
       defaultMessage: 'This dashboard is system managed. Clone this dashboard to make changes.',

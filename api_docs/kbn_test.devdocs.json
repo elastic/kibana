@@ -2550,39 +2550,6 @@
       },
       {
         "parentPluginId": "@kbn/test",
-        "id": "def-common.readRolesFromResource",
-        "type": "Function",
-        "tags": [],
-        "label": "readRolesFromResource",
-        "description": [],
-        "signature": [
-          "(resourcePath: string) => string[]"
-        ],
-        "path": "packages/kbn-test/src/auth/helper.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/test",
-            "id": "def-common.readRolesFromResource.$1",
-            "type": "string",
-            "tags": [],
-            "label": "resourcePath",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "packages/kbn-test/src/auth/helper.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/test",
         "id": "def-common.runCheckFtrCodeOwnersCli",
         "type": "Function",
         "tags": [],
@@ -3336,7 +3303,7 @@
             "signature": [
               "Pick<",
               "ServerlessOptions",
-              ", \"image\" | \"host\" | \"tag\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
+              ", \"host\" | \"tag\" | \"image\" | \"resources\" | \"kibanaUrl\" | \"projectType\"> | undefined"
             ],
             "path": "packages/kbn-test/src/es/test_es_cluster.ts",
             "deprecated": false,

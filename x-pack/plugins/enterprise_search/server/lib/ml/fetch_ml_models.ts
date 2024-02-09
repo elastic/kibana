@@ -6,8 +6,11 @@
  */
 
 import { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+
 import { i18n } from '@kbn/i18n';
 import { MlTrainedModels } from '@kbn/ml-plugin/server';
+
+import { getMlModelTypesForModelConfig } from '../../../common/ml_inference_pipeline';
 
 import { MlModelDeploymentState, MlModel } from '../../../common/types/ml';
 
@@ -109,39 +112,39 @@ export const fetchCompatiblePromotedModelIds = async (trainedModelsProvider: MlT
 };
 
 const getModel = (modelConfig: MlTrainedModelConfig, modelStats?: MlTrainedModelStats): MlModel => {
-  {
-    const modelId = modelConfig.model_id;
-    const type = modelConfig.inference_config ? Object.keys(modelConfig.inference_config)[0] : '';
-    const model = {
-      ...BASE_MODEL,
-      modelId,
-      type,
-      title: getUserFriendlyTitle(modelId, type),
-      isPromoted: [
-        ELSER_MODEL_ID,
-        ELSER_LINUX_OPTIMIZED_MODEL_ID,
-        E5_MODEL_ID,
-        E5_LINUX_OPTIMIZED_MODEL_ID,
-      ].includes(modelId),
-    };
+  const modelId = modelConfig.model_id;
+  const type = modelConfig.inference_config ? Object.keys(modelConfig.inference_config)[0] : '';
+  const model = {
+    ...BASE_MODEL,
+    modelId,
+    type,
+    title: getUserFriendlyTitle(modelId, type),
+    description: modelConfig.description,
+    types: getMlModelTypesForModelConfig(modelConfig),
+    inputFieldNames: modelConfig.input.field_names,
+    version: modelConfig.version,
+    isPromoted: [
+      ELSER_MODEL_ID,
+      ELSER_LINUX_OPTIMIZED_MODEL_ID,
+      E5_MODEL_ID,
+      E5_LINUX_OPTIMIZED_MODEL_ID,
+    ].includes(modelId),
+  };
 
-    // Enrich deployment stats
-    if (modelStats && modelStats.deployment_stats) {
-      model.hasStats = true;
-      model.deploymentState = getDeploymentState(
-        modelStats.deployment_stats.allocation_status.state
-      );
-      model.nodeAllocationCount = modelStats.deployment_stats.allocation_status.allocation_count;
-      model.targetAllocationCount =
-        modelStats.deployment_stats.allocation_status.target_allocation_count;
-      model.threadsPerAllocation = modelStats.deployment_stats.threads_per_allocation;
-      model.startTime = modelStats.deployment_stats.start_time;
-    } else if (model.modelId === LANG_IDENT_MODEL_ID) {
-      model.deploymentState = MlModelDeploymentState.FullyAllocated;
-    }
-
-    return model;
+  // Enrich deployment stats
+  if (modelStats && modelStats.deployment_stats) {
+    model.hasStats = true;
+    model.deploymentState = getDeploymentState(modelStats.deployment_stats.allocation_status.state);
+    model.nodeAllocationCount = modelStats.deployment_stats.allocation_status.allocation_count;
+    model.targetAllocationCount =
+      modelStats.deployment_stats.allocation_status.target_allocation_count;
+    model.threadsPerAllocation = modelStats.deployment_stats.threads_per_allocation;
+    model.startTime = modelStats.deployment_stats.start_time;
+  } else if (model.modelId === LANG_IDENT_MODEL_ID) {
+    model.deploymentState = MlModelDeploymentState.FullyAllocated;
   }
+
+  return model;
 };
 
 const enrichModelWithDownloadStatus = async (

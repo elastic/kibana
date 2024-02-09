@@ -9262,7 +9262,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; schema?: string | undefined; enabled?: boolean | undefined; }"
+          " | undefined; enabled?: boolean | undefined; schema?: string | undefined; }"
         ],
         "path": "src/plugins/data/common/search/aggs/agg_config.ts",
         "deprecated": false,
@@ -10695,7 +10695,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/public/index.ts",
             "deprecated": false,
@@ -12215,10 +12215,6 @@
             {
               "plugin": "graph",
               "path": "x-pack/plugins/graph/public/plugin.ts"
-            },
-            {
-              "plugin": "infra",
-              "path": "x-pack/plugins/infra/public/hooks/use_kibana_index_patterns.ts"
             },
             {
               "plugin": "inputControlVis",
@@ -17343,6 +17339,20 @@
             "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-server.FieldDescriptor.defaultFormatter",
+            "type": "string",
+            "tags": [],
+            "label": "defaultFormatter",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/data_views/server/fetcher/index_patterns_fetcher.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -17731,7 +17741,7 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
+              ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
             ],
             "path": "src/plugins/data/server/index.ts",
             "deprecated": false,
@@ -20024,7 +20034,7 @@
                 "section": "def-common.SerializableRecord",
                 "text": "SerializableRecord"
               },
-              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+              "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -20034,7 +20044,7 @@
               },
               " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
               "MappingTimeSeriesMetricType",
-              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+              " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -20105,6 +20115,20 @@
             "label": "count",
             "description": [
               "\nSet count, which is used for field popularity in discover."
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.DataViewField.defaultFormatter",
+            "type": "string",
+            "tags": [],
+            "label": "defaultFormatter",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -20562,6 +20586,19 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.DataViewField.isNull",
+            "type": "boolean",
+            "tags": [],
+            "label": "isNull",
+            "description": [
+              "\nReturns true if field is Empty"
+            ],
+            "path": "src/plugins/data_views/common/fields/data_view_field.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.DataViewField.isSubtypeNested",
             "type": "Function",
             "tags": [],
@@ -20684,7 +20721,7 @@
                 "section": "def-common.IFieldSubType",
                 "text": "IFieldSubType"
               },
-              " | undefined; customLabel: string | undefined; }"
+              " | undefined; customLabel: string | undefined; defaultFormatter: string | undefined; }"
             ],
             "path": "src/plugins/data_views/common/fields/data_view_field.ts",
             "deprecated": false,
@@ -22614,7 +22651,7 @@
             "section": "def-common.Datatable",
             "text": "Datatable"
           },
-          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }: CSVOptions) => string"
+          ", { csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }: CSVOptions) => string"
         ],
         "path": "src/plugins/data/common/exports/export_csv.tsx",
         "deprecated": false,
@@ -22646,7 +22683,7 @@
             "id": "def-common.datatableToCSV.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues }",
+            "label": "{ csvSeparator, quoteValues, formatFactory, raw, escapeFormulaValues, columnsSorting }",
             "description": [],
             "signature": [
               "CSVOptions"
@@ -25155,7 +25192,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
+          "> | undefined; esTypes?: string[] | undefined; searchable: boolean; aggregatable: boolean; isNull?: boolean | undefined; readFromDocValues?: boolean | undefined; indexed?: boolean | undefined; customLabel?: string | undefined; runtimeField?: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -25165,7 +25202,7 @@
           },
           " | undefined; fixedInterval?: string[] | undefined; timeZone?: string[] | undefined; timeSeriesDimension?: boolean | undefined; timeSeriesMetric?: ",
           "MappingTimeSeriesMetricType",
-          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; }"
+          " | undefined; shortDotsEnable?: boolean | undefined; isMapped?: boolean | undefined; parentName?: string | undefined; defaultFormatter?: string | undefined; }"
         ],
         "path": "src/plugins/data_views/common/types.ts",
         "deprecated": false,

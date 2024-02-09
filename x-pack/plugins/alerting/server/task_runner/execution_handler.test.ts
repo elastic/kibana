@@ -161,6 +161,7 @@ const generateAlert = ({
   lastScheduledActionsGroup = 'default',
   maintenanceWindowIds,
   pendingRecoveredCount,
+  activeCount,
 }: {
   id: number;
   group?: ActiveActionGroup | 'recovered';
@@ -171,6 +172,7 @@ const generateAlert = ({
   lastScheduledActionsGroup?: string;
   maintenanceWindowIds?: string[];
   pendingRecoveredCount?: number;
+  activeCount?: number;
 }) => {
   const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default' | 'other-group'>(
     String(id),
@@ -184,6 +186,7 @@ const generateAlert = ({
           actions: throttledActions,
         },
         pendingRecoveredCount,
+        activeCount,
       },
     }
   );

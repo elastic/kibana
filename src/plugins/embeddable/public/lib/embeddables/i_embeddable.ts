@@ -12,6 +12,7 @@ import { DefaultPresentationPanelApi } from '@kbn/presentation-panel-plugin/publ
 import {
   HasEditCapabilities,
   HasType,
+  HasDisableTriggers,
   PublishesBlockingError,
   PublishesDataLoading,
   PublishesDataViews,
@@ -22,6 +23,8 @@ import {
   PublishesViewMode,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
+  PublishesPhaseEvents,
+  PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { Observable } from 'rxjs';
 import { EmbeddableInput } from '../../../common/types';
@@ -38,6 +41,8 @@ export type { EmbeddableInput };
  */
 export type LegacyEmbeddableAPI = HasType &
   HasUniqueId &
+  HasDisableTriggers &
+  PublishesPhaseEvents &
   PublishesViewMode &
   PublishesDataViews &
   HasEditCapabilities &
@@ -50,7 +55,8 @@ export type LegacyEmbeddableAPI = HasType &
   PublishesWritablePanelDescription &
   Partial<CanLinkToLibrary & CanUnlinkFromLibrary> &
   HasParentApi<DefaultPresentationPanelApi['parentApi']> &
-  EmbeddableHasTimeRange;
+  EmbeddableHasTimeRange &
+  PublishesSavedObjectId;
 
 export interface EmbeddableAppContext {
   /**

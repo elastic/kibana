@@ -12,7 +12,7 @@ export type DatasourceMock = jest.Mocked<Datasource> & {
 };
 
 export function createMockDatasource(
-  id: string,
+  id = 'testDatasource',
   customPublicApi: Partial<DatasourcePublicAPI> = {}
 ): DatasourceMock {
   const publicAPIMock = {
@@ -78,7 +78,7 @@ export function createMockDatasource(
 }
 
 export function mockDatasourceMap() {
-  const datasource = createMockDatasource('testDatasource');
+  const datasource = createMockDatasource();
   datasource.getDatasourceSuggestionsFromCurrentState.mockReturnValue([
     {
       state: {},

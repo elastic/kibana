@@ -142,6 +142,27 @@ export function collectVariables(
           });
         }
       }
+      if (command.name === 'stats') {
+        const commandOptionsWithAssignment = command.args.filter(
+          (arg) => isOptionItem(arg) && arg.name === 'by'
+        ) as ESQLCommandOption[];
+        for (const commandOption of commandOptionsWithAssignment) {
+          const optionAssignOperations = commandOption.args.filter(isAssignment);
+          for (const assignOperation of optionAssignOperations) {
+            if (isColumnItem(assignOperation.args[0])) {
+              const rightHandSideArgType = getAssignRightHandSideType(
+                assignOperation.args[1],
+                fields
+              );
+              addToVariableOccurrencies(variables, {
+                name: assignOperation.args[0].name,
+                type: rightHandSideArgType || 'number' /* fallback to number */,
+                location: assignOperation.args[0].location,
+              });
+            }
+          }
+        }
+      }
     }
     if (command.name === 'enrich') {
       const commandOptionsWithAssignment = command.args.filter(

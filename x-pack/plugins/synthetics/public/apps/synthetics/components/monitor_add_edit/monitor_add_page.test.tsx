@@ -6,11 +6,8 @@
  */
 
 import React from 'react';
-import { mockGlobals } from '../../utils/testing';
 import { render } from '../../utils/testing/rtl_helpers';
 import { MonitorAddPage } from './monitor_add_page';
-
-mockGlobals();
 
 describe('MonitorAddPage', () => {
   it('renders correctly', async () => {

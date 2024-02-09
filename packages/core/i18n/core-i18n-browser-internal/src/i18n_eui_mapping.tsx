@@ -523,6 +523,14 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: '{columnId}, column {col}, row {row}',
         values: { columnId, row, col },
       }),
+    'euiDataGridCell.expansionEnterPrompt': i18n.translate(
+      'core.euiDataGridCell.expansionEnterPrompt',
+      { defaultMessage: 'Press the Enter key to expand this cell.' }
+    ),
+    'euiDataGridCell.focusTrapEnterPrompt': i18n.translate(
+      'core.euiDataGridCell.focusTrapEnterPrompt',
+      { defaultMessage: "Press the Enter key to interact with this cell's contents." }
+    ),
     'euiDataGridCellActions.expandButtonTitle': i18n.translate(
       'core.euiDataGridCellActions.expandButtonTitle',
       {
@@ -1702,13 +1710,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Notification',
       description: 'ARIA label on an element containing a notification',
     }),
-    'euiTourStep.endTour': i18n.translate('core.euiTourStep.endTour', {
+    'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
-    'euiTourStep.skipTour': i18n.translate('core.euiTourStep.skipTour', {
+    'euiTourFooter.skipTour': i18n.translate('core.euiTourFooter.skipTour', {
       defaultMessage: 'Skip tour',
     }),
-    'euiTourStep.closeTour': i18n.translate('core.euiTourStep.closeTour', {
+    'euiTourFooter.closeTour': i18n.translate('core.euiTourFooter.closeTour', {
       defaultMessage: 'Close tour',
     }),
     'euiTourStepIndicator.isActive': i18n.translate('core.euiTourStepIndicator.isActive', {
