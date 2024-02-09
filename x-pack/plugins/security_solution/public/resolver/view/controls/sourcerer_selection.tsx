@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import { EuiPopover } from '@elastic/eui';
 import { StyledEuiButtonIcon } from './styles';
 import { useColors } from '../use_colors';
 import { Sourcerer } from '../../../common/components/sourcerer';
@@ -55,11 +55,6 @@ export const SourcererButton = ({
       closePopover={closePopover}
       anchorPosition="leftCenter"
     >
-      <EuiPopoverTitle style={{ textTransform: 'uppercase' }}>
-        {i18n.translate('xpack.securitySolution.resolver.graphControls.sourcererSelection', {
-          defaultMessage: 'Data View Selection',
-        })}
-      </EuiPopoverTitle>
       <Sourcerer scope={SourcererScopeName.analyzer} />
     </EuiPopover>
   );

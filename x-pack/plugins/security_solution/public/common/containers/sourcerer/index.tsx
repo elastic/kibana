@@ -187,7 +187,6 @@ export const useInitSourcerer = (
   // Related to timeline
   useEffect(() => {
     if (
-      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       !loadingSignalIndex &&
       signalIndexName != null &&
       signalIndexNameSourcerer == null &&
@@ -221,7 +220,6 @@ export const useInitSourcerer = (
         })
       );
     } else if (
-      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       signalIndexNameSourcerer != null &&
       (activeTimeline == null || activeTimeline.savedObjectId == null) &&
       initialTimelineSourcerer.current &&
@@ -339,7 +337,6 @@ export const useInitSourcerer = (
   // Related to the detection page
   useEffect(() => {
     if (
-      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       scopeId === SourcererScopeName.detections &&
       isSignalIndexExists &&
       signalIndexName != null &&
@@ -360,7 +357,6 @@ export const useInitSourcerer = (
         })
       );
     } else if (
-      // TODO: fix this https://github.com/elastic/kibana/blob/main/STYLEGUIDE.mdx#L417
       scopeId === SourcererScopeName.detections &&
       signalIndexNameSourcerer != null &&
       initialTimelineSourcerer.current &&

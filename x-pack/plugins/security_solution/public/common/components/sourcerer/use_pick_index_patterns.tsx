@@ -65,7 +65,6 @@ export const usePickIndexPatterns = ({
   const {
     data: { dataViews },
   } = useKibana().services;
-  // TODO: this should not be necessary, remove
   const isHookAlive = useRef(true);
   const [loadingIndexPatterns, setLoadingIndexPatterns] = useState(false);
   const alertsOptions = useMemo(
