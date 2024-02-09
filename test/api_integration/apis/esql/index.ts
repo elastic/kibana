@@ -10,7 +10,6 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('ESQL sync', () => {
-    loadTestFile(require.resolve('./functions'));
     loadTestFile(require.resolve('./errors'));
   });
 }

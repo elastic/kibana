@@ -211,22 +211,6 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     ],
   },
   {
-    name: 'least',
-    description: i18n.translate('monaco.esql.definitions.leastDoc', {
-      defaultMessage: 'Returns the minimum value from many columns.',
-    }),
-    signatures: [
-      {
-        params: [
-          { name: 'first', type: 'number' },
-          { name: 'rest', type: 'number' },
-        ],
-        returnType: 'number',
-        examples: ['from index | eval l = least(a, b)'],
-      },
-    ],
-  },
-  {
     name: 'split',
     description: i18n.translate('monaco.esql.definitions.splitDoc', {
       defaultMessage: 'Splits a single valued string into multiple strings.',
@@ -266,20 +250,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
       {
         params: [{ name: 'field', type: 'any' }],
         returnType: 'boolean',
-        examples: [`from index | EVAL bool = to_boolean(field)`],
-      },
-    ],
-  },
-  {
-    name: 'to_cartesianpoint',
-    description: i18n.translate('monaco.esql.definitions.toCartesianPointDoc', {
-      defaultMessage: 'Converts an input value to a `point` value.',
-    }),
-    signatures: [
-      {
-        params: [{ name: 'field', type: 'any' }],
-        returnType: 'cartesian_point',
-        examples: [`from index | EVAL point = to_cartesianpoint(field)`],
+        examples: [`from index" | EVAL bool = to_boolean(field)`],
       },
     ],
   },
@@ -491,8 +462,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'field', type: 'date' },
           { name: 'format_string', type: 'string', optional: true },
+          { name: 'field', type: 'date' },
         ],
         returnType: 'string',
         examples: ['from index | eval hired = date_format("YYYY-MM-dd", hire_date)'],
@@ -712,9 +683,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'field', type: 'number' }],
+        params: [{ name: 'field', type: 'any' }],
         infiniteParams: true,
-        returnType: 'number',
+        returnType: 'any',
         examples: [`ROW a = 10, b = 20 | EVAL g = GREATEST(a, b)`],
       },
     ],
@@ -726,11 +697,9 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [
-          { name: 'first', type: 'number' },
-          { name: 'rest', type: 'number' },
-        ],
-        returnType: 'number',
+        params: [{ name: 'first', type: 'any' }],
+        infiniteParams: true,
+        returnType: 'any',
         examples: ['from index | eval l = least(a, b)'],
       },
     ],
