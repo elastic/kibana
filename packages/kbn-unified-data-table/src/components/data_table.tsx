@@ -46,7 +46,6 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import { css } from '@emotion/react';
 import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
@@ -98,12 +97,6 @@ export enum DataLoadingState {
 }
 
 const themeDefault = { darkMode: false };
-const dataGridCss = css`
-  .euiDataGridHeaderCell:not(.euiDataGridHeaderCell--controlColumn) .euiDataGridHeaderCell__button {
-    height: 100%;
-    align-items: flex-start;
-  }
-`;
 
 interface SortObj {
   id: string;
@@ -983,7 +976,6 @@ export const UnifiedDataTable = ({
             renderCustomGridBody={renderCustomGridBody}
             renderCustomToolbar={renderCustomToolbarFn}
             trailingControlColumns={trailingControlColumns}
-            css={dataGridCss}
           />
         </div>
         {loadingState !== DataLoadingState.loading &&
