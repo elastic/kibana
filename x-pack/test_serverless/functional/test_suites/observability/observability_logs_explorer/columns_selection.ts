@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('render content virtual column properly', async () => {
       it('should render log level and log message when present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 4);
+          const cellElement = await dataGrid.getCellElement(0, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
           expect(cellValue.includes('A sample log')).to.be(true);
@@ -96,7 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render log message when present and skip log level when missing', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(1, 4);
+          const cellElement = await dataGrid.getCellElement(1, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(false);
           expect(cellValue.includes('A sample log')).to.be(true);
@@ -105,7 +105,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render message from error object when top level message not present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(2, 4);
+          const cellElement = await dataGrid.getCellElement(2, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
           expect(cellValue.includes('error.message')).to.be(true);
@@ -115,7 +115,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render message from event.original when top level message and error.message not present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(3, 4);
+          const cellElement = await dataGrid.getCellElement(3, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
           expect(cellValue.includes('event.original')).to.be(true);
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the whole JSON when neither message, error.message and event.original are present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(4, 4);
+          const cellElement = await dataGrid.getCellElement(4, 3);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('info')).to.be(true);
 
@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('on cell expansion with no message field should open JSON Viewer', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          await dataGrid.clickCellExpandButton(4, 4);
+          await dataGrid.clickCellExpandButton(4, 3);
           await testSubjects.existOrFail('dataTableExpandCellActionJsonPopover');
         });
       });
@@ -149,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('on cell expansion with message field should open regular popover', async () => {
         await navigateToLogsExplorer();
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          await dataGrid.clickCellExpandButton(3, 4);
+          await dataGrid.clickCellExpandButton(3, 3);
           await testSubjects.existOrFail('euiDataGridExpansionPopover');
         });
       });
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('render resource virtual column properly', async () => {
       it('should render service name and host name when present', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 3);
+          const cellElement = await dataGrid.getCellElement(0, 2);
           const cellValue = await cellElement.getVisibleText();
           expect(cellValue.includes('synth-service')).to.be(true);
           expect(cellValue.includes('synth-host')).to.be(true);
@@ -172,7 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       it('should render a popover with cell actions when a chip on content column is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 4);
+          const cellElement = await dataGrid.getCellElement(0, 3);
           const logLevelChip = await cellElement.findByTestSubject(
             'dataTablePopoverChip_log.level'
           );
@@ -188,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the table filtered where log.level value is info when filter in action is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 4);
+          const cellElement = await dataGrid.getCellElement(0, 3);
           const logLevelChip = await cellElement.findByTestSubject(
             'dataTablePopoverChip_log.level'
           );
@@ -208,7 +208,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the table filtered where log.level value is not info when filter out action is clicked', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 4);
+          const cellElement = await dataGrid.getCellElement(0, 3);
           const logLevelChip = await cellElement.findByTestSubject(
             'dataTablePopoverChip_log.level'
           );
@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       it('should render the table filtered where service.name value is selected', async () => {
         await retry.tryForTime(TEST_TIMEOUT, async () => {
-          const cellElement = await dataGrid.getCellElement(0, 3);
+          const cellElement = await dataGrid.getCellElement(0, 2);
           const serviceNameChip = await cellElement.findByTestSubject(
             'dataTablePopoverChip_service.name'
           );

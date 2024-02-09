@@ -79,6 +79,7 @@ export function ChipWithPopover({
         display: flex;
         justify-content: center;
         ${shouldRenderPopover && `margin-right: 4px; margin-top: -3px;`}
+        cursor: pointer;
       `}
       style={style}
     >
