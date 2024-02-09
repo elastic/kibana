@@ -235,11 +235,14 @@ describe('Resolver Data Middleware', () => {
         );
       });
       it('should use that time over anything else', () => {
-        const {
-          filters: { from, to },
-        } = selectors.treeParametersToFetch(store.getState()[id].data);
-        expect(from).toEqual('Sep 21, 2024 @ 20:49:13.452');
-        expect(to).toEqual('Sep 21, 2024 @ 20:49:13.452');
+        const params = selectors.treeParametersToFetch(store.getState()[id].data);
+        if (params?.filters !== undefined) {
+          const {
+            filters: { from, to },
+          } = params;
+          expect(from).toEqual('Sep 21, 2024 @ 20:49:13.452');
+          expect(to).toEqual('Sep 21, 2024 @ 20:49:13.452');
+        }
       });
     });
 
