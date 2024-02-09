@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects([
     'settings',
+    'svlCommonPage',
     'common',
     'header',
     'discover',
@@ -343,6 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
+      await PageObjects.svlCommonPage.loginAsAdmin();
 
       log.debug('create source indices');
       await createSourceIndex();
