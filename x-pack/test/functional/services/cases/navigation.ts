@@ -12,13 +12,13 @@ export function CasesNavigationProvider({ getPageObject, getService }: FtrProvid
   const testSubjects = getService('testSubjects');
 
   return {
-    async navigateToApp(app: string = 'cases', appSelector: string = 'cases-app') {
-      await common.navigateToApp(app);
+    async navigateToApp(app: string = 'cases', appSelector: string = 'cases-app', search?: string) {
+      await common.navigateToApp(app, { search });
       await testSubjects.existOrFail(appSelector);
     },
 
-    async navigateToConfigurationPage(app: string = 'cases', appSelector: string = 'cases-app') {
-      await this.navigateToApp(app, appSelector);
+    async navigateToConfigurationPage(app: string = 'cases') {
+      await this.navigateToApp(app, 'cases-app');
       await common.clickAndValidate('configure-case-button', 'case-configure-title');
     },
 

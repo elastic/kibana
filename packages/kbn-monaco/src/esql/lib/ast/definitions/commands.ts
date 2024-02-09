@@ -7,9 +7,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { isColumnItem, isSettingItem } from '../shared/helpers';
-import { ESQLColumn, ESQLCommand, ESQLCommandMode, ESQLMessage } from '../types';
-import { ccqMode } from './settings';
+import {
+  getFunctionDefinition,
+  isAssignment,
+  isAssignmentComplete,
+  isColumnItem,
+  isFunctionItem,
+} from '../shared/helpers';
+import type { ESQLColumn, ESQLCommand, ESQLAstItem, ESQLMessage } from '../types';
+import { enrichModes } from './settings';
 import {
   appendSeparatorOption,
   asOption,
@@ -88,6 +94,64 @@ export const commandDefinitions: CommandDefinition[] = [
           code: 'statsNoArguments',
         });
       }
+
+      // now that all functions are supported, there's a specific check to perform
+      // unfortunately the logic here is a bit complex as it needs to dig deeper into the args
+      // until an agg function is detected
+      // in the long run this might be integrated into the validation function
+      const fnArg = command.args.filter(isFunctionItem);
+      if (fnArg.length) {
+        function isAggFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type === 'agg';
+        }
+        function isOtherFunction(arg: ESQLAstItem) {
+          return isFunctionItem(arg) && getFunctionDefinition(arg.name)?.type !== 'agg';
+        }
+        function isOtherFunctionWithAggInside(arg: ESQLAstItem) {
+          return (
+            isFunctionItem(arg) &&
+            isOtherFunction(arg) &&
+            arg.args.filter(isFunctionItem).some(
+              // this is recursive as builtin fns can be wrapped one withins another
+              (subArg): boolean =>
+                isAggFunction(subArg) ||
+                (isOtherFunction(subArg) ? isOtherFunctionWithAggInside(subArg) : false)
+            )
+          );
+        }
+        // which is the presence of at least one agg type function at root level
+        const hasAggFunction = fnArg.some(isAggFunction);
+        // or as builtin function arg with an agg function as sub arg
+        const hasAggFunctionWithinBuiltin = fnArg
+          .filter((arg) => !isAssignment(arg))
+          .some(isOtherFunctionWithAggInside);
+
+        // assignment requires a special handling
+        const hasAggFunctionWithinAssignment = fnArg
+          .filter((arg) => isAssignment(arg) && isAssignmentComplete(arg))
+          // extract the right hand side of the assignments
+          .flatMap((arg) => arg.args[1])
+          .filter(isFunctionItem)
+          // now check that they are either agg functions
+          // or builtin functions with an agg function as sub arg
+          .some((arg) => isAggFunction(arg) || isOtherFunctionWithAggInside(arg));
+
+        if (!hasAggFunction && !hasAggFunctionWithinBuiltin && !hasAggFunctionWithinAssignment) {
+          messages.push({
+            location: command.location,
+            text: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
+              defaultMessage:
+                "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
+              values: {
+                name: fnArg[0].name,
+                argType: getFunctionDefinition(fnArg[0].name)?.signatures[0].returnType,
+              },
+            }),
+            type: 'error',
+            code: 'noNestedArgumentSupport',
+          });
+        }
+      }
       return messages;
     },
   },
@@ -148,22 +212,6 @@ export const commandDefinitions: CommandDefinition[] = [
     signature: {
       multipleParams: true,
       params: [{ name: 'column', type: 'column', wildcards: true }],
-    },
-    validate: (command: ESQLCommand) => {
-      // the command name is automatically converted into KEEP by the ast_walker
-      // so validate the actual text
-      const messages: ESQLMessage[] = [];
-      if (/^project/.test(command.text.toLowerCase())) {
-        messages.push({
-          location: command.location,
-          text: i18n.translate('monaco.esql.validation.projectCommandDeprecated', {
-            defaultMessage: 'PROJECT command is no longer supported, please use KEEP instead',
-          }),
-          type: 'warning',
-          code: 'projectCommandDeprecated',
-        });
-      }
-      return messages;
     },
   },
   {
@@ -304,41 +352,10 @@ export const commandDefinitions: CommandDefinition[] = [
       '… | enrich my-policy on pivotField with a = enrichFieldA, b = enrichFieldB',
     ],
     options: [onOption, withOption],
-    modes: [ccqMode],
+    modes: [enrichModes],
     signature: {
       multipleParams: false,
       params: [{ name: 'policyName', type: 'source', innerType: 'policy' }],
-    },
-    validate: (command: ESQLCommand) => {
-      const messages: ESQLMessage[] = [];
-      if (command.args.some(isSettingItem)) {
-        const settings = command.args.filter(isSettingItem);
-        const settingCounters: Record<string, number> = {};
-        const settingLookup: Record<string, ESQLCommandMode> = {};
-        for (const setting of settings) {
-          if (!settingCounters[setting.name]) {
-            settingCounters[setting.name] = 0;
-            settingLookup[setting.name] = setting;
-          }
-          settingCounters[setting.name]++;
-        }
-        const duplicateSettings = Object.entries(settingCounters).filter(([_, count]) => count > 1);
-        messages.push(
-          ...duplicateSettings.map(([name]) => ({
-            location: settingLookup[name].location,
-            text: i18n.translate('monaco.esql.validation.duplicateSettingWarning', {
-              defaultMessage:
-                'Multiple definition of setting [{name}]. Only last one will be applied.',
-              values: {
-                name,
-              },
-            }),
-            type: 'warning' as const,
-            code: 'duplicateSettingWarning',
-          }))
-        );
-      }
-      return messages;
     },
   },
 ];
