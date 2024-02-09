@@ -43,7 +43,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
-          "update_by_query": 60000,
+          "update_by_query": 30000,
         },
         "requeue_invalid_tasks": Object {
           "delay": 3000,
@@ -106,7 +106,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
-          "update_by_query": 60000,
+          "update_by_query": 30000,
         },
         "requeue_invalid_tasks": Object {
           "delay": 3000,
@@ -172,7 +172,7 @@ describe('config validation', () => {
         "poll_interval": 3000,
         "request_capacity": 1000,
         "request_timeouts": Object {
-          "update_by_query": 60000,
+          "update_by_query": 30000,
         },
         "requeue_invalid_tasks": Object {
           "delay": 3000,
