@@ -11,6 +11,7 @@ import {
   EuiMarkdownEditor,
   EuiMarkdownEditorProps,
   EuiMarkdownFormat,
+  euiMarkdownLinkValidator,
   getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -24,6 +25,10 @@ export type MarkdownProps = Partial<
    */
   readOnly?: boolean;
   enableTooltipSupport?: boolean;
+  /**
+   * allow opt in to default EUI link validation behavior, see {@link https://eui.elastic.co/#/editors-syntax/markdown-plugins#link-validation-security}
+   */
+  validateLinks?: boolean;
   defaultValue?: string;
   markdownContent?: string;
   ariaLabelContent?: string;
@@ -45,6 +50,7 @@ export const Markdown = ({
   height = 'full',
   readOnly = false,
   enableTooltipSupport = false,
+  validateLinks = false,
   ...restProps
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
@@ -56,6 +62,13 @@ export const Markdown = ({
   // openLinksInNewTab functionality from https://codesandbox.io/s/relaxed-yalow-hy69r4?file=/demo.js:482-645
   processingPlugins[1][1].components.a = (props) => <EuiLink {...props} target="_blank" />;
 
+  const _parsingPlugins = validateLinks
+    ? parsingPlugins
+    : // @ts-expect-error
+      parsingPlugins.filter(([plugin]) => {
+        return plugin !== euiMarkdownLinkValidator;
+      });
+
   // Render EuiMarkdownFormat when readOnly set to true
   if (readOnly) {
     if (!children && !markdownContent) {
@@ -65,7 +78,7 @@ export const Markdown = ({
       <EuiMarkdownFormat
         className={className}
         aria-label={ariaLabelContent ?? 'markdown component'}
-        parsingPluginList={parsingPlugins}
+        parsingPluginList={_parsingPlugins}
         processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
         data-test-subj={restProps['data-test-subj']}
       >
@@ -84,7 +97,7 @@ export const Markdown = ({
       onChange={setValue}
       height={height}
       uiPlugins={uiPlugins}
-      parsingPluginList={parsingPlugins}
+      parsingPluginList={_parsingPlugins}
       processingPluginList={openLinksInNewTab ? processingPlugins : undefined}
       data-test-subj={restProps['data-test-subj']}
     />
