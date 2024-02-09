@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import { EuiIcon, EuiLoadingSpinner, EuiNotificationBadge, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiLoadingSpinner, EuiBadge, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAlertsCount } from '../../../../../hooks/use_alerts_count';
 import { infraAlertFeatureIds } from './config';
@@ -40,12 +40,12 @@ export const AlertsTabBadge = () => {
     typeof alertsCount?.activeAlertCount === 'number' && alertsCount.activeAlertCount > 0;
 
   return shouldRenderBadge ? (
-    <EuiNotificationBadge
+    <EuiBadge
+      color="danger"
       className="eui-alignCenter"
-      size="m"
       data-test-subj="hostsView-tabs-alerts-count"
     >
       {alertsCount?.activeAlertCount}
-    </EuiNotificationBadge>
+    </EuiBadge>
   ) : null;
 };

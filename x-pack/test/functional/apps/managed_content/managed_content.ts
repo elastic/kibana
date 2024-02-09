@@ -16,10 +16,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'common',
     'discover',
     'maps',
+    'visualize',
+    'dashboard',
   ]);
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const testSubjects = getService('testSubjects');
+  const dashboardAddPanel = getService('dashboardAddPanel');
+  const listingTable = getService('listingTable');
+  const log = getService('log');
 
   describe('Managed Content', () => {
     before(async () => {
@@ -30,21 +35,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     after(async () => {
       esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       kibanaServer.importExport.unload('test/functional/fixtures/kbn_archiver/managed_content');
+      kibanaServer.importExport.savedObjects.clean({ types: ['dashboard'] }); // we do create a new dashboard in this test
     });
 
-    const expectManagedContentSignifiers = async (
-      expected: boolean,
-      saveButtonTestSubject: string
-    ) => {
-      await testSubjects[expected ? 'existOrFail' : 'missingOrFail']('managedContentBadge');
-      await testSubjects.click(saveButtonTestSubject);
-
-      const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
-      expect(await testSubjects.isEuiSwitchChecked(saveAsNewCheckbox)).to.be(expected);
-      expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be(expected ? 'true' : null);
-    };
-
     describe('preventing the user from overwriting managed content', () => {
+      const expectManagedContentSignifiers = async (
+        expected: boolean,
+        saveButtonTestSubject: string
+      ) => {
+        await testSubjects[expected ? 'existOrFail' : 'missingOrFail']('managedContentBadge');
+        await testSubjects.click(saveButtonTestSubject);
+
+        const saveAsNewCheckbox = await testSubjects.find('saveAsNewCheckbox');
+        expect(await testSubjects.isEuiSwitchChecked(saveAsNewCheckbox)).to.be(expected);
+        expect(await saveAsNewCheckbox.getAttribute('disabled')).to.be(expected ? 'true' : null);
+      };
+
       it('lens', async () => {
         await PageObjects.common.navigateToActualUrl(
           'lens',
@@ -64,60 +70,145 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await expectManagedContentSignifiers(false, 'lnsApp_saveButton');
       });
+
+      it('discover', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'discover',
+          'view/managed-3d62-4113-ac7c-de2e20a68fbc'
+        );
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
+
+        await expectManagedContentSignifiers(true, 'discoverSaveButton');
+
+        await PageObjects.common.navigateToActualUrl(
+          'discover',
+          'view/unmanaged-3d62-4113-ac7c-de2e20a68fbc'
+        );
+        await PageObjects.discover.waitForDiscoverAppOnScreen();
+
+        await expectManagedContentSignifiers(false, 'discoverSaveButton');
+      });
+
+      it('visualize', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'visualize',
+          'edit/managed-feb9-4ba6-9538-1b8f67fb4f57'
+        );
+        await PageObjects.visChart.waitForVisualization();
+
+        await expectManagedContentSignifiers(true, 'visualizeSaveButton');
+
+        await PageObjects.common.navigateToActualUrl(
+          'visualize',
+          'edit/unmanaged-feb9-4ba6-9538-1b8f67fb4f57'
+        );
+        await PageObjects.visChart.waitForVisualization();
+
+        await expectManagedContentSignifiers(false, 'visualizeSaveButton');
+      });
+
+      it('maps', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'maps',
+          'map/managed-d7ab-46eb-a807-8fed28ed8566'
+        );
+        await PageObjects.maps.waitForLayerAddPanelClosed();
+
+        await expectManagedContentSignifiers(true, 'mapSaveButton');
+
+        await PageObjects.common.navigateToActualUrl(
+          'maps',
+          'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
+        );
+        await PageObjects.maps.waitForLayerAddPanelClosed();
+
+        await expectManagedContentSignifiers(false, 'mapSaveButton');
+      });
     });
 
-    it('discover', async () => {
-      await PageObjects.common.navigateToActualUrl(
-        'discover',
-        'view/managed-3d62-4113-ac7c-de2e20a68fbc'
-      );
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
+    describe('library views', () => {
+      const assertInspectorReadonly = async (name: string) => {
+        log.debug(`making sure table list inspector for ${name} is read-only`);
+        await listingTable.searchForItemWithName(name);
+        await listingTable.waitUntilTableIsLoaded();
+        await listingTable.inspectVisualization();
+        expect(await listingTable.inspectorFieldsReadonly()).to.be(true);
+        await listingTable.closeInspector();
+      };
 
-      await expectManagedContentSignifiers(true, 'discoverSaveButton');
+      it('visualize library: managed content is read-only', async () => {
+        await PageObjects.visualize.gotoVisualizationLandingPage();
 
-      await PageObjects.common.navigateToActualUrl(
-        'discover',
-        'view/unmanaged-3d62-4113-ac7c-de2e20a68fbc'
-      );
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
 
-      await expectManagedContentSignifiers(false, 'discoverSaveButton');
+        expect(deletableItems).to.eql([
+          'Unmanaged lens vis',
+          'Unmanaged legacy visualization',
+          'Unmanaged map',
+        ]);
+
+        await assertInspectorReadonly('Managed lens vis');
+        await assertInspectorReadonly('Managed legacy visualization');
+        await assertInspectorReadonly('Managed map');
+      });
+
+      it('dashboard library: managed content is read-only', async () => {
+        await PageObjects.dashboard.gotoDashboardListingURL();
+
+        const deletableItems = await listingTable.getAllSelectableItemsNames();
+
+        expect(deletableItems).to.eql([]);
+
+        await assertInspectorReadonly('Managed dashboard');
+      });
     });
 
-    it('visualize', async () => {
-      await PageObjects.common.navigateToActualUrl(
-        'visualize',
-        'edit/managed-feb9-4ba6-9538-1b8f67fb4f57'
-      );
-      await PageObjects.visChart.waitForVisualization();
+    describe('managed panels in dashboards', () => {
+      it('inlines panels when managed dashboard cloned', async () => {
+        await PageObjects.common.navigateToActualUrl(
+          'dashboard',
+          'view/c44c86f9-b105-4a9c-9a24-449a58a827f3',
+          // for some reason the URL didn't always match the expected, so I turned off this check
+          // URL doesn't matter as long as we get the dashboard app
+          { ensureCurrentUrl: false }
+        );
 
-      await expectManagedContentSignifiers(true, 'visualizeSaveButton');
+        await PageObjects.dashboard.waitForRenderComplete();
 
-      await PageObjects.common.navigateToActualUrl(
-        'visualize',
-        'edit/unmanaged-feb9-4ba6-9538-1b8f67fb4f57'
-      );
-      await PageObjects.visChart.waitForVisualization();
+        await PageObjects.dashboard.clickClone();
 
-      await expectManagedContentSignifiers(false, 'visualizeSaveButton');
-    });
+        await PageObjects.dashboard.waitForRenderComplete();
 
-    it('maps', async () => {
-      await PageObjects.common.navigateToActualUrl(
-        'maps',
-        'map/managed-d7ab-46eb-a807-8fed28ed8566'
-      );
-      await PageObjects.maps.waitForLayerAddPanelClosed();
+        await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+      });
 
-      await expectManagedContentSignifiers(true, 'mapSaveButton');
+      it('adds managed panels by-value', async () => {
+        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.gotoDashboardLandingPage();
+        await PageObjects.dashboard.clickNewDashboard();
 
-      await PageObjects.common.navigateToActualUrl(
-        'maps',
-        'map/unmanaged-d7ab-46eb-a807-8fed28ed8566'
-      );
-      await PageObjects.maps.waitForLayerAddPanelClosed();
+        await dashboardAddPanel.addEmbeddables([
+          { name: 'Managed lens vis', type: 'lens' },
+          { name: 'Managed legacy visualization', type: 'visualization' },
+          { name: 'Managed map', type: 'map' },
+          { name: 'Managed saved search', type: 'search' },
+        ]);
 
-      await expectManagedContentSignifiers(false, 'mapSaveButton');
+        await testSubjects.missingOrFail('embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION');
+
+        await dashboardAddPanel.addEmbeddables([
+          { name: 'Unmanaged lens vis', type: 'lens' },
+          { name: 'Unmanaged legacy visualization', type: 'visualization' },
+          { name: 'Unmanaged map', type: 'map' },
+          { name: 'Unmanaged saved search', type: 'search' },
+        ]);
+
+        const byRefSignifiers = await testSubjects.findAll(
+          'embeddablePanelNotification-ACTION_LIBRARY_NOTIFICATION'
+        );
+
+        expect(byRefSignifiers.length).to.be(4);
+      });
     });
   });
 }

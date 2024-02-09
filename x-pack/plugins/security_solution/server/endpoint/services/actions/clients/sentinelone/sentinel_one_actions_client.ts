@@ -182,17 +182,29 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
     await this.validateRequest(options);
     await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: options.endpoint_ids[0] });
 
-    const reqIndexOptions: ResponseActionsClientWriteActionRequestToEndpointIndexOptions = {
+    const actionRequestDoc = await this.writeActionRequestToEndpointIndex({
       ...options,
       command: 'isolate',
-    };
-    const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
+    });
     await this.writeActionResponseToEndpointIndex({
       actionId: actionRequestDoc.EndpointActions.action_id,
       agentId: actionRequestDoc.agent.id,
       data: {
         command: actionRequestDoc.EndpointActions.data.command,
       },
+    });
+    await this.updateCases({
+      command: 'isolate',
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      hosts: options.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: options.comment,
+      actionId: actionRequestDoc.EndpointActions.action_id,
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
@@ -215,6 +227,19 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       data: {
         command: actionRequestDoc.EndpointActions.data.command,
       },
+    });
+    await this.updateCases({
+      command: 'unisolate',
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      hosts: options.endpoint_ids.map((agentId) => {
+        return {
+          hostId: agentId,
+          hostname: actionRequestDoc.EndpointActions.data.hosts?.[agentId].name ?? '',
+        };
+      }),
+      comment: options.comment,
+      actionId: actionRequestDoc.EndpointActions.action_id,
     });
 
     return this.fetchActionDetails(actionRequestDoc.EndpointActions.action_id);
