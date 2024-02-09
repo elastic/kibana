@@ -10,6 +10,7 @@ import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
+  ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
@@ -17,13 +18,14 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
+import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
-  CustomThresholdRuleParams,
+  CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
   CustomThresholdAlertState,
   CustomThresholdAlertContext,
@@ -66,7 +68,7 @@ export const createCustomThresholdExecutor = ({
   config: ObservabilityConfig;
   locators: CustomThresholdLocators;
 }): LifecycleRuleExecutor<
-  CustomThresholdRuleParams,
+  CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
   CustomThresholdAlertState,
   CustomThresholdAlertContext,
@@ -108,6 +110,7 @@ export const createCustomThresholdExecutor = ({
       actionGroup,
       additionalContext,
       evaluationValues,
+      threshold,
       group
     ) =>
       alertWithLifecycle({
@@ -116,6 +119,7 @@ export const createCustomThresholdExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
+          [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_GROUP]: group,
           ...flattenAdditionalContext(additionalContext),
         },
@@ -139,7 +143,7 @@ export const createCustomThresholdExecutor = ({
         ? state.missingGroups
         : [];
 
-    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
+    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
     const dataView = initialSearchSource.getField('index')!;
     const { id: dataViewId, timeFieldName } = dataView;
     const dataViewIndexPattern = dataView.getIndexPattern();
@@ -241,6 +245,8 @@ export const createCustomThresholdExecutor = ({
 
       if (reason) {
         const timestamp = startedAt.toISOString();
+        const threshold = getThreshold(criteria);
+        const evaluationValues = getEvaluationValues(alertResults, group);
         const actionGroupId: CustomThresholdActionGroup =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
@@ -258,19 +264,13 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
-          if (result[group]) {
-            acc.push(result[group].currentValue);
-          }
-          return acc;
-        }, []);
-
         const alert = alertFactory(
           `${group}`,
           reason,
           actionGroupId,
           additionalContext,
           evaluationValues,
+          threshold,
           groupByKeysObjectMapping[group]
         );
         const alertUuid = getAlertUuid(group);
