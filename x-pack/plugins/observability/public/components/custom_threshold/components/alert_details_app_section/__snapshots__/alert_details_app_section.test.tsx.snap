@@ -8,7 +8,7 @@ Array [
         "meta": Object {},
         "query": Object {
           "term": Object {
-            "kibana.alert.group.value": Object {
+            "host.name": Object {
               "value": "host-1",
             },
           },

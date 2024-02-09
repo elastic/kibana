@@ -345,8 +345,7 @@ export function RuleConditionChart({
       </div>
     );
   }
-  console.log('additionalFilters:', additionalFilters);
-  console.log('filters:', filters);
+
   return (
     <div>
       <lens.EmbeddableComponent
