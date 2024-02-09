@@ -577,7 +577,6 @@
       "total_alerts": {
         "type": "integer"
       },
-      },
       "total_comments": {
         "type": "integer"
       },
