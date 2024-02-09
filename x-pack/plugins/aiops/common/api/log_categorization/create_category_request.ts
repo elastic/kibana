@@ -31,7 +31,8 @@ export function createCategoryRequest(
   queryIn: QueryDslQueryContainer,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
-  additionalFilter?: CategorizationAdditionalFilter
+  additionalFilter?: CategorizationAdditionalFilter,
+  tokenizer?: Tokenizer
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
@@ -39,7 +40,7 @@ export function createCategoryRequest(
       categorize_text: {
         field,
         size: CATEGORY_LIMIT,
-        categorization_analyzer: categorizationAnalyzer,
+        categorization_analyzer: getCategorizationAnalyzer(tokenizer),
       },
       aggs: {
         examples: {
@@ -106,15 +107,19 @@ export function createCategoryRequest(
   };
 }
 
+type Tokenizer = 'standard' | 'ml_standard';
+
 // This is a copy of the default categorization analyzer but using the 'standard' tokenizer rather than the 'ml_standard' tokenizer.
 // The 'ml_standard' tokenizer splits tokens in a way that was observed to give better categories in testing many years ago, however,
 // the downside of these better categories is then a potential failure to match the original documents when creating a filter for Discover.
 // A future enhancement would be to check which analyzer is specified in the mappings for the source field and to use
 // that instead of unconditionally using 'standard'.
 // However for an initial fix, using the standard analyzer will be more likely to match the results from the majority of searches.
-const categorizationAnalyzer: AggregationsCustomCategorizeTextAnalyzer = {
+const getCategorizationAnalyzer = (
+  tokenizer: Tokenizer = 'standard'
+): AggregationsCustomCategorizeTextAnalyzer => ({
   char_filter: ['first_line_with_letters'],
-  tokenizer: 'standard',
+  tokenizer,
   filter: [
     // @ts-expect-error filter type in AggregationsCustomCategorizeTextAnalyzer is incorrect
     {
@@ -168,4 +173,4 @@ const categorizationAnalyzer: AggregationsCustomCategorizeTextAnalyzer = {
       max_token_count: '100',
     },
   ],
-};
+});
