@@ -21,9 +21,9 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 import { NotificationsStart } from '@kbn/core/public';
+import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
@@ -34,6 +34,7 @@ import {
   showChangeBenchmarkRuleStatesSuccessToast,
   TakeAction,
 } from '../../components/take_action';
+import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -71,6 +72,9 @@ export const RuleFlyout = ({
 }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { data: rulesData } = useFetchDetectionRulesByTags(
+    getFindingsDetectionRuleSearchTags(rule.metadata)
+  );
   const isRuleMuted = rule?.state === 'muted';
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
@@ -83,7 +87,12 @@ export const RuleFlyout = ({
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
       await refetchRulesStates();
-      await showChangeBenchmarkRuleStatesSuccessToast(notifications, nextRuleStates !== 'mute');
+      await showChangeBenchmarkRuleStatesSuccessToast(
+        notifications,
+        nextRuleStates !== 'mute',
+        1,
+        rulesData?.total || 0
+      );
     }
   };
 

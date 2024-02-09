@@ -20,12 +20,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { NotificationsStart } from '@kbn/core/public';
+import { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { ColumnNameWithTooltip } from '../../components/column_name_with_tooltip';
 import type { CspBenchmarkRulesWithStates, RulesState } from './rules_container';
 import * as TEST_SUBJECTS from './test_subjects';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { showChangeBenchmarkRuleStatesSuccessToast } from '../../components/take_action';
+import { fetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_ROWS_ENABLE_SWITCH_BUTTON = 'rules-row-enable-switch-button';
 export const RULES_ROW_SELECT_ALL_CURRENT_PAGE = 'cloud-security-fields-selector-item-all';
@@ -60,6 +63,7 @@ type GetColumnProps = Pick<
     selectedRulesArray: CspBenchmarkRulesWithStates[]
   ) => boolean;
   notifications: NotificationsStart;
+  http: HttpSetup;
 };
 
 export const RulesTable = ({
@@ -112,6 +116,7 @@ export const RulesTable = ({
   });
 
   const [isAllRulesSelectedThisPage, setIsAllRulesSelectedThisPage] = useState<boolean>(false);
+
   const postRequestChangeRulesStates = useChangeCspRuleState();
 
   const isCurrentPageRulesASubset = (
@@ -129,6 +134,7 @@ export const RulesTable = ({
     return true;
   };
 
+  const { http } = useKibana<CoreStart>().services;
   useEffect(() => {
     if (selectedRules.length >= items.length && items.length > 0 && selectedRules.length > 0)
       setIsAllRulesSelectedThisPage(true);
@@ -148,6 +154,7 @@ export const RulesTable = ({
         isCurrentPageRulesASubset,
         onRuleClick,
         notifications,
+        http,
       }),
     [
       refetchRulesStates,
@@ -158,6 +165,7 @@ export const RulesTable = ({
       isAllRulesSelectedThisPage,
       onRuleClick,
       notifications,
+      http,
     ]
   );
 
@@ -189,6 +197,7 @@ const getColumns = ({
   isCurrentPageRulesASubset,
   onRuleClick,
   notifications,
+  http,
 }: GetColumnProps): Array<EuiTableFieldDataColumnType<CspBenchmarkRulesWithStates>> => [
   {
     field: 'action',
@@ -307,7 +316,20 @@ const getColumns = ({
         if (rule?.metadata.benchmark.rule_number) {
           await postRequestChangeRulesStates(nextRuleState, [rulesObjectRequest]);
           await refetchRulesStates();
-          await showChangeBenchmarkRuleStatesSuccessToast(notifications, nextRuleState !== 'mute');
+          // Calling this function this way to make sure it didn't get called on every single row render
+          const detectionRuleCount = (
+            await fetchDetectionRulesByTags(
+              getFindingsDetectionRuleSearchTags(rule.metadata),
+              'AND',
+              http
+            )
+          ).total;
+          await showChangeBenchmarkRuleStatesSuccessToast(
+            notifications,
+            nextRuleState !== 'mute',
+            1,
+            detectionRuleCount
+          );
         }
       };
       return (

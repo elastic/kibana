@@ -13,9 +13,10 @@ const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
 
 const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
 
-export const convertRuleTagsToKQL = (tags: string[]): string => {
+// By default uses AND operator, we use OR operator when we are handling tags from multiple rules instead of just 1 rule
+export const convertRuleTagsToKQL = (tags: string[], operator = 'AND'): string => {
   const TAGS_FIELD = 'alert.attributes.tags';
-  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(' AND ')})`;
+  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(` ${operator} `)})`;
 };
 
 /*
@@ -40,6 +41,29 @@ export const getFindingsDetectionRuleSearchTags = (
     : cspBenchmarkRule.benchmark.id.replace('_', ' ').toUpperCase();
 
   return benchmarkIdTags.concat([benchmarkRuleNumberTag]);
+};
+
+export const getFindingsDetectionRuleSearchTagsFromArrayOfRules = (
+  cspBenchmarkRules: CspBenchmarkRuleMetadata[]
+): string[] => {
+  if (
+    !cspBenchmarkRules ||
+    !cspBenchmarkRules.some((rule) => rule.benchmark) ||
+    !cspBenchmarkRules.some((rule) => rule.benchmark.id)
+  ) {
+    return [];
+  }
+
+  // we can just take the first benchmark id because we Know that the array will ONLY contain 1 kind of id
+  const benchmarkId = cspBenchmarkRules[0]?.benchmark?.id;
+  const benchmarkRuleNumbers = cspBenchmarkRules.map(
+    (benchmark) => benchmark.benchmark.rule_number
+  );
+  const benchmarkTagArray = benchmarkRuleNumbers.map(
+    (tag) => benchmarkId.replace('_', ' ').toUpperCase() + ' ' + tag
+  );
+
+  return benchmarkTagArray;
 };
 
 export const generateBenchmarkRuleTags = (rule: CspBenchmarkRuleMetadata) => {
