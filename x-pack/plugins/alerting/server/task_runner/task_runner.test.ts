@@ -2885,32 +2885,37 @@ describe('Task Runner', () => {
         group: 'default',
         id: '1',
         actionTypeId: 'action',
+        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '2',
         actionTypeId: 'action',
+        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '3',
         actionTypeId: 'action',
+        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '4',
         actionTypeId: 'action',
+        type: RuleActionTypes.DEFAULT,
       },
       {
         group: 'default',
         id: '5',
         actionTypeId: 'action',
+        type: RuleActionTypes.DEFAULT,
       },
     ];
 
     rulesClient.getAlertFromRaw.mockReturnValue({
       ...(mockedRuleTypeSavedObject as Rule),
-      actions: mockActions as RuleAction[],
+      actions: mockActions as Array<RuleAction<'withSystemAction'>>,
     });
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);
@@ -3059,28 +3064,33 @@ describe('Task Runner', () => {
           group: 'default',
           id: '1',
           actionTypeId: '.server-log',
+          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '2',
           actionTypeId: '.server-log',
+          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '3',
           actionTypeId: '.server-log',
+          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '4',
           actionTypeId: 'any-action',
+          type: RuleActionTypes.DEFAULT,
         },
         {
           group: 'default',
           id: '5',
           actionTypeId: 'any-action',
+          type: RuleActionTypes.DEFAULT,
         },
-      ] as RuleAction[],
+      ] as Array<RuleAction<'withSystemAction'>>,
     });
 
     ruleTypeRegistry.get.mockReturnValue(ruleType);

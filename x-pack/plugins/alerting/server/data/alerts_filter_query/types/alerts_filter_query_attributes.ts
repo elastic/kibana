@@ -18,5 +18,5 @@ export interface AlertsFilterAttributes {
 export interface AlertsFilterQueryAttributes {
   kql: string;
   filters: AlertsFilterAttributes[];
-  dsl?: string;
+  dsl: string;
 }

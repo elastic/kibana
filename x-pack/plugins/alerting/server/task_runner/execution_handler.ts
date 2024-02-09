@@ -557,7 +557,7 @@ export class ExecutionHandler<
   }: {
     numberOfAlerts: number;
     numberOfSummarizedAlerts: number;
-    action: RuleAction;
+    action: RuleAction<'withSystemAction'>;
   }) {
     const count = numberOfAlerts - numberOfSummarizedAlerts;
     if (count > 0) {
@@ -586,7 +586,7 @@ export class ExecutionHandler<
     return false;
   }
 
-  private isExecutableAction(action: RuleAction) {
+  private isExecutableAction(action: RuleAction<'withSystemAction'>) {
     return this.taskRunnerContext.actionsPlugin.isActionExecutable(action.id, action.actionTypeId, {
       notifyUsage: true,
     });
@@ -685,7 +685,7 @@ export class ExecutionHandler<
     }
   }
 
-  private getEnqueueOptions(action: RuleAction): EnqueueExecutionOptions {
+  private getEnqueueOptions(action: RuleAction<'withSystemAction'>): EnqueueExecutionOptions {
     const {
       apiKey,
       ruleConsumer,
@@ -818,7 +818,7 @@ export class ExecutionHandler<
     action,
     throttledSummaryActions,
   }: {
-    action: RuleAction;
+    action: RuleAction<'withSystemAction'>;
     throttledSummaryActions: ThrottledActions;
   }) {
     if (!this.canGetSummarizedAlerts()) {
@@ -864,7 +864,7 @@ export class ExecutionHandler<
     ruleId,
     spaceId,
   }: {
-    action: RuleAction;
+    action: RuleAction<'withSystemAction'>;
     ruleId: string;
     spaceId: string;
   }): Promise<CombinedSummarizedAlerts> {

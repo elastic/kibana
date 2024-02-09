@@ -84,13 +84,13 @@ export interface RuleExecutionStatus {
 export type RuleActionParams = SavedObjectAttributes;
 export type RuleActionParam = SavedObjectAttribute;
 
-export interface RuleActionFrequency {
+export interface RuleActionFrequency extends SavedObjectAttributes {
   summary: boolean;
   notifyWhen: RuleNotifyWhenType;
   throttle: string | null;
 }
 
-export interface AlertsFilterTimeframe {
+export interface AlertsFilterTimeframe extends SavedObjectAttributes {
   days: IsoWeekday[];
   timezone: string;
   hours: {
@@ -99,7 +99,7 @@ export interface AlertsFilterTimeframe {
   };
 }
 
-export interface AlertsFilter {
+export interface AlertsFilter extends SavedObjectAttributes {
   query?: {
     kql: string;
     filters: Filter[];
@@ -145,8 +145,13 @@ export interface RuleSystemAction {
 }
 
 export type RuleActionKey = keyof RuleDefaultAction | keyof RuleSystemAction;
-export type RuleAction = RuleDefaultAction | RuleSystemAction;
 
+export type RuleAction<T extends 'withSystemAction' | 'defaultAction' = 'defaultAction'> =
+  T extends 'withSystemAction'
+    ? RuleDefaultAction | RuleSystemAction
+    : Omit<RuleDefaultAction, 'type'>;
+
+// export type RuleAction = Omit<RuleDefaultAction, 'type'>;
 export interface RuleLastRun {
   outcome: RuleLastRunOutcomes;
   outcomeOrder?: number;
@@ -179,7 +184,7 @@ export interface Rule<Params extends RuleTypeParams = never> {
   alertTypeId: string; // this is persisted in the Rule saved object so we would need a migration to change this to ruleTypeId
   consumer: string;
   schedule: IntervalSchedule;
-  actions: RuleAction[];
+  actions: Array<RuleAction<'withSystemAction'>>;
   params: Params;
   mapped_params?: MappedParams;
   scheduledTaskId?: string | null;

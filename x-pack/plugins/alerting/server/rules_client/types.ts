@@ -88,7 +88,10 @@ export interface RulesClientContext {
   readonly uiSettings: UiSettingsServiceStart;
 }
 
-export type NormalizedAlertAction = DistributiveOmit<RuleAction, 'actionTypeId'>;
+export type NormalizedAlertAction = DistributiveOmit<
+  RuleAction<'withSystemAction'>,
+  'actionTypeId'
+>;
 export type NormalizedSystemAction = Omit<RuleSystemAction, 'actionTypeId'>;
 
 export type NormalizedAlertDefaultActionWithGeneratedValues = Omit<

@@ -96,7 +96,7 @@ export type Executable<
   ActionGroupIds extends string,
   RecoveryActionGroupId extends string
 > = {
-  action: RuleAction;
+  action: RuleAction<'withSystemAction'>;
 } & (
   | {
       alert: Alert<State, Context, ActionGroupIds | RecoveryActionGroupId>;

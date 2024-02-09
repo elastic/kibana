@@ -8,10 +8,10 @@
 import { AsApiContract } from '@kbn/actions-plugin/common';
 import { RuleAction, RuleSystemAction, RuleActionTypes } from '../rule';
 
-type GetSystemActionType<T> = T extends RuleAction
+type GetSystemActionType<T> = T extends RuleAction<'withSystemAction'>
   ? RuleSystemAction
   : AsApiContract<RuleSystemAction>;
 
 export const isSystemAction = (
-  action: RuleAction | AsApiContract<RuleAction>
+  action: RuleAction<'withSystemAction'> | AsApiContract<RuleAction<'withSystemAction'>>
 ): action is GetSystemActionType<typeof action> => action.type === RuleActionTypes.SYSTEM;

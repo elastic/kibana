@@ -20,7 +20,7 @@ import {
 const now = '2021-05-13T12:33:37.000Z';
 Date.now = jest.fn().mockReturnValue(new Date(now));
 
-const mockOldAction: RuleAction = {
+const mockOldAction: RuleAction<'withSystemAction'> = {
   id: '1',
   group: 'default',
   actionTypeId: 'slack',
@@ -29,7 +29,7 @@ const mockOldAction: RuleAction = {
   type: RuleActionTypes.DEFAULT,
 };
 
-const mockAction: RuleAction = {
+const mockAction: RuleAction<'withSystemAction'> = {
   id: '1',
   group: 'default',
   actionTypeId: 'slack',
@@ -43,7 +43,7 @@ const mockAction: RuleAction = {
   type: RuleActionTypes.DEFAULT,
 };
 
-const mockSummaryAction: RuleAction = {
+const mockSummaryAction: RuleAction<'withSystemAction'> = {
   id: '1',
   group: 'default',
   actionTypeId: 'slack',
@@ -93,7 +93,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is not a proper RuleAction', () => {
-      const result = isSummaryAction({} as RuleAction);
+      const result = isSummaryAction({} as RuleAction<'withSystemAction'>);
       expect(result).toBe(false);
     });
   });
@@ -113,7 +113,7 @@ describe('rule_action_helper', () => {
       const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, notifyWhen: 'onActiveAlert' },
-      } as RuleAction);
+      } as RuleAction<'withSystemAction'>);
       expect(result).toBe(false);
     });
 
@@ -121,7 +121,7 @@ describe('rule_action_helper', () => {
       const result = isActionOnInterval({
         ...mockAction,
         frequency: { ...mockAction.frequency, throttle: null },
-      } as RuleAction);
+      } as RuleAction<'withSystemAction'>);
       expect(result).toBe(false);
     });
 
@@ -136,7 +136,7 @@ describe('rule_action_helper', () => {
     });
 
     test('should return false if the action is not a proper RuleAction', () => {
-      const result = isActionOnInterval({} as RuleAction);
+      const result = isActionOnInterval({} as RuleAction<'withSystemAction'>);
       expect(result).toBe(false);
     });
   });
@@ -248,7 +248,7 @@ describe('rule_action_helper', () => {
         action: {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, notifyWhen: 'onActiveAlert' },
-        } as RuleAction,
+        } as RuleAction<'withSystemAction'>,
         throttledSummaryActions,
         logger,
       });
@@ -260,7 +260,7 @@ describe('rule_action_helper', () => {
         action: {
           ...mockSummaryAction,
           frequency: { ...mockSummaryAction.frequency, throttle: null },
-        } as RuleAction,
+        } as RuleAction<'withSystemAction'>,
         throttledSummaryActions,
         logger,
       });

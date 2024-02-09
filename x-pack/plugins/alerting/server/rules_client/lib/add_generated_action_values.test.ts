@@ -68,7 +68,7 @@ describe('addGeneratedActionValues()', () => {
     isSystemAction: jest.fn(),
   };
 
-  const mockAction: RuleAction = {
+  const mockAction: RuleAction<'withSystemAction'> = {
     id: '1',
     group: 'default',
     type: 'default',

@@ -114,7 +114,7 @@ interface AlertsFilterTimeFrameAttributes {
   };
 }
 
-interface AlertsFilterAttributes {
+export interface AlertsFilterAttributes {
   query?: AlertsFilterQueryAttributes;
   timeframe?: AlertsFilterTimeFrameAttributes;
 }
