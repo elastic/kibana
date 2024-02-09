@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
-
-import React, { useEffect, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -18,29 +15,30 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { useFormContext } from 'react-hook-form';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CreateSLOInput } from '@kbn/slo-schema';
-import { CreateSLOForm } from '../../types';
+import { CreateSLOInput, GetSLOResponse } from '@kbn/slo-schema';
+import React, { useEffect, useState } from 'react';
+import { useFormContext } from 'react-hook-form';
 import { transformCreateSLOFormToCreateSLOInput } from '../../helpers/process_slo_form_values';
+import { CreateSLOForm } from '../../types';
 
-export function EquivalentApiRequest({
-  isCreateSloLoading,
-  isUpdateSloLoading,
-}: {
-  isCreateSloLoading: boolean;
-  isUpdateSloLoading: boolean;
-}) {
+interface Props {
+  isEditMode: boolean;
+  disabled: boolean;
+  slo?: GetSLOResponse;
+}
+
+export function EquivalentApiRequest({ disabled, isEditMode, slo }: Props) {
   const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
-
   const { getValues, trigger } = useFormContext<CreateSLOForm>();
-
   const [sloData, setSloData] = useState<CreateSLOInput>();
 
   useEffect(() => {
     if (!isFlyoutVisible) {
       return;
     }
+
     trigger().then((isValid) => {
       if (isValid) {
         setSloData(transformCreateSLOFormToCreateSLOInput(getValues()));
@@ -72,7 +70,7 @@ export function EquivalentApiRequest({
           </EuiText>
           <EuiSpacer size="s" />
           <EuiCodeBlock language="javascript" isCopyable paddingSize="s">
-            {'POST /api/observability/slos'}
+            {isEditMode ? `PUT /api/observability/slos/${slo!.id}` : 'POST /api/observability/slos'}
           </EuiCodeBlock>
           <EuiSpacer size="s" />
           <EuiText>
@@ -115,7 +113,7 @@ export function EquivalentApiRequest({
         color="primary"
         iconType="copyClipboard"
         data-test-subj="sloFormCopyJsonButton"
-        disabled={isCreateSloLoading || isUpdateSloLoading}
+        disabled={disabled}
         onClick={() => setIsFlyoutVisible(true)}
       >
         {i18n.translate('xpack.observability.slo.sloEdit.equivalentApiRequest', {
