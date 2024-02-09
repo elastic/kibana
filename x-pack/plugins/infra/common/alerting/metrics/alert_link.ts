@@ -58,7 +58,7 @@ export const getInventoryViewInAppUrl = (
 
   if (nodeType) {
     if (hostName) {
-      return getLinkToHostDetails({ hostName: hostName, timestamp: inventoryFields[TIMESTAMP] });
+      return getLinkToHostDetails({ hostName, timestamp: inventoryFields[TIMESTAMP] });
     } else {
       const linkToParams = {
         nodeType: inventoryFields[nodeTypeField][0],
