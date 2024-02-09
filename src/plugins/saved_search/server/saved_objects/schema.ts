@@ -93,6 +93,7 @@ export const SCHEMA_SEARCH_V8_12_0 = schema.object({
     })
   ),
 });
-export const SCHEMA_SEARCH_V8_13_0 = SCHEMA_SEARCH_V8_12_0.extends({
+
+export const SCHEMA_SEARCH_MODEL_VERSION_1 = SCHEMA_SEARCH_V8_12_0.extends({
   headerRowHeight: schema.maybe(schema.number()),
 });
