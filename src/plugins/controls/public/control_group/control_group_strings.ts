@@ -11,26 +11,19 @@ import { RANGE_SLIDER_CONTROL } from '../range_slider';
 
 export const ControlGroupStrings = {
   invalidControlWarning: {
-    getTourStepTitle: (controlType: string) => {
-      switch (controlType) {
-        case RANGE_SLIDER_CONTROL: {
-          return i18n.translate(
-            'controls.controlGroup.invalidControlWarning.tourStepTitle.rangeSlider',
-            {
-              defaultMessage: 'You have selected an invalid range',
-            }
-          );
-        }
-        default: {
-          return i18n.translate(
-            'controls.controlGroup.invalidControlWarning.tourStepTitle.default',
-            {
-              defaultMessage: 'You have invalid selections',
-            }
-          );
-        }
+    title: i18n.translate('controls.controlGroup.invalidControlWarning.title', {
+      defaultMessage: 'Selections are returning no results',
+    }),
+    text: i18n.translate('controls.controlGroup.invalidControlWarning.text', {
+      defaultMessage:
+        'Some control selections are returning no results. Remove them for complete results.',
+    }),
+    dismissButtonLabel: i18n.translate(
+      'controls.controlGroup.invalidControlWarning.dismissButtonLabel',
+      {
+        defaultMessage: 'Do not show again',
       }
-    },
+    ),
   },
   manageControl: {
     getFlyoutCreateTitle: () =>

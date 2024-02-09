@@ -11,7 +11,7 @@ import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { lastValueFrom, Subscription, merge, switchMap, BehaviorSubject } from 'rxjs';
+import { lastValueFrom, Subscription, merge, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -37,11 +37,10 @@ import {
 import { pluginServices } from '../../services';
 import { ControlsDataService } from '../../services/data/types';
 import { ControlsDataViewsService } from '../../services/data_views/types';
-import { IValidatableControl, IClearableControl } from '../../types';
+import { IClearableControl } from '../../types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
-import { ControlsStorageService } from '../../services/storage/types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -91,7 +90,6 @@ export class RangeSliderEmbeddable
   // Controls services
   private dataService: ControlsDataService;
   private dataViewsService: ControlsDataViewsService;
-  private storageService: ControlsStorageService;
 
   // Internal data fetching state for this input control.
   private dataView?: DataView;
@@ -115,11 +113,7 @@ export class RangeSliderEmbeddable
     this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
-    ({
-      data: this.dataService,
-      dataViews: this.dataViewsService,
-      storage: this.storageService,
-    } = pluginServices.getServices());
+    ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       RangeSliderReduxState,
@@ -411,13 +405,6 @@ export class RangeSliderEmbeddable
       id: this.id,
       hasInvalidSelections,
     });
-  };
-
-  public canShowInvalidSelectionsWarning = () =>
-    this.storageService.getShowInvalidSelectionWarning() ?? true;
-
-  public supressInvalidSelectionsWarning = () => {
-    this.storageService.setShowInvalidSelectionWarning(false);
   };
 
   public clearSelections() {

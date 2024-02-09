@@ -9,13 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import {
-  EuiRangeTick,
-  EuiDualRange,
-  EuiDualRangeProps,
-  EuiTourStep,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
@@ -24,7 +18,6 @@ import { ControlError } from '../../control_group/component/control_error_compon
 import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
-import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
@@ -35,15 +28,12 @@ export const RangeSliderControl: FC = () => {
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const value = rangeSlider.select((state) => state.explicitInput.value);
 
-  // Embeddable cmponent state
+  // Embeddable component state
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
   const error = rangeSlider.select((state) => state.componentState.error);
   const fieldSpec = rangeSlider.select((state) => state.componentState.field);
   const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
-  const showInvalidSelectionWarning = rangeSlider.select(
-    (state) => state.componentState.showInvalidRangeWarning
-  );
 
   // Embeddable output
   const isLoading = rangeSlider.select((state) => state.output.loading);
@@ -74,13 +64,6 @@ export const RangeSliderControl: FC = () => {
     ];
     return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
   }, [min, max, value]);
-
-  // show warning if there are invalid selections and the warning is not supressed
-  useEffect(() => {
-    if (isInvalid && rangeSlider.canShowInvalidSelectionsWarning()) {
-      rangeSlider.dispatch.setInvalidRangeWarningOpen(true);
-    }
-  }, [isInvalid, rangeSlider]);
 
   /**
    * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,

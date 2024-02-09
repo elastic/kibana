@@ -38,7 +38,6 @@ import {
 import { pluginServices } from '../../services';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { ControlsStorageService } from '../../services/storage/types';
 import { IClearableControl } from '../../types';
 import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
@@ -93,7 +92,6 @@ export class OptionsListEmbeddable
   // Controls services
   private dataViewsService: ControlsDataViewsService;
   private optionsListService: ControlsOptionsListService;
-  private storageService: ControlsStorageService;
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
@@ -120,11 +118,8 @@ export class OptionsListEmbeddable
     this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
-    ({
-      dataViews: this.dataViewsService,
-      optionsList: this.optionsListService,
-      storage: this.storageService,
-    } = pluginServices.getServices());
+    ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
+      pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
     this.loadMoreSubject = new Subject<number>();
@@ -420,13 +415,6 @@ export class OptionsListEmbeddable
     newFilter.meta.key = field?.name;
     if (exclude) newFilter.meta.negate = true;
     return [newFilter];
-  };
-
-  public canShowInvalidSelectionsWarning = () =>
-    this.storageService.getShowInvalidSelectionWarning() ?? true;
-
-  public supressInvalidSelectionsWarning = () => {
-    this.storageService.setShowInvalidSelectionWarning(false);
   };
 
   public clearSelections() {

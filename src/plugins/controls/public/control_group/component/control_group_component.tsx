@@ -25,14 +25,7 @@ import {
   SortableContext,
   sortableKeyboardCoordinates,
 } from '@dnd-kit/sortable';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiTourStep,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import classNames from 'classnames';
 import React, { useEffect, useMemo, useState } from 'react';
 import { TypedUseSelectorHook, useSelector } from 'react-redux';
@@ -54,19 +47,15 @@ export const ControlGroup = () => {
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
-  const invalidSelectionsControlId = contextSelect(
-    (state) => state.componentState.invalidSelectionsControlId
+  const controlsHaveInvalidSelections = contextSelect(
+    (state) => state.componentState.controlsHaveInvalidSelections
   );
 
-  const [renderTourStep, setRenderTourStep] = useState(false);
   useEffect(() => {
-    /**
-     * This forces the tour step to get unmounted so that it can attach to the new invalid
-     * control - otherwise, the anchor will remain attached to the old invalid control
-     */
-    setRenderTourStep(false);
-    setTimeout(() => setRenderTourStep(true), 100);
-  }, [invalidSelectionsControlId]);
+    if (controlsHaveInvalidSelections) {
+      controlGroup.showInvalidSelectionsToast();
+    }
+  }, [controlGroup, controlsHaveInvalidSelections]);
 
   const isEditable = viewMode === ViewMode.EDIT;
 
@@ -137,39 +126,6 @@ export const ControlGroup = () => {
             alignItems="center"
             data-test-subj="controls-group"
           >
-            {renderTourStep && invalidSelectionsControlId && (
-              <EuiTourStep
-                anchor={`#controlFrame--${invalidSelectionsControlId}`}
-                content={'Content'}
-                isStepOpen={true}
-                minWidth={300}
-                onFinish={() => {}}
-                step={1}
-                stepsTotal={1}
-                repositionOnScroll
-                maxWidth={300}
-                panelPaddingSize="m"
-                display="block"
-                title={ControlGroupStrings.invalidControlWarning.getTourStepTitle(
-                  panels[invalidSelectionsControlId].type
-                )}
-                anchorPosition="downCenter"
-                footerAction={
-                  <EuiButtonEmpty
-                    size="xs"
-                    flush="right"
-                    color="text"
-                    data-test-subj="invalidSelectionsPopoverDismissButton"
-                    onClick={() => {
-                      // set cookie to dismiss warning for **all** control types
-                    }}
-                  >
-                    {/* TODO: i18n this  */}
-                    Do not show again
-                  </EuiButtonEmpty>
-                }
-              />
-            )}
             <EuiFlexItem>
               <DndContext
                 onDragStart={({ active }) => setDraggingId(active.id)}

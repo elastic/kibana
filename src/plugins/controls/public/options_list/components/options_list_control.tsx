@@ -56,18 +56,6 @@ export const OptionsListControl = ({
     };
   }, [optionsList]);
 
-  const hasInvalidSelections = useMemo(
-    () => invalidSelections && invalidSelections?.length > 0,
-    [invalidSelections]
-  );
-
-  // show warning if there are invalid selections and the warning is not supressed
-  useEffect(() => {
-    if (hasInvalidSelections && optionsList.canShowInvalidSelectionsWarning()) {
-      optionsList.dispatch.setInvalidSelectionWarningOpen(true);
-    }
-  }, [hasInvalidSelections, optionsList]);
-
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
   const debounceSetLoading = useMemo(

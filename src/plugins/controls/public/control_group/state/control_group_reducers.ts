@@ -19,11 +19,11 @@ export const controlGroupReducers = {
   ) => {
     state.componentState.lastSavedInput = action.payload;
   },
-  setInvalidSelectionsControlId: (
+  setControlsHaveInvalidSelections: (
     state: WritableDraft<ControlGroupReduxState>,
-    action: PayloadAction<ControlGroupComponentState['invalidSelectionsControlId']>
+    action: PayloadAction<ControlGroupComponentState['controlsHaveInvalidSelections']>
   ) => {
-    state.componentState.invalidSelectionsControlId = action.payload;
+    state.componentState.controlsHaveInvalidSelections = action.payload;
   },
   setControlStyle: (
     state: WritableDraft<ControlGroupReduxState>,
