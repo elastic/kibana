@@ -71,7 +71,10 @@ export interface TextBasedLanguagesEditorProps {
   /** Callback running everytime the query changes */
   onTextLangQueryChange: (query: AggregateQuery) => void;
   /** Callback running when the user submits the query */
-  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  onTextLangQuerySubmit: (
+    query?: AggregateQuery,
+    abortController?: AbortController
+  ) => Promise<void>;
   /** Can be used to expand/minimize the editor */
   expandCodeEditor: (status: boolean) => void;
   /** If it is true, the editor initializes with height EDITOR_INITIAL_HEIGHT_EXPANDED */
@@ -105,6 +108,9 @@ export interface TextBasedLanguagesEditorProps {
   editorIsInline?: boolean;
   /** Disables the submit query action*/
   disableSubmitAction?: boolean;
+
+  /** when set to true enables query cancellation **/
+  allowQueryCancellation?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -158,6 +164,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
+  allowQueryCancellation,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -176,7 +183,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
-
+  const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [abortController, setAbortController] = useState(new AbortController());
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
@@ -186,12 +194,25 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   });
 
   const onQuerySubmit = useCallback(() => {
-    const currentValue = editor1.current?.getValue();
-    if (currentValue != null) {
-      setCodeStateOnSubmission(currentValue);
+    if (isQueryLoading && allowQueryCancellation) {
+      abortController?.abort();
+      setIsQueryLoading(false);
+    } else {
+      setIsQueryLoading(true);
+      const abc = new AbortController();
+      setAbortController(abc);
+
+      const currentValue = editor1.current?.getValue();
+      if (currentValue != null) {
+        setCodeStateOnSubmission(currentValue);
+      }
+      onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-    onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery);
-  }, [language, onTextLangQuerySubmit]);
+  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  useEffect(() => {
+    if (!isLoading) setIsQueryLoading(false);
+  }, [isLoading]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -311,12 +332,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
       ({ esql }) => esql
     );
+
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
@@ -334,7 +356,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
           try {
-            const table = await memoizedFieldsFromESQL(esqlQuery, expressions).result;
+            const table = await memoizedFieldsFromESQL(
+              esqlQuery,
+              expressions,
+              undefined,
+              abortController
+            ).result;
             return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
           } catch (e) {
             // no action yet
@@ -352,7 +379,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
     }),
-    [dataViews, expressions, indexManagementApiService, esqlFieldsCache, memoizedFieldsFromESQL]
+    [
+      dataViews,
+      expressions,
+      indexManagementApiService,
+      esqlFieldsCache,
+      memoizedFieldsFromESQL,
+      abortController,
+    ]
   );
 
   const queryValidation = useCallback(
@@ -867,7 +901,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         disableSubmitAction={disableSubmitAction}
                         hideRunQueryText={hideRunQueryText}
                         isSpaceReduced={isSpaceReduced}
-                        isLoading={isLoading}
+                        isLoading={isQueryLoading}
+                        allowQueryCancellation={allowQueryCancellation}
                       />
                     )}
                   </div>
@@ -954,13 +989,16 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           lines={lines}
           containerCSS={styles.bottomContainer}
           onErrorClick={onErrorClick}
-          runQuery={onQuerySubmit}
+          runQuery={() => {
+            onQuerySubmit();
+          }}
           detectTimestamp={detectTimestamp}
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
           isSpaceReduced={isSpaceReduced}
-          isLoading={isLoading}
+          isLoading={isQueryLoading}
+          allowQueryCancellation={allowQueryCancellation}
           {...editorMessages}
         />
       )}

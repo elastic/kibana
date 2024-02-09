@@ -197,7 +197,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.DEV_TOOLS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_FEATURE_ID",
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "devTools",
+        "id": "def-public.ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "description": [
+          "\nUI Setting ID for enabling / disabling the docked console in Kibana"
+        ],
+        "signature": [
+          "\"devTools:enableDockedConsole\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [],
     "setup": {
       "parentPluginId": "devTools",
@@ -267,7 +302,42 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "devTools",
+        "id": "def-common.DEV_TOOLS_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "DEV_TOOLS_FEATURE_ID",
+        "description": [
+          "\nThe UI Setting prefix and category for dev tools UI Settings"
+        ],
+        "signature": [
+          "\"devTools\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "devTools",
+        "id": "def-common.ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "type": "string",
+        "tags": [],
+        "label": "ENABLE_DOCKED_CONSOLE_UI_SETTING_ID",
+        "description": [
+          "\nUI Setting ID for enabling / disabling the docked console in Kibana"
+        ],
+        "signature": [
+          "\"devTools:enableDockedConsole\""
+        ],
+        "path": "src/plugins/dev_tools/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }
