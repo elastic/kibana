@@ -8,7 +8,6 @@ import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin
 import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
 import {
   ProfilingEmbeddableProvider,
@@ -16,7 +15,6 @@ import {
 } from '../profiling_embeddable_provider';
 import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
 import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
-import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export class EmbeddableFunctions extends Embeddable<
   EmbeddableFunctionsEmbeddableInput,
@@ -37,13 +35,11 @@ export class EmbeddableFunctions extends Embeddable<
     this._domNode = domNode;
     const { data, isLoading, rangeFrom, rangeTo } = this.input;
     const totalSeconds = (rangeTo - rangeFrom) / 1000;
-    const { core } = useProfilingDependencies().start;
-    const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
         <AsyncEmbeddableComponent isLoading={isLoading}>
           <div style={{ width: '100%' }}>
-            <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} showErrorFrames={showErrorFrames} />
+            <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
           </div>
         </AsyncEmbeddableComponent>
       </ProfilingEmbeddableProvider>,
