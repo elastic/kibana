@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export const ruleTypesRegistry = new Map([
+import { RuleTypeIndex } from '../../types';
+
+export const ruleTypesIndex = new Map([
   [
     '.index-threshold',
     {
@@ -3427,4 +3429,4 @@ export const ruleTypesRegistry = new Map([
       is_exportable: false,
     },
   ],
-]);
+]) as unknown as RuleTypeIndex;

@@ -33,7 +33,7 @@ import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
 import { useRuleStats } from './hooks/use_rule_stats';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
 import { NON_SIEM_FEATURE_IDS } from '../alerts_search_bar/constants';
-import { alertProducersData, observabilityFeatureIds } from '../alerts_table/constants';
+import { alertProducersData } from '../alerts_table/constants';
 import { UrlSyncedAlertsSearchBar } from '../alerts_search_bar/url_synced_alerts_search_bar';
 import { useKibana } from '../../../common/lib/kibana';
 import { alertsTableQueryClient } from '../alerts_table/query_client';
@@ -45,6 +45,7 @@ import { getCurrentDocTitle } from '../../lib/doc_title';
 import { createMatchPhraseFilter, createRuleTypesFilter } from '../../lib/search_filters';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { nonNullable } from '../../../../common/utils';
+import { useRuleTypeIdsByFeatureId } from './hooks/use_rule_type_ids_by_feature_id';
 const AlertsTable = lazy(() => import('../alerts_table/alerts_table_state'));
 
 interface BuildEsQueryArgs {
@@ -72,8 +73,6 @@ export function buildEsQuery({
   const queryToUse = [...kueryFilter, ...queries];
   return kbnBuildEsQuery(undefined, queryToUse, filtersToUse, config);
 }
-
-type RuleTypeIdsByFeatureId = Record<AlertConsumers, string[]>;
 
 /**
  * A unified view for all types of alerts
@@ -110,20 +109,8 @@ const PageContent = () => {
     ruleTypesState: { data: ruleTypesIndex, initialLoad: isInitialLoadingRuleTypes },
     authorizedToReadAnyRules,
   } = useLoadRuleTypesQuery({ filteredRuleTypes: [] });
-  const ruleTypeIdsByFeatureId = useMemo(
-    () =>
-      ruleTypesIndex?.size > 0
-        ? Array.from(ruleTypesIndex.entries()).reduce((types, [key, value]) => {
-            let producer = value.producer as AlertConsumers;
-            producer = observabilityFeatureIds.includes(producer)
-              ? AlertConsumers.OBSERVABILITY
-              : producer;
-            (types[producer] = types[producer] || []).push(key);
-            return types;
-          }, {} as RuleTypeIdsByFeatureId)
-        : ({} as RuleTypeIdsByFeatureId),
-    [ruleTypesIndex]
-  );
+  const ruleTypeIdsByFeatureId = useRuleTypeIdsByFeatureId(ruleTypesIndex);
+
   const browsingSiem = useMemo(
     () => activeFeatureFilters.length === 1 && activeFeatureFilters[0] === AlertConsumers.SIEM,
     [activeFeatureFilters]

@@ -12,8 +12,8 @@ import {
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
   ALERT_RULE_CATEGORY,
+  ALERT_RULE_CONSUMER,
   ALERT_RULE_NAME,
-  ALERT_RULE_PRODUCER,
   ALERT_RULE_TAGS,
   ALERT_START,
   ALERT_STATUS,
@@ -40,7 +40,7 @@ const columns = [
   },
   {
     displayAsText: FEATURE_LABEL,
-    id: ALERT_RULE_PRODUCER,
+    id: ALERT_RULE_CONSUMER,
     schema: 'string',
     initialWidth: 180,
   },

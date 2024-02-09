@@ -11,7 +11,7 @@ import { waitFor } from '@testing-library/react';
 import { GlobalAlertsPage } from './global_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../common/get_experimental_features';
 import { AppMockRenderer, createAppMockRenderer } from '../test_utils';
-import { ruleTypesRegistry } from './global_alerts_page.mock';
+import { ruleTypesIndex } from '../../mock/rule_types_index';
 
 jest.mock('../../../common/get_experimental_features');
 jest.mock('../../../common/lib/kibana');
@@ -41,7 +41,7 @@ describe('GlobalAlertsPage', () => {
     const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
     useLoadRuleTypesQuery.mockReturnValue({
       ruleTypesState: {
-        data: ruleTypesRegistry,
+        data: ruleTypesIndex,
         initialLoad: false,
       },
       authorizedToReadAnyRules: true,
@@ -59,7 +59,7 @@ describe('GlobalAlertsPage', () => {
     const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
     useLoadRuleTypesQuery.mockReturnValue({
       ruleTypesState: {
-        data: ruleTypesRegistry,
+        data: ruleTypesIndex,
         initialLoad: false,
       },
       authorizedToReadAnyRules: false,

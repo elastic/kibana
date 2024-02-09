@@ -9,12 +9,13 @@ import { isEmpty } from 'lodash';
 import React, { type ReactNode } from 'react';
 import {
   ALERT_DURATION,
-  ALERT_RULE_PRODUCER,
   AlertConsumers,
   ALERT_RULE_NAME,
   ALERT_RULE_UUID,
   ALERT_START,
   TIMESTAMP,
+  ALERT_RULE_CONSUMER,
+  ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import {
   FIELD_FORMAT_IDS,
@@ -22,7 +23,7 @@ import {
   FieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
 import { EuiBadge, EuiLink } from '@elastic/eui';
-import { alertProducersData } from '../constants';
+import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { GetRenderCellValue } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -124,13 +125,17 @@ const AlertRuleLink = ({ alertFields }: { alertFields: Array<{ field: string; va
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: any, rowData?: any): React.ReactElement => {
+  return (
+    columnId: string,
+    value: any,
+    rowData?: Array<{ field: string; value: any }>
+  ): React.ReactElement => {
     switch (columnId) {
       case TIMESTAMP:
       case ALERT_START:
         return <>{getFormatter(FIELD_FORMAT_IDS.DATE)(value)}</>;
       case ALERT_RULE_NAME:
-        return <AlertRuleLink alertFields={rowData} />;
+        return rowData ? <AlertRuleLink alertFields={rowData} /> : <>{value}</>;
       case ALERT_DURATION:
         return (
           <>
@@ -140,8 +145,17 @@ export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
             })(value) || '--'}
           </>
         );
-      case ALERT_RULE_PRODUCER:
-        const consumerData = alertProducersData[value as AlertConsumers];
+      case ALERT_RULE_CONSUMER:
+        const producer = rowData?.find(({ field }) => field === ALERT_RULE_PRODUCER)?.value?.[0];
+        const consumer: AlertConsumers = observabilityFeatureIds.includes(value)
+          ? 'observability'
+          : producer && (value === 'alerts' || value === 'stackAlerts')
+          ? producer
+          : value;
+        const consumerData = alertProducersData[consumer];
+        if (!consumerData) {
+          return <>{value}</>;
+        }
         return <EuiBadge iconType={consumerData.icon}>{consumerData.displayName}</EuiBadge>;
       default:
         return <>{value}</>;
