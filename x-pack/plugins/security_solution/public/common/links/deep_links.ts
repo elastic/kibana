@@ -14,18 +14,18 @@ export type DeepLinksFormatter = (appLinks: AppLinkItems) => AppDeepLink[];
 
 const defaultDeepLinksFormatter: DeepLinksFormatter = (appLinks) =>
   appLinks.map((appLink) => {
-    const visibleIn: AppDeepLinkLocations[] = [];
+    const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
     if (!appLink.globalSearchDisabled) {
-      visibleIn.push('globalSearch');
+      visibleIn.add('globalSearch');
     }
     if (appLink.globalNavPosition != null) {
-      visibleIn.push('sideNav');
+      visibleIn.add('sideNav');
     }
     const deepLink: AppDeepLink = {
       id: appLink.id,
       path: appLink.path,
       title: appLink.title,
-      visibleIn,
+      visibleIn: Array.from(visibleIn),
       ...(appLink.globalNavPosition != null ? { order: appLink.globalNavPosition } : {}),
       ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
       ...(appLink.links && appLink.links?.length

@@ -150,6 +150,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
+      visibleIn: ['home', 'globalSearch', 'sideNav'],
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;

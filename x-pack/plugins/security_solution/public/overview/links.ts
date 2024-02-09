@@ -43,6 +43,7 @@ export const overviewLinks: LinkItem = {
       defaultMessage: 'Overview',
     }),
   ],
+  visibleIn: ['home'],
 };
 
 export const gettingStartedLinks: LinkItem = {

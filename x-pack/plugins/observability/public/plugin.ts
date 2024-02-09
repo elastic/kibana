@@ -312,7 +312,7 @@ export class Plugin
         'user',
         'experience',
       ],
-      visibleIn: Boolean(pluginsSetup.serverless) ? ['globalSearch'] : [],
+      visibleIn: Boolean(pluginsSetup.serverless) ? ['home'] : ['globalSearch', 'home'],
     };
 
     coreSetup.application.register(app);

@@ -243,7 +243,7 @@ export type PublicAppDeepLinkInfo = Omit<AppDeepLink, 'deepLinks' | 'keywords' |
 };
 
 /** The places in the UI where a deepLink can be shown */
-export type AppDeepLinkLocations = 'globalSearch' | 'sideNav' | 'kibanaOverview';
+export type AppDeepLinkLocations = 'globalSearch' | 'sideNav' | 'home' | 'kibanaOverview';
 
 /**
  * Input type for registering secondary in-app locations for an application.

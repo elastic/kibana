@@ -10,18 +10,18 @@ import type { DeepLinksFormatter } from '@kbn/security-solution-plugin/public/co
 
 export const formatProjectDeepLinks: DeepLinksFormatter = (appLinks) =>
   appLinks.map((appLink) => {
-    const visibleIn: AppDeepLinkLocations[] = [];
+    const visibleIn: Set<AppDeepLinkLocations> = new Set(appLink.visibleIn ?? []);
     if (!appLink.globalSearchDisabled) {
-      visibleIn.push('globalSearch');
+      visibleIn.add('globalSearch');
     }
     if (!appLink.sideNavDisabled) {
-      visibleIn.push('sideNav');
+      visibleIn.add('sideNav');
     }
     const deepLink: AppDeepLink = {
       id: appLink.id,
       path: appLink.path,
       title: appLink.title,
-      visibleIn,
+      visibleIn: Array.from(visibleIn),
       ...(appLink.globalSearchKeywords != null ? { keywords: appLink.globalSearchKeywords } : {}),
       ...(appLink.links && appLink.links?.length
         ? {
