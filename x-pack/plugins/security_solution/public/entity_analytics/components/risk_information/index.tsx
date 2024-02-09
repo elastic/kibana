@@ -43,9 +43,7 @@ interface RiskLevelTableItem {
   level: RiskSeverity;
 }
 
-const getRiskLevelTableColumns = (
-  riskEntity?: RiskScoreEntity
-): Array<EuiBasicTableColumn<RiskLevelTableItem>> => [
+const getRiskLevelTableColumns = (): Array<EuiBasicTableColumn<RiskLevelTableItem>> => [
   {
     field: 'level',
     name: i18n.INFORMATION_LEVEL_HEADER,
@@ -57,7 +55,7 @@ const getRiskLevelTableColumns = (
   },
   {
     field: 'range',
-    name: i18n.INFORMATION_RISK_HEADER(riskEntity),
+    name: i18n.INFORMATION_RISK_HEADER,
   },
 ];
 

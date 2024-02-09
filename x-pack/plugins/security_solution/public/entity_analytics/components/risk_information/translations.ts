@@ -6,7 +6,6 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import { getRiskEntityTranslation } from '../risk_score/translations';
 
 export const INFORMATION_LEVEL_HEADER = i18n.translate(
@@ -23,13 +22,15 @@ export const INFORMATION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const INFORMATION_RISK_HEADER = (riskEntity?: RiskScoreEntity) =>
-  i18n.translate('xpack.securitySolution.riskInformation.riskHeader', {
+export const INFORMATION_RISK_HEADER = i18n.translate(
+  'xpack.securitySolution.riskInformation.riskHeader',
+  {
     defaultMessage: '{riskEntity} risk score range',
     values: {
-      riskEntity: getRiskEntityTranslation(riskEntity),
+      riskEntity: getRiskEntityTranslation(),
     },
-  });
+  }
+);
 
 export const INFORMATION_TIER_HEADER = i18n.translate(
   'xpack.securitySolution.riskInformation.tierColumnHeader',
