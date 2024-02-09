@@ -27,7 +27,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('console app', function describeIndexTests() {
     before(async () => {
-      await PageObjects.svlCommonPage.loginWithRole('viewer');
+      // TODO: https://github.com/elastic/kibana/issues/176582
+      // this test scenario requires roles definition check:
+      // Search & Oblt projects 'viewer' role has access to Console, but for
+      // Security project only 'admin' role has access
+      await PageObjects.svlCommonPage.loginWithRole('admin');
       log.debug('navigateTo console');
       await PageObjects.common.navigateToApp('dev_tools', { hash: '/console' });
     });
