@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
@@ -29,6 +29,20 @@ export function ObservabilityAIAssistantActionMenuItem() {
   );
 
   const initialMessages = useMemo(() => [], []);
+
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.code === 'Semicolon') {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener('keypress', keyboardListener);
+
+    return () => {
+      window.removeEventListener('keypress', keyboardListener);
+    };
+  }, []);
 
   if (!service.isEnabled()) {
     return null;

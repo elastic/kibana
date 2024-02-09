@@ -678,6 +678,76 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.deleteConnectorSecret",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteConnectorSecret",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", id: string) => Promise<",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorsAPIUpdateResponse",
+            "text": "ConnectorsAPIUpdateResponse"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-search-connectors/lib/delete_connector_secret.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.deleteConnectorSecret.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/delete_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.deleteConnectorSecret.$2",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/delete_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.fetchConnectorById",
         "type": "Function",
         "tags": [],
@@ -1350,8 +1420,8 @@
             "text": "ElasticsearchClient"
           },
           ", connectorId: string, isNative: boolean) => Promise<",
-          "UpdateResponse",
-          "<unknown>>"
+          "Result",
+          ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_native.ts",
         "deprecated": false,
@@ -1898,7 +1968,7 @@
             "text": "ElasticsearchClient"
           },
           ", connectorId: string, indexName: string) => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_index_name.ts",
@@ -2171,7 +2241,7 @@
             "text": "ElasticsearchClient"
           },
           ", connectorId: string, serviceType: string) => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_service_type.ts",
@@ -2258,7 +2328,7 @@
             "text": "ConnectorStatus"
           },
           ") => Promise<",
-          "WriteResponseBase",
+          "Result",
           ">"
         ],
         "path": "packages/kbn-search-connectors/lib/update_connector_status.ts",
