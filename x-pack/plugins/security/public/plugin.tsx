@@ -134,14 +134,13 @@ export class SecurityPlugin
     });
 
     if (management) {
-      const uiConfig = applyServerlessUiOverrides(this.config, this.buildFlavor);
       this.managementService.setup({
         license,
         management,
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
-        uiConfig,
+        uiConfig: this.config.ui,
       });
     }
 
@@ -190,10 +189,9 @@ export class SecurityPlugin
     this.securityCheckupService.start({ http, notifications, docLinks });
 
     if (management) {
-      const uiConfig = applyServerlessUiOverrides(this.config, this.buildFlavor);
       this.managementService.start({
         capabilities: application.capabilities,
-        uiConfig,
+        uiConfig: this.config.ui,
       });
     }
 
@@ -244,24 +242,4 @@ export interface SecurityPluginStart extends SecurityPluginStartWithoutDeprecate
    * @deprecated
    */
   uiApi: UiApi;
-}
-
-function applyServerlessUiOverrides(
-  config: ConfigType,
-  buildFlavor: BuildFlavor
-):
-  | {
-      userManagementEnabled: boolean;
-      roleManagementEnabled: boolean;
-      roleMappingManagementEnabled: boolean;
-    }
-  | undefined {
-  let result = config.ui;
-  const roleUiOverride = config?.serverlessOverrides?.ui?.roleManagementEnabled;
-
-  if (buildFlavor === 'serverless' && roleUiOverride !== undefined) {
-    result = { ...config.ui, roleManagementEnabled: roleUiOverride };
-  }
-
-  return result;
 }

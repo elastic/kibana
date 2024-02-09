@@ -302,15 +302,6 @@ export const ConfigSchema = schema.object({
     ),
   }),
 
-  // Overrides for serverless configs
-  serverlessOverrides: offeringBasedSchema({
-    serverless: schema.object({
-      ui: schema.object({
-        roleManagementEnabled: schema.boolean({ defaultValue: false }),
-      }),
-    }),
-  }),
-
   // Setting only allowed in the Serverless offering
   ui: offeringBasedSchema({
     serverless: schema.object({

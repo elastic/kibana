@@ -227,11 +227,6 @@ describe('config schema', () => {
         "loginAssistanceMessage": "",
         "public": Object {},
         "secureCookies": false,
-        "serverlessOverrides": Object {
-          "ui": Object {
-            "roleManagementEnabled": false,
-          },
-        },
         "session": Object {
           "cleanupInterval": "PT1H",
           "idleTimeout": "P3D",
@@ -1539,28 +1534,6 @@ describe('config schema', () => {
         }
       `);
     });
-
-    it('should allow xpack.security.ui.* to be configured inside of the serverless context and be overridden from regular config', () => {
-      expect(
-        ConfigSchema.validate(
-          {
-            ui: {
-              userManagementEnabled: false,
-              roleManagementEnabled: false,
-              roleMappingManagementEnabled: false,
-            },
-          },
-          { serverless: true }
-        ).ui
-      ).toMatchInlineSnapshot(`
-        Object {
-          "roleManagementEnabled": false,
-          "roleMappingManagementEnabled": false,
-          "userManagementEnabled": false,
-        }
-      `);
-    });
-  });
 
   describe('session', () => {
     it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {

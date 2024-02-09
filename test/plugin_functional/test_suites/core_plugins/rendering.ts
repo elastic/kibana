@@ -7,7 +7,7 @@
  */
 
 import _ from 'lodash';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import '@kbn/core-provider-plugin/types';
 import { PluginFunctionalProviderContext } from '../../services';
@@ -310,7 +310,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
-        'xpack.security.serverlessOverrides (any)',
         'xpack.spaces.maxSpaces (number)',
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
@@ -374,7 +373,6 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.security.showInsecureClusterWarning (boolean)',
         'xpack.security.showNavLinks (boolean)',
         'xpack.security.ui (any)',
-        'xpack.security.serverlessOverrides (any)',
 
         'telemetry.allowChangingOptInStatus (boolean)',
         'telemetry.appendServerlessChannelsSuffix (any)', // It's a boolean (any because schema.conditional)
