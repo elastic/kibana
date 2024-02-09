@@ -659,6 +659,52 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await searchBar.getAttribute('value')).to.be(casesState.search);
       });
 
+      it('updates the local storage correctly when navigating to a URL', async () => {
+        const theCase = await cases.api.createCase({
+          title: 'url-testing',
+          assignees: [{ uid: profiles[0].uid }],
+          description: 'url testing',
+          category: 'url-testing',
+          tags: ['url'],
+          severity: CaseSeverity.CRITICAL,
+          customFields: [{ key: customFields[0].key, type: CustomFieldTypes.TOGGLE, value: true }],
+        });
+
+        await cases.casesTable.waitForNthToBeListed(caseIds.length + 1);
+
+        const casesState = {
+          search: theCase.title,
+          severity: [theCase.severity],
+          status: [theCase.status],
+          tags: theCase.tags,
+          assignees: [profiles[0].uid],
+          category: [theCase.category],
+          customFields: { [customFields[0].key]: ['on'] },
+        };
+
+        await cases.casesTable.setStateToUrlAndNavigate(casesState);
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        await cases.casesTable.verifyCase(theCase.id, 0);
+
+        const currentState = await cases.casesTable.getAllCasesStateInLocalStorage();
+
+        expect(currentState).to.eql({
+          queryParams: { page: 1, perPage: 10, sortField: 'createdAt', sortOrder: 'desc' },
+          filterOptions: {
+            search: theCase.title,
+            searchFields: ['title', 'description'],
+            severity: [theCase.severity],
+            assignees: [profiles[0].uid],
+            reporters: [],
+            status: [theCase.status],
+            tags: theCase.tags,
+            owner: [],
+            category: [theCase.category],
+            customFields: { my_field_01: { type: CustomFieldTypes.TOGGLE, options: ['on'] } },
+          },
+        });
+      });
+
       it('loads the state from a legacy URL', async () => {
         const theCase = await cases.api.createCase({
           title: 'url-testing',

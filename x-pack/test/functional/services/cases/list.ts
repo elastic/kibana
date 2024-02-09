@@ -474,6 +474,14 @@ export function CasesTableServiceProvider(
       expect(deepEqual(currentState, state)).to.be(true);
     },
 
+    async getAllCasesStateInLocalStorage() {
+      const currentState = JSON.parse(
+        (await browser.getLocalStorageItem('management.cases.list.state')) ?? '{}'
+      );
+
+      return currentState;
+    },
+
     async setFiltersConfigurationInLocalStorage(state: Array<{ key: string; isActive: boolean }>) {
       await browser.setLocalStorageItem(
         'management.cases.list.tableFiltersConfig',
