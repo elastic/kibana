@@ -8,9 +8,16 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
 import { useUserRelatedHosts } from '.';
 import { useSearchStrategy } from '../../use_search_strategy';
+// import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 jest.mock('../../use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
+}));
+
+jest.mock('../../../../entity_analytics/api/hooks/use_risk_engine_status', () => ({
+  useIsNewRiskScoreModuleInstalled: jest
+    .fn()
+    .mockReturnValue({ isLoading: false, installed: true }),
 }));
 const mockUseSearchStrategy = useSearchStrategy as jest.Mock;
 const mockSearch = jest.fn();
