@@ -75,6 +75,62 @@ describe('useReplaceCustomField', () => {
     });
   });
 
+  it('calls the api when invoked with the correct parameters of toggle field', async () => {
+    const newData = {
+      caseId: basicCase.id,
+      customFieldId: 'test_key_2',
+      customFieldValue: false,
+      caseVersion: basicCase.version,
+    };
+    const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    act(() => {
+      result.current.mutate(newData);
+    });
+
+    await waitForNextUpdate();
+
+    expect(patchCustomFieldSpy).toHaveBeenCalledWith({
+      caseId: newData.caseId,
+      customFieldId: newData.customFieldId,
+      request: {
+        value: newData.customFieldValue,
+        caseVersion: newData.caseVersion,
+      },
+    });
+  });
+
+  it('calls the api when invoked with the correct parameters with null value', async () => {
+    const newData = {
+      caseId: basicCase.id,
+      customFieldId: 'test_key_3',
+      customFieldValue: null,
+      caseVersion: basicCase.version,
+    };
+    const patchCustomFieldSpy = jest.spyOn(api, 'replaceCustomField');
+    const { waitForNextUpdate, result } = renderHook(() => useReplaceCustomField(), {
+      wrapper: appMockRender.AppWrapper,
+    });
+
+    act(() => {
+      result.current.mutate(newData);
+    });
+
+    await waitForNextUpdate();
+
+    expect(patchCustomFieldSpy).toHaveBeenCalledWith({
+      caseId: newData.caseId,
+      customFieldId: newData.customFieldId,
+      request: {
+        value: newData.customFieldValue,
+        caseVersion: newData.caseVersion,
+      },
+    });
+  });
+
   it('shows a toast error when the api return an error', async () => {
     jest
       .spyOn(api, 'replaceCustomField')
