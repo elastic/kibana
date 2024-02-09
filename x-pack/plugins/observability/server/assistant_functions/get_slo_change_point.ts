@@ -19,11 +19,15 @@ export interface SLOSourceItem {
 
 const parameters = {
   type: 'object',
-  additionalProperties: false,
+  additionalProperties: true,
   properties: {
     'slo.name': {
       type: 'string',
-      description: 'Filter the slos by name',
+      description: 'Optional filter the slos by name',
+    },
+    'slo.id': {
+      type: 'string',
+      description: 'Optional filter the slos by id',
     },
     start: {
       type: 'string',
@@ -62,7 +66,6 @@ const parameters = {
       },
     },
   },
-  required: ['slo.name'],
 } as const;
 
 export function registerGetSLOChangeDetectionFunction({
@@ -100,6 +103,7 @@ export function registerGetSLOChangeDetectionFunction({
     async ({ arguments: args }, signal) => {
       const {
         'slo.name': name,
+        'slo.id': id,
         longWindow,
         start,
         end,
@@ -109,6 +113,7 @@ export function registerGetSLOChangeDetectionFunction({
       const sloChangePoint = new SLOChangePoint(
         sloClient,
         name,
+        id,
         start,
         end,
         alertStart,
@@ -123,8 +128,8 @@ export function registerGetSLOChangeDetectionFunction({
       const sourceIndex = slo.indicator.params.index;
       let dataView: DataView;
 
-      const dataViewId = (await dataViewsClient.getIdsWithTitle()).find((id) => {
-        return id.title === sourceIndex;
+      const dataViewId = (await dataViewsClient.getIdsWithTitle()).find((view) => {
+        return view.title === sourceIndex;
       })?.id;
       if (dataViewId) {
         dataView = await dataViewsClient.get(dataViewId);
@@ -192,6 +197,7 @@ export class SLOChangePoint {
   constructor(
     private sloClient: FunctionRegistrationParameters['sloClient'],
     private name: string,
+    private id: string | undefined,
     private start: string,
     private end: string,
     private alertStart: string,
@@ -207,6 +213,9 @@ export class SLOChangePoint {
       page: '1',
       perPage: '1',
     };
+    if (this.id) {
+      params.kqlQuery += ` AND slo.id: "${this.id}"`;
+    }
     const findResponse = await this.sloClient.find.execute(params);
     return findResponse.results[0];
   }

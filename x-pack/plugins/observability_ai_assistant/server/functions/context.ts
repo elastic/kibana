@@ -31,7 +31,7 @@ export function registerContextFunction({
         'This function allows the assistant to recall previous learnings from the Knowledge base and gather context of how you are using the application.',
       parameters: {
         type: 'object',
-        additionalProperties: false,
+        additionalProperties: true,
         properties: {
           queries: {
             type: 'array',

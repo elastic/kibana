@@ -37,13 +37,26 @@ export default function AlertDetailsAppSection({
   const {
     services: {
       http: { basePath },
+      observabilityAIAssistant: { useObservabilityAIAssistantChatContext },
     },
   } = useKibana();
+  const { setContext } = useObservabilityAIAssistantChatContext();
 
   const sloId = alert.fields['kibana.alert.rule.parameters']!.sloId as string;
   const instanceId = alert.fields['kibana.alert.instance.id']!;
   const { isLoading, data: slo } = useFetchSloDetails({ sloId, instanceId });
   const alertLink = alert.link;
+
+  setContext({
+    'slo.id': {
+      description: 'SLO ID',
+      value: alert.fields['slo.id'],
+    },
+    'slo.name': {
+      description: 'The name of the SLO',
+      value: slo?.name,
+    },
+  });
 
   useEffect(() => {
     setAlertSummaryFields([

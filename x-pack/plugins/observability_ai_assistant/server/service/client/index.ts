@@ -251,6 +251,12 @@ export class ObservabilityAIAssistantClient {
               ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
             });
 
+            const context = await this.getChatContext();
+            const formattedContext = Object.keys(context).reduce((acc, key) => {
+              acc[key] = context[key].value;
+              return acc;
+            }, {});
+
             const functionResponse =
               numFunctionsCalled >= MAX_FUNCTION_CALLS
                 ? {
@@ -265,6 +271,7 @@ export class ObservabilityAIAssistantClient {
                       name: lastMessage.message.function_call!.name,
                       messages: nextMessages,
                       args: lastMessage.message.function_call!.arguments,
+                      context: formattedContext,
                       signal,
                     })
                     .then((response) => {
@@ -765,6 +772,9 @@ export class ObservabilityAIAssistantClient {
     signal: AbortSignal;
   }) => {
     const conversation = await this.get(conversationId);
+    const content = conversation.messages.slice(1).reduce((acc, curr) => {
+      return `${acc} ${curr.message.role}: ${curr.message.content}`;
+    }, 'You are a helpful assistant for Elastic Observability. Assume the following message is a conversation between you and the user. On the basis of this conversation, suggest four things the user can do now. Phrase the suggestions like the user is asking you a follow up question. Return suggestions as an unordered list. Do not use quotes. Here is the content:');
 
     const response$ = await this.chat('generate_suggestions', {
       messages: [
@@ -772,9 +782,7 @@ export class ObservabilityAIAssistantClient {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
-            content: conversation.messages.slice(1).reduce((acc, curr) => {
-              return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is a conversation between you and the user. On the basis of this conversation, suggest four things the user can do now. Phrase the suggestions like the user is asking you a follow up question. Return suggestions as an unordered list. Do not use quotes. Here is the content:'),
+            content,
           },
         },
       ],

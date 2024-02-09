@@ -39,7 +39,7 @@ export function registerGetSLOListFunction({
       ),
       parameters: {
         type: 'object',
-        additionalProperties: false,
+        additionalProperties: true,
         properties: {
           'slo.name': {
             type: 'string',

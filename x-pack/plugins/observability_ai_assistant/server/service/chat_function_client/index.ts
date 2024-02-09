@@ -69,6 +69,7 @@ export class ChatFunctionClient {
   async executeFunction({
     name,
     args,
+    context,
     messages,
     signal,
     connectorId,
@@ -85,7 +86,7 @@ export class ChatFunctionClient {
       throw new Error(`Function ${name} not found`);
     }
 
-    const parsedArguments = args ? JSON.parse(args) : {};
+    const parsedArguments = args ? { ...context, ...JSON.parse(args) } : context;
 
     this.validate(name, parsedArguments);
 
