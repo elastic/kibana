@@ -36,6 +36,8 @@ interface Options {
     end: number;
   };
   interval: string;
+  instanceId?: string;
+  groupBy?: string;
 }
 export class GetPreviewData {
   constructor(private esClient: ElasticsearchClient) {}
@@ -45,6 +47,11 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const filter: estypes.QueryDslQueryContainer[] = [];
+    if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -137,7 +144,12 @@ export class GetPreviewData {
     indicator: APMTransactionErrorRateIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
-    const filter = [];
+    const filter: estypes.QueryDslQueryContainer[] = [];
+    if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -224,15 +236,24 @@ export class GetPreviewData {
     const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
     const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
     const timestampField = indicator.params.timestampField;
+
+    const filter: estypes.QueryDslQueryContainer[] = [
+      { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+      filterQuery,
+    ];
+
+    if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
+
     const result = await this.esClient.search({
       index: indicator.params.index,
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
-            filterQuery,
-          ],
+          filter,
         },
       },
       aggs: {
@@ -279,15 +300,23 @@ export class GetPreviewData {
     const timestampField = indicator.params.timestampField;
     const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
     const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
+
+    const filter: estypes.QueryDslQueryContainer[] = [
+      { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+      filterQuery,
+    ];
+    if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
+
     const result = await this.esClient.search({
       index: indicator.params.index,
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
-            filterQuery,
-          ],
+          filter,
         },
       },
       aggs: {
@@ -336,15 +365,24 @@ export class GetPreviewData {
     const getCustomMetricIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(
       indicator
     );
+
+    const filter: estypes.QueryDslQueryContainer[] = [
+      { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+      filterQuery,
+    ];
+
+    if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
+
     const result = await this.esClient.search({
       index: indicator.params.index,
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
-            filterQuery,
-          ],
+          filter,
         },
       },
       aggs: {
@@ -379,15 +417,23 @@ export class GetPreviewData {
     const goodQuery = getElasticsearchQueryOrThrow(indicator.params.good);
     const totalQuery = getElasticsearchQueryOrThrow(indicator.params.total);
     const timestampField = indicator.params.timestampField;
+    const filter: estypes.QueryDslQueryContainer[] = [
+      { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
+      filterQuery,
+    ];
+
+    if (options.instanceId !== ALL_VALUE && options.groupBy) {
+      filter.push({
+        term: { [options.groupBy]: options.instanceId },
+      });
+    }
+
     const result = await this.esClient.search({
       index: indicator.params.index,
       size: 0,
       query: {
         bool: {
-          filter: [
-            { range: { [timestampField]: { gte: options.range.start, lte: options.range.end } } },
-            filterQuery,
-          ],
+          filter,
         },
       },
       aggs: {
@@ -441,7 +487,9 @@ export class GetPreviewData {
               1
             );
       const options: Options = {
+        instanceId: params.instanceId,
         range: params.range,
+        groupBy: params.groupBy,
         interval: `${bucketSize}m`,
       };
 

@@ -72,6 +72,8 @@ const getPreviewDataParamsSchema = t.type({
     }),
     t.partial({
       objective: objectiveSchema,
+      instanceId: t.string,
+      groupBy: t.string,
     }),
   ]),
 });
