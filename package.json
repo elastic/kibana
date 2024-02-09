@@ -676,6 +676,7 @@
     "@kbn/search-index-documents": "link:packages/kbn-search-index-documents",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
+    "@kbn/security-hardening": "link:packages/kbn-security-hardening",
     "@kbn/security-plugin": "link:x-pack/plugins/security",
     "@kbn/security-plugin-types-common": "link:x-pack/packages/security/plugin_types_common",
     "@kbn/security-plugin-types-public": "link:x-pack/packages/security/plugin_types_public",

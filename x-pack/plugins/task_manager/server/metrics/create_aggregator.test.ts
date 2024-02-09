@@ -74,6 +74,9 @@ const config: TaskManagerConfig = {
   version_conflict_threshold: 80,
   worker_utilization_running_average_window: 5,
   claim_strategy: 'default',
+  request_timeouts: {
+    update_by_query: 1000,
+  },
 };
 
 describe('createAggregator', () => {
