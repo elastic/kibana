@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { isEqual } from 'lodash/fp';
 import type { FC } from 'react';
-import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 
 import { EuiButton } from '@elastic/eui';
 import type { AlertAssignees } from '../../../../common/api/detection_engine';
@@ -45,28 +44,21 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
      */
     const [selectedUserIds, setSelectedUserIds] =
       useState<AssigneesIdsSelection[]>(assignedUserIds);
-    const [assigneesToUpdate, setAssigneesToUpdate] = useState<AlertAssignees>({
-      add: [],
-      remove: [],
-    });
+
+    const assigneesToUpdate = useMemo<AlertAssignees>(() => {
+      const updatedIds = removeNoAssigneesSelection(selectedUserIds);
+      const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
+      const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
+      return {
+        add: assigneesToAddArray,
+        remove: assigneesToRemoveArray,
+      };
+    }, [assignedUserIds, selectedUserIds]);
+
     const isDirty = useMemo(
       () => assigneesToUpdate.add.length || assigneesToUpdate.remove.length,
       [assigneesToUpdate]
     );
-
-    useEffect(() => {
-      const updatedIds = removeNoAssigneesSelection(selectedUserIds);
-      const assigneesToAddArray = updatedIds.filter((uid) => !assignedUserIds.includes(uid));
-      const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
-
-      const toUpdate = {
-        add: assigneesToAddArray,
-        remove: assigneesToRemoveArray,
-      };
-      if (!isEqual(toUpdate, assigneesToUpdate)) {
-        setAssigneesToUpdate(toUpdate);
-      }
-    }, [assignedUserIds, assigneesToUpdate, selectedUserIds]);
 
     const handleSelectionChange = useCallback((userIds: AssigneesIdsSelection[]) => {
       setSelectedUserIds(userIds);
