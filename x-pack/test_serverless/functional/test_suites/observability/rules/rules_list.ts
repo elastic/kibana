@@ -363,7 +363,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElementByIndex(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -388,7 +388,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('bulkDisable');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElementByIndex(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Disabled 1 rule');
       });
@@ -476,7 +476,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       await testSubjects.click('confirmModalConfirmButton');
 
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElementByIndex(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Deleted 1 rule');
       });
@@ -929,7 +929,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         '[data-test-subj="rulesListNotifyBadge-snoozed"]:not(.euiButton-isDisabled)'
       );
       await retry.try(async () => {
-        const resultToast = await toasts.getToastElementByIndex(1);
+        const resultToast = await toasts.getElementByIndex(1);
         const toastText = await resultToast.getVisibleText();
         expect(toastText).toEqual('Rules notification successfully unsnoozed');
       });

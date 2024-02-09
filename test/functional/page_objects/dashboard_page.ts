@@ -490,7 +490,7 @@ export class DashboardPageObject extends FtrService {
       // Confirm that the Dashboard has actually been saved
       await this.testSubjects.existOrFail('saveDashboardSuccess');
     });
-    const message = await this.toasts.closeToast();
+    const message = await this.toasts.dismiss();
     await this.header.waitUntilLoadingHasFinished();
     await this.common.waitForSaveModalToClose();
 

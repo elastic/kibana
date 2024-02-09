@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.dashboard.gotoDashboardEditMode(
       dashboardDrilldownsManage.DASHBOARD_WITH_PIE_CHART_NAME
     );
-    await toasts.dismissAllToasts(); // toasts get in the way of bottom "Create drilldown" button in flyout
+    await toasts.dismissAll(); // toasts get in the way of bottom "Create drilldown" button in flyout
 
     // create drilldown
     await dashboardPanelActions.openContextMenu();
@@ -78,7 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     controls: Array<{ field: string; type: string }>
   ) => {
     await PageObjects.dashboard.gotoDashboardEditMode(dashboardName);
-    await toasts.dismissAllToasts(); // toasts get in the way of bottom "Save and close" button in create control flyout
+    await toasts.dismissAll(); // toasts get in the way of bottom "Save and close" button in create control flyout
 
     for (const control of controls) {
       await PageObjects.dashboardControls.createControl({

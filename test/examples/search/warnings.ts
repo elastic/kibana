@@ -95,14 +95,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     afterEach(async () => {
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
     });
 
     it('should show search warnings as toasts', async () => {
       await testSubjects.click('searchSourceWithOther');
 
       await retry.try(async () => {
-        expect(await toasts.getToastCount()).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
         await testSubjects.click('viewWarningBtn');
       });
 
@@ -150,7 +150,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // wait for toasts - toasts appear after the response is rendered
       await retry.try(async () => {
-        expect(await toasts.getToastCount()).to.be(2);
+        expect(await toasts.getCount()).to.be(2);
       });
 
       // warnings tab

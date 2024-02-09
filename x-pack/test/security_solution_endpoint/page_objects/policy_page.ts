@@ -112,7 +112,7 @@ export function EndpointPolicyPageProvider({ getService, getPageObjects }: FtrPr
       // which are displayed using one or more Toast messages. This in turn prevents the user from
       // actually clicking the Save button. Because those errors are not associated with Policy details,
       // we'll first check that all toasts are cleared
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
 
       await testSubjects.click('policyDetailsSaveButton');
       await testSubjects.existOrFail('policyDetailsConfirmModal');

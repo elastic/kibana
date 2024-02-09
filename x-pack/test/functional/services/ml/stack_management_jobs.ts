@@ -89,10 +89,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const title = await toasts.getToastTitleByIndex(1);
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^\d+ item[s]? synchronized$/);
 
-      await toasts.dismissToastByIndex(1);
+      await toasts.dismissByIndex(1);
     },
 
     async assertADJobRowSpaces(adJobId: string, expectedSpaces: string[]) {
@@ -278,10 +278,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const title = await toasts.getToastTitleByIndex(1);
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^\d+ job[s]? successfully imported$/);
 
-      await toasts.dismissToastByIndex(1);
+      await toasts.dismissByIndex(1);
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtImportJobsFlyout', { timeout: 60 * 1000 });
@@ -343,10 +343,10 @@ export function MachineLearningStackManagementJobsProvider({
       });
 
       // check and close success toast
-      const title = await toasts.getToastTitleByIndex(1);
+      const title = await toasts.getTitleByIndex(1);
       expect(title).to.match(/^Your file is downloading in the background$/);
 
-      await toasts.dismissAllToastsWithChecks();
+      await toasts.dismissAllWithChecks();
 
       // check that the flyout is closed
       await testSubjects.missingOrFail('mlJobMgmtExportJobsFlyout', { timeout: 60 * 1000 });

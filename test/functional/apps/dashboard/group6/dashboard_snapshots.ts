@@ -59,7 +59,7 @@ export default function ({
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: tsvb-ts');
-      await toasts.closeToastIfExists();
+      await toasts.closeIfExists();
 
       await PageObjects.dashboard.saveDashboard('tsvb');
       await PageObjects.dashboard.clickFullScreenMode();
@@ -81,7 +81,7 @@ export default function ({
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.timePicker.setLogstashDataRange();
       await dashboardAddPanel.addVisualization('Rendering Test: area with not filter');
-      await toasts.closeToastIfExists();
+      await toasts.closeIfExists();
 
       await PageObjects.dashboard.saveDashboard('area');
       await PageObjects.dashboard.clickFullScreenMode();

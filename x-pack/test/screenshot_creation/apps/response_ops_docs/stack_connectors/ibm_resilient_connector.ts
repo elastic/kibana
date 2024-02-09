@@ -48,9 +48,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await commonScreenshots.takeScreenshot('resilient-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
       // Close all toasts since it is unable to get incident types from example site
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await pageObjects.header.waitUntilLoadingHasFinished();
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await commonScreenshots.takeScreenshot('resilient-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });

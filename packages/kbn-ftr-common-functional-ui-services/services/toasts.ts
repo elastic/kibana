@@ -25,14 +25,14 @@ export class ToastsService extends FtrService {
    * @param titleOnly If this is true, only the title of the error message is returned. There are error messages that only contain a title, no message.
    * @returns The title and message of the specified error toast.
    */
-  public async getErrorToastByIndex(
+  public async getErrorByIndex(
     index: number = 1,
     titleOnly: boolean = false
   ): Promise<{ title: string; message?: string }> {
-    const title = await this.getToastTitleByIndex(index);
+    const title = await this.getTitleByIndex(index);
     if (titleOnly) return { title };
 
-    const toast = await this.getToastElementByIndex(index);
+    const toast = await this.getElementByIndex(index);
     const messageElement = await this.testSubjects.findDescendant('errorToastMessage', toast);
     const message: string = await messageElement.getVisibleText();
 
@@ -59,14 +59,14 @@ export class ToastsService extends FtrService {
    *
    * @param index The 1-based index of the toast to dismiss. Use first by default.
    */
-  public async dismissToastByIndex(index: number = 1): Promise<void> {
-    const toast = await this.getToastElementByIndex(index);
+  public async dismissByIndex(index: number = 1): Promise<void> {
+    const toast = await this.getElementByIndex(index);
     await toast.moveMouseTo();
     const dismissButton = await this.testSubjects.findDescendant('toastCloseButton', toast);
     await dismissButton.click();
   }
 
-  public async closeToastIfExists(): Promise<void> {
+  public async closeIfExists(): Promise<void> {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
@@ -77,7 +77,7 @@ export class ToastsService extends FtrService {
     }
   }
 
-  public async closeToast(): Promise<string> {
+  public async dismiss(): Promise<string> {
     const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
     await toast.moveMouseTo();
     const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
@@ -86,8 +86,8 @@ export class ToastsService extends FtrService {
     return title;
   }
 
-  public async dismissAllToasts(): Promise<void> {
-    const allToastElements = await this.getAllToastElements();
+  public async dismissAll(): Promise<void> {
+    const allToastElements = await this.getAll();
 
     if (allToastElements.length === 0) return;
 
@@ -102,16 +102,16 @@ export class ToastsService extends FtrService {
     }
   }
 
-  public async dismissAllToastsWithChecks(): Promise<void> {
+  public async dismissAllWithChecks(): Promise<void> {
     await this.retry.tryForTime(30 * 1000, async (): Promise<void> => {
-      await this.dismissAllToasts();
-      await this.assertToastCount(0);
+      await this.dismissAll();
+      await this.assertCount(0);
     });
   }
 
-  public async assertToastCount(expectedCount: number): Promise<void> {
+  public async assertCount(expectedCount: number): Promise<void> {
     await this.retry.tryForTime(5 * 1000, async (): Promise<void> => {
-      const toastCount = await this.getToastCount({ timeout: 1000 });
+      const toastCount = await this.getCount({ timeout: 1000 });
       expect(toastCount).to.eql(
         expectedCount,
         `Toast count should be ${expectedCount} (got ${toastCount})`
@@ -119,35 +119,33 @@ export class ToastsService extends FtrService {
     });
   }
 
-  public async getToastElementByIndex(index: number): Promise<WebElementWrapper> {
-    return await (
-      await this.getGlobalToastList()
-    ).findByCssSelector(`.euiToast:nth-child(${index})`);
+  public async getElementByIndex(index: number): Promise<WebElementWrapper> {
+    return await (await this.getGlobalList()).findByCssSelector(`.euiToast:nth-child(${index})`);
   }
 
-  public async getToastTitleByIndex(index: number): Promise<string> {
-    const resultToast = await this.getToastElementByIndex(index);
+  public async getTitleByIndex(index: number): Promise<string> {
+    const resultToast = await this.getElementByIndex(index);
     const titleElement = await this.testSubjects.findDescendant('euiToastHeader', resultToast);
     const title: string = await titleElement.getVisibleText();
     return title;
   }
 
-  public async getToastContentByIndex(index: number): Promise<string> {
-    const elem = await this.getToastElementByIndex(index);
+  public async getContentByIndex(index: number): Promise<string> {
+    const elem = await this.getElementByIndex(index);
     return await elem.getVisibleText();
   }
 
-  public async getAllToastElements(): Promise<WebElementWrapper[]> {
-    const list = await this.getGlobalToastList();
+  public async getAll(): Promise<WebElementWrapper[]> {
+    const list = await this.getGlobalList();
     return await list.findAllByCssSelector(`.euiToast`);
   }
 
-  private async getGlobalToastList(options?: { timeout?: number }): Promise<WebElementWrapper> {
+  private async getGlobalList(options?: { timeout?: number }): Promise<WebElementWrapper> {
     return await this.testSubjects.find('globalToastList', options?.timeout);
   }
 
-  public async getToastCount(options?: { timeout?: number }): Promise<number> {
-    const list = await this.getGlobalToastList(options);
+  public async getCount(options?: { timeout?: number }): Promise<number> {
+    const list = await this.getGlobalList(options);
     const toasts = await list.findAllByCssSelector(`.euiToast`, options?.timeout);
     return toasts.length;
   }

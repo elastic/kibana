@@ -166,7 +166,7 @@ export class HomePageObject extends FtrService {
 
   async launchSampleDataSet(id: string) {
     await this.addSampleDataSet(id);
-    await this.toasts.closeToastIfExists();
+    await this.toasts.closeIfExists();
     await this.retry.try(async () => {
       await this.testSubjects.click(`launchSampleDataSet${id}`);
       await this.find.byCssSelector(

@@ -635,7 +635,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('row actions', () => {
       afterEach(async () => {
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
       });
 
       describe('Status', () => {
@@ -721,7 +721,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
     describe('Column Selection', () => {
       afterEach(async () => {
-        await toasts.dismissAllToastsWithChecks();
+        await toasts.dismissAllWithChecks();
       });
 
       before(async () => {

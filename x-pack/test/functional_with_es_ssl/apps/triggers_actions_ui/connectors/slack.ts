@@ -211,7 +211,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         //     tags: '',
         //   },
         // ]);
-        // const toastTitle = await toasts.closeToast();
+        // const toastTitle = await toasts.dismiss();
         // expect(toastTitle).to.eql(`Created rule "${ruleName}"`);
       });
     });

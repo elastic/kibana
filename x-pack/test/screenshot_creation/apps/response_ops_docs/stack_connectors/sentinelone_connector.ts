@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await testSubjects.setValue('secrets.token-input', 'tester');
       await commonScreenshots.takeScreenshot('sentinelone-connector', screenshotDirectories);
       await testSubjects.click('create-connector-flyout-save-test-btn');
-      await toasts.dismissAllToasts();
+      await toasts.dismissAll();
       await commonScreenshots.takeScreenshot('sentinelone-params-test', screenshotDirectories);
       await testSubjects.click('euiFlyoutCloseButton');
     });
