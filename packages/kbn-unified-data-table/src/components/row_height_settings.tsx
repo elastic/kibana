@@ -22,17 +22,15 @@ export interface RowHeightSettingsProps {
 
 const idPrefix = htmlIdGenerator()();
 
-export function RowHeightSettings(props: RowHeightSettingsProps) {
-  const {
-    label,
-    rowHeight,
-    rowHeightLines,
-    onChangeRowHeight,
-    onChangeRowHeightLines,
-    maxRowHeight,
-    ['data-test-subj']: dataTestSubj,
-  } = props;
-
+export function RowHeightSettings({
+  label,
+  rowHeight,
+  rowHeightLines,
+  onChangeRowHeight,
+  onChangeRowHeightLines,
+  maxRowHeight,
+  ['data-test-subj']: dataTestSubj,
+}: RowHeightSettingsProps) {
   const rowHeightModeOptions = [
     {
       id: `${idPrefix}single`,
@@ -64,7 +62,6 @@ export function RowHeightSettings(props: RowHeightSettingsProps) {
           <EuiButtonGroup
             isFullWidth
             legend={label}
-            name="legendLocation"
             buttonSize="compressed"
             options={rowHeightModeOptions}
             idSelected={`${idPrefix}${rowHeight ?? 'single'}`}

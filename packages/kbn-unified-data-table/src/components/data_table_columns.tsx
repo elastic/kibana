@@ -202,7 +202,7 @@ function buildEuiGridColumn({
   return column;
 }
 
-const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
+export const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
   if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto) {
     return undefined;
   } else if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.single) {

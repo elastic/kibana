@@ -192,6 +192,11 @@ describe('saved search embeddable', () => {
     await waitOneTick();
     expect(searchProps.rowHeightState).toEqual(40);
 
+    expect(searchProps.headerRowHeightState).toEqual(5);
+    searchProps.onUpdateHeaderRowHeight!(3);
+    await waitOneTick();
+    expect(searchProps.headerRowHeightState).toEqual(3);
+
     expect(searchProps.rowsPerPageState).toEqual(50);
     searchProps.onUpdateRowsPerPage!(100);
     await waitOneTick();

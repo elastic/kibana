@@ -846,7 +846,7 @@ export const UnifiedDataTable = ({
       options.allowDensity = false;
     }
 
-    if (onChangeRowHeight || onChangeHeaderRowHeight || onUpdateSampleSize) {
+    if (onUpdateRowHeight || onUpdateHeaderRowHeight || onUpdateSampleSize) {
       options.allowResetButton = false;
       options.additionalDisplaySettings = (
         <UnifiedDataTableAdditionalDisplaySettings
@@ -874,6 +874,7 @@ export const UnifiedDataTable = ({
     onChangeHeaderRowHeightLines,
     onChangeRowHeight,
     onChangeRowHeightLines,
+    onUpdateHeaderRowHeight,
     onUpdateRowHeight,
     onUpdateSampleSize,
     rowHeight,
