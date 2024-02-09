@@ -5,6 +5,9 @@
   "private": true,
   "license": "Elastic License 2.0",
   "scripts": {
+    "initialize-server:genai": "node ./scripts/index.js server genai trial_license_complete_tier",
+    "run-tests:genai": "node ./scripts/index.js runner genai trial_license_complete_tier",
+
     "initialize-server:ea": "node ./scripts/index.js server entity_analytics trial_license_complete_tier",
     "run-tests:ea": "node ./scripts/index.js runner entity_analytics trial_license_complete_tier",
 
@@ -25,6 +28,12 @@
 
     "initialize-server:lists:complete": "node ./scripts/index.js server lists_and_exception_lists trial_license_complete_tier",
     "run-tests:lists:complete": "node ./scripts/index.js runner lists_and_exception_lists trial_license_complete_tier",
+
+    "genai:server:serverless": "npm run initialize-server:genai invoke_ai serverless",
+    "genai:runner:serverless": "npm run run-tests:genai invoke_ai serverless serverlessEnv",
+    "genai:qa:serverless": "npm run run-tests:genai invoke_ai serverless qaEnv",
+    "genai:server:ess": "npm run initialize-server:genai invoke_ai ess",
+    "genai:runner:ess": "npm run run-tests:genai invoke_ai ess essEnv",
 
     "entity_analytics:server:serverless": "npm run initialize-server:ea risk_engine serverless",
     "entity_analytics:runner:serverless": "npm run run-tests:ea risk_engine serverless serverlessEnv",
