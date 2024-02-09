@@ -64,7 +64,7 @@ export function TransactionOverview() {
     return setApplicationContext({
       description: `The user is looking at the transactions overview for ${serviceName}, and the transaction type is ${transactionType}`,
     });
-  }, [setApplicationContext]);
+  }, [setApplicationContext, serviceName, transactionType]);
 
   return (
     <>

@@ -52,7 +52,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
     return () => {
       unregister();
     };
-  }, []);
+  }, [service]);
 
   if (!service.isEnabled()) {
     return null;
