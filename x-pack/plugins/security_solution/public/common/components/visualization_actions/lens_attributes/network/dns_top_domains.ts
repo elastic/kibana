@@ -133,6 +133,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                   scale: 'interval',
                   params: {
                     interval: 'auto',
+                    includeEmptyRows: true,
                   },
                 },
                 '2a4d5e20-f570-48e4-b9ab-ff3068919377': {
@@ -142,6 +143,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                   scale: 'ratio',
                   sourceField: 'dns.question.name',
                   isBucketed: false,
+                  params: { emptyAsNull: true },
                 },
               },
               columnOrder: [

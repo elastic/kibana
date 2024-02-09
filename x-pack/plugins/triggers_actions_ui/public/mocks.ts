@@ -15,8 +15,6 @@ import { getEditRuleFlyoutLazy } from './common/get_edit_rule_flyout';
 import { TypeRegistry } from './application/type_registry';
 import {
   ActionTypeModel,
-  RuleAddProps,
-  RuleEditProps,
   RuleTypeModel,
   AlertsTableProps,
   FieldBrowserProps,
@@ -73,7 +71,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+    getAddRuleFlyout: (props) => {
       return getAddRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
@@ -81,7 +79,7 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
         connectorServices,
       });
     },
-    getEditRuleFlyout: (props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+    getEditRuleFlyout: (props) => {
       return getEditRuleFlyoutLazy({
         ...props,
         actionTypeRegistry,
