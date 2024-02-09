@@ -843,7 +843,7 @@ export default class QueryStringInputUI extends PureComponent<QueryStringInputPr
                 role="textbox"
                 data-test-subj={this.props.dataTestSubj || 'queryInput'}
                 isInvalid={this.props.isInvalid}
-                isClearable={this.props.isClearable}
+                isClearable={this.props.isClearable && !this.props.isDisabled}
                 icon={this.props.iconType}
               >
                 {this.forwardNewValueIfNeeded(this.getQueryString())}
