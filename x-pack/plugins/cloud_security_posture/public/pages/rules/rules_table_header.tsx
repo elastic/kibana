@@ -281,9 +281,7 @@ const CurrentPageOfTotal = ({
   };
 
   const { data: rulesData } = useFetchDetectionRulesByTags(
-    getFindingsDetectionRuleSearchTagsFromArrayOfRules(
-      selectedRules.map((element) => element.metadata)
-    ),
+    getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
     'OR'
   );
 

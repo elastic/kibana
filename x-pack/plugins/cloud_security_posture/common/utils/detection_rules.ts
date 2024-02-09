@@ -56,9 +56,7 @@ export const getFindingsDetectionRuleSearchTagsFromArrayOfRules = (
 
   // we can just take the first benchmark id because we Know that the array will ONLY contain 1 kind of id
   const benchmarkId = cspBenchmarkRules[0]?.benchmark?.id;
-  const benchmarkRuleNumbers = cspBenchmarkRules.map(
-    (benchmark) => benchmark.benchmark.rule_number
-  );
+  const benchmarkRuleNumbers = cspBenchmarkRules.map((rule) => rule.benchmark.rule_number);
   const benchmarkTagArray = benchmarkRuleNumbers.map(
     (tag) => benchmarkId.replace('_', ' ').toUpperCase() + ' ' + tag
   );
