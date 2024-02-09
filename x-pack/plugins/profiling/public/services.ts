@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { HttpFetchQuery } from '@kbn/core/public';
 import {
   createFlameGraph,
@@ -21,6 +23,7 @@ import type {
 import { TopNResponse } from '../common/topn';
 import type { SetupDataCollectionInstructions } from '../server/routes/setup/get_cloud_setup_instructions';
 import { AutoAbortedHttpService } from './hooks/use_auto_aborted_http_client';
+import { useProfilingDependencies } from './components/contexts/profiling_dependencies/use_profiling_dependencies';
 
 export interface ProfilingSetupStatus {
   has_setup: boolean;
@@ -108,8 +111,11 @@ export function getServices(): Services {
         kuery,
       };
 
+      const { core } = useProfilingDependencies().start;
+      const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
+
       const baseFlamegraph = (await http.get(paths.Flamechart, { query })) as BaseFlameGraph;
-      return createFlameGraph(baseFlamegraph);
+      return createFlameGraph(baseFlamegraph, showErrorFrames);
     },
     fetchHasSetup: async ({ http }) => {
       const hasSetup = (await http.get(paths.HasSetupESResources, {})) as ProfilingSetupStatus;

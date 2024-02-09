@@ -81,12 +81,15 @@ export interface ElasticFlameGraph
  * This allows us to create a flamegraph in two steps (e.g. first on the server
  * and finally in the browser).
  * @param base BaseFlameGraph
+ * @param showErrorFrames
  * @returns ElasticFlameGraph
  */
-export function createFlameGraph(base: BaseFlameGraph, showErrorFrame: boolean): ElasticFlameGraph {
-  if (!showErrorFrame) {
+export function createFlameGraph(
+  base: BaseFlameGraph,
+  showErrorFrames: boolean
+): ElasticFlameGraph {
+  if (!showErrorFrames) {
     // This loop jumps over the error frames in the graph.
-    // This code is temporary until we decided how to present error frames in the UI.
     // Error frames only appear as child nodes of the root frame.
     // Error frames only have a single child node.
     for (let i = 0; i < base.Edges[0].length; i++) {
