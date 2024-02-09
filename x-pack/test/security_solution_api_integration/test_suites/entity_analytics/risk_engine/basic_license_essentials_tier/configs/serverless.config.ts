@@ -13,13 +13,14 @@ export default createTestConfig({
       'entityAnalyticsAssetCriticalityEnabled',
     ])}`,
     `--xpack.securitySolutionServerless.productTypes=${JSON.stringify([
-      { product_line: 'security', product_tier: 'complete' },
-      { product_line: 'endpoint', product_tier: 'complete' },
-      { product_line: 'cloud', product_tier: 'complete' },
+      { product_line: 'security', product_tier: 'essentials' },
+      { product_line: 'endpoint', product_tier: 'essentials' },
+      { product_line: 'cloud', product_tier: 'essentials' },
     ])}`,
   ],
   testFiles: [require.resolve('..')],
   junit: {
-    reportName: 'Entity Analytics - Risk Engine Integration Tests - Serverless Env - Complete Tier',
+    reportName:
+      'Entity Analytics - Risk Engine Integration Tests - Serverless Env - Essentials Tier',
   },
 });
