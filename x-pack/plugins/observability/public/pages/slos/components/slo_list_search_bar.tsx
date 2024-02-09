@@ -36,11 +36,10 @@ export function SloListSearchBar() {
   const containerRef = React.useRef<HTMLDivElement>(null);
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
-  const loading = isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo;
+  const loading = isCreatingSlo || isUpdatingSlo || isDeletingSlo;
 
   const { dataView } = useCreateDataView({
     indexPatternString: SLO_SUMMARY_DESTINATION_INDEX_NAME,

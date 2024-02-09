@@ -37,7 +37,6 @@ export function SloList() {
   const { results = [], total = 0 } = sloList ?? {};
 
   const isCreatingSlo = Boolean(useIsMutating(['creatingSlo']));
-  const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
 
@@ -54,7 +53,7 @@ export function SloList() {
           onChangeView={(newView) => onStateChange({ view: newView })}
           onStateChange={onStateChange}
           state={state}
-          loading={isLoading || isCreatingSlo || isCloningSlo || isUpdatingSlo || isDeletingSlo}
+          loading={isLoading || isCreatingSlo || isUpdatingSlo || isDeletingSlo}
         />
       </EuiFlexItem>
       {groupBy === 'ungrouped' && (
