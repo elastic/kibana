@@ -28,21 +28,18 @@ import {
   EuiHorizontalRule,
   useEuiTheme,
 } from '@elastic/eui';
-import React, { useMemo, useState } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
+import { useToggle } from 'react-use';
 import { PICK_ASSET_CRITICALITY } from './translations';
 import {
   AssetCriticalityBadge,
   AssetCriticalityBadgeAllowMissing,
 } from './asset_criticality_badge';
 import type { Entity, State } from './use_asset_criticality';
-import {
-  useAssetCriticalityData,
-  useCriticalityModal,
-  useAssetCriticalityPrivileges,
-} from './use_asset_criticality';
+import { useAssetCriticalityData, useAssetCriticalityPrivileges } from './use_asset_criticality';
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
 interface Props {
@@ -53,9 +50,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
   entity: Entity;
   compressed?: boolean;
 }> = ({ criticality, entity, compressed = false }) => {
-  const modal = useCriticalityModal();
-  const openModal = useMemo(() => () => modal.toggle(true), [modal]);
-  const closeModal = useMemo(() => () => modal.toggle(false), [modal]);
+  const [visible, toggleModal] = useToggle(false);
   const sFontSize = useEuiFontSize('s').fontSize;
 
   return (
@@ -96,7 +91,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
                     defaultMessage: 'Change asset criticality',
                   }
                 )}
-                onClick={openModal}
+                onClick={() => toggleModal(true)}
               />
             </EuiFlexItem>
           )}
@@ -108,7 +103,7 @@ const AssetCriticalitySelectorComponent: React.FC<{
                 iconType="arrowStart"
                 iconSide="left"
                 flush="right"
-                onClick={openModal}
+                onClick={() => toggleModal(true)}
               >
                 {criticality.status === 'update' ? (
                   <FormattedMessage
@@ -126,8 +121,8 @@ const AssetCriticalitySelectorComponent: React.FC<{
           )}
         </EuiFlexGroup>
       )}
-      {modal.visible ? (
-        <AssetCriticalityModal entity={entity} criticality={criticality} onClose={closeModal} />
+      {visible ? (
+        <AssetCriticalityModal entity={entity} criticality={criticality} toggle={toggleModal} />
       ) : null}
     </>
   );
@@ -179,18 +174,18 @@ const AssetCriticalityAccordionComponent: React.FC<Props> = ({ entity }) => {
 
 interface ModalProps {
   criticality: State;
-  onClose: () => void;
+  toggle: (nextValue: boolean) => void;
   entity: Entity;
 }
 
-const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, onClose }) => {
+const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, toggle }) => {
   const basicSelectId = useGeneratedHtmlId({ prefix: 'basicSelect' });
   const [value, setNewValue] = useState<CriticalityLevel>(
     criticality.query.data?.criticality_level ?? 'normal'
   );
 
   return (
-    <EuiModal onClose={onClose}>
+    <EuiModal onClose={() => toggle(false)}>
       <EuiModalHeader>
         <EuiModalHeaderTitle data-test-subj="asset-criticality-modal-title">
           {PICK_ASSET_CRITICALITY}
@@ -207,7 +202,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, onCl
         />
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty onClick={() => toggle(false)}>
           <FormattedMessage
             id="xpack.securitySolution.entityAnalytics.assetCriticality.cancelButton"
             defaultMessage="Cancel"
@@ -221,7 +216,7 @@ const AssetCriticalityModal: React.FC<ModalProps> = ({ criticality, entity, onCl
               idField: `${entity.type}.name`,
               idValue: entity.name,
             });
-            onClose();
+            toggle(false);
           }}
           fill
           data-test-subj="asset-criticality-modal-save-btn"

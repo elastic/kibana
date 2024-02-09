@@ -7,8 +7,6 @@
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-
-import { useToggle } from 'react-use';
 import type { AssetCriticalityRecord } from '../../../../common/api/entity_analytics/asset_criticality';
 import type { EntityAnalyticsPrivileges } from '../../../../common/api/entity_analytics/common';
 import type { AssetCriticality } from '../../api/api';
@@ -60,11 +58,6 @@ export const useAssetCriticalityData = ({
     mutation,
     privileges,
   };
-};
-
-export const useCriticalityModal = () => {
-  const [visible, toggle] = useToggle(false);
-  return { visible, toggle };
 };
 
 export interface State {
