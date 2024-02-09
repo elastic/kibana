@@ -10,6 +10,7 @@ import uniqBy from 'lodash/uniqBy';
 import {
   CommandModeDefinition,
   CommandOptionsDefinition,
+  FunctionDefinition,
   SignatureArgType,
 } from '../definitions/types';
 import {
@@ -134,8 +135,9 @@ function validateNestedFunctionArg(
   ) {
     // The isSupported check ensure the definition exists
     const argFn = getFunctionDefinition(actualArg.name)!;
-
-    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions) {
+    const fnDef = getFunctionDefinition(astFunction.name)!;
+    // no nestying criteria should be enforced only for same type function
+    if ('noNestingFunctions' in argDef && argDef.noNestingFunctions && fnDef.type === argFn.type) {
       messages.push(
         getMessageFromId({
           messageId: 'noNestedArgumentSupport',
@@ -170,56 +172,76 @@ function validateFunctionColumnArg(
   parentCommand: string
 ) {
   const messages: ESQLMessage[] = [];
-  if (isColumnItem(actualArg) && actualArg.name) {
-    const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
-    if (!columnCheck) {
-      messages.push(
-        getMessageFromId({
-          messageId: 'unknownColumn',
-          values: {
-            name: actualArg.name,
-          },
-          locations: actualArg.location,
-        })
-      );
-    } else {
-      if (actualArg.name === '*') {
-        // if function does not support wildcards return a specific error
-        if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'noWildcardSupportAsArg',
-              values: {
-                name: astFunction.name,
-              },
-              locations: actualArg.location,
-            })
-          );
-        }
-        // do not validate any further for now, only count() accepts wildcard as args...
+  if (isColumnItem(actualArg)) {
+    if (actualArg.name) {
+      const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
+      if (!columnCheck) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownColumn',
+            values: {
+              name: actualArg.name,
+            },
+            locations: actualArg.location,
+          })
+        );
       } else {
-        // guaranteed by the check above
-        const columnHit = getColumnHit(nameHit!, references);
-        // check the type of the column hit
-        const typeHit = columnHit!.type;
-        if (!isEqualType(actualArg, argDef, references, parentCommand)) {
-          messages.push(
-            getMessageFromId({
-              messageId: 'wrongArgumentType',
-              values: {
-                name: astFunction.name,
-                argType: argDef.type,
-                value: actualArg.name,
-                givenType: typeHit,
-              },
-              locations: actualArg.location,
-            })
-          );
+        if (actualArg.name === '*') {
+          // if function does not support wildcards return a specific error
+          if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'noWildcardSupportAsArg',
+                values: {
+                  name: astFunction.name,
+                },
+                locations: actualArg.location,
+              })
+            );
+          }
+          // do not validate any further for now, only count() accepts wildcard as args...
+        } else {
+          // guaranteed by the check above
+          const columnHit = getColumnHit(nameHit!, references);
+          // check the type of the column hit
+          const typeHit = columnHit!.type;
+          if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+            messages.push(
+              getMessageFromId({
+                messageId: 'wrongArgumentType',
+                values: {
+                  name: astFunction.name,
+                  argType: argDef.type,
+                  value: actualArg.name,
+                  givenType: typeHit,
+                },
+                locations: actualArg.location,
+              })
+            );
+          }
         }
       }
     }
   }
   return messages;
+}
+
+function extractCompatibleSignaturesForFunction(
+  fnDef: FunctionDefinition,
+  astFunction: ESQLFunction
+) {
+  return fnDef.signatures.filter((def) => {
+    if (def.infiniteParams && astFunction.args.length > 0) {
+      return true;
+    }
+    if (def.minParams && astFunction.args.length >= def.minParams) {
+      return true;
+    }
+    if (astFunction.args.length === def.params.length) {
+      return true;
+    }
+    return astFunction.args.length === def.params.filter(({ optional }) => !optional).length;
+  });
 }
 
 function validateFunction(
@@ -235,16 +257,8 @@ function validateFunction(
     return messages;
   }
   const fnDefinition = getFunctionDefinition(astFunction.name)!;
-  const supportNestedFunctions =
-    fnDefinition?.signatures.some(({ params }) =>
-      params.some(({ noNestingFunctions }) => !noNestingFunctions)
-    ) || true;
 
-  const isFnSupported = isSupportedFunction(
-    astFunction.name,
-    isNested && !supportNestedFunctions ? 'eval' : parentCommand,
-    parentOption
-  );
+  const isFnSupported = isSupportedFunction(astFunction.name, parentCommand, parentOption);
 
   if (!isFnSupported.supported) {
     if (isFnSupported.reason === 'unknownFunction') {
@@ -282,18 +296,7 @@ function validateFunction(
       return messages;
     }
   }
-  const matchingSignatures = fnDefinition.signatures.filter((def) => {
-    if (def.infiniteParams && astFunction.args.length > 0) {
-      return true;
-    }
-    if (def.minParams && astFunction.args.length >= def.minParams) {
-      return true;
-    }
-    if (astFunction.args.length === def.params.length) {
-      return true;
-    }
-    return astFunction.args.length >= def.params.filter(({ optional }) => !optional).length;
-  });
+  const matchingSignatures = extractCompatibleSignaturesForFunction(fnDefinition, astFunction);
   if (!matchingSignatures.length) {
     const numArgs = fnDefinition.signatures[0].params.filter(({ optional }) => !optional).length;
     messages.push(
@@ -303,6 +306,7 @@ function validateFunction(
           fn: astFunction.name,
           numArgs,
           passedArgs: astFunction.args.length,
+          exactly: fnDefinition.signatures[0].params.length - numArgs,
         },
         locations: astFunction.location,
       })
@@ -325,9 +329,9 @@ function validateFunction(
       }
     }
   }
-  // check if the definition has some warning to show:
-  if (fnDefinition.warning) {
-    const payloads = fnDefinition.warning(astFunction);
+  // check if the definition has some specific validation to apply:
+  if (fnDefinition.validate) {
+    const payloads = fnDefinition.validate(astFunction);
     if (payloads.length) {
       messages.push(...payloads);
     }
@@ -399,6 +403,7 @@ function validateFunction(
       failingSignatures.push(failingSignature);
     }
   }
+
   if (failingSignatures.length && failingSignatures.length === matchingSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
       .map((arr, index) => ({ index, count: arr.length }))
@@ -435,27 +440,27 @@ function validateSetting(
     );
     return messages;
   }
-  setting.args.forEach((arg, index) => {
-    if (!Array.isArray(arg)) {
-      const argDef = settingDef.signature.params[index];
-      const value = 'value' in arg ? arg.value : arg.name;
-      if (argDef.values && !argDef.values?.includes(String(value).toLowerCase())) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unsupportedSettingCommandValue',
-            values: {
-              setting: setting.name,
-              command: command.name.toUpperCase(),
-              value: String(value),
-              // for some reason all this enums are uppercase in ES
-              expected: (argDef.values?.join(', ') || argDef.type).toUpperCase(),
-            },
-            locations: arg.location,
-          })
-        );
-      }
-    }
-  });
+  if (
+    settingDef.values.every(({ name }) => name !== setting.name) ||
+    // enforce the check on the prefix if present
+    (settingDef.prefix && !setting.text.startsWith(settingDef.prefix))
+  ) {
+    messages.push(
+      getMessageFromId({
+        messageId: 'unsupportedSettingCommandValue',
+        values: {
+          command: command.name.toUpperCase(),
+          value: setting.text,
+          // for some reason all this enums are uppercase in ES
+          expected: settingDef.values
+            .map(({ name }) => `${settingDef.prefix || ''}${name}`)
+            .join(', ')
+            .toUpperCase(),
+        },
+        locations: setting.location,
+      })
+    );
+  }
   return messages;
 }
 
@@ -657,14 +662,7 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
       }
 
       if (isSettingItem(arg)) {
-        messages.push(
-          ...validateSetting(
-            arg,
-            commandDef.modes?.find(({ name }) => name === arg.name),
-            command,
-            references
-          )
-        );
+        messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
       }
 
       if (isOptionItem(arg)) {
@@ -790,7 +788,7 @@ export async function validateAst(
     retrieveMetadataFields(callbacks),
   ]);
 
-  if (availablePolicies.size && ast.filter(({ name }) => name === 'enrich')) {
+  if (availablePolicies.size) {
     const fieldsFromPoliciesMap = await retrievePoliciesFields(ast, availablePolicies, callbacks);
     fieldsFromPoliciesMap.forEach((value, key) => availableFields.set(key, value));
   }
