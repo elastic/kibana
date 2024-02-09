@@ -7,21 +7,25 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react-hooks';
+import { waitFor } from '@testing-library/react';
+import { CaseStatuses } from '@kbn/cases-components';
 
 import { TestProviders } from '../../common/mock';
 import { useAllCasesState } from './use_all_cases_state';
 import { DEFAULT_CASES_TABLE_STATE, DEFAULT_TABLE_LIMIT } from '../../containers/constants';
 import { SortFieldCase } from '../../containers/types';
 import { stringifyUrlParams } from './utils/stringify_url_params';
-import { CaseStatuses } from '@kbn/cases-components';
 import { CaseSeverity } from '../../../common';
 import type { AllCasesTableState } from './types';
 import { CustomFieldTypes } from '../../../common/types/domain';
-import { waitFor } from '@testing-library/react';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 const mockLocation = { search: '' };
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+
+jest.mock('../../containers/configure/use_get_case_configuration');
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -37,12 +41,16 @@ jest.mock('react-router-dom', () => ({
   })),
 }));
 
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+
 const LS_KEY = 'testAppId.cases.list.state';
 
 describe('useAllCasesQueryParams', () => {
   beforeEach(() => {
     localStorage.clear();
     mockLocation.search = '';
+
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
   });
 
   afterEach(() => {
@@ -537,6 +545,27 @@ describe('useAllCasesQueryParams', () => {
     };
 
     localStorage.setItem(LS_KEY, JSON.stringify(existingLocalStorageValues));
+
+    renderHook(() => useAllCasesState(), {
+      wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
+    });
+
+    // first call is the initial call made by useLocalStorage
+    expect(lsSpy).toBeCalledTimes(1);
+  });
+
+  it('does not update the local storage when the custom field configuration is loading', async () => {
+    mockLocation.search = stringifyUrlParams({
+      severity: [CaseSeverity.HIGH],
+      status: [CaseStatuses['in-progress']],
+    });
+
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      isLoading: true,
+    }));
+
+    const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,

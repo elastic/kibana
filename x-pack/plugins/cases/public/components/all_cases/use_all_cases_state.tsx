@@ -41,6 +41,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
   const [tableState, setTableState] = useState<AllCasesTableState>(DEFAULT_CASES_TABLE_STATE);
   const [urlState, setUrlState] = useAllCasesUrlState();
   const [localStorageState, setLocalStorageState] = useAllCasesLocalStorage();
+  const { isLoading: isLoadingCasesConfiguration } = useGetCaseConfiguration();
 
   const allCasesTableState: AllCasesTableState = useMemo(
     () => (isModalView ? tableState : getAllCasesTableState(urlState, localStorageState)),
@@ -89,6 +90,7 @@ export function useAllCasesState(isModalView: boolean = false): UseAllCasesState
     !isURLStateEmpty(urlState) &&
     localStorageState &&
     !deepEqual(allCasesTableState, localStorageState) &&
+    !isLoadingCasesConfiguration &&
     !isModalView
   ) {
     setLocalStorageState(allCasesTableState);
