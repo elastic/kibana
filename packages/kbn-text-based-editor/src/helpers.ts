@@ -116,6 +116,17 @@ export const parseErrors = (errors: Error[], code: string): MonacoMessage[] => {
         endLineNumber: Number(lineNumber),
         severity: monaco.MarkerSeverity.Error,
       };
+    } else if (error.message.includes('expression was aborted')) {
+      return {
+        message: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.aborted', {
+          defaultMessage: 'Request was aborted',
+        }),
+        startColumn: 1,
+        startLineNumber: 1,
+        endColumn: 10,
+        endLineNumber: 1,
+        severity: monaco.MarkerSeverity.Warning,
+      };
     } else {
       // unknown error message
       return {
