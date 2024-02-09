@@ -7,7 +7,6 @@
 
 import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
-import { isEmpty } from 'lodash';
 import * as i18n from './translations';
 import type { FilterOptions } from '../../containers/types';
 
@@ -25,11 +24,8 @@ const TableSearchComponent: React.FC<TableSearchComponentProps> = ({
   const onSearch = useCallback(
     (newSearch) => {
       const trimSearch = newSearch.trim();
-
-      if (!isEmpty(trimSearch)) {
-        setSearch(trimSearch);
-        onFilterOptionsChange({ search: trimSearch });
-      }
+      setSearch(trimSearch);
+      onFilterOptionsChange({ search: trimSearch });
     },
     [onFilterOptionsChange]
   );

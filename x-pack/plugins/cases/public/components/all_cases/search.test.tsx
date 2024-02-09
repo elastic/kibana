@@ -48,13 +48,25 @@ describe('TableSearch', () => {
     expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: 'My search' });
   });
 
-  it('does not call onFilterOptionsChange if the search term is empty', async () => {
+  it('calls onFilterOptionsChange if the search term is empty', async () => {
     appMockRender.render(
       <TableSearch filterOptionsSearch="" onFilterOptionsChange={onFilterOptionsChange} />
     );
 
     userEvent.type(await screen.findByTestId('search-cases'), '      {enter}');
 
-    expect(onFilterOptionsChange).not.toHaveBeenCalled();
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
+  });
+
+  it('calls onFilterOptionsChange when clearing the search bar', async () => {
+    appMockRender.render(
+      <TableSearch filterOptionsSearch="My search" onFilterOptionsChange={onFilterOptionsChange} />
+    );
+
+    await screen.findByDisplayValue('My search');
+
+    userEvent.click(await screen.findByTestId('clearSearchButton'));
+
+    expect(onFilterOptionsChange).toHaveBeenCalledWith({ search: '' });
   });
 });
