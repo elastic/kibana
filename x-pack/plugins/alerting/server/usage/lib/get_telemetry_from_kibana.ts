@@ -46,7 +46,6 @@ type GetTotalCountsResults = Pick<
   | 'throttle_time_number_s'
   | 'schedule_time_number_s'
   | 'connectors_per_alert'
-  | 'count_rules_by_search_type'
 > & { errorMessage?: string; hasErrors: boolean };
 
 interface GetTotalCountInUseResults {
@@ -321,7 +320,10 @@ export async function getTotalCountAggregations({
     return {
       hasErrors: false,
       count_total: totalRulesCount ?? 0,
-      count_by_type: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      count_by_type: {
+        ...parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+        ...countRulesBySearchType,
+      },
       count_rules_by_execution_status: countRulesByExecutionStatus,
       count_rules_with_tags: aggregations.sum_rules_with_tags.value ?? 0,
       count_rules_by_notify_when: countRulesByNotifyWhen,
@@ -329,7 +331,6 @@ export async function getTotalCountAggregations({
       count_rules_muted: aggregations.sum_rules_muted.value ?? 0,
       count_rules_with_muted_alerts: aggregations.sum_rules_with_muted_alerts.value ?? 0,
       count_connector_types_by_consumers: countConnectorTypesByConsumers,
-      count_rules_by_search_type: countRulesBySearchType,
       throttle_time: {
         min: `${aggregations.min_throttle_time.value ?? 0}s`,
         avg: `${aggregations.avg_throttle_time.value ?? 0}s`,
@@ -382,11 +383,6 @@ export async function getTotalCountAggregations({
       count_rules_muted: 0,
       count_rules_with_muted_alerts: 0,
       count_connector_types_by_consumers: {},
-      count_rules_by_search_type: {
-        es_query: 0,
-        search_source: 0,
-        esql_query: 0,
-      },
       throttle_time: {
         min: '0s',
         avg: '0s',
@@ -440,6 +436,11 @@ export async function getTotalCountInUse({
               size: NUM_ALERTING_RULE_TYPES,
             },
           },
+          by_search_type: {
+            terms: {
+              field: 'alert.params.searchType',
+            },
+          },
         },
       },
     };
@@ -452,15 +453,23 @@ export async function getTotalCountInUse({
     const aggregations = results.aggregations as {
       by_rule_type_id: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
       namespaces_count: AggregationsCardinalityAggregate;
+      by_search_type: AggregationsTermsAggregateBase<AggregationsStringTermsBucketKeys>;
     };
 
     const totalEnabledRulesCount =
       typeof results.hits.total === 'number' ? results.hits.total : results.hits.total?.value;
 
+    const countRulesBySearchType = groupRulesBySearchType(
+      parseSimpleRuleTypeBucket(aggregations.by_search_type.buckets)
+    );
+
     return {
       hasErrors: false,
       countTotal: totalEnabledRulesCount ?? 0,
-      countByType: parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+      countByType: {
+        ...parseSimpleRuleTypeBucket(aggregations.by_rule_type_id.buckets),
+        ...countRulesBySearchType,
+      },
       countNamespaces: aggregations.namespaces_count.value ?? 0,
     };
   } catch (err) {

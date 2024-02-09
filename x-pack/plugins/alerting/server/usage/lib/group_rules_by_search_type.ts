@@ -8,11 +8,11 @@
 import { AlertingUsage } from '../types';
 
 export function groupRulesBySearchType(
-  rulesByNotifyWhen: Record<string, number>
-): AlertingUsage['count_rules_by_search_type'] {
+  rulesBySearchType: Record<string, number>
+): AlertingUsage['count_by_type'] {
   return {
-    es_query: rulesByNotifyWhen.esQuery ?? 0,
-    search_source: rulesByNotifyWhen.searchSource ?? 0,
-    esql_query: rulesByNotifyWhen.esqlQuery ?? 0,
+    '__es-query_es_query': rulesBySearchType.esQuery ?? 0,
+    '__es-query_search_source': rulesBySearchType.searchSource ?? 0,
+    '__es-query_esql_query': rulesBySearchType.esqlQuery ?? 0,
   };
 }

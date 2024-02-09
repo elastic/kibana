@@ -192,6 +192,9 @@ describe('kibana index telemetry', () => {
           document__test__: 1,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
+          '__es-query_es_query': 0,
+          '__es-query_esql_query': 3,
+          '__es-query_search_source': 1,
         },
         count_total: 4,
         hasErrors: false,
@@ -237,11 +240,6 @@ describe('kibana index telemetry', () => {
           siem: {
             __index: 4,
           },
-        },
-        count_rules_by_search_type: {
-          es_query: 0,
-          search_source: 1,
-          esql_query: 3,
         },
       });
     });
@@ -308,11 +306,6 @@ describe('kibana index telemetry', () => {
           min: 0,
         },
         count_connector_types_by_consumers: {},
-        count_rules_by_search_type: {
-          es_query: 0,
-          search_source: 0,
-          esql_query: 0,
-        },
       });
     });
   });
@@ -356,6 +349,24 @@ describe('kibana index telemetry', () => {
               },
             ],
           },
+          by_search_type: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [
+              {
+                key: 'esQuery',
+                doc_count: 0,
+              },
+              {
+                key: 'searchSource',
+                doc_count: 1,
+              },
+              {
+                key: 'esqlQuery',
+                doc_count: 3,
+              },
+            ],
+          },
         },
       });
 
@@ -373,6 +384,9 @@ describe('kibana index telemetry', () => {
           document__test__: 1,
           // eslint-disable-next-line @typescript-eslint/naming-convention
           logs__alert__document__count: 1,
+          '__es-query_es_query': 0,
+          '__es-query_esql_query': 3,
+          '__es-query_search_source': 1,
         },
         countNamespaces: 1,
         countTotal: 4,

@@ -43,11 +43,6 @@ export interface AlertingUsage {
   count_rules_muted: number;
   count_rules_with_muted_alerts: number;
   count_rules_by_execution_status_per_day: Record<string, number>;
-  count_rules_by_search_type: {
-    es_query: number;
-    search_source: number;
-    esql_query: number;
-  };
   percentile_num_generated_actions_per_day: {
     p50: number;
     p90: number;

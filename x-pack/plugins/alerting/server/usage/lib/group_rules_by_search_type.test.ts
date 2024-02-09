@@ -17,17 +17,17 @@ describe('groupRulesBySearchType', () => {
         foo: 5,
       })
     ).toEqual({
-      es_query: 1,
-      search_source: 2,
-      esql_query: 3,
+      '__es-query_es_query': 1,
+      '__es-query_search_source': 2,
+      '__es-query_esql_query': 3,
     });
   });
 
   test('should fallback to 0 if any of the expected search types are absent', () => {
     expect(groupRulesBySearchType({ unknown: 100, bar: 300 })).toEqual({
-      es_query: 0,
-      search_source: 0,
-      esql_query: 0,
+      '__es-query_es_query': 0,
+      '__es-query_search_source': 0,
+      '__es-query_esql_query': 0,
     });
   });
 });

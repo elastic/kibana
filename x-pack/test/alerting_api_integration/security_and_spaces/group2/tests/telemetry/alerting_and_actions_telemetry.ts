@@ -253,12 +253,18 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_by_type.test__throw).to.equal(3);
       expect(telemetry.count_by_type['__es-query']).to.equal(3);
+      expect(telemetry.count_by_type['__es-query_es_query']).to.equal(0);
+      expect(telemetry.count_by_type['__es-query_search_source']).to.equal(0);
+      expect(telemetry.count_by_type['__es-query_esql_query']).to.equal(3);
 
       // total number of enabled rules broken down by rule type
       expect(telemetry.count_active_by_type.test__patternFiring).to.equal(3);
       expect(telemetry.count_active_by_type.test__multipleSearches).to.equal(3);
       expect(telemetry.count_active_by_type.test__throw).to.equal(3);
       expect(telemetry.count_active_by_type['__es-query']).to.equal(3);
+      expect(telemetry.count_active_by_type['__es-query_es_query']).to.equal(0);
+      expect(telemetry.count_active_by_type['__es-query_search_source']).to.equal(0);
+      expect(telemetry.count_active_by_type['__es-query_esql_query']).to.equal(3);
 
       // throttle time stats
       expect(telemetry.throttle_time.min).to.equal('0s');
@@ -453,10 +459,6 @@ export default function createAlertingAndActionsTelemetryTests({ getService }: F
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__noop).to.equal(6);
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.test__throw).to.equal(3);
       expect(telemetry.count_connector_types_by_consumers.alertsFixture.__slack).to.equal(3);
-      // rules grouped by search type
-      expect(telemetry.count_rules_by_search_type.es_query).to.equal(0);
-      expect(telemetry.count_rules_by_search_type.search_source).to.equal(0);
-      expect(telemetry.count_rules_by_search_type.esql_query).to.equal(3);
 
       expect(telemetry.count_rules_by_execution_status_per_day.failure > 0).to.be(true);
       expect(telemetry.count_rules_by_execution_status_per_day.success > 0).to.be(true);
