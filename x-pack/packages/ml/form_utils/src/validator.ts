@@ -15,5 +15,6 @@
  *
  * @param value The value to be validated
  * @param isOptional Optional boolean flag if the provided value is optional
+ * @param reservedValues Optional array of reserved values
  */
 export type Validator = <T>(value: T, isOptional?: boolean, reservedValues?: string[]) => string[];
