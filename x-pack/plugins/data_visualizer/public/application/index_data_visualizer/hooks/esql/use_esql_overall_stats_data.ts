@@ -377,17 +377,7 @@ export const useESQLOverallStatsData = (
         // to safeguard against huge datasets
         const esqlBaseQueryWithLimit = searchQuery.esql + getSafeESQLLimitSize(limitSize);
 
-        // @TODO: remove
-        console.log(`--@@totalCount`, totalCount);
         if (totalCount === 0) {
-          console.log(`--@@setTableData`, {
-            aggregatableFields: undefined,
-            nonAggregatableFields: undefined,
-            overallStats: undefined,
-            columns: undefined,
-            timeFieldName: undefined,
-          });
-
           setTableData({
             aggregatableFields: undefined,
             nonAggregatableFields: undefined,

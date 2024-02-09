@@ -554,10 +554,6 @@ export const useESQLDataVisualizerData = (
       dataVisualizerListState.pageSize,
     ]
   );
-  // @TODO: remove
-  console.log(`--@@configs`, configs);
-  console.log(`--@@nonMetricConfigs`, nonMetricConfigs);
-  console.log(`--@@metricConfigs`, metricConfigs);
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
