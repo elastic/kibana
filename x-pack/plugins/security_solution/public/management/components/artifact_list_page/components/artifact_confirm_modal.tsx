@@ -60,7 +60,7 @@ export const ArtifactConfirmModal = memo<ConfirmArtifactModalProps>(
           <EuiButton
             fill
             color="danger"
-            onClick={onConfirm}
+            onClick={onSuccess}
             data-test-subj={getTestId('submitButton')}
           >
             {confirmButton}

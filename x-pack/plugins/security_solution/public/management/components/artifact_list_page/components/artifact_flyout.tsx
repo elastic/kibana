@@ -42,6 +42,7 @@ import { useWithArtifactSubmitData } from '../hooks/use_with_artifact_submit_dat
 import { useIsArtifactAllowedPerPolicyUsage } from '../hooks/use_is_artifact_allowed_per_policy_usage';
 import { useGetArtifact } from '../../../hooks/artifacts';
 import type { PolicyData } from '../../../../../common/endpoint/types';
+import { ArtifactConfirmModal } from './artifact_confirm_modal';
 
 export const ARTIFACT_FLYOUT_LABELS = Object.freeze({
   flyoutEditTitle: i18n.translate('xpack.securitySolution.artifactListPage.flyoutEditTitle', {
@@ -207,23 +208,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         ..._labels,
       };
     }, [_labels]);
-    // TODO:PT Refactor internal/external state into the `useEithArtifactSucmitData()` hook
+    // TODO:PT Refactor internal/external state into the `useWithArtifactSucmitData()` hook
     const [externalIsSubmittingData, setExternalIsSubmittingData] = useState<boolean>(false);
     const [externalSubmitHandlerError, setExternalSubmitHandlerError] = useState<
       IHttpFetchError | undefined
     >(undefined);
     const [showConfirmModal, setShowConfirmModal] = useState<boolean>(false);
-    /*
-    let confirmModal: EuiModal;
-        const { title, body, confirmButtonText, cancelButtonText } = formState.confirmWarningModal;
-        <ArtifactConfirmModal
-          title={title}
-          body={body}
-          confirmButton={confirmButtonText}
-          cancelButton={cancelButtonText}
-          onSuccess={submitData(formState.item).then(handleSuccess)}
-          onCancel={}
-        />;*/
 
     const isEditFlow = urlParams.show === 'edit';
     const formMode: ArtifactFormComponentProps['mode'] = isEditFlow ? 'edit' : 'create';
@@ -282,12 +272,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
-      ({ item: updatedItem, isValid, confirmWarningModal }) => {
+      ({ item: updatedItem, isValid, confirmModal }) => {
         if (isMounted()) {
           setFormState({
             item: updatedItem,
             isValid,
-            confirmWarningModal,
+            confirmModal,
           });
         }
       },
@@ -329,7 +319,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               setExternalIsSubmittingData(false);
             }
           });
-      } else if (formState.confirmWarningModal) {
+      } else if (formState.confirmModal) {
         setShowConfirmModal(true);
       } else {
         submitData(formState.item).then(handleSuccess);
@@ -337,12 +327,23 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [
       formMode,
       formState.item,
-      formState.confirmWarningModal,
+      formState.confirmModal,
       handleSuccess,
       isMounted,
       submitData,
       submitHandler,
     ]);
+
+    const confirmModal = (
+      <ArtifactConfirmModal
+        title="hi"
+        body="body"
+        confirmButton="Add"
+        cancelButton="Cancel"
+        onSuccess={() => console.log('success')}
+        onCancel={() => setShowConfirmModal(false)}
+      />
+    );
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now
@@ -365,7 +366,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
       isMounted,
     ]);
 
-    // If we got an error while trying ot retrieve the item for edit, then show a toast message
+    // If we got an error while trying to retrieve the item for edit, then show a toast message
     useEffect(() => {
       if (isEditFlow && error) {
         toasts.addWarning(labels.flyoutEditItemLoadFailure(error?.body?.message || error.message));

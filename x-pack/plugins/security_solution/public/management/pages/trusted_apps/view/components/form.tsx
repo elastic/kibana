@@ -91,7 +91,7 @@ interface ValidationResult {
   }>;
 
   /**  Additional Warning callout after submit */
-  extraWarning: boolean;
+  extraWarning?: boolean;
 }
 
 const addResultToValidation = (
@@ -99,7 +99,7 @@ const addResultToValidation = (
   field: keyof NewTrustedApp,
   type: 'warnings' | 'errors',
   resultValue: React.ReactNode,
-  addToFront: boolean | undefined
+  addToFront?: boolean
 ) => {
   if (!validation.result[field]) {
     validation.result[field] = {
@@ -283,7 +283,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         onChange({
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
-          confirmWarningModal: updatedValidationResult.extraWarning
+          confirmModal: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS
             : undefined,
         });
