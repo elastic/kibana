@@ -56,7 +56,7 @@ while read -r config; do
   echo "--- $ $FULL_COMMAND"
 
   start=$(date +%s)
-
+  export TEST_BROWSER_BINARY_PATH="$(which google-chrome-beta)"
   # prevent non-zero exit code from breaking the loop
   set +e;
   node ./scripts/functional_tests \
