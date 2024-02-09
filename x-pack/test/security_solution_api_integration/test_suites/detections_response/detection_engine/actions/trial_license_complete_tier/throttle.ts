@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {

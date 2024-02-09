@@ -6,7 +6,7 @@
  */
 
 import { omit } from 'lodash/fp';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { ALERT_CASE_IDS, ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
 
 import { Case, AttachmentType } from '@kbn/cases-plugin/common';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { ALERT_RISK_SCORE } from '@kbn/rule-data-utils';
 import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';

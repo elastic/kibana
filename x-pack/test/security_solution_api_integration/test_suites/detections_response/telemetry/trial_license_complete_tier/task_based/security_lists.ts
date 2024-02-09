@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import {
   ENDPOINT_EVENT_FILTERS_LIST_ID,
   ENDPOINT_LIST_ID,

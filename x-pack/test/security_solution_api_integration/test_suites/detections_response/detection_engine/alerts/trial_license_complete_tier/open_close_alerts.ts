@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
 import { adminTestUser } from '@kbn/test';
 import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';

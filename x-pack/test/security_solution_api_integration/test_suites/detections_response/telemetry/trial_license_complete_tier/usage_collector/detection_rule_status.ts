@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type { MlJobUsageMetric } from '@kbn/security-solution-plugin/server/usage/detections/ml_jobs/types';
 import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
