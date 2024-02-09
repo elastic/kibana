@@ -365,8 +365,8 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from remote-*:indexes*`, []);
     testErrorsAndWarnings(`from remote-*:indexes`, []);
     testErrorsAndWarnings(`from remote-ccs:indexes`, []);
-    testErrorsAndWarnings(`from a, remote-ccs:indexes`, []);
-    testErrorsAndWarnings('from .secretIndex', []);
+    testErrorsAndWarnings(`from a_index, remote-ccs:indexes`, []);
+    testErrorsAndWarnings('from .secret_index', []);
     testErrorsAndWarnings('from my-index', []);
     testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
     testErrorsAndWarnings('from policy', ['Unknown index [policy]']);
@@ -806,29 +806,34 @@ describe('validation logic', () => {
       "SyntaxError: missing STRING at '%'",
     ]);
     // Do not try to validate the dissect pattern string
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}"', []);
-    testErrorsAndWarnings('from a | dissect numberField "%{firstWord}"', [
-      'DISSECT only supports string type values, found [numberField] of type number',
+    testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}"', []);
+    testErrorsAndWarnings('from a_index | dissect numberField "%{firstWord}"', [
+      'DISSECT only supports string type values, found [numberField] of type [number]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option ', [
+    testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option = ', [
+    testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" option = ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET} but found "<EOF>"',
       'Invalid option for DISSECT: [option]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option = 1', [
+    testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" option = 1', [
       'Invalid option for DISSECT: [option]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" append_separator = "-"', []);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" ignore_missing = true', [
-      'Invalid option for DISSECT: [ignore_missing]',
-    ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" append_separator = true', [
-      'Invalid value for DISSECT append_separator: expected a string, but was [true]',
-    ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" | keep firstWord', []);
-    // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
+    testErrorsAndWarnings(
+      'from a_index | dissect stringField "%{firstWord}" append_separator = "-"',
+      []
+    );
+    testErrorsAndWarnings(
+      'from a_index | dissect stringField "%{firstWord}" ignore_missing = true',
+      ['Invalid option for DISSECT: [ignore_missing]']
+    );
+    testErrorsAndWarnings(
+      'from a_index | dissect stringField "%{firstWord}" append_separator = true',
+      ['Invalid value for DISSECT append_separator: expected a string, but was [true]']
+    );
+    testErrorsAndWarnings('from a_index | dissect stringField "%{firstWord}" | keep firstWord', []);
+    // testErrorsAndWarnings('from a_index | dissect s* "%{a}"', [
     //   'Using wildcards (*) in dissect is not allowed [s*]',
     // ]);
   });
@@ -847,14 +852,16 @@ describe('validation logic', () => {
       "SyntaxError: missing {UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} at '<EOF>'",
       'Unknown column [stringField.]',
     ]);
-    testErrorsAndWarnings('from a | grok stringField %a', ["SyntaxError: missing STRING at '%'"]);
-    // Do not try to validate the grok pattern string
-    testErrorsAndWarnings('from a | grok stringField "%{firstWord}"', []);
-    testErrorsAndWarnings('from a | grok numberField "%{firstWord}"', [
-      'GROK only supports string type values, found [numberField] of type number',
+    testErrorsAndWarnings('from a_index | grok stringField %a', [
+      "SyntaxError: missing STRING at '%'",
     ]);
-    testErrorsAndWarnings('from a | grok stringField "%{firstWord}" | keep firstWord', []);
-    // testErrorsAndWarnings('from a | grok s* "%{a}"', [
+    // Do not try to validate the grok pattern string
+    testErrorsAndWarnings('from a_index | grok stringField "%{firstWord}"', []);
+    testErrorsAndWarnings('from a_index | grok numberField "%{firstWord}"', [
+      'GROK only supports string type values, found [numberField] of type [number]',
+    ]);
+    testErrorsAndWarnings('from a_index | grok stringField "%{firstWord}" | keep firstWord', []);
+    // testErrorsAndWarnings('from a_index | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
     // ]);
   });
@@ -1216,7 +1223,7 @@ describe('validation logic', () => {
             const expectedArgs = signatures[0].params.filter(({ optional }) => !optional).length;
             const shouldBeExactly = signatures[0].params.length;
             testErrorsAndWarnings(
-              `from a | eval ${
+              `from a_index | eval ${
                 getFunctionSignatures(
                   {
                     name,
@@ -1263,22 +1270,22 @@ describe('validation logic', () => {
       }
     }
     testErrorsAndWarnings(
-      'from a | eval log10(-1)',
+      'from a_index | eval log10(-1)',
       [],
       ['Log of a negative number results in null: -1']
     );
     testErrorsAndWarnings(
-      'from a | eval log(-1)',
+      'from a_index | eval log(-1)',
       [],
       ['Log of a negative number results in null: -1']
     );
     testErrorsAndWarnings(
-      'from a | eval log(-1, 20)',
+      'from a_index | eval log(-1, 20)',
       [],
       ['Log of a negative number results in null: -1']
     );
     testErrorsAndWarnings(
-      'from a | eval log(-1, -20)',
+      'from a_index | eval log(-1, -20)',
       [],
       [
         'Log of a negative number results in null: -1',
@@ -1286,7 +1293,7 @@ describe('validation logic', () => {
       ]
     );
     testErrorsAndWarnings(
-      'from a | eval var0 = log(-1, -20)',
+      'from a_index | eval var0 = log(-1, -20)',
       [],
       [
         'Log of a negative number results in null: -1',
@@ -1501,11 +1508,11 @@ describe('validation logic', () => {
     );
     for (const op of ['+', '-', '*', '/', '%']) {
       testErrorsAndWarnings(
-        `from a | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
+        `from a_index | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
         []
       );
     }
-    testErrorsAndWarnings('from a | stats count(* + 1) BY ipField', [
+    testErrorsAndWarnings('from a_index | stats count(* + 1) BY ipField', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
     ]);
     testErrorsAndWarnings('from a_index | stats count(* + round(numberField)) BY ipField', [
@@ -1517,32 +1524,32 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a_index | stats count(count(*)) BY ipField', [
       `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
     ]);
-    testErrorsAndWarnings('from a | stats numberField + 1', [
+    testErrorsAndWarnings('from a_index | stats numberField + 1', [
       `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
     ]);
 
     for (const nesting of [1, 2, 3, 4]) {
       const moreBuiltinWrapping = Array(nesting).fill('+ 1').join('');
-      testErrorsAndWarnings(`from a | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
-      testErrorsAndWarnings(`from a | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
-      testErrorsAndWarnings(`from a | stats 5 ${moreBuiltinWrapping} + numberField`, [
+      testErrorsAndWarnings(`from a_index | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
+      testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
+      testErrorsAndWarnings(`from a_index | stats 5 ${moreBuiltinWrapping} + numberField`, [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
       ]);
-      testErrorsAndWarnings(`from a | stats 5 + numberField ${moreBuiltinWrapping}`, [
+      testErrorsAndWarnings(`from a_index | stats 5 + numberField ${moreBuiltinWrapping}`, [
         "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
       ]);
     }
 
-    testErrorsAndWarnings('from a | stats 5 + numberField + 1', [
+    testErrorsAndWarnings('from a_index | stats 5 + numberField + 1', [
       "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
     ]);
 
-    testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
+    testErrorsAndWarnings('from a_index | stats numberField + 1 by ipField', [
       `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
     ]);
 
     testErrorsAndWarnings(
-      'from a | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
+      'from a_index | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
       []
     );
 
@@ -1577,7 +1584,7 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings(
-          `from a | stats var = round(${
+          `from a_index | stats var = round(${
             getFunctionSignatures(
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
@@ -1586,7 +1593,7 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings(
-          `from a | stats round(${
+          `from a_index | stats round(${
             getFunctionSignatures(
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
@@ -1595,7 +1602,7 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings(
-          `from a | stats var = round(${
+          `from a_index | stats var = round(${
             getFunctionSignatures(
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
@@ -1609,7 +1616,7 @@ describe('validation logic', () => {
           []
         );
         testErrorsAndWarnings(
-          `from a | stats round(${
+          `from a_index | stats round(${
             getFunctionSignatures(
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
@@ -1847,53 +1854,55 @@ describe('validation logic', () => {
   });
 
   describe('enrich', () => {
-    testErrorsAndWarnings(`from a | enrich`, [
+    testErrorsAndWarnings(`from a_index | enrich`, [
       "SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'",
     ]);
-    testErrorsAndWarnings(`from a | enrich _`, ['Unknown policy [_]']);
-    testErrorsAndWarnings(`from a | enrich _:`, [
+    testErrorsAndWarnings(`from a_index | enrich _`, ['Unknown policy [_]']);
+    testErrorsAndWarnings(`from a_index | enrich _:`, [
       "SyntaxError: token recognition error at: ':'",
       'Unknown policy [_]',
     ]);
-    testErrorsAndWarnings(`from a | enrich _:policy`, [
+    testErrorsAndWarnings(`from a_index | enrich _:policy`, [
       'Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-    testErrorsAndWarnings(`from a | enrich :policy`, [
+    testErrorsAndWarnings(`from a_index | enrich :policy`, [
       "SyntaxError: token recognition error at: ':'",
     ]);
-    testErrorsAndWarnings(`from a | enrich any:`, [
+    testErrorsAndWarnings(`from a_index | enrich any:`, [
       "SyntaxError: token recognition error at: ':'",
       'Unknown policy [any]',
     ]);
-    testErrorsAndWarnings(`from a | enrich _any:`, [
+    testErrorsAndWarnings(`from a_index | enrich _any:`, [
       "SyntaxError: token recognition error at: ':'",
       'Unknown policy [_any]',
     ]);
-    testErrorsAndWarnings(`from a | enrich any:policy`, [
+    testErrorsAndWarnings(`from a_index | enrich any:policy`, [
       'Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-    testErrorsAndWarnings(`from a | enrich policy `, []);
+    testErrorsAndWarnings(`from a_index | enrich policy `, []);
     for (const value of ['any', 'coordinator', 'remote']) {
-      testErrorsAndWarnings(`from a | enrich _${value}:policy `, []);
-      testErrorsAndWarnings(`from a | enrich _${value} :  policy `, [
+      testErrorsAndWarnings(`from a_index | enrich _${value}:policy `, []);
+      testErrorsAndWarnings(`from a_index | enrich _${value} :  policy `, [
         "SyntaxError: token recognition error at: ':'",
         "SyntaxError: extraneous input 'policy' expecting <EOF>",
         `Unknown policy [_${value}]`,
       ]);
-      testErrorsAndWarnings(`from a | enrich _${value}:  policy `, [
+      testErrorsAndWarnings(`from a_index | enrich _${value}:  policy `, [
         "SyntaxError: token recognition error at: ':'",
         "SyntaxError: extraneous input 'policy' expecting <EOF>",
         `Unknown policy [_${value}]`,
       ]);
-      testErrorsAndWarnings(`from a | enrich _${camelCase(value)}:policy `, []);
-      testErrorsAndWarnings(`from a | enrich _${value.toUpperCase()}:policy `, []);
+      testErrorsAndWarnings(`from a_index | enrich _${camelCase(value)}:policy `, []);
+      testErrorsAndWarnings(`from a_index | enrich _${value.toUpperCase()}:policy `, []);
     }
 
-    testErrorsAndWarnings(`from a | enrich _unknown:policy`, [
+    testErrorsAndWarnings(`from a_index | enrich _unknown:policy`, [
       'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-    testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
-    testErrorsAndWarnings(`from a | enrich policy on `, [
+    testErrorsAndWarnings(`from a_index | enrich missing-policy `, [
+      'Unknown policy [missing-policy]',
+    ]);
+    testErrorsAndWarnings(`from a_index | enrich policy on `, [
       "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from a_index | enrich policy on b `, ['Unknown column [b]']);
@@ -2029,7 +2038,7 @@ describe('validation logic', () => {
     it(`should not crash if no callbacks are available`, async () => {
       try {
         await validateAst(
-          `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
+          `from a_index | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
           getAstAndErrors,
           {
             getFieldsFor: undefined,
@@ -2046,7 +2055,7 @@ describe('validation logic', () => {
     it(`should not crash if no callbacks are passed`, async () => {
       try {
         await validateAst(
-          `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
+          `from a_index | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
           getAstAndErrors
         );
       } catch {

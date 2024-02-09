@@ -203,8 +203,40 @@
       "error": true
     },
     {
+      "query": "from remote-ccs:indexes [METADATA _id]",
+      "error": false
+    },
+    {
+      "query": "from *:indexes [METADATA _id]",
+      "error": false
+    },
+    {
+      "query": "from index METADATA _id",
+      "error": false
+    },
+    {
       "query": "from index metadata _id",
+      "error": false
+    },
+    {
+      "query": "from index METADATA _id, _source",
+      "error": false
+    },
+    {
+      "query": "from index METADATA _id, _source2",
       "error": true
+    },
+    {
+      "query": "from index metadata _id, _source METADATA _id2",
+      "error": true
+    },
+    {
+      "query": "from remote-ccs:indexes METADATA _id",
+      "error": false
+    },
+    {
+      "query": "from *:indexes METADATA _id",
+      "error": false
     },
     {
       "query": "from index (metadata _id)",
@@ -248,14 +280,6 @@
     },
     {
       "query": "from a_index, remote-ccs:indexes",
-      "error": false
-    },
-    {
-      "query": "from remote-ccs:indexes [METADATA _id]",
-      "error": false
-    },
-    {
-      "query": "from *:indexes [METADATA _id]",
       "error": false
     },
     {
@@ -748,6 +772,22 @@
     },
     {
       "query": "row var = length(5)",
+      "error": true
+    },
+    {
+      "query": "row var = log(5, 5)",
+      "error": false
+    },
+    {
+      "query": "row log(5, 5)",
+      "error": false
+    },
+    {
+      "query": "row var = log(to_integer(\"a\"), to_integer(\"a\"))",
+      "error": false
+    },
+    {
+      "query": "row var = log(\"a\", \"a\")",
       "error": true
     },
     {
@@ -2336,11 +2376,11 @@
     },
     {
       "query": "from index | project stringField, numberField, dateField",
-      "error": false
+      "error": true
     },
     {
       "query": "from index | PROJECT stringField, numberField, dateField",
-      "error": false
+      "error": true
     },
     {
       "query": "from index | project missingField, numberField, dateField",
@@ -2571,36 +2611,40 @@
       "error": true
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\"",
+      "query": "from a_index | dissect stringField \"%{firstWord}\"",
       "error": false
     },
     {
-      "query": "from a_index | dissect numberField \"%{a}\"",
+      "query": "from a_index | dissect numberField \"%{firstWord}\"",
       "error": true
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\" option ",
+      "query": "from a_index | dissect stringField \"%{firstWord}\" option ",
       "error": true
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\" option = ",
+      "query": "from a_index | dissect stringField \"%{firstWord}\" option = ",
       "error": true
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\" option = 1",
+      "query": "from a_index | dissect stringField \"%{firstWord}\" option = 1",
       "error": true
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\" append_separator = \"-\"",
+      "query": "from a_index | dissect stringField \"%{firstWord}\" append_separator = \"-\"",
       "error": false
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\" ignore_missing = true",
+      "query": "from a_index | dissect stringField \"%{firstWord}\" ignore_missing = true",
       "error": true
     },
     {
-      "query": "from a_index | dissect stringField \"%{a}\" append_separator = true",
+      "query": "from a_index | dissect stringField \"%{firstWord}\" append_separator = true",
       "error": true
+    },
+    {
+      "query": "from a_index | dissect stringField \"%{firstWord}\" | keep firstWord",
+      "error": false
     },
     {
       "query": "from a_index | grok",
@@ -2623,12 +2667,16 @@
       "error": true
     },
     {
-      "query": "from a_index | grok stringField \"%{a}\"",
+      "query": "from a_index | grok stringField \"%{firstWord}\"",
       "error": false
     },
     {
-      "query": "from a_index | grok numberField \"%{a}\"",
+      "query": "from a_index | grok numberField \"%{firstWord}\"",
       "error": true
+    },
+    {
+      "query": "from a_index | grok stringField \"%{firstWord}\" | keep firstWord",
+      "error": false
     },
     {
       "query": "from a_index | where b",
@@ -3535,6 +3583,14 @@
       "error": true
     },
     {
+      "query": "from a_index | where log(numberField) > 0",
+      "error": false
+    },
+    {
+      "query": "from a_index | where log(stringField) > 0",
+      "error": true
+    },
+    {
       "query": "from a_index | where log10(numberField) > 0",
       "error": false
     },
@@ -4395,6 +4451,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval abs(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = abs(*)",
       "error": true
     },
@@ -4412,6 +4472,10 @@
     },
     {
       "query": "from a_index | eval acos(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval acos(numberField, extraArg)",
       "error": true
     },
     {
@@ -4435,6 +4499,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval asin(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = asin(*)",
       "error": true
     },
@@ -4455,6 +4523,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval atan(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = atan(*)",
       "error": true
     },
@@ -4472,6 +4544,10 @@
     },
     {
       "query": "from a_index | eval atan2(stringField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval atan2(numberField, numberField, extraArg)",
       "error": true
     },
     {
@@ -4512,6 +4588,10 @@
     },
     {
       "query": "from a_index | eval ceil(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval ceil(numberField, extraArg)",
       "error": true
     },
     {
@@ -4583,6 +4663,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval cos(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = cos(*)",
       "error": true
     },
@@ -4600,6 +4684,10 @@
     },
     {
       "query": "from a_index | eval cosh(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval cosh(numberField, extraArg)",
       "error": true
     },
     {
@@ -4623,6 +4711,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval date_extract(\"ALIGNED_DAY_OF_WEEK_IN_MONTH\", dateField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = date_format(stringField, dateField)",
       "error": false
     },
@@ -4636,6 +4728,10 @@
     },
     {
       "query": "from a_index | eval date_format(numberField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval date_format(stringField, dateField, extraArg)",
       "error": true
     },
     {
@@ -4655,6 +4751,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval date_parse(stringField, stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = date_trunc(1 year, dateField)",
       "error": false
     },
@@ -4668,6 +4768,10 @@
     },
     {
       "query": "from a_index | eval date_trunc(stringField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval date_trunc(1 year, dateField, extraArg)",
       "error": true
     },
     {
@@ -4685,6 +4789,10 @@
     {
       "query": "from a_index | eval e()",
       "error": false
+    },
+    {
+      "query": "from a_index | eval e(extraArg)",
+      "error": true
     },
     {
       "query": "from a_index | eval var = ends_with(stringField, stringField)",
@@ -4703,6 +4811,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval ends_with(stringField, stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = floor(numberField)",
       "error": false
     },
@@ -4716,6 +4828,10 @@
     },
     {
       "query": "from a_index | eval floor(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval floor(numberField, extraArg)",
       "error": true
     },
     {
@@ -4763,6 +4879,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval left(stringField, numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = length(stringField)",
       "error": false
     },
@@ -4779,7 +4899,31 @@
       "error": true
     },
     {
+      "query": "from a_index | eval length(stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = length(*)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = log(numberField, numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval log(numberField, numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval var = log(to_integer(stringField), to_integer(stringField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval log(stringField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval log(numberField, numberField, extraArg)",
       "error": true
     },
     {
@@ -4796,6 +4940,10 @@
     },
     {
       "query": "from a_index | eval log10(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval log10(numberField, extraArg)",
       "error": true
     },
     {
@@ -4819,6 +4967,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval ltrim(stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = ltrim(*)",
       "error": true
     },
@@ -4839,6 +4991,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval mv_avg(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = mv_avg(*)",
       "error": true
     },
@@ -4856,6 +5012,10 @@
     },
     {
       "query": "from a_index | eval mv_concat(numberField, numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval mv_concat(stringField, stringField, extraArg)",
       "error": true
     },
     {
@@ -4923,6 +5083,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval mv_max(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = mv_max(*)",
       "error": true
     },
@@ -4940,6 +5104,10 @@
     },
     {
       "query": "from a_index | eval mv_median(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval mv_median(numberField, extraArg)",
       "error": true
     },
     {
@@ -4963,6 +5131,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval mv_min(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = mv_min(*)",
       "error": true
     },
@@ -4980,6 +5152,10 @@
     },
     {
       "query": "from a_index | eval mv_sum(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval mv_sum(numberField, extraArg)",
       "error": true
     },
     {
@@ -5003,12 +5179,8 @@
       "error": false
     },
     {
-      "query": "from a_index | eval var = pi()",
-      "error": false
-    },
-    {
-      "query": "from a_index | eval pi()",
-      "error": false
+      "query": "from a_index | eval now(extraArg)",
+      "error": true
     },
     {
       "query": "from a_index | eval var = pi()",
@@ -5017,6 +5189,18 @@
     {
       "query": "from a_index | eval pi()",
       "error": false
+    },
+    {
+      "query": "from a_index | eval var = pi()",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval pi()",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval pi(extraArg)",
+      "error": true
     },
     {
       "query": "from a_index | eval var = pow(numberField, numberField)",
@@ -5032,6 +5216,10 @@
     },
     {
       "query": "from a_index | eval pow(stringField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval pow(numberField, numberField, extraArg)",
       "error": true
     },
     {
@@ -5051,6 +5239,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval replace(stringField, stringField, stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = right(stringField, numberField)",
       "error": false
     },
@@ -5064,6 +5256,10 @@
     },
     {
       "query": "from a_index | eval right(numberField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval right(stringField, numberField, extraArg)",
       "error": true
     },
     {
@@ -5083,6 +5279,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval round(numberField, numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = rtrim(stringField)",
       "error": false
     },
@@ -5096,6 +5296,10 @@
     },
     {
       "query": "from a_index | eval rtrim(numberField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval rtrim(stringField, extraArg)",
       "error": true
     },
     {
@@ -5119,6 +5323,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval sin(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = sin(*)",
       "error": true
     },
@@ -5136,6 +5344,10 @@
     },
     {
       "query": "from a_index | eval sinh(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval sinh(numberField, extraArg)",
       "error": true
     },
     {
@@ -5159,6 +5371,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval split(stringField, stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = sqrt(numberField)",
       "error": false
     },
@@ -5172,6 +5388,10 @@
     },
     {
       "query": "from a_index | eval sqrt(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval sqrt(numberField, extraArg)",
       "error": true
     },
     {
@@ -5195,6 +5415,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval starts_with(stringField, stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = substring(stringField, numberField, numberField)",
       "error": false
     },
@@ -5211,6 +5435,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval substring(stringField, numberField, numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = tan(numberField)",
       "error": false
     },
@@ -5224,6 +5452,10 @@
     },
     {
       "query": "from a_index | eval tan(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval tan(numberField, extraArg)",
       "error": true
     },
     {
@@ -5247,6 +5479,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval tanh(numberField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = tanh(*)",
       "error": true
     },
@@ -5265,6 +5501,10 @@
     {
       "query": "from a_index | eval tau()",
       "error": false
+    },
+    {
+      "query": "from a_index | eval tau(extraArg)",
+      "error": true
     },
     {
       "query": "from a_index | eval var = to_boolean(stringField)",
@@ -5336,6 +5576,10 @@
     },
     {
       "query": "from a_index | eval to_degrees(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval to_degrees(numberField, extraArg)",
       "error": true
     },
     {
@@ -5439,6 +5683,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval to_lower(stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = to_lower(*)",
       "error": true
     },
@@ -5456,6 +5704,10 @@
     },
     {
       "query": "from a_index | eval to_radians(stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval to_radians(numberField, extraArg)",
       "error": true
     },
     {
@@ -5515,6 +5767,10 @@
       "error": true
     },
     {
+      "query": "from a_index | eval to_upper(stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = to_upper(*)",
       "error": true
     },
@@ -5567,8 +5823,32 @@
       "error": true
     },
     {
+      "query": "from a_index | eval trim(stringField, extraArg)",
+      "error": true
+    },
+    {
       "query": "from a_index | eval var = trim(*)",
       "error": true
+    },
+    {
+      "query": "from a_index | eval log10(-1)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval log(-1)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval log(-1, 20)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval log(-1, -20)",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval var0 = log(-1, -20)",
+      "error": false
     },
     {
       "query": "from a_index | eval numberField > 0",
@@ -6707,6 +6987,26 @@
       "error": false
     },
     {
+      "query": "from a_index | stats avg(numberField) + percentile(numberField, 50) BY ipField",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField) - percentile(numberField, 50) BY ipField",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField) * percentile(numberField, 50) BY ipField",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField) / percentile(numberField, 50) BY ipField",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField) % percentile(numberField, 50) BY ipField",
+      "error": false
+    },
+    {
       "query": "from a_index | stats count(* + 1) BY ipField",
       "error": true
     },
@@ -6727,12 +7027,80 @@
       "error": true
     },
     {
+      "query": "from a_index | stats 5 + avg(numberField) + 1",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1 + avg(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1 + numberField",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + numberField + 1",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + avg(numberField) + 1+ 1",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1+ 1 + avg(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1+ 1 + numberField",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + numberField + 1+ 1",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + avg(numberField) + 1+ 1+ 1",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1+ 1+ 1 + avg(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1+ 1+ 1 + numberField",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + numberField + 1+ 1+ 1",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + avg(numberField) + 1+ 1+ 1+ 1",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1+ 1+ 1+ 1 + avg(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats 5 + 1+ 1+ 1+ 1 + numberField",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + numberField + 1+ 1+ 1+ 1",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats 5 + numberField + 1",
+      "error": true
+    },
+    {
       "query": "from a_index | stats numberField + 1 by ipField",
       "error": true
     },
     {
       "query": "from a_index | stats avg(numberField), percentile(numberField, 50) + 1 by ipField",
-      "error": true
+      "error": false
     },
     {
       "query": "from a_index | stats count(*)",
@@ -6764,6 +7132,22 @@
     },
     {
       "query": "from a_index | stats avg(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(avg(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(avg(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(avg(numberField)) + avg(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(avg(numberField)) + avg(numberField)",
       "error": false
     },
     {
@@ -6847,6 +7231,22 @@
       "error": false
     },
     {
+      "query": "from a_index | stats var = round(max(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(max(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(max(numberField)) + max(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(max(numberField)) + max(numberField)",
+      "error": false
+    },
+    {
       "query": "from a_index | stats max(numberField / 2)",
       "error": false
     },
@@ -6924,6 +7324,22 @@
     },
     {
       "query": "from a_index | stats min(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(min(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(min(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(min(numberField)) + min(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(min(numberField)) + min(numberField)",
       "error": false
     },
     {
@@ -7007,6 +7423,22 @@
       "error": false
     },
     {
+      "query": "from a_index | stats var = round(sum(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(sum(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(sum(numberField)) + sum(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(sum(numberField)) + sum(numberField)",
+      "error": false
+    },
+    {
       "query": "from a_index | stats sum(numberField / 2)",
       "error": false
     },
@@ -7084,6 +7516,22 @@
     },
     {
       "query": "from a_index | stats median(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(median(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(median(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(median(numberField)) + median(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(median(numberField)) + median(numberField)",
       "error": false
     },
     {
@@ -7167,6 +7615,22 @@
       "error": false
     },
     {
+      "query": "from a_index | stats var = round(median_absolute_deviation(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(median_absolute_deviation(numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(median_absolute_deviation(numberField)) + median_absolute_deviation(numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(median_absolute_deviation(numberField)) + median_absolute_deviation(numberField)",
+      "error": false
+    },
+    {
       "query": "from a_index | stats median_absolute_deviation(numberField / 2)",
       "error": false
     },
@@ -7247,6 +7711,22 @@
       "error": false
     },
     {
+      "query": "from a_index | stats var = round(percentile(numberField, numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(percentile(numberField, numberField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(numberField, numberField)) + percentile(numberField, numberField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(percentile(numberField, numberField)) + percentile(numberField, numberField)",
+      "error": false
+    },
+    {
       "query": "from a_index | stats percentile(numberField / 2, numberField)",
       "error": false
     },
@@ -7323,6 +7803,22 @@
       "error": false
     },
     {
+      "query": "from a_index | stats var = round(count(stringField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(count(stringField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(count(stringField)) + count(stringField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(count(stringField)) + count(stringField)",
+      "error": false
+    },
+    {
       "query": "from a_index | stats var = count_distinct(stringField)",
       "error": false
     },
@@ -7331,11 +7827,43 @@
       "error": false
     },
     {
+      "query": "from a_index | stats var = round(count_distinct(stringField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(stringField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(count_distinct(stringField)) + count_distinct(stringField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(count_distinct(stringField)) + count_distinct(stringField)",
+      "error": false
+    },
+    {
       "query": "from a_index | stats var = st_centroid(cartesianPointField)",
       "error": false
     },
     {
       "query": "from a_index | stats st_centroid(cartesianPointField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(st_centroid(cartesianPointField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(st_centroid(cartesianPointField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(st_centroid(cartesianPointField)) + st_centroid(cartesianPointField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(st_centroid(cartesianPointField)) + st_centroid(cartesianPointField)",
       "error": false
     },
     {
@@ -7360,6 +7888,22 @@
     },
     {
       "query": "from a_index | stats st_centroid(geoPointField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(st_centroid(geoPointField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(st_centroid(geoPointField))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(st_centroid(geoPointField)) + st_centroid(geoPointField)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(st_centroid(geoPointField)) + st_centroid(geoPointField)",
       "error": false
     },
     {
@@ -7475,23 +8019,31 @@
       "error": true
     },
     {
-      "query": "from a_index | enrich [",
+      "query": "from a_index | enrich _",
       "error": true
     },
     {
-      "query": "from a_index | enrich [ccq.mode",
+      "query": "from a_index | enrich _:",
       "error": true
     },
     {
-      "query": "from a_index | enrich [ccq.mode:",
+      "query": "from a_index | enrich _:policy",
       "error": true
     },
     {
-      "query": "from a_index | enrich [ccq.mode:any",
+      "query": "from a_index | enrich :policy",
       "error": true
     },
     {
-      "query": "from a_index | enrich [ccq.mode:any] ",
+      "query": "from a_index | enrich any:",
+      "error": true
+    },
+    {
+      "query": "from a_index | enrich _any:",
+      "error": true
+    },
+    {
+      "query": "from a_index | enrich any:policy",
       "error": true
     },
     {
@@ -7499,56 +8051,68 @@
       "error": false
     },
     {
-      "query": "from a_index | enrich [ccq.mode:value] policy ",
+      "query": "from a_index | enrich _any:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _any :  policy ",
       "error": true
     },
     {
-      "query": "from a_index | enrich [ccq.mode:any] policy ",
-      "error": false
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:ANY] policy ",
-      "error": false
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:coordinator] policy ",
-      "error": false
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:COORDINATOR] policy ",
-      "error": false
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:remote] policy ",
-      "error": false
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:REMOTE] policy ",
-      "error": false
-    },
-    {
-      "query": "from a_index | enrich [setting:value policy",
+      "query": "from a_index | enrich _any:  policy ",
       "error": true
     },
     {
-      "query": "from a_index | enrich [ccq.mode:any policy",
-      "error": true
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:any policy",
-      "error": true
-    },
-    {
-      "query": "from a_index | enrich [setting:value] policy",
-      "error": true
-    },
-    {
-      "query": "from a_index | enrich [ccq.mode:any] policy$",
+      "query": "from a_index | enrich _any:policy ",
       "error": false
     },
     {
-      "query": "from a_index | enrich [ccq.mode:any][ccq.mode:coordinator] policy$",
+      "query": "from a_index | enrich _ANY:policy ",
       "error": false
+    },
+    {
+      "query": "from a_index | enrich _coordinator:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _coordinator :  policy ",
+      "error": true
+    },
+    {
+      "query": "from a_index | enrich _coordinator:  policy ",
+      "error": true
+    },
+    {
+      "query": "from a_index | enrich _coordinator:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _COORDINATOR:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _remote:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _remote :  policy ",
+      "error": true
+    },
+    {
+      "query": "from a_index | enrich _remote:  policy ",
+      "error": true
+    },
+    {
+      "query": "from a_index | enrich _remote:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _REMOTE:policy ",
+      "error": false
+    },
+    {
+      "query": "from a_index | enrich _unknown:policy",
+      "error": true
     },
     {
       "query": "from a_index | enrich missing-policy ",
