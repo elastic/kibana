@@ -6,14 +6,18 @@
  * Side Public License, v 1.
  */
 
+export {
+  extractSavedObjectIdRef,
+  injectSavedObjectIdRef,
+  isSavedObjectEmbeddableInput,
+} from './lib';
+export type { SavedObjectEmbeddableInput } from './lib';
+export { ViewMode } from './types';
 export type {
-  EmbeddableInput,
   CommonEmbeddableStartContract,
-  EmbeddableStateWithType,
-  PanelState,
+  EmbeddableInput,
   EmbeddablePersistableStateService,
   EmbeddableRegistryDefinition,
+  EmbeddableStateWithType,
+  PanelState,
 } from './types';
-export { ViewMode } from './types';
-export type { SavedObjectEmbeddableInput } from './lib';
-export { isSavedObjectEmbeddableInput } from './lib';

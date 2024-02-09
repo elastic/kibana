@@ -6,21 +6,35 @@
  * Side Public License, v 1.
  */
 
-import {
-  EmbeddableInput,
-  EmbeddableStateWithType,
-  EmbeddablePersistableStateService,
-} from '@kbn/embeddable-plugin/common';
 import { Reference } from '@kbn/content-management-utils';
 import { CONTROL_GROUP_TYPE, PersistableControlGroupInput } from '@kbn/controls-plugin/common';
-
-import { DashboardPanelState } from '../types';
+import {
+  EmbeddableInput,
+  EmbeddablePersistableStateService,
+  EmbeddableStateWithType,
+} from '@kbn/embeddable-plugin/common';
 import { ParsedDashboardAttributesWithType } from '../../types';
-
-const getPanelStatePrefix = (state: DashboardPanelState) => `${state.explicitInput.id}:`;
 
 const controlGroupReferencePrefix = 'controlGroup_';
 const controlGroupId = 'dashboard_control_group';
+
+export const getReferencesForPanelId = (id: string, references: Reference[]): Reference[] => {
+  const prefix = `${id}:`;
+  const filteredReferences = references
+    .filter((reference) => reference.name.indexOf(prefix) === 0)
+    .map((reference) => ({ ...reference, name: reference.name.replace(prefix, '') }));
+  return filteredReferences;
+};
+
+export const prefixReferencesFromPanel = (id: string, references: Reference[]): Reference[] => {
+  const prefix = `${id}:`;
+  return references
+    .filter((reference) => reference.type !== 'tag') // panel references should never contain tags. If they do, they must be removed
+    .map((reference) => ({
+      ...reference,
+      name: `${prefix}${reference.name}`,
+    }));
+};
 
 export const createInject = (
   persistableStateService: EmbeddablePersistableStateService
@@ -33,47 +47,17 @@ export const createInject = (
     if ('panels' in workingState) {
       workingState.panels = { ...workingState.panels };
 
-      for (const [key, panel] of Object.entries(workingState.panels)) {
-        workingState.panels[key] = { ...panel };
-        // Find the references for this panel
-        const prefix = getPanelStatePrefix(panel);
+      for (const [id, panel] of Object.entries(workingState.panels)) {
+        workingState.panels[id] = { ...panel };
 
-        const filteredReferences = references
-          .filter((reference) => reference.name.indexOf(prefix) === 0)
-          .map((reference) => ({ ...reference, name: reference.name.replace(prefix, '') }));
-
-        const panelReferences = filteredReferences.length === 0 ? references : filteredReferences;
-
-        // Inject dashboard references back in
-        if (panel.panelRefName !== undefined) {
-          const matchingReference = panelReferences.find(
-            (reference) => reference.name === panel.panelRefName
-          );
-
-          if (!matchingReference) {
-            throw new Error(`Could not find reference "${panel.panelRefName}"`);
-          }
-
-          if (matchingReference !== undefined) {
-            workingState.panels[key] = {
-              ...panel,
-              type: matchingReference.type,
-              explicitInput: {
-                ...workingState.panels[key].explicitInput,
-                savedObjectId: matchingReference.id,
-              },
-            };
-
-            delete workingState.panels[key].panelRefName;
-          }
-        }
+        const panelReferences = getReferencesForPanelId(id, references);
 
         const { type, ...injectedState } = persistableStateService.inject(
-          { ...workingState.panels[key].explicitInput, type: workingState.panels[key].type },
+          { ...workingState.panels[id].explicitInput, type: workingState.panels[id].type },
           panelReferences
         );
 
-        workingState.panels[key].explicitInput = injectedState as EmbeddableInput;
+        workingState.panels[id].explicitInput = injectedState as EmbeddableInput;
       }
     }
 
@@ -116,39 +100,14 @@ export const createExtract = (
       workingState.panels = { ...workingState.panels };
 
       // Run every panel through the state service to get the nested references
-      for (const [key, panel] of Object.entries(workingState.panels)) {
-        const prefix = getPanelStatePrefix(panel);
-
-        // If the panel is a saved object, then we will make the reference for that saved object and change the explicit input
-        if (panel.explicitInput.savedObjectId) {
-          panel.panelRefName = `panel_${key}`;
-
-          references.push({
-            name: `${prefix}panel_${key}`,
-            type: panel.type,
-            id: panel.explicitInput.savedObjectId as string,
-          });
-
-          delete panel.explicitInput.savedObjectId;
-        }
-
+      for (const [id, panel] of Object.entries(workingState.panels)) {
         const { state: panelState, references: panelReferences } = persistableStateService.extract({
           ...panel.explicitInput,
           type: panel.type,
         });
-
-        // We're going to prefix the names of the references so that we don't end up with dupes (from visualizations for instance)
-        const prefixedReferences = panelReferences
-          .filter((reference) => reference.type !== 'tag') // panel references should never contain tags. If they do, they must be removed
-          .map((reference) => ({
-            ...reference,
-            name: `${prefix}${reference.name}`,
-          }));
-
-        references.push(...prefixedReferences);
-
+        references.push(...prefixReferencesFromPanel(id, panelReferences));
         const { type, ...restOfState } = panelState;
-        workingState.panels[key].explicitInput = restOfState as EmbeddableInput;
+        workingState.panels[id].explicitInput = restOfState as EmbeddableInput;
       }
     }
 

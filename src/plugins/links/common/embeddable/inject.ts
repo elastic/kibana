@@ -6,7 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import {
+  EmbeddableRegistryDefinition,
+  injectSavedObjectIdRef,
+} from '@kbn/embeddable-plugin/common';
 import { LinksAttributes } from '../content_management';
 import { injectReferences } from '../persistable_state';
 import { LinksPersistableState } from './types';
@@ -16,7 +19,7 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
 
   // by-reference embeddable
   if (!('attributes' in typedState) || typedState.attributes === undefined) {
-    return typedState;
+    return injectSavedObjectIdRef(state, references);
   }
 
   // by-value embeddable

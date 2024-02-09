@@ -6,18 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import {
+  EmbeddableRegistryDefinition,
+  extractSavedObjectIdRef,
+} from '@kbn/embeddable-plugin/common';
 import type { LinksAttributes } from '../content_management';
 import { extractReferences } from '../persistable_state';
 import { LinksPersistableState } from './types';
 
-export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
-  const typedState = state as LinksPersistableState;
+export const extract: EmbeddableRegistryDefinition['extract'] = (_state) => {
+  const typedState = _state as LinksPersistableState;
 
   // by-reference embeddable
   if (!('attributes' in typedState) || typedState.attributes === undefined) {
+    const { state, references } = extractSavedObjectIdRef(_state, []);
     // No references to extract for by-reference embeddable since all references are stored with by-reference saved object
-    return { state, references: [] };
+    return { state, references };
   }
 
   // by-value embeddable
@@ -27,7 +31,7 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
 
   return {
     state: {
-      ...state,
+      ..._state,
       attributes,
     },
     references,

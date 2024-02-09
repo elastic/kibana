@@ -7,9 +7,11 @@
 
 import type { SerializableRecord, Serializable } from '@kbn/utility-types';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type {
+import {
   EmbeddableStateWithType,
   EmbeddableRegistryDefinition,
+  extractSavedObjectIdRef,
+  injectSavedObjectIdRef,
 } from '@kbn/embeddable-plugin/common';
 
 export type LensEmbeddablePersistableState = EmbeddableStateWithType & {
@@ -36,7 +38,8 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
     typedState.attributes.references = matchedReferences as unknown as Serializable[];
   }
 
-  return typedState;
+  const stateWithSOId = injectSavedObjectIdRef(typedState, references);
+  return stateWithSOId;
 };
 
 export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
@@ -47,5 +50,8 @@ export const extract: EmbeddableRegistryDefinition['extract'] = (state) => {
     references = typedState.attributes.references as unknown as SavedObjectReference[];
   }
 
-  return { state, references };
+  const { references: referencesWithExtractedSOId, state: stateWithoutSOId } =
+    extractSavedObjectIdRef(typedState, references);
+
+  return { state: stateWithoutSOId, references: referencesWithExtractedSOId };
 };

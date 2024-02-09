@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { EmbeddableRegistryDefinition } from '@kbn/embeddable-plugin/common';
+import {
+  EmbeddableRegistryDefinition,
+  injectSavedObjectIdRef,
+} from '@kbn/embeddable-plugin/common';
 import type { MapEmbeddablePersistableState } from './types';
 import type { MapAttributes } from '../content_management';
 import { extractReferences, injectReferences } from '../migrations/references';
@@ -15,7 +18,8 @@ export const inject: EmbeddableRegistryDefinition['inject'] = (state, references
 
   // by-reference embeddable
   if (!('attributes' in typedState) || typedState.attributes === undefined) {
-    return typedState;
+    // inject the saved object ID reference into the state.
+    return injectSavedObjectIdRef(state, references);
   }
 
   // by-value embeddable
