@@ -8,7 +8,6 @@ import { act, renderHook } from '@testing-library/react-hooks';
 import { TestProviders } from '../../../mock';
 import { useUserRelatedHosts } from '.';
 import { useSearchStrategy } from '../../use_search_strategy';
-// import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 jest.mock('../../use_search_strategy', () => ({
   useSearchStrategy: jest.fn(),
