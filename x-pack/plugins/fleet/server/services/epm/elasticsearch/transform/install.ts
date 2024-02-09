@@ -449,15 +449,14 @@ const installTransformsAssets = async (
     // generate api key, and pass es-secondary-authorization in header when creating the transforms.
     const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
       ? await generateTransformSecondaryAuthHeaders({
-          authorizationHeader,
-          logger,
-          pkgName: packageInstallContext.packageInfo.name,
-          pkgVersion: packageInstallContext.packageInfo.version,
-          username,
-        })
+        authorizationHeader,
+        logger,
+        pkgName: packageInstallContext.packageInfo.name,
+        pkgVersion: packageInstallContext.packageInfo.version,
+        username,
+      })
       : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
-        undefined;
-
+      undefined;
     // delete all previous transform
     await Promise.all([
       deleteTransforms(
