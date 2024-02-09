@@ -102,7 +102,7 @@ const BedrockParamsFields: React.FunctionComponent<ActionParamsProps<BedrockActi
       >
         <EuiFieldText
           data-test-subj="bedrock-model"
-          placeholder={'anthropic.claude-v2'}
+          placeholder={'anthropic.claude-v2:1'}
           value={model}
           onChange={(ev) => {
             editSubActionParams({ model: ev.target.value });

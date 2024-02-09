@@ -76,7 +76,7 @@ export function SloList() {
                 itemsPerPage={perPage}
                 itemsPerPageOptions={[10, 25, 50, 100]}
                 onChangeItemsPerPage={(newPerPage) => {
-                  storeState({ perPage: newPerPage, page: 0 });
+                  onStateChange({ perPage: newPerPage });
                 }}
               />
             </EuiFlexItem>

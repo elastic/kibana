@@ -7,6 +7,7 @@
  */
 
 import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
+import { unsafeConsole } from '@kbn/security-hardening';
 import { BrowserLoggingSystem } from './logging_system';
 
 describe('BrowserLoggingSystem', () => {
@@ -25,7 +26,7 @@ describe('BrowserLoggingSystem', () => {
   };
 
   beforeEach(() => {
-    mockConsoleLog = jest.spyOn(global.console, 'log').mockReturnValue(undefined);
+    mockConsoleLog = jest.spyOn(unsafeConsole, 'log').mockReturnValue(undefined);
     jest.spyOn<any, any>(global, 'Date').mockImplementation(() => timestamp);
     loggingSystem = new BrowserLoggingSystem(createLoggingConfig());
   });
