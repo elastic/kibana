@@ -59,7 +59,7 @@ const CasesTableFiltersComponent = ({
   const { caseAssignmentAuthorized } = useCasesFeatures();
   const {
     data: { customFields },
-    isLoading: isLoadingCasesConfiguration,
+    isFetching: isLoadingCasesConfiguration,
   } = useGetCaseConfiguration();
 
   const onFilterOptionsChange = useCallback(

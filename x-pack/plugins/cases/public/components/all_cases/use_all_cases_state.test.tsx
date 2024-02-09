@@ -482,7 +482,18 @@ describe('useAllCasesQueryParams', () => {
     mockLocation.search = stringifyUrlParams({
       severity: [CaseSeverity.HIGH],
       status: [CaseStatuses['in-progress']],
+      customFields: { my_field: ['foo'] },
     });
+
+    useGetCaseConfigurationMock.mockImplementation(() => ({
+      ...useCaseConfigureResponse,
+      data: {
+        ...useCaseConfigureResponse.data,
+        customFields: [
+          { key: 'my_field', required: false, type: CustomFieldTypes.TEXT, label: 'foo' },
+        ],
+      },
+    }));
 
     renderHook(() => useAllCasesState(), {
       wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
@@ -496,6 +507,7 @@ describe('useAllCasesQueryParams', () => {
         ...DEFAULT_CASES_TABLE_STATE.filterOptions,
         severity: [CaseSeverity.HIGH],
         status: [CaseStatuses['in-progress']],
+        customFields: { my_field: { options: ['foo'], type: CustomFieldTypes.TEXT } },
       },
     });
   });
@@ -562,7 +574,7 @@ describe('useAllCasesQueryParams', () => {
 
     useGetCaseConfigurationMock.mockImplementation(() => ({
       ...useCaseConfigureResponse,
-      isLoading: true,
+      isFetching: true,
     }));
 
     const lsSpy = jest.spyOn(Storage.prototype, 'setItem');
