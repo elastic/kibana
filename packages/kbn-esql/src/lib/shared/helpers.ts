@@ -20,10 +20,8 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
-  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -226,10 +224,6 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   return [byOption, metadataOption, asOption, onOption, withOption, appendSeparatorOption].find(
     ({ name }) => name === optionName
   );
-}
-
-export function getCommandMode(settingName: CommandModeDefinition['name']) {
-  return [ccqMode].find(({ name }) => name === settingName);
 }
 
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {
