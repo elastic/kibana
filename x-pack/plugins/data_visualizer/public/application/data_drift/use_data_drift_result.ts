@@ -8,6 +8,7 @@
 import { chunk, cloneDeep, flatten } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
@@ -30,7 +31,7 @@ import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
 import type { AggregationsMultiTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
-import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
+import { buildEsQuery } from '@kbn/es-query';
 import { useDataVisualizerKibana } from '../kibana_context';
 
 import { useDataDriftStateManagerContext } from './use_state_manager';
@@ -758,18 +759,18 @@ export const useFetchDataComparisonResult = (
 
         const kqlQuery =
           searchString !== undefined && searchQueryLanguage !== undefined
-            ? { query: searchString, language: searchQueryLanguage }
+            ? ({ query: searchString, language: searchQueryLanguage } as Query)
             : undefined;
 
         const refDataQuery = getDataComparisonQuery({
-          searchQuery: createMergedEsQuery(
-            kqlQuery,
+          searchQuery: buildEsQuery(
+            currentDataView,
+            kqlQuery ?? [],
             mapAndFlattenFilters([
               ...queryManager.filterManager.getFilters(),
               ...(referenceStateManager.filters ?? []),
             ]),
-            currentDataView,
-            uiSettings
+            uiSettings ? getEsQueryConfig(uiSettings) : undefined
           ),
           datetimeField: currentDataView?.timeFieldName,
           runtimeFields,
@@ -827,14 +828,14 @@ export const useFetchDataComparisonResult = (
           setLoaded(0.25);
 
           const prodDataQuery = getDataComparisonQuery({
-            searchQuery: createMergedEsQuery(
-              kqlQuery,
+            searchQuery: buildEsQuery(
+              currentDataView,
+              kqlQuery ?? [],
               mapAndFlattenFilters([
                 ...queryManager.filterManager.getFilters(),
                 ...(comparisonStateManager.filters ?? []),
               ]),
-              currentDataView,
-              uiSettings
+              uiSettings ? getEsQueryConfig(uiSettings) : undefined
             ),
             datetimeField: currentDataView?.timeFieldName,
             runtimeFields,
