@@ -37,7 +37,7 @@ import {
   createScopedLogger,
   flattenAdditionalContext,
   getContextForRecoveredAlerts,
-  getViewInInventoryAppUrl,
+  getInventoryViewInAppUrlWithSpaceId,
   UNGROUPED_FACTORY_KEY,
 } from '../common/utils';
 import { evaluateCondition, ConditionResult } from './evaluate_condition';
@@ -149,7 +149,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             reason,
             timestamp: startedAt.toISOString(),
             value: null,
-            viewInAppUrl: getViewInInventoryAppUrl({
+            viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
               basePath: libs.basePath,
               criteria,
               nodeType,
@@ -286,7 +286,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
             value: mapToConditionsLookup(results, (result) =>
               formatMetric(result[group].metric, result[group].currentValue)
             ),
-            viewInAppUrl: getViewInInventoryAppUrl({
+            viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
               basePath: libs.basePath,
               criteria,
               nodeType,
@@ -324,7 +324,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
           metric: mapToConditionsLookup(criteria, (c) => c.metric),
           threshold: mapToConditionsLookup(criteria, (c) => c.threshold),
           timestamp: startedAt.toISOString(),
-          viewInAppUrl: getViewInInventoryAppUrl({
+          viewInAppUrl: getInventoryViewInAppUrlWithSpaceId({
             basePath: libs.basePath,
             criteria,
             nodeType,

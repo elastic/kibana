@@ -11,6 +11,7 @@ import { stringify } from 'query-string';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common/parse_technical_fields';
 import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { HOST_FIELD } from '../../constants';
+import { LINK_TO_METRICS_EXPLORER } from '.';
 
 export const flatAlertRuleParams = (params: {}, pKey = ''): Record<string, unknown[]> => {
   return Object.entries(params).reduce((acc, [key, field]) => {
@@ -88,6 +89,16 @@ export const getInventoryViewInAppUrl = (
   }
 
   return viewInAppUrl;
+};
+
+export const getMetricsViewInAppUrl = (fields: ParsedTechnicalFields & Record<string, any>) => {
+  const hostName = fields[HOST_FIELD];
+  const timestamp = fields[TIMESTAMP];
+
+  if (hostName) {
+    return getLinkToHostDetails(hostName, timestamp);
+  }
+  return LINK_TO_METRICS_EXPLORER;
 };
 
 export function getLinkToHostDetails(hostName: string, timestamp: string): string {

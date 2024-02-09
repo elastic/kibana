@@ -20,8 +20,10 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { set } from '@kbn/safer-lodash-set';
 import { Alert } from '@kbn/alerts-as-data-utils';
 import { ParsedExperimentalFields } from '@kbn/rule-registry-plugin/common/parse_experimental_fields';
-import { LINK_TO_METRICS_EXPLORER } from '../../../../common/alerting/metrics';
-import { getInventoryViewInAppUrl } from '../../../../common/alerting/metrics/alert_link';
+import {
+  getInventoryViewInAppUrl,
+  getMetricsViewInAppUrl,
+} from '../../../../common/alerting/metrics/alert_link';
 import {
   AlertExecutionDetails,
   InventoryMetricConditions,
@@ -120,7 +122,7 @@ export const getAlertDetailsPageEnabledForApp = (
   return config[appName].enabled;
 };
 
-export const getViewInInventoryAppUrl = ({
+export const getInventoryViewInAppUrlWithSpaceId = ({
   basePath,
   criteria,
   nodeType,
@@ -154,8 +156,28 @@ export const getViewInInventoryAppUrl = ({
   );
 };
 
-export const getViewInMetricsAppUrl = (basePath: IBasePath, spaceId: string) =>
-  addSpaceIdToPath(basePath.publicBaseUrl, spaceId, LINK_TO_METRICS_EXPLORER);
+export const getMetricsViewInAppUrlWithSpaceId = ({
+  basePath,
+  spaceId,
+  timestamp,
+  hostName,
+}: {
+  basePath: IBasePath;
+  spaceId: string;
+  timestamp: string;
+  hostName?: string;
+}) => {
+  const fields = {
+    [TIMESTAMP]: timestamp,
+    [HOST_NAME]: hostName,
+  };
+
+  return addSpaceIdToPath(
+    basePath.publicBaseUrl,
+    spaceId,
+    getMetricsViewInAppUrl(parseTechnicalFields(fields, true))
+  );
+};
 
 export const KUBERNETES_POD_UID = 'kubernetes.pod.uid';
 export const NUMBER_OF_DOCUMENTS = 10;
