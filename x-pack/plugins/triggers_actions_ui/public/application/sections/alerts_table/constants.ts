@@ -16,6 +16,7 @@ import {
   SECURITY_DISPLAY_NAME,
   SLO_DISPLAY_NAME,
   STACK_MANAGEMENT_DISPLAY_NAME,
+  STACK_MONITORING_DISPLAY_NAME,
   UPTIME_DISPLAY_NAME,
 } from '../translations';
 
@@ -32,6 +33,7 @@ export const observabilityFeatureIds: AlertConsumers[] = [
   AlertConsumers.LOGS,
   AlertConsumers.SLO,
   AlertConsumers.UPTIME,
+  AlertConsumers.MONITORING,
 ];
 
 export const [_, ...observabilityApps] = observabilityFeatureIds;
@@ -61,6 +63,10 @@ export const alertProducersData: Record<AlertConsumers, AlertProducerData> = {
   [AlertConsumers.UPTIME]: {
     displayName: UPTIME_DISPLAY_NAME,
     icon: 'uptimeApp',
+  },
+  [AlertConsumers.MONITORING]: {
+    displayName: STACK_MONITORING_DISPLAY_NAME,
+    icon: 'monitoringApp',
   },
   [AlertConsumers.ML]: {
     displayName: ML_DISPLAY_NAME,

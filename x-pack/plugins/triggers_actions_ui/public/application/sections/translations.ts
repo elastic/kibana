@@ -39,6 +39,13 @@ export const STACK_MANAGEMENT_DISPLAY_NAME = i18n.translate(
   }
 );
 
+export const STACK_MONITORING_DISPLAY_NAME = i18n.translate(
+  'xpack.triggersActionsUI.sections.alertsTable.stackMonitoring',
+  {
+    defaultMessage: 'Stack monitoring',
+  }
+);
+
 export const UPTIME_DISPLAY_NAME = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.uptime',
   {
