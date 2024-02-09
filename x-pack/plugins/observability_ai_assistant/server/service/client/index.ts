@@ -12,18 +12,26 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import apm from 'elastic-apm-node';
 import { decode, encode } from 'gpt-tokenizer';
-import { compact, isEmpty, last, merge, noop, omit, pick, take } from 'lodash';
-import type OpenAI from 'openai';
-import { filter, isObservable, lastValueFrom, Observable, shareReplay, toArray } from 'rxjs';
+import { last, merge, noop, omit, pick, take } from 'lodash';
+import {
+  filter,
+  isObservable,
+  last as lastOperator,
+  lastValueFrom,
+  Observable,
+  shareReplay,
+  toArray,
+} from 'rxjs';
 import { Readable } from 'stream';
 import { v4 } from 'uuid';
+import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorEvent,
   createConversationNotFoundError,
+  createTokenLimitReachedError,
   MessageAddEvent,
   StreamingChatResponseEventType,
-  createTokenLimitReachedError,
   type StreamingChatResponseEvent,
 } from '../../../common/conversation_complete';
 import {
@@ -39,7 +47,6 @@ import {
 } from '../../../common/types';
 import { concatenateChatCompletionChunks } from '../../../common/utils/concatenate_chat_completion_chunks';
 import { emitWithConcatenatedMessage } from '../../../common/utils/emit_with_concatenated_message';
-import { processOpenAiStream } from '../../../common/utils/process_openai_stream';
 import type { ChatFunctionClient } from '../chat_function_client';
 import {
   KnowledgeBaseEntryOperationType,
@@ -48,7 +55,9 @@ import {
 } from '../knowledge_base_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
-import { streamIntoObservable } from '../util/stream_into_observable';
+import { createBedrockClaudeAdapter } from './adapters/bedrock_claude_adapter';
+import { createOpenAiAdapter } from './adapters/openai_adapter';
+import { LlmApiAdapter } from './adapters/types';
 
 export class ObservabilityAIAssistantClient {
   constructor(
@@ -320,6 +329,10 @@ export class ObservabilityAIAssistantClient {
               },
             };
 
+            this.dependencies.logger.debug(
+              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
+            );
+
             nextMessages = nextMessages.concat(functionResponseMessage);
 
             subscriber.next({
@@ -356,6 +369,8 @@ export class ObservabilityAIAssistantClient {
 
             return await next(nextMessages);
           }
+
+          this.dependencies.logger.debug(`Conversation: ${JSON.stringify(nextMessages, null, 2)}`);
 
           if (!persist) {
             subscriber.complete();
@@ -449,91 +464,104 @@ export class ObservabilityAIAssistantClient {
   ): Promise<Observable<ChatCompletionChunkEvent>> => {
     const span = apm.startSpan(`chat ${name}`);
 
-    const messagesForOpenAI: Array<
-      Omit<OpenAI.ChatCompletionMessageParam, 'role'> & {
-        role: MessageRole;
+    const spanId = (span?.ids['span.id'] || '').substring(0, 6);
+
+    try {
+      const connector = await this.dependencies.actionsClient.get({
+        id: connectorId,
+      });
+
+      let adapter: LlmApiAdapter;
+
+      switch (connector.actionTypeId) {
+        case ObservabilityAIAssistantConnectorType.OpenAI:
+          adapter = createOpenAiAdapter({
+            logger: this.dependencies.logger,
+            messages,
+            functionCall,
+            functions,
+          });
+          break;
+
+        case ObservabilityAIAssistantConnectorType.Bedrock:
+          adapter = createBedrockClaudeAdapter({
+            logger: this.dependencies.logger,
+            messages,
+            functionCall,
+            functions,
+          });
+          break;
+
+        default:
+          throw new Error(`Connector type is not supported: ${connector.actionTypeId}`);
       }
-    > = compact(
-      messages
-        .filter((message) => message.message.content || message.message.function_call?.name)
-        .map((message) => {
-          const role =
-            message.message.role === MessageRole.Elastic ? MessageRole.User : message.message.role;
 
-          return {
-            role,
-            content: message.message.content,
-            function_call: isEmpty(message.message.function_call?.name)
-              ? undefined
-              : omit(message.message.function_call, 'trigger'),
-            name: message.message.name,
-          };
-        })
-    );
+      const subAction = adapter.getSubAction();
 
-    const functionsForOpenAI = functions;
+      this.dependencies.logger.debug(`Sending conversation to connector`);
+      this.dependencies.logger.trace(JSON.stringify(subAction.subActionParams, null, 2));
 
-    const request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string } = {
-      messages: messagesForOpenAI as OpenAI.ChatCompletionCreateParams['messages'],
-      stream: true,
-      ...(!!functions?.length ? { functions: functionsForOpenAI } : {}),
-      temperature: 0,
-      function_call: functionCall ? { name: functionCall } : undefined,
-    };
+      const now = performance.now();
 
-    this.dependencies.logger.debug(`Sending conversation to connector`);
-    this.dependencies.logger.trace(JSON.stringify(request, null, 2));
+      const executeResult = await this.dependencies.actionsClient.execute({
+        actionId: connectorId,
+        params: subAction,
+      });
 
-    const executeResult = await this.dependencies.actionsClient.execute({
-      actionId: connectorId,
-      params: {
-        subAction: 'stream',
-        subActionParams: {
-          body: JSON.stringify(request),
-          stream: true,
+      this.dependencies.logger.debug(
+        `Received action client response: ${executeResult.status} (took: ${Math.round(
+          performance.now() - now
+        )}ms)${spanId ? ` (${spanId})` : ''}`
+      );
+
+      if (executeResult.status === 'error' && executeResult?.serviceMessage) {
+        const tokenLimitRegex =
+          /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
+        const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
+
+        if (tokenLimitRegexResult) {
+          const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
+          throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
+        }
+      }
+
+      if (executeResult.status === 'error') {
+        throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
+      }
+
+      const response = executeResult.data as Readable;
+
+      signal.addEventListener('abort', () => response.destroy());
+
+      const response$ = adapter.streamIntoObservable(response).pipe(shareReplay());
+
+      response$.pipe(concatenateChatCompletionChunks(), lastOperator()).subscribe({
+        error: (error) => {
+          this.dependencies.logger.debug('Error in chat response');
+          this.dependencies.logger.debug(error);
         },
-      },
-    });
+        next: (message) => {
+          this.dependencies.logger.debug(`Received message:\n${JSON.stringify(message)}`);
+        },
+      });
 
-    this.dependencies.logger.debug(`Received action client response: ${executeResult.status}`);
-
-    if (executeResult.status === 'error' && executeResult?.serviceMessage) {
-      const tokenLimitRegex =
-        /This model's maximum context length is (\d+) tokens\. However, your messages resulted in (\d+) tokens/g;
-      const tokenLimitRegexResult = tokenLimitRegex.exec(executeResult.serviceMessage);
-
-      if (tokenLimitRegexResult) {
-        const [, tokenLimit, tokenCount] = tokenLimitRegexResult;
-        throw createTokenLimitReachedError(parseInt(tokenLimit, 10), parseInt(tokenCount, 10));
-      }
-    }
-
-    if (executeResult.status === 'error') {
-      throw internal(`${executeResult?.message} - ${executeResult?.serviceMessage}`);
-    }
-
-    const response = executeResult.data as Readable;
-
-    signal.addEventListener('abort', () => response.destroy());
-
-    const observable = streamIntoObservable(response).pipe(processOpenAiStream(), shareReplay());
-
-    if (span) {
-      lastValueFrom(observable)
-        .then(
-          () => {
-            span.setOutcome('success');
-          },
-          () => {
-            span.setOutcome('failure');
-          }
-        )
+      lastValueFrom(response$)
+        .then(() => {
+          span?.setOutcome('success');
+        })
+        .catch(() => {
+          span?.setOutcome('failure');
+        })
         .finally(() => {
-          span.end();
+          span?.end();
         });
-    }
 
-    return observable;
+      return response$;
+    } catch (error) {
+      span?.setOutcome('failure');
+      span?.end();
+      throw error;
+    }
   };
 
   find = async (options?: { query?: string }): Promise<{ conversations: Conversation[] }> => {
@@ -596,12 +624,35 @@ export class ObservabilityAIAssistantClient {
     const response$ = await this.chat('generate_title', {
       messages: [
         {
+          '@timestamp': new Date().toString(),
+          message: {
+            role: MessageRole.System,
+            content: `You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you.`,
+          },
+        },
+        {
           '@timestamp': new Date().toISOString(),
           message: {
             role: MessageRole.User,
             content: messages.slice(1).reduce((acc, curr) => {
               return `${acc} ${curr.message.role}: ${curr.message.content}`;
-            }, 'You are a helpful assistant for Elastic Observability. Assume the following message is the start of a conversation between you and a user; give this conversation a title based on the content below. DO NOT UNDER ANY CIRCUMSTANCES wrap this title in single or double quotes. This title is shown in a list of conversations to the user, so title it for the user, not for you. Here is the content:'),
+            }, 'Generate a title, using the title_conversation_function, based on the following conversation:\n\n'),
+          },
+        },
+      ],
+      functions: [
+        {
+          name: 'title_conversation',
+          description:
+            'Use this function to title the conversation. Do not wrap the title in quotes',
+          parameters: {
+            type: 'object',
+            properties: {
+              title: {
+                type: 'string',
+              },
+            },
+            required: ['title'],
           },
         },
       ],
@@ -611,7 +662,10 @@ export class ObservabilityAIAssistantClient {
 
     const response = await lastValueFrom(response$.pipe(concatenateChatCompletionChunks()));
 
-    const input = response.message?.content || '';
+    const input =
+      (response.message.function_call.name
+        ? JSON.parse(response.message.function_call.arguments).title
+        : response.message?.content) || '';
 
     // This regular expression captures a string enclosed in single or double quotes.
     // It extracts the string content without the quotes.
