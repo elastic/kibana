@@ -166,4 +166,5 @@ export interface UsageStats {
   'observability:profilingCostPervCPUPerHour': number;
   'observability:profilingAWSCostDiscountRate': number;
   'data_views:fields_excluded_data_tiers': string;
+  'devTools:enableDockedConsole': boolean;
 }
