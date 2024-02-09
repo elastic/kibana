@@ -104,7 +104,7 @@ const AssetCriticalityComponent: React.FC<Props> = ({ entity }) => {
                   ) : (
                     <FormattedMessage
                       id="xpack.securitySolution.entityAnalytics.assetCriticality.createButton"
-                      defaultMessage="Create"
+                      defaultMessage="Assign"
                     />
                   )}
                 </EuiButtonEmpty>
