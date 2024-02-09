@@ -83,7 +83,7 @@ const buildItemsList = (nodes: InfraAssetMetricsItem[]): HostNodeRow[] => {
         {} as HostMetrics
       ),
 
-      alertsCount: alertsCount ? alertsCount : 0,
+      alertsCount: alertsCount ?? 0,
     };
   });
 };
@@ -105,14 +105,10 @@ const sortValues = (aValue: any, bValue: any, { direction }: Sorting) => {
 };
 
 const sortTableData =
-  ({ direction, field }: Sorting, displayAlerts: boolean) =>
+  ({ direction, field }: Sorting) =>
   (a: HostNodeRow, b: HostNodeRow) => {
     const aValue = a[field as keyof HostNodeRow];
     const bValue = b[field as keyof HostNodeRow];
-
-    if (displayAlerts) {
-      return sortValues(aValue, bValue, { direction, field });
-    }
 
     if (isTitleColumn(aValue) && isTitleColumn(bValue)) {
       return sortValues(aValue.name, bValue.name, { direction, field });
@@ -208,8 +204,8 @@ export const useHostsTable = () => {
     const endIndex = (pageIndex + 1) * pageSize;
     const startIndex = pageIndex * pageSize;
 
-    return items.sort(sortTableData(sorting, displayAlerts)).slice(startIndex, endIndex);
-  }, [items, pagination, sorting, displayAlerts]);
+    return items.sort(sortTableData(sorting)).slice(startIndex, endIndex);
+  }, [items, pagination, sorting]);
 
   const columns: Array<EuiBasicTableColumn<HostNodeRow>> = useMemo(
     () => [
@@ -238,13 +234,13 @@ export const useHostsTable = () => {
               name: TABLE_COLUMN_LABEL.alertsCount,
               field: 'alertsCount',
               sortable: true,
-              'data-test-subj': 'hostsView-tableRow-title',
+              'data-test-subj': 'hostsView-tableRow-alertsCount',
               render: (alertsCount: HostNodeRow['alertsCount']) => {
                 if (!alertsCount) {
                   return null;
                 }
                 return (
-                  <EuiToolTip position="bottom" content={TABLE_COLUMN_LABEL.alertsCount}>
+                  <EuiToolTip position="top" content={TABLE_COLUMN_LABEL.alertsCount}>
                     <EuiBadge iconType="warning" color="danger">
                       {alertsCount}
                     </EuiBadge>
@@ -348,7 +344,6 @@ export const useHostsTable = () => {
         'data-test-subj': 'hostsView-tableRow-rx',
         render: (avg: number) => formatMetric('rx', avg),
         align: 'right',
-        width: '120px',
       },
       {
         name: (
@@ -363,7 +358,6 @@ export const useHostsTable = () => {
         'data-test-subj': 'hostsView-tableRow-tx',
         render: (avg: number) => formatMetric('tx', avg),
         align: 'right',
-        width: '120px',
       },
     ],
     [

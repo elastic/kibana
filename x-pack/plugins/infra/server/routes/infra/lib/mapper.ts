@@ -39,24 +39,18 @@ export const mapToApiResponse = (
       const metrics = convertMetricBucket(params, bucket);
       const metadata = convertMetadataBucket(bucket);
 
-      return { name: bucket.key as string, metrics, metadata };
+      const cpuValue = metrics.find((metric) => metric.name === 'cpu')?.value ?? 0;
+      const alerts = alertsCountResponse?.find((item) => item.name === bucket.key);
+
+      return { name: bucket.key as string, metrics, metadata, cpuValue, ...alerts };
     })
     .sort((a, b) => {
-      const cpuAValue = a.metrics.find((metric) => metric.name === 'cpu')?.value ?? null;
-      const cpuBValue = b.metrics.find((metric) => metric.name === 'cpu')?.value ?? null;
-
-      // If both cpuAValue and cpuBValue are not null or undefined, perform the comparison
-      return (cpuBValue! ?? 0) - (cpuAValue! ?? 0);
+      return b.cpuValue - a.cpuValue;
     });
-
-  const mergedHostWithAlertsCount = hosts.map((itm) => ({
-    ...alertsCountResponse?.find((item) => item.name === itm.name),
-    ...itm,
-  }));
 
   return {
     type: params.type,
-    nodes: mergedHostWithAlertsCount,
+    nodes: hosts.map(({ cpuValue, ...rest }) => rest),
   };
 };
 

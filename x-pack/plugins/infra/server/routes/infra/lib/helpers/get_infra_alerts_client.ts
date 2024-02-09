@@ -8,7 +8,12 @@ import { isEmpty } from 'lodash';
 import { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
 import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import { KibanaRequest } from '@kbn/core/server';
-import { InfraPluginStartServicesAccessor } from '../../../../types';
+import type { InfraPluginStartServicesAccessor } from '../../../../types';
+
+type RequiredParams = ESSearchRequest & {
+  size: number;
+  track_total_hits: boolean | number;
+};
 
 export type InfraAlertsClient = Awaited<ReturnType<typeof getInfraAlertsClient>>;
 
@@ -26,10 +31,6 @@ export async function getInfraAlertsClient({
   if (!infraAlertsIndices || isEmpty(infraAlertsIndices)) {
     throw Error('No alert indices exist for "infrastrucuture"');
   }
-  type RequiredParams = ESSearchRequest & {
-    size: number;
-    track_total_hits: boolean | number;
-  };
 
   return {
     search<TParams extends RequiredParams>(

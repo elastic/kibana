@@ -24,19 +24,21 @@ export const getHosts = async (args: GetHostsArgs): Promise<GetInfraMetricsRespo
     };
   }
 
-  const result = await getAllHosts(args, hostNamesShortList);
   const {
     range: { from, to },
     limit,
   } = args.params;
 
-  const alertsCountResponse = await getHostsAlertsCount({
-    alertsClient: args.alertsClient,
-    hostNamesShortList,
-    from,
-    to,
-    maxNumHosts: limit,
-  });
+  const [result, alertsCountResponse] = await Promise.all([
+    getAllHosts(args, hostNamesShortList),
+    getHostsAlertsCount({
+      alertsClient: args.alertsClient,
+      hostNamesShortList,
+      from,
+      to,
+      maxNumHosts: limit,
+    }),
+  ]);
 
   return mapToApiResponse(args.params, result?.nodes.buckets, alertsCountResponse);
 };
