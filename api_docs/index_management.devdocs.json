@@ -3091,6 +3091,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateListItem.composedOf",
+            "type": "Array",
+            "tags": [],
+            "label": "composedOf",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateListItem._kbnMeta",
             "type": "Object",
             "tags": [],
