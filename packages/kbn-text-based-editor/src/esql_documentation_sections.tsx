@@ -10,9 +10,12 @@ import { i18n } from '@kbn/i18n';
 import { Markdown } from '@kbn/shared-ux-markdown';
 
 export const initialSection = (
-  <Markdown readOnly>
-    {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown', {
-      defaultMessage: `## ES|QL
+  <Markdown
+    readOnly
+    markdownContent={i18n.translate(
+      'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.markdown',
+      {
+        defaultMessage: `## ES|QL
 
 An ES|QL (Elasticsearch query language) query consists of a series of commands, separated by pipe characters: \`|\`. Each query starts with a **source command**, which produces a table, typically with data from Elasticsearch. 
 
@@ -25,9 +28,10 @@ source-command
 \`\`\`
 
 The result of a query is the table produced by the final processing command.                                  
-                                    `,
-    })}
-  </Markdown>
+                                      `,
+      }
+    )}
+  />
 );
 
 export const sourceCommands = {
@@ -49,8 +53,10 @@ export const sourceCommands = {
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.from.markdown',
             {
               defaultMessage: `### FROM
@@ -105,7 +111,7 @@ FROM employees [METADATA _index, _id]
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -116,13 +122,14 @@ FROM employees [METADATA _index, _id]
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.row.markdown',
             {
               defaultMessage: `### ROW
 The \`ROW\` source command produces a row with one or more columns with values that you specify. This can be useful for testing.
-            
+              
 \`\`\`
 ROW a = 1, b = "two", c = null
 \`\`\`
@@ -138,12 +145,12 @@ ROW supports the use of functions:
 \`\`\`
 ROW a = ROUND(1.23, 0)
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -154,8 +161,9 @@ ROW a = ROUND(1.23, 0)
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.show.markdown',
             {
               defaultMessage: `### SHOW
@@ -168,7 +176,7 @@ The \`SHOW <item>\` source command returns information about the deployment and 
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
   ],
@@ -193,8 +201,10 @@ export const processingCommands = {
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dissect.markdown',
             {
               defaultMessage: `### DISSECT
@@ -206,12 +216,12 @@ Refer to the [dissect processor documentation](https://www.elastic.co/guide/en/e
 ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
 | DISSECT a "%\\{Y\\}-%\\{M\\}-%\\{D\\}T%\\{h\\}:%\\{m\\}:%\\{s\\}Z - %\\{msg\\} - %\\{ip\\}"
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -222,8 +232,9 @@ ROW a = "1953-01-23T12:15:00Z - some text - 127.0.0.1"
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.drop.markdown',
             {
               defaultMessage: `### DROP
@@ -245,7 +256,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -256,8 +267,10 @@ FROM employees
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.enrich.markdown',
             {
               defaultMessage: `### ENRICH
@@ -294,12 +307,12 @@ ROW a = "1"
 By default (if no \`WITH\` is defined), \`ENRICH\` will add all the enrich fields defined in the enrich policy to the result.
 
 In case of name collisions, the newly created fields will override the existing fields.
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -310,8 +323,9 @@ In case of name collisions, the newly created fields will override the existing 
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eval.markdown',
             {
               defaultMessage: `### EVAL
@@ -333,12 +347,12 @@ FROM employees
 
 #### Functions
 \`EVAL\` supports various functions for calculating values. Refer to Functions for more information.
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -349,8 +363,10 @@ FROM employees
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.grok.markdown',
             {
               defaultMessage: `### GROK
@@ -362,12 +378,12 @@ Refer to the [grok processor documentation](https://www.elastic.co/guide/en/elas
 ROW a = "12 15.5 15.6 true"
 | GROK a "%\\{NUMBER:b:int\\} %\\{NUMBER:c:float\\} %\\{NUMBER:d:double\\} %\\{WORD:e:boolean\\}"
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -378,8 +394,9 @@ ROW a = "12 15.5 15.6 true"
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.keep.markdown',
             {
               defaultMessage: `### KEEP
@@ -410,7 +427,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -421,23 +438,24 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.limit.markdown',
             {
               defaultMessage: `### LIMIT
 The \`LIMIT\` processing command enables you to limit the number of rows:
-            
+              
 \`\`\`
 FROM employees
 | LIMIT 5
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -448,8 +466,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvExpand.markdown',
             {
               defaultMessage: `### MV_EXPAND
@@ -458,12 +477,12 @@ The \`MV_EXPAND\` processing command expands multivalued fields into one row per
 ROW a=[1,2,3], b="b", j=["a","b"]
 | MV_EXPAND a
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -474,8 +493,9 @@ ROW a=[1,2,3], b="b", j=["a","b"]
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rename.markdown',
             {
               defaultMessage: `### RENAME
@@ -502,12 +522,12 @@ FROM employees
 | KEEP first_name, last_name
 | RENAME first_name AS fn, last_name AS ln
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -518,8 +538,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sort.markdown',
             {
               defaultMessage: `### SORT
@@ -560,7 +581,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -571,8 +592,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.statsby.markdown',
             {
               defaultMessage: `### STATS ... BY
@@ -650,7 +672,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -661,8 +683,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.where.markdown',
             {
               defaultMessage: `### WHERE
@@ -685,7 +708,7 @@ Refer to **Operators** for an overview of the supported operators.
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
   ],
@@ -710,8 +733,9 @@ export const functions = {
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.absFunction.markdown',
             {
               defaultMessage: `### ABS
@@ -727,7 +751,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -738,8 +762,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.acosFunction.markdown',
             {
               defaultMessage: `### ACOS
@@ -749,12 +774,12 @@ Inverse cosine trigonometric function.
 ROW a=.9
 | EVAL acos=ACOS(a)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -765,8 +790,9 @@ ROW a=.9
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.asinFunction.markdown',
             {
               defaultMessage: `### ASIN
@@ -781,7 +807,7 @@ ROW a=.9
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -792,8 +818,9 @@ ROW a=.9
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atanFunction.markdown',
             {
               defaultMessage: `### ATAN
@@ -808,7 +835,7 @@ ROW a=12.9
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -819,8 +846,9 @@ ROW a=12.9
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.atan2Function.markdown',
             {
               defaultMessage: `### ATAN2
@@ -835,7 +863,7 @@ ROW y=12.9, x=.6
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -846,8 +874,9 @@ ROW y=12.9, x=.6
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.autoBucketFunction.markdown',
             {
               defaultMessage: `### AUTO_BUCKET
@@ -910,7 +939,7 @@ NOTE: \`AUTO_BUCKET\` does not create buckets that don’t match any documents. 
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -921,8 +950,9 @@ NOTE: \`AUTO_BUCKET\` does not create buckets that don’t match any documents. 
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.caseFunction.markdown',
             {
               defaultMessage: `### CASE
@@ -931,17 +961,17 @@ Accepts pairs of conditions and values. The function returns the value that belo
 \`\`\`
 FROM employees
 | EVAL type = CASE(
-  languages <= 1, "monolingual",
-  languages <= 2, "bilingual",
-   "polyglot")
+    languages <= 1, "monolingual",
+    languages <= 2, "bilingual",
+     "polyglot")
 | KEEP first_name, last_name, type
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -952,8 +982,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ceilFunction.markdown',
             {
               defaultMessage: `### CEIL
@@ -970,7 +1001,7 @@ Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`do
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -981,8 +1012,9 @@ Note: This is a noop for \`long\` (including unsigned) and \`integer\`. For \`do
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cidrMatchFunction.markdown',
             {
               defaultMessage: `### CIDR_MATCH
@@ -994,12 +1026,12 @@ Returns \`true\` if the provided IP is contained in one of the provided CIDR blo
 FROM hosts
 | WHERE CIDR_MATCH(ip, "127.0.0.2/32", "127.0.0.3/32")
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1010,8 +1042,9 @@ FROM hosts
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coalesceFunction.markdown',
             {
               defaultMessage: `### COALESCE
@@ -1021,12 +1054,12 @@ Returns the first non-null value.
 ROW a=null, b="b"
 | EVAL COALESCE(a, b)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1037,8 +1070,9 @@ ROW a=null, b="b"
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.concatFunction.markdown',
             {
               defaultMessage: `### CONCAT
@@ -1049,12 +1083,12 @@ FROM employees
 | KEEP first_name, last_name, height
 | EVAL fullname = CONCAT(first_name, " ", last_name)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1065,8 +1099,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.cosFunction.markdown',
             {
               defaultMessage: `### COS
@@ -1076,12 +1111,12 @@ Cosine trigonometric function.
 ROW a=1.8
 | EVAL cos=COS(a)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1092,8 +1127,9 @@ ROW a=1.8
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.coshFunction.markdown',
             {
               defaultMessage: `### COSH
@@ -1103,12 +1139,12 @@ Cosine hyperbolic function.
 ROW a=1.8
 | EVAL cosh=COSH(a)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1119,8 +1155,9 @@ ROW a=1.8
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateDiffFunction.markdown',
             {
               defaultMessage: `### DATE_DIFF
@@ -1135,7 +1172,7 @@ ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-1
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1146,8 +1183,9 @@ ROW date1 = TO_DATETIME("2023-12-02T11:00:00.000Z"), date2 = TO_DATETIME("2023-1
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateExtractFunction.markdown',
             {
               defaultMessage: `### DATE_EXTRACT
@@ -1169,7 +1207,7 @@ FROM sample_data
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1180,8 +1218,9 @@ FROM sample_data
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateFormatFunction.markdown',
             {
               defaultMessage: `### DATE_FORMAT
@@ -1192,12 +1231,12 @@ FROM employees
 | KEEP first_name, last_name, hire_date
 | EVAL hired = DATE_FORMAT("YYYY-MM-dd", hire_date)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1208,23 +1247,25 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly openLinksInNewTab>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateParseFunction.markdown',
             {
               defaultMessage: `### DATE_PARSE
 Returns a date by parsing the second argument using the format specified in the first argument. If no format is specified, the \`yyyy-MM-dd'T'HH:mm:ss.SSSZ\` format is used.
-Refer to [\`DateTimeFormatter\` documentation](https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/time/format/DateTimeFormatter.html) for syntax.
+Refer to [\`DateTimeFormatter\` documentation](https://docs.oracle.com/en/java/javase/14/docs/api/java.base/java/time/format/DateTimeFormatter.html) for syntax.
 \`\`\`
 ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1235,8 +1276,9 @@ ROW date_string = "2022-05-06"
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.dateTruncFunction.markdown',
             {
               defaultMessage: `### DATE_TRUNC
@@ -1264,7 +1306,7 @@ Timespan literals are not whitespace sensitive. These expressions are all valid:
 
 * \`1day\`
 * \`1 day\`
-* \`1      day\`
+* \`1      day\`
 
 Combine \`DATE_TRUNC\` with \`STATS ... BY\` to create date histograms. For example, to return the number of hires per year:
 
@@ -1279,7 +1321,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1290,8 +1332,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.eFunction.markdown',
             {
               defaultMessage: `### E
@@ -1300,12 +1343,12 @@ Euler’s number.
 \`\`\`
 ROW E()
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1316,8 +1359,9 @@ ROW E()
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.endsWithFunction.markdown',
             {
               defaultMessage: `### ENDS_WITH
@@ -1333,7 +1377,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1344,8 +1388,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.floorFunction.markdown',
             {
               defaultMessage: `### FLOOR
@@ -1362,7 +1407,7 @@ Note: this is a noop for \`long\` (including unsigned) and \`integer\`. For \`do
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1373,8 +1418,9 @@ Note: this is a noop for \`long\` (including unsigned) and \`integer\`. For \`do
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.greatestFunction.markdown',
             {
               defaultMessage: `### GREATEST
@@ -1386,12 +1432,12 @@ ROW a = 10, b = 20
 \`\`\`
 
 Note: when run on \`keyword\` or \`text\` fields, this will return the last string in alphabetical order. When run on \`boolean\` columns this will return \`true\` if any values are \`true\`.
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1402,8 +1448,9 @@ Note: when run on \`keyword\` or \`text\` fields, this will return the last stri
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leastFunction.markdown',
             {
               defaultMessage: `### LEAST
@@ -1415,12 +1462,12 @@ ROW a = 10, b = 20
 \`\`\`
 
 Note: when run on \`keyword\` or \`text\` fields, this will return the first string in alphabetical order. When run on \`boolean\` columns this will return \`false\` if any values are \`false\`.
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1431,8 +1478,9 @@ Note: when run on \`keyword\` or \`text\` fields, this will return the first str
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.leftFunction.markdown',
             {
               defaultMessage: `### LEFT
@@ -1445,12 +1493,12 @@ FROM employees
 | SORT last_name ASC
 | LIMIT 5
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1461,8 +1509,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.lengthFunction.markdown',
             {
               defaultMessage: `### LENGTH
@@ -1473,12 +1522,12 @@ FROM employees
 | KEEP first_name, last_name, height
 | EVAL fn_length = LENGTH(first_name)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1489,8 +1538,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.log10Function.markdown',
             {
               defaultMessage: `### LOG10
@@ -1502,12 +1552,12 @@ Logs of negative numbers are NaN. Logs of infinites are infinite, as is the log 
 ROW d = 1000.0
 | EVAL s = LOG10(d)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1518,8 +1568,9 @@ ROW d = 1000.0
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.ltrimFunction.markdown',
             {
               defaultMessage: `### LTRIM
@@ -1532,12 +1583,12 @@ ROW message = "   some text  ",  color = " red "
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1548,8 +1599,9 @@ ROW message = "   some text  ",  color = " red "
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvAvgFunction.markdown',
             {
               defaultMessage: `### MV_AVG
@@ -1567,12 +1619,12 @@ Returning:
 \`\`\`
 
 NOTE: The output type is always a double and the input type can be any number.
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1583,8 +1635,9 @@ NOTE: The output type is always a double and the input type can be any number.
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvConcatFunction.markdown',
             {
               defaultMessage: `### MV_CONCAT
@@ -1618,7 +1671,7 @@ Returning:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1629,8 +1682,9 @@ Returning:
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvCountFunction.markdown',
             {
               defaultMessage: `### MV_COUNT
@@ -1648,12 +1702,12 @@ Returning:
 \`\`\`
 
 NOTE: This function accepts all types and always returns an integer.
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1664,8 +1718,9 @@ NOTE: This function accepts all types and always returns an integer.
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvDedupeFunction.markdown',
             {
               defaultMessage: `### MV_DEDUPE
@@ -1683,12 +1738,12 @@ Returning:
 \`\`\`
 
 NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1699,8 +1754,10 @@ NOTE: \`MV_DEDUPE\` may, but won’t always, sort the values in the field.
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvFirstFunction.markdown',
             {
               defaultMessage: `### MV_FIRST
@@ -1720,12 +1777,12 @@ foo;bar;baz | foo
 \`\`\`
 
 The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearch/reference/current/esql-multivalued-fields.html) are read from underlying storage is not guaranteed. It is frequently ascending, but don’t rely on that. If you need the minimum field value use \`MV_MIN\` instead of \`MV_FIRST\`. \`MV_MIN\` has optimizations for sorted values so there isn’t a performance benefit to \`MV_FIRST\`. \`MV_FIRST\` is mostly useful with functions that create multivalued fields like \`SPLIT\`.
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1736,8 +1793,9 @@ The order that [multivalued fields](https://www.elastic.co/guide/en/elasticsearc
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMaxFunction.markdown',
             {
               defaultMessage: `### MV_MAX
@@ -1766,12 +1824,12 @@ Returning:
 \`\`\`
 ["foo", "zoo", "bar"] | "zoo"
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1782,8 +1840,9 @@ Returning:
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMedianFunction.markdown',
             {
               defaultMessage: `### MV_MEDIAN
@@ -1812,12 +1871,12 @@ Returning:
 \`\`\`
 [3, 7, 1, 6] | 4
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1828,8 +1887,9 @@ Returning:
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvMinFunction.markdown',
             {
               defaultMessage: `### MV_MIN
@@ -1858,12 +1918,12 @@ Returning:
 \`\`\`
 ["foo", "bar"] | "bar"
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1874,8 +1934,9 @@ Returning:
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvSumFunction.markdown',
             {
               defaultMessage: `### MV_SUM
@@ -1892,12 +1953,12 @@ Returning:
 \`\`\`
 
 NOTE: The input type can be any number and the output type is the same as the input type.
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1908,13 +1969,14 @@ NOTE: The input type can be any number and the output type is the same as the in
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.mvLastFunction.markdown',
             {
               defaultMessage: `### MV_LAST
 Converts a multivalued field into a single valued field containing the last value. This is most useful when reading from a function that emits multivalued fields in a known order like \`SPLIT\`:
-
+  
 \`\`\`
 ROW a="foo;bar;baz" 
 | EVAL first_a = MV_LAST(SPLIT(a, ";"))
@@ -1925,12 +1987,12 @@ Returning:
 \`\`\`
 foo;bar;baz | baz
 \`\`\`
-          `,
+            `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1941,8 +2003,9 @@ foo;bar;baz | baz
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.nowFunction.markdown',
             {
               defaultMessage: `### NOW
@@ -1951,12 +2014,12 @@ Returns current date and time.
 \`\`\`
 ROW current_date = NOW()
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1967,8 +2030,9 @@ ROW current_date = NOW()
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.piFunction.markdown',
             {
               defaultMessage: `### PI
@@ -1977,12 +2041,12 @@ The ratio of a circle's circumference to its diameter.
 \`\`\`
 ROW PI()
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -1993,8 +2057,9 @@ ROW PI()
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.powFunction.markdown',
             {
               defaultMessage: `### POW
@@ -2013,12 +2078,12 @@ The exponent can be a fraction, which is similar to performing a root. For examp
 ROW base = 4, exponent = 0.5
 | EVAL s = POW(base, exponent)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2029,8 +2094,9 @@ ROW base = 4, exponent = 0.5
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rightFunction.markdown',
             {
               defaultMessage: `### RIGHT
@@ -2043,12 +2109,12 @@ FROM employees
 | SORT last_name ASC
 | LIMIT 5
 \`\`\`
-          `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2059,8 +2125,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.roundFunction.markdown',
             {
               defaultMessage: `### ROUND
@@ -2071,12 +2138,12 @@ FROM employees
 | KEEP first_name, last_name, height
 | EVAL height = ROUND(height * 3.281, 1)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2087,8 +2154,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.rtrimFunction.markdown',
             {
               defaultMessage: `### RTRIM
@@ -2101,12 +2169,12 @@ ROW message = "   some text  ",  color = " red "
 | EVAL message = CONCAT("'", message, "'")
 | EVAL color = CONCAT("'", color, "'")
 \`\`\`
-          `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2117,8 +2185,9 @@ ROW message = "   some text  ",  color = " red "
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinFunction.markdown',
             {
               defaultMessage: `### SIN
@@ -2128,12 +2197,12 @@ Sine trigonometric function.
 ROW a=1.8
 | EVAL sin=SIN(a)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2144,8 +2213,9 @@ ROW a=1.8
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sinhFunction.markdown',
             {
               defaultMessage: `### SINH
@@ -2155,12 +2225,12 @@ Sine hyperbolic function.
 ROW a=1.8
 | EVAL sinh=SINH(a)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2171,8 +2241,9 @@ ROW a=1.8
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.splitFunction.markdown',
             {
               defaultMessage: `### SPLIT
@@ -2190,12 +2261,12 @@ foo;bar;baz;qux;quux;corge | [foo,bar,baz,qux,quux,corge]
 \`\`\`
 
 NOTE: Only single byte delimiters are currently supported.
-          `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2206,8 +2277,9 @@ NOTE: Only single byte delimiters are currently supported.
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sqrtFunction.markdown',
             {
               defaultMessage: `### SQRT
@@ -2219,12 +2291,12 @@ Square roots of negative numbers are NaN. Square roots of infinites are infinite
 ROW d = 100.0
 | EVAL s = SQRT(d)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2235,8 +2307,9 @@ ROW d = 100.0
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.startsWithFunction.markdown',
             {
               defaultMessage: `### STARTS_WITH
@@ -2247,12 +2320,12 @@ FROM employees
 | KEEP first_name, last_name, height
 | EVAL ln_S = STARTS_WITH(last_name, "S")
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2263,8 +2336,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.substringFunction.markdown',
             {
               defaultMessage: `### SUBSTRING
@@ -2291,12 +2365,12 @@ FROM employees
 | KEEP last_name
 | EVAL ln_sub = SUBSTRING(last_name, 2)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2307,8 +2381,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanFunction.markdown',
             {
               defaultMessage: `### TAN
@@ -2318,12 +2393,12 @@ Tangent trigonometric function.
 ROW a=1.8
 | EVAL tan=TAN(a)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2334,8 +2409,9 @@ ROW a=1.8
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tanhFunction.markdown',
             {
               defaultMessage: `### TANH
@@ -2345,12 +2421,12 @@ Tangent hyperbolic function.
 ROW a=1.8
 | EVAL tanh=TANH(a)
 \`\`\`
-          `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2361,8 +2437,9 @@ ROW a=1.8
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.tauFunction.markdown',
             {
               defaultMessage: `### TAU
@@ -2371,12 +2448,12 @@ The ratio of a circle's circumference to its radius.
 \`\`\`
 ROW TAU()
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2387,8 +2464,9 @@ ROW TAU()
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toBooleanFunction.markdown',
             {
               defaultMessage: `### TO_BOOLEAN
@@ -2412,12 +2490,12 @@ Returning:
 The numerical value of **0** will be converted to **false**, anything else will be converted to **true**.
 
 Alias: TO_BOOL
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2428,8 +2506,9 @@ Alias: TO_BOOL
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianpointFunction.markdown',
             {
               defaultMessage: `### TO_CARTESIANPOINT
@@ -2444,12 +2523,12 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
 | MV_EXPAND wkt
 | EVAL pt = TO_CARTESIANPOINT(wkt)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2460,30 +2539,32 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POINT(7580.93 2272.77)"]
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toCartesianShapeFunction.markdown',
             {
               defaultMessage: `### TO_CARTESIANSHAPE
 Converts an input value to a \`cartesian_shape\` value.
 
 The input can be a single- or multi-valued field or an expression. The input type must be a string or a \`cartesian_shape\`.
-            
+              
 A string will only be successfully converted if it respects the [WKT](https://en.wikipedia.org/wiki/Well-known_text_representation_of_geometry) format:
-  
+    
 For example:
-  
+    
 \`\`\`
 ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.63 4865942.27, 2226389.81 4865942.27, 1113194.90 2273030.92, 3339584.72 1118889.97))"]
 | MV_EXPAND wkt
 | EVAL geom = TO_CARTESIANSHAPE(wkt)
 \`\`\`
-                      `,
+                        `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2494,8 +2575,9 @@ ROW wkt = ["POINT(4297.11 -1475.53)", "POLYGON ((3339584.72 1118889.97, 4452779.
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDatetimeFunction.markdown',
             {
               defaultMessage: `### TO_DATETIME
@@ -2537,7 +2619,7 @@ Alias: TO_DT
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2548,8 +2630,9 @@ Alias: TO_DT
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDegreesFunction.markdown',
             {
               defaultMessage: `### TO_DEGREES
@@ -2561,12 +2644,12 @@ The input can be a single- or multi-valued field or an expression. The input typ
 ROW rad = [1.57, 3.14, 4.71]
 | EVAL deg = TO_DEGREES(rad)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2577,8 +2660,9 @@ ROW rad = [1.57, 3.14, 4.71]
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toDoubleFunction.markdown',
             {
               defaultMessage: `### TO_DOUBLE
@@ -2611,7 +2695,7 @@ Alias: TO_DBL
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2622,8 +2706,10 @@ Alias: TO_DBL
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeopointFunction.markdown',
             {
               defaultMessage: `### TO_GEOPOINT
@@ -2642,7 +2728,7 @@ ROW wkt = "POINT(42.97109630194 14.7552534413725)"
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2653,8 +2739,10 @@ ROW wkt = "POINT(42.97109630194 14.7552534413725)"
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toGeoshapeFunction.markdown',
             {
               defaultMessage: `### TO_GEOSHAPE
@@ -2676,12 +2764,12 @@ Returning:
 \`\`\`
 POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)) | POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10))
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2692,8 +2780,9 @@ POLYGON ((30 10, 40 40, 20 40, 10 20, 30 10)) | POLYGON ((30 10, 40 40, 20 40, 1
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIntegerFunction.markdown',
             {
               defaultMessage: `### TO_INTEGER
@@ -2726,7 +2815,7 @@ Alias: TO_INT
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2737,8 +2826,9 @@ Alias: TO_INT
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toIpFunction.markdown',
             {
               defaultMessage: `### TO_IP
@@ -2766,7 +2856,7 @@ Note that in the example above the last conversion of the string isn’t possibl
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2777,8 +2867,9 @@ Note that in the example above the last conversion of the string isn’t possibl
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLongFunction.markdown',
             {
               defaultMessage: `### TO_LONG
@@ -2809,7 +2900,7 @@ Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2820,8 +2911,9 @@ Boolean \`true\` will be converted to long \`1\`, \`false\` to \`0\`.
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toLowerFunction.markdown',
             {
               defaultMessage: `### TO_LOWER
@@ -2843,7 +2935,7 @@ Some Text | some text
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2854,8 +2946,9 @@ Some Text | some text
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toRadiansFunction.markdown',
             {
               defaultMessage: `### TO_RADIANS
@@ -2872,7 +2965,7 @@ ROW deg = [90.0, 180.0, 270.0]
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2883,8 +2976,9 @@ ROW deg = [90.0, 180.0, 270.0]
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toStringFunction.markdown',
             {
               defaultMessage: `### TO_STRING
@@ -2906,7 +3000,7 @@ ROW a=[10, 9, 8]
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2917,8 +3011,9 @@ ROW a=[10, 9, 8]
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUnsignedLongFunction.markdown',
             {
               defaultMessage: `### TO_UNSIGNED_LONG
@@ -2953,7 +3048,7 @@ Alias: TO_ULONG, TO_UL
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2964,8 +3059,9 @@ Alias: TO_ULONG, TO_UL
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toUpperFunction.markdown',
             {
               defaultMessage: `### TO_UPPER
@@ -2983,12 +3079,12 @@ Returning:
 \`\`\`
 Some Text | SOME TEXT
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -2999,8 +3095,9 @@ Some Text | SOME TEXT
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.toVersionFunction.markdown',
             {
               defaultMessage: `### TO_VERSION
@@ -3017,12 +3114,12 @@ Returning:
 \`\`\`
 
 Alias: TO_VER
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3033,8 +3130,9 @@ Alias: TO_VER
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.trimFunction.markdown',
             {
               defaultMessage: `### TRIM
@@ -3050,7 +3148,7 @@ ROW message = "   some text  ",  color = " red "
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
   ],
@@ -3075,8 +3173,9 @@ export const aggregationFunctions = {
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.avgFunction.markdown',
             {
               defaultMessage: `### AVG
@@ -3098,7 +3197,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3109,8 +3208,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countFunction.markdown',
             {
               defaultMessage: `### COUNT
@@ -3142,7 +3242,7 @@ ROW words="foo;bar;baz;qux;quux;foo"
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3153,8 +3253,10 @@ ROW words="foo;bar;baz;qux;quux;foo"
         }
       ),
       description: (
-        <Markdown openLinksInNewTab={true} readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.countDistinctFunction.markdown',
             {
               defaultMessage: `### COUNT_DISTINCT
@@ -3183,7 +3285,7 @@ ROW words="foo;bar;baz;qux;quux;foo"
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3194,8 +3296,9 @@ ROW words="foo;bar;baz;qux;quux;foo"
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.maxFunction.markdown',
             {
               defaultMessage: `### MAX
@@ -3217,7 +3320,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3228,8 +3331,10 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly openLinksInNewTab>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianFunction.markdown',
             {
               defaultMessage: `### MEDIAN
@@ -3257,7 +3362,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3268,8 +3373,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.medianAbsoluteDeviationFunction.markdown',
             {
               defaultMessage: `### MEDIAN_ABSOLUTE_DEVIATION
@@ -3296,7 +3402,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3307,8 +3413,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.minFunction.markdown',
             {
               defaultMessage: `### MIN
@@ -3330,7 +3437,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3341,8 +3448,10 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly openLinksInNewTab>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          openLinksInNewTab={true}
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.percentileFunction.markdown',
             {
               defaultMessage: `### PERCENTILE
@@ -3370,7 +3479,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3381,8 +3490,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stCentroidFunction.markdown',
             {
               defaultMessage: `### ST_CENTROID
@@ -3397,7 +3507,7 @@ FROM airports
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3408,8 +3518,9 @@ FROM airports
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.sumFunction.markdown',
             {
               defaultMessage: `### SUM
@@ -3431,7 +3542,7 @@ FROM employees
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
   ],
@@ -3456,8 +3567,9 @@ export const operators = {
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.binaryOperators.markdown',
             {
               defaultMessage: `### Binary operators
@@ -3470,12 +3582,12 @@ These binary comparison operators are supported:
 * less than or equal: \`<=\`
 * larger than: \`>\`
 * larger than or equal: \`>=\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3486,8 +3598,9 @@ These binary comparison operators are supported:
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.booleanOperators.markdown',
             {
               defaultMessage: `### Boolean operators
@@ -3501,7 +3614,7 @@ The following boolean operators are supported:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3512,8 +3625,9 @@ The following boolean operators are supported:
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.inOperator.markdown',
             {
               defaultMessage: `### IN
@@ -3528,7 +3642,7 @@ ROW a = 1, b = 4, c = 3
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3539,8 +3653,9 @@ ROW a = 1, b = 4, c = 3
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.stringOperators.markdown',
             {
               defaultMessage: `### LIKE and RLIKE
@@ -3564,12 +3679,12 @@ FROM employees
 | WHERE first_name RLIKE ".leja.*"
 | KEEP first_name, last_name
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
     {
@@ -3580,8 +3695,9 @@ FROM employees
         }
       ),
       description: (
-        <Markdown readOnly>
-          {i18n.translate(
+        <Markdown
+          readOnly
+          markdownContent={i18n.translate(
             'textBasedEditor.query.textBasedLanguagesEditor.documentationESQL.predicates.markdown',
             {
               defaultMessage: `### NULL values
@@ -3600,12 +3716,12 @@ FROM employees
 | WHERE is_rehired IS NOT NULL
 | STATS count(emp_no)
 \`\`\`
-            `,
+              `,
               description:
                 'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
             }
           )}
-        </Markdown>
+        />
       ),
     },
   ],
