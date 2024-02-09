@@ -3064,6 +3064,101 @@ Object {
         "presence": "optional",
       },
       "keys": Object {
+        "filter": Object {
+          "flags": Object {
+            "default": [Function],
+            "error": [Function],
+            "presence": "optional",
+          },
+          "items": Array [
+            Object {
+              "flags": Object {
+                "default": Object {
+                  "special": "deep",
+                },
+                "error": [Function],
+                "presence": "optional",
+              },
+              "keys": Object {
+                "meta": Object {
+                  "flags": Object {
+                    "error": [Function],
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "key": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                        "value": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "type": "any",
+                        },
+                      },
+                      "name": "entries",
+                    },
+                  ],
+                  "type": "record",
+                },
+                "query": Object {
+                  "flags": Object {
+                    "default": [Function],
+                    "error": [Function],
+                    "presence": "optional",
+                  },
+                  "rules": Array [
+                    Object {
+                      "args": Object {
+                        "key": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "rules": Array [
+                            Object {
+                              "args": Object {
+                                "method": [Function],
+                              },
+                              "name": "custom",
+                            },
+                          ],
+                          "type": "string",
+                        },
+                        "value": Object {
+                          "flags": Object {
+                            "error": [Function],
+                          },
+                          "type": "any",
+                        },
+                      },
+                      "name": "entries",
+                    },
+                  ],
+                  "type": "record",
+                },
+              },
+              "preferences": Object {
+                "stripUnknown": Object {
+                  "objects": false,
+                },
+              },
+              "type": "object",
+            },
+          ],
+          "type": "array",
+        },
         "index": Object {
           "flags": Object {
             "error": [Function],
@@ -7219,20 +7314,60 @@ Object {
                         "type": "string",
                       },
                       "params": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "command": Object {
-                            "const": "isolate",
-                            "type": "string",
+                        "anyOf": Array [
+                          Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "command": Object {
+                                "const": "isolate",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                            ],
+                            "type": "object",
                           },
-                          "comment": Object {
-                            "type": "string",
+                          Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "command": Object {
+                                "enum": Array [
+                                  "kill-process",
+                                  "suspend-process",
+                                ],
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "field": Object {
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
                         ],
-                        "type": "object",
                       },
                     },
                     "required": Array [
@@ -7857,20 +7992,60 @@ Object {
                         "type": "string",
                       },
                       "params": Object {
-                        "additionalProperties": false,
-                        "properties": Object {
-                          "command": Object {
-                            "const": "isolate",
-                            "type": "string",
+                        "anyOf": Array [
+                          Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "command": Object {
+                                "const": "isolate",
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                            ],
+                            "type": "object",
                           },
-                          "comment": Object {
-                            "type": "string",
+                          Object {
+                            "additionalProperties": false,
+                            "properties": Object {
+                              "command": Object {
+                                "enum": Array [
+                                  "kill-process",
+                                  "suspend-process",
+                                ],
+                                "type": "string",
+                              },
+                              "comment": Object {
+                                "type": "string",
+                              },
+                              "config": Object {
+                                "additionalProperties": false,
+                                "properties": Object {
+                                  "field": Object {
+                                    "type": "string",
+                                  },
+                                  "overwrite": Object {
+                                    "default": true,
+                                    "type": "boolean",
+                                  },
+                                },
+                                "required": Array [
+                                  "field",
+                                ],
+                                "type": "object",
+                              },
+                            },
+                            "required": Array [
+                              "command",
+                              "config",
+                            ],
+                            "type": "object",
                           },
-                        },
-                        "required": Array [
-                          "command",
                         ],
-                        "type": "object",
                       },
                     },
                     "required": Array [

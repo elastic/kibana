@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import { concatMap, filter, from, map, Observable } from 'rxjs';
+import { Observable } from 'rxjs';
 import type { Readable } from 'stream';
 
-export function streamIntoObservable(readable: Readable): Observable<string> {
-  let lineBuffer = '';
+export function streamIntoObservable(readable: Readable): Observable<any> {
+  return new Observable<string>((subscriber) => {
+    const decodedStream = readable;
 
-  return from(readable).pipe(
-    map((chunk: Buffer) => chunk.toString('utf-8')),
-    map((part) => {
-      const lines = (lineBuffer + part).split('\n');
-      lineBuffer = lines.pop() || ''; // Keep the last incomplete line for the next chunk
-      return lines;
-    }),
-    concatMap((lines) => lines),
-    filter((line) => line.trim() !== '')
-  );
+    async function processStream() {
+      for await (const chunk of decodedStream) {
+        subscriber.next(chunk);
+      }
+    }
+
+    processStream()
+      .then(() => {
+        subscriber.complete();
+      })
+      .catch((error) => {
+        subscriber.error(error);
+      });
+  });
 }
