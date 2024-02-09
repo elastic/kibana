@@ -332,14 +332,16 @@ export class CommonPageObject extends FtrService {
         }
 
         currentUrl = (await this.browser.getCurrentUrl()).replace(/\/\/\w+:\w+@/, '//');
+        const decodedAppUrl = decodeURIComponent(appUrl);
+        const decodedCurrentUrl = decodeURIComponent(currentUrl);
 
-        const navSuccessful = currentUrl
+        const navSuccessful = decodedCurrentUrl
           .replace(':80/', '/')
           .replace(':443/', '/')
-          .startsWith(appUrl.replace(':80/', '/').replace(':443/', '/'));
+          .startsWith(decodedAppUrl.replace(':80/', '/').replace(':443/', '/'));
 
         if (!navSuccessful) {
-          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${appUrl} currentUrl=${currentUrl}`;
+          const msg = `App failed to load: ${appName} in ${this.defaultFindTimeout}ms appUrl=${decodedAppUrl} currentUrl=${decodedCurrentUrl}`;
           this.log.debug(msg);
           throw new Error(msg);
         }
