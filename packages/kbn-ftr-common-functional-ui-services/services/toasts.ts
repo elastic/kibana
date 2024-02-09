@@ -87,11 +87,11 @@ export class ToastsService extends FtrService {
   }
 
   public async dismissAllToasts(): Promise<void> {
-    const xs = await this.getAllToastElements();
+    const allToastElements = await this.getAllToastElements();
 
-    if (xs.length === 0) return;
+    if (allToastElements.length === 0) return;
 
-    for (const toastElement of xs) {
+    for (const toastElement of allToastElements) {
       try {
         await toastElement.moveMouseTo();
         const closeBtn = await toastElement.findByTestSubject('toastCloseButton');
