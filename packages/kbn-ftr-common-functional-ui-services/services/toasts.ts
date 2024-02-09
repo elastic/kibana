@@ -39,18 +39,33 @@ export class ToastsService extends FtrService {
     return { title, message };
   }
 
-  public async toastMessageByTestSubj(testSubj = 'csp:toast-success') {
-    const testSubjSvc = this.testSubjects;
-    return {
-      async getElement(): Promise<WebElementWrapper> {
-        return await testSubjSvc.find(testSubj);
-      },
-      async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
-        const element = await this.getElement();
-        const link = await element.findByTestSubject(linkTestSubj);
-        await link.click();
-      },
-    };
+  // public async toastMessageByTestSubj(testSubj = 'csp:toast-success') {
+  //   const testSubjSvc = this.testSubjects;
+  //   return {
+  //     async getElement(): Promise<WebElementWrapper> {
+  //       const res = await testSubjSvc.find(testSubj);
+  //       return res;
+  //     },
+  //     async clickToastMessageLink(linkTestSubj = 'csp:toast-success-link') {
+  //       const element = await this.getElement();
+  //       const link = await element.findByTestSubject(linkTestSubj);
+  //       await link.click();
+  //     },
+  //   };
+  // }
+
+  public async getByTestSubject(testSubj = 'csp:toast-success') {
+    const element = await this.testSubjects.find(testSubj);
+    return element;
+  }
+
+  public async clickLinkByTestSubject(
+    testSubj = 'csp:toast-success',
+    linkTestSubj = 'csp:toast-success-link'
+  ): Promise<void> {
+    const element = await this.getByTestSubject(testSubj);
+    const link = await element.findByTestSubject(linkTestSubj);
+    await link.click();
   }
 
   /**
