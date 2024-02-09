@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { REDUX_UD_FOR_MEMORY_STORAGE } from '../constants';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
 import { selectPanelsById, useSelector } from '../redux';
 
@@ -15,6 +15,7 @@ import { selectPanelsById, useSelector } from '../redux';
  */
 export const useExpandableFlyoutState = () => {
   const { urlKey } = useExpandableFlyoutContext();
-  const id = urlKey || REDUX_UD_FOR_MEMORY_STORAGE;
+  // if no urlKey is provided, we are in memory storage mode and use the reserved word 'memory'
+  const id = urlKey || REDUX_ID_FOR_MEMORY_STORAGE;
   return useSelector(selectPanelsById(id));
 };

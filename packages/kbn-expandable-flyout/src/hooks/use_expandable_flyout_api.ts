@@ -7,7 +7,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { REDUX_UD_FOR_MEMORY_STORAGE } from '../constants';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from '../constants';
 import { useExpandableFlyoutContext } from '../context';
 import {
   closeLeftPanelAction,
@@ -32,7 +32,8 @@ export const useExpandableFlyoutApi = () => {
   const dispatch = useDispatch();
 
   const { urlKey } = useExpandableFlyoutContext();
-  const id = urlKey || REDUX_UD_FOR_MEMORY_STORAGE;
+  // if no urlKey is provided, we are in memory storage mode and use the reserved word 'memory'
+  const id = urlKey || REDUX_ID_FOR_MEMORY_STORAGE;
 
   const openPanels = useCallback(
     ({

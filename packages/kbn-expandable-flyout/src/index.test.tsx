@@ -18,9 +18,9 @@ import {
 } from './components/test_ids';
 import { type State } from './state';
 import { TestProvider } from './test/provider';
-import { REDUX_UD_FOR_MEMORY_STORAGE } from './constants';
+import { REDUX_ID_FOR_MEMORY_STORAGE } from './constants';
 
-const id = REDUX_UD_FOR_MEMORY_STORAGE;
+const id = REDUX_ID_FOR_MEMORY_STORAGE;
 const registeredPanels: Panel[] = [
   {
     key: 'key',
@@ -30,12 +30,12 @@ const registeredPanels: Panel[] = [
 
 describe('ExpandableFlyout', () => {
   it(`shouldn't render flyout if no panels`, () => {
-    const context: State = {
+    const state: State = {
       byId: {},
     };
 
     const result = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -44,7 +44,7 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render right section', () => {
-    const context = {
+    const state = {
       byId: {
         [id]: {
           right: {
@@ -57,7 +57,7 @@ describe('ExpandableFlyout', () => {
     };
 
     const { getByTestId } = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -66,7 +66,7 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render left section', () => {
-    const context = {
+    const state = {
       byId: {
         [id]: {
           right: undefined,
@@ -79,7 +79,7 @@ describe('ExpandableFlyout', () => {
     };
 
     const { getByTestId } = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );
@@ -88,7 +88,7 @@ describe('ExpandableFlyout', () => {
   });
 
   it('should render preview section', () => {
-    const context = {
+    const state = {
       byId: {
         [id]: {
           right: undefined,
@@ -103,7 +103,7 @@ describe('ExpandableFlyout', () => {
     };
 
     const { getByTestId } = render(
-      <TestProvider state={context}>
+      <TestProvider state={state}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
       </TestProvider>
     );

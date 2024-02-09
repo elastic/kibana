@@ -19,7 +19,7 @@ import { urlChangedAction } from './actions';
 /**
  * Dispatches actions when url state changes and initializes the state when the app is loaded with flyout url parameters
  */
-const UrlSynchronizer = () => {
+export const UrlSynchronizer = () => {
   const { urlKey } = useExpandableFlyoutContext();
   const panels = useExpandableFlyoutState();
   const needsSync = useSelector(selectNeedsSync());
