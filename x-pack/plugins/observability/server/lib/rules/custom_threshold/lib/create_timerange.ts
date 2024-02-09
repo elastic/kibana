@@ -10,11 +10,15 @@ import moment from 'moment';
 export const createTimerange = (
   interval: number,
   timeframe: { end: string; start: string },
-  lastPeriodEnd?: number
+  lastPeriodEnd?: number,
+  isRateAgg?: boolean
 ) => {
   const end = moment(timeframe.end).valueOf();
   let start = moment(timeframe.start).valueOf();
 
+  const minimumBuckets = isRateAgg ? 2 : 1;
+
+  interval = interval * minimumBuckets;
   start = start - interval;
 
   // Use lastPeriodEnd - interval when it's less than start

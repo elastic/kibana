@@ -230,20 +230,39 @@ export class DashboardAddPanelService extends FtrService {
     return this.addEmbeddable(vizName, 'Visualization');
   }
 
-  async addEmbeddable(embeddableName: string, embeddableType: string) {
+  async addEmbeddable(
+    embeddableName: string,
+    embeddableType?: string,
+    closePanelWhenComplete: boolean = true
+  ) {
     this.log.debug(
       `DashboardAddPanel.addEmbeddable, name: ${embeddableName}, type: ${embeddableType}`
     );
     await this.ensureAddPanelIsShowing();
-    await this.savedObjectsFinder.toggleFilter(embeddableType);
-    await this.savedObjectsFinder.filterEmbeddableNames(`"${embeddableName.replace('-', ' ')}"`);
+    await this.savedObjectsFinder.filterEmbeddableNames(
+      `${embeddableType ? 'type:(' + embeddableType + ') ' : ''}"${embeddableName.replace(
+        '-',
+        ' '
+      )}"`
+    );
     await this.testSubjects.click(`savedObjectTitle${embeddableName.split(' ').join('-')}`);
     await this.testSubjects.exists('addObjectToDashboardSuccess');
-    await this.closeAddPanel();
+    if (closePanelWhenComplete) {
+      await this.closeAddPanel();
+    }
 
     // close "Added successfully" toast
     await this.common.clearAllToasts();
     return embeddableName;
+  }
+
+  async addEmbeddables(embeddables: Array<{ name: string; type?: string }>) {
+    const addedEmbeddables: string[] = [];
+    for (const { name, type } of embeddables) {
+      addedEmbeddables.push(await this.addEmbeddable(name, type, false));
+    }
+    await this.closeAddPanel();
+    return addedEmbeddables;
   }
 
   async panelAddLinkExists(name: string) {
