@@ -126,14 +126,7 @@ describe('Case View Page files tab', () => {
       <CustomFields
         isLoading={false}
         customFields={customFieldsMock}
-        customFieldsConfiguration={[
-          {
-            type: CustomFieldTypes.TOGGLE,
-            key: 'test_key_2',
-            label: 'My test label 2',
-            required: false,
-          },
-        ]}
+        customFieldsConfiguration={[customFieldsConfigurationMock[1]]}
         onSubmit={onSubmit}
       />
     );
@@ -149,7 +142,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('replaces an existing toggle field correctly', async () => {
+  it('updates an existing toggle field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -170,7 +163,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('replaces new toggle field correctly', async () => {
+  it('updates new toggle field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -191,7 +184,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('replaces existing text field correctly', async () => {
+  it('updates existing text field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
@@ -220,7 +213,7 @@ describe('Case View Page files tab', () => {
     });
   });
 
-  it('replaces new text field correctly', async () => {
+  it('updates new text field correctly', async () => {
     appMockRender.render(
       <CustomFields
         isLoading={false}
