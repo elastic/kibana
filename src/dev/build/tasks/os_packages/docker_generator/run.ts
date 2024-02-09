@@ -36,6 +36,7 @@ export async function runDockerGenerator(
     cloud?: boolean;
     serverless?: boolean;
     dockerBuildDate?: string;
+    fips?: boolean;
   }
 ) {
   let baseImageName = '';
@@ -47,6 +48,7 @@ export async function runDockerGenerator(
   if (flags.ironbank) imageFlavor += '-ironbank';
   if (flags.cloud) imageFlavor += '-cloud';
   if (flags.serverless) imageFlavor += '-serverless';
+  if (flags.fips) imageFlavor += '-fips';
 
   // General docker var config
   const license = 'Elastic License';
@@ -111,6 +113,7 @@ export async function runDockerGenerator(
     architecture: flags.architecture,
     revision: config.getBuildSha(),
     publicArtifactSubdomain,
+    fips: flags.fips,
   };
 
   type HostArchitectureToDocker = Record<string, string>;
@@ -147,6 +150,14 @@ export async function runDockerGenerator(
     config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/base'),
     dockerBuildDir
   );
+
+  // Copy fips related resources
+  if (flags.fips) {
+    await copyAll(
+      config.resolveFromRepo('src/dev/build/tasks/os_packages/docker_generator/resources/fips'),
+      dockerBuildDir
+    );
+  }
 
   // Build docker image into the target folder
   // In order to do this we just call the file we
