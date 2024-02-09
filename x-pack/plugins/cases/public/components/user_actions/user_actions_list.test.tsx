@@ -32,6 +32,7 @@ const defaultProps = {
 jest.mock('../../common/lib/kibana');
 
 // FLAKY: https://github.com/elastic/kibana/issues/176524
+// FLAKY: https://github.com/elastic/kibana/issues/176525
 describe.skip(`UserActionsList`, () => {
   let appMockRender: AppMockRenderer;
 
