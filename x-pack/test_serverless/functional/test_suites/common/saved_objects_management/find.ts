@@ -25,7 +25,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/saved_objects_management/hidden_saved_objects'
         );
-        await pageObjects.svlCommonPage.login();
+        await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');
         await testSubjects.click('app-card-objects');
         await pageObjects.savedObjects.waitTableIsLoaded();
@@ -42,7 +42,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         // "index_not_found_exception: no such index [.kibana_ingest]",
         // so it was switched to `savedObjects.cleanStandardList()
         await kibanaServer.savedObjects.cleanStandardList();
-        await pageObjects.svlCommonPage.forceLogout();
       });
 
       it('returns saved objects with importableAndExportable types', async () =>

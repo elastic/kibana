@@ -68,30 +68,30 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should mount the flyout customization content', async () => {
-      await dataGrid.clickRowToggle();
+      await dataGrid.clickRowToggle({ columnIndex: 4 });
       await testSubjects.existOrFail('logsExplorerFlyoutDetail');
     });
 
     it('should display a timestamp badge', async () => {
-      await dataGrid.clickRowToggle();
+      await dataGrid.clickRowToggle({ columnIndex: 4 });
       await testSubjects.existOrFail('logsExplorerFlyoutLogTimestamp');
     });
 
     it('should display a log level badge when available', async () => {
-      await dataGrid.clickRowToggle();
+      await dataGrid.clickRowToggle({ columnIndex: 4 });
       await testSubjects.existOrFail('logsExplorerFlyoutLogLevel');
       await dataGrid.closeFlyout();
 
-      await dataGrid.clickRowToggle({ rowIndex: 1 });
+      await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
       await testSubjects.missingOrFail('logsExplorerFlyoutLogLevel');
     });
 
     it('should display a message code block when available', async () => {
-      await dataGrid.clickRowToggle();
+      await dataGrid.clickRowToggle({ columnIndex: 4 });
       await testSubjects.existOrFail('logsExplorerFlyoutLogMessage');
       await dataGrid.closeFlyout();
 
-      await dataGrid.clickRowToggle({ rowIndex: 1 });
+      await dataGrid.clickRowToggle({ rowIndex: 1, columnIndex: 4 });
       await testSubjects.missingOrFail('logsExplorerFlyoutLogMessage');
     });
   });
