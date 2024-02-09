@@ -110,7 +110,6 @@ export function useAlertSearchBarStateContainer(
   useEffect(() => {
     if (!savedQuery) {
       setSavedQueryId(undefined);
-      stateContainer.set(defaultState);
       return;
     }
     if (savedQuery.id !== savedQueryId) {
