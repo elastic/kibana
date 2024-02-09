@@ -66,7 +66,7 @@ export class ToastsService extends FtrService {
     await dismissButton.click();
   }
 
-  public async closeIfExists(): Promise<void> {
+  public async dismissIfExists(): Promise<void> {
     const toastShown = await this.find.existsByCssSelector('.euiToast');
     if (toastShown) {
       try {
