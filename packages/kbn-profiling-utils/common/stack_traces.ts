@@ -121,11 +121,8 @@ const createInlineTrace = (
 
   // This code is temporary until we decided how to present error frames in the UI.
   // Error frames only appear as first frame in a stacktrace.
-  let start = 0;
   // eslint-disable-next-line no-bitwise
-  if (trace.frame_ids.length > 0 && (trace.type_ids[0] & 0x80) !== 0) {
-    start = 1;
-  }
+  const start = trace.frame_ids.length > 0 && (trace.type_ids[0] & 0x80) !== 0 ? 1 : 0;
 
   for (let i = start; i < trace.frame_ids.length; i++) {
     const frameID = trace.frame_ids[i];

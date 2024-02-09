@@ -103,11 +103,8 @@ export function createTopNFunctions({
 
     // This code is temporary until we decided how to present error frames in the UI.
     // Error frames only appear as first frame in a stacktrace.
-    let start = 0;
     // eslint-disable-next-line no-bitwise
-    if (lenStackTrace > 0 && (stackTrace.Types[0] & 0x80) !== 0) {
-      start = 1;
-    }
+    const start = lenStackTrace > 0 && (stackTrace.Types[0] & 0x80) !== 0 ? 1 : 0;
 
     for (let i = start; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];
