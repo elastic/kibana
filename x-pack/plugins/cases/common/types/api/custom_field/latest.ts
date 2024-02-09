@@ -5,9 +5,4 @@
  * 2.0.
  */
 
-<<<<<<<< HEAD:x-pack/test/timeline/utils/index.ts
-export * from './delete_all_timelines';
-export * from './wait_for';
-========
 export * from './v1';
->>>>>>>> dc82ef318ac5f9e20de2dca900f262a8116c0d60:x-pack/plugins/cases/common/types/api/custom_field/latest.ts
