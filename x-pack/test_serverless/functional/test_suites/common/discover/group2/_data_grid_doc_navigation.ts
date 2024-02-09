@@ -12,7 +12,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const dataGrid = getService('dataGrid');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'discover', 'timePicker', 'context']);
+  const PageObjects = getPageObjects(['common', 'svlCommonPage', 'discover', 'timePicker']);
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
@@ -24,6 +24,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
     });
 
     after(async () => {

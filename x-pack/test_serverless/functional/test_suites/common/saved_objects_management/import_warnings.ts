@@ -21,10 +21,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // "index_not_found_exception: no such index [.kibana_ingest]",
       // so it was switched to `savedObjects.cleanStandardList()
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
-      await PageObjects.svlCommonPage.login();
       await PageObjects.common.navigateToApp('management');
       await testSubjects.click('app-card-objects');
       await PageObjects.savedObjects.waitTableIsLoaded();
