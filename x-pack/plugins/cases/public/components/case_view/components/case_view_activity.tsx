@@ -94,8 +94,7 @@ export const CaseViewActivity = ({
     caseData,
   });
 
-  const { isLoading: isLoadingCustomFields, mutate: updateCustomFieldProperty } =
-    useReplaceCustomField();
+  const { isLoading: isUpdatingCustomField, mutate: replaceCustomField } = useReplaceCustomField();
 
   const isLoadingAssigneeData =
     (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
@@ -149,14 +148,14 @@ export const CaseViewActivity = ({
 
   const onSubmitCustomField = useCallback(
     (customField: CaseUICustomField) => {
-      updateCustomFieldProperty({
+      replaceCustomField({
         caseId: caseData.id,
         customFieldId: customField.key,
         customFieldValue: customField.value,
         caseVersion: caseData.version,
       });
     },
-    [updateCustomFieldProperty, caseData]
+    [replaceCustomField, caseData]
   );
 
   const handleUserActionsActivityChanged = useCallback(
@@ -296,7 +295,7 @@ export const CaseViewActivity = ({
             />
           ) : null}
           <CustomFields
-            isLoading={(isLoading && loadingKey === 'customFields') || isLoadingCustomFields}
+            isLoading={(isLoading && loadingKey === 'customFields') || isUpdatingCustomField}
             customFields={caseData.customFields}
             customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomField}

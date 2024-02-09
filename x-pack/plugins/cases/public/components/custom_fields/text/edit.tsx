@@ -135,6 +135,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
       const value = isEmpty(data.value) ? null : data.value;
 
       onSubmit({
+        ...customField,
         key: customField?.key ?? customFieldConfiguration.key,
         type: CustomFieldTypes.TEXT,
         value,
