@@ -157,6 +157,15 @@ const FlyoutHeaderComponent: React.FC<{
             defaultMessage: 'Configuration',
           })}
         </EuiTab>
+        <EuiTab
+          onClick={setRulesTab}
+          data-test-subj="rulesConnectorTab"
+          isSelected={EditConnectorTabs.Rules === selectedTab}
+        >
+          {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
+            defaultMessage: 'Rules',
+          })}
+        </EuiTab>
         {canExecute && (
           <EuiTab
             onClick={setTestTab}
@@ -168,15 +177,6 @@ const FlyoutHeaderComponent: React.FC<{
             })}
           </EuiTab>
         )}
-        <EuiTab
-          onClick={setRulesTab}
-          data-test-subj="rulesConnectorTab"
-          isSelected={EditConnectorTabs.Rules === selectedTab}
-        >
-          {i18n.translate('xpack.triggersActionsUI.sections.rulesConnectorList.tabText', {
-            defaultMessage: 'Rules',
-          })}
-        </EuiTab>
       </EuiTabs>
     </EuiFlyoutHeader>
   );

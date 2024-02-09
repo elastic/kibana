@@ -19,12 +19,18 @@ import {
   EuiFlexItem,
   EuiFieldSearch,
 } from '@elastic/eui';
+import { fromKueryExpression } from '@kbn/es-query';
+import {
+  systemConnectorActionRefPrefix,
+  preconfiguredConnectorActionRefPrefix,
+} from '@kbn/alerting-plugin/common';
+
 import { useKibana } from '../../../common/lib/kibana';
 import { getRuleHealthColor } from '../../../common/lib/rule_status_helpers';
 import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 import { useLoadRulesQuery } from '../../hooks/use_load_rules_query';
 import { Pagination, Rule, ActionConnector } from '../../../types';
-import { DEFAULT_SEARCH_PAGE_SIZE } from '../../constants';
+import { DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE } from '../../constants';
 import { rulesLastRunOutcomeTranslationMapping } from '../rules_list/translations';
 import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -42,7 +48,10 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
 
   const [searchText, setSearchText] = useState<string>('');
   const [searchFilter, setSearchFilter] = useState<string>('');
-  const [page, setPage] = useState<Pagination>({ index: 0, size: DEFAULT_SEARCH_PAGE_SIZE });
+  const [page, setPage] = useState<Pagination>({
+    index: 0,
+    size: DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE,
+  });
   const [sort, setSort] = useState<EuiTableSortingType<Rule>['sort']>({
     field: 'name',
     direction: 'asc',
@@ -58,15 +67,45 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
 
   const ruleTypeIds = authorizedRuleTypes.map((art) => art.id);
 
-  const { rulesState } = useLoadRulesQuery({
-    filters: {
+  const ruleFilters = useMemo(() => {
+    const baseFilters = {
       searchText: searchFilter,
       types: ruleTypeIds,
-    },
-    hasReference: {
-      type: 'action',
-      id: connector.id,
-    },
+    };
+
+    if (connector.isPreconfigured) {
+      return {
+        filters: {
+          ...baseFilters,
+          kueryNode: fromKueryExpression(
+            `alert.attributes.actions:{ actionRef: "${preconfiguredConnectorActionRefPrefix}${connector.id}" }`
+          ),
+        },
+      };
+    }
+
+    if (connector.isSystemAction) {
+      return {
+        filters: {
+          ...baseFilters,
+          kueryNode: fromKueryExpression(
+            `alert.attributes.actions:{ actionRef: "${systemConnectorActionRefPrefix}${connector.id}" }`
+          ),
+        },
+      };
+    }
+
+    return {
+      filters: baseFilters,
+      hasReference: {
+        type: 'action',
+        id: connector.id,
+      },
+    };
+  }, [connector, searchFilter, ruleTypeIds]);
+
+  const { rulesState } = useLoadRulesQuery({
+    ...ruleFilters,
     hasDefaultRuleTypesFiltersOn: ruleTypeIds.length === 0,
     page,
     sort,
@@ -91,27 +130,23 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         truncateText: false,
         render: (name: string, rule: Rule) => {
           return (
-            <EuiLink
-              title={name}
-              href={getUrlForApp('management', {
-                path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-              })}
-            >
-              {name}
-            </EuiLink>
-          );
-        },
-      },
-      {
-        field: 'ruleTypeId',
-        name: i18n.translate(
-          'xpack.triggersActionsUI.sections.connectorRulesList.columns.ruleType',
-          { defaultMessage: 'Rule type' }
-        ),
-        truncateText: false,
-        render: (ruleTypeId: string) => {
-          return (
-            <EuiText size="s">{ruleTypesState.data.get(ruleTypeId)?.name || ruleTypeId}</EuiText>
+            <EuiFlexGroup direction="column" gutterSize="xs">
+              <EuiFlexItem grow={false}>
+                <EuiLink
+                  title={name}
+                  href={getUrlForApp('management', {
+                    path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+                  })}
+                >
+                  {name}
+                </EuiLink>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText color="subdued" size="xs">
+                  {ruleTypesState.data.get(rule.ruleTypeId)?.name || rule.ruleTypeId}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
           );
         },
       },
@@ -121,6 +156,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
           'xpack.triggersActionsUI.sections.connectorRulesList.columns.lastResponse',
           { defaultMessage: 'Last response' }
         ),
+        width: '150px',
         sortable: true,
         truncateText: false,
         render: (_, rule: Rule) => {
