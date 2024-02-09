@@ -8,13 +8,15 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator, EuiSpacer } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiRange, htmlIdGenerator } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 export interface RowHeightSettingsProps {
   rowHeight?: 'auto' | 'single' | 'custom';
   rowHeightLines?: number;
   maxRowHeight?: number;
   label: string;
+  compressed?: boolean;
   onChangeRowHeight: (newHeightMode: 'auto' | 'single' | 'custom' | undefined) => void;
   onChangeRowHeightLines: (newRowHeightLines: number) => void;
   'data-test-subj'?: string;
@@ -26,6 +28,7 @@ export function RowHeightSettings({
   label,
   rowHeight,
   rowHeightLines,
+  compressed,
   onChangeRowHeight,
   onChangeRowHeightLines,
   maxRowHeight,
@@ -72,23 +75,23 @@ export function RowHeightSettings({
             data-test-subj={`${dataTestSubj}_rowHeightButtonGroup`}
           />
           {rowHeight === 'custom' ? (
-            <>
-              <EuiSpacer size="xs" />
-              <EuiRange
-                compressed
-                fullWidth
-                showInput
-                min={1}
-                max={maxRowHeight ?? 20}
-                step={1}
-                value={rowHeightLines ?? 2}
-                onChange={(e) => {
-                  const lineCount = Number(e.currentTarget.value);
-                  onChangeRowHeightLines(lineCount);
-                }}
-                data-test-subj={`${dataTestSubj}_lineCountNumber`}
-              />
-            </>
+            <EuiRange
+              compressed
+              fullWidth
+              showInput
+              min={1}
+              max={maxRowHeight ?? 20}
+              step={1}
+              value={rowHeightLines ?? 2}
+              onChange={(e) => {
+                const lineCount = Number(e.currentTarget.value);
+                onChangeRowHeightLines(lineCount);
+              }}
+              data-test-subj={`${dataTestSubj}_lineCountNumber`}
+              css={{
+                marginTop: compressed ? euiThemeVars.euiSizeXS : euiThemeVars.euiSizeM,
+              }}
+            />
           ) : null}
         </>
       </EuiFormRow>

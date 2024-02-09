@@ -72,6 +72,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           }}
           data-test-subj="lnsHeaderHeightSettings"
           maxRowHeight={5}
+          compressed
         />
         <RowHeightSettings
           rowHeight={state.rowHeight}
@@ -84,6 +85,7 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
             onChangeHeightLines(lines, 'rowHeightLines');
           }}
           data-test-subj="lnsRowHeightSettings"
+          compressed
         />
         <EuiFormRow
           label={i18n.translate('xpack.lens.table.visualOptionsPaginateTable', {
