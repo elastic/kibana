@@ -245,7 +245,7 @@ export const useLatestFindingsGrouping = ({
   };
 
   const isEmptyResults =
-    !isFetching && isFindingsRootGroupingAggregation(groupData) && !groupData.unitsCount?.value;
+    data && isFindingsRootGroupingAggregation(groupData) && !groupData.unitsCount?.value;
 
   return {
     groupData,

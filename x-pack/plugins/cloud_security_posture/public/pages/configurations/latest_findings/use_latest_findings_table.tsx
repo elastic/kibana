@@ -42,6 +42,7 @@ export const useLatestFindingsTable = ({
     data,
     error: fetchError,
     isFetching,
+    isLoading,
     fetchNextPage,
   } = useLatestFindings({
     query,
@@ -77,6 +78,7 @@ export const useLatestFindingsTable = ({
     rows,
     error,
     isFetching,
+    isLoading,
     fetchNextPage,
     passed,
     failed,

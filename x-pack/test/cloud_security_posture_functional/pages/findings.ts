@@ -121,11 +121,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     let latestFindingsTable: typeof findings.latestFindingsTable;
     let distributionBar: typeof findings.distributionBar;
 
-    beforeEach(async () => {
-      await kibanaServer.savedObjects.clean({
-        types: ['cloud-security-posture-settings'],
-      });
-
+    before(async () => {
       findings = pageObjects.findings;
       latestFindingsTable = findings.latestFindingsTable;
       distributionBar = findings.distributionBar;
@@ -136,16 +132,22 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Prepare mocked findings
       await findings.index.remove();
       await findings.index.add(data);
+    });
+
+    beforeEach(async () => {
+      await kibanaServer.savedObjects.clean({
+        types: ['cloud-security-posture-settings'],
+      });
 
       await findings.navigateToLatestFindingsPage();
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length
       );
-      pageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    afterEach(async () => {
+    after(async () => {
       await findings.index.remove();
     });
 

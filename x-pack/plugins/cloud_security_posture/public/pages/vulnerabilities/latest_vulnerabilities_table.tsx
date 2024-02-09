@@ -87,7 +87,7 @@ export const LatestVulnerabilitiesTable = ({
   height,
   nonPersistedFilters,
 }: LatestVulnerabilitiesTableProps) => {
-  const { cloudPostureDataTable, rows, total, error, isFetching, fetchNextPage } =
+  const { cloudPostureDataTable, rows, total, error, isFetching, isLoading, fetchNextPage } =
     useLatestVulnerabilitiesTable({
       getDefaultQuery,
       nonPersistedFilters,
@@ -105,7 +105,7 @@ export const LatestVulnerabilitiesTable = ({
       ) : (
         <CloudSecurityDataTable
           data-test-subj={LATEST_VULNERABILITIES_TABLE}
-          isLoading={isFetching}
+          isLoading={isFetching || isLoading}
           defaultColumns={defaultColumns}
           rows={rows}
           total={total}

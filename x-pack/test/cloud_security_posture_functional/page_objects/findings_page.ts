@@ -236,7 +236,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
   const navigateToLatestFindingsPage = async () => {
     await PageObjects.common.navigateToUrl(
       'securitySolution', // Defined in Security Solution plugin
-      'cloud_security_posture/findings/configurations',
+      'cloud_security_posture/findings',
       { shouldUseHashForSubUrl: false }
     );
   };

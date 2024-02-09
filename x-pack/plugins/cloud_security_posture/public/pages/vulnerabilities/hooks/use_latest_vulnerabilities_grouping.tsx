@@ -170,7 +170,7 @@ export const useLatestVulnerabilitiesGrouping = ({
   );
 
   const isEmptyResults =
-    !isFetching &&
+    data &&
     isVulnerabilitiesRootGroupingAggregation(groupData) &&
     groupData.unitsCount?.value === 0;
 

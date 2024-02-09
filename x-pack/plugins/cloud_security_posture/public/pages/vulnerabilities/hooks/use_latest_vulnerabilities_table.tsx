@@ -34,6 +34,7 @@ export const useLatestVulnerabilitiesTable = ({
     data,
     error: fetchError,
     isFetching,
+    isLoading,
     fetchNextPage,
   } = useLatestVulnerabilities({
     query,
@@ -52,6 +53,7 @@ export const useLatestVulnerabilitiesTable = ({
     rows,
     error,
     isFetching,
+    isLoading,
     fetchNextPage,
     total,
   };
