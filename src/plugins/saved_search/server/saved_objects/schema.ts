@@ -41,7 +41,6 @@ const SCHEMA_SEARCH_BASE = {
     { defaultValue: {} }
   ),
   rowHeight: schema.maybe(schema.number()),
-  headerRowHeight: schema.maybe(schema.number()),
   rowsPerPage: schema.maybe(schema.number()),
 
   // Chart
@@ -93,4 +92,7 @@ export const SCHEMA_SEARCH_V8_12_0 = schema.object({
       max: MAX_SAVED_SEARCH_SAMPLE_SIZE,
     })
   ),
+});
+export const SCHEMA_SEARCH_V8_13_0 = SCHEMA_SEARCH_V8_12_0.extends({
+  headerRowHeight: schema.maybe(schema.number()),
 });
