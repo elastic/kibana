@@ -167,4 +167,5 @@ export interface UsageStats {
   'observability:profilingAWSCostDiscountRate': number;
   'data_views:fields_excluded_data_tiers': string;
   'observability:apmEnableTransactionProfiling': boolean;
+  'devTools:enableDockedConsole': boolean;
 }
