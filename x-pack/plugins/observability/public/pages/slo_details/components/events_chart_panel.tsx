@@ -58,7 +58,13 @@ export function EventsChartPanel({ slo, range }: Props) {
   });
 
   const instanceIdFilter =
-    slo.instanceId !== ALL_VALUE ? `${slo.groupBy}: "${slo.instanceId}"` : null;
+    slo.instanceId !== ALL_VALUE
+      ? `${Object.keys(slo.groupings)
+          .map((key) => {
+            return `${key} : "${slo.groupings[key]}"`;
+          })
+          .join(' AND ')}`
+      : null;
   const sloIndicator = cloneDeep(slo.indicator);
   if (instanceIdFilter) {
     sloIndicator.params.filter =
