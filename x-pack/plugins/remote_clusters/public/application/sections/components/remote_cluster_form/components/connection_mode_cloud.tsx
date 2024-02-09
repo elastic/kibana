@@ -17,6 +17,7 @@ import {
   EuiFieldText,
   EuiLink,
   EuiFieldNumber,
+  EuiCode,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -87,7 +88,10 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
         helpText={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.fieldRemoteAddressHelpText"
-            defaultMessage="When no port is specified, the default 9400 port is used."
+            defaultMessage="When no port is specified, the default {default_port} port is used."
+            values={{
+              default_port: <EuiCode>{'9400'}</EuiCode>,
+            }}
           />
         }
         isInvalid={Boolean(areErrorsVisible && proxyAddressError)}

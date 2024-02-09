@@ -80,7 +80,7 @@ describe('Create Remote cluster', () => {
         expect(actions.saveButton.isDisabled()).toBe(true);
       });
 
-      test('renders no switch for cloud url input and proxy address + server name input modes', () => {
+      test('renders no switch for cloud advanced options', () => {
         expect(actions.cloudAdvancedOptionsSwitch.exists()).toBe(false);
       });
     });
@@ -93,14 +93,20 @@ describe('Create Remote cluster', () => {
         component.update();
       });
 
-      test('renders a switch between cloud url input and proxy address + server name input for proxy connection', () => {
+      test('TLS server name has optional label', () => {
+        actions.cloudAdvancedOptionsSwitch.toggle();
+        expect(actions.tlsServerNameInput.getLabel()).toBe('TLS server name (optional)');
+      });
+
+      test('renders a switch for advanced options', () => {
         expect(actions.cloudAdvancedOptionsSwitch.exists()).toBe(true);
       });
 
       test('renders no switch between sniff and proxy modes', () => {
         expect(actions.connectionModeSwitch.exists()).toBe(false);
       });
-      test('defaults to cloud url input for proxy connection', () => {
+
+      test('advanced options are initially disabled', () => {
         expect(actions.cloudAdvancedOptionsSwitch.isChecked()).toBe(false);
       });
     });
@@ -286,7 +292,7 @@ describe('Create Remote cluster', () => {
         component.update();
       });
 
-      test('name and remote address are required', () => {
+      test('remote address is required', () => {
         actions.saveButton.click();
         expect(actions.getErrorMessages()).toContain('A remote address is required.');
       });

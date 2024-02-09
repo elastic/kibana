@@ -49,6 +49,10 @@ export interface RemoteClustersActions {
     getLabel: () => string;
     exists: () => boolean;
   };
+  tlsServerNameInput: {
+    getLabel: () => string;
+    exists: () => boolean;
+  };
   isOnFirstStep: () => boolean;
   saveButton: {
     click: () => void;
@@ -230,6 +234,16 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
+  const createTlsServerNameActions = () => {
+    const serverNameSelector = 'remoteClusterFormTLSServerNameFormRow';
+    return {
+      tlsServerNameInput: {
+        getLabel: () => find(serverNameSelector).find('label').text(),
+        exists: () => exists(serverNameSelector),
+      },
+    };
+  };
+
   const globalErrorExists = () => exists('remoteClusterFormGlobalError');
 
   const createCloudRemoteAddressInputActions = () => {
@@ -252,6 +266,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createCloudRemoteAddressInputActions(),
     ...createProxyAddressActions(),
     ...createServerNameActions(),
+    ...createTlsServerNameActions(),
     ...createSetupTrustActions(),
     getErrorMessages: form.getErrorsMessages,
     globalErrorExists,

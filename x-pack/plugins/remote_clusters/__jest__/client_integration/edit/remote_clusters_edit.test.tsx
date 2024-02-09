@@ -94,7 +94,7 @@ describe('Edit Remote cluster', () => {
 
       expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
       expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
-      expect(actions.serverNameInput.exists()).toBe(true);
+      expect(actions.tlsServerNameInput.exists()).toBe(true);
     });
 
     test("existing cluster that doesn't have a TLS server name", async () => {
@@ -113,7 +113,7 @@ describe('Edit Remote cluster', () => {
 
       expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
       expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:9500`);
-      expect(actions.serverNameInput.exists()).toBe(false);
+      expect(actions.tlsServerNameInput.exists()).toBe(false);
     });
 
     test('existing cluster that has remote address different from TLS server name)', async () => {
@@ -133,7 +133,7 @@ describe('Edit Remote cluster', () => {
 
       expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
       expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
-      expect(actions.serverNameInput.exists()).toBe(true);
+      expect(actions.tlsServerNameInput.exists()).toBe(true);
     });
   });
 });
