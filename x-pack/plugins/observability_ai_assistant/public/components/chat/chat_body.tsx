@@ -35,11 +35,7 @@ import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import {
-  ChatActionClickHandler,
-  ChatActionClickType,
-  type ChatFlyoutSecondSlotHandler,
-} from './types';
+import { ChatActionClickHandler, ChatActionClickType } from './types';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
@@ -94,7 +90,6 @@ const animClassName = css`
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
-  chatFlyoutSecondSlotHandler,
   connectors,
   currentUser,
   flyoutWidthMode,
@@ -107,7 +102,6 @@ export function ChatBody({
   onConversationUpdate,
   onToggleFlyoutWidthMode,
 }: {
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   connectors: UseGenAIConnectorsResult;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   flyoutWidthMode?: FlyoutWidthMode;
@@ -362,7 +356,6 @@ export function ChatBody({
                   onStopGenerating={() => {
                     stop();
                   }}
-                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                   onActionClick={handleActionClick}
                 />
               )}
