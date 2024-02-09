@@ -10,6 +10,8 @@ import { createFrameGroupID } from './frame_group';
 import { fnv1a64 } from './hash';
 import { createStackFrameMetadata, getCalleeLabel } from './profiling';
 import { convertTonsToKgs } from './utils';
+import {CoreRequestHandlerContext} from "@kbn/core-http-request-handler-context-server";
+import {profilingShowErrorFrames} from "@kbn/observability-plugin/common";
 
 /**
  * Base Flamegraph
@@ -84,15 +86,18 @@ export interface ElasticFlameGraph
  * @returns ElasticFlameGraph
  */
 export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
-  // This loop jumps over the error frames in the graph.
-  // This code is temporary until we decided how to present error frames in the UI.
-  // Error frames only appear as child nodes of the root frame.
-  // Error frames only have a single child node.
-  for (let i = 0; i < base.Edges[0].length; i++) {
-    const childNodeID = base.Edges[0][i];
-    // eslint-disable-next-line no-bitwise
-    if ((base.FrameType[childNodeID] & 0x80) !== 0) {
-      base.Edges[0][i] = base.Edges[childNodeID][0];
+  const show = CoreRequestHandlerContext.uiSettings.client.get<number>(profilingShowErrorFrames);
+  if (!show) {
+    // This loop jumps over the error frames in the graph.
+    // This code is temporary until we decided how to present error frames in the UI.
+    // Error frames only appear as child nodes of the root frame.
+    // Error frames only have a single child node.
+    for (let i = 0; i < base.Edges[0].length; i++) {
+      const childNodeID = base.Edges[0][i];
+      // eslint-disable-next-line no-bitwise
+      if ((base.FrameType[childNodeID] & 0x80) !== 0) {
+        base.Edges[0][i] = base.Edges[childNodeID][0];
+      }
     }
   }
 

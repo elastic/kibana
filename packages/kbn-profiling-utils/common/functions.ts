@@ -24,6 +24,8 @@ import {
   emptyStackFrame,
   emptyStackTrace,
 } from '..';
+import {CoreRequestHandlerContext} from "@kbn/core-http-request-handler-context-server";
+import {profilingShowErrorFrames} from "@kbn/observability-plugin/common";
 
 interface TopNFunctionAndFrameGroup {
   Frame: StackFrameMetadata;
@@ -101,10 +103,11 @@ export function createTopNFunctions({
 
     const lenStackTrace = stackTrace.FrameIDs.length;
 
+    const show = CoreRequestHandlerContext.uiSettings.client.get<number>(profilingShowErrorFrames);
     // This code is temporary until we decided how to present error frames in the UI.
     // Error frames only appear as first frame in a stacktrace.
     // eslint-disable-next-line no-bitwise
-    const start = lenStackTrace > 0 && (stackTrace.Types[0] & 0x80) !== 0 ? 1 : 0;
+    const start = !show && lenStackTrace > 0 && (stackTrace.Types[0] & 0x80) !== 0 ? 1 : 0;
 
     for (let i = start; i < lenStackTrace; i++) {
       const frameID = stackTrace.FrameIDs[i];

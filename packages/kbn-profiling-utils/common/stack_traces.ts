@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { ProfilingESField } from './elasticsearch';
 import {
   Executable,
@@ -16,6 +17,7 @@ import {
   StackTraceID,
 } from './profiling';
 import { convertTonsToKgs } from './utils';
+import { CoreRequestHandlerContext } from '@kbn/core/server';
 
 /** Profiling status response */
 export interface ProfilingStatusResponse {
@@ -119,10 +121,11 @@ const createInlineTrace = (
   const addressOrLines: number[] = [];
   const typeIDs: number[] = [];
 
+  const show = CoreRequestHandlerContext.uiSettings.client.get<number>(profilingShowErrorFrames);
   // This code is temporary until we decided how to present error frames in the UI.
   // Error frames only appear as first frame in a stacktrace.
   // eslint-disable-next-line no-bitwise
-  const start = trace.frame_ids.length > 0 && (trace.type_ids[0] & 0x80) !== 0 ? 1 : 0;
+  const start = !show && trace.frame_ids.length > 0 && (trace.type_ids[0] & 0x80) !== 0 ? 1 : 0;
 
   for (let i = start; i < trace.frame_ids.length; i++) {
     const frameID = trace.frame_ids[i];
