@@ -184,7 +184,7 @@ export function queryTopNCommon({
       const { timeFrom, timeTo, kuery } = request.query;
       const [client, core] = await Promise.all([getClient(context), context.core]);
 
-      const showErrorFrames = core.uiSettings.client.get<boolean>(profilingShowErrorFrames);
+      const showErrorFrames = await core.uiSettings.client.get<boolean>(profilingShowErrorFrames);
 
       try {
         return response.ok({
