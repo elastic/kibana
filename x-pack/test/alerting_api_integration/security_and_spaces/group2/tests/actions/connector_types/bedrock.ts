@@ -27,7 +27,7 @@ const secrets = {
 };
 
 const defaultConfig = {
-  defaultModel: 'anthropic.claude-v2',
+  defaultModel: 'anthropic.claude-v2:1',
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -381,12 +381,12 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                   subActionParams: {
                     messages: [
                       {
-                        role: 'user',
-                        content: 'Hello world',
-                      },
-                      {
                         role: 'system',
                         content: 'Be a good chatbot',
+                      },
+                      {
+                        role: 'user',
+                        content: 'Hello world',
                       },
                       {
                         role: 'assistant',
@@ -404,7 +404,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
 
             expect(simulator.requestData).to.eql({
               prompt:
-                '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
+                'Be a good chatbot\n\nHuman:Hello world\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
               max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
               temperature: 0.5,
               stop_sequences: ['\n\nHuman:'],
