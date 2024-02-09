@@ -16,6 +16,7 @@ export { decorateQuery } from './decorate_query';
 export {
   isOfQueryType,
   isOfAggregateQueryType,
+  isOfEsqlQueryType,
   getAggregateQueryMode,
   getLanguageDisplayName,
 } from './es_aggregate_query';

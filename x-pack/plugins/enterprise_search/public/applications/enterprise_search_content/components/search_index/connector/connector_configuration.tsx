@@ -95,7 +95,12 @@ export const ConnectorConfiguration: React.FC = () => {
               steps={[
                 {
                   children: (
-                    <ApiKeyConfig indexName={indexName} hasApiKey={!!index.connector.api_key_id} />
+                    <ApiKeyConfig
+                      indexName={indexName}
+                      hasApiKey={!!index.connector.api_key_id}
+                      isNative={false}
+                      secretId={null}
+                    />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -122,29 +127,8 @@ export const ConnectorConfiguration: React.FC = () => {
                     <>
                       <EuiText size="s">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
-                          defaultMessage="The connectors repository contains several {link}. Use our framework to accelerate developing connectors for custom data sources."
-                          values={{
-                            link: (
-                              <EuiLink
-                                href="https://github.com/elastic/connectors-python/tree/main/connectors"
-                                target="_blank"
-                                external
-                              >
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.clientExamplesLink',
-                                  { defaultMessage: 'connector client examples' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                      <EuiSpacer />
-                      <EuiText size="s">
-                        <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.thirdParagraph"
-                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
+                          defaultMessage="In this step, you will need to clone or fork the Elastic connectors repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
                           values={{
                             link: (
                               <EuiLink
@@ -191,7 +175,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
                     {
-                      defaultMessage: 'Deploy connector',
+                      defaultMessage: 'Deploy connector service',
                     }
                   ),
                   titleSize: 'xs',
@@ -270,7 +254,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.enhance.title',
                     {
-                      defaultMessage: 'Enhance your connector client',
+                      defaultMessage: 'Configure your connector client',
                     }
                   ),
                   titleSize: 'xs',

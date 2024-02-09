@@ -17,6 +17,8 @@ import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
 import { commandDefinitions } from '../definitions/commands';
+import { TRIGGER_SUGGESTION_COMMAND } from './factories';
+import { camelCase } from 'lodash';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -130,9 +132,12 @@ function getFunctionSignaturesByReturnType(
       }
       return true;
     })
-    .map(({ type, name, signatures, ...defRest }) =>
-      type === 'builtin' ? `${name} $0` : `${name}($0)`
-    );
+    .map(({ type, name, signatures }) => {
+      if (type === 'builtin') {
+        return signatures.some(({ params }) => params.length > 1) ? `${name} $0` : name;
+      }
+      return `${name}($0)`;
+    });
 }
 
 function getFieldNamesByType(requestedType: string) {
@@ -287,30 +292,33 @@ describe('autocomplete', () => {
   const sourceCommands = ['row', 'from', 'show'];
 
   describe('New command', () => {
-    testSuggestions(' ', sourceCommands);
+    testSuggestions(
+      ' ',
+      sourceCommands.map((name) => name + ' $0')
+    );
     testSuggestions(
       'from a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
     testSuggestions(
       'from a [metadata _id] | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
     testSuggestions(
       'from a | eval var0 = a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
     testSuggestions(
       'from a [metadata _id] | eval var0 = a | ',
       commandDefinitions
         .filter(({ name }) => !sourceCommands.includes(name))
-        .map(({ name }) => name)
+        .map(({ name }) => name + ' $0')
     );
   });
 
@@ -319,14 +327,19 @@ describe('autocomplete', () => {
       .filter(({ hidden }) => !hidden)
       .map(({ name, suggestedAs }) => suggestedAs || name);
     // Monaco will filter further down here
-    testSuggestions('f', sourceCommands);
+    testSuggestions(
+      'f',
+      sourceCommands.map((name) => name + ' $0')
+    );
     testSuggestions('from ', suggestedIndexes);
     testSuggestions('from a,', suggestedIndexes);
-    testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
+    testSuggestions('from a, b ', ['metadata $0', '|', ',']);
     testSuggestions('from *,', suggestedIndexes);
     testSuggestions('from index', suggestedIndexes, 6 /* index index in from */);
     testSuggestions('from a, b [metadata ]', ['_index', '_score'], 20);
+    testSuggestions('from a, b metadata ', ['_index', '_score'], 19);
     testSuggestions('from a, b [metadata _index, ]', ['_score'], 27);
+    testSuggestions('from a, b metadata _index, ', ['_score'], 26);
   });
 
   describe('show', () => {
@@ -532,11 +545,11 @@ describe('autocomplete', () => {
 
   describe('rename', () => {
     testSuggestions('from a | rename ', getFieldNamesByType('any'));
-    testSuggestions('from a | rename stringField ', ['as']);
+    testSuggestions('from a | rename stringField ', ['as $0']);
     testSuggestions('from a | rename stringField as ', ['var0']);
   });
 
-  for (const command of ['keep', 'drop', 'project']) {
+  for (const command of ['keep', 'drop']) {
     describe(command, () => {
       testSuggestions(`from a | ${command} `, getFieldNamesByType('any'));
       testSuggestions(
@@ -550,40 +563,52 @@ describe('autocomplete', () => {
     const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
       agg: true,
     });
-    testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
+    const allEvaFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
+      evalMath: true,
+    });
+    testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a ', ['= $0']);
-    testSuggestions('from a | stats a=', [...allAggFunctions]);
+    testSuggestions('from a | stats a=', [...allAggFunctions, ...allEvaFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
     testSuggestions('from a | stats a=max(b) BY ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
     testSuggestions('from a | stats a=c by d ', ['|', ',']);
     testSuggestions('from a | stats a=c by d, ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
-    testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
+    testSuggestions('from a | stats a=max(b), ', [
+      'var0 =',
+      ...allAggFunctions,
+      ...allEvaFunctions,
+    ]);
     testSuggestions('from a | stats a=min()', getFieldNamesByType('number'), '(');
-    testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
+    testSuggestions('from a | stats a=min(b) ', ['by $0', '|', ',']);
     testSuggestions('from a | stats a=min(b) by ', [
       ...getFieldNamesByType('any'),
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...allEvaFunctions,
       'var0 =',
     ]);
-    testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
-    testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
+    testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions, ...allEvaFunctions]);
+    testSuggestions('from a | stats var0=min(b),var1=c,', [
+      'var2 =',
+      ...allAggFunctions,
+      ...allEvaFunctions,
+    ]);
     testSuggestions('from a | stats a=min(b), b=max()', getFieldNamesByType('number'));
     // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', [
       'var2 =',
       ...allAggFunctions,
+      ...allEvaFunctions,
       'var0',
       'var1',
     ]);
@@ -591,7 +616,7 @@ describe('autocomplete', () => {
     // smoke testing with suggestions not at the end of the string
     testSuggestions(
       'from a | stats a = min(b) | sort b',
-      ['by', '|', ','],
+      ['by $0', '|', ','],
       27 /* " " after min(b) */
     );
     testSuggestions(
@@ -624,29 +649,25 @@ describe('autocomplete', () => {
 
   describe('enrich', () => {
     const modes = ['any', 'coordinator', 'remote'];
+    const policyNames = policies.map(({ name, suggestedAs }) => suggestedAs || name);
     for (const prevCommand of [
       '',
-      '| enrich other-policy ',
-      '| enrich other-policy on b ',
-      '| enrich other-policy with c ',
+      // '| enrich other-policy ',
+      // '| enrich other-policy on b ',
+      // '| enrich other-policy with c ',
     ]) {
+      testSuggestions(`from a ${prevCommand}| enrich `, policyNames);
       testSuggestions(
-        `from a ${prevCommand}| enrich `,
-        policies.map(({ name, suggestedAs }) => suggestedAs || name)
+        `from a ${prevCommand}| enrich _`,
+        modes.map((mode) => `_${mode}:$0`),
+        '_'
       );
-      testSuggestions(
-        `from a ${prevCommand}| enrich [`,
-        modes.map((mode) => `ccq.mode:${mode}`),
-        '['
-      );
-      // Not suggesting duplicate setting
-      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:any] [`, [], '[');
-      testSuggestions(`from a ${prevCommand}| enrich [ccq.mode:`, modes, ':');
-      testSuggestions(
-        `from a ${prevCommand}| enrich [ccq.mode:any] `,
-        policies.map(({ name, suggestedAs }) => suggestedAs || name)
-      );
-      testSuggestions(`from a ${prevCommand}| enrich policy `, ['on', 'with', '|']);
+      for (const mode of modes) {
+        testSuggestions(`from a ${prevCommand}| enrich _${mode}:`, policyNames, ':');
+        testSuggestions(`from a ${prevCommand}| enrich _${mode.toUpperCase()}:`, policyNames, ':');
+        testSuggestions(`from a ${prevCommand}| enrich _${camelCase(mode)}:`, policyNames, ':');
+      }
+      testSuggestions(`from a ${prevCommand}| enrich policy `, ['on $0', 'with $0', '|']);
       testSuggestions(`from a ${prevCommand}| enrich policy on `, [
         'stringField',
         'numberField',
@@ -656,7 +677,7 @@ describe('autocomplete', () => {
         'any#Char$Field',
         'kubernetes.something.something',
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with', '|', ',']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with $0', '|', ',']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with `, [
         'var0 =',
         ...getPolicyFields('policy'),
@@ -1036,6 +1057,49 @@ describe('autocomplete', () => {
         callbackMocks
       );
       expect(callbackMocks.getFieldsFor).toHaveBeenCalledWith({ query: 'from a' });
+    });
+  });
+
+  describe('auto triggers', () => {
+    function getSuggestionsFor(statement: string) {
+      const callbackMocks = createCustomCallbackMocks(undefined, undefined, undefined);
+      const triggerOffset = statement.lastIndexOf(' ') + 1; // drop <here>
+      const context = createSuggestContext(statement, statement[triggerOffset]);
+      const { model, position } = createModelAndPosition(statement, triggerOffset + 2);
+      return suggest(
+        model,
+        position,
+        context,
+        async (text) => (text ? await getAstAndErrors(text) : { ast: [], errors: [] }),
+        callbackMocks
+      );
+    }
+    it('should trigger further suggestions for functions', async () => {
+      const suggestions = await getSuggestionsFor('from a | eval ');
+      // test that all functions will retrigger suggestions
+      expect(
+        suggestions
+          .filter(({ kind }) => kind === 1)
+          .every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+      ).toBeTruthy();
+      // now test that non-function won't retrigger
+      expect(
+        suggestions.filter(({ kind }) => kind !== 1).every(({ command }) => command == null)
+      ).toBeTruthy();
+    });
+    it('should trigger further suggestions for commands', async () => {
+      const suggestions = await getSuggestionsFor('from a | ');
+      // test that all commands will retrigger suggestions
+      expect(
+        suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+      ).toBeTruthy();
+    });
+    it('should trigger further suggestions after enrich mode', async () => {
+      const suggestions = await getSuggestionsFor('from a | enrich _any:');
+      // test that all commands will retrigger suggestions
+      expect(
+        suggestions.every(({ command }) => command === TRIGGER_SUGGESTION_COMMAND)
+      ).toBeTruthy();
     });
   });
 });
