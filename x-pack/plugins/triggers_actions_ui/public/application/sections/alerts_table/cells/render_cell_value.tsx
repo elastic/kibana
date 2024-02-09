@@ -121,13 +121,17 @@ const AlertRuleLink = ({ alertFields }: { alertFields: Array<{ field: string; va
 export function getAlertFormatters(fieldFormats: FieldFormatsRegistry) {
   const getFormatter = getFieldFormatterProvider(fieldFormats);
 
-  return (columnId: string, value: any, rowData?: any): React.ReactElement => {
+  return (
+    columnId: string,
+    value: any,
+    rowData?: Array<{ field: string; value: any }>
+  ): React.ReactElement => {
     switch (columnId) {
       case TIMESTAMP:
       case ALERT_START:
         return <>{getFormatter(FIELD_FORMAT_IDS.DATE)(value)}</>;
       case ALERT_RULE_NAME:
-        return <AlertRuleLink alertFields={rowData} />;
+        return rowData ? <AlertRuleLink alertFields={rowData} /> : <>{value}</>;
       case ALERT_DURATION:
         return (
           <>
