@@ -88,6 +88,8 @@ describe('Agent Status API route handler', () => {
             agentType: 'sentinel_one',
             found: false,
             id: 'one',
+            isUninstalled: false,
+            isPendingUninstall: false,
             isolated: false,
             lastSeen: '',
             pendingActions: {
@@ -106,6 +108,8 @@ describe('Agent Status API route handler', () => {
             agentType: 'sentinel_one',
             found: false,
             id: 'two',
+            isUninstalled: false,
+            isPendingUninstall: false,
             isolated: false,
             lastSeen: '',
             pendingActions: {
