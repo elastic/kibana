@@ -1710,13 +1710,13 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Notification',
       description: 'ARIA label on an element containing a notification',
     }),
-    'euiTourStep.endTour': i18n.translate('core.euiTourStep.endTour', {
+    'euiTourFooter.endTour': i18n.translate('core.euiTourFooter.endTour', {
       defaultMessage: 'End tour',
     }),
-    'euiTourStep.skipTour': i18n.translate('core.euiTourStep.skipTour', {
+    'euiTourFooter.skipTour': i18n.translate('core.euiTourFooter.skipTour', {
       defaultMessage: 'Skip tour',
     }),
-    'euiTourStep.closeTour': i18n.translate('core.euiTourStep.closeTour', {
+    'euiTourFooter.closeTour': i18n.translate('core.euiTourFooter.closeTour', {
       defaultMessage: 'Close tour',
     }),
     'euiTourStepIndicator.isActive': i18n.translate('core.euiTourStepIndicator.isActive', {

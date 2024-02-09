@@ -11,19 +11,38 @@ import userEvent from '@testing-library/user-event';
 import { UpdateSourceEditor } from './update_source_editor';
 import { ESQLSource } from './esql_source';
 
-jest.mock('./esql_utils', () => ({}));
+jest.mock('../../../kibana_services', () => {
+  return {
+    getIndexPatternService() {
+      return {
+        get: async () => {
+          return {
+            fields: [
+              {
+                name: 'timestamp',
+                type: 'date',
+              },
+              {
+                name: 'utc_timestamp',
+                type: 'date',
+              },
+              {
+                name: 'location',
+                type: 'geo_point',
+              },
+              {
+                name: 'utc_timestamp',
+                type: 'geo_point',
+              },
+            ],
+          };
+        },
+      };
+    },
+  };
+});
 
 describe('UpdateSourceEditor', () => {
-  beforeEach(() => {
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('./esql_utils').getFields = async () => {
-      return {
-        dateFields: ['timestamp', 'utc_timestamp'],
-        geoFields: ['location', 'dest_location'],
-      };
-    };
-  });
-
   describe('narrow by map bounds switch', () => {
     function getNarrowByMapBoundsSwitch() {
       return screen.getByText('Narrow ES|QL statement by visible map area');
@@ -32,6 +51,7 @@ describe('UpdateSourceEditor', () => {
     test('should set geoField when checked and geo field is not set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
+        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         columns: [
           {
@@ -55,6 +75,7 @@ describe('UpdateSourceEditor', () => {
     test('should not reset geoField when checked and geoField is set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
+        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         columns: [
           {
@@ -82,6 +103,7 @@ describe('UpdateSourceEditor', () => {
     test('should set dateField when checked and date field is not set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
+        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         columns: [
           {
@@ -105,6 +127,7 @@ describe('UpdateSourceEditor', () => {
     test('should not reset dateField when checked and dateField is set', async () => {
       const onChange = jest.fn();
       const sourceDescriptor = ESQLSource.createDescriptor({
+        dataViewId: '1234',
         esql: 'from logs | keep location | limit 10000',
         columns: [
           {
