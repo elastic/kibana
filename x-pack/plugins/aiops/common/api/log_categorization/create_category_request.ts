@@ -14,6 +14,8 @@ import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { createCategorizeQuery } from './create_categorize_query';
 
+type Tokenizer = 'standard' | 'ml_standard';
+
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 4;
 
@@ -106,8 +108,6 @@ export function createCategoryRequest(
     },
   };
 }
-
-type Tokenizer = 'standard' | 'ml_standard';
 
 // This is a copy of the default categorization analyzer but using the 'standard' tokenizer rather than the 'ml_standard' tokenizer.
 // The 'ml_standard' tokenizer splits tokens in a way that was observed to give better categories in testing many years ago, however,
