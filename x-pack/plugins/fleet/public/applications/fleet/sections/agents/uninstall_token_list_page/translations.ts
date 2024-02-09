@@ -31,7 +31,15 @@ export const VIEW_UNINSTALL_COMMAND_LABEL = i18n.translate(
   { defaultMessage: 'View uninstall command' }
 );
 
-export const SEARCH_BY_POLICY_ID_PLACEHOLDER = i18n.translate(
-  'xpack.fleet.uninstallTokenList.searchByPolicyPlaceholder',
-  { defaultMessage: 'Search by policy ID' }
+export const SEARCH_BY_POLICY_ID_OR_NAME_PLACEHOLDER = i18n.translate(
+  'xpack.fleet.uninstallTokenList.searchByPolicyIdOrNamePlaceholder',
+  { defaultMessage: 'Search by policy ID or policy name' }
+);
+
+export const SEARCH_BY_POLICY_ID_OR_NAME_HINT = i18n.translate(
+  'xpack.fleet.uninstallTokenList.searchByPolicyIdOrNameHint',
+  {
+    defaultMessage:
+      'If an Agent Policy is deleted, its name is deleted as well. Therefore you can only search for its uninstall tokens by using the ID of the deleted Agent Policy.',
+  }
 );

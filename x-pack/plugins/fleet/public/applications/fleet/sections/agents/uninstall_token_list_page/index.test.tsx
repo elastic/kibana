@@ -195,7 +195,7 @@ describe('UninstallTokenList page', () => {
       expect(useGetUninstallTokenMock).toHaveBeenCalledWith(uninstallTokenFixture.id);
     });
 
-    it('should filter by policyID', async () => {
+    it('should filter by policyID or policy name', async () => {
       const renderResult = render();
 
       fireEvent.change(renderResult.getByTestId('uninstallTokensPolicyIdSearchInput'), {
@@ -205,7 +205,7 @@ describe('UninstallTokenList page', () => {
       expect(useGetUninstallTokensMock).toHaveBeenCalledWith({
         page: 1,
         perPage: 20,
-        policyId: 'searched policy id',
+        search: 'searched policy id',
       });
     });
   });
