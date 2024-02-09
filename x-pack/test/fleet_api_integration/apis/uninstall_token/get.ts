@@ -10,7 +10,10 @@ import {
   GetUninstallTokensMetadataResponse,
   GetUninstallTokenResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
-import { uninstallTokensRouteService } from '@kbn/fleet-plugin/common/services';
+import {
+  agentPolicyRouteService,
+  uninstallTokensRouteService,
+} from '@kbn/fleet-plugin/common/services';
 import { AgentPolicy } from '@kbn/fleet-plugin/common';
 import { testUsers } from '../test_users';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
@@ -274,6 +277,23 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.items[0].policy_id).to.equal(selectedPolicyId);
         });
 
+        it('should not return token metadata by policy name', async () => {
+          const selectedPolicyName = generatedPolicyArray[2].name;
+
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              policyId: selectedPolicyName,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(0);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items).to.eql([]);
+        });
+
         it('should return nothing if policy is not found', async () => {
           const response = await supertest
             .get(uninstallTokensRouteService.getListPath())
@@ -287,6 +307,207 @@ export default function (providerContext: FtrProviderContext) {
           expect(body.page).to.equal(1);
           expect(body.perPage).to.equal(20);
           expect(body.items).to.eql([]);
+        });
+      });
+
+      describe('when `search` query param is used', () => {
+        let generatedManagedPolicyArray: AgentPolicy[];
+        let generatedPolicyArray: AgentPolicy[];
+
+        before(async () => {
+          generatedPolicyArray = await generateNPolicies(supertest, 8);
+          generatedPolicyArray.push(
+            ...(await generateNPolicies(supertest, 1, { name: 'Special: Policy' }))
+          );
+          generatedPolicyArray.push(
+            ...(await generateNPolicies(supertest, 1, { name: 'Special<Policy' }))
+          );
+          generatedManagedPolicyArray = await generateNPolicies(supertest, 3, { is_managed: true });
+        });
+
+        after(async () => {
+          await kibanaServer.savedObjects.cleanStandardList();
+        });
+
+        it('should return token metadata for full policyID', async () => {
+          const selectedPolicyId = generatedPolicyArray[3].id;
+
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: selectedPolicyId,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(1);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items[0].policy_id).to.equal(selectedPolicyId);
+        });
+
+        it('should return token metadata for partial policyID', async () => {
+          const selectedPolicyId = generatedPolicyArray[2].id;
+
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: selectedPolicyId.slice(4, 11),
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(1);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items[0].policy_id).to.equal(selectedPolicyId);
+        });
+
+        it('should return token metadata for policyID even if policy is deleted', async () => {
+          const deletedPolicy = (await generateNPolicies(supertest, 1))[0];
+          await supertest
+            .post(agentPolicyRouteService.getDeletePath())
+            .set('kbn-xsrf', 'xxxx')
+            .send({ agentPolicyId: deletedPolicy.id })
+            .expect(200);
+
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: deletedPolicy.id,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(1);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items[0].policy_id).to.equal(deletedPolicy.id);
+          expect(body.items[0].policy_name).to.equal(null);
+        });
+
+        it('should return token metadata for full policy name', async () => {
+          const selectedPolicy = generatedPolicyArray[6];
+
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: selectedPolicy.name,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(1);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items[0].policy_id).to.equal(selectedPolicy.id);
+        });
+
+        it('should return token metadata for partial policy name', async () => {
+          const selectedPolicy = generatedPolicyArray[1];
+
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: selectedPolicy.name.slice(4),
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(1);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items[0].policy_id).to.equal(selectedPolicy.id);
+        });
+
+        it('should return nothing if policy is not found', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: 'not-existing-policy-id-or-name',
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(0);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items).to.eql([]);
+        });
+
+        it('should return nothing if searched for managed policy id', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: generatedManagedPolicyArray[0].id,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(0);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items).to.eql([]);
+        });
+
+        it('should return nothing if searched for managed policy name', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: generatedManagedPolicyArray[0].name,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(0);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items).to.eql([]);
+        });
+
+        it('should return nothing if searched for managed policy name', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: generatedManagedPolicyArray[0].name,
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(0);
+          expect(body.page).to.equal(1);
+          expect(body.perPage).to.equal(20);
+          expect(body.items).to.eql([]);
+        });
+
+        it('should remove special characters', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              search: 'Special Policy',
+            })
+            .expect(200);
+
+          const body: GetUninstallTokensMetadataResponse = response.body;
+          expect(body.total).to.equal(2);
+          const returnedPolicyNames = body.items.map((item) => item.policy_name);
+          expect(returnedPolicyNames).to.contain('Special: Policy');
+          expect(returnedPolicyNames).to.contain('Special<Policy');
+        });
+
+        it('should return 400 if both `search` and `policyId` are used', async () => {
+          const response = await supertest
+            .get(uninstallTokensRouteService.getListPath())
+            .query({
+              policyId: 'policy id',
+              search: 'policy name',
+            })
+            .expect(400);
+
+          const body = response.body;
+          expect(body.message).to.equal(
+            'Query parameters `policyId` and `search` cannot be used at the same time.'
+          );
         });
       });
 

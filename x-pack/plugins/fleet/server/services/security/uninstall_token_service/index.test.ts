@@ -352,6 +352,44 @@ describe('UninstallTokenService', () => {
           );
         });
       });
+
+      describe('prepareSearchString', () => {
+        let prepareSearchString: (str: string | undefined, wildcard: string) => string;
+
+        beforeEach(() => {
+          ({ prepareSearchString } = uninstallTokenService as unknown as {
+            prepareSearchString: typeof prepareSearchString;
+          });
+        });
+
+        it('should generate search string with given wildcard', () => {
+          expect(prepareSearchString('input', '*')).toEqual('*input*');
+          expect(prepareSearchString('another', '.*')).toEqual('.*another.*');
+        });
+
+        it('should remove special characters', () => {
+          expect(prepareSearchString('_in:put', '*')).toEqual('*in*put*');
+          expect(prepareSearchString('<input>', '*')).toEqual('*input*');
+          expect(prepareSearchString('inp"ut"', '*')).toEqual('*inp*ut*');
+          expect(prepareSearchString('"input"', '*')).toEqual('*input*');
+        });
+
+        it('should replace multiple special characters with only one wildcard', () => {
+          expect(prepareSearchString('<<<<inp"""""ut>>>>>', '*')).toEqual('*inp*ut*');
+        });
+
+        it('should keep digits, letters and dash', () => {
+          expect(prepareSearchString('123-ABC-XYZ-4567890', '*')).toEqual('*123-ABC-XYZ-4567890*');
+        });
+
+        it('should return undefined if there are no useful characters', () => {
+          expect(prepareSearchString('<<<<""""">>>>>', '*')).toEqual(undefined);
+        });
+
+        it('should return undefined if input is undefined', () => {
+          expect(prepareSearchString(undefined, '*')).toEqual(undefined);
+        });
+      });
     });
 
     describe('get hashed uninstall tokens', () => {

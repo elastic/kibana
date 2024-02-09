@@ -32,6 +32,16 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
     return response.customError(UNINSTALL_TOKEN_SERVICE_UNAVAILABLE_ERROR);
   }
 
+  const { page = 1, perPage = 20, policyId, search } = request.query;
+
+  if (policyId && search) {
+    return response.badRequest({
+      body: {
+        message: 'Query parameters `policyId` and `search` cannot be used at the same time.',
+      },
+    });
+  }
+
   try {
     const fleetContext = await context.fleet;
     const soClient = fleetContext.internalSoClient;
@@ -44,10 +54,12 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
 
     const managedPolicyIds = managedPolicies.map((policy) => policy.id);
 
-    const { page = 1, perPage = 20, policyId } = request.query;
+    const policyIdSearchTerm = search?.trim() ?? policyId?.trim();
+    const policyNameSearchTerm = search?.trim();
 
     const body = await uninstallTokenService.getTokenMetadata(
-      policyId?.trim(),
+      policyIdSearchTerm,
+      policyNameSearchTerm,
       page,
       perPage,
       managedPolicyIds.length > 0 ? managedPolicyIds : undefined
