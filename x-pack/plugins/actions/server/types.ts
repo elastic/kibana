@@ -119,6 +119,7 @@ export interface ActionValidationService {
 }
 
 export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  logger: Logger,
   params: Params,
   variables: Record<string, unknown>,
   actionId?: string

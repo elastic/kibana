@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { dynamic } from '../common/dynamic';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { LogsSharedPlugin } from './plugin';
 
 export type {

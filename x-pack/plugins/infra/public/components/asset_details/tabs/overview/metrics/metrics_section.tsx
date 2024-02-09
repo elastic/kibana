@@ -6,7 +6,6 @@
  */
 import React, { useMemo } from 'react';
 
-import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
@@ -18,6 +17,7 @@ import {
 } from '../../../components/section_titles';
 import { useMetadataStateContext } from '../../../hooks/use_metadata_state';
 import { MetricsGrid } from './metrics_grid';
+import { CollapsibleSection } from '../section/collapsible_section';
 
 interface Props {
   assetName: string;
@@ -49,7 +49,7 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
 
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <Section title={MetricsSectionTitle}>
+      <Section title={MetricsSectionTitle} collapsible>
         <MetricsGrid
           assetName={assetName}
           dateRange={dateRange}
@@ -92,7 +92,7 @@ export const MetricsSectionCompact = ({
   );
 
   return (
-    <Section title={MetricsSectionTitle}>
+    <Section title={MetricsSectionTitle} collapsible>
       <MetricsGrid
         assetName={assetName}
         dateRange={dateRange}
@@ -107,13 +107,14 @@ export const MetricsSectionCompact = ({
 const Section = ({
   title,
   dependsOn = [],
+  collapsible = false,
   children,
 }: {
   title: React.FunctionComponent;
   dependsOn?: string[];
+  collapsible?: boolean;
   children: React.ReactNode;
 }) => {
-  const Title = title;
   const { metadata } = useMetadataStateContext();
 
   const shouldRender = useMemo(
@@ -124,11 +125,13 @@ const Section = ({
   );
 
   return shouldRender ? (
-    <EuiFlexGroup gutterSize="m" direction="column">
-      <EuiFlexItem grow={false}>
-        <Title />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>{children}</EuiFlexItem>
-    </EuiFlexGroup>
+    <CollapsibleSection
+      title={title}
+      collapsible={collapsible}
+      data-test-subj={`infraAssetDetailsMetrics${collapsible ? 'Collapsible' : 'Section'}`}
+      id="metrics"
+    >
+      {children}
+    </CollapsibleSection>
   ) : null;
 };

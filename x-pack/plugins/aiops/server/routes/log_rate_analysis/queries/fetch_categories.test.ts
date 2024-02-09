@@ -145,7 +145,7 @@ describe('getCategoryRequest', () => {
                 },
                 aggs: {
                   examples: {
-                    top_hits: { size: 1, sort: ['the-time-field-name'], _source: 'the-field-name' },
+                    top_hits: { size: 4, sort: ['the-time-field-name'], _source: 'the-field-name' },
                   },
                 },
               },

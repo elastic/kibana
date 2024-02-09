@@ -259,7 +259,9 @@ export function getTextBasedDatasource({
     onRefreshIndexPattern() {},
 
     getUsedDataViews: (state) => {
-      return Object.values(state.layers).map(({ index }) => index);
+      return Object.values(state.layers)
+        .map(({ index }) => index)
+        .filter((index) => index !== undefined) as string[];
     },
 
     getPersistableState({ layers }: TextBasedPrivateState) {
@@ -343,16 +345,16 @@ export function getTextBasedDatasource({
       return (
         Boolean(layers) &&
         Object.values(layers).some((layer) => {
-          return Boolean(indexPatterns[layer.index]?.timeFieldName);
+          return layer.index && Boolean(indexPatterns[layer.index]?.timeFieldName);
         })
       );
     },
     getUsedDataView: (state: TextBasedPrivateState, layerId?: string) => {
-      if (!layerId) {
+      if (!layerId || !state.layers[layerId].index) {
         const layers = Object.values(state.layers);
-        return layers?.[0]?.index;
+        return layers?.[0]?.index as string;
       }
-      return state.layers[layerId].index;
+      return state.layers[layerId].index as string;
     },
 
     removeColumn,
@@ -545,9 +547,11 @@ export function getTextBasedDatasource({
     getDatasourceInfo: async (state, references, dataViewsService) => {
       const indexPatterns: DataView[] = [];
       for (const { index } of Object.values(state.layers)) {
-        const dataView = await dataViewsService?.get(index);
-        if (dataView) {
-          indexPatterns.push(dataView);
+        if (index) {
+          const dataView = await dataViewsService?.get(index);
+          if (dataView) {
+            indexPatterns.push(dataView);
+          }
         }
       }
       return Object.entries(state.layers).reduce<DataSourceInfo[]>((acc, [key, layer]) => {

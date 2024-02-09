@@ -24,6 +24,7 @@ interface Context {
 }
 
 export async function isEditActionCompatible(embeddable: IEmbeddable) {
+  if (!embeddable?.getInput) return false;
   // display the action only if dashboard is on editable mode
   const inDashboardEditMode = embeddable.getInput().viewMode === 'edit';
   return Boolean(isLensEmbeddable(embeddable) && embeddable.getIsEditable() && inDashboardEditMode);

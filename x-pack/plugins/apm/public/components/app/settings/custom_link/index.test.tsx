@@ -112,7 +112,7 @@ describe('CustomLink', () => {
       expect(createButton.disabled).toBeFalsy();
     });
 
-    it('enables edit button on custom link table when user has writte privileges', () => {
+    it('enables edit button on custom link table when user has write privileges', () => {
       const mockContext = getMockAPMContext({ canSave: true });
 
       const { getAllByText } = render(

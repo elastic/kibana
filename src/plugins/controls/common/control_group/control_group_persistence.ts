@@ -22,7 +22,12 @@ import {
   genericControlPanelDiffSystem,
 } from './control_group_panel_diff_system';
 import { ControlGroupInput } from '..';
-import { ControlsPanels, PersistableControlGroupInput, RawControlGroupAttributes } from './types';
+import {
+  ControlsPanels,
+  PersistableControlGroupInput,
+  persistableControlGroupInputKeys,
+  RawControlGroupAttributes,
+} from './types';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -46,6 +51,9 @@ export const getDefaultControlGroupInput = (): Omit<ControlGroupInput, 'id'> => 
     ignoreValidations: false,
   },
 });
+
+export const getDefaultControlGroupPersistableInput = (): PersistableControlGroupInput =>
+  pick(getDefaultControlGroupInput(), persistableControlGroupInputKeys);
 
 export const persistableControlGroupInputIsEqual = (
   a: PersistableControlGroupInput | undefined,

@@ -6,8 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { type EmbeddableApiContext, apiHasType } from '@kbn/presentation-publishing';
+import { type EmbeddableApiContext, apiHasType, apiIsOfType } from '@kbn/presentation-publishing';
 import { createAction } from '@kbn/ui-actions-plugin/public';
+import { apiHasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 import { type FilterByMapExtentActionApi } from './types';
 import { MAP_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { isLegacyMapApi } from '../../legacy_visualizations/is_legacy_map';
@@ -52,10 +53,11 @@ export const filterByMapExtentAction = createAction<EmbeddableApiContext>({
     return 'filter';
   },
   isCompatible: async ({ embeddable }: EmbeddableApiContext) => {
-    if (!isApiCompatible(embeddable)) return false;
-    return embeddable.disableTriggers
-      ? false
-      : embeddable.type === MAP_SAVED_OBJECT_TYPE || isLegacyMapApi(embeddable);
+    if (!isApiCompatible(embeddable) || embeddable.disableTriggers) return false;
+    return (
+      apiIsOfType(embeddable, MAP_SAVED_OBJECT_TYPE) ||
+      (apiHasVisualizeConfig(embeddable) && isLegacyMapApi(embeddable))
+    );
   },
   execute: async ({ embeddable }: EmbeddableApiContext) => {
     const { openModal } = await import('./modal');
