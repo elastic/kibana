@@ -674,6 +674,7 @@ packages/kbn-search-index-documents @elastic/enterprise-search-frontend
 packages/kbn-search-response-warnings @elastic/kibana-data-discovery
 x-pack/plugins/searchprofiler @elastic/platform-deployment-management
 x-pack/test/security_api_integration/packages/helpers @elastic/kibana-security
+packages/kbn-security-hardening @elastic/kibana-security
 x-pack/plugins/security @elastic/kibana-security
 x-pack/packages/security/plugin_types_common @elastic/kibana-security
 x-pack/packages/security/plugin_types_public @elastic/kibana-security
