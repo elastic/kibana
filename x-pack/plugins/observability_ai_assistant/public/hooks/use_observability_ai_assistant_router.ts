@@ -7,7 +7,6 @@
 
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { ObservabilityAIAssistantRouter, ObservabilityAIAssistantRoutes } from '../routes/config';
 import { observabilityAIAssistantRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
@@ -21,15 +20,9 @@ interface StatefulObservabilityAIAssistantRouter extends ObservabilityAIAssistan
     path: T,
     ...params: TypeAsArgs<TypeOf<ObservabilityAIAssistantRoutes, T>>
   ): void;
-  navigateToConversationsApp<T extends PathsOf<ObservabilityAIAssistantRoutes>>(
-    path: T,
-    ...params: TypeAsArgs<TypeOf<ObservabilityAIAssistantRoutes, T>>
-  ): void;
 }
 
 export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssistantRouter {
-  const history = useHistory();
-
   const {
     services: {
       http,
@@ -47,20 +40,16 @@ export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssi
       ...observabilityAIAssistantRouter,
       push: (...args) => {
         const next = link(...args);
-        history.push(next);
+        navigateToApp('observabilityAIAssistant', { path: next, replace: false });
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
-        history.replace(next);
-      },
-      navigateToConversationsApp: (path, ...args) => {
-        const next = link(path, ...args);
-        navigateToApp('observabilityAIAssistant', { path: next, replace: false });
+        navigateToApp('observabilityAIAssistant', { path: next, replace: true });
       },
       link: (path, ...args) => {
         return http.basePath.prepend('/app/observabilityAIAssistant' + link(path, ...args));
       },
     }),
-    [history, navigateToApp, http.basePath]
+    [navigateToApp, http.basePath]
   );
 }
