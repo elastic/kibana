@@ -93,12 +93,6 @@ export const Chat = () => {
                 }}
                 render={({ field }) => (
                   <QuestionInput
-                    placeholder={i18n.translate(
-                      'aiPlayground.chat.questionInput.askQuestionPlaceholder',
-                      {
-                        defaultMessage: 'Ask a question',
-                      }
-                    )}
                     value={field.value}
                     onChange={field.onChange}
                     onEnterPress={handleSubmit(onSubmit)}
