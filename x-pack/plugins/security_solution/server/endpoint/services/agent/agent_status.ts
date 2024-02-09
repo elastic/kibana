@@ -18,8 +18,8 @@ import type { SentinelOneGetAgentsResponse } from '@kbn/stack-connectors-plugin/
 import { stringify } from '../../utils/stringify';
 import type { ResponseActionAgentType } from '../../../../common/endpoint/service/response_actions/constants';
 import type { AgentStatusApiResponse } from '../../../../common/endpoint/types';
-import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { HostStatus } from '../../../../common/endpoint/types';
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 
 export interface GetAgentStatusOptions {
   // NOTE: only sentinel_one currently supported
@@ -63,7 +63,7 @@ export const getAgentStatus = async ({
     params: {
       subAction: SUB_ACTION.GET_AGENTS,
       subActionParams: {
-        uuids: agentIds.join(','),
+        uuids: agentIds.filter((agentId) => agentId.trim().length).join(','),
       },
     },
   })) as ActionTypeExecutorResult<SentinelOneGetAgentsResponse>;
@@ -84,14 +84,15 @@ export const getAgentStatus = async ({
 
   logger.debug(`Response from SentinelOne API:\n${stringify(agentDetailsById)}`);
 
-  return agentIds.reduce((acc, agentId) => {
+  return agentIds.reduce<AgentStatusApiResponse['data']>((acc, agentId) => {
     const thisAgentDetails = agentDetailsById[agentId];
     const thisAgentStatus = {
       agentType,
       id: agentId,
       found: false,
-      status: HostStatus.UNENROLLED,
       isolated: false,
+      isPendingUninstall: false,
+      isUninstalled: false,
       lastSeen: '',
       pendingActions: {
         execute: 0,
@@ -103,14 +104,17 @@ export const getAgentStatus = async ({
         'suspend-process': 0,
         'running-processes': 0,
       },
+      status: HostStatus.UNENROLLED,
     };
 
     if (thisAgentDetails) {
       merge(thisAgentStatus, {
         found: true,
         lastSeen: thisAgentDetails.updatedAt,
+        isPendingUninstall: thisAgentDetails.isPendingUninstall,
+        isUninstalled: thisAgentDetails.isUninstalled,
         isolated: thisAgentDetails.networkStatus === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTED,
-        status: HostStatus.HEALTHY,
+        status: !thisAgentDetails.isActive ? HostStatus.OFFLINE : HostStatus.HEALTHY,
         pendingActions: {
           isolate:
             thisAgentDetails.networkStatus === SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING ? 1 : 0,
@@ -123,7 +127,7 @@ export const getAgentStatus = async ({
     acc[agentId] = thisAgentStatus;
 
     return acc;
-  }, {} as AgentStatusApiResponse['data']);
+  }, {});
 };
 
 export enum SENTINEL_ONE_NETWORK_STATUS {

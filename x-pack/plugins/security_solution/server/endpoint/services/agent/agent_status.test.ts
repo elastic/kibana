@@ -103,6 +103,8 @@ describe('Endpoint Get Agent Status service', () => {
         agentType: 'sentinel_one',
         found: true,
         id: 'aaa',
+        isUninstalled: false,
+        isPendingUninstall: false,
         isolated: true,
         lastSeen: '2023-12-26T21:35:35.986596Z',
         pendingActions: {
@@ -121,6 +123,8 @@ describe('Endpoint Get Agent Status service', () => {
         agentType: 'sentinel_one',
         found: true,
         id: 'bbb',
+        isUninstalled: false,
+        isPendingUninstall: false,
         isolated: false,
         lastSeen: '2023-12-26T21:35:35.986596Z',
         pendingActions: {
@@ -139,6 +143,8 @@ describe('Endpoint Get Agent Status service', () => {
         agentType: 'sentinel_one',
         found: true,
         id: 'ccc',
+        isUninstalled: false,
+        isPendingUninstall: false,
         isolated: false,
         lastSeen: '2023-12-26T21:35:35.986596Z',
         pendingActions: {
@@ -157,6 +163,8 @@ describe('Endpoint Get Agent Status service', () => {
         agentType: 'sentinel_one',
         found: false,
         id: 'invalid',
+        isUninstalled: false,
+        isPendingUninstall: false,
         isolated: false,
         lastSeen: '',
         pendingActions: {

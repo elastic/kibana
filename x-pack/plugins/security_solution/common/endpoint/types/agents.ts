@@ -14,12 +14,14 @@ import {} from '../service/response_actions/constants';
 
 export interface AgentStatusInfo {
   id: string;
-  found: boolean;
   agentType: ResponseActionAgentType;
-  status: HostStatus;
+  found: boolean;
   isolated: boolean;
+  isPendingUninstall: boolean;
+  isUninstalled: boolean;
   lastSeen: string; // ISO date
   pendingActions: Record<ResponseActionsApiCommandNames, number>;
+  status: HostStatus;
 }
 
 export interface AgentStatusApiResponse {
