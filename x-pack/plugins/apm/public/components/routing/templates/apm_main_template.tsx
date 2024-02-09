@@ -127,12 +127,12 @@ export function ApmMainTemplate({
         hasApmIntegrations
           ? 'The user has the APM integration installed. '
           : 'The user does not have the APM integration installed',
-        !noDataConfig
-          ? ''
-          : 'The user is looking at a screen that tells them they do not have any data.',
+        noDataConfig !== undefined
+          ? 'The user is looking at a screen that tells them they do not have any data.'
+          : '',
       ].join('\n'),
     });
-  }, [hasApmData, hasApmIntegrations, !!noDataConfig]);
+  }, [hasApmData, hasApmIntegrations, noDataConfig, aiAssistant]);
 
   const rightSideItems = [
     ...(showServiceGroupSaveButton ? [<ServiceGroupSaveButton />] : []),

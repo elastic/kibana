@@ -18,7 +18,7 @@ import {
 } from '../../../../common/service_inventory';
 import { useAnomalyDetectionJobsContext } from '../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
-import { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { FETCH_STATUS, isFailure, isPending } from '../../../hooks/use_fetcher';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
 import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useProgressiveFetcher } from '../../../hooks/use_progressive_fetcher';
@@ -271,13 +271,13 @@ export function ServiceInventory() {
       .setApplicationContext;
 
   useEffect(() => {
-    if (mainStatisticsStatus === FETCH_STATUS.FAILURE) {
+    if (isFailure(mainStatisticsStatus)) {
       return setApplicationContext({
         description: 'The services have failed to load',
       });
     }
 
-    if (mainStatisticsStatus === FETCH_STATUS.LOADING) {
+    if (isPending(mainStatisticsStatus)) {
       return setApplicationContext({
         description: 'The services are still loading',
       });
@@ -292,7 +292,7 @@ export function ServiceInventory() {
         },
       ],
     });
-  }, [mainStatisticsStatus, mainStatisticsData.items]);
+  }, [mainStatisticsStatus, mainStatisticsData.items, setApplicationContext]);
 
   return (
     <>
