@@ -116,10 +116,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
       >
         {Array.isArray(topValues)
           ? topValues.map((value) => {
-              const fieldValue =
-                value.key_as_string ?? (value.key ? value.key.toString() : EMPTY_EXAMPLE);
+              const fieldValue = value.key_as_string ?? (value.key ? value.key.toString() : '');
+              const displayValue = fieldValue ?? EMPTY_EXAMPLE;
               return (
-                <EuiFlexGroup gutterSize="xs" alignItems="center" key={fieldValue}>
+                <EuiFlexGroup gutterSize="xs" alignItems="center" key={displayValue}>
                   <EuiFlexItem data-test-subj="dataVisualizerFieldDataTopValueBar">
                     <EuiProgress
                       value={value.percent}
@@ -136,7 +136,7 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                     />
                   </EuiFlexItem>
                   {fieldName !== undefined &&
-                  fieldValue !== undefined &&
+                  displayValue !== undefined &&
                   onAddFilter !== undefined ? (
                     <div
                       css={css`
@@ -151,10 +151,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                           'xpack.dataVisualizer.dataGrid.field.addFilterAriaLabel',
                           {
                             defaultMessage: 'Filter for {fieldName}: "{value}"',
-                            values: { fieldName, value: fieldValue },
+                            values: { fieldName, value: displayValue },
                           }
                         )}
-                        data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${fieldValue}`}
+                        data-test-subj={`dvFieldDataTopValuesAddFilterButton-${fieldName}-${displayValue}`}
                         style={{
                           minHeight: 'auto',
                           minWidth: 'auto',
@@ -172,10 +172,10 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
                           'xpack.dataVisualizer.dataGrid.field.removeFilterAriaLabel',
                           {
                             defaultMessage: 'Filter out {fieldName}: "{value}"',
-                            values: { fieldName, value: fieldValue },
+                            values: { fieldName, value: displayValue },
                           }
                         )}
-                        data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${fieldValue}`}
+                        data-test-subj={`dvFieldDataTopValuesExcludeFilterButton-${fieldName}-${displayValue}`}
                         style={{
                           minHeight: 'auto',
                           minWidth: 'auto',

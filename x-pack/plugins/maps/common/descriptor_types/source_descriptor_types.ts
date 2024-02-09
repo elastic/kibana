@@ -45,6 +45,7 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   id: string;
   esql: string;
   columns: ESQLColumn[];
+  dataViewId: string;
   /*
    * Date field used to narrow ES|QL requests by global time range
    */

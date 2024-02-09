@@ -105,7 +105,7 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor, monaco-yaml and react-monaco-editor which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|react-monaco-editor|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|react-monaco-editor|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/[/\\\\].+\\.js$',
     '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith))/dist/util/[/\\\\].+\\.js$',
