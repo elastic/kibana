@@ -30,7 +30,7 @@ export class LogsExplorerLocatorDefinition implements LocatorDefinition<LogsExpl
       : undefined;
 
     const discoverColumns = columns?.map((column) => {
-      return column.type === 'document-field' ? column.field : column.name;
+      return column.type === 'document-field' ? column.field : column.smartField;
     });
 
     return this.deps.discoverAppLocator?.getLocation({

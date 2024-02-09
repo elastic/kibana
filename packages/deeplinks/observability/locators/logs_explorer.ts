@@ -37,7 +37,7 @@ export type DocumentFieldGridColumnOptions = {
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type SmartFieldGridColumnOptions = {
   type: 'smart-field';
-  name: 'content' | 'resource';
+  smartField: 'content' | 'resource';
   width?: number;
 };
 

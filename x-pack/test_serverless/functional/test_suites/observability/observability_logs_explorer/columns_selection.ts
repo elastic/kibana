@@ -61,12 +61,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             },
             columns: [
               {
-                name: 'resource',
+                smartField: 'resource',
                 type: 'smart-field',
                 fallbackFields: ['host.name', 'service.name'],
               },
               {
-                name: 'content',
+                smartField: 'content',
                 type: 'smart-field',
                 fallbackFields: ['message'],
               },

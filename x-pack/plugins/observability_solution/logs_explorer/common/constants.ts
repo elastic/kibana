@@ -46,20 +46,20 @@ export const DATA_GRID_COLUMN_WIDTH_MEDIUM = 320;
 
 export const RESOURCE_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
   type: 'smart-field',
-  name: RESOURCE_FIELD,
-  fallbackFields: ['host.name', 'service.name'],
+  smartField: RESOURCE_FIELD,
+  fallbackFields: [HOST_NAME_FIELD, SERVICE_NAME_FIELD],
   width: DATA_GRID_COLUMN_WIDTH_MEDIUM,
 };
 
 export const CONTENT_FIELD_CONFIGURATION: SmartFieldGridColumnOptions = {
   type: 'smart-field',
-  name: CONTENT_FIELD,
-  fallbackFields: ['message'],
+  smartField: CONTENT_FIELD,
+  fallbackFields: [MESSAGE_FIELD],
 };
 
 export const SMART_FALLBACK_FIELDS = {
-  [CONTENT_FIELD]: CONTENT_FIELD_CONFIGURATION.fallbackFields,
-  [RESOURCE_FIELD]: RESOURCE_FIELD_CONFIGURATION.fallbackFields,
+  [CONTENT_FIELD]: CONTENT_FIELD_CONFIGURATION,
+  [RESOURCE_FIELD]: RESOURCE_FIELD_CONFIGURATION,
 };
 
 // UI preferences
