@@ -34,6 +34,15 @@ export class MemWritable extends Writable {
   }
 }
 
+function wrapInlineInProject(inlineJourney: string) {
+  return `import { journey, step, expect } from '@elastic/synthetics';
+
+journey('inline', ({ page, context, browser, params, request }) => {
+  ${inlineJourney}
+});
+`;
+}
+
 export async function inlineToProjectZip(
   inlineJourney: string,
   monitorId: string,
@@ -48,17 +57,9 @@ export async function inlineToProjectZip(
       archive.on('error', reject);
       mWriter.on('close', resolve);
       archive.pipe(mWriter);
-      archive.append(
-        `import { journey, step, expect } from '@elastic/synthetics';
-
-journey('inline', ({ page, context, browser, params, request }) => {
-  ${inlineJourney}
-});
-`,
-        {
-          name: 'inline.journey.ts',
-        }
-      );
+      archive.append(wrapInlineInProject(inlineJourney), {
+        name: 'inline.journey.ts',
+      });
       archive.finalize();
     });
   } catch (e) {
