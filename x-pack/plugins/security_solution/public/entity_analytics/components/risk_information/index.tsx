@@ -237,7 +237,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep2"
-                defaultMessage="Generates an 'Alert' category score by aggregating alerts by entity idenfifier such that alerts with higher risk contribute more than alerts with lower risk scores."
+                defaultMessage="Generates an 'Alert' category score by aggregating alerts by entity idenfifier such that alerts with higher risk scores contribute more than alerts with lower risk scores."
               />
             </li>
             <li>
