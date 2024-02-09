@@ -128,13 +128,13 @@ export const showChangeBenchmarkRuleStatesSuccessToast = (
               </EuiText>
               {numberOfDetectionRules > 0 ? (
                 <FormattedMessage
-                  id="xpack.csp.flyout.ruleEnabledToast"
+                  id="xpack.csp.flyout.ruleDisabledToast"
                   defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}} and {detectionRuleCount, plural, one {# detection rule} other {# detection rules}}"
                   values={{ ruleCount: numberOfRules, detectionRuleCount: numberOfDetectionRules }}
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.csp.flyout.ruleEnabledToastNoDetectionRule"
+                  id="xpack.csp.flyout.ruleDisabledToastNoDetectionRule"
                   defaultMessage="Successfully disabled {ruleCount, plural, one {# rule} other {# rules}}"
                   values={{ ruleCount: numberOfRules }}
                 />
