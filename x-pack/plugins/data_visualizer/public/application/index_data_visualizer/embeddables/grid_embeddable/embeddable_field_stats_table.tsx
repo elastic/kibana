@@ -12,7 +12,7 @@ import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
 } from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import { getDefaultDataVisualizerListState } from '../../components/index_data_visualizer_view/index_data_visualizer_view';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';

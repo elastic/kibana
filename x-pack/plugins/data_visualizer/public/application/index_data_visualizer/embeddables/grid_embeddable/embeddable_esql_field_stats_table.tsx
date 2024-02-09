@@ -7,7 +7,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import type { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { FieldVisConfig } from '../../../../../common/types/field_vis_config';
-import { DataVisualizerTableState } from '../../../../../common/types';
+import type { DataVisualizerTableState } from '../../../../../common/types';
 import { DataVisualizerTable } from '../../../common/components/stats_table';
 
 import {
@@ -44,8 +44,6 @@ export const EmbeddableESQLFieldStatsTableWrapper = ({
 
   const {
     configs,
-    // searchQueryLanguage,
-    // searchString,
     extendedColumns,
     progress,
     overallStatsProgress,

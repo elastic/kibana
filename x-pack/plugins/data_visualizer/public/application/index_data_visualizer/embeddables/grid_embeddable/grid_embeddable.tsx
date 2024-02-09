@@ -24,7 +24,7 @@ import { DATA_VISUALIZER_GRID_EMBEDDABLE_TYPE } from './constants';
 import { EmbeddableLoading } from './embeddable_loading_fallback';
 import { EmbeddableESQLFieldStatsTableWrapper } from './embeddable_esql_field_stats_table';
 import { EmbeddableFieldStatsTableWrapper } from './embeddable_field_stats_table';
-import {
+import type {
   DataVisualizerGridEmbeddableInput,
   ESQLDataVisualizerGridEmbeddableInput,
   DataVisualizerGridEmbeddableOutput,

@@ -19,7 +19,7 @@ import { isFulfilled } from '../../../common/util/promise_all_settled_utils';
 import type { Column } from '../../hooks/esql/use_esql_overall_stats_data';
 import { AggregatableField } from '../../types/esql_data_visualizer';
 import { handleError, HandleErrorCallback } from './handle_error';
-import { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
+import type { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
 
 interface Field extends Column {
   aggregatable?: boolean;

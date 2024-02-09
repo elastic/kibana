@@ -5,13 +5,13 @@
  * 2.0.
  */
 import React, { FC, useEffect, useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE, LayerDescriptor } from '@kbn/maps-plugin/common';
-import { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
+import type { CombinedQuery } from '../../../../index_data_visualizer/types/combined_query';
 import { ExpandedRowContent } from '../../stats_table/components/field_data_expanded_row/expanded_row_content';
 import { DocumentStatsTable } from '../../stats_table/components/field_data_expanded_row/document_stats';
 import { ExamplesList } from '../../examples_list';
-import { FieldVisConfig } from '../../stats_table/types';
+import type { FieldVisConfig } from '../../stats_table/types';
 import { useDataVisualizerKibana } from '../../../../kibana_context';
 import { SUPPORTED_FIELD_TYPES } from '../../../../../../common/constants';
 import { EmbeddedMapComponent } from '../../embedded_map';

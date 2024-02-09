@@ -35,7 +35,7 @@ import {
   handleError,
   type HandleErrorCallback,
 } from '../../search_strategy/esql_requests/handle_error';
-import { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
+import type { ESQLDefaultLimitSizeOption } from '../../embeddables/grid_embeddable/types';
 
 export interface Column {
   type: string;

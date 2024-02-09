@@ -48,9 +48,9 @@ import {
   DataVisualizerTable,
   ItemIdToExpandedRowMap,
 } from '../../../common/components/stats_table';
-import { FieldVisConfig } from '../../../common/components/stats_table/types';
+import type { FieldVisConfig } from '../../../common/components/stats_table/types';
 import type { TotalFieldsStats } from '../../../common/components/stats_table/components/field_count_stats';
-import { OverallStats } from '../../types/overall_stats';
+import type { OverallStats } from '../../types/overall_stats';
 import { IndexBasedDataVisualizerExpandedRow } from '../../../common/components/expanded_row/index_based_expanded_row';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import {
@@ -69,7 +69,7 @@ import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_
 import {
   MIN_SAMPLER_PROBABILITY,
   RANDOM_SAMPLER_OPTION,
-  RandomSamplerOption,
+  type RandomSamplerOption,
 } from '../../constants/random_sampler';
 import type { DataVisualizerGridInput } from '../../embeddables/grid_embeddable/types';
 
