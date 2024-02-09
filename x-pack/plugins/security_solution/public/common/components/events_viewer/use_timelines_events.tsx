@@ -411,6 +411,15 @@ export const useTimelineEventsHandler = ({
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);
 
+  // Abort the active query when this unmounts such as when a user leaves a page or changes a sub-tab
+  // Better implementation will be using searchSessions
+  useEffect(() => {
+    return () => {
+      if (abortCtrl.current) {
+        abortCtrl.current.abort();
+      }
+    };
+  }, []);
   return [loading, timelineResponse, timelineEventsSearchHandler];
 };
 
