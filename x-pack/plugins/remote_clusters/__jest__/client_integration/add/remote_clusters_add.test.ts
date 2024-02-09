@@ -81,7 +81,7 @@ describe('Create Remote cluster', () => {
       });
 
       test('renders no switch for cloud url input and proxy address + server name input modes', () => {
-        expect(actions.cloudUrlSwitch.exists()).toBe(false);
+        expect(actions.cloudAdvancedOptionsSwitch.exists()).toBe(false);
       });
     });
     describe('on cloud', () => {
@@ -94,18 +94,14 @@ describe('Create Remote cluster', () => {
       });
 
       test('renders a switch between cloud url input and proxy address + server name input for proxy connection', () => {
-        expect(actions.cloudUrlSwitch.exists()).toBe(true);
+        expect(actions.cloudAdvancedOptionsSwitch.exists()).toBe(true);
       });
 
       test('renders no switch between sniff and proxy modes', () => {
         expect(actions.connectionModeSwitch.exists()).toBe(false);
       });
       test('defaults to cloud url input for proxy connection', () => {
-        expect(actions.cloudUrlSwitch.isChecked()).toBe(false);
-      });
-      test('server name has no optional label', () => {
-        actions.cloudUrlSwitch.toggle();
-        expect(actions.serverNameInput.getLabel()).toBe('Server name');
+        expect(actions.cloudAdvancedOptionsSwitch.isChecked()).toBe(false);
       });
     });
   });
@@ -290,19 +286,9 @@ describe('Create Remote cluster', () => {
         component.update();
       });
 
-      test('cloud url is required since cloud url input is enabled by default', () => {
+      test('name and remote address are required', () => {
         actions.saveButton.click();
-        expect(actions.getErrorMessages()).toContain('A url is required.');
-      });
-
-      test('proxy address and server name are required when cloud url input is disabled', () => {
-        actions.cloudUrlSwitch.toggle();
-        actions.saveButton.click();
-        expect(actions.getErrorMessages()).toEqual([
-          'Name is required.',
-          'A proxy address is required.',
-          'A server name is required.',
-        ]);
+        expect(actions.getErrorMessages()).toContain('A remote address is required.');
       });
     });
   });

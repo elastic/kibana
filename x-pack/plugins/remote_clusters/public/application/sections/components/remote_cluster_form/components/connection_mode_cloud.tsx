@@ -65,7 +65,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
                 />
               }
               checked={cloudAdvancedOptionsEnabled}
-              data-test-subj="remoteClusterFormCloudUrlToggle"
+              data-test-subj="remoteClusterFormCloudAdvancedOptionsToggle"
               onChange={(e) =>
                 onFieldsChange({ cloudAdvancedOptionsEnabled: e.target.checked, serverName: '' })
               }
@@ -104,7 +104,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
           )}
           onChange={(e) => onFieldsChange({ cloudRemoteAddress: e.target.value })}
           isInvalid={Boolean(areErrorsVisible && proxyAddressError)}
-          data-test-subj="remoteClusterFormProxyAddressInput"
+          data-test-subj="remoteClusterFormRemoteAddressInput"
           fullWidth
         />
       </EuiFormRow>

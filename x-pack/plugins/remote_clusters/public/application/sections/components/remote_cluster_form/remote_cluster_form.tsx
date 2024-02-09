@@ -87,7 +87,8 @@ export class RemoteClusterForm extends Component<Props, State> {
     super(props, context);
 
     const { cluster } = props;
-    const { isCloudEnabled } = context;
+    // const { isCloudEnabled } = context;
+    const isCloudEnabled = true;
 
     // Connection mode should default to "proxy" in cloud
     const defaultMode = isCloudEnabled ? PROXY_MODE : SNIFF_MODE;
@@ -97,7 +98,9 @@ export class RemoteClusterForm extends Component<Props, State> {
         ...defaultClusterValues,
         mode: defaultMode,
         cloudRemoteAddress: '',
-        cloudAdvancedOptionsEnabled: false,
+        cloudAdvancedOptionsEnabled:
+          cluster?.serverName != null ||
+          cluster?.proxySocketConnections !== defaultClusterValues.proxySocketConnections,
       },
       cluster
     );
@@ -118,7 +121,8 @@ export class RemoteClusterForm extends Component<Props, State> {
   };
 
   onFieldsChange = (changedFields: Partial<FormFields>) => {
-    const { isCloudEnabled } = this.context;
+    // const { isCloudEnabled } = this.context;
+    const isCloudEnabled = true;
 
     // when cloudUrl changes, fill proxy address and server name
     const { cloudAdvancedOptionsEnabled, serverName, cloudRemoteAddress } = changedFields;

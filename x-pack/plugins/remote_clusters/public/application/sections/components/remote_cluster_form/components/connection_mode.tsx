@@ -29,7 +29,8 @@ export interface Props {
 export const ConnectionMode: FunctionComponent<Props> = (props) => {
   const { fields, onFieldsChange } = props;
   const { mode } = fields;
-  const { isCloudEnabled } = useAppContext();
+  // const { isCloudEnabled } = useAppContext();
+  const isCloudEnabled = true;
 
   return isCloudEnabled ? (
     <ConnectionModeCloud {...props} />

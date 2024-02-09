@@ -28,12 +28,12 @@ export interface RemoteClustersActions {
     toggle: () => void;
     isChecked: () => boolean;
   };
-  cloudUrlSwitch: {
+  cloudAdvancedOptionsSwitch: {
     toggle: () => void;
     exists: () => boolean;
     isChecked: () => boolean;
   };
-  cloudUrlInput: {
+  cloudRemoteAddressInput: {
     exists: () => boolean;
     getValue: () => string;
   };
@@ -123,10 +123,10 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     };
   };
 
-  const createCloudUrlSwitchActions = () => {
-    const cloudUrlSelector = 'remoteClusterFormCloudUrlToggle';
+  const createCloudAdvancedOptionsSwitchActions = () => {
+    const cloudUrlSelector = 'remoteClusterFormCloudAdvancedOptionsToggle';
     return {
-      cloudUrlSwitch: {
+      cloudAdvancedOptionsSwitch: {
         exists: () => exists(cloudUrlSelector),
         toggle: () => {
           act(() => {
@@ -232,10 +232,10 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
 
   const globalErrorExists = () => exists('remoteClusterFormGlobalError');
 
-  const createCloudUrlInputActions = () => {
-    const cloudUrlInputSelector = 'remoteClusterFormCloudUrlInput';
+  const createCloudRemoteAddressInputActions = () => {
+    const cloudUrlInputSelector = 'remoteClusterFormRemoteAddressInput';
     return {
-      cloudUrlInput: {
+      cloudRemoteAddressInput: {
         exists: () => exists(cloudUrlInputSelector),
         getValue: () => find(cloudUrlInputSelector).props().value,
       },
@@ -247,9 +247,9 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     ...createNameInputActions(),
     ...createSkipUnavailableActions(),
     ...createConnectionModeActions(),
-    ...createCloudUrlSwitchActions(),
+    ...createCloudAdvancedOptionsSwitchActions(),
     ...createSeedsInputActions(),
-    ...createCloudUrlInputActions(),
+    ...createCloudRemoteAddressInputActions(),
     ...createProxyAddressActions(),
     ...createServerNameActions(),
     ...createSetupTrustActions(),

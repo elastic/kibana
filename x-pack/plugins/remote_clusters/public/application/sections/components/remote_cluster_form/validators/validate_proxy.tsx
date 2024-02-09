@@ -12,7 +12,12 @@ import { isAddressValid, isPortValid } from './validate_address';
 
 export function validateProxy(isCloudEnabled: boolean, proxy?: string): null | JSX.Element {
   if (!proxy) {
-    return (
+    return isCloudEnabled ? (
+      <FormattedMessage
+        id="xpack.remoteClusters.remoteClusterForm.proxyError.missingRemoteAddressMessage"
+        defaultMessage="A remote address is required."
+      />
+    ) : (
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.proxyError.missingProxyMessage"
         defaultMessage="A proxy address is required."
