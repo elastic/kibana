@@ -8,6 +8,7 @@
 import { css } from '@emotion/react';
 import React, { FC, useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import type { Required } from 'utility-types';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import {
   useEuiBreakpoint,
@@ -21,7 +22,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import { type Filter, FilterStateStore, type Query } from '@kbn/es-query';
+import { type Filter, FilterStateStore, type Query, buildEsQuery } from '@kbn/es-query';
 import { generateFilters } from '@kbn/data-plugin/public';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
@@ -62,7 +63,6 @@ import { DocumentCountContent } from '../../../common/components/document_count_
 import { OMIT_FIELDS } from '../../../../../common/constants';
 import { SearchPanel } from '../search_panel';
 import { ActionsPanel } from '../actions_panel';
-import { createMergedEsQuery } from '../../utils/saved_search_utils';
 import { DataVisualizerDataViewManagement } from '../data_view_management';
 import type { GetAdditionalLinks } from '../../../common/components/results_links';
 import { useDataVisualizerGridData } from '../../hooks/use_data_visualizer_grid_data';
@@ -389,14 +389,14 @@ export const IndexDataVisualizerView: FC<IndexDataVisualizerViewProps> = (dataVi
         language: searchQueryLanguage,
       };
 
-      const combinedQuery = createMergedEsQuery(
+      const combinedQuery = buildEsQuery(
+        currentDataView,
         {
           query: searchString || '',
           language: searchQueryLanguage,
         },
         data.query.filterManager.getFilters() ?? [],
-        currentDataView,
-        uiSettings
+        uiSettings ? getEsQueryConfig(uiSettings) : undefined
       );
 
       setSearchParams({

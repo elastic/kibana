@@ -40,7 +40,7 @@ export const useAssetCriticalityData = (entity: Entity, modal: ModalState): Stat
     queryKey: QUERY_KEYS.doc,
     queryFn: () => fetchAssetCriticality({ idField: `${entity.type}.name`, idValue: entity.name }),
     retry: (failureCount, error) => error.body.statusCode === 404 && failureCount > 0,
-    enabled: privileges.data?.has_all_required,
+    enabled: !!privileges.data?.has_read_permissions,
   });
 
   const mutation = useMutation({
