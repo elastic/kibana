@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { InvokeCreator } from 'xstate';
 import { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 
@@ -28,12 +29,21 @@ export const createAdHocDataView =
   };
 
 export const changeDataView =
-  (): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
+  ({
+    dataViews,
+  }: {
+    dataViews: DataViewsPublicPluginStart;
+  }): InvokeCreator<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
   async (context) => {
     if (!('discoverStateContainer' in context)) return;
     const { discoverStateContainer } = context;
 
-    return discoverStateContainer.actions.onChangeDataView(
-      context.datasetSelection.toDataviewSpec().id
-    );
+    // We need to manually retrieve the data view and force a set and change on the state container
+    // to guarantee the correct update on the data view selection and avoid a race condition
+    // when updating the control panels.
+    const nextDataView = await dataViews.get(context.datasetSelection.toDataviewSpec().id, false);
+    discoverStateContainer.actions.setDataView(nextDataView);
+    if (nextDataView.id) {
+      await discoverStateContainer.actions.onChangeDataView(nextDataView.id);
+    }
   };
