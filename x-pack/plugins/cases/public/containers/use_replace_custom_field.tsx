@@ -9,24 +9,24 @@ import { useMutation } from '@tanstack/react-query';
 import { useCasesToast } from '../common/use_cases_toast';
 import { useRefreshCaseViewPage } from '../components/case_view/use_on_refresh_case_view_page';
 import type { ServerError } from '../types';
-import { updateCustomField } from './api';
+import { replaceCustomField } from './api';
 import { casesMutationsKeys } from './constants';
 import * as i18n from './translations';
 
-interface UpdateCustomField {
+interface ReplaceCustomField {
   caseId: string;
   customFieldId: string;
-  customFieldValue: string;
+  customFieldValue: string | boolean | null;
   caseVersion: string;
 }
 
-export const useUpdateCustomField = () => {
+export const useReplaceCustomField = () => {
   const { showErrorToast } = useCasesToast();
   const refreshCaseViewPage = useRefreshCaseViewPage();
 
   return useMutation(
-    ({ caseId, customFieldId, customFieldValue, caseVersion }: UpdateCustomField) =>
-      updateCustomField({
+    ({ caseId, customFieldId, customFieldValue, caseVersion }: ReplaceCustomField) =>
+      replaceCustomField({
         caseId,
         customFieldId,
         request: { value: customFieldValue, caseVersion },
@@ -43,4 +43,4 @@ export const useUpdateCustomField = () => {
   );
 };
 
-export type UseUpdateCustomField = ReturnType<typeof useUpdateCustomField>;
+export type UseReplaceCustomField = ReturnType<typeof useReplaceCustomField>;

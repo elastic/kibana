@@ -16,7 +16,7 @@ import { useGetCaseConnectors } from '../../../containers/use_get_case_connector
 import { useCasesFeatures } from '../../../common/use_cases_features';
 import { useGetCurrentUserProfile } from '../../../containers/user_profiles/use_get_current_user_profile';
 import { useGetSupportedActionConnectors } from '../../../containers/configure/use_get_supported_action_connectors';
-import type { CaseCustomField, CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
+import type { CaseSeverity, CaseStatuses } from '../../../../common/types/domain';
 import type { CaseUICustomField, UseFetchAlertData } from '../../../../common/ui/types';
 import type { CaseUI } from '../../../../common';
 import { EditConnector } from '../../edit_connector';
@@ -40,7 +40,7 @@ import { Description } from '../../description';
 import { EditCategory } from './edit_category';
 import { parseCaseUsers } from '../../utils';
 import { CustomFields } from './custom_fields';
-import { useUpdateCustomField } from '../../../containers/use_update_custom_field';
+import { useReplaceCustomField } from '../../../containers/use_replace_custom_field';
 
 export const CaseViewActivity = ({
   ruleDetailsNavigation,
@@ -95,7 +95,7 @@ export const CaseViewActivity = ({
   });
 
   const { isLoading: isLoadingCustomFields, mutate: updateCustomFieldProperty } =
-    useUpdateCustomField();
+    useReplaceCustomField();
 
   const isLoadingAssigneeData =
     (isLoading && loadingKey === 'assignees') || isLoadingCaseUsers || isLoadingCurrentUserProfile;
@@ -147,19 +147,8 @@ export const CaseViewActivity = ({
     [onUpdateField]
   );
 
-  // const onSubmitCustomFields = useCallback(
-  //   (customFields: CaseUICustomField[]) => {
-  //     onUpdateField({
-  //       key: 'customFields',
-  //       value: customFields,
-  //     });
-  //   },
-  //   [onUpdateField]
-  // );
-
   const onSubmitCustomField = useCallback(
     (customField: CaseUICustomField) => {
-      console.log('case view activity onSubmitCustomField', { customField });
       updateCustomFieldProperty({
         caseId: caseData.id,
         customFieldId: customField.key,
@@ -167,7 +156,7 @@ export const CaseViewActivity = ({
         caseVersion: caseData.version,
       });
     },
-    [updateCustomFieldProperty]
+    [updateCustomFieldProperty, caseData]
   );
 
   const handleUserActionsActivityChanged = useCallback(
@@ -307,7 +296,7 @@ export const CaseViewActivity = ({
             />
           ) : null}
           <CustomFields
-            isLoading={isLoading && loadingKey === 'customFields'}
+            isLoading={(isLoading && loadingKey === 'customFields') || isLoadingCustomFields}
             customFields={caseData.customFields}
             customFieldsConfiguration={casesConfiguration.customFields}
             onSubmit={onSubmitCustomField}

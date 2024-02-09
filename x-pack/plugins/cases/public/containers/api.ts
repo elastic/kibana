@@ -7,7 +7,7 @@
 
 import { ALERT_RULE_CONSUMER, ALERT_RULE_PRODUCER, ALERT_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common/constants';
-import type { User } from '../../common/types/domain';
+import type { CaseCustomField, User } from '../../common/types/domain';
 import { AttachmentType } from '../../common/types/domain';
 import type { Case, Cases } from '../../common';
 import type {
@@ -21,7 +21,7 @@ import type {
   GetCaseConnectorsResponse,
   UserActionFindResponse,
   SingleCaseMetricsResponse,
-  CustomFieldPatchRequest,
+  CustomFieldPutRequest,
 } from '../../common/types/api';
 import type {
   CaseConnectors,
@@ -35,6 +35,7 @@ import type {
   CasesFindResponseUI,
   CasesUI,
   FilterOptions,
+  CaseUICustomField,
 } from '../../common/ui/types';
 import { SortFieldCase } from '../../common/ui/types';
 import {
@@ -57,7 +58,6 @@ import {
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   CASES_INTERNAL_URL,
-  INTERNAL_PATCH_CUSTOM_FIELDS_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -370,7 +370,7 @@ export const updateCases = async ({
   return convertCasesToCamelCase(decodeCasesResponse(response));
 };
 
-export const updateCustomField = async ({
+export const replaceCustomField = async ({
   caseId,
   customFieldId,
   request,
@@ -378,19 +378,19 @@ export const updateCustomField = async ({
 }: {
   caseId: string;
   customFieldId: string;
-  request: CustomFieldPatchRequest;
+  request: CustomFieldPutRequest;
   signal?: AbortSignal;
-}): Promise<CaseUI> => {
-  const response = await KibanaServices.get().http.fetch<Case>(
+}): Promise<CaseUICustomField> => {
+  const response = await KibanaServices.get().http.fetch<CaseCustomField>(
     getCustomFieldUpdateUrl(caseId, customFieldId),
     {
-      method: 'PATCH',
+      method: 'PUT',
       body: JSON.stringify(request),
       signal,
     }
   );
 
-  return convertCaseToCamelCase(decodeCaseResponse(response));
+  return convertToCamelCase<CaseCustomField, CaseUICustomField>(response);
 };
 
 export const postComment = async (

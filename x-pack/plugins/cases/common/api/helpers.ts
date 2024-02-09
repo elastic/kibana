@@ -21,7 +21,7 @@ import {
   INTERNAL_CASE_USERS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   CASE_FIND_ATTACHMENTS_URL,
-  INTERNAL_PATCH_CUSTOM_FIELDS_URL,
+  INTERNAL_PUT_CUSTOM_FIELDS_URL,
 } from '../constants';
 
 export const getCaseDetailsUrl = (id: string): string => {
@@ -85,7 +85,7 @@ export const getCasesDeleteFileAttachmentsUrl = (id: string): string => {
 };
 
 export const getCustomFieldUpdateUrl = (caseId: string, customFieldId: string): string => {
-  return INTERNAL_PATCH_CUSTOM_FIELDS_URL.replace('{case_id}', caseId).replace(
+  return INTERNAL_PUT_CUSTOM_FIELDS_URL.replace('{case_id}', caseId).replace(
     '{custom_field_id}',
     customFieldId
   );
