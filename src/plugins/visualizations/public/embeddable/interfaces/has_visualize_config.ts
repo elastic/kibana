@@ -6,13 +6,18 @@
  * Side Public License, v 1.
  */
 
+import { type HasType, apiIsOfType } from '@kbn/presentation-publishing';
 import { VisParams } from '../../types';
 import Vis from '../../vis';
 
-export interface HasVisualizeConfig {
+export type HasVisualizeConfig = HasType<'visualization'> & {
   getVis: () => Vis<VisParams>;
-}
+};
 
 export const apiHasVisualizeConfig = (api: unknown): api is HasVisualizeConfig => {
-  return Boolean(api && typeof (api as HasVisualizeConfig).getVis === 'function');
+  return Boolean(
+    api &&
+      apiIsOfType(api, 'visualization') &&
+      typeof (api as HasVisualizeConfig).getVis === 'function'
+  );
 };

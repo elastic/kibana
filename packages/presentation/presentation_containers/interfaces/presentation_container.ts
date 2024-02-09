@@ -7,21 +7,37 @@
  */
 
 import { apiHasParentApi, PublishesViewMode } from '@kbn/presentation-publishing';
+import { PublishesLastSavedState } from './last_saved_state';
 
 export interface PanelPackage {
   panelType: string;
-  initialState: unknown;
+  initialState?: object;
 }
-export interface PresentationContainer extends Partial<PublishesViewMode> {
-  removePanel: (panelId: string) => void;
-  canRemovePanels?: () => boolean;
-  replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
-}
+
+export type PresentationContainer = Partial<PublishesViewMode> &
+  PublishesLastSavedState & {
+    addNewPanel: <ApiType extends unknown = unknown>(
+      panel: PanelPackage,
+      displaySuccessMessage?: boolean
+    ) => Promise<ApiType | undefined>;
+    registerPanelApi: <ApiType extends unknown = unknown>(
+      panelId: string,
+      panelApi: ApiType
+    ) => void;
+    removePanel: (panelId: string) => void;
+    canRemovePanels?: () => boolean;
+    replacePanel: (idToRemove: string, newPanel: PanelPackage) => Promise<string>;
+  };
 
 export const apiIsPresentationContainer = (
   unknownApi: unknown | null
 ): unknownApi is PresentationContainer => {
-  return Boolean((unknownApi as PresentationContainer)?.removePanel !== undefined);
+  return Boolean(
+    (unknownApi as PresentationContainer)?.removePanel !== undefined &&
+      (unknownApi as PresentationContainer)?.registerPanelApi !== undefined &&
+      (unknownApi as PresentationContainer)?.replacePanel !== undefined &&
+      (unknownApi as PresentationContainer)?.addNewPanel !== undefined
+  );
 };
 
 export const getContainerParentFromAPI = (

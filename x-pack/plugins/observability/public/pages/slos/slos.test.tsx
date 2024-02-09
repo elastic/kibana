@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { act, fireEvent, screen, waitFor } from '@testing-library/react';
-import React from 'react';
-import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
+import { encode } from '@kbn/rison';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
+import React from 'react';
+import Router from 'react-router-dom';
 import { paths } from '../../../common/locators/paths';
 import { historicalSummaryData } from '../../data/slo/historical_summary_data';
 import { emptySloList, sloList } from '../../data/slo/slo';
@@ -20,10 +21,10 @@ import { useDeleteSlo } from '../../hooks/slo/use_delete_slo';
 import { useFetchHistoricalSummary } from '../../hooks/slo/use_fetch_historical_summary';
 import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
 import { useLicense } from '../../hooks/use_license';
+import { TagsList } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { render } from '../../utils/test_helper';
 import { SlosPage } from './slos';
-import { encode } from '@kbn/rison';
 
 jest.mock('react-router-dom', () => ({
   ...jest.requireActual('react-router-dom'),
@@ -46,6 +47,8 @@ const useCreateSloMock = useCreateSlo as jest.Mock;
 const useDeleteSloMock = useDeleteSlo as jest.Mock;
 const useFetchHistoricalSummaryMock = useFetchHistoricalSummary as jest.Mock;
 const useCapabilitiesMock = useCapabilities as jest.Mock;
+const TagsListMock = TagsList as jest.Mock;
+TagsListMock.mockReturnValue(<div>Tags list</div>);
 
 const mockCreateSlo = jest.fn();
 const mockDeleteSlo = jest.fn();
@@ -127,6 +130,9 @@ describe('SLOs Page', () => {
     jest.clearAllMocks();
     mockKibana();
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    jest
+      .spyOn(Router, 'useLocation')
+      .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
   });
 
   describe('when the incorrect license is found', () => {
@@ -218,10 +224,10 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
 
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        (await screen.findAllByLabelText('All actions')).at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -247,8 +253,8 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
@@ -273,8 +279,8 @@ describe('SLOs Page', () => {
         await act(async () => {
           render(<SlosPage />);
         });
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();
@@ -300,9 +306,9 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
-        screen.getAllByLabelText('All actions').at(0)?.click();
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
+        (await screen.findAllByLabelText('All actions')).at(0)?.click();
 
         await waitForEuiPopoverOpen();
 
@@ -332,8 +338,8 @@ describe('SLOs Page', () => {
           render(<SlosPage />);
         });
 
-        expect(await screen.findByTestId('sloListViewButton')).toBeTruthy();
-        fireEvent.click(screen.getByTestId('sloListViewButton'));
+        expect(await screen.findByTestId('compactView')).toBeTruthy();
+        fireEvent.click(screen.getByTestId('compactView'));
         screen.getAllByLabelText('All actions').at(0)?.click();
 
         await waitForEuiPopoverOpen();

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { TestProviders } from '@kbn/timelines-plugin/public/mock';
 import { renderHook } from '@testing-library/react-hooks';
 import { mockObservedUser } from '../mocks';
+import { TestProviders } from '../../../../common/mock';
 import { useObservedUserItems } from './use_observed_user_items';
 
 describe('useManagedUserItems', () => {

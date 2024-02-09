@@ -49,6 +49,7 @@ export function useFetchHistoricalSummary({
         // ignore error
       }
     },
+    enabled: Boolean(list.length > 0),
     refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
     refetchOnWindowFocus: false,
     keepPreviousData: true,

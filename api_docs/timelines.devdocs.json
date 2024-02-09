@@ -927,7 +927,7 @@
               "EuiButtonIconPropsForAnchor",
               ", ",
               "EuiButtonIconPropsForButton",
-              "> & { type?: \"button\" | \"reset\" | \"submit\" | undefined; } & ",
+              "> & { type?: \"reset\" | \"button\" | \"submit\" | undefined; } & ",
               "EuiButtonIconProps",
               " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
               "DisambiguateSet",

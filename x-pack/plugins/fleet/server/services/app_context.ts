@@ -42,6 +42,8 @@ import type {
   PostPackagePolicyPostDeleteCallback,
   PostPackagePolicyPostCreateCallback,
   PutPackagePolicyUpdateCallback,
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
 } from '../types';
 import type { FleetAppContext } from '../plugin';
 import type { TelemetryEventsSender } from '../telemetry/sender';
@@ -245,7 +247,11 @@ class AppContextService {
     type: T
   ):
     | Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback
@@ -258,7 +264,11 @@ class AppContextService {
     | undefined {
     if (this.externalCallbacks) {
       return this.externalCallbacks.get(type) as Set<
-        T extends 'packagePolicyCreate'
+        T extends 'agentPolicyCreate'
+          ? PostAgentPolicyCreateCallback
+          : T extends 'agentPolicyUpdate'
+          ? PostAgentPolicyUpdateCallback
+          : T extends 'packagePolicyCreate'
           ? PostPackagePolicyCreateCallback
           : T extends 'packagePolicyDelete'
           ? PostPackagePolicyDeleteCallback

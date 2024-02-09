@@ -38,6 +38,7 @@ import {
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
   enableInfrastructureProfilingIntegration,
+  enableInfrastructureHostsCustomDashboards,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -251,6 +252,24 @@ export const uiSettings: Record<string, UiSettings> = {
     ),
     schema: schema.boolean(),
   },
+  [enableInfrastructureHostsCustomDashboards]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.enableInfrastructureHostsCustomDashboards', {
+      defaultMessage: 'Custom dashboards for Host Details in Infrastructure',
+    }),
+    value: false,
+    description: i18n.translate(
+      'xpack.observability.enableInfrastructureHostsCustomDashboardsDescription',
+      {
+        defaultMessage:
+          '{betaLabel} Enable option to link custom dashboards in the Host Details view.',
+        values: {
+          betaLabel: `<em>[${betaLabel}]</em>`,
+        },
+      }
+    ),
+    schema: schema.boolean(),
+  },
   [enableAwsLambdaMetrics]: {
     category: [observabilityFeatureId],
     name: i18n.translate('xpack.observability.enableAwsLambdaMetrics', {
@@ -298,8 +317,8 @@ export const uiSettings: Record<string, UiSettings> = {
       },
     }),
     schema: schema.boolean(),
-    value: false,
-    requiresPageReload: false,
+    value: true,
+    requiresPageReload: true,
     type: 'boolean',
   },
   [apmAWSLambdaPriceFactor]: {

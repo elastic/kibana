@@ -21,6 +21,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { DEFAULT_APP_CATEGORIES, AppNavLinkStatus } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { getLazyEndpointAgentTamperProtectionExtension } from './management/pages/policy/view/ingest_manager_integration/lazy_endpoint_agent_tamper_protection_extension';
 import type { FleetUiExtensionGetterOptions } from './management/pages/policy/view/ingest_manager_integration/types';
 import type {
   PluginSetup,
@@ -58,6 +59,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import { parseConfigSettings, type ConfigSettings } from '../common/config_settings';
+import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   /**
@@ -107,6 +109,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     this.telemetry = new TelemetryService();
     this.storage = new Storage(window.localStorage);
   }
+
   private appUpdater$ = new Subject<AppUpdater>();
 
   private storage = new Storage(localStorage);
@@ -271,6 +274,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       },
     });
 
+    plugins.cases?.attachmentFramework.registerExternalReference(
+      getExternalReferenceAttachmentEndpointRegular()
+    );
+
     return this.contract.getSetupContract();
   }
 
@@ -336,6 +343,12 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         package: 'endpoint',
         view: 'package-detail-assets',
         Component: LazyEndpointCustomAssetsExtension,
+      });
+
+      registerExtension({
+        package: 'endpoint',
+        view: 'endpoint-agent-tamper-protection',
+        Component: getLazyEndpointAgentTamperProtectionExtension(registerOptions),
       });
     }
 
@@ -479,6 +492,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       ),
     };
   }
+
   /**
    * Lazily instantiate a `SecurityAppStore`. We lazily instantiate this because it requests large dynamic imports. We instantiate it once because each subPlugin needs to share the same reference.
    */

@@ -42,6 +42,7 @@ import { ConnectorStats } from './connector_stats';
 import { ConnectorsLogic } from './connectors_logic';
 import { ConnectorsTable } from './connectors_table';
 import { CrawlerEmptyState } from './crawler_empty_state';
+import { DeleteConnectorModal } from './delete_connector_modal';
 
 export const baseBreadcrumbs = [
   i18n.translate('xpack.enterpriseSearch.content.connectors.breadcrumb', {
@@ -53,7 +54,8 @@ export interface ConnectorsProps {
   isCrawler: boolean;
 }
 export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
-  const { fetchConnectors, onPaginate, setIsFirstRequest } = useActions(ConnectorsLogic);
+  const { fetchConnectors, onPaginate, setIsFirstRequest, openDeleteModal } =
+    useActions(ConnectorsLogic);
   const { data, isLoading, searchParams, isEmpty, connectors } = useValues(ConnectorsLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const [searchQuery, setSearchValue] = useState('');
@@ -69,151 +71,158 @@ export const Connectors: React.FC<ConnectorsProps> = ({ isCrawler }) => {
   return !isLoading && isEmpty && !isCrawler ? (
     <SelectConnector />
   ) : (
-    <EnterpriseSearchContentPageTemplate
-      pageChrome={baseBreadcrumbs}
-      pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
-      isLoading={isLoading}
-      pageHeader={{
-        pageTitle: !isCrawler
-          ? i18n.translate('xpack.enterpriseSearch.connectors.title', {
-              defaultMessage: 'Elasticsearch connectors',
-            })
-          : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
-              defaultMessage: 'Elasticsearch web crawlers',
-            }),
-        rightSideGroupProps: {
-          gutterSize: 's',
-        },
-        rightSideItems: isLoading
-          ? []
-          : !isCrawler
-          ? [
-              <EuiButton
-                key="newConnector"
-                color="primary"
-                iconType="plusInCircle"
-                fill
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
-                }}
-              >
-                <FormattedMessage
-                  id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
-                  defaultMessage="New Connector"
-                />
-              </EuiButton>,
-              <EuiButton
-                key="newConnectorNative"
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH);
-                }}
-              >
-                {i18n.translate('xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel', {
-                  defaultMessage: 'New Native Connector',
-                })}
-              </EuiButton>,
-              <EuiButton
-                key="newConnectorClient"
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH);
-                }}
-              >
-                {i18n.translate(
-                  'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
-                  { defaultMessage: 'New Connector Client' }
-                )}
-              </EuiButton>,
-            ]
-          : [
-              <EuiButton
-                disabled={Boolean(errorConnectingMessage)}
-                key="newCrawler"
-                color="primary"
-                iconType="plusInCircle"
-                fill
-                onClick={() => {
-                  KibanaLogic.values.navigateToUrl(
-                    generateEncodedPath(NEW_INDEX_METHOD_PATH, {
-                      type: INGESTION_METHOD_IDS.CRAWLER,
-                    })
-                  );
-                }}
-              >
-                {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {
-                  defaultMessage: 'New web crawler',
-                })}
-              </EuiButton>,
-            ],
-      }}
-    >
-      {Boolean(errorConnectingMessage) && (
-        <>
-          <CannotConnect />
-          <EuiSpacer />
-        </>
-      )}
-      <ConnectorStats isCrawler={isCrawler} />
-      <EuiSpacer />
-
-      <EuiFlexGroup direction="column">
-        {isEmpty && isCrawler ? (
-          <CrawlerEmptyState />
-        ) : (
-          <>
-            <EuiFlexItem>
-              <EuiTitle>
-                <h2>
-                  {!isCrawler ? (
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
-                      defaultMessage="Available connectors"
-                    />
-                  ) : (
-                    <FormattedMessage
-                      id="xpack.enterpriseSearch.connectorsTable.h2.availableCrawlersLabel"
-                      defaultMessage="Available web crawlers"
-                    />
+    <>
+      <DeleteConnectorModal />
+      <EnterpriseSearchContentPageTemplate
+        pageChrome={baseBreadcrumbs}
+        pageViewTelemetry={!isCrawler ? 'Connectors' : 'Web Crawlers'}
+        isLoading={isLoading}
+        pageHeader={{
+          pageTitle: !isCrawler
+            ? i18n.translate('xpack.enterpriseSearch.connectors.title', {
+                defaultMessage: 'Elasticsearch connectors',
+              })
+            : i18n.translate('xpack.enterpriseSearch.crawlers.title', {
+                defaultMessage: 'Elasticsearch web crawlers',
+              }),
+          rightSideGroupProps: {
+            gutterSize: 's',
+          },
+          rightSideItems: isLoading
+            ? []
+            : !isCrawler
+            ? [
+                <EuiButton
+                  key="newConnector"
+                  color="primary"
+                  iconType="plusInCircle"
+                  fill
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_PATH);
+                  }}
+                >
+                  <FormattedMessage
+                    id="xpack.enterpriseSearch.connectors.newConnectorButtonLabel"
+                    defaultMessage="New Connector"
+                  />
+                </EuiButton>,
+                <EuiButton
+                  key="newConnectorNative"
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
+                    {
+                      defaultMessage: 'New Native Connector',
+                    }
                   )}
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <EuiSearchBar
-                query={searchQuery}
-                box={{
-                  incremental: true,
-                  placeholder: !isCrawler
-                    ? i18n.translate(
-                        'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
-                        { defaultMessage: 'Filter connectors' }
-                      )
-                    : i18n.translate(
-                        'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
-                        { defaultMessage: 'Filter web crawlers' }
-                      ),
-                }}
-                aria-label={
-                  !isCrawler
-                    ? i18n.translate(
-                        'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
-                        { defaultMessage: 'Filter connectors' }
-                      )
-                    : i18n.translate(
-                        'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',
-                        { defaultMessage: 'Filter web crawlers' }
-                      )
-                }
-                onChange={(event) => setSearchValue(event.queryText)}
-              />
-            </EuiFlexItem>
-            <ConnectorsTable
-              items={connectors || []}
-              meta={data?.meta}
-              onChange={handlePageChange(onPaginate)}
-            />
+                </EuiButton>,
+                <EuiButton
+                  key="newConnectorClient"
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH);
+                  }}
+                >
+                  {i18n.translate(
+                    'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
+                    { defaultMessage: 'New Connector Client' }
+                  )}
+                </EuiButton>,
+              ]
+            : [
+                <EuiButton
+                  disabled={Boolean(errorConnectingMessage)}
+                  key="newCrawler"
+                  color="primary"
+                  iconType="plusInCircle"
+                  fill
+                  onClick={() => {
+                    KibanaLogic.values.navigateToUrl(
+                      generateEncodedPath(NEW_INDEX_METHOD_PATH, {
+                        type: INGESTION_METHOD_IDS.CRAWLER,
+                      })
+                    );
+                  }}
+                >
+                  {i18n.translate('xpack.enterpriseSearch.connectors.newCrawlerButtonLabel', {
+                    defaultMessage: 'New web crawler',
+                  })}
+                </EuiButton>,
+              ],
+        }}
+      >
+        {Boolean(errorConnectingMessage) && (
+          <>
+            <CannotConnect />
+            <EuiSpacer />
           </>
         )}
-      </EuiFlexGroup>
-    </EnterpriseSearchContentPageTemplate>
+        <ConnectorStats isCrawler={isCrawler} />
+        <EuiSpacer />
+
+        <EuiFlexGroup direction="column">
+          {isEmpty && isCrawler ? (
+            <CrawlerEmptyState />
+          ) : (
+            <>
+              <EuiFlexItem>
+                <EuiTitle>
+                  <h2>
+                    {!isCrawler ? (
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.connectorsTable.h2.availableConnectorsLabel"
+                        defaultMessage="Available connectors"
+                      />
+                    ) : (
+                      <FormattedMessage
+                        id="xpack.enterpriseSearch.connectorsTable.h2.availableCrawlersLabel"
+                        defaultMessage="Available web crawlers"
+                      />
+                    )}
+                  </h2>
+                </EuiTitle>
+              </EuiFlexItem>
+              <EuiFlexItem>
+                <EuiSearchBar
+                  query={searchQuery}
+                  box={{
+                    incremental: true,
+                    placeholder: !isCrawler
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsPlaceholder',
+                          { defaultMessage: 'Filter connectors' }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersPlaceholder',
+                          { defaultMessage: 'Filter web crawlers' }
+                        ),
+                  }}
+                  aria-label={
+                    !isCrawler
+                      ? i18n.translate(
+                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterConnectorsLabel',
+                          { defaultMessage: 'Filter connectors' }
+                        )
+                      : i18n.translate(
+                          'xpack.enterpriseSearch.connectorsTable.euiSearchBar.filterCrawlersLabel',
+                          { defaultMessage: 'Filter web crawlers' }
+                        )
+                  }
+                  onChange={(event) => setSearchValue(event.queryText)}
+                />
+              </EuiFlexItem>
+              <ConnectorsTable
+                items={connectors || []}
+                meta={data?.meta}
+                onChange={handlePageChange(onPaginate)}
+                onDelete={openDeleteModal}
+              />
+            </>
+          )}
+        </EuiFlexGroup>
+      </EnterpriseSearchContentPageTemplate>
+    </>
   );
 };
