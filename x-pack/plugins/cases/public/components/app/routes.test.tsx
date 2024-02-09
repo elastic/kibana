@@ -86,9 +86,9 @@ for (let i = 0; i <= 200; i = i + 1) {
         expect(await screen.findByText('Create case')).toBeInTheDocument();
       });
 
-      it('shows the no privileges page if the user does not have create privileges', () => {
+      it('shows the no privileges page if the user does not have create privileges', async () => {
         renderWithRouter(['/cases/create'], noCreateCasesPermissions());
-        expect(screen.getByText('Privileges required')).toBeInTheDocument();
+        expect(await screen.findByText('Privileges required')).toBeInTheDocument();
       });
     });
 
