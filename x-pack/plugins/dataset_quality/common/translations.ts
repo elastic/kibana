@@ -105,7 +105,7 @@ export const summaryPanelQualityText = i18n.translate(
 export const summaryPanelQualityTooltipText = i18n.translate(
   'xpack.datasetQuality.summaryPanelQualityTooltipText',
   {
-    defaultMessage: 'Quality is based on the percentage of malformed docs in a dataset.',
+    defaultMessage: 'Quality is based on the percentage of degraded docs in a dataset.',
   }
 );
 

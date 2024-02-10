@@ -18,7 +18,7 @@ class IndexStatsService {
     size_in_bytes: number;
   }> {
     try {
-      const index = `${type}-*`;
+      const index = `${type}-*-*`;
 
       const indexStats = await esClient.indices.stats({ index });
       return {

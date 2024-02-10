@@ -63,8 +63,6 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
   );
 
   return {
-    summaryPanelStateService,
-
     datasetsQuality,
     isDatasetsQualityLoading,
 
@@ -76,4 +74,9 @@ const useSummaryPanel = ({ dataStreamStatsClient, toasts }: SummaryPanelContextD
   };
 };
 
-export const [SummaryPanelProvider, useSummaryPanelContext] = createContainer(useSummaryPanel);
+const [SummaryPanelProvider, useSummaryPanelContext] = createContainer(useSummaryPanel);
+
+export { useSummaryPanelContext };
+
+// eslint-disable-next-line import/no-default-export
+export default SummaryPanelProvider;
