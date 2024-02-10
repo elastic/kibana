@@ -28,7 +28,7 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
-import { QualityIndications } from '../../common';
+import { InfoIndicators } from '../../common';
 
 export function DatasetsQualityIndicators() {
   const { datasetsQuality, isDatasetsQualityLoading } = useSummaryPanelContext();
@@ -79,7 +79,7 @@ const QualityIndicator = ({
   isLoading,
 }: {
   value: number;
-  quality: QualityIndications;
+  quality: InfoIndicators;
   description: string;
   isLoading: boolean;
 }) => {

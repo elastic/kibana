@@ -10,10 +10,9 @@ import {
   POOR_QUALITY_MINIMUM_PERCENTAGE,
   DEGRADED_QUALITY_MINIMUM_PERCENTAGE,
 } from '../../../common/constants';
+import { QualityIndicators } from '../common';
 
-type Quality = 'poor' | 'degraded' | 'good';
-
-export const mapPercentageToQuality = (percentage: number): Quality => {
+export const mapPercentageToQuality = (percentage: number): QualityIndicators => {
   return percentage > POOR_QUALITY_MINIMUM_PERCENTAGE
     ? 'poor'
     : percentage > DEGRADED_QUALITY_MINIMUM_PERCENTAGE
@@ -21,6 +20,7 @@ export const mapPercentageToQuality = (percentage: number): Quality => {
     : 'good';
 };
 
-export const mapPercentagesToQualityCounts = (percentages: number[]): Record<Quality, number> => {
-  return countBy(percentages.map(mapPercentageToQuality)) as Record<Quality, number>;
-};
+export const mapPercentagesToQualityCounts = (
+  percentages: number[]
+): Record<QualityIndicators, number> =>
+  countBy(percentages.map(mapPercentageToQuality)) as Record<QualityIndicators, number>;

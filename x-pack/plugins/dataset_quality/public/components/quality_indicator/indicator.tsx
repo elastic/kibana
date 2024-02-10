@@ -7,16 +7,16 @@
 
 import { EuiHealth } from '@elastic/eui';
 import React, { ReactNode } from 'react';
-import { QualityIndications } from '../common';
+import { InfoIndicators, QualityIndicators } from '../common';
 
 export function QualityIndicator({
   quality,
   description,
 }: {
-  quality: QualityIndications;
+  quality: QualityIndicators;
   description: string | ReactNode;
 }) {
-  const qualityColors: Record<string, QualityIndications> = {
+  const qualityColors: Record<QualityIndicators, InfoIndicators> = {
     poor: 'danger',
     degraded: 'warning',
     good: 'success',
