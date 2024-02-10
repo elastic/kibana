@@ -12,10 +12,7 @@ import {
   deleteAllRules,
   waitForRuleSuccess,
   deleteAllAlerts,
-  getCustomQueryRuleParams,
-  createWebHookRuleAction,
-  fetchRule,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

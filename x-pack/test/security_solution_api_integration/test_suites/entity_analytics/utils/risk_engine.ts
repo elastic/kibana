@@ -27,6 +27,7 @@ import {
   RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import { routeWithNamespace } from '../../detections_response/utils';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -34,8 +35,7 @@ import {
   getRuleForAlertTesting,
   countDownTest,
   waitFor,
-  routeWithNamespace,
-} from '../../detections_response/utils';
+} from '../../../../common/utils/security_solution';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
   const {

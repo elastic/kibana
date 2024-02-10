@@ -7,4 +7,4 @@
  */
 
 require('../src/setup_node_env');
-require('@kbn/ts-type-check-cli');
+require('@kbn/ts-type-check-cli/run_type_check_cli');
