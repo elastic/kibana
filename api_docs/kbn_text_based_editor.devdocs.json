@@ -43,7 +43,7 @@
             "section": "def-common.TimeRange",
             "text": "TimeRange"
           },
-          " | undefined, dataView: ",
+          " | undefined, abortController: AbortController | undefined, dataView: ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -140,6 +140,21 @@
           {
             "parentPluginId": "@kbn/text-based-editor",
             "id": "def-public.fetchFieldsFromESQL.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "abortController",
+            "description": [],
+            "signature": [
+              "AbortController | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/fetch_fields_from_esql.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.fetchFieldsFromESQL.$5",
             "type": "Object",
             "tags": [],
             "label": "dataView",
@@ -298,7 +313,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined) => void"
+              " | undefined, abortController?: AbortController | undefined) => Promise<void>"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
@@ -320,6 +335,21 @@
                     "text": "AggregateQuery"
                   },
                   " | undefined"
+                ],
+                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/text-based-editor",
+                "id": "def-public.TextBasedLanguagesEditorProps.onTextLangQuerySubmit.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abortController",
+                "description": [],
+                "signature": [
+                  "AbortController | undefined"
                 ],
                 "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
                 "deprecated": false,
@@ -542,6 +572,22 @@
             "label": "disableSubmitAction",
             "description": [
               "Disables the submit query action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/text-based-editor",
+            "id": "def-public.TextBasedLanguagesEditorProps.allowQueryCancellation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowQueryCancellation",
+            "description": [
+              "when set to true enables query cancellation"
             ],
             "signature": [
               "boolean | undefined"

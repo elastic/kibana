@@ -111,7 +111,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
   const { core } = useApmPluginContext();
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
     apmEnableTableSearchBar,
-    false
+    true
   );
 
   const {
