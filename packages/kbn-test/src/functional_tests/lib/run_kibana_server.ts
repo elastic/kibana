@@ -80,28 +80,32 @@ export async function runKibanaServer(options: {
     kbnFlags = remapPluginPaths(kbnFlags, installDir);
   }
 
-  if (dockerImage) {
-    const dockerServer = new DockerServersService(
-      {
-        'kibana-fips': {
-          enabled: true,
-          port: 5601,
-          portInContainer: 5601,
-          image: dockerImage,
-          waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
-        },
-      },
-      log,
-      new Lifecycle(log)
-    );
-
-    log.warning(dockerImage);
-  }
-
   const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
   const promises = dockerImage
-    ? []
+    ? [
+        new Promise(async (r, reject) => {
+          try {
+            const d = new DockerServersService(
+              {
+                'kibana-fips': {
+                  enabled: true,
+                  port: 5601,
+                  portInContainer: 5601,
+                  image: dockerImage,
+                  waitForLogLine: 'Kibana has not been configured.',
+                  waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+                },
+              },
+              log,
+              new Lifecycle(log)
+            );
+            await d.startServers();
+            r(d);
+          } catch (error) {
+            reject(error);
+          }
+        }),
+      ]
     : [
         // main process
         procs.run(mainName, {

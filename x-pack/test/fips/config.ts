@@ -15,9 +15,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
     testFiles: [require.resolve('./tests')],
 
-    kbnTestServer: {
-      dockerImage:
-        'docker.elastic.co/kibana-ci/kibana-ubi-fips:8.13.0-SNAPSHOT-2566dab061e9d5c10e6c926e5d192c477fed41e1',
-    },
+    // kbnTestServer: {
+    //   dockerImage:
+    //     'docker.elastic.co/kibana-ci/kibana-ubi-fips:8.13.0-SNAPSHOT-2566dab061e9d5c10e6c926e5d192c477fed41e1',
+    // },
   };
 }
