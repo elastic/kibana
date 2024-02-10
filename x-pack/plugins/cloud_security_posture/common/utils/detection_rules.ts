@@ -13,10 +13,14 @@ const CSP_RULE_TAG_DATA_SOURCE_PREFIX = 'Data Source: ';
 
 const STATIC_RULE_TAGS = [CSP_RULE_TAG, CSP_RULE_TAG_USE_CASE];
 
-// By default uses AND operator, we use OR operator when we are handling tags from multiple rules instead of just 1 rule
-export const convertRuleTagsToKQL = (tags: string[], operator = 'AND'): string => {
+export const convertRuleTagsToMatchAllKQL = (tags: string[]): string => {
   const TAGS_FIELD = 'alert.attributes.tags';
-  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(` ${operator} `)})`;
+  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(` AND `)})`;
+};
+
+export const convertRuleTagsToMatchAnyKQL = (tags: string[]): string => {
+  const TAGS_FIELD = 'alert.attributes.tags';
+  return `${TAGS_FIELD}:(${tags.map((tag) => `"${tag}"`).join(` OR `)})`;
 };
 
 /*

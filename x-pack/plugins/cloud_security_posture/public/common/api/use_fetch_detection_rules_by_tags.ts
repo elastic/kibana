@@ -11,7 +11,10 @@ import { useQuery } from '@tanstack/react-query';
 import { DETECTION_RULE_RULES_API_CURRENT_VERSION } from '../../../common/constants';
 import { RuleResponse } from '../types';
 import { DETECTION_ENGINE_RULES_KEY } from '../constants';
-import { convertRuleTagsToKQL } from '../../../common/utils/detection_rules';
+import {
+  convertRuleTagsToMatchAllKQL,
+  convertRuleTagsToMatchAnyKQL,
+} from '../../../common/utils/detection_rules';
 
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
@@ -46,11 +49,13 @@ export const fetchDetectionRulesByTags = (
   option: { match: 'all' | 'any' } = { match: 'all' },
   http: HttpSetup
 ) => {
-  const operator = option.match === 'all' ? 'AND' : 'OR';
   const query = {
     page: 1,
     per_page: 1,
-    filter: convertRuleTagsToKQL(tags, operator),
+    filter:
+      option.match === 'all'
+        ? convertRuleTagsToMatchAllKQL(tags)
+        : convertRuleTagsToMatchAnyKQL(tags),
   };
   return http.fetch<FetchRulesResponse>(DETECTION_ENGINE_RULES_URL_FIND, {
     method: 'GET',
