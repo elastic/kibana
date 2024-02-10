@@ -63,10 +63,11 @@ export const getFindingsDetectionRuleSearchTagsFromArrayOfRules = (
   if (benchmarkIds.length === 0) return [];
   const benchmarkId = benchmarkIds[0];
   const benchmarkRuleNumbers = cspBenchmarkRules.map((rule) => rule.benchmark.rule_number);
+  if (benchmarkRuleNumbers.length === 0) return [];
   const benchmarkTagArray = benchmarkRuleNumbers.map(
     (tag) => benchmarkId.replace('_', ' ').toUpperCase() + ' ' + tag
   );
-
+  // we want the tags to only consist of a format like this CIS AWS 1.1.0
   return benchmarkTagArray;
 };
 
