@@ -146,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.remove();
     });
 
-    // Skipped: DataView tests works when running this file on isolation but fails when running all tests
+    // Skipped: tests involving DataView works when running this file on isolation but fails when running all tests
     // TODO: Discover why it fails when running all tests
     describe.skip('SearchBar', () => {
       it('add / remove filter', async () => {
@@ -198,7 +198,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // Skipped: DataView tests works when running this file on isolation but fails when running all tests
+    // Skipped: tests involving DataView works when running this file on isolation but fails when running all tests
     // TODO: Discover why it fails when running all tests
     describe.skip('DataTable features', () => {
       it('Findings table columns are initialized from DataView', async () => {
