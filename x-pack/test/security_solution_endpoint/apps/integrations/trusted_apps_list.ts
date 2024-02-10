@@ -49,7 +49,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       ).to.equal(
         'AND process.hash.*IS a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'
       );
-      await toasts.closeToast();
+      await toasts.dismiss();
 
       // Title is shown after adding an item
       expect(await testSubjects.getVisibleText('header-page-title')).to.equal(

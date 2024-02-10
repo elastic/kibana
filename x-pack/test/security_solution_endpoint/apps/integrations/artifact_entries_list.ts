@@ -242,7 +242,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               checkResult.value
             );
           }
-          await toasts.closeToast();
+          await toasts.dismiss();
 
           // Title is shown after adding an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -276,7 +276,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             );
           }
 
-          await toasts.closeToast();
+          await toasts.dismiss();
 
           // Title still shown after editing an item
           expect(await testSubjects.getVisibleText('header-page-title')).to.equal(testData.title);
@@ -334,7 +334,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           policyId: firstPolicy.packagePolicy.id,
           suffix: firstSuffix,
         });
-        await toasts.closeToast();
+        await toasts.dismiss();
 
         // Create second trusted app
         await createArtifact(testData, {
@@ -342,11 +342,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           suffix: secondSuffix,
           createButton: 'pageAddButton',
         });
-        await toasts.closeToast();
+        await toasts.dismiss();
 
         // Create third trusted app
         await createArtifact(testData, { suffix: thirdSuffix, createButton: 'pageAddButton' });
-        await toasts.closeToast();
+        await toasts.dismiss();
 
         // Checks if fleet artifact has been updated correctly
         await checkFleetArtifacts(

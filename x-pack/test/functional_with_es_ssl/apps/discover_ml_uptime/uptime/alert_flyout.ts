@@ -87,7 +87,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(ruleName);
         await alerts.clickSaveAlertsConfirmButton();
-        await toasts.closeToast();
+        await toasts.dismiss();
       });
 
       it('posts an alert, verifies its presence, and deletes the alert', async () => {
@@ -172,7 +172,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('can save alert', async () => {
         await alerts.clickSaveRuleButton(alertId);
         await alerts.clickSaveAlertsConfirmButton();
-        await toasts.closeToast();
+        await toasts.dismiss();
       });
 
       it('has created a valid alert with expected parameters', async () => {

@@ -173,7 +173,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastEntry({ field: 'process.executable', operator: 'matches', value: 'ex*' });
 
       await testSubjects.click('addExceptionConfirmButton');
-      await toasts.closeToast();
+      await toasts.dismiss();
 
       await checkArtifact({
         entries: [
@@ -217,7 +217,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await setLastEntry({ field: 'process.executable', operator: 'is', value: 'something' });
 
       await testSubjects.click('addExceptionConfirmButton');
-      await toasts.closeToast();
+      await toasts.dismiss();
 
       await checkArtifact({
         entries: [
