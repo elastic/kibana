@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import styled from '@emotion/styled';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { css } from '@emotion/react';
 
 import {
   EuiFlexGroup,
@@ -28,6 +28,7 @@ import {
   summaryPanelQualityTooltipText,
 } from '../../../../common/translations';
 import { mapPercentagesToQualityCounts } from '../../quality_indicator';
+import { QualityIndications } from '../../common';
 
 export function DatasetsQualityIndicators() {
   const { datasetsQuality, isDatasetsQualityLoading } = useSummaryPanelContext();
@@ -51,14 +52,14 @@ export function DatasetsQualityIndicators() {
             description={summaryPanelQualityPoorText}
             isLoading={isDatasetsQualityLoading}
           />
-          <VerticalRule />
+          <span css={verticalRule} />
           <QualityIndicator
             value={qualityCounts.degraded}
             quality="warning"
             description={summaryPanelQualityDegradedText}
             isLoading={isDatasetsQualityLoading}
           />
-          <VerticalRule />
+          <span css={verticalRule} />
           <QualityIndicator
             value={qualityCounts.good}
             quality="success"
@@ -78,7 +79,7 @@ const QualityIndicator = ({
   isLoading,
 }: {
   value: number;
-  quality: 'success' | 'danger' | 'warning';
+  quality: QualityIndications;
   description: string;
   isLoading: boolean;
 }) => {
@@ -102,7 +103,7 @@ const QualityIndicator = ({
   );
 };
 
-const VerticalRule = styled.span`
+const verticalRule = css`
   width: 1px;
   height: 63px;
   background-color: ${euiThemeVars.euiColorLightShade};

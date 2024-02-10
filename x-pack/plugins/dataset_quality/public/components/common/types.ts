@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './integration_icon';
-export * from './types';
+export type QualityIndications = 'success' | 'danger' | 'warning';
