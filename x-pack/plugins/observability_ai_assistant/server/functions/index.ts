@@ -67,6 +67,9 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
 
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
+
+        The user is able to change the language in which it wants you to reply in the settings page for the Observability AI Assistant, which can be found in the Stack Management app under the option AI Assistants.
+        If the user asks how to change the language, reply in the same language the user asked in.
         `
     );
 
