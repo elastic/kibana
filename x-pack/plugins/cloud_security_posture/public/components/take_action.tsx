@@ -31,6 +31,7 @@ interface TakeActionProps {
   createRuleFn?: (http: HttpSetup) => Promise<RuleResponse>;
   enableBenchmarkRuleFn?: () => Promise<void>;
   disableBenchmarkRuleFn?: () => Promise<void>;
+  isRuleMuted?: boolean;
 }
 
 export const showCreateDetectionRuleSuccessToast = (
@@ -169,6 +170,7 @@ export const TakeAction = ({
   createRuleFn,
   enableBenchmarkRuleFn,
   disableBenchmarkRuleFn,
+  isRuleMuted = true,
 }: TakeActionProps) => {
   const queryClient = useQueryClient();
   const [isPopoverOpen, setPopoverOpen] = useState(false);
@@ -206,6 +208,7 @@ export const TakeAction = ({
         notifications={notifications}
         http={http}
         queryClient={queryClient}
+        isRuleMuted={isRuleMuted}
       />
     );
   if (enableBenchmarkRuleFn)
@@ -255,6 +258,7 @@ const CreateDetectionRule = ({
   notifications,
   http,
   queryClient,
+  isRuleMuted = true,
 }: {
   createRuleFn: (http: HttpSetup) => Promise<RuleResponse>;
   setIsLoading: (isLoading: boolean) => void;
@@ -262,10 +266,12 @@ const CreateDetectionRule = ({
   notifications: NotificationsStart;
   http: HttpSetup;
   queryClient: QueryClient;
+  isRuleMuted: boolean;
 }) => {
   return (
     <EuiContextMenuItem
       key="createRule"
+      disabled={isRuleMuted}
       onClick={async () => {
         closePopover();
         setIsLoading(true);

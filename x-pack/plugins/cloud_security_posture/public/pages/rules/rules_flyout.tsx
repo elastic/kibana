@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NotificationsStart } from '@kbn/core/public';
+import { HttpSetup, NotificationsStart } from '@kbn/core/public';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
@@ -35,6 +35,7 @@ import {
   TakeAction,
 } from '../../components/take_action';
 import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
+import { createDetectionRuleFromBenchmark } from '../configurations/utils/create_detection_rule_from_benchmark';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -94,6 +95,9 @@ export const RuleFlyout = ({
     }
   };
 
+  const createMisconfigurationRuleFn = async (http: HttpSetup) =>
+    await createDetectionRuleFromBenchmark(http, rule.metadata);
+
   return (
     <EuiFlyout
       ownFocus={false}
@@ -134,9 +138,17 @@ export const RuleFlyout = ({
         <EuiFlexGroup gutterSize="none" direction="rowReverse">
           <EuiFlexItem grow={false}>
             {isRuleMuted ? (
-              <TakeAction enableBenchmarkRuleFn={switchRuleStates} />
+              <TakeAction
+                enableBenchmarkRuleFn={switchRuleStates}
+                createRuleFn={createMisconfigurationRuleFn}
+                isRuleMuted={isRuleMuted}
+              />
             ) : (
-              <TakeAction disableBenchmarkRuleFn={switchRuleStates} />
+              <TakeAction
+                disableBenchmarkRuleFn={switchRuleStates}
+                createRuleFn={createMisconfigurationRuleFn}
+                isRuleMuted={isRuleMuted}
+              />
             )}
           </EuiFlexItem>
         </EuiFlexGroup>
