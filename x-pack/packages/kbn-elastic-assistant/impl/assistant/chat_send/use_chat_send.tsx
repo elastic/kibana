@@ -77,11 +77,12 @@ export const useChatSend = ({
           ...currentConversation,
           replacements,
         });
+        return replacements;
       };
 
       const systemPrompt = allSystemPrompts.find((prompt) => prompt.id === editingSystemPromptId);
 
-      const userMessages = getCombinedMessage({
+      const userMessage = getCombinedMessage({
         isNewChat: currentConversation.messages.length === 0,
         currentReplacements: currentConversation.replacements,
         promptText,
@@ -90,16 +91,16 @@ export const useChatSend = ({
         onNewReplacements,
       });
 
-      const updatedMessages = [...currentConversation.messages, ...userMessages];
+      const updatedMessages = [...currentConversation.messages, userMessage].map((m) => ({
+        ...m,
+        content: getMessageContentWithoutReplacements({
+          messageContent: m.content ?? '',
+          replacements,
+        }),
+      }));
       setCurrentConversation({
         ...currentConversation,
-        messages: updatedMessages.map((m) => ({
-          ...m,
-          content: getMessageContentWithoutReplacements({
-            messageContent: m.content ?? '',
-            replacements,
-          }),
-        })),
+        messages: updatedMessages,
       });
 
       // Reset prompt context selection and preview before sending:
@@ -109,7 +110,7 @@ export const useChatSend = ({
       const rawResponse = await sendMessages({
         apiConfig: currentConversation.apiConfig,
         http,
-        messages: userMessages,
+        messages: [userMessage],
         conversationId: currentConversation.id,
         replacements,
       });

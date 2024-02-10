@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getAnonymizedData,
-  getAnonymizedValues,
-  getCsvFromData,
-} from '@kbn/elastic-assistant-common';
+import { transformRawData } from '@kbn/elastic-assistant-common';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';
 import type { Message } from '../../assistant_context/types';
 import type { SelectedPromptContext } from '../prompt_context/types';
@@ -54,40 +50,34 @@ export function getCombinedMessage({
     rawValue: string;
   }) => string;
   isNewChat: boolean;
-  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  onNewReplacements: (
+    newReplacements: Record<string, string>
+  ) => Record<string, string> | undefined;
   promptText: string;
   selectedPromptContexts: Record<string, SelectedPromptContext>;
   selectedSystemPrompt: Prompt | undefined;
-}): Message[] {
-  return Object.keys(selectedPromptContexts)
+}): Message {
+  const promptContextsContent = Object.keys(selectedPromptContexts)
     .sort()
     .map((id) => {
-      let content: string;
-      if (typeof selectedPromptContexts[id].rawData === 'string') {
-        content = `${SYSTEM_PROMPT_CONTEXT_NON_I18N(
-          selectedPromptContexts[id].rawData.toString()
-        )}`;
-      } else {
-        const anonymizedData = getAnonymizedData({
-          allow: selectedPromptContexts[id].allow,
-          allowReplacement: selectedPromptContexts[id].allowReplacement,
-          currentReplacements,
-          rawData: selectedPromptContexts[id].rawData as Record<string, string[]>,
-          getAnonymizedValue,
-          getAnonymizedValues,
-        });
+      const promptContext = transformRawData({
+        allow: selectedPromptContexts[id].allow,
+        allowReplacement: selectedPromptContexts[id].allowReplacement,
+        currentReplacements,
+        getAnonymizedValue,
+        onNewReplacements,
+        rawData: selectedPromptContexts[id].rawData,
+      });
 
-        const promptContext = getCsvFromData(anonymizedData.anonymizedData);
-        content = `${
-          isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
-        }${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}
-      ${promptText}`;
-        onNewReplacements(anonymizedData.replacements);
-      }
-      return {
-        content,
-        role: 'user', // we are combining the system and user messages into one message
-        timestamp: new Date().toLocaleString(),
-      };
+      return `${SYSTEM_PROMPT_CONTEXT_NON_I18N(promptContext)}`;
     });
+
+  return {
+    content: `${
+      isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
+    }${promptContextsContent}
+  ${promptText}`,
+    role: 'user', // we are combining the system and user messages into one message
+    timestamp: new Date().toLocaleString(),
+  };
 }
