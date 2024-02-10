@@ -89,6 +89,8 @@ export function IntegrationContainer() {
     );
   }
 
+  // No data screen
+
   return (
     <div>
       {assets.map((asset) => (
