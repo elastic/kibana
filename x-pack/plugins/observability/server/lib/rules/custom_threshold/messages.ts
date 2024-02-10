@@ -16,6 +16,8 @@ import {
   BETWEEN_TEXT,
   NOT_BETWEEN_TEXT,
   CUSTOM_EQUATION_I18N,
+  ABOVE_OR_EQ_TEXT,
+  BELOW_OR_EQ_TEXT,
 } from './translations';
 import { UNGROUPED_FACTORY_KEY } from './constants';
 
@@ -33,11 +35,13 @@ const recoveredComparatorToI18n = (
     case Comparator.OUTSIDE_RANGE:
       return BETWEEN_TEXT;
     case Comparator.GT:
-    case Comparator.GT_OR_EQ:
-      return BELOW_TEXT;
-    case Comparator.LT:
-    case Comparator.LT_OR_EQ:
       return ABOVE_TEXT;
+    case Comparator.GT_OR_EQ:
+      return ABOVE_OR_EQ_TEXT;
+    case Comparator.LT:
+      return BELOW_TEXT;
+    case Comparator.LT_OR_EQ:
+      return BELOW_OR_EQ_TEXT;
   }
 };
 
@@ -48,11 +52,13 @@ const alertComparatorToI18n = (comparator: Comparator) => {
     case Comparator.OUTSIDE_RANGE:
       return NOT_BETWEEN_TEXT;
     case Comparator.GT:
-    case Comparator.GT_OR_EQ:
       return ABOVE_TEXT;
+    case Comparator.GT_OR_EQ:
+      return ABOVE_OR_EQ_TEXT;
     case Comparator.LT:
-    case Comparator.LT_OR_EQ:
       return BELOW_TEXT;
+    case Comparator.LT_OR_EQ:
+      return BELOW_OR_EQ_TEXT;
   }
 };
 

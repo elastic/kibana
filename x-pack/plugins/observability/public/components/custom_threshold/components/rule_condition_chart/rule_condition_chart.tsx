@@ -4,9 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import React, { useState, useEffect } from 'react';
+import { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { EuiEmptyPrompt, useEuiTheme } from '@elastic/eui';
-import { FillStyle, OperationType, SeriesType } from '@kbn/lens-plugin/public';
+import { Query } from '@kbn/es-query';
+import { FillStyle, SeriesType } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
@@ -19,24 +22,27 @@ import {
   XYReferenceLinesLayer,
   XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
-
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { EventAnnotationConfig } from '@kbn/event-annotation-common';
-import {
-  Aggregators,
-  Comparator,
-  AggType,
-} from '../../../../../common/custom_threshold_rule/types';
+import { EventsAsUnit } from '../../../../../common/constants';
+import { Comparator } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
 import { AggMap, PainlessTinyMathParser } from './painless_tinymath_parser';
+import {
+  lensFieldFormatter,
+  getBufferThreshold,
+  getLensOperationFromRuleMetric,
+  isRate,
+  LensFieldFormat,
+} from './helpers';
 
 interface RuleConditionChartProps {
   metricExpression: MetricExpression;
+  searchConfiguration: SerializedSearchSourceFields;
   dataView?: DataView;
-  filterQuery?: string;
   groupBy?: string | string[];
   error?: IErrorObject;
   timeRange: TimeRange;
@@ -44,19 +50,15 @@ interface RuleConditionChartProps {
   seriesType?: SeriesType;
 }
 
-const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
-  if (aggType === Aggregators.AVERAGE) return 'average';
-  if (aggType === Aggregators.CARDINALITY) return 'unique_count';
-  return aggType;
+const defaultQuery: Query = {
+  language: 'kuery',
+  query: '',
 };
-
-export const getBufferThreshold = (threshold?: number): string =>
-  (Math.ceil((threshold || 0) * 1.1 * 100) / 100).toFixed(2).toString();
 
 export function RuleConditionChart({
   metricExpression,
+  searchConfiguration,
   dataView,
-  filterQuery,
   groupBy,
   error,
   annotations,
@@ -107,13 +109,6 @@ export function RuleConditionChart({
   useEffect(() => {
     if (!threshold) return;
     const refLayers = [];
-    const isPercent = Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct'));
-    const format = {
-      id: isPercent ? 'percent' : 'number',
-      params: {
-        decimals: isPercent ? 0 : 2,
-      },
-    };
 
     if (
       comparator === Comparator.OUTSIDE_RANGE ||
@@ -125,7 +120,6 @@ export function RuleConditionChart({
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'none',
-            format,
           },
         ],
       });
@@ -135,7 +129,6 @@ export function RuleConditionChart({
             value: (threshold[1] || 0).toString(),
             color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'none',
-            format,
           },
         ],
       });
@@ -152,7 +145,6 @@ export function RuleConditionChart({
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
             fill,
-            format,
           },
         ],
       });
@@ -163,7 +155,6 @@ export function RuleConditionChart({
             value: getBufferThreshold(threshold[0]),
             color: 'transparent',
             fill,
-            format,
           },
         ],
       });
@@ -191,17 +182,7 @@ export function RuleConditionChart({
       return;
     }
     const aggMapFromMetrics = metrics.reduce((acc, metric) => {
-      const operation = getOperationTypeFromRuleAggType(metric.aggType);
-      let sourceField = metric.field;
-
-      if (metric.aggType === Aggregators.COUNT) {
-        sourceField = '___records___';
-      }
-      let operationField = `${operation}(${sourceField})`;
-      if (metric?.filter) {
-        const aggFilter = JSON.stringify(metric.filter).replace(/"|\\/g, '');
-        operationField = `${operation}(${sourceField},kql='${aggFilter}')`;
-      }
+      const operationField = getLensOperationFromRuleMetric(metric);
       return {
         ...acc,
         [metric.name]: operationField,
@@ -232,16 +213,17 @@ export function RuleConditionChart({
     if (!formulaAsync.value || !dataView || !formula) {
       return;
     }
-    const isPercent = Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct'));
+    const formatId = lensFieldFormatter(metrics);
     const baseLayer = {
       type: 'formula',
       value: formula,
       label: 'Custom Threshold',
       groupBy,
       format: {
-        id: isPercent ? 'percent' : 'number',
+        id: formatId,
         params: {
-          decimals: isPercent ? 0 : 2,
+          decimals: formatId === LensFieldFormat.PERCENT ? 0 : 2,
+          suffix: isRate(metrics) && formatId === LensFieldFormat.NUMBER ? EventsAsUnit : undefined,
         },
       },
     };
@@ -273,6 +255,8 @@ export function RuleConditionChart({
         value: layer.value,
         label: layer.label,
         format: layer.format,
+        // We always scale the chart with seconds with RATE Agg.
+        timeScale: isRate(metrics) ? 's' : undefined,
       })),
       options: xYDataLayerOptions,
     });
@@ -307,7 +291,7 @@ export function RuleConditionChart({
     comparator,
     dataView,
     equation,
-    filterQuery,
+    searchConfiguration,
     formula,
     formulaAsync.value,
     groupBy,
@@ -361,10 +345,8 @@ export function RuleConditionChart({
         timeRange={timeRange}
         attributes={attributes}
         disableTriggers={true}
-        query={{
-          language: 'kuery',
-          query: filterQuery || '',
-        }}
+        query={(searchConfiguration.query as Query) || defaultQuery}
+        filters={searchConfiguration.filter}
       />
     </div>
   );

@@ -20,7 +20,7 @@ import {
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
-interface SLOListParams {
+export interface SLOListParams {
   kqlQuery?: string;
   page?: number;
   sortBy?: string;
@@ -30,6 +30,7 @@ interface SLOListParams {
   lastRefresh?: number;
   tagsFilter?: SearchState['tagsFilter'];
   statusFilter?: SearchState['statusFilter'];
+  disabled?: boolean;
 }
 
 export interface UseFetchSloListResponse {
@@ -51,6 +52,7 @@ export function useFetchSloList({
   lastRefresh,
   tagsFilter,
   statusFilter,
+  disabled = false,
 }: SLOListParams = {}): UseFetchSloListResponse {
   const {
     http,
@@ -98,13 +100,14 @@ export function useFetchSloList({
           ...(kqlQuery && { kqlQuery }),
           ...(sortBy && { sortBy }),
           ...(sortDirection && { sortDirection }),
-          ...(page && { page }),
-          ...(perPage && { perPage }),
+          ...(page !== undefined && { page }),
+          ...(perPage !== undefined && { perPage }),
           ...(filters && { filters }),
         },
         signal,
       });
     },
+    enabled: !disabled,
     cacheTime: 0,
     refetchOnWindowFocus: false,
     retry: (failureCount, error) => {

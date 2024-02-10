@@ -2120,7 +2120,9 @@
             "type": "Unknown",
             "tags": [],
             "label": "embeddable",
-            "description": [],
+            "description": [
+              "\nTODO: once all actions are entirely decoupled from the embeddable system, this key should be renamed to \"api\"\nto reflect the fact that this context could contain any api."
+            ],
             "signature": [
               "unknown"
             ],

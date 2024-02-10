@@ -331,7 +331,11 @@ export class Plugin
 
     coreSetup.application.register(app);
 
-    registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry, logsExplorerLocator);
+    registerObservabilityRuleTypes(
+      this.observabilityRuleTypeRegistry,
+      coreSetup.uiSettings,
+      logsExplorerLocator
+    );
 
     const assertPlatinumLicense = async () => {
       const licensing = await pluginsSetup.licensing;
