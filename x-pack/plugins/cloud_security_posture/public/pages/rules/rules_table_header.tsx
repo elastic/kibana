@@ -282,7 +282,7 @@ const CurrentPageOfTotal = ({
 
   const { data: rulesData } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
-    'OR'
+    { match: 'any' }
   );
 
   const postRequestChangeRulesState = useChangeCspRuleState();

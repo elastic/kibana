@@ -316,7 +316,7 @@ const getColumns = ({
           const detectionRuleCount = (
             await fetchDetectionRulesByTags(
               getFindingsDetectionRuleSearchTags(rule.metadata),
-              'AND',
+              { match: 'all' },
               http
             )
           ).total;

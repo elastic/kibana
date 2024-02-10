@@ -31,15 +31,22 @@ const DETECTION_ENGINE_URL = '/api/detection_engine' as const;
 const DETECTION_ENGINE_RULES_URL = `${DETECTION_ENGINE_URL}/rules` as const;
 export const DETECTION_ENGINE_RULES_URL_FIND = `${DETECTION_ENGINE_RULES_URL}/_find` as const;
 
-export const useFetchDetectionRulesByTags = (tags: string[], operator = 'AND') => {
+export const useFetchDetectionRulesByTags = (
+  tags: string[],
+  option: { match: 'all' | 'any' } = { match: 'all' }
+) => {
   const { http } = useKibana<CoreStart>().services;
-
   return useQuery([DETECTION_ENGINE_RULES_KEY, tags], () =>
-    fetchDetectionRulesByTags(tags, operator, http)
+    fetchDetectionRulesByTags(tags, option, http)
   );
 };
 
-export const fetchDetectionRulesByTags = (tags: string[], operator = 'AND', http: HttpSetup) => {
+export const fetchDetectionRulesByTags = (
+  tags: string[],
+  option: { match: 'all' | 'any' } = { match: 'all' },
+  http: HttpSetup
+) => {
+  const operator = option.match === 'all' ? 'AND' : 'OR';
   const query = {
     page: 1,
     per_page: 1,
