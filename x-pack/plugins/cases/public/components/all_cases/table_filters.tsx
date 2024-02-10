@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiButton } from '@elastic/eui';
+import React, { useCallback } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import { mergeWith, isEqual } from 'lodash';
 import { MoreFiltersSelectable } from './table_filter_config/more_filters_selectable';
 import type { CaseStatuses } from '../../../common/types/domain';
@@ -18,6 +18,8 @@ import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { TableSearch } from './search';
 
 export interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -52,10 +54,13 @@ const CasesTableFiltersComponent = ({
   currentUserProfile,
   filterOptions,
 }: CasesTableFiltersProps) => {
-  const [search, setSearch] = useState(filterOptions.search);
-  const { data: tags = [] } = useGetTags();
-  const { data: categories = [] } = useGetCategories();
+  const { data: tags = [], isLoading: isLoadingTags } = useGetTags();
+  const { data: categories = [], isLoading: isLoadingCategories } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
+  const {
+    data: { customFields },
+    isFetching: isLoadingCasesConfiguration,
+  } = useGetCaseConfiguration();
 
   const onFilterOptionsChange = useCallback(
     (partialFilterOptions: Partial<FilterOptions>) => {
@@ -67,6 +72,9 @@ const CasesTableFiltersComponent = ({
     [filterOptions, onFilterChanged]
   );
 
+  const isLoadingFilters =
+    isLoading || isLoadingTags || isLoadingCategories || isLoadingCasesConfiguration;
+
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
     caseAssignmentAuthorized,
@@ -76,7 +84,7 @@ const CasesTableFiltersComponent = ({
     countOpenCases,
     currentUserProfile,
     hiddenStatuses,
-    isLoading,
+    isLoading: isLoadingFilters,
     isSelectorView,
     onFilterOptionsChange,
     tags,
@@ -87,18 +95,14 @@ const CasesTableFiltersComponent = ({
     selectableOptions,
     activeSelectableOptionKeys,
     onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig, onFilterOptionsChange, isSelectorView, filterOptions });
-
-  const handleOnSearch = useCallback(
-    (newSearch) => {
-      const trimSearch = newSearch.trim();
-      if (!isEqual(trimSearch, search)) {
-        setSearch(trimSearch);
-        onFilterChanged({ search: trimSearch });
-      }
-    },
-    [onFilterChanged, search]
-  );
+  } = useFilterConfig({
+    systemFilterConfig,
+    onFilterOptionsChange,
+    isSelectorView,
+    filterOptions,
+    customFields,
+    isLoading: isLoadingFilters,
+  });
 
   const handleOnCreateCasePressed = useCallback(() => {
     if (onCreateCasePressed) {
@@ -126,13 +130,15 @@ const CasesTableFiltersComponent = ({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem grow={false}>
-        <EuiFieldSearch
-          aria-label={i18n.SEARCH_CASES}
-          data-test-subj="search-cases"
-          fullWidth
-          incremental={false}
-          placeholder={i18n.SEARCH_PLACEHOLDER}
-          onSearch={handleOnSearch}
+        <TableSearch
+          filterOptionsSearch={filterOptions.search}
+          /**
+           * we need this to reset the internal state of the
+           * TableSearch component each time the search in
+           * the all cases state changes
+           */
+          key={filterOptions.search}
+          onFilterOptionsChange={onFilterOptionsChange}
         />
       </EuiFlexItem>
       {activeFilters.map((filter) => (
@@ -147,6 +153,7 @@ const CasesTableFiltersComponent = ({
             options={selectableOptions}
             activeFilters={activeSelectableOptionKeys}
             onChange={onFilterConfigChange}
+            isLoading={isLoadingFilters}
           />
         </EuiFlexItem>
       )}

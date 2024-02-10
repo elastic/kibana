@@ -11,8 +11,6 @@ import {
   createConnector,
   fetchConnectorByIndexName,
   deleteConnectorById,
-  createConnectorSecret,
-  updateConnectorApiKeyId,
 } from '@kbn/search-connectors';
 
 import { ErrorCode } from '../../../common/types/error_codes';
@@ -27,8 +25,6 @@ jest.mock('@kbn/search-connectors', () => ({
   createConnector: jest.fn(),
   deleteConnectorById: jest.fn(),
   fetchConnectorByIndexName: jest.fn(),
-  createConnectorSecret: jest.fn(),
-  updateConnectorApiKeyId: jest.fn(),
 }));
 jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
 jest.mock('../indices/generate_api_key', () => ({ generateApiKey: jest.fn() }));
@@ -76,10 +72,7 @@ describe('addConnector lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-
     (generateApiKey as jest.Mock).mockImplementation(() => undefined);
-    (createConnectorSecret as jest.Mock).mockImplementation(() => undefined);
-    (updateConnectorApiKeyId as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -108,8 +101,6 @@ describe('addConnector lib function', () => {
 
     // non-native connector should not generate API key or update secrets storage
     expect(generateApiKey).toBeCalledTimes(0);
-    expect(createConnectorSecret).toBeCalledTimes(0);
-    expect(updateConnectorApiKeyId).toBeCalledTimes(0);
   });
 
   it('should add a native connector', async () => {
@@ -122,13 +113,10 @@ describe('addConnector lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-
     (generateApiKey as jest.Mock).mockImplementation(() => ({
       id: 'api-key-id',
       encoded: 'encoded-api-key',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => ({ id: 'connector-secret-id' }));
-    (updateConnectorApiKeyId as jest.Mock).mockImplementation(() => ({ acknowledged: true }));
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -156,14 +144,7 @@ describe('addConnector lib function', () => {
     });
 
     // native connector should generate API key and update secrets storage
-    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name');
-    expect(createConnectorSecret).toHaveBeenCalledWith(mockClient.asCurrentUser, 'encoded-api-key');
-    expect(updateConnectorApiKeyId).toHaveBeenCalledWith(
-      mockClient.asCurrentUser,
-      'fakeId',
-      'api-key-id',
-      'connector-secret-id'
-    );
+    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true, null);
   });
 
   it('should reject if index already exists', async () => {
@@ -254,13 +235,10 @@ describe('addConnector lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => ({ id: 'connectorId' }));
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
-
     (generateApiKey as jest.Mock).mockImplementation(() => ({
       id: 'api-key-id',
       encoded: 'encoded-api-key',
     }));
-    (createConnectorSecret as jest.Mock).mockImplementation(() => ({ id: 'connector-secret-id' }));
-    (updateConnectorApiKeyId as jest.Mock).mockImplementation(() => ({ acknowledged: true }));
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
