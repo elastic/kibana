@@ -248,6 +248,7 @@ export const schema = Joi.object()
           .default(),
         env: Joi.object().unknown().default(),
         delayShutdown: Joi.number(),
+        dockerImage: Joi.string().optional(),
       })
       .default(),
 

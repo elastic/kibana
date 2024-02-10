@@ -13,24 +13,31 @@ import { v4 as uuidv4 } from 'uuid';
 import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { REPO_ROOT } from '@kbn/repo-info';
 
+import { ToolingLog } from '@kbn/tooling-log';
 import type { Config } from '../../functional_test_runner';
-import { DedicatedTaskRunner } from '../../functional_test_runner/lib';
+import {
+  DedicatedTaskRunner,
+  DockerServersService,
+  Lifecycle,
+} from '../../functional_test_runner/lib';
 import { parseRawFlags, getArgValue, remapPluginPaths } from './kibana_cli_args';
 
 export async function runKibanaServer(options: {
   procs: ProcRunner;
   config: Config;
+  log: ToolingLog;
   installDir?: string;
   extraKbnOpts?: string[];
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
   inspect?: boolean;
 }) {
-  const { config, procs } = options;
+  const { config, procs, log } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
   const installDir = runOptions.alwaysUseSource ? undefined : options.installDir;
   const devMode = !installDir;
   const useTaskRunner = options.config.get('kbnTestServer.useDedicatedTaskRunner');
+  const dockerImage = options.config.get('kbnTestServer.dockerImage');
 
   const procRunnerOpts = {
     cwd: installDir || REPO_ROOT,
@@ -73,28 +80,49 @@ export async function runKibanaServer(options: {
     kbnFlags = remapPluginPaths(kbnFlags, installDir);
   }
 
+  if (dockerImage) {
+    const dockerServer = new DockerServersService(
+      {
+        'kibana-fips': {
+          enabled: true,
+          port: 5601,
+          portInContainer: 5601,
+          image: dockerImage,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 10000, // 2 minutes
+        },
+      },
+      log,
+      new Lifecycle(log)
+    );
+
+    log.warning(dockerImage);
+  }
+
   const mainName = useTaskRunner ? 'kbn-ui' : 'kibana';
-  const promises = [
-    // main process
-    procs.run(mainName, {
-      ...procRunnerOpts,
-      writeLogsToPath: options.logsDir
-        ? Path.resolve(options.logsDir, `${mainName}.log`)
-        : undefined,
-      args: [
-        ...prefixArgs,
-        ...parseRawFlags([
-          ...kbnFlags,
-          ...(!useTaskRunner
-            ? []
-            : [
-                '--node.roles=["ui"]',
-                `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
-              ]),
-        ]),
-      ],
-    }),
-  ];
+  const promises = dockerImage
+    ? []
+    : [
+        // main process
+        procs.run(mainName, {
+          ...procRunnerOpts,
+          writeLogsToPath: options.logsDir
+            ? Path.resolve(options.logsDir, `${mainName}.log`)
+            : undefined,
+          args: [
+            ...prefixArgs,
+            ...parseRawFlags([
+              ...kbnFlags,
+              ...(!useTaskRunner
+                ? []
+                : [
+                    '--node.roles=["ui"]',
+                    `--path.data=${Path.resolve(Os.tmpdir(), `ftr-ui-${uuidv4()}`)}`,
+                  ]),
+            ]),
+          ],
+        }),
+      ];
 
   if (useTaskRunner) {
     const mainUuid = getArgValue(kbnFlags, 'server.uuid');
