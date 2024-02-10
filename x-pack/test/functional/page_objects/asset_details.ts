@@ -48,7 +48,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
       const container = await testSubjects.find('infraAssetDetailsServicesContainer');
       const serviceLinks = await container.findAllByCssSelector('[data-test-subj="serviceLink"]');
 
-      const servicesWithIconsAndNames: ServiceWithIconAndName[] = await Promise.all(
+      const servicesWithIconsAndNames = await Promise.all(
         serviceLinks.map(async (link, index) => {
           const icon = await link.findByTagName('img');
           const iconSrc = await icon.getAttribute('src');
