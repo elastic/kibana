@@ -7,7 +7,6 @@
 
 import { stringHash } from '@kbn/ml-string-hash';
 import { FtrProviderContext } from '../ftr_provider_context';
-import { ServiceWithIconAndName } from './types';
 
 export function AssetDetailsProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
