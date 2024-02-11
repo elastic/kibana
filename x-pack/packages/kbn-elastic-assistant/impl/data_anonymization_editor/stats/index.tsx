@@ -26,8 +26,8 @@ interface Props {
   inline?: boolean;
 }
 
-const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, selectedPromptContext }) => {
-  const { allowed, anonymized, total, inline } = useMemo(
+const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, selectedPromptContext, inline }) => {
+  const { allowed, anonymized, total } = useMemo(
     () => getStats(selectedPromptContext),
     [selectedPromptContext]
   );

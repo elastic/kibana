@@ -147,10 +147,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       nowProvider: this.nowProvider,
     });
 
-    const title = i18n.translate('xpack.aiAssistantManagementSecurity.app.title', {
-      defaultMessage: 'AI Assistant for Security',
-    });
-
     if (plugins.home) {
       plugins.home.featureCatalogue.registerSolution({
         id: APP_ID,
@@ -162,46 +158,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         icon: 'logoSecurity',
         path: APP_PATH,
         order: 300,
-      });
-
-      plugins.home.featureCatalogue.register({
-        id: 'ai_assistant_security',
-        title,
-        description: i18n.translate('aiAssistantManagementSecurity.app.description', {
-          defaultMessage: 'Manage your AI Assistant for Security.',
-        }),
-        icon: 'sparkles',
-        path: '/app/management/kibana/ai-assistant/security',
-        showOnHomePage: false,
-        category: 'admin',
-      });
-    }
-
-    if (plugins.management) {
-      plugins.management.sections.section.kibana.registerApp({
-        id: 'aiAssistantManagementSecurity',
-        title,
-        hideFromSidebar: true,
-        order: 1,
-        mount: async (params) => {
-          // required to show the alert table inside cases
-          const { alertsTableConfigurationRegistry } = plugins.triggersActionsUi;
-          const { registerAlertsTableConfiguration } =
-            await this.lazyRegisterAlertsTableConfiguration();
-          registerAlertsTableConfiguration(alertsTableConfigurationRegistry, this.storage);
-
-          const [coreStart, startPlugins] = await core.getStartServices();
-          const services = await startServices(params);
-
-          const { renderManagementApp } = await this.lazyAssistantSettingsManagement();
-
-          return renderManagementApp({
-            ...params,
-            coreStart,
-            services,
-            usageCollection: plugins.usageCollection,
-          });
-        },
       });
     }
 
@@ -473,17 +429,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     return import(
       /* webpackChunkName: "actions" */
       './actions'
-    );
-  }
-
-  private lazyAssistantSettingsManagement() {
-    /**
-     * The specially formatted comment in the `import` expression causes the corresponding webpack chunk to be named. This aids us in debugging chunk size issues.
-     * See https://webpack.js.org/api/module-methods/#magic-comments
-     */
-    return import(
-      /* webpackChunkName: "actions" */
-      './lazy_assistant_settings_management'
     );
   }
 
