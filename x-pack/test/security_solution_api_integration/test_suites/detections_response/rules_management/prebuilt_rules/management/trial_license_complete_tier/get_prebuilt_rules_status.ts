@@ -14,13 +14,16 @@ import {
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRules,
-  deleteRule,
   upgradePrebuiltRules,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
 } from '../../../../utils';
-import { deleteAllRules, createRule } from '../../../../../../../common/utils/security_solution';
+import {
+  deleteAllRules,
+  createRule,
+  deleteRule,
+} from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');

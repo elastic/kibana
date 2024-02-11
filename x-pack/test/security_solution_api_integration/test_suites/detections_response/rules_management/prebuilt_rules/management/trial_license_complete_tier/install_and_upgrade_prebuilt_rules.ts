@@ -12,7 +12,6 @@ import {
   createRuleAssetSavedObject,
   createPrebuiltRuleAssetSavedObjects,
   installPrebuiltRulesAndTimelines,
-  deleteRule,
   getPrebuiltRulesAndTimelinesStatus,
   createHistoricalPrebuiltRuleAssetSavedObjects,
   getPrebuiltRulesStatus,
@@ -20,7 +19,7 @@ import {
   getInstalledRules,
   upgradePrebuiltRules,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
+import { deleteAllRules, deleteRule } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
