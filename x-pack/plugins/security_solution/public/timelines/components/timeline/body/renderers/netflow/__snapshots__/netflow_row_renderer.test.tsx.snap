@@ -2,7 +2,12 @@
 
 exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
 <DocumentFragment>
-  .c0 {
+  .c14 svg {
+  position: relative;
+  top: -1px;
+}
+
+.c0 {
   display: inline-block;
   font-size: 12px;
   line-height: 1.5;
@@ -14,11 +19,6 @@ exports[`netflowRowRenderer renders correctly against snapshot 1`] = `
   padding: 0 8px;
   border: 1px solid #343741;
   border-radius: 4px;
-}
-
-.c14 svg {
-  position: relative;
-  top: -1px;
 }
 
 .c12,

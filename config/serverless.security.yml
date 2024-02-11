@@ -66,3 +66,6 @@ xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: true
 xpack.ml.nlp.enabled: false
 xpack.ml.compatibleModuleType: 'security'
+
+# Disable the embedded Dev Console
+console.ui.embeddedEnabled: false

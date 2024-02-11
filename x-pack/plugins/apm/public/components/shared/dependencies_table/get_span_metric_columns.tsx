@@ -13,7 +13,6 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Breakpoints } from '../../../hooks/use_breakpoints';
 import {
   ChartType,
   getTimeSeriesColor,
@@ -53,14 +52,12 @@ export interface SpanMetricGroup {
 }
 
 export function getSpanMetricColumns({
-  breakpoints,
   comparisonFetchStatus,
+  shouldShowSparkPlots,
 }: {
-  breakpoints: Breakpoints;
   comparisonFetchStatus: FETCH_STATUS;
+  shouldShowSparkPlots: boolean;
 }): Array<ITableColumn<SpanMetricGroup>> {
-  const { isLarge } = breakpoints;
-  const shouldShowSparkPlots = !isLarge;
   const isLoading = isPending(comparisonFetchStatus);
 
   return [

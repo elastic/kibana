@@ -65,7 +65,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       await kibanaServer.importExport.load(
         'test/api_integration/fixtures/kbn_archiver/index_patterns/constant_keyword.json'
       );
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('unifiedFieldListExamples');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.waitFor('combobox is ready', async () => {
@@ -90,10 +90,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       );
       await PageObjects.unifiedFieldList.cleanSidebarLocalStorage();
       await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.svlCommonPage.forceLogout();
     });
 
-    describe('existence', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/172781
+    describe.skip('existence', () => {
       it('should find which fields exist in the sample documents', async () => {
         const sidebarFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(sidebarFields.sort()).to.eql([...metaFields, ...fieldsWithData].sort());

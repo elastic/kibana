@@ -9,8 +9,10 @@ import { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { IncomingMessage } from 'http';
 import { pick } from 'lodash';
-import { concatMap, delay, map, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
+import { concatMap, delay, filter, map, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
 import {
+  BufferFlushEvent,
+  StreamingChatResponseEventType,
   StreamingChatResponseEventWithoutError,
   type StreamingChatResponseEvent,
 } from '../../common/conversation_complete';
@@ -116,7 +118,7 @@ export async function createChatService({
 
   return {
     analytics,
-    renderFunction: (name, args, response) => {
+    renderFunction: (name, args, response, onActionClick) => {
       const fn = renderFunctionRegistry.get(name);
 
       if (!fn) {
@@ -130,7 +132,11 @@ export async function createChatService({
         data: JSON.parse(response.data ?? '{}'),
       };
 
-      return fn?.({ response: parsedResponse, arguments: parsedArguments });
+      return fn?.({
+        response: parsedResponse,
+        arguments: parsedArguments,
+        onActionClick,
+      });
     },
     getContexts: () => contextDefinitions,
     getFunctions,
@@ -159,7 +165,11 @@ export async function createChatService({
             const response = _response as unknown as HttpResponse<IncomingMessage>;
             const response$ = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                filter(
+                  (line): line is StreamingChatResponseEvent =>
+                    line.type !== StreamingChatResponseEventType.BufferFlush
+                ),
                 throwSerializedChatCompletionErrors()
               )
               .subscribe(subscriber);
@@ -174,33 +184,41 @@ export async function createChatService({
           });
       });
     },
-    chat({
-      connectorId,
-      messages,
-      function: callFunctions = 'auto',
-      signal,
-    }: {
-      connectorId: string;
-      messages: Message[];
-      function?: 'none' | 'auto';
-      signal: AbortSignal;
-    }) {
+    chat(
+      name: string,
+      {
+        connectorId,
+        messages,
+        function: callFunctions = 'auto',
+        signal,
+      }: {
+        connectorId: string;
+        messages: Message[];
+        function?: 'none' | 'auto';
+        signal: AbortSignal;
+      }
+    ) {
       return new Observable<StreamingChatResponseEventWithoutError>((subscriber) => {
         const contexts = ['core', 'apm'];
 
-        const functions = getFunctions({ contexts });
+        const functions = getFunctions({ contexts }).filter((fn) => {
+          const visibility = fn.visibility ?? FunctionVisibility.All;
+
+          return (
+            visibility === FunctionVisibility.All || visibility === FunctionVisibility.AssistantOnly
+          );
+        });
 
         client('POST /internal/observability_ai_assistant/chat', {
           params: {
             body: {
+              name,
               messages,
               connectorId,
               functions:
                 callFunctions === 'none'
                   ? []
-                  : functions
-                      .filter((fn) => fn.visibility !== FunctionVisibility.User)
-                      .map((fn) => pick(fn, 'name', 'description', 'parameters')),
+                  : functions.map((fn) => pick(fn, 'name', 'description', 'parameters')),
             },
           },
           signal,
@@ -212,7 +230,11 @@ export async function createChatService({
 
             const subscription = toObservable(response)
               .pipe(
-                map((line) => JSON.parse(line) as StreamingChatResponseEvent),
+                map((line) => JSON.parse(line) as StreamingChatResponseEvent | BufferFlushEvent),
+                filter(
+                  (line): line is StreamingChatResponseEvent =>
+                    line.type !== StreamingChatResponseEventType.BufferFlush
+                ),
                 throwSerializedChatCompletionErrors()
               )
               .subscribe(subscriber);

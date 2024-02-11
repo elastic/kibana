@@ -47,6 +47,7 @@ const AlertDetailsAppSection = ({
   const theme = useTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
+  const alertContext = alert.fields[ALERT_CONTEXT];
   const interval = `${rule.params.timeSize}${rule.params.timeUnit}`;
   const thresholdFill = convertComparatorToFill(rule.params.count.comparator);
   const filter = rule.params.groupBy
@@ -85,7 +86,7 @@ const AlertDetailsAppSection = ({
         (selectedFields: Record<string, any>, field) => ({
           ...selectedFields,
           ...{
-            [field]: get(alert.fields[ALERT_CONTEXT], ['groupByKeys', ...field.split('.')], null),
+            [field]: get(alertContext, ['groupByKeys', ...field.split('.')], null),
           },
         }),
         {}
@@ -96,7 +97,7 @@ const AlertDetailsAppSection = ({
       value,
     }));
     setAlertSummaryFields(alertSummaryFields);
-  }, [alert.fields, rule.params.groupBy, setAlertSummaryFields]);
+  }, [alertContext, rule.params.groupBy, setAlertSummaryFields]);
 
   const getLogRatioChart = () => {
     if (isRatioRule(rule.params.criteria)) {

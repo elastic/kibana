@@ -39,13 +39,13 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         query: params,
       })
       .catch((error) => {
-        throw new GetDataStreamsStatsError(`Failed to fetch data streams stats": ${error}`);
+        throw new GetDataStreamsStatsError(`Failed to fetch data streams stats: ${error}`);
       });
 
     const { dataStreamsStats, integrations } = decodeOrThrow(
       getDataStreamsStatsResponseRt,
       (message: string) =>
-        new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}"`)
+        new GetDataStreamsStatsError(`Failed to decode data streams stats response: ${message}`)
     )(response);
 
     const mergedDataStreamsStats = dataStreamsStats.map((statsItem) => {
@@ -69,16 +69,14 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         }
       )
       .catch((error) => {
-        throw new GetDataStreamsStatsError(
-          `Failed to fetch data streams degraded stats": ${error}`
-        );
+        throw new GetDataStreamsStatsError(`Failed to fetch data streams degraded stats: ${error}`);
       });
 
     const { degradedDocs } = decodeOrThrow(
       getDataStreamsDegradedDocsStatsResponseRt,
       (message: string) =>
         new GetDataStreamsStatsError(
-          `Failed to decode data streams degraded docs stats response: ${message}"`
+          `Failed to decode data streams degraded docs stats response: ${message}`
         )
     )(response);
 

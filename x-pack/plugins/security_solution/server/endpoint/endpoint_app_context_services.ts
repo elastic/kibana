@@ -24,6 +24,8 @@ import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/aler
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import {
+  getAgentPolicyCreateCallback,
+  getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
@@ -118,6 +120,15 @@ export class EndpointAppContextService {
         appFeaturesService,
         savedObjectsClient,
       } = dependencies;
+
+      registerIngestCallback(
+        'agentPolicyCreate',
+        getAgentPolicyCreateCallback(logger, appFeaturesService)
+      );
+      registerIngestCallback(
+        'agentPolicyUpdate',
+        getAgentPolicyUpdateCallback(logger, appFeaturesService)
+      );
 
       registerIngestCallback(
         'packagePolicyCreate',

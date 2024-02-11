@@ -54,7 +54,8 @@ import {
   getDiscoverGlobalStateContainer,
   DiscoverGlobalStateContainer,
 } from './discover_global_state_container';
-interface DiscoverStateContainerParams {
+
+export interface DiscoverStateContainerParams {
   /**
    * Browser history
    */
@@ -356,6 +357,7 @@ export function getDiscoverStateContainer({
       dataStateContainer,
       internalStateContainer,
       savedSearchContainer,
+      globalStateContainer,
       services,
       setDataView,
     });
