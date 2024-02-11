@@ -9,7 +9,7 @@ import {
   AssistantOverlay as ElasticAssistantOverlay,
   useAssistantContext,
 } from '@kbn/elastic-assistant';
-import { SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE } from '@kbn/management-settings-ids';
+import { SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 
 export const AssistantOverlay: React.FC = () => {
