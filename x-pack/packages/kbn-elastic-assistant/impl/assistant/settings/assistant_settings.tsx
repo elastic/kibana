@@ -63,7 +63,7 @@ interface Props {
   onClose: (
     event?: React.KeyboardEvent<HTMLDivElement> | React.MouseEvent<HTMLButtonElement>
   ) => void;
-  onSave: () => void;
+  onSave?: () => void;
   selectedConversation: Conversation;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -81,7 +81,7 @@ export const AssistantSettings: React.FC<Props> = React.memo(
     selectedConversation: defaultSelectedConversation,
     setSelectedConversationId,
   }) => {
-    const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
+    const { toasts, modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab } =
       useAssistantContext();
 
     const {
@@ -149,13 +149,18 @@ export const AssistantSettings: React.FC<Props> = React.memo(
         setSelectedConversationId(conversationSettings[newSelectedConversationId].id);
       }
       saveSettings();
-      onSave();
+      toasts?.addSuccess({
+        iconType: 'check',
+        title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
+      });
+      onSave?.();
     }, [
       conversationSettings,
       defaultSelectedConversation.id,
       onSave,
       saveSettings,
       setSelectedConversationId,
+      toasts,
     ]);
 
     return (

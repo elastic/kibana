@@ -31,7 +31,7 @@ export const renderManagementApp = async ({
   theme$,
 }: MountParams) => {
   coreStart.chrome.docTitle.change(
-    i18n.translate('aiAssistantManagementObservability.app.titleBar', {
+    i18n.translate('xpack.securitySolution.aiAssistantManagementSecurity.app.titleBar', {
       defaultMessage: 'AI Assistant for Security Settings',
     })
   );

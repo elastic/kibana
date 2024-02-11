@@ -22,6 +22,7 @@ interface Props {
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
   isDisabled?: boolean;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -36,6 +37,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
     setIsSettingsModalVisible,
     selectedConversation,
     setSelectedConversationId,
+    isFlyoutMode,
   }) => {
     const { toasts, setSelectedSettingsTab } = useAssistantContext();
 
@@ -71,6 +73,7 @@ export const AssistantSettingsButton: React.FC<Props> = React.memo(
             isDisabled={isDisabled}
             iconType="gear"
             size="xs"
+            {...(isFlyoutMode ? { color: 'text' } : {})}
           />
         </EuiToolTip>
 

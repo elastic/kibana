@@ -168,6 +168,10 @@ export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandab
 export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
 
+/** This Kibana Advanced Setting allows users to toggle between Modal and Flyout-mode AI Assistant */
+export const SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE =
+  'securitySolution:enableAIAssistantFlyoutMode' as const;
+
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 

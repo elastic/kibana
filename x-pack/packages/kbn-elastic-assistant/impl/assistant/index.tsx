@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, {
   Dispatch,
   SetStateAction,
@@ -16,18 +18,24 @@ import React, {
   useState,
 } from 'react';
 import {
+  EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiCommentList,
   EuiSwitchEvent,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFlyoutBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalBody,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
+import styled from '@emotion/styled';
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -49,6 +57,16 @@ import { QuickPrompts } from './quick_prompts/quick_prompts';
 import { useLoadConnectors } from '../connectorland/use_load_connectors';
 import { useConnectorSetup } from '../connectorland/connector_setup';
 import { ConnectorMissingCallout } from '../connectorland/connector_missing_callout';
+import { ConversationSidePanel } from './conversations/conversation_sidepanel';
+import { SystemPrompt } from './prompt_editor/system_prompt';
+import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
+import { AssistantHeaderFlyout } from './assistant_header/assistant_header_flyout';
+
+const CommentContainer = styled('span')`
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+`;
 
 export interface Props {
   conversationId?: string;
@@ -57,6 +75,8 @@ export interface Props {
   shouldRefocusPrompt?: boolean;
   showTitle?: boolean;
   setConversationId?: Dispatch<SetStateAction<string>>;
+  onCloseFlyout?: () => void;
+  isFlyoutMode?: boolean;
 }
 
 /**
@@ -70,6 +90,8 @@ const AssistantComponent: React.FC<Props> = ({
   shouldRefocusPrompt = false,
   showTitle = true,
   setConversationId,
+  onCloseFlyout,
+  isFlyoutMode = false,
 }) => {
   const {
     assistantTelemetry,
@@ -263,6 +285,11 @@ const AssistantComponent: React.FC<Props> = ({
     [setShowAnonymizedValues]
   );
 
+  const isNewConversation = useMemo(
+    () => currentConversation.messages.length === 0,
+    [currentConversation.messages.length]
+  );
+
   useEffect(() => {
     // Adding `conversationId !== selectedConversationId` to prevent auto-run still executing after changing selected conversation
     if (currentConversation.messages.length || conversationId !== selectedConversationId) {
@@ -369,29 +396,34 @@ const AssistantComponent: React.FC<Props> = ({
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
           })}
-          css={css`
-            margin-right: 20px;
-          `}
+          {...(!isFlyoutMode
+            ? {
+                css: css`
+                  margin-right: 20px;
+                `,
+              }
+            : {})}
         />
 
         {currentConversation.messages.length !== 0 && selectedPromptContextsCount > 0 && (
           <EuiSpacer size={'m'} />
         )}
 
-        {(currentConversation.messages.length === 0 || selectedPromptContextsCount > 0) && (
-          <PromptEditor
-            conversation={currentConversation}
-            editingSystemPromptId={editingSystemPromptId}
-            isNewConversation={currentConversation.messages.length === 0}
-            isSettingsModalVisible={isSettingsModalVisible}
-            promptContexts={promptContexts}
-            promptTextPreview={promptTextPreview}
-            onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
-            selectedPromptContexts={selectedPromptContexts}
-            setIsSettingsModalVisible={setIsSettingsModalVisible}
-            setSelectedPromptContexts={setSelectedPromptContexts}
-          />
-        )}
+        {!isFlyoutMode &&
+          (currentConversation.messages.length === 0 || selectedPromptContextsCount > 0) && (
+            <PromptEditor
+              conversation={currentConversation}
+              editingSystemPromptId={editingSystemPromptId}
+              isNewConversation={isNewConversation}
+              isSettingsModalVisible={isSettingsModalVisible}
+              promptContexts={promptContexts}
+              promptTextPreview={promptTextPreview}
+              onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+              selectedPromptContexts={selectedPromptContexts}
+              setIsSettingsModalVisible={setIsSettingsModalVisible}
+              setSelectedPromptContexts={setSelectedPromptContexts}
+            />
+          )}
       </>
     ),
     [
@@ -401,7 +433,9 @@ const AssistantComponent: React.FC<Props> = ({
       getComments,
       handleOnSystemPromptSelectionChange,
       handleRegenerateResponse,
+      isFlyoutMode,
       isLoadingChatSend,
+      isNewConversation,
       isSettingsModalVisible,
       promptContexts,
       promptTextPreview,
@@ -435,6 +469,209 @@ const AssistantComponent: React.FC<Props> = ({
     },
     [assistantTelemetry, selectedConversationId]
   );
+
+  const [chatHistoryVisible, setChatHistoryVisible] = useState(false);
+
+  if (isFlyoutMode) {
+    return (
+      <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
+        {chatHistoryVisible && (
+          <EuiFlexItem
+            grow={false}
+            css={css`
+              inline-size: 220px;
+              border-right: 1px solid ${euiThemeVars.euiColorLightShade};
+            `}
+          >
+            <ConversationSidePanel
+              selectedConversationId={selectedConversationId}
+              onConversationSelected={handleOnConversationSelected}
+              conversations={conversations}
+            />
+          </EuiFlexItem>
+        )}
+        <EuiFlexItem
+          css={css`
+            inline-size: 50vw;
+          `}
+        >
+          <CommentContainer ref={commentsContainerRef}>
+            <EuiFlexGroup
+              css={css`
+                overflow: hidden;
+              `}
+            >
+              <EuiFlexItem
+                css={css`
+                  max-width: 100%;
+                `}
+              >
+                <EuiFlyoutHeader hasBorder>
+                  {showTitle && (
+                    <AssistantHeaderFlyout
+                      currentConversation={currentConversation}
+                      defaultConnectorId={defaultConnectorId}
+                      defaultProvider={defaultProvider}
+                      docLinks={docLinks}
+                      isDisabled={isDisabled}
+                      isSettingsModalVisible={isSettingsModalVisible}
+                      onToggleShowAnonymizedValues={onToggleShowAnonymizedValues}
+                      setIsSettingsModalVisible={setIsSettingsModalVisible}
+                      setSelectedConversationId={setSelectedConversationId}
+                      showAnonymizedValues={showAnonymizedValues}
+                      title={currentTitle}
+                      onCloseFlyout={onCloseFlyout}
+                      onChatCleared={handleOnChatCleared}
+                      chatHistoryVisible={chatHistoryVisible}
+                      setChatHistoryVisible={setChatHistoryVisible}
+                    />
+                  )}
+
+                  {/* Create portals for each EuiCodeBlock to add the `Investigate in Timeline` action */}
+                  {createCodeBlockPortals()}
+                </EuiFlyoutHeader>
+                <EuiFlyoutBody
+                  css={css`
+                    min-height: 100px;
+                    flex: 1;
+                  `}
+                >
+                  <EuiPanel hasShadow={false}>
+                    {comments}
+
+                    {!isDisabled && showMissingConnectorCallout && areConnectorsFetched && (
+                      <>
+                        <EuiSpacer />
+                        <EuiFlexGroup justifyContent="spaceAround">
+                          <EuiFlexItem grow={false}>
+                            <ConnectorMissingCallout
+                              isConnectorConfigured={connectors?.length > 0}
+                              isSettingsModalVisible={isSettingsModalVisible}
+                              setIsSettingsModalVisible={setIsSettingsModalVisible}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </>
+                    )}
+                  </EuiPanel>
+                </EuiFlyoutBody>
+                <EuiFlyoutFooter
+                  css={css`
+                    background: none;
+                    border-top: 1px solid ${euiThemeVars.euiColorLightShade};
+                    overflow: auto;
+                  `}
+                >
+                  <EuiPanel paddingSize="m" hasShadow={false}>
+                    <BlockBotCallToAction
+                      connectorPrompt={connectorPrompt}
+                      http={http}
+                      isAssistantEnabled={isAssistantEnabled}
+                      isWelcomeSetup={isWelcomeSetup}
+                    />
+                    {!isDisabled &&
+                      Object.keys(promptContexts).length !== selectedPromptContextsCount && (
+                        <EuiFlexGroup>
+                          <EuiFlexItem>
+                            <>
+                              <ContextPills
+                                defaultAllow={defaultAllow}
+                                defaultAllowReplacement={defaultAllowReplacement}
+                                promptContexts={promptContexts}
+                                selectedPromptContexts={selectedPromptContexts}
+                                setSelectedPromptContexts={setSelectedPromptContexts}
+                                isFlyoutMode={isFlyoutMode}
+                              />
+                              {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
+                            </>
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      )}
+
+                    <EuiPanel
+                      hasShadow={false}
+                      hasBorder
+                      css={
+                        currentConversation.messages.length === 0 || selectedPromptContextsCount > 0
+                          ? css`
+                              background: ${euiThemeVars.euiColorLightestShade};
+                            `
+                          : css`
+                              padding: 0;
+                              border: 0;
+                            `
+                      }
+                    >
+                      <EuiFlexGroup direction="column" gutterSize="s">
+                        {currentConversation.messages.length === 0 && (
+                          <EuiFlexItem grow={false}>
+                            <SystemPrompt
+                              conversation={currentConversation}
+                              editingSystemPromptId={editingSystemPromptId}
+                              onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
+                              isSettingsModalVisible={isSettingsModalVisible}
+                              setIsSettingsModalVisible={setIsSettingsModalVisible}
+                              isFlyoutMode
+                            />
+                          </EuiFlexItem>
+                        )}
+
+                        {Object.keys(selectedPromptContexts).length ? (
+                          <EuiFlexItem grow={false}>
+                            <SelectedPromptContexts
+                              isNewConversation={isNewConversation}
+                              promptContexts={promptContexts}
+                              selectedPromptContexts={selectedPromptContexts}
+                              setSelectedPromptContexts={setSelectedPromptContexts}
+                              currentReplacements={currentConversation.replacements}
+                              isFlyoutMode={isFlyoutMode}
+                            />
+                          </EuiFlexItem>
+                        ) : null}
+
+                        <EuiFlexItem grow={false}>
+                          <ChatSend
+                            isDisabled={isSendingDisabled}
+                            shouldRefocusPrompt={shouldRefocusPrompt}
+                            userPrompt={userPrompt}
+                            handleButtonSendMessage={handleButtonSendMessage}
+                            handleOnChatCleared={handleOnChatCleared}
+                            handlePromptChange={handlePromptChange}
+                            handleSendMessage={handleSendMessage}
+                            handleRegenerateResponse={handleRegenerateResponse}
+                            isLoading={isLoadingChatSend}
+                            isFlyoutMode={isFlyoutMode}
+                          />
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </EuiPanel>
+                  </EuiPanel>
+
+                  {!isDisabled && (
+                    <EuiPanel
+                      css={css`
+                        background: ${euiThemeVars.euiColorLightestShade};
+                      `}
+                      hasShadow={false}
+                      paddingSize="m"
+                      borderRadius="none"
+                    >
+                      <QuickPrompts
+                        setInput={setUserPrompt}
+                        setIsSettingsModalVisible={setIsSettingsModalVisible}
+                        trackPrompt={trackPrompt}
+                        isFlyoutMode={isFlyoutMode}
+                      />
+                    </EuiPanel>
+                  )}
+                </EuiFlyoutFooter>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </CommentContainer>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
 
   return getWrapper(
     <>
@@ -473,6 +710,7 @@ const AssistantComponent: React.FC<Props> = ({
               promptContexts={promptContexts}
               selectedPromptContexts={selectedPromptContexts}
               setSelectedPromptContexts={setSelectedPromptContexts}
+              isFlyoutMode={isFlyoutMode}
             />
             {Object.keys(promptContexts).length > 0 && <EuiSpacer size={'s'} />}
           </>
@@ -503,7 +741,7 @@ const AssistantComponent: React.FC<Props> = ({
       </EuiModalBody>
       <EuiModalFooter
         css={css`
-          align-items: flex-start;
+          align-items: stretch;
           flex-direction: column;
         `}
       >
@@ -523,12 +761,14 @@ const AssistantComponent: React.FC<Props> = ({
           handleSendMessage={handleSendMessage}
           handleRegenerateResponse={handleRegenerateResponse}
           isLoading={isLoadingChatSend}
+          isFlyoutMode={isFlyoutMode}
         />
         {!isDisabled && (
           <QuickPrompts
             setInput={setUserPrompt}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
             trackPrompt={trackPrompt}
+            isFlyoutMode={isFlyoutMode}
           />
         )}
       </EuiModalFooter>

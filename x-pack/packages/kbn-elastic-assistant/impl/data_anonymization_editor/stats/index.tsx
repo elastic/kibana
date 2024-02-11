@@ -23,10 +23,11 @@ const StatFlexItem = styled(EuiFlexItem)`
 interface Props {
   isDataAnonymizable: boolean;
   selectedPromptContext: SelectedPromptContext;
+  inline?: boolean;
 }
 
 const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, selectedPromptContext }) => {
-  const { allowed, anonymized, total } = useMemo(
+  const { allowed, anonymized, total, inline } = useMemo(
     () => getStats(selectedPromptContext),
     [selectedPromptContext]
   );
@@ -35,17 +36,21 @@ const StatsComponent: React.FC<Props> = ({ isDataAnonymizable, selectedPromptCon
     <EuiFlexGroup alignItems="center" data-test-subj="stats" gutterSize="none">
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
-          <AllowedStat allowed={allowed} total={total} />
+          <AllowedStat allowed={allowed} total={total} inline={inline} />
         </StatFlexItem>
       )}
 
       <StatFlexItem grow={false}>
-        <AnonymizedStat anonymized={anonymized} isDataAnonymizable={isDataAnonymizable} />
+        <AnonymizedStat
+          anonymized={anonymized}
+          isDataAnonymizable={isDataAnonymizable}
+          inline={inline}
+        />
       </StatFlexItem>
 
       {isDataAnonymizable && (
         <StatFlexItem grow={false}>
-          <AvailableStat total={total} />
+          <AvailableStat total={total} inline={inline} />
         </StatFlexItem>
       )}
     </EuiFlexGroup>

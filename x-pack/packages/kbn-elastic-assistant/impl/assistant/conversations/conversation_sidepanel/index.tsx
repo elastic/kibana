@@ -13,26 +13,29 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
+  EuiButtonEmpty,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import useEvent from 'react-use/lib/useEvent';
-import { v4 as uuidv4 } from 'uuid';
+import { FormProvider, useForm } from 'react-hook-form';
 
-import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { Conversation } from '../../../..';
-import { useAssistantContext } from '../../../assistant_context';
-import * as i18n from './translations';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
+import { TitleField } from './title_field';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
   selectedConversationId: string | undefined;
-  onConversationSelected: ({ cId, cTitle }: { cId: string; cTitle?: string }) => void;
-  onConversationDeleted: (conversationId: string) => void;
+  onConversationSelected: (conversationId: string) => void;
   shouldDisableKeyboardShortcut?: () => boolean;
   isDisabled?: boolean;
   conversations: Record<string, Conversation>;
@@ -57,97 +60,36 @@ export type ConversationSelectorOption = EuiComboBoxOptionOption<{
 export const ConversationSidePanel: React.FC<Props> = React.memo(
   ({
     selectedConversationId = DEFAULT_CONVERSATION_TITLE,
-    defaultConnectorId,
-    defaultProvider,
     onConversationSelected,
-    onConversationDeleted,
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
     conversations,
   }) => {
-    const { allSystemPrompts } = useAssistantContext();
+    const { deleteConversation, createConversation } = useConversation();
 
-    const { createConversation } = useConversation();
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
-    const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
-      return Object.values(conversations).map((conversation) => ({
-        value: { isDefault: conversation.isDefault ?? false },
-        id: conversation.id ?? conversation.title,
-        label: conversation.title,
-      }));
-    }, [conversations]);
-
-    // Callback for when user types to create a new system prompt
-    const onCreateOption = useCallback(async () => {
-      const defaultSystemPrompt = allSystemPrompts.find(
-        (systemPrompt) => systemPrompt.isNewConversationDefault
-      );
-
-      const newConversation: Conversation = {
-        id: uuidv4(),
-        title: 'New chat',
-        messages: [],
-        apiConfig: {
-          connectorId: defaultConnectorId,
-          provider: defaultProvider,
-          defaultSystemPromptId: defaultSystemPrompt?.id,
-        },
-      };
-
-      let cId;
-      try {
-        cId = (await createConversation(newConversation))?.id;
-        onConversationSelected({ cId: cId ?? DEFAULT_CONVERSATION_TITLE });
-      } catch (e) {}
-    }, [
-      allSystemPrompts,
-      onConversationSelected,
-      defaultConnectorId,
-      defaultProvider,
-      createConversation,
-    ]);
 
     // Callback for when user deletes a conversation
     const onDelete = useCallback(
       (cId: string) => {
-        onConversationDeleted(cId);
         if (selectedConversationId === cId) {
-          const prevConversationId = getPreviousConversationId(conversationIds, cId);
-          onConversationSelected({
-            cId: prevConversationId,
-            cTitle: conversations[prevConversationId].title,
-          });
+          onConversationSelected(getPreviousConversationId(conversationIds, cId));
         }
+        setTimeout(() => {
+          deleteConversation(cId);
+        }, 0);
       },
-      [
-        selectedConversationId,
-        onConversationDeleted,
-        onConversationSelected,
-        conversationIds,
-        conversations,
-      ]
-    );
-
-    const onChange = useCallback(
-      async (newOptions: ConversationSelectorOption[]) => {
-        if (newOptions.length === 0 || !newOptions?.[0].id) {
-          // setSelectedOptions([]);
-        } else if (conversationOptions.findIndex((o) => o.id === newOptions?.[0].id) !== -1) {
-          const { id, label } = newOptions?.[0];
-          await onConversationSelected({ cId: id, cTitle: label });
-        }
-      },
-      [conversationOptions, onConversationSelected]
+      [conversationIds, deleteConversation, selectedConversationId, onConversationSelected]
     );
 
     const onLeftArrowClick = useCallback(() => {
       const prevId = getPreviousConversationId(conversationIds, selectedConversationId);
-      onConversationSelected({ cId: prevId, cTitle: conversations[prevId].title });
-    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
+      onConversationSelected(prevId);
+    }, [conversationIds, selectedConversationId, onConversationSelected]);
     const onRightArrowClick = useCallback(() => {
       const nextId = getNextConversationId(conversationIds, selectedConversationId);
-      onConversationSelected({ cId: nextId, cTitle: conversations[nextId].title });
-    }, [conversationIds, selectedConversationId, onConversationSelected, conversations]);
+      onConversationSelected(nextId);
+    }, [conversationIds, selectedConversationId, onConversationSelected]);
 
     // Register keyboard listener for quick conversation switching
     const onKeyDown = useCallback(
@@ -181,39 +123,143 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
         shouldDisableKeyboardShortcut,
       ]
     );
+
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const showModal = () => {
+      setIsModalVisible(true);
+    };
+
+    const closeModal = () => {
+      setIsModalVisible(false);
+    };
+
     useEvent('keydown', onKeyDown);
 
-    console.error('conversation', conversations);
+    const hookFormMethods = useForm({
+      defaultValues: {
+        title: '',
+      },
+    });
+
+    const onSubmit = useCallback(
+      (data) => {
+        createConversation({ conversationId: data.title });
+        onConversationSelected(data.title);
+        closeModal();
+      },
+      [createConversation, onConversationSelected]
+    );
 
     return (
-      <EuiPanel>
-        <EuiFlexGroup direction="column" justifyContent="spaceBetween">
+      <>
+        <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
           <EuiFlexItem>
-            <EuiListGroup>
-              {Object.values(conversations).map((conversation) => (
-                <EuiListGroupItem
-                  onClick={() =>
-                    onConversationSelected({ cId: conversation.id, cTitle: conversation.title })
-                  }
-                  label={conversation.title}
-                  isActive={conversation.id === selectedConversationId}
-                  extraAction={{
-                    color: 'danger',
-                    onClick: () => onDelete(conversation.id),
-                    iconType: 'trash',
-                    iconSize: 's',
-                  }}
-                />
-              ))}
-            </EuiListGroup>
+            <EuiPanel hasShadow={false} borderRadius="none">
+              <EuiListGroup
+                size="xs"
+                css={css`
+                  padding: 0;
+                `}
+              >
+                {Object.values(conversations).map((conversation) => (
+                  <EuiListGroupItem
+                    key={conversation.id}
+                    onClick={() => onConversationSelected(conversation.id)}
+                    label={conversation.id}
+                    isActive={conversation.id === selectedConversationId}
+                    extraAction={{
+                      color: 'danger',
+                      onClick: () => onDelete(conversation.id),
+                      iconType: 'trash',
+                      iconSize: 's',
+                      disabled: conversation.isDefault,
+                      'aria-label': i18n.translate(
+                        'xpack.elasticAssistant.assistant.conversations.sidePanel.deleteAriaLabel',
+                        {
+                          defaultMessage: 'Delete conversation',
+                        }
+                      ),
+                      'data-test-subj': 'delete-option',
+                    }}
+                  />
+                ))}
+              </EuiListGroup>
+            </EuiPanel>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiButton color="primary" iconType="discuss" onClick={onCreateOption}>
-              {'New chat'}
-            </EuiButton>
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              hasShadow={false}
+              hasBorder
+              borderRadius="none"
+              paddingSize="m"
+              css={css`
+                border-left: 0;
+                border-right: 0;
+                border-bottom: 0;
+                padding-top: 12px;
+                padding-bottom: 12px;
+              `}
+            >
+              <EuiButton
+                color="primary"
+                fill
+                iconType="discuss"
+                onClick={showModal}
+                fullWidth
+                size="s"
+              >
+                {i18n.translate(
+                  'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
+                  {
+                    defaultMessage: 'New chat',
+                  }
+                )}
+              </EuiButton>
+            </EuiPanel>
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPanel>
+
+        {isModalVisible && (
+          <FormProvider {...hookFormMethods}>
+            <EuiModal onClose={closeModal}>
+              <EuiModalHeader>
+                <EuiModalHeaderTitle>
+                  <h1>
+                    {i18n.translate(
+                      'xpack.elasticAssistant.assistant.conversations.sidePanel.createChatModalTitle',
+                      {
+                        defaultMessage: 'Create New Chat',
+                      }
+                    )}
+                  </h1>
+                </EuiModalHeaderTitle>
+              </EuiModalHeader>
+              <EuiModalBody>
+                <TitleField conversationIds={conversationIds} />
+              </EuiModalBody>
+              <EuiModalFooter>
+                <EuiButtonEmpty onClick={closeModal}>
+                  {i18n.translate(
+                    'xpack.elasticAssistant.assistant.conversations.sidePanelSide.cancelButtonLabel',
+                    {
+                      defaultMessage: 'Cancel',
+                    }
+                  )}
+                </EuiButtonEmpty>
+                <EuiButton onClick={hookFormMethods.handleSubmit(onSubmit)} fill>
+                  {i18n.translate(
+                    'xpack.elasticAssistant.assistant.conversations.sidePanel.saveButtonLabel',
+                    {
+                      defaultMessage: 'Save',
+                    }
+                  )}
+                </EuiButton>
+              </EuiModalFooter>
+            </EuiModal>
+          </FormProvider>
+        )}
+      </>
     );
   }
 );

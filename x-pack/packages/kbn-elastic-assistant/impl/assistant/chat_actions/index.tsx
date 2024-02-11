@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { css } from '@emotion/react';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { CLEAR_CHAT, SUBMIT_MESSAGE } from '../translations';
 
 interface OwnProps {
   isDisabled: boolean;
   isLoading: boolean;
+  isFlyoutMode: boolean;
   onChatCleared: () => void;
   onSendMessage: () => void;
 }
@@ -27,28 +27,25 @@ export const ChatActions: React.FC<Props> = ({
   isLoading,
   onChatCleared,
   onSendMessage,
+  isFlyoutMode,
 }) => {
   return (
-    <EuiFlexGroup
-      css={css`
-        position: absolute;
-      `}
-      direction="column"
-      gutterSize="xs"
-    >
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="right" content={CLEAR_CHAT}>
-          <EuiButtonIcon
-            aria-label={CLEAR_CHAT}
-            color="danger"
-            data-test-subj="clear-chat"
-            display="base"
-            iconType="cross"
-            isDisabled={isDisabled}
-            onClick={onChatCleared}
-          />
-        </EuiToolTip>
-      </EuiFlexItem>
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      {!isFlyoutMode && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="right" content={CLEAR_CHAT}>
+            <EuiButtonIcon
+              aria-label={CLEAR_CHAT}
+              color="danger"
+              data-test-subj="clear-chat"
+              display="base"
+              iconType="cross"
+              isDisabled={isDisabled}
+              onClick={onChatCleared}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
       <EuiFlexItem grow={false}>
         <EuiToolTip position="right" content={SUBMIT_MESSAGE}>
           <EuiButtonIcon

@@ -232,7 +232,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
             padding-left: 5px;
           `}
         >
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <div>
               <EuiHealth color={elserHealth}>{i18n.KNOWLEDGE_BASE_ELSER_LABEL}</EuiHealth>
               <EuiText
@@ -271,7 +271,7 @@ export const KnowledgeBaseSettings: React.FC<Props> = React.memo(
               </EuiText>
             </div>
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <div>
               <EuiHealth color={knowledgeBaseHealth}>{i18n.KNOWLEDGE_BASE_LABEL}</EuiHealth>
               <EuiText

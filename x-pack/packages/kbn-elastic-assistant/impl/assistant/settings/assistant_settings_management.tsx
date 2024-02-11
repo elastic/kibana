@@ -17,6 +17,7 @@ import {
 
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { css } from '@emotion/react';
+import { ActionConnectorProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { Conversation, Prompt, QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
@@ -29,6 +30,8 @@ import {
   QuickPromptSettings,
   SystemPromptSettings,
 } from '.';
+import { useLoadConnectors } from '../../connectorland/use_load_connectors';
+import { getDefaultConnector } from '../helpers';
 
 export const CONVERSATIONS_TAB = 'CONVERSATION_TAB' as const;
 export const QUICK_PROMPTS_TAB = 'QUICK_PROMPTS_TAB' as const;
@@ -45,8 +48,6 @@ export type SettingsTabs =
   | typeof KNOWLEDGE_BASE_TAB
   | typeof EVALUATION_TAB;
 interface Props {
-  defaultConnectorId?: string;
-  defaultProvider?: OpenAiProviderType;
   selectedConversation: Conversation;
   setSelectedConversationId: React.Dispatch<React.SetStateAction<string>>;
 }
@@ -56,15 +57,24 @@ interface Props {
  * anonymization, knowledge base, and evaluation via the `isModelEvaluationEnabled` feature flag.
  */
 export const AssistantSettingsManagement: React.FC<Props> = React.memo(
-  ({
-    defaultConnectorId,
-    defaultProvider,
-    selectedConversation: defaultSelectedConversation,
-    setSelectedConversationId,
-  }) => {
+  ({ selectedConversation: defaultSelectedConversation, setSelectedConversationId }) => {
     const [hasPendingChanges, setHasPendingChanges] = useState(false);
     const { modelEvaluatorEnabled, http, selectedSettingsTab, setSelectedSettingsTab, toasts } =
       useAssistantContext();
+
+    // Connector details
+    const { data: connectors } = useLoadConnectors({ http });
+    const defaultConnectorId = useMemo(() => getDefaultConnector(connectors)?.id, [connectors]);
+    const defaultProvider = useMemo(
+      () =>
+        (
+          getDefaultConnector(connectors) as ActionConnectorProps<
+            { apiProvider: OpenAiProviderType },
+            unknown
+          >
+        )?.config?.apiProvider,
+      [connectors]
+    );
 
     const {
       conversationSettings,
@@ -136,6 +146,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
         iconType: 'check',
         title: i18n.SETTINGS_UPDATED_TOAST_TITLE,
       });
+      setHasPendingChanges(false);
     }, [
       conversationSettings,
       defaultSelectedConversation.id,
@@ -208,12 +219,7 @@ export const AssistantSettingsManagement: React.FC<Props> = React.memo(
 
     return (
       <>
-        <EuiPageTemplate.Header
-          pageTitle="Settings"
-          tabs={tabs}
-          paddingSize="none"
-          // rightSideItems={[button]}
-        />
+        <EuiPageTemplate.Header pageTitle="Settings" tabs={tabs} paddingSize="none" />
         <EuiPageTemplate.Section
           paddingSize="l"
           css={css`

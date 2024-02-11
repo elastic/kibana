@@ -6,18 +6,20 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiBadge, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
-// eslint-disable-next-line @kbn/eslint/module_migration
-import styled from 'styled-components';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiBadge,
+  EuiPopover,
+  EuiButtonIcon,
+  EuiButtonEmpty,
+} from '@elastic/eui';
 
+import { css } from '@emotion/react';
 import { QuickPrompt } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';
 import { QUICK_PROMPTS_TAB } from '../settings/assistant_settings';
-
-const QuickPromptsFlexGroup = styled(EuiFlexGroup)`
-  margin: 16px;
-`;
 
 export const KNOWLEDGE_BASE_CATEGORY = 'knowledge-base';
 
@@ -26,6 +28,7 @@ interface QuickPromptsProps {
   setInput: (input: string) => void;
   setIsSettingsModalVisible: React.Dispatch<React.SetStateAction<boolean>>;
   trackPrompt: (prompt: string) => void;
+  isFlyoutMode: boolean;
 }
 
 /**
@@ -34,7 +37,7 @@ interface QuickPromptsProps {
  * and localstorage for storing new and edited prompts.
  */
 export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
-  ({ setInput, setIsSettingsModalVisible, trackPrompt }) => {
+  ({ setInput, setIsSettingsModalVisible, trackPrompt, isFlyoutMode }) => {
     const { allQuickPrompts, knowledgeBase, promptContexts, setSelectedSettingsTab } =
       useAssistantContext();
 
@@ -90,49 +93,83 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
     }, [setIsSettingsModalVisible, setSelectedSettingsTab]);
 
     return (
-      <QuickPromptsFlexGroup gutterSize="s" alignItems="center">
-        {contextFilteredQuickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
-          <EuiFlexItem key={index} grow={false}>
-            <EuiBadge
-              color={badge.color}
-              onClick={() => onClickAddQuickPrompt(badge)}
-              onClickAriaLabel={badge.title}
-            >
-              {badge.title}
-            </EuiBadge>
-          </EuiFlexItem>
-        ))}
-        {contextFilteredQuickPrompts.length > COUNT_BEFORE_OVERFLOW && (
-          <EuiFlexItem grow={false}>
-            <EuiPopover
-              button={
+      <EuiFlexGroup
+        gutterSize="s"
+        alignItems="center"
+        css={
+          !isFlyoutMode &&
+          css`
+            margin: 16px;
+          `
+        }
+      >
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            overflow: hidden;
+          `}
+        >
+          <EuiFlexGroup gutterSize="s" alignItems="center" wrap={false}>
+            {contextFilteredQuickPrompts.slice(0, COUNT_BEFORE_OVERFLOW).map((badge, index) => (
+              <EuiFlexItem
+                grow={false}
+                key={index}
+                css={css`
+                  overflow: hidden;
+                `}
+              >
                 <EuiBadge
-                  color={'hollow'}
-                  iconType={'boxesHorizontal'}
-                  onClick={toggleOverflowPopover}
-                  onClickAriaLabel={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
-                />
-              }
-              isOpen={isOverflowPopoverOpen}
-              closePopover={closeOverflowPopover}
-              anchorPosition="rightUp"
-            >
-              <EuiFlexGroup direction="column" gutterSize="s">
-                {contextFilteredQuickPrompts.slice(COUNT_BEFORE_OVERFLOW).map((badge, index) => (
-                  <EuiFlexItem key={index} grow={false}>
-                    <EuiBadge
-                      color={badge.color}
-                      onClick={() => onClickOverflowQuickPrompt(badge)}
-                      onClickAriaLabel={badge.title}
-                    >
-                      {badge.title}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPopover>
-          </EuiFlexItem>
-        )}
+                  color={badge.color}
+                  onClick={() => onClickAddQuickPrompt(badge)}
+                  onClickAriaLabel={badge.title}
+                >
+                  {badge.title}
+                </EuiBadge>
+              </EuiFlexItem>
+            ))}
+            {contextFilteredQuickPrompts.length > COUNT_BEFORE_OVERFLOW && (
+              <EuiFlexItem grow={false}>
+                <EuiPopover
+                  button={
+                    isFlyoutMode ? (
+                      <EuiButtonIcon
+                        color={'primary'}
+                        iconType={'boxesHorizontal'}
+                        onClick={toggleOverflowPopover}
+                      />
+                    ) : (
+                      <EuiBadge
+                        color={'hollow'}
+                        iconType={'boxesHorizontal'}
+                        onClick={toggleOverflowPopover}
+                        onClickAriaLabel={i18n.QUICK_PROMPT_OVERFLOW_ARIA}
+                      />
+                    )
+                  }
+                  isOpen={isOverflowPopoverOpen}
+                  closePopover={closeOverflowPopover}
+                  anchorPosition="rightUp"
+                >
+                  <EuiFlexGroup direction="column" gutterSize="s">
+                    {contextFilteredQuickPrompts
+                      .slice(COUNT_BEFORE_OVERFLOW)
+                      .map((badge, index) => (
+                        <EuiFlexItem key={index} grow={false}>
+                          <EuiBadge
+                            color={badge.color}
+                            onClick={() => onClickOverflowQuickPrompt(badge)}
+                            onClickAriaLabel={badge.title}
+                          >
+                            {badge.title}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                  </EuiFlexGroup>
+                </EuiPopover>
+              </EuiFlexItem>
+            )}
+          </EuiFlexGroup>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             data-test-subj="addQuickPrompt"
@@ -143,7 +180,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
             {i18n.ADD_QUICK_PROMPT}
           </EuiButtonEmpty>
         </EuiFlexItem>
-      </QuickPromptsFlexGroup>
+      </EuiFlexGroup>
     );
   }
 );

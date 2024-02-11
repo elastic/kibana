@@ -6,11 +6,12 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
-import { EuiModal } from '@elastic/eui';
+import { EuiModal, EuiFlyout } from '@elastic/eui';
 
 import useEvent from 'react-use/lib/useEvent';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
+import { css } from '@emotion/react';
 import { ShowAssistantOverlayProps, useAssistantContext } from '../../assistant_context';
 import { Assistant } from '..';
 import { WELCOME_CONVERSATION_TITLE } from '../use_conversation/translations';
@@ -27,7 +28,10 @@ const StyledEuiModal = styled(EuiModal)`
  * Modal container for Elastic AI Assistant conversations, receiving the page contents as context, plus whatever
  * component currently has focus and any specific context it may provide through the SAssInterface.
  */
-export const AssistantOverlay = React.memo(() => {
+export interface Props {
+  isFlyoutMode: boolean;
+}
+export const AssistantOverlay = React.memo<Props>(({ isFlyoutMode }) => {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [conversationId, setConversationId] = useState<string | undefined>(
     WELCOME_CONVERSATION_TITLE
@@ -96,6 +100,33 @@ export const AssistantOverlay = React.memo(() => {
   const handleCloseModal = useCallback(() => {
     cleanupAndCloseModal();
   }, [cleanupAndCloseModal]);
+
+  if (!isModalVisible) return null;
+
+  if (isFlyoutMode) {
+    return (
+      <EuiFlyout
+        css={css`
+          inline-size: auto !important;
+
+          > div {
+            height: 100%;
+          }
+        `}
+        onClose={handleCloseModal}
+        data-test-subj="ai-assistant-flyout"
+        paddingSize="none"
+        hideCloseButton
+      >
+        <Assistant
+          conversationId={conversationId}
+          promptContextId={promptContextId}
+          onCloseFlyout={handleCloseModal}
+          isFlyoutMode={isFlyoutMode}
+        />
+      </EuiFlyout>
+    );
+  }
 
   return (
     <>

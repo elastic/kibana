@@ -85,6 +85,7 @@ export const AssistantHeader: React.FC<Props> = ({
             docLinks={docLinks}
             selectedConversation={currentConversation}
             title={title}
+            isFlyoutMode={false}
           />
         </EuiFlexItem>
 
@@ -132,6 +133,7 @@ export const AssistantHeader: React.FC<Props> = ({
                   selectedConversation={currentConversation}
                   setIsSettingsModalVisible={setIsSettingsModalVisible}
                   setSelectedConversationId={setSelectedConversationId}
+                  isFlyoutMode={false}
                 />
               </EuiFlexItem>
             </EuiFlexGroup>

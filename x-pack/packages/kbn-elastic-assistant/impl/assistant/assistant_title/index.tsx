@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import * as i18n from '../translations';
 import type { Conversation } from '../../..';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
@@ -32,7 +33,8 @@ export const AssistantTitle: React.FC<{
   title: string | JSX.Element;
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
-}> = ({ isDisabled = false, title, docLinks, selectedConversation }) => {
+  isFlyoutMode: boolean;
+}> = ({ isDisabled = false, title, docLinks, selectedConversation, isFlyoutMode }) => {
   const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
@@ -72,11 +74,15 @@ export const AssistantTitle: React.FC<{
 
   return (
     <EuiModalHeaderTitle>
-      <EuiFlexGroup gutterSize="m">
+      <EuiFlexGroup gutterSize="m" alignItems="center">
         <EuiFlexItem grow={false}>
-          <AssistantAvatar data-test-subj="titleIcon" size={'m'} />
+          <AssistantAvatar data-test-subj="titleIcon" size={isFlyoutMode ? 's' : 'm'} />
         </EuiFlexItem>
-        <EuiFlexGroup direction="column" gutterSize="none" justifyContent="center">
+        <EuiFlexGroup
+          direction={isFlyoutMode ? 'row' : 'column'}
+          gutterSize="none"
+          justifyContent={isFlyoutMode ? 'spaceBetween' : 'center'}
+        >
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
@@ -86,6 +92,12 @@ export const AssistantTitle: React.FC<{
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
+                  css={
+                    isFlyoutMode &&
+                    css`
+                      display: inline-flex;
+                    `
+                  }
                   button={
                     <EuiButtonIcon
                       aria-label={i18n.TOOLTIP_ARIA_LABEL}
