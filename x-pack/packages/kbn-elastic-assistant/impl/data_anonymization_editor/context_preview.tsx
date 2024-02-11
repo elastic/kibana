@@ -13,7 +13,13 @@ import { getAnonymizedValues } from '@kbn/elastic-assistant-common/impl/data_ano
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
 import { AnonymizedData } from '@kbn/elastic-assistant-common/impl/data_anonymization/types';
+import styled from '@emotion/styled';
 import { SelectedPromptContext } from '../assistant/prompt_context/types';
+
+const Strong = styled.strong<{ showRealValues: boolean }>`
+  color: ${(props) =>
+    props.showRealValues ? euiThemeVars.euiColorSuccess : euiThemeVars.euiColorAccent};
+`;
 
 export interface Props {
   selectedPromptContext: SelectedPromptContext;
@@ -56,15 +62,9 @@ const SelectedPromptContextPreviewComponent = ({
           {`${key},`}
 
           {data.replacements[value[0]] ? (
-            <strong
-              css={css`
-                color: ${showRealValues
-                  ? euiThemeVars.euiColorSuccess
-                  : euiThemeVars.euiColorAccent};
-              `}
-            >
+            <Strong showRealValues={showRealValues}>
               {showRealValues ? data.replacements[value[0]] : value}
-            </strong>
+            </Strong>
           ) : (
             value
           )}
