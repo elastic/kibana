@@ -7,6 +7,7 @@
 
 import { from, takeUntil } from 'rxjs';
 
+import { IBasePath } from '@kbn/core-http-server';
 import {
   GlobalSearchProviderResult,
   GlobalSearchResultProvider,
@@ -17,7 +18,7 @@ import { ENTERPRISE_SEARCH_CONTENT_PLUGIN } from '../../common/constants';
 
 import { getIndexData } from '../lib/indices/utils/get_index_data';
 
-export function getIndicesSearchResultProvider(): GlobalSearchResultProvider {
+export function getIndicesSearchResultProvider(basePath: IBasePath): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, client, maxResults }) => {
       if (!client || !term || tags || (types && !types.includes('indices'))) {
@@ -44,6 +45,7 @@ export function getIndicesSearchResultProvider(): GlobalSearchResultProvider {
             return {
               id: indexName,
               title: indexName,
+              icon: basePath.prepend('/plugins/enterpriseSearch/assets/source_icons/index.svg'),
               type: i18n.translate('xpack.enterpriseSearch.searchIndexProvider.type.name', {
                 defaultMessage: 'Index',
               }),
