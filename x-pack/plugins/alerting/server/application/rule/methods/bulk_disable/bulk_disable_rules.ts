@@ -50,7 +50,7 @@ export const bulkDisableRules = async <Params extends RuleParams>(
     throw Boom.badRequest(`Error validating bulk disable data - ${error.message}`);
   }
 
-  const { ids, filter, untrack = true } = options;
+  const { ids, filter, untrack = false } = options;
 
   const kueryNodeFilter = ids ? convertRuleIdsToKueryNode(ids) : buildKueryNodeFilter(filter);
   const authorizationFilter = await getAuthorizationFilter(context, { action: 'DISABLE' });
@@ -122,7 +122,7 @@ const bulkDisableRulesWithOCC = async (
   context: RulesClientContext,
   {
     filter,
-    untrack = true,
+    untrack = false,
   }: {
     filter: KueryNode | null;
     untrack: boolean;

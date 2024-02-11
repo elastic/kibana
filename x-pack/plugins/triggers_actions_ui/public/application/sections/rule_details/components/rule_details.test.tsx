@@ -778,7 +778,10 @@ describe('rule_details', () => {
       modal.find('[data-test-subj="confirmModalConfirmButton"]').last().simulate('click');
 
       expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledTimes(1);
-      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({ ids: [rule.id], untrack: true });
+      expect(mockRuleApis.bulkDisableRules).toHaveBeenCalledWith({
+        ids: [rule.id],
+        untrack: false,
+      });
     });
 
     it('should enable the rule when clicked', async () => {

@@ -186,7 +186,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
     setIsUntrackAlertsModalOpen(true);
   }, []);
 
-  const onModalClose = useCallback(() => {
+  const onDisableModalClose = useCallback(() => {
     setIsUntrackAlertsModalOpen(false);
   }, []);
 
@@ -201,13 +201,13 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
 
   const onDisable = useCallback(
     async (untrack: boolean) => {
-      onModalClose();
+      onDisableModalClose();
       await bulkDisableRules({ ids: [item.id], untrack });
       onRuleChanged();
       setIsDisabled(true);
       setIsPopoverOpen(false);
     },
-    [onModalClose, bulkDisableRules, onRuleChanged, item.id]
+    [onDisableModalClose, bulkDisableRules, onRuleChanged, item.id]
   );
 
   const onDisableClick = useCallback(() => {
@@ -355,7 +355,7 @@ export const CollapsedItemActions: React.FunctionComponent<ComponentOpts> = ({
         />
       </EuiPopover>
       {isUntrackAlertsModalOpen && (
-        <UntrackAlertsModal onCancel={onModalClose} onConfirm={onDisable} />
+        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
       )}
     </>
   );

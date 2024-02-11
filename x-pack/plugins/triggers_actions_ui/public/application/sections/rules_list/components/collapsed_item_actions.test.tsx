@@ -236,7 +236,7 @@ describe('CollapsedItemActions', () => {
       });
       expect(bulkDisableRules).toHaveBeenCalledWith({
         ids: ['1'],
-        untrack: true,
+        untrack: false,
       });
     });
 

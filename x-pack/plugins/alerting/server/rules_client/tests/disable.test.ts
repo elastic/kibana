@@ -299,7 +299,7 @@ describe('disable()', () => {
       },
       ownerId: null,
     });
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1', untrack: true });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,
@@ -388,7 +388,7 @@ describe('disable()', () => {
 
   test('disables the rule even if unable to retrieve task manager doc to generate untrack event log events', async () => {
     taskManager.get.mockRejectedValueOnce(new Error('Fail'));
-    await rulesClient.disable({ id: '1' });
+    await rulesClient.disable({ id: '1', untrack: true });
     expect(unsecuredSavedObjectsClient.get).not.toHaveBeenCalled();
     expect(encryptedSavedObjects.getDecryptedAsInternalUser).toHaveBeenCalledWith(
       RULE_SAVED_OBJECT_TYPE,

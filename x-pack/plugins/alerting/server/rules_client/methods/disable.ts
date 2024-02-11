@@ -19,7 +19,7 @@ export async function disable(
   context: RulesClientContext,
   {
     id,
-    untrack = true,
+    untrack = false,
   }: {
     id: string;
     untrack?: boolean;
@@ -36,7 +36,7 @@ async function disableWithOCC(
   context: RulesClientContext,
   {
     id,
-    untrack = true,
+    untrack = false,
   }: {
     id: string;
     untrack?: boolean;

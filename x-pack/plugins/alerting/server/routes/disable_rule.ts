@@ -18,7 +18,7 @@ const paramSchema = schema.object({
 const bodySchema = schema.nullable(
   schema.maybe(
     schema.object({
-      untrack: schema.maybe(schema.boolean({ defaultValue: true })),
+      untrack: schema.maybe(schema.boolean({ defaultValue: false })),
     })
   )
 );
@@ -39,7 +39,7 @@ export const disableRuleRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
         const { id } = req.params;
-        const { untrack = true } = req.body || {};
+        const { untrack = false } = req.body || {};
         try {
           await rulesClient.disable({ id, untrack });
           return res.noContent();

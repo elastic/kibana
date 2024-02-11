@@ -236,6 +236,8 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
 
       await testSubjects.click('disableButton');
 
+      await testSubjects.click('untrackAlertsModalSwitch');
+
       await testSubjects.click('confirmModalConfirmButton');
 
       await header.waitUntilLoadingHasFinished();
@@ -275,8 +277,6 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       await testSubjects.click('collapsedItemActions');
 
       await testSubjects.click('disableButton');
-
-      await testSubjects.click('untrackAlertsModalSwitch');
 
       await testSubjects.click('confirmModalConfirmButton');
 

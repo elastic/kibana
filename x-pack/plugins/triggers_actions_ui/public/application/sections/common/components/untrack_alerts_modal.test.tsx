@@ -28,6 +28,8 @@ describe('Untrack alerts modal', () => {
   it('should track alerts', () => {
     render(<UntrackAlertsModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
 
+    fireEvent.click(screen.getByTestId('untrackAlertsModalSwitch'));
+
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
     expect(onConfirmMock).toHaveBeenCalledWith(true);
@@ -35,8 +37,6 @@ describe('Untrack alerts modal', () => {
 
   it('should untrack alerts', () => {
     render(<UntrackAlertsModal onCancel={onCancelMock} onConfirm={onConfirmMock} />);
-
-    fireEvent.click(screen.getByTestId('untrackAlertsModalSwitch'));
 
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 

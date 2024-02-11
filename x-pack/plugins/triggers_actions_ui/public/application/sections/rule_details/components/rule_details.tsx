@@ -300,7 +300,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
     setIsUntrackAlertsModalOpen(true);
   };
 
-  const onModalClose = () => {
+  const onDisableModalClose = () => {
     setIsUntrackAlertsModalOpen(false);
   };
 
@@ -310,7 +310,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
   };
 
   const onDisable = async (untrack: boolean) => {
-    onModalClose();
+    onDisableModalClose();
     await bulkDisableRules({ ids: [rule.id], untrack });
     requestRefresh();
   };
@@ -342,7 +342,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
         />
       )}
       {isUntrackAlertsModalOpen && (
-        <UntrackAlertsModal onCancel={onModalClose} onConfirm={onDisable} />
+        <UntrackAlertsModal onCancel={onDisableModalClose} onConfirm={onDisable} />
       )}
       <UpdateApiKeyModalConfirmation
         onCancel={() => {

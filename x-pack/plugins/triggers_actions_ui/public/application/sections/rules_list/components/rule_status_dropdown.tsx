@@ -128,16 +128,16 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
     setIsUntrackAlertsModalOpen(true);
   }, []);
 
-  const onModalClose = useCallback(() => {
+  const onDisableModalClose = useCallback(() => {
     setIsUntrackAlertsModalOpen(false);
   }, []);
 
   const onModalConfirm = useCallback(
     (untrack: boolean) => {
-      onModalClose();
+      onDisableModalClose();
       onDisable(untrack);
     },
-    [onModalClose, onDisable]
+    [onDisableModalClose, onDisable]
   );
 
   const onChangeEnabledStatus = useCallback(
@@ -262,7 +262,7 @@ export const RuleStatusDropdown: React.FunctionComponent<ComponentOpts> = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       {isUntrackAlertsModalOpen && (
-        <UntrackAlertsModal onConfirm={onModalConfirm} onCancel={onModalClose} />
+        <UntrackAlertsModal onConfirm={onModalConfirm} onCancel={onDisableModalClose} />
       )}
     </>
   );

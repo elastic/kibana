@@ -281,12 +281,19 @@ export const RulesListTable = (props: RulesListTableProps) => {
     [ruleTypeRegistry]
   );
 
+  const onDisableRuleInternal = useCallback(
+    (rule: RuleTableItem) => (untrack: boolean) => {
+      return onDisableRule(rule, untrack);
+    },
+    [onDisableRule]
+  );
+
   const renderRuleStatusDropdown = useCallback(
     (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
-          disableRule={async (untrack) => await onDisableRule(rule, untrack)}
+          disableRule={onDisableRuleInternal(rule)}
           enableRule={async () => await onEnableRule(rule)}
           snoozeRule={async () => {}}
           unsnoozeRule={async () => {}}
@@ -296,7 +303,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         />
       );
     },
-    [isRuleTypeEditableInContext, onDisableRule, onEnableRule, onRuleChanged]
+    [isRuleTypeEditableInContext, onDisableRuleInternal, onEnableRule, onRuleChanged]
   );
 
   const selectionColumn = useMemo(() => {

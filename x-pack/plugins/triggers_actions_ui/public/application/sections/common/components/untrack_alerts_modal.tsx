@@ -12,7 +12,7 @@ import { EuiConfirmModal, EuiSwitch, EuiSwitchEvent } from '@elastic/eui';
 const UNTRACK_ORPHANED_ALERTS_TITLE = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.title',
   {
-    defaultMessage: 'Untrack orphaned alerts',
+    defaultMessage: 'Disable rule',
   }
 );
 
@@ -33,7 +33,8 @@ const UNTRACK_ORPHANED_ALERTS_CANCEL_BUTTON_TEXT = i18n.translate(
 const UNTRACK_ORPHANED_ALERTS_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.toggleLabel',
   {
-    defaultMessage: 'Untrack orphaned alerts',
+    defaultMessage:
+      'When disabling, all alerts related to this rule will be updated to "Untracked"',
   }
 );
 
@@ -45,7 +46,7 @@ export interface UntrackAlertsModalProps {
 export const UntrackAlertsModal = (props: UntrackAlertsModalProps) => {
   const { onCancel, onConfirm } = props;
 
-  const [isUntrack, setIsUntrack] = useState<boolean>(true);
+  const [isUntrack, setIsUntrack] = useState<boolean>(false);
 
   const onChange = useCallback((e: EuiSwitchEvent) => {
     setIsUntrack(e.target.checked);
