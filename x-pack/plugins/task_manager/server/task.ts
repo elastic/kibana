@@ -50,6 +50,7 @@ export type SuccessfulRunResult = {
   state: Record<string, unknown>;
   taskRunError?: DecoratedError;
   skipAttempts?: number;
+  shouldValidate?: boolean;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {

@@ -14,8 +14,10 @@ import {
   I18nStart,
   CoreTheme,
   DocLinksStart,
+  CoreStart,
 } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 
 import { ObjectStorageClient } from '../../../../common/types';
 
@@ -62,10 +64,10 @@ interface ConsoleDependencies {
   trackUiMetric: MetricsTracker;
 }
 
-const loadDependencies = async ({
-  core,
-  usageCollection,
-}: EmbeddableConsoleDependencies): Promise<ConsoleDependencies> => {
+const loadDependencies = async (
+  core: CoreStart,
+  usageCollection?: UsageCollectionStart
+): Promise<ConsoleDependencies> => {
   const {
     docLinks: { DOC_LINK_VERSION, links },
     http,
@@ -107,10 +109,12 @@ const loadDependencies = async ({
   };
 };
 
-export const ConsoleWrapper = (props: EmbeddableConsoleDependencies): React.ReactElement => {
+type ConsoleWrapperProps = Omit<EmbeddableConsoleDependencies, 'setDispatch'>;
+
+export const ConsoleWrapper: React.FunctionComponent<ConsoleWrapperProps> = (props) => {
   const [dependencies, setDependencies] = useState<ConsoleDependencies | null>(null);
   useEffect(() => {
-    loadDependencies(props).then(setDependencies);
+    loadDependencies(props.core, props.usageCollection).then(setDependencies);
   }, [setDependencies, props]);
   useEffect(() => {
     return () => {
