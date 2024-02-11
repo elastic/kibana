@@ -7,13 +7,13 @@
 
 import { useBenchmarkDynamicValues } from './use_benchmark_dynamic_values';
 import { renderHook } from '@testing-library/react-hooks/dom';
-import * as useCspIntegrationLinkModule from '../navigation/use_csp_integration_link';
+import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
 
 jest.mock('../navigation/use_csp_integration_link');
 
 describe('useBenchmarkDynamicValues', () => {
   const setupMocks = (cspmIntegrationLink, kspmIntegrationLink) => {
-    useCspIntegrationLinkModule.useCspIntegrationLink
+    useCspIntegrationLink
       .mockReturnValueOnce(cspmIntegrationLink)
       .mockReturnValueOnce(kspmIntegrationLink);
   };
