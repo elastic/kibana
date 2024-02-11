@@ -192,6 +192,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
     <EuiFlexGroup direction="column">
       <EuiFlexItem>
         <EuiFieldSearch
+          data-test-subj="connectorRulesListSearch"
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.connectorRulesList.fieldSearch.label',
             { defaultMessage: 'Search rules' }
@@ -209,6 +210,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
       </EuiFlexItem>
       <EuiFlexItem>
         <EuiBasicTable
+          data-test-subj="connectorRulesList"
           loading={isLoading}
           items={rulesState.data}
           columns={columns}
@@ -232,6 +234,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
               setSort(changedSort);
             }
           }}
+          rowProps={{ 'data-test-subj': 'connectorRuleRow' }}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
