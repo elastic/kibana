@@ -450,57 +450,67 @@ describe('setAlertsToUntracked()', () => {
 
     expect(getAlertIndicesAliasMock).lastCalledWith(['test-rule-type'], 'default');
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((clusterClient.updateByQuery.mock.lastCall![0] as any).body.query).toEqual({
-      bool: {
-        must: [
-          {
-            term: {
-              'kibana.alert.status': {
-                value: 'active', // This has to be active
-              },
-            },
-          },
-        ],
-        filter: [
-          {
+    expect(clusterClient.updateByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          query: {
             bool: {
-              must: {
-                term: {
-                  'kibana.alert.rule.name': 'test',
+              must: [
+                {
+                  term: {
+                    'kibana.alert.status': {
+                      value: 'active', // This has to be active
+                    },
+                  },
                 },
-              },
+              ],
+              filter: [
+                {
+                  bool: {
+                    must: {
+                      term: {
+                        'kibana.alert.rule.name': 'test',
+                      },
+                    },
+                  },
+                },
+              ],
             },
           },
-        ],
-      },
-    });
+        }),
+      })
+    );
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    expect((clusterClient.search.mock.lastCall![0] as any).body.query).toEqual({
-      bool: {
-        must: [
-          {
-            term: {
-              'kibana.alert.status': {
-                value: 'untracked', // This has to be untracked
-              },
-            },
-          },
-        ],
-        filter: [
-          {
+    expect(clusterClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({
+          query: {
             bool: {
-              must: {
-                term: {
-                  'kibana.alert.rule.name': 'test',
+              must: [
+                {
+                  term: {
+                    'kibana.alert.status': {
+                      value: 'untracked', // This has to be untracked
+                    },
+                  },
                 },
-              },
+              ],
+              filter: [
+                {
+                  bool: {
+                    must: {
+                      term: {
+                        'kibana.alert.rule.name': 'test',
+                      },
+                    },
+                  },
+                },
+              ],
             },
           },
-        ],
-      },
-    });
+        }),
+      })
+    );
 
     expect(result).toEqual([
       {
