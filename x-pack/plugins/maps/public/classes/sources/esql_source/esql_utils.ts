@@ -7,8 +7,9 @@
 
 import { i18n } from '@kbn/i18n';
 import { lastValueFrom } from 'rxjs';
-import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
-import type { ESQLColumn } from '@kbn/es-types';
+import type { DataView } from '@kbn/data-plugin/common';
+import { getESQLAdHocDataview, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import type { ESQLColumn, ESQLSearchReponse } from '@kbn/es-types';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import { getData, getIndexPatternService } from '../../../kibana_services';
 
@@ -22,13 +23,6 @@ export const ESQL_GEO_POINT_TYPE = 'geo_point';
 // ESQL_GEO_SHAPE_TYPE is a column type from an ESQL response
 export const ESQL_GEO_SHAPE_TYPE = 'geo_shape';
 
-const NO_GEOMETRY_COLUMN_ERROR_MSG = i18n.translate(
-  'xpack.maps.source.esql.noGeometryColumnErrorMsg',
-  {
-    defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
-  }
-);
-
 export function isGeometryColumn(column: ESQLColumn) {
   return [ESQL_GEO_POINT_TYPE, ESQL_GEO_SHAPE_TYPE].includes(column.type);
 }
@@ -36,7 +30,11 @@ export function isGeometryColumn(column: ESQLColumn) {
 export function verifyGeometryColumn(columns: ESQLColumn[]) {
   const geometryColumns = columns.filter(isGeometryColumn);
   if (geometryColumns.length === 0) {
-    throw new Error(NO_GEOMETRY_COLUMN_ERROR_MSG);
+    throw new Error(
+      i18n.translate('xpack.maps.source.esql.noGeometryColumnErrorMsg', {
+        defaultMessage: 'Elasticsearch ES|QL query does not have a geometry column.',
+      })
+    );
   }
 
   if (geometryColumns.length > 1) {
@@ -51,19 +49,15 @@ export function verifyGeometryColumn(columns: ESQLColumn[]) {
   }
 }
 
-export function getGeometryColumnIndex(columns: ESQLColumn[]) {
-  const index = columns.findIndex(isGeometryColumn);
-  if (index === -1) {
-    throw new Error(NO_GEOMETRY_COLUMN_ERROR_MSG);
-  }
-  return index;
-}
-
 export async function getESQLMeta(esql: string) {
-  const fields = await getFields(esql);
+  const adhocDataView = await getESQLAdHocDataview(
+    getIndexPatternFromESQLQuery(esql),
+    getIndexPatternService()
+  );
   return {
     columns: await getColumns(esql),
-    ...fields,
+    adhocDataViewId: adhocDataView.id!,
+    ...getFields(adhocDataView),
   };
 }
 
@@ -104,7 +98,8 @@ async function getColumns(esql: string) {
       )
     );
 
-    return (resp.rawResponse as unknown as { columns: ESQLColumn[] }).columns;
+    const searchResponse = resp.rawResponse as unknown as ESQLSearchReponse;
+    return searchResponse.all_columns ? searchResponse.all_columns : searchResponse.columns;
   } catch (error) {
     throw new Error(
       i18n.translate('xpack.maps.source.esql.getColumnsErrorMsg', {
@@ -115,33 +110,19 @@ async function getColumns(esql: string) {
   }
 }
 
-export async function getFields(esql: string) {
+export function getFields(dataView: DataView) {
   const dateFields: string[] = [];
   const geoFields: string[] = [];
-  const pattern: string = getIndexPatternFromESQLQuery(esql);
-  try {
-    // TODO pass field type filter to getFieldsForWildcard when field type filtering is supported
-    (await getIndexPatternService().getFieldsForWildcard({ pattern })).forEach((field) => {
-      if (field.type === 'date') {
-        dateFields.push(field.name);
-      } else if (
-        field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
-        field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
-      ) {
-        geoFields.push(field.name);
-      }
-    });
-  } catch (error) {
-    throw new Error(
-      i18n.translate('xpack.maps.source.esql.getFieldsErrorMsg', {
-        defaultMessage: `Unable to load fields from index pattern: {pattern}. {errorMessage}`,
-        values: {
-          errorMessage: error.message,
-          pattern,
-        },
-      })
-    );
-  }
+  dataView.fields.forEach((field) => {
+    if (field.type === 'date') {
+      dateFields.push(field.name);
+    } else if (
+      field.type === ES_GEO_FIELD_TYPE.GEO_POINT ||
+      field.type === ES_GEO_FIELD_TYPE.GEO_SHAPE
+    ) {
+      geoFields.push(field.name);
+    }
+  });
 
   return {
     dateFields,

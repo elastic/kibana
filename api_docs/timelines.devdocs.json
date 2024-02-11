@@ -1529,6 +1529,14 @@
           },
           {
             "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
+          },
+          {
+            "plugin": "securitySolution",
             "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
           },
           {

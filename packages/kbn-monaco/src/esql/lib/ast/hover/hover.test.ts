@@ -14,6 +14,7 @@ import { AstListener } from '../ast_factory';
 import { getHoverItem } from './hover';
 import { getFunctionDefinition } from '../shared/helpers';
 import { getFunctionSignatures } from '../definitions/helpers';
+import { enrichModes } from '../definitions/settings';
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({
@@ -187,6 +188,16 @@ describe('hover', () => {
     testSuggestions(`from a | enrich policy`, 'policy', createPolicyContent);
     testSuggestions(`from a | enrich policy on b `, 'policy', createPolicyContent);
     testSuggestions(`from a | enrich policy on b `, 'non-policy', createPolicyContent);
+
+    describe('ccq mode', () => {
+      for (const mode of enrichModes.values) {
+        testSuggestions(
+          `from a | enrich ${enrichModes.prefix || ''}${mode.name}:policy`,
+          `${enrichModes.prefix || ''}${mode.name}`,
+          () => [enrichModes.description, `**${mode.name}**: ${mode.description}`]
+        );
+      }
+    });
   });
   describe('functions', () => {
     function createFunctionContent(fn: string) {
