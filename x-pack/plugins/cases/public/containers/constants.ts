@@ -63,6 +63,7 @@ export const casesMutationsKeys = {
   deleteFileAttachment: ['delete-file-attachment'] as const,
   bulkCreateAttachments: ['bulk-create-attachments'] as const,
   persistCaseConfiguration: ['persist-case-configuration'] as const,
+  replaceCustomField: ['replace-custom-field'] as const,
 };
 
 const DEFAULT_SEARCH_FIELDS = ['title', 'description'];
