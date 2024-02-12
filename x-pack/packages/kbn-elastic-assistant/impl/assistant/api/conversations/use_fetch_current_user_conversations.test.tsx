@@ -44,7 +44,7 @@ describe('useFetchCurrentUserConversations', () => {
       );
       await waitForNextUpdate();
       expect(defaultProps.http.fetch).toHaveBeenCalledWith(
-        '/api/elastic_assistant/conversations/current_user/_find',
+        '/api/elastic_assistant/current_user/conversations/_find',
         {
           method: 'GET',
           query: {
