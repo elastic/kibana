@@ -12,6 +12,7 @@ import { SQLLang } from './sql';
 import { monaco } from './monaco_imports';
 import { ESQL_THEME_ID, ESQLLang, buildESQlTheme } from './esql';
 import { YAML_LANG_ID } from './yaml';
+import { ShellLang } from './shell';
 import { registerLanguage, registerTheme } from './helpers';
 
 export const DEFAULT_WORKER_ID = 'default';
@@ -21,6 +22,7 @@ const langSpecificWorkerIds = [
   ESQLLang.ID,
   monaco.languages.json.jsonDefaults.languageId,
   YAML_LANG_ID,
+  ShellLang.ID,
 ];
 
 /**
@@ -30,6 +32,7 @@ registerLanguage(XJsonLang);
 registerLanguage(PainlessLang);
 registerLanguage(SQLLang);
 registerLanguage(ESQLLang);
+registerLanguage(ShellLang);
 
 /**
  * Register custom themes

@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-// Monaco languages support
-declare module 'monaco-editor/esm/vs/basic-languages/markdown/markdown';
-declare module 'monaco-editor/esm/vs/basic-languages/css/css';
-declare module 'monaco-editor/esm/vs/basic-languages/yaml/yaml';
-declare module 'monaco-editor/esm/vs/basic-languages/shell/shell';
+import { shellConf, shellLanguage } from '../monaco_imports';
+
+export { shellConf as languageConfiguration, shellLanguage as lexerRules };
