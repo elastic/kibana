@@ -30,7 +30,6 @@ export default function ({ getService }: FtrProviderContext) {
   const alertingApi = getService('alertingApi');
   const dataViewApi = getService('dataViewApi');
   let alertId: string;
-  let startedAt: string;
 
   describe('Custom Threshold rule - GROUP_BY - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
@@ -180,7 +179,6 @@ export default function ({ getService }: FtrProviderContext) {
           ruleId,
         });
         alertId = (resp.hits.hits[0]._source as any)['kibana.alert.uuid'];
-        startedAt = (resp.hits.hits[0]._source as any)['kibana.alert.start'];
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
