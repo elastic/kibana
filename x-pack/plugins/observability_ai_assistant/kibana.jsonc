@@ -25,7 +25,9 @@
       "ml"
     ],
     "requiredBundles": [ "kibanaReact", "kibanaUtils"],
-    "optionalPlugins": [],
+    "optionalPlugins": [
+      "cloud"
+    ],
     "extraPublicDirs": []
   }
 }
