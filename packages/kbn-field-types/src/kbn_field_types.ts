@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { createKbnFieldTypes, kbnFieldTypeUnknown } from './kbn_field_types_factory';
 import { KbnFieldType } from './kbn_field_type';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from './types';
@@ -49,3 +48,16 @@ export const castEsToKbnFieldTypeName = (esType: ES_FIELD_TYPES | string): KBN_F
  */
 export const getFilterableKbnTypeNames = (): string[] =>
   registeredKbnTypes.filter((type) => type.filterable).map((type) => type.name);
+
+export function esFieldTypeToKibanaFieldType(type: string) {
+  switch (type) {
+    case ES_FIELD_TYPES._INDEX:
+      return KBN_FIELD_TYPES.STRING;
+    case '_version':
+      return KBN_FIELD_TYPES.NUMBER;
+    case 'datetime':
+      return KBN_FIELD_TYPES.DATE;
+    default:
+      return castEsToKbnFieldTypeName(type);
+  }
+}

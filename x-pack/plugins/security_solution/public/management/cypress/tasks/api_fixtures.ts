@@ -69,6 +69,28 @@ export const loadRule = (body = {}, includeResponseActions = true) =>
                 params: { command: 'isolate', comment: 'Isolate host' },
                 action_type_id: '.endpoint',
               },
+              {
+                params: {
+                  command: 'suspend-process',
+                  comment: 'Suspend host',
+                  config: {
+                    field: 'entity_id',
+                    overwrite: false,
+                  },
+                },
+                action_type_id: '.endpoint',
+              },
+              {
+                params: {
+                  command: 'kill-process',
+                  comment: 'Kill host',
+                  config: {
+                    field: '',
+                    overwrite: true,
+                  },
+                },
+                action_type_id: '.endpoint',
+              },
             ],
           }
         : {}),

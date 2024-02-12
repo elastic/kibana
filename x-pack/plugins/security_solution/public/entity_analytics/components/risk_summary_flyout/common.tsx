@@ -8,17 +8,14 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { sumBy } from 'lodash/fp';
 
-import type {
-  HostRiskScore,
-  RiskStats,
-  UserRiskScore,
-} from '../../../../common/search_strategy/security_solution/risk_score';
+import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
 
 interface TableItem {
   category: string;
   count: number;
-  score: string;
+  score: number;
 }
 
 interface EntityData {
@@ -26,7 +23,9 @@ interface EntityData {
   risk: RiskStats;
 }
 
-export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
+export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<TableItem>> = (
+  showFooter
+) => [
   {
     field: 'category',
     name: (
@@ -38,6 +37,12 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
+    footer: showFooter ? (
+      <FormattedMessage
+        id="xpack.securitySolution.flyout.entityDetails.categoryColumnFooterLabel"
+        defaultMessage="Result"
+      />
+    ) : undefined,
   },
   {
     field: 'score',
@@ -51,6 +56,14 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     mobileOptions: { show: true },
     sortable: true,
     dataType: 'number',
+    align: 'right',
+    render: (score: number) => displayNumber(score),
+    footer: (props) =>
+      showFooter ? (
+        <span data-test-subj="risk-summary-result-score">
+          {displayNumber(sumBy((i) => i.score, props.items))}
+        </span>
+      ) : undefined,
   },
   {
     field: 'count',
@@ -64,25 +77,40 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     mobileOptions: { show: true },
     sortable: true,
     dataType: 'number',
+    align: 'right',
+    footer: (props) =>
+      showFooter ? (
+        <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+      ) : undefined,
   },
 ];
 
-export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
+export const getItems: (
+  entityData: EntityData | undefined,
+  isAssetCriticalityEnabled: boolean
+) => TableItem[] = (entityData, isAssetCriticalityEnabled) => {
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
         defaultMessage: 'Alerts',
       }),
-      score: displayNumber(entityData?.risk.category_1_score ?? 0),
+      score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
     },
-    {
-      category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
-        defaultMessage: 'Contexts',
-      }),
-      score: displayNumber(entityData?.risk.category_2_score ?? 0),
-      count: entityData?.risk.category_2_count ?? 0,
-    },
+    ...(isAssetCriticalityEnabled
+      ? [
+          {
+            category: i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.contextGroupLabel',
+              {
+                defaultMessage: 'Contexts',
+              }
+            ),
+            score: entityData?.risk.category_2_score ?? 0,
+            count: entityData?.risk.category_2_count ?? 0,
+          },
+        ]
+      : []),
   ];
 };
 
@@ -109,4 +137,6 @@ export const getEntityData = (
 const displayNumber = (num: number) => num.toFixed(2);
 
 export const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
+export const LENS_VISUALIZATION_MIN_WIDTH = 160; // Lens visualization min-width in pixels
+export const SUMMARY_TABLE_MIN_WIDTH = 180; // Summary table min-width in pixels
 export const LAST_30_DAYS = { from: 'now-30d', to: 'now' };

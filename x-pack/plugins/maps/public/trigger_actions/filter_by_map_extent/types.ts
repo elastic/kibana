@@ -8,5 +8,5 @@
 import type { HasDisableTriggers, HasParentApi, HasType } from '@kbn/presentation-publishing';
 import type { HasVisualizeConfig } from '@kbn/visualizations-plugin/public';
 
-export type FilterByMapExtentActionApi = HasType &
+export type FilterByMapExtentActionApi = HasType<'visualization' | 'map'> &
   Partial<HasDisableTriggers & HasParentApi<HasType> & HasVisualizeConfig>;
