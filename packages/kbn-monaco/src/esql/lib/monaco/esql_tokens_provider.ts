@@ -7,7 +7,7 @@
  */
 
 import { CharStreams, type Token } from 'antlr4ts';
-import { getLexer, ESQL_TOKEN_POSTFIX } from '@kbn/esql';
+import { getLexer, ESQL_TOKEN_POSTFIX } from '@kbn/esql-ast';
 import { monaco } from '../../../monaco_imports';
 import { ANTLREErrorListener } from '../../../common/error_listener';
 

@@ -7,7 +7,7 @@
  */
 
 import { euiThemeVars, darkMode } from '@kbn/ui-theme';
-import { ESQL_TOKEN_POSTFIX } from '@kbn/esql';
+import { ESQL_TOKEN_POSTFIX } from '@kbn/esql-ast';
 import { monaco } from '../../../monaco_imports';
 
 const buildRuleGroup = (tokens: string[], color: string, isBold: boolean = false) =>

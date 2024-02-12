@@ -4588,11 +4588,11 @@
   version "0.0.0"
   uid ""
 
-"@kbn/esql-utils@link:packages/kbn-esql-utils":
+"@kbn/esql-ast@link:packages/kbn-esql":
   version "0.0.0"
   uid ""
 
-"@kbn/esql@link:packages/kbn-esql":
+"@kbn/esql-utils@link:packages/kbn-esql-utils":
   version "0.0.0"
   uid ""
 

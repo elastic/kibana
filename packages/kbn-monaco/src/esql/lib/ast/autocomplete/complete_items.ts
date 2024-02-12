@@ -12,7 +12,7 @@ import {
   commandDefinitions,
   evalFunctionsDefinitions,
   statsAggregationFunctionDefinitions,
-} from '@kbn/esql';
+} from '@kbn/esql-ast';
 import type { AutocompleteCommandDefinition } from './types';
 import {
   getAutocompleteFunctionDefinition,

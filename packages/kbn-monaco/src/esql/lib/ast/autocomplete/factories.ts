@@ -20,7 +20,7 @@ import {
   shouldBeQuotedText,
   statsAggregationFunctionDefinitions,
   timeLiterals,
-} from '@kbn/esql';
+} from '@kbn/esql-ast';
 import { AutocompleteCommandDefinition } from './types';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 

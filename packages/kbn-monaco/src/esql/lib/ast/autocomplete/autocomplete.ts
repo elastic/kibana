@@ -50,7 +50,7 @@ import {
   type ESQLCommandOption,
   type ESQLFunction,
   type ESQLSingleAstItem,
-} from '@kbn/esql';
+} from '@kbn/esql-ast';
 import type { monaco } from '../../../../monaco_imports';
 import type { AutocompleteCommandDefinition } from './types';
 import {

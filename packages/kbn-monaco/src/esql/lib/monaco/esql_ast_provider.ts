@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { validateAst, type ESQLMessage, type ESQLCallbacks } from '@kbn/esql';
+import { validateAst, type ESQLMessage, type ESQLCallbacks } from '@kbn/esql-ast';
 import type { EditorError } from '../../../types';
 import { monaco } from '../../../monaco_imports';
 import type { ESQLWorker } from '../../worker/esql_worker';

@@ -29,7 +29,7 @@ SHARED_DEPS = [
 
 js_library(
   name = "kbn-esql",
-  package_name = "@kbn/esql",
+  package_name = "@kbn/esql-ast",
   srcs = ["package.json"] + SRCS,
   deps = SHARED_DEPS,
   visibility = ["//visibility:public"],

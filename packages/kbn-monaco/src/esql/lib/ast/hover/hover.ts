@@ -18,7 +18,7 @@ import {
   type ESQLCallbacks,
   getCommandDefinition,
   isSettingItem,
-} from '@kbn/esql';
+} from '@kbn/esql-ast';
 import type { monaco } from '../../../../monaco_imports';
 
 export async function getHoverItem(

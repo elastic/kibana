@@ -20,7 +20,7 @@ import {
   type AstProviderFn,
   type ESQLAst,
   type ESQLCommand,
-} from '@kbn/esql';
+} from '@kbn/esql-ast';
 import type { monaco } from '../../../../monaco_imports';
 
 type GetSourceFn = () => Promise<string[]>;

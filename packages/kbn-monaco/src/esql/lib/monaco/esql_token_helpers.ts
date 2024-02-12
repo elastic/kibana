@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ESQL_TOKEN_POSTFIX } from '@kbn/esql';
+import { ESQL_TOKEN_POSTFIX } from '@kbn/esql-ast';
 import { monaco } from '../../../monaco_imports';
 
 function nonNullable<T>(v: T): v is NonNullable<T> {
