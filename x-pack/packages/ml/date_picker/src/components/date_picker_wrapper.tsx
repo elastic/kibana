@@ -99,7 +99,7 @@ interface DatePickerWrapperProps {
    */
   needsUpdate?: boolean;
   /**
-   * Callback function that gets caleld
+   * Callback function that gets called
    * when EuiSuperDatePicker's 'Refresh'|'Update' button is clicked
    */
   onRefresh?: () => void;
