@@ -102,7 +102,7 @@ export interface BuildkiteTriggerStep {
     commit?: string; // The commit hash for the build.
     branch?: string; // The branch for the build.
     meta_data?: string; // A map of meta-data for the build.
-    env?: Record<string, string>; //	A map of environment variables for the build.
+    env?: Record<string, string>; // A map of environment variables for the build.
   };
   async?: boolean;
   branches?: string;
