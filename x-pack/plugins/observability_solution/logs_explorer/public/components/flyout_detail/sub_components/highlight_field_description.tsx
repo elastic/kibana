@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
-import { EcsFlat } from '@elastic/ecs/build/esm';
+import { EcsFlat } from '@elastic/ecs';
 import { FieldIcon } from '@kbn/react-field';
 import React from 'react';
 
