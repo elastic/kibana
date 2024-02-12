@@ -7,6 +7,7 @@
 
 import { RouteDependencies } from '../../plugin';
 
+import { registerAIPlaygroundRoutes } from './ai_playground';
 import { registerDocumentRoute } from './documents';
 import { registerIndexRoutes } from './indices';
 import { registerMappingRoute } from './mapping';
@@ -19,4 +20,5 @@ export const registerEnterpriseSearchRoutes = (dependencies: RouteDependencies) 
   registerSearchRoute(dependencies);
   registerDocumentRoute(dependencies);
   registerSearchApplicationsRoutes(dependencies);
+  registerAIPlaygroundRoutes(dependencies);
 };
