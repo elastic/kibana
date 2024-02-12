@@ -6,8 +6,10 @@
  * Side Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Saved queries', () => {
-    loadTestFile(require.resolve('./saved_queries'));
-  });
+export interface HasSupportedTriggers {
+  supportedTriggers: () => string[];
 }
+
+export const apiHasSupportedTriggers = (api: unknown | null): api is HasSupportedTriggers => {
+  return Boolean(api && typeof (api as HasSupportedTriggers).supportedTriggers === 'function');
+};
