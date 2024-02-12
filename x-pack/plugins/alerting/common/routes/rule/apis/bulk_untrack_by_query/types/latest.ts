@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformRequestBodyToApplication } from './v1';
+export type { BulkUntrackByQueryRequestBody } from './v1';

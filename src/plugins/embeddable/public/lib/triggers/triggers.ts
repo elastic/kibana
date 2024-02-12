@@ -13,6 +13,9 @@ import { Trigger, RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { BooleanRelation } from '@kbn/es-query';
 import { IEmbeddable } from '..';
 
+/**
+ * @deprecated use `EmbeddableApiContext` from `@kbn/presentation-publishing`
+ */
 export interface EmbeddableContext<T extends IEmbeddable = IEmbeddable> {
   embeddable: T;
 }
