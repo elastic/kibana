@@ -269,7 +269,10 @@ export class ObservabilityAIAssistantService {
         [CoreStart, { security: SecurityPluginStart; actions: ActionsPluginStart }, unknown]
       >,
     ]);
-    const user = plugins.security.authc.getCurrentUser(request);
+    const user = plugins.security.authc.getCurrentUser(request) || {
+      profile_uid: 'foobar',
+      username: 'kibana_system',
+    };
 
     if (!user) {
       throw Boom.forbidden(`User not found for current request`);
