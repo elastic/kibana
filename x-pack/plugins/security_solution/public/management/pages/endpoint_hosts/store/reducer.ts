@@ -141,7 +141,7 @@ export const endpointListReducer: StateReducer = (state = initialEndpointPageSta
   } else if (action.type === 'serverFinishedInitialization') {
     return {
       ...state,
-      isInitialized: true,
+      isInitialized: action.payload,
     };
   } else if (action.type === 'endpointPackageInfoStateChanged') {
     return handleEndpointPackageInfoStateChanged(state, action);

@@ -646,10 +646,8 @@ export const EndpointList = () => {
     handleCreatePolicyClick,
   ]);
 
-  const hideHeader = useMemo(
-    () => !(endpointsExist && isInitialized && !listError),
-    [endpointsExist, isInitialized, listError]
-  );
+  const hideHeader = !(endpointsExist && isInitialized && !listError);
+
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"

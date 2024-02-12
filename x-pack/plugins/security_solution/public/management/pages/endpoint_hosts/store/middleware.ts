@@ -418,6 +418,7 @@ async function endpointListMiddleware({
     if (await doEndpointsExist(http)) {
       dispatch({
         type: 'serverFinishedInitialization',
+        payload: true,
       });
       return;
     }
@@ -461,6 +462,7 @@ async function endpointListMiddleware({
 
   dispatch({
     type: 'serverFinishedInitialization',
+    payload: true,
   });
 }
 

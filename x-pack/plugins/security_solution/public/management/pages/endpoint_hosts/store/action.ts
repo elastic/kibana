@@ -80,6 +80,7 @@ export interface ServerReturnedEndpointAgentPolicies {
 
 export interface ServerFinishedInitialization {
   type: 'serverFinishedInitialization';
+  payload: boolean;
 }
 
 export interface ServerReturnedEndpointExistValue {
