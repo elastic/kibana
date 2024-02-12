@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from './types';
+import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext) => {
   describe('InfraOps App', function () {
