@@ -37,11 +37,6 @@ describe('MemWritable', () => {
 });
 
 describe('inlineToProjectZip', () => {
-  beforeEach(() => {
-    // Reset the mock implementation and clear any instances
-    jest.clearAllMocks();
-  });
-
   it('should return base64 encoded zip data', async () => {
     const inlineJourney = `
 step('goto', () => page.goto('https://elastic.co'));

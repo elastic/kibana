@@ -401,11 +401,11 @@ export class SyntheticsService {
         this.locations,
         async (location) => {
           if (bucketsByLocation[location.id].length > perBucket && output) {
-            const locMonitors: any = await Promise.all(
+            const locMonitors = await Promise.all(
               bucketsByLocation[location.id].splice(0, PER_PAGE).map(async (monitorData) => {
                 // no inline script data, sync without further processing
                 if (!monitorData?.['source.inline.script']) return monitorData;
-                // project content is already defined, this script was zipped at persist time
+                // project content is already truthy, this script was zipped at persist time
                 else if (!!monitorData?.[ConfigKey.SOURCE_PROJECT_CONTENT]) {
                   return {
                     ...monitorData,
