@@ -32,7 +32,7 @@ export function createCategoryRequest(
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
   additionalFilter?: CategorizationAdditionalFilter,
-  useStandardTokenizer?: boolean
+  useStandardTokenizer: boolean = true
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {

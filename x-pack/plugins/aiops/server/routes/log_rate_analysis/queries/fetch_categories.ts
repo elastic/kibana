@@ -79,7 +79,7 @@ export const getCategoryRequest = (
     wrap,
     undefined,
     undefined,
-    true
+    false
   );
 
   // In this case we're only interested in the aggregation which
