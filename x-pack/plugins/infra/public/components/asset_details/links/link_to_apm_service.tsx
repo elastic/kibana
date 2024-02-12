@@ -36,6 +36,7 @@ export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToAp
         <EuiBadge
           data-test-subj="serviceLink"
           color="hollow"
+          css={{ padding: '4px' }}
           href={linkProps.href as string}
           title={i18n.translate('xpack.infra.assetDetails.services.serviceButtonTitle', {
             defaultMessage: '{serviceName} last reported by {agentName}',
@@ -43,7 +44,7 @@ export const LinkToApmService = ({ serviceName, agentName, dateRange }: LinkToAp
           })}
         >
           {agentName ? (
-            <AgentIcon agentName={agentName as AgentName} size="l" css={{ marginRight: '2px' }} />
+            <AgentIcon agentName={agentName as AgentName} size="m" css={{ marginRight: '4px' }} />
           ) : null}
           <span data-test-subj={`serviceNameText-${serviceName}`}>{serviceName}</span>
         </EuiBadge>
