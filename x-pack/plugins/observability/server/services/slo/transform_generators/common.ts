@@ -6,12 +6,12 @@
  */
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import { KqlWithFiltersSchema } from '@kbn/slo-schema';
+import { QuerySchema, kqlQuerySchema } from '@kbn/slo-schema';
 import { InvalidTransformError } from '../../../errors';
 
-export function getElasticsearchQueryOrThrow(kuery: KqlWithFiltersSchema | undefined = '') {
+export function getElasticsearchQueryOrThrow(kuery: QuerySchema = '') {
   try {
-    if (typeof kuery === 'string') {
+    if (kqlQuerySchema.is(kuery)) {
       return toElasticsearchQuery(fromKueryExpression(kuery));
     } else {
       return buildEsQuery(

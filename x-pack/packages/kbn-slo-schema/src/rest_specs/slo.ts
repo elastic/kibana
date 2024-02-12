@@ -35,6 +35,7 @@ import {
   timesliceMetricDocCountMetric,
   timesliceMetricPercentileMetric,
   kqlWithFiltersSchema,
+  querySchema,
 } from '../schema';
 
 const createSLOParamsSchema = t.type({
@@ -338,6 +339,7 @@ type HistogramIndicator = t.OutputOf<typeof histogramIndicatorSchema>;
 type KQLCustomIndicator = t.OutputOf<typeof kqlCustomIndicatorSchema>;
 type GroupSummary = t.TypeOf<typeof groupSummarySchema>;
 type KqlWithFiltersSchema = t.TypeOf<typeof kqlWithFiltersSchema>;
+type QuerySchema = t.TypeOf<typeof querySchema>;
 
 export {
   createSLOParamsSchema,
@@ -414,4 +416,5 @@ export type {
   TimeWindow,
   GroupSummary,
   KqlWithFiltersSchema,
+  QuerySchema,
 };

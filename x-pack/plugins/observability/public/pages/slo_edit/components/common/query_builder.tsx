@@ -9,7 +9,7 @@ import { EuiFormRow } from '@elastic/eui';
 import React, { ReactNode } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
 import styled from 'styled-components';
-import { KqlWithFiltersSchema } from '@kbn/slo-schema';
+import { kqlQuerySchema } from '@kbn/slo-schema';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -68,57 +68,50 @@ export function QueryBuilder({
         rules={{
           required: Boolean(required) && Boolean(dataView),
         }}
-        render={({ field, fieldState }) => {
-          const existingValue = field.value as KqlWithFiltersSchema;
-
-          return (
-            <Container>
-              <SearchBar
-                appName="Observability"
-                dataTestSubj={dataTestSubj}
-                indexPatterns={dataView ? [dataView] : []}
-                isDisabled={!dataView}
-                placeholder={placeholder}
-                query={{
-                  query:
-                    typeof existingValue === 'string'
-                      ? String(existingValue)
-                      : existingValue.kqlQuery,
-                  language: 'kuery',
-                }}
-                onQuerySubmit={(value) => {
-                  if (typeof existingValue === 'string') {
-                    field.onChange(String(value.query?.query));
-                  } else {
-                    field.onChange({
-                      ...(existingValue ?? {}),
-                      kqlQuery: String(value.query?.query),
-                    });
-                  }
-                }}
-                onFiltersUpdated={(filters) => {
-                  if (typeof existingValue === 'string') {
-                    field.onChange({
-                      filters,
-                      kqlQuery: existingValue,
-                    });
-                  } else {
-                    field.onChange({
-                      ...(existingValue ?? {}),
-                      filters,
-                    });
-                  }
-                }}
-                showDatePicker={false}
-                showSubmitButton={false}
-                showQueryInput={true}
-                disableQueryLanguageSwitcher={true}
-                onClearSavedQuery={() => {}}
-                filters={typeof existingValue === 'string' ? [] : existingValue?.filters ?? []}
-              />
-            </Container>
-          );
-        }}
+        render={({ field, fieldState }) => (
+          <Container>
+            <SearchBar
+              appName="Observability"
+              dataTestSubj={dataTestSubj}
+              indexPatterns={dataView ? [dataView] : []}
+              isDisabled={!dataView}
+              placeholder={placeholder}
+              query={{
+                query: kqlQuerySchema.is(field.value) ? String(field.value) : field.value.kqlQuery,
+                language: 'kuery',
+              }}
+              onQuerySubmit={(value) => {
+                if (kqlQuerySchema.is(field.value)) {
+                  field.onChange(String(value.query?.query));
+                } else {
+                  field.onChange({
+                    ...(field.value ?? {}),
+                    kqlQuery: String(value.query?.query),
+                  });
+                }
+              }}
+              onFiltersUpdated={(filters) => {
+                if (kqlQuerySchema.is(field.value)) {
+                  field.onChange({
+                    filters,
+                    kqlQuery: field.value,
+                  });
+                } else {
+                  field.onChange({
+                    ...(field.value ?? {}),
+                    filters,
+                  });
+                }
+              }}
+              showDatePicker={false}
+              showSubmitButton={false}
+              showQueryInput={true}
+              disableQueryLanguageSwitcher={true}
+              onClearSavedQuery={() => {}}
+              filters={kqlQuerySchema.is(field.value) ? [] : field.value?.filters ?? []}
+            />
+          </Container>
+        )}
       />
     </EuiFormRow>
   );
