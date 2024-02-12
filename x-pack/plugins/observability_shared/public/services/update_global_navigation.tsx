@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { AppStatus, AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
+import { AppUpdater, ApplicationStart, AppDeepLink } from '@kbn/core/public';
 import { CasesDeepLinkId } from '@kbn/cases-plugin/public';
 import { casesFeatureId, sloFeatureId } from '../../common';
 
