@@ -87,7 +87,7 @@ export const commandDefinitions: CommandDefinition[] = [
       if (!command.args.length) {
         messages.push({
           location: command.location,
-          text: i18n.translate('monaco.esql.validation.statsNoArguments', {
+          text: i18n.translate('esql.validation.statsNoArguments', {
             defaultMessage: 'At least one aggregation or grouping expression required in [STATS]',
           }),
           type: 'error',
@@ -139,7 +139,7 @@ export const commandDefinitions: CommandDefinition[] = [
         if (!hasAggFunction && !hasAggFunctionWithinBuiltin && !hasAggFunctionWithinAssignment) {
           messages.push({
             location: command.location,
-            text: i18n.translate('monaco.esql.validation.noNestedArgumentSupport', {
+            text: i18n.translate('esql.validation.noNestedArgumentSupport', {
               defaultMessage:
                 "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [{name}] of type [{argType}]",
               values: {
@@ -233,7 +233,7 @@ export const commandDefinitions: CommandDefinition[] = [
         messages.push(
           ...wildcardItems.map((column) => ({
             location: (column as ESQLColumn).location,
-            text: i18n.translate('monaco.esql.validation.dropAllColumnsError', {
+            text: i18n.translate('esql.validation.dropAllColumnsError', {
               defaultMessage: 'Removing all fields is not allowed [*]',
             }),
             type: 'error' as const,
@@ -247,7 +247,7 @@ export const commandDefinitions: CommandDefinition[] = [
       if (droppingTimestamp) {
         messages.push({
           location: (droppingTimestamp as ESQLColumn).location,
-          text: i18n.translate('monaco.esql.validation.dropTimestampWarning', {
+          text: i18n.translate('esql.validation.dropTimestampWarning', {
             defaultMessage: 'Drop [@timestamp] will remove all time filters to the search results',
           }),
           type: 'warning',

@@ -40,7 +40,7 @@ export const metadataOption: CommandOptionsDefinition = {
     if (/\[metadata/i.test(command.text)) {
       messages.push({
         location: option.location,
-        text: i18n.translate('monaco.esql.validation.metadataBracketsDeprecation', {
+        text: i18n.translate('esql.validation.metadataBracketsDeprecation', {
           defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
         }),
         type: 'warning',
@@ -54,7 +54,7 @@ export const metadataOption: CommandOptionsDefinition = {
         if (!metadataFieldsAvailable.has(field.name)) {
           messages.push({
             location: field.location,
-            text: i18n.translate('monaco.esql.validation.wrongMetadataArgumentType', {
+            text: i18n.translate('esql.validation.wrongMetadataArgumentType', {
               defaultMessage:
                 'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
               values: {
@@ -127,7 +127,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
       const value = 'value' in firstArg ? firstArg.value : firstArg.name;
       messages.push({
         location: firstArg.location,
-        text: i18n.translate('monaco.esql.validation.wrongDissectOptionArgumentType', {
+        text: i18n.translate('esql.validation.wrongDissectOptionArgumentType', {
           defaultMessage:
             'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
           values: {
