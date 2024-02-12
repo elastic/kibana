@@ -16,7 +16,7 @@ function createNumericAggDefinition({
 }: {
   name: string;
   description: string;
-  args?: Array<{ name: string; type: string; value: string }>;
+  args?: Array<{ name: string; type: string; value: string; literalOnly?: boolean }>;
 }): FunctionDefinition {
   const extraParamsExample = args.length ? `, ${args.map(({ value }) => value).join(',')}` : '';
   return {
@@ -28,10 +28,11 @@ function createNumericAggDefinition({
       {
         params: [
           { name: 'column', type: 'number', noNestingFunctions: true },
-          ...args.map(({ name: paramName, type }) => ({
+          ...args.map(({ name: paramName, type, literalOnly }) => ({
             name: paramName,
             type,
             noNestingFunctions: true,
+            literalOnly,
           })),
         ],
         returnType: 'number',

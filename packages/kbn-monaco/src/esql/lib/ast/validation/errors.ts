@@ -223,6 +223,17 @@ function getMessageAndTypeFromId<K extends ErrorTypes>({
         }),
         type: 'error',
       };
+    case 'expectedConstant':
+      return {
+        message: i18n.translate('monaco.esql.validation.expectedConstantValue', {
+          defaultMessage: 'Argument of [{fn}] must be a constant, received [{given}]',
+          values: {
+            given: out.given,
+            fn: out.fn,
+          },
+        }),
+        type: 'error',
+      };
   }
   return { message: '' };
 }
@@ -251,4 +262,10 @@ export function createMessage(
     location,
     code: messageId,
   };
+}
+
+export function getUnknownTypeLabel() {
+  return i18n.translate('monaco.esql.validation.unknownColumnType', {
+    defaultMessage: 'Unknown type',
+  });
 }

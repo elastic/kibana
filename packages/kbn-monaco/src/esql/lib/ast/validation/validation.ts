@@ -52,7 +52,7 @@ import type {
   ESQLSingleAstItem,
   ESQLSource,
 } from '../types';
-import { getMessageFromId } from './errors';
+import { getMessageFromId, getUnknownTypeLabel } from './errors';
 import type { ESQLRealField, ESQLVariable, ReferenceMaps, ValidationResult } from './types';
 import type { ESQLCallbacks } from '../shared/types';
 import {
@@ -176,16 +176,41 @@ function validateFunctionColumnArg(
     if (actualArg.name) {
       const { hit: columnCheck, nameHit } = columnExists(actualArg, references);
       if (!columnCheck) {
-        messages.push(
-          getMessageFromId({
-            messageId: 'unknownColumn',
-            values: {
-              name: actualArg.name,
-            },
-            locations: actualArg.location,
-          })
-        );
+        if (argDef.literalOnly) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'expectedConstant',
+              values: {
+                fn: astFunction.name,
+                given: getUnknownTypeLabel(),
+              },
+              locations: actualArg.location,
+            })
+          );
+        } else {
+          messages.push(
+            getMessageFromId({
+              messageId: 'unknownColumn',
+              values: {
+                name: actualArg.name,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
       } else {
+        if (argDef.literalOnly) {
+          messages.push(
+            getMessageFromId({
+              messageId: 'expectedConstant',
+              values: {
+                fn: astFunction.name,
+                given: actualArg.name,
+              },
+              locations: actualArg.location,
+            })
+          );
+        }
         if (actualArg.name === '*') {
           // if function does not support wildcards return a specific error
           if (!('supportsWildcard' in argDef) || !argDef.supportsWildcard) {
