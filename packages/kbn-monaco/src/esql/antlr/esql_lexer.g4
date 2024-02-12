@@ -19,7 +19,6 @@ INLINESTATS : I N L I N E S T A T S     -> pushMode(EXPRESSION_MODE);
 KEEP : K E E P                          -> pushMode(PROJECT_MODE);
 LIMIT : L I M I T                       -> pushMode(EXPRESSION_MODE);
 MV_EXPAND : M V UNDERSCORE E X P A N D  -> pushMode(MVEXPAND_MODE);
-PROJECT : P R O J E C T                 -> pushMode(PROJECT_MODE);
 RENAME : R E N A M E                    -> pushMode(RENAME_MODE);
 ROW : R O W                             -> pushMode(EXPRESSION_MODE);
 SHOW : S H O W                          -> pushMode(SHOW_MODE);
@@ -218,7 +217,7 @@ FROM_WS
     : WS -> channel(HIDDEN)
     ;
 //
-// DROP, KEEP, PROJECT
+// DROP, KEEP
 //
 mode PROJECT_MODE;
 PROJECT_PIPE : PIPE -> type(PIPE), popMode;
@@ -299,7 +298,8 @@ fragment ENRICH_POLICY_NAME_BODY
     : ~[\\/?"<>| ,#\t\r\n:]
     ;
 ENRICH_POLICY_NAME
-    : (LETTER | DIGIT) ENRICH_POLICY_NAME_BODY*
+    // allow prefix for the policy to specify its resolution
+    : (ENRICH_POLICY_NAME_BODY+ COLON)? ENRICH_POLICY_NAME_BODY+
     ;
 
 ENRICH_QUOTED_IDENTIFIER

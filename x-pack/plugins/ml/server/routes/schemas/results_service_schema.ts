@@ -144,4 +144,5 @@ export const getAnomalyRecordsSchema = schema.object({
   latestMs: schema.number(),
   criteriaFields: schema.arrayOf(schema.any()),
   interval: schema.string(),
+  functionDescription: schema.maybe(schema.nullable(schema.string())),
 });
