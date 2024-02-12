@@ -5,7 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { EuiCode } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const flyoutContentLabel = i18n.translate('xpack.logsExplorer.flyoutDetail.label.message', {
   defaultMessage: 'Content breakdown',
@@ -19,6 +22,17 @@ export const resourceLabel = i18n.translate(
   'xpack.logsExplorer.dataTable.header.popover.resource',
   {
     defaultMessage: 'Resource',
+  }
+);
+
+export const actionsLabel = i18n.translate('xpack.logsExplorer.dataTable.header.popover.actions', {
+  defaultMessage: 'Actions',
+});
+
+export const actionsLabelLowerCase = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.popover.actions.lowercase',
+  {
+    defaultMessage: 'actions',
   }
 );
 
@@ -208,17 +222,21 @@ export const closeCellActionPopoverText = i18n.translate(
   }
 );
 
-export const contentHeaderTooltipParagraph1 = i18n.translate(
-  'xpack.logsExplorer.dataTable.header.content.tooltip.paragraph1',
-  {
-    defaultMessage: "Fields that provide information on the document's source, such as:",
-  }
+export const contentHeaderTooltipParagraph1 = (
+  <FormattedMessage
+    id="xpack.logsExplorer.dataTable.header.content.tooltip.paragraph1"
+    defaultMessage="Displays the document's {logLevel} and {message} fields."
+    values={{
+      logLevel: <strong>log.level</strong>,
+      message: <strong>message</strong>,
+    }}
+  />
 );
 
 export const contentHeaderTooltipParagraph2 = i18n.translate(
   'xpack.logsExplorer.dataTable.header.content.tooltip.paragraph2',
   {
-    defaultMessage: 'When the message field is empty, one of the following is displayed',
+    defaultMessage: 'When the message field is empty, one of the following is displayed:',
   }
 );
 
@@ -226,5 +244,65 @@ export const resourceHeaderTooltipParagraph = i18n.translate(
   'xpack.logsExplorer.dataTable.header.resource.tooltip.paragraph',
   {
     defaultMessage: "Fields that provide information on the document's source, such as:",
+  }
+);
+
+export const actionsHeaderTooltipParagraph = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.actions.tooltip.paragraph',
+  {
+    defaultMessage: 'Fields that provide actionable information, such as:',
+  }
+);
+
+export const actionsHeaderTooltipExpandAction = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.actions.tooltip.expand',
+  { defaultMessage: 'Expand log details' }
+);
+
+export const actionsHeaderTooltipMalformedAction = (
+  <FormattedMessage
+    id="xpack.logsExplorer.dataTable.controlColumn.actions.button.malformedDoc"
+    defaultMessage="Access to malformed doc with {ignoredProperty} field"
+    values={{
+      ignoredProperty: (
+        <EuiCode language="json" transparentBackground>
+          _ignored
+        </EuiCode>
+      ),
+    }}
+  />
+);
+
+export const actionsHeaderTooltipStacktraceAction = i18n.translate(
+  'xpack.logsExplorer.dataTable.header.actions.tooltip.stacktrace',
+  { defaultMessage: 'Access to available stacktraces based on:' }
+);
+
+export const malformedDocButtonLabelWhenPresent = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.actions.button.malformedDocPresent',
+  {
+    defaultMessage:
+      "This document couldn't be parsed correctly. Not all fields are properly populated",
+  }
+);
+
+export const malformedDocButtonLabelWhenNotPresent = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.actions.button.malformedDocNotPresent',
+  {
+    defaultMessage: 'All fields in this document were parsed correctly',
+  }
+);
+
+export const stacktraceAvailableControlButton = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.actions.button.stacktrace.available',
+  {
+    defaultMessage: 'Stacktraces available',
+  }
+);
+
+export const stacktraceNotAvailableControlButton = i18n.translate(
+  'xpack.logsExplorer.dataTable.controlColumn.actions.button.stacktrace.notAvailable',
+  {
+    defaultMessage: 'Stacktraces not available',
   }
 );
