@@ -141,8 +141,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [{ name: 'field', type: 'string' }],
-        infiniteParams: true,
-        minParams: 1,
+        minParams: 2,
         returnType: 'string',
         examples: ['from index | eval concatenated = concat(field1, "-", field2)'],
       },
@@ -561,8 +560,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [
           { name: 'field', type: 'date' },
           { name: 'buckets', type: 'number' },
-          { name: 'startDate', type: 'string' },
-          { name: 'endDate', type: 'string' },
+          { name: 'startDate', type: 'string', literalOnly: true },
+          { name: 'endDate', type: 'string', literalOnly: true },
         ],
         returnType: 'date',
         examples: [
@@ -573,8 +572,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         params: [
           { name: 'field', type: 'date' },
           { name: 'buckets', type: 'number' },
-          { name: 'startValue', type: 'number' },
-          { name: 'endValue', type: 'number' },
+          { name: 'startValue', type: 'number', literalOnly: true },
+          { name: 'endValue', type: 'number', literalOnly: true },
         ],
         returnType: 'number',
         examples: ['from index | eval bs = auto_bucket(salary, 20, 25324, 74999)'],

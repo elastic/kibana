@@ -4535,20 +4535,28 @@
       "error": true
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, stringField, stringField)",
+      "query": "from a_index | eval var = auto_bucket(dateField, numberField, \"a\", \"a\")",
+      "error": false
+    },
+    {
+      "query": "from a_index | eval auto_bucket(dateField, numberField, \"a\", \"a\")",
       "error": false
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, stringField, stringField)",
+      "error": true
+    },
+    {
+      "query": "from a_index | eval var = auto_bucket(dateField, numberField, 5, 5)",
       "error": false
     },
     {
-      "query": "from a_index | eval var = auto_bucket(dateField, numberField, numberField, numberField)",
+      "query": "from a_index | eval auto_bucket(dateField, numberField, 5, 5)",
       "error": false
     },
     {
       "query": "from a_index | eval auto_bucket(dateField, numberField, numberField, numberField)",
-      "error": false
+      "error": true
     },
     {
       "query": "from a_index | eval var = case(booleanField, stringField)",
@@ -7679,95 +7687,99 @@
       "error": true
     },
     {
-      "query": "from a_index | stats var = percentile(numberField, numberField)",
+      "query": "from a_index | stats var = percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(numberField, 5))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(percentile(numberField, 5))",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = round(percentile(numberField, 5)) + percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats round(percentile(numberField, 5)) + percentile(numberField, 5)",
       "error": false
     },
     {
       "query": "from a_index | stats percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(numberField, numberField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats round(percentile(numberField, numberField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var = round(percentile(numberField, numberField)) + percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats round(percentile(numberField, numberField)) + percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats percentile(numberField / 2, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(numberField / 2, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), percentile(numberField / 2, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField / 2, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField, numberField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats percentile(numberField, numberField) by round(numberField / 2)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var0 = percentile(numberField, numberField) by var1 = round(numberField / 2)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), percentile(numberField, numberField) by round(numberField / 2), ipField",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField, numberField) by var1 = round(numberField / 2), ipField",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), percentile(numberField, numberField) by round(numberField / 2), numberField / 2",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField, numberField) by var1 = round(numberField / 2), numberField / 2",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var = percentile(avg(numberField), avg(numberField))",
       "error": true
     },
     {
-      "query": "from a_index | stats percentile(avg(numberField), avg(numberField))",
+      "query": "from a_index | stats percentile(numberField / 2, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(numberField / 2, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), percentile(numberField / 2, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField / 2, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField, 5)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats percentile(numberField, 5) by round(numberField / 2)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var0 = percentile(numberField, 5) by var1 = round(numberField / 2)",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), percentile(numberField, 5) by round(numberField / 2), ipField",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField, 5) by var1 = round(numberField / 2), ipField",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), percentile(numberField, 5) by round(numberField / 2), numberField / 2",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats avg(numberField), var0 = percentile(numberField, 5) by var1 = round(numberField / 2), numberField / 2",
+      "error": false
+    },
+    {
+      "query": "from a_index | stats var = percentile(avg(numberField), 5)",
       "error": true
     },
     {
-      "query": "from a_index | stats percentile(stringField, stringField)",
+      "query": "from a_index | stats percentile(avg(numberField), 5)",
+      "error": true
+    },
+    {
+      "query": "from a_index | stats percentile(stringField, 5)",
       "error": true
     },
     {
@@ -7827,22 +7839,6 @@
       "error": false
     },
     {
-      "query": "from a_index | stats var = round(st_centroid(cartesianPointField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats round(st_centroid(cartesianPointField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var = round(st_centroid(cartesianPointField)) + st_centroid(cartesianPointField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats round(st_centroid(cartesianPointField)) + st_centroid(cartesianPointField)",
-      "error": false
-    },
-    {
       "query": "from a_index | stats var = st_centroid(avg(numberField))",
       "error": true
     },
@@ -7864,22 +7860,6 @@
     },
     {
       "query": "from a_index | stats st_centroid(geoPointField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var = round(st_centroid(geoPointField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats round(st_centroid(geoPointField))",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats var = round(st_centroid(geoPointField)) + st_centroid(geoPointField)",
-      "error": false
-    },
-    {
-      "query": "from a_index | stats round(st_centroid(geoPointField)) + st_centroid(geoPointField)",
       "error": false
     },
     {

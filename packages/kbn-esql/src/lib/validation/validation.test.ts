@@ -160,14 +160,22 @@ function getFieldMapping(
     useLiterals: true,
   }
 ) {
-  return params.map(({ name: _name, type, ...rest }) => {
+  const literalValues = {
+    string: `"a"`,
+    number: 5,
+  };
+  return params.map(({ name: _name, type, literalOnly, ...rest }) => {
     const typeString: string = type;
     if (fieldTypes.includes(typeString)) {
+      const fieldName =
+        literalOnly && typeString in literalValues
+          ? literalValues[typeString as keyof typeof literalValues]!
+          : getFieldName(typeString, {
+              useNestedFunction,
+              isStats: !useLiterals,
+            });
       return {
-        name: getFieldName(typeString, {
-          useNestedFunction,
-          isStats: !useLiterals,
-        }),
+        name: fieldName,
         type,
         ...rest,
       };
@@ -196,7 +204,15 @@ function generateWrongMappingForArgs(
   currentParams: FunctionDefinition['signatures'][number]['params'],
   values: { stringField: string; numberField: string; booleanField: string }
 ) {
-  const wrongFieldMapping = currentParams.map(({ name: _name, type, ...rest }, i) => {
+  const literalValues = {
+    string: `"a"`,
+    number: 5,
+  };
+  const wrongFieldMapping = currentParams.map(({ name: _name, literalOnly, type, ...rest }, i) => {
+    // this thing is complex enough, let's not make it harder for constants
+    if (literalOnly) {
+      return { name: literalValues[type as keyof typeof literalValues], type, ...rest };
+    }
     const typeString = type;
     const canBeFieldButNotString =
       fieldTypes.filter((t) => t !== 'string').includes(typeString) &&
@@ -222,6 +238,7 @@ function generateWrongMappingForArgs(
   };
 
   const expectedErrors = signatures[0].params
+    .filter(({ literalOnly }) => !literalOnly)
     .map(({ type }, i) => {
       const fieldName = wrongFieldMapping[i].name;
       if (
@@ -1173,6 +1190,32 @@ describe('validation logic', () => {
           }`,
           []
         );
+        if (params.some(({ literalOnly }) => literalOnly)) {
+          const fieldReplacedType = params
+            .filter(({ literalOnly }) => literalOnly)
+            .map(({ type }) => type);
+          // create the mapping without the literal flag
+          // this will make the signature wrong on purpose where in place on constants
+          // the arg will be a column of the same type
+          const fieldMappingWithoutLiterals = getFieldMapping(
+            params.map(({ literalOnly, ...rest }) => rest)
+          );
+          testErrorsAndWarnings(
+            `from a_index | eval ${
+              getFunctionSignatures(
+                {
+                  name,
+                  ...defRest,
+                  signatures: [{ params: fieldMappingWithoutLiterals, returnType }],
+                },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            fieldReplacedType.map(
+              (type) => `Argument of [${name}] must be a constant, received [${type}Field]`
+            )
+          );
+        }
 
         if (alias) {
           for (const otherName of alias) {
@@ -1579,70 +1622,53 @@ describe('validation logic', () => {
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
       for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
-        testErrorsAndWarnings(
-          `from a_index | stats var = ${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats ${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats var = round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          })`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          })`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats var = round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }) + ${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a_index | stats round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }) + ${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          []
-        );
+
+        const correctSignature = getFunctionSignatures(
+          { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+          { withTypes: false }
+        )[0].declaration;
+        testErrorsAndWarnings(`from a_index | stats var = ${correctSignature}`, []);
+        testErrorsAndWarnings(`from a_index | stats ${correctSignature}`, []);
+
+        if (returnType === 'number') {
+          testErrorsAndWarnings(`from a_index | stats var = round(${correctSignature})`, []);
+          testErrorsAndWarnings(`from a_index | stats round(${correctSignature})`, []);
+          testErrorsAndWarnings(
+            `from a_index | stats var = round(${correctSignature}) + ${correctSignature}`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a_index | stats round(${correctSignature}) + ${correctSignature}`,
+            []
+          );
+        }
+
+        if (params.some(({ literalOnly }) => literalOnly)) {
+          const fieldReplacedType = params
+            .filter(({ literalOnly }) => literalOnly)
+            .map(({ type }) => type);
+          // create the mapping without the literal flag
+          // this will make the signature wrong on purpose where in place on constants
+          // the arg will be a column of the same type
+          const fieldMappingWithoutLiterals = getFieldMapping(
+            params.map(({ literalOnly, ...rest }) => rest)
+          );
+          testErrorsAndWarnings(
+            `from a_index | stats ${
+              getFunctionSignatures(
+                {
+                  name,
+                  ...defRest,
+                  signatures: [{ params: fieldMappingWithoutLiterals, returnType }],
+                },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            fieldReplacedType.map(
+              (type) => `Argument of [${name}] must be a constant, received [${type}Field]`
+            )
+          );
+        }
 
         if (alias) {
           for (const otherName of alias) {
@@ -1746,6 +1772,13 @@ describe('validation logic', () => {
             useNestedFunction: true,
             useLiterals: false,
           });
+
+          const nestedAggsExpectedErrors = params
+            .filter(({ literalOnly }) => !literalOnly)
+            .map(
+              (_) =>
+                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
+            );
           testErrorsAndWarnings(
             `from a_index | stats var = ${
               getFunctionSignatures(
@@ -1757,10 +1790,7 @@ describe('validation logic', () => {
                 { withTypes: false }
               )[0].declaration
             }`,
-            params.map(
-              (_) =>
-                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
-            )
+            nestedAggsExpectedErrors
           );
           testErrorsAndWarnings(
             `from a_index | stats ${
@@ -1773,10 +1803,7 @@ describe('validation logic', () => {
                 { withTypes: false }
               )[0].declaration
             }`,
-            params.map(
-              (_) =>
-                `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [avg(numberField)] of type [number]`
-            )
+            nestedAggsExpectedErrors
           );
 
           const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
