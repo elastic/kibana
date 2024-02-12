@@ -37,7 +37,7 @@ import {
   LogicalBinaryContext,
   LogicalInContext,
   LogicalNotContext,
-  MetadataContext,
+  MetadataOptionContext,
   MvExpandCommandContext,
   NullLiteralContext,
   NumericArrayLiteralContext,
@@ -74,9 +74,8 @@ import {
   createColumnStar,
   wrapIdentifierAsArray,
   createPolicy,
-  createSettingTuple,
-  createLiteralString,
   isMissingText,
+  createSetting,
 } from './ast_helpers';
 import { getPosition } from './ast_position_utils';
 import type {
@@ -92,9 +91,9 @@ export function collectAllSourceIdentifiers(ctx: FromCommandContext): ESQLAstIte
 }
 
 function extractIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ) {
-  if (ctx instanceof MetadataContext) {
+  if (ctx instanceof MetadataOptionContext) {
     return wrapIdentifierAsArray(ctx.fromIdentifier());
   }
   if (ctx instanceof MvExpandCommandContext) {
@@ -114,32 +113,22 @@ function makeColumnsOutOfIdentifiers(identifiers: ParserRuleContext[]) {
 }
 
 export function collectAllColumnIdentifiers(
-  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataContext
+  ctx: KeepCommandContext | DropCommandContext | MvExpandCommandContext | MetadataOptionContext
 ): ESQLAstItem[] {
   const identifiers = extractIdentifiers(ctx);
   return makeColumnsOutOfIdentifiers(identifiers);
 }
 
 export function getPolicyName(ctx: EnrichCommandContext) {
-  if (!ctx._policyName || (ctx._policyName.text && /<missing /.test(ctx._policyName.text))) {
+  if (!ctx._policyName || !ctx._policyName.text || /<missing /.test(ctx._policyName.text)) {
     return [];
   }
-  return [createPolicy(ctx._policyName)];
-}
-
-export function getPolicySettings(ctx: EnrichCommandContext) {
-  if (!ctx.setting() || !ctx.setting().length) {
-    return [];
+  const policyComponents = ctx._policyName.text.split(':');
+  if (policyComponents.length > 1) {
+    const [setting, policyName] = policyComponents;
+    return [createSetting(ctx._policyName, setting), createPolicy(ctx._policyName, policyName)];
   }
-  return ctx.setting().map((setting) => {
-    const node = createSettingTuple(setting);
-    if (setting._name?.text && setting._value?.text) {
-      node.args.push(createLiteralString(setting._value)!);
-      return node;
-    }
-    // incomplete setting
-    return node;
-  });
+  return [createPolicy(ctx._policyName, policyComponents[0])];
 }
 
 export function getMatchField(ctx: EnrichCommandContext) {
@@ -277,7 +266,7 @@ function visitOperatorExpression(
   if (ctx instanceof ArithmeticUnaryContext) {
     const arg = visitOperatorExpression(ctx.operatorExpression());
     // this is a number sign thing
-    const fn = createFunction('multiply', ctx);
+    const fn = createFunction('*', ctx);
     fn.args.push(createFakeMultiplyLiteral(ctx));
     if (arg) {
       fn.args.push(arg);
@@ -443,7 +432,7 @@ function collectIsNullExpression(ctx: BooleanExpressionContext) {
     return [];
   }
   const negate = ctx.NOT();
-  const fnName = `${negate ? 'not_' : ''}is_null`;
+  const fnName = `is${negate ? ' not ' : ' '}null`;
   const fn = createFunction(fnName, ctx);
   const arg = visitValueExpression(ctx.valueExpression());
   if (arg) {

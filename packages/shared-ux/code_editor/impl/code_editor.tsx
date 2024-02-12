@@ -7,7 +7,6 @@
  */
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
-import { useResizeDetector } from 'react-resize-detector';
 import ReactMonacoEditor, {
   type MonacoEditorProps as ReactMonacoEditorProps,
 } from 'react-monaco-editor';
@@ -140,12 +139,21 @@ export interface CodeEditorProps {
    * Alternate text to display, when an attempt is made to edit read only content. (Defaults to "Cannot edit in read-only editor")
    */
   readOnlyMessage?: string;
+
+  /**
+   * Enables the editor to grow vertically to fit its content.
+   * This option overrides the `height` option.
+   */
+  fitToContent?: {
+    minLines?: number;
+    maxLines?: number;
+  };
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
   languageId,
   value,
-  onChange,
+  onChange: _onChange,
   width,
   height,
   options,
@@ -168,6 +176,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
     defaultMessage: 'Cannot edit in read-only editor',
   }),
+  fitToContent,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -189,7 +198,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const isReadOnly = options?.readOnly ?? false;
 
-  const _editor = useRef<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const [_editor, setEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
   const _placeholderWidget = useRef<PlaceholderWidget | null>(null);
   const isSuggestionMenuOpen = useRef(false);
   const editorHint = useRef<HTMLDivElement>(null);
@@ -197,21 +206,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const [isHintActive, setIsHintActive] = useState(true);
 
-  const _updateDimensions = useCallback(() => {
-    _editor.current?.layout();
-  }, []);
-
-  useResizeDetector({
-    handleWidth: true,
-    handleHeight: true,
-    onResize: _updateDimensions,
-    refreshMode: 'debounce',
-  });
+  const onChange = useBug175684OnChange(_onChange);
 
   const startEditing = useCallback(() => {
     setIsHintActive(false);
-    _editor.current?.focus();
-  }, []);
+    _editor?.focus();
+  }, [_editor]);
 
   const stopEditing = useCallback(() => {
     setIsHintActive(true);
@@ -391,8 +391,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       remeasureFonts();
 
-      _editor.current = editor;
-
       const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
       if (textbox) {
         // Make sure the textarea is not directly accessible with TAB
@@ -435,6 +433,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       }
 
       editorDidMount?.(editor);
+      setEditor(editor);
     },
     [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
   );
@@ -454,16 +453,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (placeholder && !value && _editor.current) {
+    if (placeholder && !value && _editor) {
       // Mounts editor inside constructor
-      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor.current);
+      _placeholderWidget.current = new PlaceholderWidget(placeholder, euiTheme, _editor);
     }
 
     return () => {
       _placeholderWidget.current?.dispose();
       _placeholderWidget.current = null;
     };
-  }, [placeholder, value, euiTheme]);
+  }, [placeholder, value, euiTheme, _editor]);
+
+  useFitToContent({ editor: _editor, fitToContent, isFullScreen });
 
   const { CopyButton } = useCopy({ isCopyable, value });
 
@@ -512,7 +513,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           value={value}
           onChange={onChange}
           width={isFullScreen ? '100vw' : width}
-          height={isFullScreen ? '100vh' : height}
+          height={isFullScreen ? '100vh' : fitToContent ? undefined : height}
           editorWillMount={_editorWillMount}
           editorDidMount={_editorDidMount}
           editorWillUnmount={_editorWillUnmount}
@@ -639,4 +640,58 @@ const useCopy = ({ isCopyable, value }: { isCopyable: boolean; value: string }) 
   };
 
   return { showCopyButton, CopyButton };
+};
+
+const useFitToContent = ({
+  editor,
+  fitToContent,
+  isFullScreen,
+}: {
+  editor: monaco.editor.IStandaloneCodeEditor | null;
+  isFullScreen: boolean;
+  fitToContent?: { minLines?: number; maxLines?: number };
+}) => {
+  const isFitToContent = !!fitToContent;
+  const minLines = fitToContent?.minLines;
+  const maxLines = fitToContent?.maxLines;
+  useEffect(() => {
+    if (!editor) return;
+    if (isFullScreen) return;
+    if (!isFitToContent) return;
+
+    const updateHeight = () => {
+      const contentHeight = editor.getContentHeight();
+      const lineHeight = editor.getOption(monaco.editor.EditorOption.lineHeight);
+      const minHeight = (minLines ?? 1) * lineHeight;
+      let maxHeight = maxLines ? maxLines * lineHeight : contentHeight;
+      maxHeight = Math.max(minHeight, maxHeight);
+      editor.layout({
+        height: Math.min(maxHeight, Math.max(minHeight, contentHeight)),
+        width: editor.getLayoutInfo().width,
+      });
+    };
+    updateHeight();
+    const disposable = editor.onDidContentSizeChange(updateHeight);
+    return () => {
+      disposable.dispose();
+      editor.layout(); // reset the layout that was controlled by the fitToContent
+    };
+  }, [editor, isFitToContent, minLines, maxLines, isFullScreen]);
+};
+
+// https://github.com/elastic/kibana/issues/175684
+// 'react-monaco-editor' has a bug that it always calls the initial onChange callback, so the closure might become stale
+// we work this around by calling the latest onChange from props
+const useBug175684OnChange = (onChange: CodeEditorProps['onChange']) => {
+  const onChangePropRef = useRef<CodeEditorProps['onChange']>(onChange);
+  useEffect(() => {
+    onChangePropRef.current = onChange;
+  }, [onChange]);
+  const onChangeWrapper = useCallback<NonNullable<CodeEditorProps['onChange']>>((_value, event) => {
+    if (onChangePropRef.current) {
+      onChangePropRef.current(_value, event);
+    }
+  }, []);
+
+  return onChangeWrapper;
 };

@@ -183,6 +183,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
 
   table?: Datatable;
+  abortController?: AbortController;
 }
 
 export const UnifiedHistogramLayout = ({
@@ -223,6 +224,7 @@ export const UnifiedHistogramLayout = ({
   onBrushEnd,
   children,
   withDefaultActions,
+  abortController,
 }: UnifiedHistogramLayoutProps) => {
   const {
     allSuggestions,
@@ -311,6 +313,7 @@ export const UnifiedHistogramLayout = ({
     <>
       <InPortal node={topPanelNode}>
         <ChartMemoized
+          abortController={abortController}
           isChartAvailable={isChartAvailable}
           className={chartClassName}
           services={services}

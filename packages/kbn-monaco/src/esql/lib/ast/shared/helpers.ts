@@ -22,10 +22,8 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
-  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -219,10 +217,6 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-export function getCommandMode(settingName: CommandModeDefinition['name']) {
-  return [ccqMode].find(({ name }) => name === settingName);
-}
-
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {
   if (item.literalType !== 'string') {
     return argTypes === item.literalType;
@@ -304,10 +298,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (subArg.type === 'column') {
-        values.push(subArg.name);
-      }
-      if (subArg.type === 'timeInterval') {
+      if (isColumnItem(subArg) || isTimeIntervalItem(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {

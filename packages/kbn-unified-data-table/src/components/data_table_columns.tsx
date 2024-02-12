@@ -17,7 +17,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { ExpandButton } from './data_table_expand_button';
-import { CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
+import { ControlColumns, CustomGridColumnsConfiguration, UnifiedDataTableSettings } from '../types';
 import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
@@ -30,8 +30,11 @@ import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_c
 const DataTableColumnHeaderMemoized = React.memo(DataTableColumnHeader);
 const DataTableTimeColumnHeaderMemoized = React.memo(DataTableTimeColumnHeader);
 
+export const OPEN_DETAILS = 'openDetails';
+export const SELECT_ROW = 'select';
+
 const openDetails = {
-  id: 'openDetails',
+  id: OPEN_DETAILS,
   width: 26,
   headerCellRender: () => (
     <EuiScreenReaderOnly>
@@ -46,7 +49,7 @@ const openDetails = {
 };
 
 const select = {
-  id: 'select',
+  id: SELECT_ROW,
   width: 24,
   rowCellRender: SelectButton,
   headerCellRender: () => (
@@ -59,6 +62,13 @@ const select = {
     </EuiScreenReaderOnly>
   ),
 };
+
+export function getAllControlColumns(): ControlColumns {
+  return {
+    [SELECT_ROW]: select,
+    [OPEN_DETAILS]: openDetails,
+  };
+}
 
 export function getLeadControlColumns(canSetExpandedDoc: boolean) {
   if (!canSetExpandedDoc) {

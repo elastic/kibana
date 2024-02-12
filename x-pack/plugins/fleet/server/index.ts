@@ -11,7 +11,6 @@ export { buildAgentStatusRuntimeField } from './services/agents/build_status_run
 export type {
   AgentService,
   AgentClient,
-  ESIndexPatternService,
   PackageService,
   PackageClient,
   AgentPolicyServiceInterface,

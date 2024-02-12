@@ -148,5 +148,8 @@ export const THREAT_TECHNIQUE = '[data-test-subj="threatTechniqueLink"]';
 
 export const THREAT_SUBTECHNIQUE = '[data-test-subj="threatSubtechniqueLink"]';
 
+export const ALERT_SUPPRESSION_INSUFFICIENT_LICENSING_ICON =
+  '[data-test-subj="alertSuppressionInsufficientLicensingIcon"]';
+
 export const HIGHLIGHTED_ROWS_IN_TABLE =
   '[data-test-subj="euiDataGridBody"] .alertsTableHighlightedRow';
