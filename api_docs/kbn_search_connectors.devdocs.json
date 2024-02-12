@@ -2226,6 +2226,91 @@
       },
       {
         "parentPluginId": "@kbn/search-connectors",
+        "id": "def-common.updateConnectorSecret",
+        "type": "Function",
+        "tags": [],
+        "label": "updateConnectorSecret",
+        "description": [],
+        "signature": [
+          "(client: ",
+          {
+            "pluginId": "@kbn/core-elasticsearch-server",
+            "scope": "common",
+            "docId": "kibKbnCoreElasticsearchServerPluginApi",
+            "section": "def-common.ElasticsearchClient",
+            "text": "ElasticsearchClient"
+          },
+          ", value: string, secretId: string) => Promise<",
+          {
+            "pluginId": "@kbn/search-connectors",
+            "scope": "common",
+            "docId": "kibKbnSearchConnectorsPluginApi",
+            "section": "def-common.ConnectorsAPIUpdateResponse",
+            "text": "ConnectorsAPIUpdateResponse"
+          },
+          ">"
+        ],
+        "path": "packages/kbn-search-connectors/lib/update_connector_secret.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorSecret.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "client",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-elasticsearch-server",
+                "scope": "common",
+                "docId": "kibKbnCoreElasticsearchServerPluginApi",
+                "section": "def-common.ElasticsearchClient",
+                "text": "ElasticsearchClient"
+              }
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorSecret.$2",
+            "type": "string",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/search-connectors",
+            "id": "def-common.updateConnectorSecret.$3",
+            "type": "string",
+            "tags": [],
+            "label": "secretId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-search-connectors/lib/update_connector_secret.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-connectors",
         "id": "def-common.updateConnectorServiceType",
         "type": "Function",
         "tags": [],
