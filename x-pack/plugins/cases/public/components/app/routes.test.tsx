@@ -31,8 +31,6 @@ jest.mock('../configure_cases', () => ({
   ConfigureCases: () => <div>{'Settings'}</div>,
 }));
 
-const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
-
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/cases'],
   permissions?: CasesPermissions
@@ -62,8 +60,8 @@ for (let i = 0; i <= 200; i = i + 1) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/163263
-    describe.skip('Case view', () => {
-      it.each(getCaseViewPaths())(
+    describe('Case view', () => {
+      it.each(['/cases/test-id', '/cases/test-id/comment-id'])(
         'navigates to the cases view page for path: %s',
         async (path: string) => {
           renderWithRouter([path]);
@@ -72,7 +70,7 @@ for (let i = 0; i <= 200; i = i + 1) {
         }
       );
 
-      it.each(getCaseViewPaths())(
+      it.each(['/cases/test-id', '/cases/test-id/comment-id'])(
         'user can navigate to the cases view page with read permissions and path: %s',
         async (path: string) => {
           renderWithRouter([path], readCasesPermissions());
