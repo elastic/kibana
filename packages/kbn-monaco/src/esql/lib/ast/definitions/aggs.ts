@@ -87,7 +87,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     description: i18n.translate('monaco.esql.definitions.percentiletDoc', {
       defaultMessage: 'Returns the n percentile of a field.',
     }),
-    args: [{ name: 'percentile', type: 'number', value: '90' }],
+    args: [{ name: 'percentile', type: 'number', value: '90', literalOnly: true }],
   },
 ]
   .map(createNumericAggDefinition)

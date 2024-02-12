@@ -22,6 +22,7 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import capitalize from 'lodash/capitalize';
 import { EditorError } from '../../../../types';
 import { camelCase } from 'lodash';
+import { nonNullable } from '../ast_helpers';
 
 const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_point', 'geo_point'];
 
@@ -174,6 +175,52 @@ function getFieldMapping(
     }
     return { name: 'stringField', type, ...rest };
   });
+}
+
+function generateWrongMappingForArgs(
+  name: string,
+  signatures: FunctionDefinition['signatures'],
+  currentParams: FunctionDefinition['signatures'][number]['params'],
+  values: { stringField: string; numberField: string; booleanField: string }
+) {
+  const wrongFieldMapping = currentParams.map(({ name: _name, type, ...rest }, i) => {
+    const typeString = type;
+    const canBeFieldButNotString =
+      fieldTypes.filter((t) => t !== 'string').includes(typeString) &&
+      signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string');
+    const canBeFieldButNotNumber =
+      fieldTypes.filter((t) => t !== 'number').includes(typeString) &&
+      signatures.every(({ params: fnParams }) => fnParams[i].type !== 'number');
+    const isLiteralType = /literal$/.test(typeString);
+    // pick a field name purposely wrong
+    const nameValue =
+      canBeFieldButNotString || isLiteralType
+        ? values.stringField
+        : canBeFieldButNotNumber
+        ? values.numberField
+        : values.booleanField;
+    return { name: nameValue, type, ...rest };
+  });
+
+  const generatedFieldTypes = {
+    [values.stringField]: 'string',
+    [values.numberField]: 'number',
+    [values.booleanField]: 'boolean',
+  };
+
+  const expectedErrors = signatures[0].params
+    .map(({ type }, i) => {
+      const fieldName = wrongFieldMapping[i].name;
+      if (
+        fieldName === 'numberField' &&
+        signatures.every(({ params: fnParams }) => fnParams[i].type !== 'string')
+      ) {
+        return;
+      }
+      return `Argument of [${name}] must be [${type}], found value [${fieldName}] type [${generatedFieldTypes[fieldName]}]`;
+    })
+    .filter(nonNullable);
+  return { wrongFieldMapping, expectedErrors };
 }
 
 describe('validation logic', () => {
@@ -449,26 +496,11 @@ describe('validation logic', () => {
 
           testErrorsAndWarnings(`row var = ${signatureString}`, []);
 
-          const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
-            const typeString = type;
-            const canBeFieldButNotString = [
-              'number',
-              'date',
-              'boolean',
-              'ip',
-              'cartesian_point',
-              'geo_point',
-            ].includes(typeString);
-            const isLiteralType = /literal$/.test(typeString);
-            // pick a field name purposely wrong
-            const nameValue = canBeFieldButNotString || isLiteralType ? '"a"' : '5';
-            return { name: nameValue, type, ...rest };
-          });
-          const expectedErrors = params.map(
-            ({ type }, i) =>
-              `Argument of [${name}] must be [${type}], found value [${
-                wrongFieldMapping[i].name
-              }] type [${wrongFieldMapping[i].name === '5' ? 'number' : 'string'}]`
+          const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+            name,
+            signatures,
+            params,
+            { stringField: '"a"', numberField: '5', booleanField: 'true' }
           );
           const wrongSignatureString = tweakSignatureForRowCommand(
             getFunctionSignatures(
@@ -958,26 +990,17 @@ describe('validation logic', () => {
         // now test that validation is working also inside each function
         // put a number field where a string is expected and viceversa
         // then test an error is returned
-        const incorrectMapping = params
-          .filter(({ optional }) => !optional)
-          .map(({ type }) =>
-            type === 'string' ? { name: `numberField`, type } : { name: 'stringField', type }
-          );
-
-        const expectedErrors = params
-          .filter(({ optional }) => !optional)
-          .map(({ name: argName, type }) => {
-            const actualValue =
-              type === 'string'
-                ? { name: `numberField`, type: 'number' }
-                : { name: 'stringField', type: 'string' };
-            return `Argument of [${name}] must be [${type}], found value [${actualValue.name}] type [${actualValue.type}]`;
-          });
+        const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+          name,
+          signatures,
+          params,
+          { stringField: 'stringField', numberField: 'numberField', booleanField: 'booleanField' }
+        );
         testErrorsAndWarnings(
           `from a | where ${returnType !== 'number' ? 'length(' : ''}${
             // hijacking a bit this function to produce a function call
             getFunctionSignatures(
-              { name, ...rest, signatures: [{ params: incorrectMapping, returnType }] },
+              { name, ...rest, signatures: [{ params: wrongFieldMapping, returnType }] },
               { withTypes: false }
             )[0].declaration
           }${returnType !== 'number' ? ')' : ''} > 0`,
@@ -1131,22 +1154,11 @@ describe('validation logic', () => {
             }`
           );
 
-          const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
-            const typeString = type;
-            const canBeFieldButNotString = fieldTypes
-              .filter((t) => t !== 'string')
-              .includes(typeString);
-            const isLiteralType = /literal$/.test(typeString);
-            // pick a field name purposely wrong
-            const nameValue =
-              canBeFieldButNotString || isLiteralType ? 'stringField' : 'numberField';
-            return { name: nameValue, type, ...rest };
-          });
-          const expectedErrors = params.map(
-            ({ type }, i) =>
-              `Argument of [${name}] must be [${type}], found value [${
-                wrongFieldMapping[i].name
-              }] type [${wrongFieldMapping[i].name.replace('Field', '')}]`
+          const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+            name,
+            signatures,
+            params,
+            { stringField: 'stringField', numberField: 'numberField', booleanField: 'booleanField' }
           );
           testErrorsAndWarnings(
             `from a | eval ${
@@ -1500,7 +1512,7 @@ describe('validation logic', () => {
     ]);
 
     for (const { name, alias, signatures, ...defRest } of statsAggregationFunctionDefinitions) {
-      for (const [signatureIndex, { params, returnType }] of Object.entries(signatures)) {
+      for (const { params, returnType } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a | stats var = ${
@@ -1699,27 +1711,11 @@ describe('validation logic', () => {
             )
           );
           // and the message is case of wrong argument type is passed
-          const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
-            const typeString = type;
-            const canBeFieldButNotString = fieldTypes
-              .filter((t) => t !== 'string')
-              .includes(typeString);
-            const isLiteralType = /literal$/.test(typeString);
-            // pick a field name purposely wrong
-            const nameValue =
-              canBeFieldButNotString || isLiteralType ? 'stringField' : 'numberField';
-            return { name: nameValue, type, ...rest };
-          });
-
-          const expectedErrors = params.map(
-            ({ type }, i) =>
-              `Argument of [${name}] must be [${
-                // If the function has multiple signatures and all fail, then only
-                // one error will be reported for the first signature type
-                +signatureIndex > 0 ? signatures[0].params[i].type : type
-              }], found value [${wrongFieldMapping[i].name}] type [${wrongFieldMapping[
-                i
-              ].name.replace('Field', '')}]`
+          const { wrongFieldMapping, expectedErrors } = generateWrongMappingForArgs(
+            name,
+            signatures,
+            params,
+            { stringField: 'stringField', numberField: 'numberField', booleanField: 'booleanField' }
           );
           testErrorsAndWarnings(
             `from a | stats ${
