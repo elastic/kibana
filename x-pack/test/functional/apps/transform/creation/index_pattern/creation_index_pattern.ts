@@ -23,6 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['discover']);
 
   // Failing: See https://github.com/elastic/kibana/issues/151889
+  // Failing: See https://github.com/elastic/kibana/issues/151811
   describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
