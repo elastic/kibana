@@ -842,7 +842,7 @@ export const RuleForm = ({
               content={
                 <FormattedMessage
                   id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                  defaultMessage="Define how many consecutive rule runs should meet the condition before creating the alert."
+                  defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
                 />
               }
             />,
