@@ -67,14 +67,8 @@ export interface ChromeNavLink {
   readonly href: string;
 
   /**
-   * Disables a link from being clickable.
-   *
-   * @internalRemarks
-   * This is only used by the ML and Graph plugins currently. They use this field
-   * to disable the nav link when the license is expired.
+   * List of locations where the nav link should be visible.
    */
-  readonly disabled?: boolean;
-
   readonly visibleIn: AppDeepLinkLocations[];
 }
 
