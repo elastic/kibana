@@ -23,9 +23,9 @@ import type { SecurityLicense } from '../../common';
 import type { PluginStartDependencies } from '../plugin';
 
 export interface ManagementAppConfigType {
-  userManagementEnabled: boolean;
-  roleManagementEnabled: boolean;
-  roleMappingManagementEnabled: boolean;
+  userManagementEnabled?: boolean;
+  roleManagementEnabled?: boolean;
+  roleMappingManagementEnabled?: boolean;
 }
 
 interface SetupParams {

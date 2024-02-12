@@ -88,6 +88,7 @@ export const config: PluginConfigDescriptor<TypeOf<typeof ConfigSchema>> = {
     sameSiteCookies: true,
     showNavLinks: true,
     ui: true,
+    roleManagementEnabled: true,
   },
 };
 export const plugin: PluginInitializer<

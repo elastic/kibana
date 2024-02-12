@@ -11,12 +11,7 @@ export interface ConfigType {
   sameSiteCookies: 'Strict' | 'Lax' | 'None' | undefined;
   ui: {
     userManagementEnabled: boolean;
-    roleManagementEnabled: boolean;
     roleMappingManagementEnabled: boolean;
   };
-  serverlessOverrides: {
-    ui: {
-      roleManagementEnabled: boolean;
-    };
-  };
+  roleManagementEnabled: boolean;
 }

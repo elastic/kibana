@@ -226,6 +226,7 @@ describe('config schema', () => {
         "cookieName": "sid",
         "loginAssistanceMessage": "",
         "public": Object {},
+        "roleManagementEnabled": false,
         "secureCookies": false,
         "session": Object {
           "cleanupInterval": "PT1H",
@@ -235,7 +236,6 @@ describe('config schema', () => {
         "showInsecureClusterWarning": true,
         "showNavLinks": true,
         "ui": Object {
-          "roleManagementEnabled": true,
           "roleMappingManagementEnabled": true,
           "userManagementEnabled": true,
         },
@@ -1487,14 +1487,77 @@ describe('config schema', () => {
         ConfigSchema.validate(
           { authc: { http: { jwt: { taggedRoutesOnly: false } } } },
           { serverless: true }
-        ).ui
-      ).toMatchInlineSnapshot(`
-          Object {
-            "roleManagementEnabled": true,
-            "roleMappingManagementEnabled": true,
-            "userManagementEnabled": true,
-          }
-        `);
+        ).authc.http.jwt.taggedRoutesOnly
+      ).toEqual(false);
+    });
+  });
+
+  describe('roleManagementEnabled', () => {
+    it('should not allow xpack.security.roleManagementEnabled to be configured outside of the serverless context', () => {
+      expect(() =>
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: false }
+        )
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"[roleManagementEnabled]: a value wasn't expected to be present"`
+      );
+    });
+
+    it('should allow xpack.security.roleManagementEnabled to be configured inside of the serverless context', () => {
+      expect(
+        ConfigSchema.validate(
+          {
+            roleManagementEnabled: false,
+          },
+          { serverless: true }
+        ).roleManagementEnabled
+      ).toEqual(false);
+    });
+
+    describe('session', () => {
+      it('should throw error if xpack.security.session.cleanupInterval is less than 10 seconds', () => {
+        expect(() => ConfigSchema.validate({ session: { cleanupInterval: '9s' } })).toThrow(
+          '[session.cleanupInterval]: the value must be greater or equal to 10 seconds.'
+        );
+      });
+
+      it('should throw error if xpack.security.session.concurrentSessions.maxSessions is less than 1 or greater than 1000', () => {
+        expect(() =>
+          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: -1 } } })
+        ).toThrow(
+          '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+        );
+
+        expect(() =>
+          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 0 } } })
+        ).toThrow(
+          '[session.concurrentSessions.maxSessions]: Value must be equal to or greater than [1].'
+        );
+
+        expect(() =>
+          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 1001 } } })
+        ).toThrow(
+          '[session.concurrentSessions.maxSessions]: Value must be equal to or lower than [1000].'
+        );
+      });
+
+      it('can be successfully validate valid xpack.security.session.concurrentSessions.maxSessions', () => {
+        expect(
+          ConfigSchema.validate({ session: { concurrentSessions: { maxSessions: 3 } } }).session
+        ).toMatchInlineSnapshot(`
+        Object {
+          "cleanupInterval": "PT1H",
+          "concurrentSessions": Object {
+            "maxSessions": 3,
+          },
+          "idleTimeout": "P3D",
+          "lifespan": "P30D",
+        }
+      `);
+      });
     });
   });
 
@@ -1505,7 +1568,6 @@ describe('config schema', () => {
           {
             ui: {
               userManagementEnabled: false,
-              roleManagementEnabled: false,
               roleMappingManagementEnabled: false,
             },
           },
@@ -1520,7 +1582,6 @@ describe('config schema', () => {
           {
             ui: {
               userManagementEnabled: false,
-              roleManagementEnabled: false,
               roleMappingManagementEnabled: false,
             },
           },
@@ -1528,7 +1589,6 @@ describe('config schema', () => {
         ).ui
       ).toMatchInlineSnapshot(`
         Object {
-          "roleManagementEnabled": false,
           "roleMappingManagementEnabled": false,
           "userManagementEnabled": false,
         }

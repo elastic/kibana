@@ -35,6 +35,7 @@ import { AuthenticationService } from './authentication';
 import type { SecurityApiClients } from './components';
 import type { ConfigType } from './config';
 import { ManagementService, UserAPIClient } from './management';
+import type { ManagementAppConfigType } from './management/management_service';
 import { SecurityNavControlService } from './nav_control';
 import { SecurityCheckupService } from './security_checkup';
 import { SessionExpired, SessionTimeout, UnauthorizedResponseHttpInterceptor } from './session';
@@ -136,7 +137,7 @@ export class SecurityPlugin
         authc: this.authc,
         fatalErrors: core.fatalErrors,
         getStartServices: core.getStartServices,
-        uiConfig: this.config.ui,
+        uiConfig: buildManagementServiceUiConfigs(this.config),
       });
     }
 
@@ -187,7 +188,7 @@ export class SecurityPlugin
     if (management) {
       this.managementService.start({
         capabilities: application.capabilities,
-        uiConfig: this.config.ui,
+        uiConfig: buildManagementServiceUiConfigs(this.config),
       });
     }
 
@@ -238,4 +239,20 @@ export interface SecurityPluginStart extends SecurityPluginStartWithoutDeprecate
    * @deprecated
    */
   uiApi: UiApi;
+}
+
+function buildManagementServiceUiConfigs(config: ConfigType): ManagementAppConfigType | undefined {
+  let result;
+  const ui = config.ui;
+  const roleManagementEnabled = config.roleManagementEnabled;
+
+  if (ui) {
+    result = { ...ui };
+  }
+
+  if (roleManagementEnabled) {
+    result = { ...result, roleManagementEnabled };
+  }
+
+  return result;
 }
