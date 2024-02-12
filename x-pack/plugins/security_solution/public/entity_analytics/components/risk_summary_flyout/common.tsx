@@ -10,11 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { sumBy } from 'lodash/fp';
 
-import type {
-  HostRiskScore,
-  RiskStats,
-  UserRiskScore,
-} from '../../../../common/search_strategy/security_solution/risk_score';
+import type { HostRiskScore, RiskStats, UserRiskScore } from '../../../../common/search_strategy';
 
 interface TableItem {
   category: string;
@@ -27,7 +23,9 @@ interface EntityData {
   risk: RiskStats;
 }
 
-export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
+export const buildColumns: (showFooter: boolean) => Array<EuiBasicTableColumn<TableItem>> = (
+  showFooter
+) => [
   {
     field: 'category',
     name: (
@@ -39,12 +37,12 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     truncateText: false,
     mobileOptions: { show: true },
     sortable: true,
-    footer: (
+    footer: showFooter ? (
       <FormattedMessage
         id="xpack.securitySolution.flyout.entityDetails.categoryColumnFooterLabel"
         defaultMessage="Result"
       />
-    ),
+    ) : undefined,
   },
   {
     field: 'score',
@@ -60,11 +58,12 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     dataType: 'number',
     align: 'right',
     render: (score: number) => displayNumber(score),
-    footer: (props) => (
-      <span data-test-subj="risk-summary-result-score">
-        {displayNumber(sumBy((i) => i.score, props.items))}
-      </span>
-    ),
+    footer: (props) =>
+      showFooter ? (
+        <span data-test-subj="risk-summary-result-score">
+          {displayNumber(sumBy((i) => i.score, props.items))}
+        </span>
+      ) : undefined,
   },
   {
     field: 'count',
@@ -79,13 +78,17 @@ export const buildColumns: () => Array<EuiBasicTableColumn<TableItem>> = () => [
     sortable: true,
     dataType: 'number',
     align: 'right',
-    footer: (props) => (
-      <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
-    ),
+    footer: (props) =>
+      showFooter ? (
+        <span data-test-subj="risk-summary-result-count">{sumBy((i) => i.count, props.items)}</span>
+      ) : undefined,
   },
 ];
 
-export const getItems: (entityData: EntityData | undefined) => TableItem[] = (entityData) => {
+export const getItems: (
+  entityData: EntityData | undefined,
+  isAssetCriticalityEnabled: boolean
+) => TableItem[] = (entityData, isAssetCriticalityEnabled) => {
   return [
     {
       category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
@@ -94,13 +97,20 @@ export const getItems: (entityData: EntityData | undefined) => TableItem[] = (en
       score: entityData?.risk.category_1_score ?? 0,
       count: entityData?.risk.category_1_count ?? 0,
     },
-    {
-      category: i18n.translate('xpack.securitySolution.flyout.entityDetails.contextGroupLabel', {
-        defaultMessage: 'Contexts',
-      }),
-      score: entityData?.risk.category_2_score ?? 0,
-      count: entityData?.risk.category_2_count ?? 0,
-    },
+    ...(isAssetCriticalityEnabled
+      ? [
+          {
+            category: i18n.translate(
+              'xpack.securitySolution.flyout.entityDetails.contextGroupLabel',
+              {
+                defaultMessage: 'Contexts',
+              }
+            ),
+            score: entityData?.risk.category_2_score ?? 0,
+            count: entityData?.risk.category_2_count ?? 0,
+          },
+        ]
+      : []),
   ];
 };
 
