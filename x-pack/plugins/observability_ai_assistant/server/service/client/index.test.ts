@@ -16,6 +16,7 @@ import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { createResourceNamesMap } from '..';
 import { MessageRole, type Message } from '../../../common';
+import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
 import {
   ChatCompletionChunkEvent,
   ChatCompletionErrorCode,
@@ -63,7 +64,7 @@ function createLlmSimulator() {
         ],
       };
       await new Promise<void>((resolve, reject) => {
-        stream.write(`data: ${JSON.stringify(chunk)}\n`, undefined, (err) => {
+        stream.write(`data: ${JSON.stringify(chunk)}\n\n`, undefined, (err) => {
           return err ? reject(err) : resolve();
         });
       });
@@ -72,7 +73,7 @@ function createLlmSimulator() {
       if (stream.destroyed) {
         throw new Error('Stream is already destroyed');
       }
-      await new Promise((resolve) => stream.write('data: [DONE]', () => stream.end(resolve)));
+      await new Promise((resolve) => stream.write('data: [DONE]\n\n', () => stream.end(resolve)));
     },
     error: (error: Error) => {
       stream.destroy(error);
@@ -85,6 +86,7 @@ describe('Observability AI Assistant client', () => {
 
   const actionsClientMock: DeeplyMockedKeys<ActionsClient> = {
     execute: jest.fn(),
+    get: jest.fn(),
   } as any;
 
   const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -123,6 +125,15 @@ describe('Observability AI Assistant client', () => {
     functionClientMock.getFunctions.mockReturnValue([]);
     functionClientMock.hasFunction.mockImplementation((name) => {
       return name !== 'recall';
+    });
+
+    actionsClientMock.get.mockResolvedValue({
+      actionTypeId: ObservabilityAIAssistantConnectorType.OpenAI,
+      id: 'foo',
+      name: 'My connector',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
     });
 
     currentUserEsClientMock.search.mockResolvedValue({
@@ -491,6 +502,8 @@ describe('Observability AI Assistant client', () => {
 
       stream.on('data', dataHandler);
 
+      await nextTick();
+
       await llmSimulator.next({ content: 'Hello' });
 
       await llmSimulator.complete();
@@ -590,6 +603,8 @@ describe('Observability AI Assistant client', () => {
 
       stream.on('data', dataHandler);
 
+      await nextTick();
+
       await llmSimulator.next({ content: 'Hello' });
 
       await new Promise((resolve) =>
@@ -598,7 +613,7 @@ describe('Observability AI Assistant client', () => {
             error: {
               message: 'Connection unexpectedly closed',
             },
-          })}\n`,
+          })}\n\n`,
           resolve
         )
       );
@@ -693,6 +708,8 @@ describe('Observability AI Assistant client', () => {
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({
         content: 'Hello',
@@ -1259,6 +1276,8 @@ describe('Observability AI Assistant client', () => {
         await nextLlmCallPromise;
       }
 
+      await nextTick();
+
       await requestAlertsFunctionCall();
 
       await requestAlertsFunctionCall();
@@ -1347,6 +1366,8 @@ describe('Observability AI Assistant client', () => {
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
 

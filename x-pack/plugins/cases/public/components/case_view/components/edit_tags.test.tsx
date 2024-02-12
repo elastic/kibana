@@ -25,7 +25,8 @@ const defaultProps: EditTagsProps = {
   tags: [],
 };
 
-describe('EditTags ', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175655
+describe.skip('EditTags ', () => {
   let appMockRender: AppMockRenderer;
 
   const sampleTags = ['coke', 'pepsi'];
