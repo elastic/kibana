@@ -424,9 +424,9 @@ export const getIndexAccountStats = async (
       );
       if (foundStatsIndex !== -1) {
         // Update the object in cloudAccountsStats based on the object in cloudAccountsStatsForEnabledRules
-        cloudAccountsStats[foundStatsIndex]['posture_management_stats_enabled_rules'] =
-          statsEnabledRule['posture_management_stats'];
-        cloudAccountsStats[foundStatsIndex]['has_muted_rules'] = true;
+        cloudAccountsStats[foundStatsIndex].posture_management_stats_enabled_rules =
+          statsEnabledRule.posture_management_stats;
+        cloudAccountsStats[foundStatsIndex].has_muted_rules = true;
       }
     });
   }
