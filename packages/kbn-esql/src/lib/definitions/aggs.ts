@@ -48,44 +48,44 @@ function createNumericAggDefinition({
 export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
   {
     name: 'avg',
-    description: i18n.translate('monaco.esql.definitions.avgDoc', {
+    description: i18n.translate('esql.definitions.avgDoc', {
       defaultMessage: 'Returns the average of the values in a field',
     }),
   },
   {
     name: 'max',
-    description: i18n.translate('monaco.esql.definitions.maxDoc', {
+    description: i18n.translate('esql.definitions.maxDoc', {
       defaultMessage: 'Returns the maximum value in a field.',
     }),
   },
   {
     name: 'min',
-    description: i18n.translate('monaco.esql.definitions.minDoc', {
+    description: i18n.translate('esql.definitions.minDoc', {
       defaultMessage: 'Returns the minimum value in a field.',
     }),
   },
   {
     name: 'sum',
-    description: i18n.translate('monaco.esql.definitions.sumDoc', {
+    description: i18n.translate('esql.definitions.sumDoc', {
       defaultMessage: 'Returns the sum of the values in a field.',
     }),
   },
   {
     name: 'median',
-    description: i18n.translate('monaco.esql.definitions.medianDoc', {
+    description: i18n.translate('esql.definitions.medianDoc', {
       defaultMessage: 'Returns the 50% percentile.',
     }),
   },
   {
     name: 'median_absolute_deviation',
-    description: i18n.translate('monaco.esql.definitions.medianDeviationDoc', {
+    description: i18n.translate('esql.definitions.medianDeviationDoc', {
       defaultMessage:
         'Returns the median of each data point’s deviation from the median of the entire sample.',
     }),
   },
   {
     name: 'percentile',
-    description: i18n.translate('monaco.esql.definitions.percentiletDoc', {
+    description: i18n.translate('esql.definitions.percentiletDoc', {
       defaultMessage: 'Returns the n percentile of a field.',
     }),
     args: [{ name: 'percentile', type: 'number', value: '90', literalOnly: true }],
@@ -96,7 +96,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     {
       name: 'count',
       type: 'agg',
-      description: i18n.translate('monaco.esql.definitions.countDoc', {
+      description: i18n.translate('esql.definitions.countDoc', {
         defaultMessage: 'Returns the count of the values in a field.',
       }),
       supportedCommands: ['stats'],
@@ -119,7 +119,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     {
       name: 'count_distinct',
       type: 'agg',
-      description: i18n.translate('monaco.esql.definitions.countDistinctDoc', {
+      description: i18n.translate('esql.definitions.countDistinctDoc', {
         defaultMessage: 'Returns the count of distinct values in a field.',
       }),
       supportedCommands: ['stats'],
@@ -137,7 +137,7 @@ export const statsAggregationFunctionDefinitions: FunctionDefinition[] = [
     {
       name: 'st_centroid',
       type: 'agg',
-      description: i18n.translate('monaco.esql.definitions.stCentroidDoc', {
+      description: i18n.translate('esql.definitions.stCentroidDoc', {
         defaultMessage: 'Returns the count of distinct values in a field.',
       }),
       supportedCommands: ['stats'],

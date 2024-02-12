@@ -12,97 +12,97 @@ import type { Literals } from './types';
 export const timeLiterals: Literals[] = [
   {
     name: 'year',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.year', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.year', {
       defaultMessage: 'Year',
     }),
   },
   {
     name: 'years',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.years', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.years', {
       defaultMessage: 'Years (Plural)',
     }),
   },
   {
     name: 'month',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.month', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.month', {
       defaultMessage: 'Month',
     }),
   },
   {
     name: 'months',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.months', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.months', {
       defaultMessage: 'Months (Plural)',
     }),
   },
   {
     name: 'week',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.week', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.week', {
       defaultMessage: 'Week',
     }),
   },
   {
     name: 'weeks',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.weeks', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.weeks', {
       defaultMessage: 'Weeks (Plural)',
     }),
   },
   {
     name: 'day',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.day', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.day', {
       defaultMessage: 'Day',
     }),
   },
   {
     name: 'days',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.days', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.days', {
       defaultMessage: 'Days (Plural)',
     }),
   },
   {
     name: 'hour',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.hour', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.hour', {
       defaultMessage: 'Hour',
     }),
   },
   {
     name: 'hours',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.hours', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.hours', {
       defaultMessage: 'Hours (Plural)',
     }),
   },
   {
     name: 'minute',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.minute', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.minute', {
       defaultMessage: 'Minute',
     }),
   },
   {
     name: 'minutes',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.minutes', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.minutes', {
       defaultMessage: 'Minutes (Plural)',
     }),
   },
   {
     name: 'second',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.second', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.second', {
       defaultMessage: 'Second',
     }),
   },
   {
     name: 'seconds',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.seconds', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.seconds', {
       defaultMessage: 'Seconds (Plural)',
     }),
   },
   {
     name: 'millisecond',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.millisecond', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.millisecond', {
       defaultMessage: 'Millisecond',
     }),
   },
   {
     name: 'milliseconds',
-    description: i18n.translate('monaco.esql.definitions.dateDurationDefinition.milliseconds', {
+    description: i18n.translate('esql.definitions.dateDurationDefinition.milliseconds', {
       defaultMessage: 'Milliseconds (Plural)',
     }),
   },
