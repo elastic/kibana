@@ -65,7 +65,13 @@ import { initUsageCollectors } from './usage';
 import type { SecuritySolutionRequestHandlerContext } from './types';
 import { securitySolutionSearchStrategyProvider } from './search_strategy/security_solution';
 import type { ITelemetryEventsSender } from './lib/telemetry/sender';
+import { type IAsyncTelemetryEventsSender } from './lib/telemetry/async_sender.types';
 import { TelemetryEventsSender } from './lib/telemetry/sender';
+import {
+  DEFAULT_QUEUE_CONFIG,
+  DEFAULT_RETRY_CONFIG,
+  AsyncTelemetryEventsSender,
+} from './lib/telemetry/async_sender';
 import type { ITelemetryReceiver } from './lib/telemetry/receiver';
 import { TelemetryReceiver } from './lib/telemetry/receiver';
 import { licenseService } from './lib/license';
@@ -137,6 +143,7 @@ export class Plugin implements ISecuritySolutionPlugin {
   private readonly endpointAppContextService = new EndpointAppContextService();
   private readonly telemetryReceiver: ITelemetryReceiver;
   private readonly telemetryEventsSender: ITelemetryEventsSender;
+  private readonly asyncTelemetryEventsSender: IAsyncTelemetryEventsSender;
 
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
@@ -158,6 +165,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService = createRuleMonitoringService(this.config, this.logger);
     this.telemetryEventsSender = new TelemetryEventsSender(this.logger);
+    this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
     this.logger.debug('plugin initialized');
@@ -458,11 +466,20 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     setIsElasticCloudDeployment(plugins.cloud.isCloudEnabled ?? false);
 
+    this.asyncTelemetryEventsSender.setup(
+      DEFAULT_RETRY_CONFIG,
+      DEFAULT_QUEUE_CONFIG,
+      this.telemetryReceiver,
+      plugins.telemetry,
+      this.telemetryUsageCounter
+    );
+
     this.telemetryEventsSender.setup(
       this.telemetryReceiver,
       plugins.telemetry,
       plugins.taskManager,
-      this.telemetryUsageCounter
+      this.telemetryUsageCounter,
+      this.asyncTelemetryEventsSender
     );
 
     this.checkMetadataTransformsTask = new CheckMetadataTransformsTask({
@@ -632,6 +649,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     artifactService.start(this.telemetryReceiver);
 
+    this.asyncTelemetryEventsSender.start(plugins.telemetry);
+
     this.telemetryEventsSender.start(
       plugins.telemetry,
       plugins.taskManager,
@@ -661,6 +680,7 @@ export class Plugin implements ISecuritySolutionPlugin {
 
   public stop() {
     this.logger.debug('Stopping plugin');
+    this.asyncTelemetryEventsSender.stop();
     this.telemetryEventsSender.stop();
     this.endpointAppContextService.stop();
     this.policyWatcher?.stop();
