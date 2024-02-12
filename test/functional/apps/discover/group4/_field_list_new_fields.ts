@@ -82,5 +82,63 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'b',
       ]);
     });
+
+    it("Mapped fields without values aren't shown", async function () {
+      const initialPattern = 'my-index-';
+      await es.transport.request({
+        path: '/my-index-000001/_doc',
+        method: 'POST',
+        body: {
+          '@timestamp': new Date().toISOString(),
+          a: 'GET /search HTTP/1.1 200 1070000',
+        },
+      });
+
+      await PageObjects.discover.createAdHocDataView(initialPattern, true);
+
+      await retry.waitFor('current data view to get updated', async () => {
+        return (await PageObjects.discover.getCurrentlySelectedDataView()) === `${initialPattern}*`;
+      });
+      await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+
+      expect(await PageObjects.discover.getHitCountInt()).to.be(1);
+      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+        '@timestamp',
+        'a',
+      ]);
+
+      await es.transport.request({
+        path: '/my-index-000001/_mapping',
+        method: 'PUT',
+        body: {
+          properties: {
+            b: {
+              type: 'keyword',
+            },
+          },
+        },
+      });
+
+      // add new doc and check for it to make sure we're looking at fresh results
+      await es.transport.request({
+        path: '/my-index-000001/_doc',
+        method: 'POST',
+        body: {
+          '@timestamp': new Date().toISOString(),
+          a: 'GET /search HTTP/1.1 200 1070000',
+        },
+      });
+
+      await retry.waitFor('the new record was found', async () => {
+        await queryBar.submitQuery();
+        await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
+        return (await PageObjects.discover.getHitCountInt()) === 2;
+      });
+
+      expect(await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).to.eql([
+        '@timestamp',
+        'a',
+      ]);
+    });
   });
 }
