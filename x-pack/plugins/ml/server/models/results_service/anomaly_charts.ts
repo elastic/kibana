@@ -766,12 +766,12 @@ export function anomalyChartsDataProvider(mlClient: MlClient, client: IScopedClu
     }
 
     // Build the tooltip data for the chart info icon, showing further details on what is being plotted.
-    let functionLabel = `${config.metricFunction}`;
+    let functionLabel = `${fullSeriesConfig.metricFunction ?? config.metricFunction}`;
     if (
       fullSeriesConfig.metricFieldName !== undefined &&
       fullSeriesConfig.metricFieldName !== null
     ) {
-      functionLabel += ` ${fullSeriesConfig.metricFieldName}`;
+      functionLabel += `(${fullSeriesConfig.metricFieldName})`;
     }
 
     fullSeriesConfig.infoTooltip = {
