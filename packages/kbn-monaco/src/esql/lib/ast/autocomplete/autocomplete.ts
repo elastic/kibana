@@ -14,7 +14,6 @@ import {
   columnExists,
   getColumnHit,
   getCommandDefinition,
-  getCommandMode,
   getCommandOption,
   getFunctionDefinition,
   getLastCharFromTrimmed,
@@ -40,7 +39,6 @@ import type {
   AstProviderFn,
   ESQLAstItem,
   ESQLCommand,
-  ESQLCommandMode,
   ESQLCommandOption,
   ESQLFunction,
   ESQLSingleAstItem,
@@ -70,7 +68,6 @@ import {
   buildVariablesDefinitions,
   buildOptionDefinition,
   buildSettingDefinitions,
-  buildSettingValueDefinitions,
 } from './factories';
 import { EDITOR_MARKER } from '../shared/constants';
 import { getAstContext, removeMarkerArgFromArgsList } from '../shared/context';
@@ -166,9 +163,12 @@ export async function suggest(
   const unclosedBrackets = unclosedRoundBrackets + unclosedSquaredBrackets;
   // if it's a comma by the user or a forced trigger by a function argument suggestion
   // add a marker to make the expression still valid
+  const charThatNeedMarkers = [',', ':'];
   if (
-    context.triggerCharacter === ',' ||
-    (context.triggerKind === 0 && unclosedRoundBrackets === 0) ||
+    (context.triggerCharacter && charThatNeedMarkers.includes(context.triggerCharacter)) ||
+    (context.triggerKind === 0 &&
+      unclosedRoundBrackets === 0 &&
+      getLastCharFromTrimmed(innerText) !== '_') ||
     (context.triggerCharacter === ' ' &&
       (isMathFunction(innerText, offset) || isComma(innerText[offset - 2])))
   ) {
@@ -225,18 +225,14 @@ export async function suggest(
     );
   }
   if (astContext.type === 'setting') {
-    // need this wrap/unwrap thing to make TS happy
-    const { setting, ...rest } = astContext;
-    if (setting && isSettingItem(setting)) {
-      return getSettingArgsSuggestions(
-        innerText,
-        ast,
-        { setting, ...rest },
-        getFieldsByType,
-        getFieldsMap,
-        getPolicyMetadata
-      );
-    }
+    return getSettingArgsSuggestions(
+      innerText,
+      ast,
+      astContext,
+      getFieldsByType,
+      getFieldsMap,
+      getPolicyMetadata
+    );
   }
   if (astContext.type === 'option') {
     // need this wrap/unwrap thing to make TS happy
@@ -1213,10 +1209,8 @@ async function getSettingArgsSuggestions(
   {
     command,
     node,
-    setting,
   }: {
     command: ESQLCommand;
-    setting: ESQLCommandMode;
     node: ESQLSingleAstItem | undefined;
   },
   getFieldsByType: GetFieldsByTypeFn,
@@ -1224,25 +1218,15 @@ async function getSettingArgsSuggestions(
   getPolicyMetadata: GetPolicyMetadataFn
 ) {
   const suggestions = [];
-  const existingSettingArgs = new Set(
-    command.args
-      .filter((item) => isSettingItem(item) && !item.incomplete)
-      .map((item) => (isSettingItem(item) ? item.name : undefined))
-  );
 
-  const settingDef =
-    setting.name && setting.incomplete
-      ? getCommandMode(setting.name)
-      : getCommandDefinition(command.name).modes.find(({ name }) => !existingSettingArgs.has(name));
+  const settingDefs = getCommandDefinition(command.name).modes;
 
-  if (settingDef) {
+  if (settingDefs.length) {
     const lastChar = getLastCharFromTrimmed(innerText);
-    if (lastChar === '[') {
-      // COMMAND [<here>
-      suggestions.push(...buildSettingDefinitions(settingDef));
-    } else if (lastChar === ':') {
-      // COMMAND [setting: <here>
-      suggestions.push(...buildSettingValueDefinitions(settingDef));
+    const matchingSettingDefs = settingDefs.filter(({ prefix }) => lastChar === prefix);
+    if (matchingSettingDefs.length) {
+      // COMMAND _<here>
+      suggestions.push(...matchingSettingDefs.flatMap(buildSettingDefinitions));
     }
   }
   return suggestions;
