@@ -23,6 +23,7 @@ export default function alertingTests({ loadTestFile, getService }: FtrProviderC
     loadTestFile(require.resolve('./snooze'));
     loadTestFile(require.resolve('./unsnooze'));
     loadTestFile(require.resolve('./bulk_edit'));
+    loadTestFile(require.resolve('./bulk_disable'));
     loadTestFile(require.resolve('./capped_action_type'));
     loadTestFile(require.resolve('./scheduled_task_id'));
     loadTestFile(require.resolve('./run_soon'));

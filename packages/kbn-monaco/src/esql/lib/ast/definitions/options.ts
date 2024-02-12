@@ -33,10 +33,20 @@ export const metadataOption: CommandOptionsDefinition = {
     params: [{ name: 'column', type: 'column' }],
   },
   optional: true,
-  wrapped: ['[', ']'],
   skipCommonValidation: true,
   validate: (option, command, references) => {
     const messages: ESQLMessage[] = [];
+    // need to test the parent command here
+    if (/\[metadata/i.test(command.text)) {
+      messages.push({
+        location: option.location,
+        text: i18n.translate('monaco.esql.validation.metadataBracketsDeprecation', {
+          defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
+        }),
+        type: 'warning',
+        code: 'metadataBracketsDeprecation',
+      });
+    }
     const fields = option.args.filter(isColumnItem);
     const metadataFieldsAvailable = references as unknown as Set<string>;
     if (metadataFieldsAvailable.size > 0) {
