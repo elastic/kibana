@@ -53,8 +53,10 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
         // if there's line number encoded in the message use it as new positioning
         // and replace the actual message without it
         if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
-          warningMessage = innerMessage;
+          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+            warningMessage.split(':');
+          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+          warningMessage = additionalInfoMessage ?? innerMessage;
           if (!Number.isNaN(Number(encodedColumn))) {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
