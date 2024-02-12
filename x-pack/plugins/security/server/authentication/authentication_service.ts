@@ -110,6 +110,11 @@ export class AuthenticationService {
       (config.authc.sortedProviders.length > 0 &&
         shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
+    const isLoginSelectorEnabled = config.authc.selector.enabled;
+    const isLoginFormAvailable =
+      config.authc.sortedProviders.length > 0 &&
+      shouldProviderUseLoginForm(config.authc.sortedProviders[0].type);
+
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
         this.logger.error('License is not available, authentication is not possible.');
@@ -201,21 +206,41 @@ export class AuthenticationService {
         canRedirectRequest(request) &&
         (request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW) || preResponse.statusCode === 401)
       ) {
-        if (!isLoginPageAvailable) {
-          const customBrandingValue = await customBranding.getBrandingFor(request, {
-            unauthenticated: true,
-          });
-
+        console.log({ isLoginFormAvailable, isLoginSelectorEnabled, isLoginPageAvailable });
+        const needsToLogout = (await this.session?.getSID(request)) !== undefined;
+        if (needsToLogout) {
+          this.logger.warn(
+            'Could not authenticate user with the existing session. Forcing logout.'
+          );
+        }
+        if (isLoginPageAvailable) {
           return toolkit.render({
-            body: renderUnauthenticatedPage({
-              staticAssets: http.staticAssets,
-              basePath: http.basePath,
-              originalURL,
-              customBranding: customBrandingValue,
-            }),
-            headers: { 'Content-Security-Policy': http.csp.header },
+            body: '<div/>',
+            headers: {
+              'Content-Security-Policy': http.csp.header,
+              Refresh: `0;url=${http.basePath.prepend(
+                `${
+                  needsToLogout ? '/logout' : '/login'
+                }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
+                  originalURL
+                )}`
+              )}`,
+            },
           });
         }
+        const customBrandingValue = await customBranding.getBrandingFor(request, {
+          unauthenticated: true,
+        });
+
+        return toolkit.render({
+          body: renderUnauthenticatedPage({
+            staticAssets: http.staticAssets,
+            basePath: http.basePath,
+            originalURL,
+            customBranding: customBrandingValue,
+          }),
+          headers: { 'Content-Security-Policy': http.csp.header },
+        });
       }
 
       if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
