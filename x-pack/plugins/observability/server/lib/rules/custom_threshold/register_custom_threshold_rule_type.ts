@@ -58,6 +58,14 @@ export const searchConfigurationSchema = schema.object({
     }),
     query: schema.string(),
   }),
+  filter: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        meta: schema.recordOf(schema.string(), schema.any()),
+      })
+    )
+  ),
 });
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
