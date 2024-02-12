@@ -527,7 +527,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.sourceSelection.selectSource(testData.source);
         });
 
-        it('navigates through the wizard and sets all needed fields', async () => {
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176697
+        it.skip('navigates through the wizard and sets all needed fields', async () => {
           await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
 
