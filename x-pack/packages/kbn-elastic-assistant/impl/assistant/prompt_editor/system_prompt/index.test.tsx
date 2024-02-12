@@ -88,6 +88,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       );
     });
@@ -118,6 +119,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       );
     });
@@ -152,6 +154,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -198,6 +201,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -258,6 +262,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -325,6 +330,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -402,6 +408,7 @@ describe('SystemPrompt', () => {
             isSettingsModalVisible={isSettingsModalVisible}
             onSystemPromptSelectionChange={onSystemPromptSelectionChange}
             setIsSettingsModalVisible={setIsSettingsModalVisible}
+            isFlyoutMode={false}
           />
         </TestProviders>
       );
@@ -470,6 +477,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );
@@ -488,6 +496,7 @@ describe('SystemPrompt', () => {
           isSettingsModalVisible={isSettingsModalVisible}
           onSystemPromptSelectionChange={onSystemPromptSelectionChange}
           setIsSettingsModalVisible={setIsSettingsModalVisible}
+          isFlyoutMode={false}
         />
       </TestProviders>
     );

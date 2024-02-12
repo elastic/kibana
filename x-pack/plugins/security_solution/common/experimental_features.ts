@@ -175,6 +175,8 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
+  /** This Kibana Advanced Setting allows users to toggle between Modal and Flyout-mode AI Assistant */
+  aiAssistantFlyoutMode: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

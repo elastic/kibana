@@ -23,6 +23,7 @@ interface Props {
   isDisabled?: boolean;
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
+  isFlyoutMode: boolean;
 }
 
 const inputContainerClassName = css`
@@ -65,7 +66,7 @@ const placeholderButtonClassName = css`
  * A compact wrapper of the ConnectorSelector component used in the Settings modal.
  */
 export const ConnectorSelectorInline: React.FC<Props> = React.memo(
-  ({ isDisabled = false, selectedConnectorId, selectedConversation }) => {
+  ({ isDisabled = false, selectedConnectorId, selectedConversation, isFlyoutMode }) => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { actionTypeRegistry, assistantAvailability, http } = useAssistantContext();
     const { setApiConfig } = useConversation();
@@ -130,11 +131,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
         justifyContent={'flexStart'}
         responsive={false}
       >
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            {i18n.INLINE_CONNECTOR_LABEL}
-          </EuiText>
-        </EuiFlexItem>
+        {!isFlyoutMode && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              {i18n.INLINE_CONNECTOR_LABEL}
+            </EuiText>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem>
           {isOpen ? (
             <ConnectorSelector

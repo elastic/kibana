@@ -38,7 +38,6 @@ import {
   DEFAULT_ALERT_TAGS_VALUE,
   ENABLE_EXPANDABLE_FLYOUT_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
-  SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -157,22 +156,6 @@ export const initUiSettings = (
       category: [APP_ID],
       requiresPageReload: true,
       schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
-    },
-    [SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableAIAssistantFlyoutMode', {
-        defaultMessage: 'Enable AI Assistant flyout mode',
-      }),
-      value: false,
-      description: i18n.translate(
-        'xpack.securitySolution.uiSettings.enableAIAssistantFlyoutModeDescription',
-        {
-          defaultMessage: '<p>When enabled, AI Assistant will use Flyout instead of Modal</p>',
-        }
-      ),
-      type: 'boolean',
-      category: [APP_ID],
-      requiresPageReload: true,
-      schema: schema.boolean(),
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {

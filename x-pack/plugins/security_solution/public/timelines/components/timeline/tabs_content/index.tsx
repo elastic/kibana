@@ -15,7 +15,6 @@ import { useDispatch } from 'react-redux';
 import styled from 'styled-components';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE } from '../../../../../common/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useAssistantTelemetry } from '../../../../assistant/use_assistant_telemetry';
@@ -292,13 +291,9 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   sessionViewConfig,
   timelineDescription,
 }) => {
-  const { configSettings, uiSettings } = useKibana().services;
   const isEsqlTabInTimelineDisabled = useIsExperimentalFeatureEnabled('timelineEsqlTabDisabled');
-  const aiAssistantFlyoutMode = useMemo(
-    () => uiSettings?.get<boolean>(SECURITY_SOLUTION_ENABLE_AI_ASSISTANT_FLYOUT_MODE) || false,
-    [uiSettings]
-  );
-  const isEsqlSettingEnabled = configSettings.ESQLEnabled;
+  const aiAssistantFlyoutMode = useIsExperimentalFeatureEnabled('aiAssistantFlyoutMode');
+  const isEsqlSettingEnabled = useKibana().services.configSettings.ESQLEnabled;
   const { hasAssistantPrivilege } = useAssistantAvailability();
   const dispatch = useDispatch();
   const getActiveTab = useMemo(() => getActiveTabSelector(), []);

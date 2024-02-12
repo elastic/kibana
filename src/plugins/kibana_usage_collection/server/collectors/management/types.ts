@@ -64,7 +64,6 @@ export interface UsageStats {
   'securitySolution:timeDefaults': string;
   'securitySolution:defaultAnomalyScore': number;
   'securitySolution:refreshIntervalDefaults': string;
-  'securitySolution:enableAIAssistantFlyoutMode': boolean;
   'securitySolution:enableNewsFeed': boolean;
   'securitySolution:enableExpandableFlyout': boolean;
   'securitySolution:excludeColdAndFrozenTiersInAnalyzer': boolean;
