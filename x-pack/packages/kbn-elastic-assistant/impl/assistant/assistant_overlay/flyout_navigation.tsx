@@ -35,14 +35,14 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           iconType="menuRight"
           size="xs"
           aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.header.collapseDetailButtonAriaLabel',
+            'xpack.elasticAssistant.flyout.right.header.collapseDetailButtonAriaLabel',
             {
               defaultMessage: 'Hide chats',
             }
           )}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.collapseDetailButtonLabel"
+            id="xpack.elasticAssistant.flyout.right.header.collapseDetailButtonLabel"
             defaultMessage="Hide chats"
           />
         </EuiButtonEmpty>
@@ -58,14 +58,14 @@ export const FlyoutNavigation = memo<FlyoutNavigationProps>(
           iconType="menuLeft"
           size="xs"
           aria-label={i18n.translate(
-            'xpack.securitySolution.flyout.right.header.expandDetailButtonAriaLabel',
+            'xpack.elasticAssistant.flyout.right.header.expandDetailButtonAriaLabel',
             {
               defaultMessage: 'Show chats',
             }
           )}
         >
           <FormattedMessage
-            id="xpack.securitySolution.flyout.right.header.expandDetailButtonLabel"
+            id="xpack.elasticAssistant.flyout.right.header.expandDetailButtonLabel"
             defaultMessage="Show chats"
           />
         </EuiButtonEmpty>

@@ -24,16 +24,22 @@ const TitleFieldComponent = ({ conversationIds, euiFieldProps }: TitleFieldProps
     defaultValue: '',
     rules: {
       required: {
-        message: i18n.translate('xpack.osquery.pack.queryFlyoutForm.emptyIdError', {
-          defaultMessage: 'Title is required',
-        }),
+        message: i18n.translate(
+          'xpack.elasticAssistant.conversation.newConversationModal.form.requiredTitleError',
+          {
+            defaultMessage: 'Title is required',
+          }
+        ),
         value: true,
       },
       validate: (text: string) => {
         if (conversationIds?.includes(value)) {
-          return i18n.translate('xpack.osquery.pack.queryFlyoutForm.uniqueIdError', {
-            defaultMessage: 'Title must be unique',
-          });
+          return i18n.translate(
+            'xpack.elasticAssistant.conversation.newConversationModal.form.uniqueTitleError',
+            {
+              defaultMessage: 'Title must be unique',
+            }
+          );
         }
       },
     },
@@ -43,9 +49,12 @@ const TitleFieldComponent = ({ conversationIds, euiFieldProps }: TitleFieldProps
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.pack.queryFlyoutForm.idFieldLabel', {
-        defaultMessage: 'Title',
-      })}
+      label={i18n.translate(
+        'xpack.elasticAssistant.conversation.newConversationModal.form.titleFieldLabel',
+        {
+          defaultMessage: 'Title',
+        }
+      )}
       error={error?.message}
       isInvalid={hasError}
       fullWidth
