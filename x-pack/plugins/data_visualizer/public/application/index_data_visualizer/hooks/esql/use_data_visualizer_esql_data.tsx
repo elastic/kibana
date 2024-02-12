@@ -47,12 +47,13 @@ const defaultSearchQuery = {
   match_all: {},
 };
 
-const FALLBACK_ESQL_QUERY: AggregateQuery = { esql: '' };
+const FALLBACK_ESQL_QUERY: ESQLQuery = { esql: '' };
 const DEFAULT_SAMPLING_OPTION: SamplingOption = {
   mode: 'random_sampling',
   seed: '',
   probability: 0,
 };
+const DEFAULT_LIMIT_SIZE = '10000';
 
 const defaults = getDefaultPageState();
 
@@ -65,7 +66,7 @@ export const getDefaultESQLDataVisualizerListState = (
   sortDirection: 'asc',
   visibleFieldTypes: [],
   visibleFieldNames: [],
-  limitSize: '10000',
+  limitSize: DEFAULT_LIMIT_SIZE,
   searchString: '',
   searchQuery: defaultSearchQuery,
   searchQueryLanguage: SEARCH_QUERY_LANGUAGE.KUERY,
@@ -557,23 +558,23 @@ export const useESQLDataVisualizerData = (
 
   const getItemIdToExpandedRowMap = useCallback(
     function (itemIds: string[], items: FieldVisConfig[]): ItemIdToExpandedRowMap {
-      return itemIds.reduce((m: ItemIdToExpandedRowMap, fieldName: string) => {
+      return itemIds.reduce((map: ItemIdToExpandedRowMap, fieldName: string) => {
         const item = items.find((fieldVisConfig) => fieldVisConfig.fieldName === fieldName);
         if (item !== undefined) {
-          m[fieldName] = (
+          map[fieldName] = (
             <IndexBasedDataVisualizerExpandedRow
               item={item}
               dataView={currentDataView}
-              combinedQuery={{ searchQueryLanguage: 'kuery', searchString: '' }}
+              esql={query.esql}
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
             />
           );
         }
-        return m;
+        return map;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, totalCount]
+    [currentDataView, totalCount, query.esql]
   );
 
   const combinedProgress = useMemo(

@@ -20,8 +20,9 @@ import { ExpandedRowPanel } from '../../stats_table/components/field_data_expand
 export const GeoPointContentWithMap: FC<{
   config: FieldVisConfig;
   dataView: DataView | undefined;
-  combinedQuery: CombinedQuery;
-}> = ({ config, dataView, combinedQuery }) => {
+  combinedQuery?: CombinedQuery;
+  esql?: string;
+}> = ({ config, dataView, combinedQuery, esql }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
@@ -31,6 +32,8 @@ export const GeoPointContentWithMap: FC<{
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
     async function updateIndexPatternSearchLayer() {
+      // @TODO: remove
+      console.log(`--@@esql`, esql);
       if (
         dataView?.id !== undefined &&
         config !== undefined &&
@@ -43,10 +46,15 @@ export const GeoPointContentWithMap: FC<{
           geoFieldName: config.fieldName,
           geoFieldType: config.type as ES_GEO_FIELD_TYPE,
           filters: data.query.filterManager.getFilters() ?? [],
-          query: {
-            query: combinedQuery.searchString,
-            language: combinedQuery.searchQueryLanguage,
-          },
+          ...(typeof esql === 'string' ? { esql } : {}),
+          ...(combinedQuery
+            ? {
+                query: {
+                  query: combinedQuery.searchString,
+                  language: combinedQuery.searchQueryLanguage,
+                },
+              }
+            : {}),
         };
         const searchLayerDescriptor = mapsPlugin
           ? await mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor(params)
@@ -58,7 +66,7 @@ export const GeoPointContentWithMap: FC<{
     }
     updateIndexPatternSearchLayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataView, combinedQuery, config, mapsPlugin, data.query]);
+  }, [dataView, combinedQuery, esql, config, mapsPlugin, data.query]);
 
   if (stats?.examples === undefined) return null;
   return (

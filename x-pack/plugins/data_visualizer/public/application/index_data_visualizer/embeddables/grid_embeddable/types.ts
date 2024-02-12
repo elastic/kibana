@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AggregateQuery, Filter } from '@kbn/es-query';
+import { Filter } from '@kbn/es-query';
 import type { EmbeddableInput, EmbeddableOutput } from '@kbn/embeddable-plugin/public';
 import type { Query } from '@kbn/es-query';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -13,6 +13,7 @@ import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SamplingOption } from '../../../../../common/types/field_stats';
 import { DATA_VISUALIZER_INDEX_VIEWER } from '../../constants/index_data_visualizer_viewer';
 import { DataVisualizerIndexBasedAppState } from '../../types/index_data_visualizer_state';
+import type { ESQLQuery } from '../../search_strategy/requests/esql_utils';
 
 export interface DataVisualizerGridInput<T = Query> {
   dataView?: DataView;
@@ -41,7 +42,7 @@ export interface DataVisualizerGridInput<T = Query> {
   indexPattern?: string;
 }
 
-export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<AggregateQuery>;
+export type ESQLDataVisualizerGridEmbeddableInput = DataVisualizerGridInput<ESQLQuery>;
 
 export type DataVisualizerGridEmbeddableInput = EmbeddableInput & DataVisualizerGridInput;
 export type DataVisualizerGridEmbeddableOutput = EmbeddableOutput;

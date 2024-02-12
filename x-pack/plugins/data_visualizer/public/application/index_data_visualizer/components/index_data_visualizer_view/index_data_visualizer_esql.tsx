@@ -134,7 +134,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
     [indexPattern, data.dataViews, currentDataView]
   );
 
-  const input: DataVisualizerGridInput<AggregateQuery> = useMemo(() => {
+  const input: DataVisualizerGridInput<ESQLQuery> = useMemo(() => {
     return {
       dataView: currentDataView,
       query,

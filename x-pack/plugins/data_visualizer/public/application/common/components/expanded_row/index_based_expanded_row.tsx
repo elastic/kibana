@@ -30,12 +30,14 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   dataView,
   combinedQuery,
   onAddFilter,
+  esql,
   totalDocuments,
   typeAccessor = 'type',
 }: {
   item: FieldVisConfig;
   dataView: DataView | undefined;
-  combinedQuery: CombinedQuery;
+  combinedQuery?: CombinedQuery;
+  esql?: string;
   totalDocuments?: number;
   typeAccessor?: 'type' | 'secondaryType';
   /**
@@ -74,6 +76,7 @@ export const IndexBasedDataVisualizerExpandedRow = ({
             config={config}
             dataView={dataView}
             combinedQuery={combinedQuery}
+            esql={esql}
           />
         );
 
