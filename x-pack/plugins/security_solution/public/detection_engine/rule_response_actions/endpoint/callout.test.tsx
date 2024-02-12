@@ -45,7 +45,7 @@ describe('EndpointActionCallout', () => {
       ).toBeInTheDocument();
       expect(
         queryByText(
-          'Only select this option if you’re certain that you want to automatically terminate the process running this host'
+          'Only select this option if you’re certain that you want to automatically terminate the process running on a host.'
         )
       ).not.toBeInTheDocument();
     });
@@ -64,7 +64,7 @@ describe('EndpointActionCallout', () => {
       expect(getByText('Proceed with caution')).toBeInTheDocument();
       expect(
         getByText(
-          'Only select this option if you’re certain that you want to automatically terminate the process running this host'
+          'Only select this option if you’re certain that you want to automatically terminate the process running on a host.'
         )
       ).toBeInTheDocument();
       expect(
