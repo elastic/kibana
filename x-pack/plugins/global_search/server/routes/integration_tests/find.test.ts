@@ -76,6 +76,7 @@ describe('POST /internal/global_search/find', () => {
       {
         preference: 'custom-pref',
         aborted$: expect.any(Object),
+        client: expect.any(Object),
       }
     );
   });
