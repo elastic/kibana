@@ -47,6 +47,20 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
       await PageObjects.common.navigateToApp('app_status_start');
     });
 
+    it('can change the visibleIn array at runtime', async () => {
+      await setAppStatus({
+        visibleIn: ['sideNav'],
+      });
+      let link = await appsMenu.getLink('App Status');
+      expect(link).not.to.eql(undefined);
+
+      await setAppStatus({
+        visibleIn: [],
+      });
+      link = await appsMenu.getLink('App Status');
+      expect(link).to.eql(undefined);
+    });
+
     it('shows an error when navigating to an inaccessible app', async () => {
       await setAppStatus({
         status: AppStatus.inaccessible,
