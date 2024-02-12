@@ -20,6 +20,7 @@ import {
 import { RuleTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import dedent from 'dedent';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -56,6 +57,9 @@ export function AlertDetails() {
     },
     http,
     triggersActionsUi: { ruleTypeRegistry },
+    observabilityAIAssistant: {
+      service: { setApplicationContext },
+    },
     uiSettings,
   } = useKibana().services;
 
@@ -70,6 +74,39 @@ export function AlertDetails() {
   });
   const [summaryFields, setSummaryFields] = useState<AlertSummaryField[]>();
   const [alertStatus, setAlertStatus] = useState<AlertStatus>();
+
+  useEffect(() => {
+    if (!alertDetail) {
+      return;
+    }
+
+    const description = dedent(`The user is looking at an ${
+      alertDetail.formatted.active ? 'active' : 'recovered'
+    } alert.
+    It started at ${new Date(
+      alertDetail.formatted.start
+    ).toISOString()}, and was last updated at ${new Date(
+      alertDetail.formatted.lastUpdated
+    ).toISOString()}.
+
+    ${
+      alertDetail.formatted.reason
+        ? `The reason given for the alert is ${alertDetail.formatted.reason}.`
+        : ''
+    }
+    `);
+
+    return setApplicationContext({
+      description,
+      data: [
+        {
+          name: 'alert_fields',
+          description: 'The fields and values for the alert',
+          value: alertDetail.formatted.fields,
+        },
+      ],
+    });
+  }, [setApplicationContext, alertDetail]);
 
   useEffect(() => {
     if (alertDetail) {

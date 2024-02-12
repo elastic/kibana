@@ -302,6 +302,7 @@ export class ObservabilityAIAssistantService {
       signal,
       registerContext: fnClient.registerContext.bind(fnClient),
       registerFunction: fnClient.registerFunction.bind(fnClient),
+      hasFunction: fnClient.hasFunction.bind(fnClient),
       resources,
       client,
     };

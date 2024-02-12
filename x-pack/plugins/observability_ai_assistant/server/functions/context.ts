@@ -6,30 +6,35 @@
  */
 
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
+import { Logger } from '@kbn/logging';
 import type { Serializable } from '@kbn/utility-types';
 import dedent from 'dedent';
+import { encode } from 'gpt-tokenizer';
 import * as t from 'io-ts';
 import { compact, last, omit } from 'lodash';
-import { lastValueFrom } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import { lastValueFrom, Observable } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
+import { MessageAddEvent } from '../../common/conversation_complete';
 import { FunctionVisibility, MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
+import { createFunctionResponseMessage } from '../service/util/create_function_response_message';
+
+const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
 
 export function registerContextFunction({
   client,
   registerFunction,
   resources,
-}: FunctionRegistrationParameters) {
+  isKnowledgeBaseAvailable,
+}: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
   registerFunction(
     {
       name: 'context',
       contexts: ['core'],
-      description: '',
-      visibility: FunctionVisibility.Internal,
-      descriptionForUser:
-        'This function allows the assistant to recall previous learnings from the Knowledge base and gather context of how you are using the application.',
+      description:
+        'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
+      visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -58,51 +63,92 @@ export function registerContextFunction({
         required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: { queries, categories }, messages, connectorId, appContexts }, signal) => {
-      const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
+    async ({ arguments: args, messages, connectorId, appContexts }, signal) => {
+      const { queries, categories } = args;
 
-      if (!systemMessage) {
-        throw new Error('No system message found');
-      }
+      async function getContext() {
+        const systemMessage = messages.find(
+          (message) => message.message.role === MessageRole.System
+        );
 
-      const userMessage = last(
-        messages.filter((message) => message.message.role === MessageRole.User)
-      );
+        const screenDescription = appContexts.map((context) => context.description).join('\n\n');
 
-      const nonEmptyQueries = compact(queries);
+        const content = { screen_description: screenDescription, learnings: [] };
 
-      const queriesOrUserPrompt = nonEmptyQueries.length
-        ? nonEmptyQueries
-        : compact([userMessage?.message.content]);
+        if (!isKnowledgeBaseAvailable) {
+          return { content };
+        }
 
-      const suggestions = await retrieveSuggestions({
-        userMessage,
-        client,
-        categories,
-        queries: queriesOrUserPrompt,
-      });
+        if (!systemMessage) {
+          throw new Error('No system message found');
+        }
 
-      const screenDescription = appContexts.map((context) => context.description).join('\n\n');
+        const userMessage = last(
+          messages.filter((message) => message.message.role === MessageRole.User)
+        );
 
-      if (suggestions.length === 0) {
+        const nonEmptyQueries = compact(queries);
+
+        const queriesOrUserPrompt = nonEmptyQueries.length
+          ? nonEmptyQueries
+          : compact([userMessage?.message.content]);
+
+        const suggestions = await retrieveSuggestions({
+          userMessage,
+          client,
+          categories,
+          queries: queriesOrUserPrompt,
+        });
+
+        if (suggestions.length === 0) {
+          return {
+            content,
+          };
+        }
+
+        const relevantDocuments = await scoreSuggestions({
+          suggestions,
+          queries: queriesOrUserPrompt,
+          messages,
+          client,
+          connectorId,
+          signal,
+          logger: resources.logger,
+        });
+
         return {
-          content: { learnings: [] as unknown as Serializable, screenDescription },
+          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
         };
       }
 
-      const relevantDocuments = await scoreSuggestions({
-        suggestions,
-        queries: queriesOrUserPrompt,
-        messages,
-        client,
-        connectorId,
-        signal,
-        logger: resources.logger,
-      });
+      return new Observable<MessageAddEvent>((subscriber) => {
+        getContext()
+          .then(({ content }) => {
+            // any data that falls within the token limit, send it automatically
 
-      return {
-        content: { learnings: relevantDocuments as unknown as Serializable, screenDescription },
-      };
+            const dataWithinTokenLimit = compact(
+              appContexts.flatMap((context) => context.data)
+            ).filter(
+              (data) =>
+                encode(JSON.stringify(data.value)).length <= MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN
+            );
+
+            subscriber.next(
+              createFunctionResponseMessage({
+                name: 'context',
+                content: {
+                  ...content,
+                  ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
+                },
+              })
+            );
+
+            subscriber.complete();
+          })
+          .catch((error) => {
+            subscriber.error(error);
+          });
+      });
     }
   );
 }

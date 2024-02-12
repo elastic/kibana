@@ -15,6 +15,7 @@ import type {
   RegisterContextDefinition,
 } from '../../common/types';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '../routes/types';
+import { ChatFunctionClient } from './chat_function_client';
 import type { ObservabilityAIAssistantClient } from './client';
 
 export type RespondFunctionResources = Pick<
@@ -53,6 +54,7 @@ export type ChatRegistrationFunction = ({}: {
   client: ObservabilityAIAssistantClient;
   registerFunction: RegisterFunction;
   registerContext: RegisterContextDefinition;
+  hasFunction: ChatFunctionClient['hasFunction'];
 }) => Promise<void>;
 
 export interface ObservabilityAIAssistantResourceNames {

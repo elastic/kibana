@@ -313,37 +313,7 @@ export class ObservabilityAIAssistantClient {
               return;
             }
 
-            const functionResponseIsObservable = isObservable(functionResponse);
-
-            const functionResponseMessage = {
-              '@timestamp': new Date().toISOString(),
-              message: {
-                name: lastMessage.message.function_call!.name,
-                ...(functionResponseIsObservable
-                  ? { content: '{}' }
-                  : {
-                      content: JSON.stringify(functionResponse.content || {}),
-                      data: functionResponse.data
-                        ? JSON.stringify(functionResponse.data)
-                        : undefined,
-                    }),
-                role: MessageRole.User,
-              },
-            };
-
-            this.dependencies.logger.debug(
-              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
-            );
-
-            nextMessages = nextMessages.concat(functionResponseMessage);
-
-            subscriber.next({
-              type: StreamingChatResponseEventType.MessageAdd,
-              message: functionResponseMessage,
-              id: v4(),
-            });
-
-            if (functionResponseIsObservable) {
+            if (isObservable(functionResponse)) {
               const shared = functionResponse.pipe(shareReplay());
 
               shared.subscribe({
@@ -366,6 +336,28 @@ export class ObservabilityAIAssistantClient {
 
               return await next(nextMessages.concat(messageEvents.map((event) => event.message)));
             }
+
+            const functionResponseMessage = {
+              '@timestamp': new Date().toISOString(),
+              message: {
+                name: lastMessage.message.function_call!.name,
+
+                content: JSON.stringify(functionResponse.content || {}),
+                data: functionResponse.data ? JSON.stringify(functionResponse.data) : undefined,
+                role: MessageRole.User,
+              },
+            };
+
+            this.dependencies.logger.debug(
+              `Function response: ${JSON.stringify(functionResponseMessage, null, 2)}`
+            );
+            nextMessages = nextMessages.concat(functionResponseMessage);
+
+            subscriber.next({
+              type: StreamingChatResponseEventType.MessageAdd,
+              message: functionResponseMessage,
+              id: v4(),
+            });
 
             span?.end();
 

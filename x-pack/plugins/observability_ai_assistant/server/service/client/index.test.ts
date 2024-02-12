@@ -26,6 +26,7 @@ import {
 import type { CreateChatCompletionResponseChunk } from '../../../public/types';
 import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
+import { createFunctionResponseMessage } from '../util/create_function_response_message';
 import { observableIntoStream } from '../util/observable_into_stream';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
@@ -986,11 +987,14 @@ describe('Observability AI Assistant client', () => {
       beforeEach(async () => {
         response$ = new Subject();
         fnResponseResolve(response$);
-        await waitForNextWrite(stream);
+
+        await nextTick();
+
+        response$.next(createFunctionResponseMessage({ name: 'my-function', content: {} }));
       });
 
-      it('appends the function response', () => {
-        expect(JSON.parse(dataHandler.mock.lastCall!)).toEqual({
+      it('appends the function response', async () => {
+        expect(JSON.parse(dataHandler.mock.calls[2]!)).toEqual({
           type: StreamingChatResponseEventType.MessageAdd,
           id: expect.any(String),
           message: {
