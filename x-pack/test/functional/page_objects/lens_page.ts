@@ -1936,8 +1936,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
       await testSubjects.click('lns_colorEditing_trigger');
-      // disable autoAssign
-      await testSubjects.setEuiSwitch('lns-colorMapping-autoAssignSwitch', 'uncheck');
+
+      // assign all
+      await testSubjects.click('lns-colorMapping-assignmentsPromptAddAll');
 
       await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
 

@@ -294,6 +294,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       scheduleNotificationResponseActionsService: getScheduleNotificationResponseActionsService({
         endpointAppContextService: this.endpointAppContextService,
         osqueryCreateActionService: plugins.osquery.createActionService,
+        experimentalFeatures: config.experimentalFeatures,
       }),
     };
 
@@ -567,7 +568,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
 
         turnOffAgentPolicyFeatures(
-          core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
           appFeaturesService,
           logger
