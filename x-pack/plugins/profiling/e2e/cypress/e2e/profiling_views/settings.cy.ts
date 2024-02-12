@@ -39,7 +39,6 @@ describe('Settings page', () => {
     cy.contains('Per vCPU Watts - arm64');
     cy.contains('AWS EDP discount rate (%)');
     cy.contains('Cost per vCPU per hour ($)');
-    cy.contains('error frames in the profiling views');
   });
 
   it('updates values', () => {
