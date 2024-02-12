@@ -17,6 +17,7 @@ import { getPromptContextFromDetectionRules } from '../../../../assistant/helper
 import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 import * as i18nAssistant from '../../../../detections/pages/detection_engine/rules/translations';
+import { PER_FIELD_UPGRADE_TOUR_ANCHOR } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_tour';
 
 export enum AllRulesTabs {
   management = 'management',
@@ -70,6 +71,7 @@ export const RulesTableToolbar = React.memo(() => {
               betaOptions: {
                 text: `${updateTotal}`,
               },
+              tourAnchor: PER_FIELD_UPGRADE_TOUR_ANCHOR,
             },
           }
         : {}),

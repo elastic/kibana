@@ -21,4 +21,5 @@ export interface TabNavigationItemProps {
   betaOptions?: {
     text: string;
   };
+  tourAnchor?: string;
 }
