@@ -22,6 +22,7 @@ async function getPrProjects() {
       .map((response) => response.data.items)
       .flat()
       .filter((project) => project.name.match(match))
+      .filter((project) => project) // filter undefined match
       .map((project) => {
         const [, prNumber, projectType] = project.name.match(match);
         return {
