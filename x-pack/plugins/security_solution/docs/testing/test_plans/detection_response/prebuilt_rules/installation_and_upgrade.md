@@ -13,6 +13,7 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
   - [Non-functional requirements](#non-functional-requirements)
   - [Functional requirements](#functional-requirements)
 - [Scenarios](#scenarios)
+
   - [Package installation](#package-installation)
     - [**Scenario: Package is installed via Fleet**](#scenario-package-is-installed-via-fleet)
     - [**Scenario: Package is installed via bundled Fleet package in Kibana**](#scenario-package-is-installed-via-bundled-fleet-package-in-kibana)
@@ -63,6 +64,9 @@ Status: `in progress`. The current test plan matches `Milestone 2` of the [Rule 
     - [**Scenario: Properties with semantically equal values should not be shown as modified**](#scenario-properties-with-semantically-equal-values-should-not-be-shown-as-modified)
     - [**Scenario: Unchanged sections of a rule should be hidden by default**](#scenario-unchanged-sections-of-a-rule-should-be-hidden-by-default)
     - [**Scenario: Properties should be sorted alphabetically**](#scenario-properties-should-be-sorted-alphabetically)
+  - [Rule upgrade workflow: preserving rule bound data](#rule-upgrade-workflow-preserving-rule-bound-data)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-the-same-rule-type)
+    - [**Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**](#scenario-rule-bound-data-is-preserved-after-upgrading-a-rule-to-a-newer-version-with-a-different-rule-type)
   - [Rule upgrade workflow: misc cases](#rule-upgrade-workflow-misc-cases)
     - [**Scenario: User doesn't see the Rule Updates tab until the package installation is completed**](#scenario-user-doesnt-see-the-rule-updates-tab-until-the-package-installation-is-completed)
   - [Error handling](#error-handling)
@@ -948,6 +952,36 @@ And visible properties should be sorted alphabetically
 When a user expands all hidden sections
 Then all properties of the rule should be sorted alphabetically
 ```
+
+### Rule upgrade workflow: preserving rule bound data
+
+#### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with the same rule type**
+
+**Automation**: 1 unit test per case, 1 integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has the same rule type
+When a user upgrades the rule
+Then the rule bound data should be preserved
+```
+
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
+
+#### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**
+
+**Automation**: 1 unit test per case, 1 integration test
+
+```Gherkin
+Given a prebuilt rule is installed in Kibana
+And this rule has an update available
+And the update has a different rule type
+When a user upgrades the rule
+Then the rule bound data should be preserved
+```
+
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
 
 ### Rule upgrade workflow: misc cases
 
