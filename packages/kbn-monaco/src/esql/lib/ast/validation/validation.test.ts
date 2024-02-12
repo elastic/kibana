@@ -1532,52 +1532,54 @@ describe('validation logic', () => {
           }`,
           []
         );
-        testErrorsAndWarnings(
-          `from a | stats var = round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          })`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a | stats round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          })`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a | stats var = round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }) + ${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          []
-        );
-        testErrorsAndWarnings(
-          `from a | stats round(${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }) + ${
-            getFunctionSignatures(
-              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
-              { withTypes: false }
-            )[0].declaration
-          }`,
-          []
-        );
+        if (returnType === 'number') {
+          testErrorsAndWarnings(
+            `from a | stats var = round(${
+              getFunctionSignatures(
+                { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            })`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats round(${
+              getFunctionSignatures(
+                { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            })`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats var = round(${
+              getFunctionSignatures(
+                { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            }) + ${
+              getFunctionSignatures(
+                { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            []
+          );
+          testErrorsAndWarnings(
+            `from a | stats round(${
+              getFunctionSignatures(
+                { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            }) + ${
+              getFunctionSignatures(
+                { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+                { withTypes: false }
+              )[0].declaration
+            }`,
+            []
+          );
+        }
 
         if (alias) {
           for (const otherName of alias) {
