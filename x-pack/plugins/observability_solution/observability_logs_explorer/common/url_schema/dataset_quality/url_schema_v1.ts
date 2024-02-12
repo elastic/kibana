@@ -52,11 +52,19 @@ export const flyoutRT = rt.exact(
   })
 );
 
+export const filtersRT = rt.exact(
+  rt.partial({
+    inactive: rt.boolean,
+    fullNames: rt.boolean,
+  })
+);
+
 export const urlSchemaRT = rt.exact(
   rt.partial({
     v: rt.literal(1),
     table: tableRT,
     flyout: flyoutRT,
+    filters: filtersRT,
   })
 );
 

@@ -8,8 +8,11 @@
 import moment from 'moment';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
+import {
+  Aggregators,
+  CustomMetricExpressionParams,
+} from '../../../../../common/custom_threshold_rule/types';
 import { AdditionalContext } from '../utils';
 import { SearchConfigurationType } from '../types';
 import { createTimerange } from './create_timerange';
@@ -50,7 +53,15 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
       const interval = `${criterion.timeSize}${criterion.timeUnit}`;
       const intervalAsSeconds = getIntervalInSeconds(interval);
       const intervalAsMS = intervalAsSeconds * 1000;
-      const calculatedTimerange = createTimerange(intervalAsMS, timeframe, lastPeriodEnd);
+      const isRateAggregation = criterion.metrics.some(
+        (metric) => metric.aggType === Aggregators.RATE
+      );
+      const calculatedTimerange = createTimerange(
+        intervalAsMS,
+        timeframe,
+        lastPeriodEnd,
+        isRateAggregation
+      );
 
       const currentValues = await getData(
         esClient,
@@ -58,7 +69,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         dataView,
         timeFieldName,
         groupBy,
-        searchConfiguration.query.query,
+        searchConfiguration,
         compositeSize,
         alertOnGroupDisappear,
         calculatedTimerange,
@@ -72,7 +83,7 @@ export const evaluateRule = async <Params extends EvaluatedRuleParams = Evaluate
         dataView,
         timeFieldName,
         groupBy,
-        searchConfiguration.query.query,
+        searchConfiguration,
         logger,
         calculatedTimerange,
         missingGroups

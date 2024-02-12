@@ -35,6 +35,9 @@ export enum Aggregators {
   MIN = 'min',
   MAX = 'max',
   CARDINALITY = 'cardinality',
+  RATE = 'rate',
+  P95 = 'p95',
+  P99 = 'p99',
 }
 export const aggType = fromEnum('Aggregators', Aggregators);
 export type AggType = rt.TypeOf<typeof aggType>;
