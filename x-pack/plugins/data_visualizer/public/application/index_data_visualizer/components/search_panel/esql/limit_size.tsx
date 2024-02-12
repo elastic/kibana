@@ -62,7 +62,6 @@ export const ESQLDefaultLimitSizeSelect = ({
 
   return (
     <EuiSelect
-      size="s"
       id={basicSelectId}
       options={options}
       value={limitSize}
@@ -71,7 +70,7 @@ export const ESQLDefaultLimitSizeSelect = ({
         defaultMessage: 'Limit size',
       })}
       prepend={
-        <EuiText textAlign="center" size="s">
+        <EuiText textAlign="center">
           <FormattedMessage
             id="xpack.dataVisualizer.searchPanel.esql.limitSizeLabel"
             defaultMessage="Limit analysis to"

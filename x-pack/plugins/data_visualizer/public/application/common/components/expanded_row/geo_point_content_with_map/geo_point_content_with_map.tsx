@@ -22,7 +22,8 @@ export const GeoPointContentWithMap: FC<{
   dataView: DataView | undefined;
   combinedQuery?: CombinedQuery;
   esql?: string;
-}> = ({ config, dataView, combinedQuery, esql }) => {
+  timeFieldName?: string;
+}> = ({ config, dataView, combinedQuery, esql, timeFieldName }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
@@ -44,7 +45,8 @@ export const GeoPointContentWithMap: FC<{
           geoFieldName: config.fieldName,
           geoFieldType: config.type as ES_GEO_FIELD_TYPE,
           filters: data.query.filterManager.getFilters() ?? [],
-          ...(typeof esql === 'string' ? { esql } : {}),
+
+          ...(typeof esql === 'string' ? { esql, type: 'ESQL' } : {}),
           ...(combinedQuery
             ? {
                 query: {
@@ -57,14 +59,46 @@ export const GeoPointContentWithMap: FC<{
         const searchLayerDescriptor = mapsPlugin
           ? await mapsPlugin.createLayerDescriptors.createESSearchSourceLayerDescriptor(params)
           : null;
-        if (searchLayerDescriptor) {
-          setLayerList([...layerList, searchLayerDescriptor]);
+
+        if (searchLayerDescriptor?.sourceDescriptor) {
+          if (esql !== undefined) {
+            // Currently, createESSearchSourceLayerDescriptor doesn't support ES|QL yet
+            // but we can manually override the source descriptor with the ES|QL ESQLSourceDescriptor
+            const esqlSourceDescriptor = {
+              columns: [
+                {
+                  name: config.fieldName,
+                  type: config.type,
+                },
+              ],
+              dataViewId: dataView.id,
+              dateField: dataView.timeFieldName,
+              geoField: config.fieldName,
+              esql,
+              narrowByGlobalSearch: true,
+              narrowByGlobalTime: true,
+              narrowByMapBounds: true,
+              id: searchLayerDescriptor.sourceDescriptor.id,
+              type: 'ESQL',
+              applyForceRefresh: true,
+            };
+
+            setLayerList([
+              ...layerList,
+              {
+                ...searchLayerDescriptor,
+                sourceDescriptor: esqlSourceDescriptor,
+              },
+            ]);
+          } else {
+            setLayerList([...layerList, searchLayerDescriptor]);
+          }
         }
       }
     }
     updateIndexPatternSearchLayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataView, combinedQuery, esql, config, mapsPlugin, data.query]);
+  }, [dataView, combinedQuery, esql, config, mapsPlugin, data.query, timeFieldName]);
 
   if (stats?.examples === undefined) return null;
   return (

@@ -568,13 +568,14 @@ export const useESQLDataVisualizerData = (
               esql={query.esql}
               totalDocuments={totalCount}
               typeAccessor="secondaryType"
+              timeFieldName={timeFieldName}
             />
           );
         }
         return map;
       }, {} as ItemIdToExpandedRowMap);
     },
-    [currentDataView, totalCount, query.esql]
+    [currentDataView, totalCount, query.esql, timeFieldName]
   );
 
   const combinedProgress = useMemo(
