@@ -32,8 +32,6 @@ export const GeoPointContentWithMap: FC<{
   // Update the layer list  with updated geo points upon refresh
   useEffect(() => {
     async function updateIndexPatternSearchLayer() {
-      // @TODO: remove
-      console.log(`--@@esql`, esql);
       if (
         dataView?.id !== undefined &&
         config !== undefined &&

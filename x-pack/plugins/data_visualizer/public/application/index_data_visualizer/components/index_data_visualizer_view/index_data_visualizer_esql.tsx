@@ -270,9 +270,9 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                       showSettings={false}
                     />
                   </EuiFlexGroup>
+                  <EuiSpacer size="s" />
                 </>
               )}
-              <EuiSpacer size="m" />
               <EuiFlexGroup direction="row">
                 <FieldCountPanel
                   showEmptyFields={showEmptyFields}
@@ -286,6 +286,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
                   onChangeLimitSize={updateLimitSize}
                 />
               </EuiFlexGroup>
+              <EuiSpacer size="s" />
 
               <EuiProgress value={combinedProgress} max={100} size="xs" />
               <DataVisualizerTable<FieldVisConfig>

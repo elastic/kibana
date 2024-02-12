@@ -62,6 +62,7 @@ export const ESQLDefaultLimitSizeSelect = ({
 
   return (
     <EuiSelect
+      size="s"
       id={basicSelectId}
       options={options}
       value={limitSize}
