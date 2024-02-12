@@ -18,7 +18,9 @@ import { eventually, setupTestServers, removeFile } from './lib/helpers';
 import {
   cleanupMockedAlerts,
   cleanupMockedExceptionLists,
+  cleanupMockedEndpointAlerts,
   createMockedAlert,
+  createMockedEndpointAlert,
   createMockedExceptionList,
   getAsyncTelemetryEventSender,
   getTelemetryTask,
@@ -107,6 +109,7 @@ describe('telemetry tasks', () => {
       exceptionsList = [];
       exceptionsListItem = [];
     });
+    await cleanupMockedEndpointAlerts(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
   });
 
   describe('detection-rules', () => {
@@ -215,6 +218,26 @@ describe('telemetry tasks', () => {
     });
   });
 
+  describe('endpoint-diagnostics', () => {
+    it('should execute when scheduled', async () => {
+      await mockAndScheduleEndpointDiagnosticsTask();
+
+      // wait until the events are sent to the telemetry server
+      const body = await eventually(async () => {
+        const found = mockedAxiosPost.mock.calls.find(([url]) => {
+          return url.startsWith(ENDPOINT_STAGING) && url.endsWith('alerts-endpoint');
+        });
+
+        expect(found).not.toBeFalsy();
+
+        return JSON.parse((found ? found[1] : '{}') as string);
+      });
+
+      expect(body).not.toBeFalsy();
+      expect(body.Endpoint).not.toBeFalsy();
+    });
+  });
+
   async function mockAndScheduleDetectionRulesTask(): Promise<SecurityTelemetryTask> {
     const task = getTelemetryTask(tasks, 'security:telemetry-detection-rules');
 
@@ -229,6 +252,19 @@ describe('telemetry tasks', () => {
 
     exceptionsList.push(exceptionList);
     exceptionsListItem.push(exceptionListItem);
+
+    // schedule task to run ASAP
+    await eventually(async () => {
+      await taskManagerPlugin.runSoon(task.getTaskId());
+    });
+
+    return task;
+  }
+
+  async function mockAndScheduleEndpointDiagnosticsTask(): Promise<SecurityTelemetryTask> {
+    const task = getTelemetryTask(tasks, 'security:endpoint-diagnostics');
+
+    await createMockedEndpointAlert(kibanaServer.coreStart.elasticsearch.client.asInternalUser);
 
     // schedule task to run ASAP
     await eventually(async () => {
