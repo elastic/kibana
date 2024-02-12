@@ -911,7 +911,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.events.etw',
       {
-        defaultMessage: 'Enable collection of ETW events. Default: true',
+        defaultMessage: 'Deprecated.',
       }
     ),
   },
