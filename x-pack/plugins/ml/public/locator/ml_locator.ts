@@ -6,11 +6,13 @@
  */
 
 import type { LocatorDefinition, KibanaLocation } from '@kbn/share-plugin/public';
+import { formatChangePointDetectionUrl } from './formatters/aiops';
 import { formatNotificationsUrl } from './formatters/notifications';
 import {
   DataFrameAnalyticsExplorationUrlState,
   MlLocatorParams,
   MlLocator,
+  ChangePointDetectionQueryState,
 } from '../../common/types/locator';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../common/constants/locator';
 import {
@@ -97,6 +99,11 @@ export class MlLocatorDefinition implements LocatorDefinition<MlLocatorParams> {
       case ML_PAGES.AIOPS_LOG_CATEGORIZATION:
       case ML_PAGES.AIOPS_LOG_CATEGORIZATION_INDEX_SELECT:
       case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION:
+        path = formatChangePointDetectionUrl(
+          '',
+          params.pageState as ChangePointDetectionQueryState
+        );
+        break;
       case ML_PAGES.AIOPS_CHANGE_POINT_DETECTION_INDEX_SELECT:
       case ML_PAGES.OVERVIEW:
       case ML_PAGES.SETTINGS:
