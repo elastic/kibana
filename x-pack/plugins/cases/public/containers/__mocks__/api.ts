@@ -13,6 +13,7 @@ import type {
   CasesStatus,
   FetchCasesProps,
   FindCaseUserActions,
+  CaseUICustomField,
 } from '../types';
 import { SortFieldCase } from '../types';
 import {
@@ -30,6 +31,7 @@ import {
   findCaseUserActionsResponse,
   getCaseUserActionsStatsResponse,
   getCaseUsersMockResponse,
+  customFieldsMock,
 } from '../mock';
 import type {
   CaseConnectors,
@@ -178,3 +180,15 @@ export const deleteFileAttachments = async ({
 
 export const getCategories = async (signal: AbortSignal): Promise<string[]> =>
   Promise.resolve(categories);
+
+export const replaceCustomField = async ({
+  caseId,
+  customFieldId,
+  customFieldValue,
+  caseVersion,
+}: {
+  caseId: string;
+  customFieldId: string;
+  customFieldValue: string | boolean | null;
+  caseVersion: string;
+}): Promise<CaseUICustomField> => Promise.resolve(customFieldsMock[0]);

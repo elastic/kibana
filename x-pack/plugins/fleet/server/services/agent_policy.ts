@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { omit, isEqual, keyBy, groupBy, pick } from 'lodash';
+import { omit, isEqual, keyBy, groupBy, pick, chunk } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { safeDump } from 'js-yaml';
 import pMap from 'p-map';
@@ -21,6 +21,10 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/server';
 import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
+
+import { asyncForEach } from '@kbn/std';
+
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { policyHasEndpointSecurity } from '../../common/services';
 
@@ -1301,6 +1305,70 @@ class AgentPolicyService {
       inactivityTimeout: parseInt(inactivityTimeout, 10),
       policyIds: policies.map((policy) => policy.id),
     }));
+  }
+
+  public async turnOffAgentTamperProtections(soClient: SavedObjectsClientContract): Promise<{
+    updatedPolicies: Array<Partial<AgentPolicy>> | null;
+    failedPolicies: Array<{ id: string; error: Error | SavedObjectError }>;
+  }> {
+    const { saved_objects: agentPoliciesWithEnabledAgentTamperProtection } =
+      await soClient.find<AgentPolicySOAttributes>({
+        type: SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: SO_SEARCH_LIMIT,
+        filter: normalizeKuery(SAVED_OBJECT_TYPE, 'ingest-agent-policies.is_protected: true'),
+        fields: ['revision'],
+      });
+
+    if (agentPoliciesWithEnabledAgentTamperProtection.length === 0) {
+      return {
+        updatedPolicies: null,
+        failedPolicies: [],
+      };
+    }
+
+    const { saved_objects: updatedAgentPolicies } =
+      await soClient.bulkUpdate<AgentPolicySOAttributes>(
+        agentPoliciesWithEnabledAgentTamperProtection.map((agentPolicy) => {
+          const { id, attributes } = agentPolicy;
+          return {
+            id,
+            type: SAVED_OBJECT_TYPE,
+            attributes: {
+              is_protected: false,
+              revision: attributes.revision + 1,
+              updated_at: new Date().toISOString(),
+              updated_by: 'system',
+            },
+          };
+        })
+      );
+
+    const failedPolicies: Array<{
+      id: string;
+      error: Error | SavedObjectError;
+    }> = [];
+
+    updatedAgentPolicies.forEach((policy) => {
+      if (policy.error) {
+        failedPolicies.push({
+          id: policy.id,
+          error: policy.error,
+        });
+      }
+    });
+
+    const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
+
+    const config = appContextService.getConfig();
+    const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
+    const policyIds = updatedPoliciesSuccess.map((policy) => policy.id);
+    await asyncForEach(
+      chunk(policyIds, batchSize),
+      async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
+    );
+
+    return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }
 
   private checkTamperProtectionLicense(agentPolicy: { is_protected?: boolean }): void {
