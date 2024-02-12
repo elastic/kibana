@@ -26,7 +26,7 @@ export function SearchConnectorTab() {
           'aiAssistantManagementObservability.searchConnectorTab.searchConnectorsEnablesYouTextLabel',
           {
             defaultMessage:
-              'Search connectors enable you to index content from external sources and make it available to the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
+              'Connectors enables you to index content from external sources thereby making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
           }
         )}
       </EuiText>
@@ -34,7 +34,7 @@ export function SearchConnectorTab() {
       <EuiText>
         <FormattedMessage
           id="aiAssistantManagementObservability.searchConnectorTab.searchConnectorsManagementLink"
-          defaultMessage="You can manage search connectors under {searchConnectorLink}."
+          defaultMessage="You can manage connectors under {searchConnectorLink}."
           values={{
             searchConnectorLink: (
               <EuiLink
@@ -43,7 +43,7 @@ export function SearchConnectorTab() {
               >
                 {i18n.translate(
                   'aiAssistantManagementObservability.searchConnectorTab.searchConnectorsManagementPageLinkLabel',
-                  { defaultMessage: 'Elasticsearch connectors' }
+                  { defaultMessage: 'Connectors' }
                 )}
               </EuiLink>
             ),
