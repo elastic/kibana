@@ -12,11 +12,9 @@ import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
-import { CasesTableUtilityBar } from './utility_bar';
 import { LinkButton } from '../links';
 
-import type { CasesFindResponseUI, CasesUI, CaseUI } from '../../../common/ui/types';
-import type { CasesColumnSelection } from './types';
+import type { CasesFindResponseUI, CaseUI } from '../../../common/ui/types';
 
 import * as i18n from './translations';
 import { useCreateCaseNavigation } from '../../common/navigation';
@@ -32,14 +30,10 @@ interface CasesTableProps {
   isSelectorView?: boolean;
   onChange: EuiBasicTableProps<CaseUI>['onChange'];
   pagination: Pagination;
-  selectedCases: CasesUI;
   selection: EuiTableSelectionType<CaseUI>;
   sorting: EuiBasicTableProps<CaseUI>['sorting'];
   tableRef?: MutableRefObject<EuiBasicTable | null>;
   tableRowProps: EuiBasicTableProps<CaseUI>['rowProps'];
-  deselectCases: () => void;
-  selectedColumns: CasesColumnSelection[];
-  onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
   isLoadingColumns: boolean;
 }
 
@@ -57,14 +51,10 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
   isSelectorView,
   onChange,
   pagination,
-  selectedCases,
   selection,
   sorting,
   tableRef,
   tableRowProps,
-  deselectCases,
-  selectedColumns,
-  onSelectedColumnsChange,
   isLoadingColumns,
 }) => {
   const { permissions } = useCasesContext();
@@ -87,15 +77,6 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
     </Div>
   ) : (
     <>
-      <CasesTableUtilityBar
-        pagination={pagination}
-        isSelectorView={isSelectorView}
-        totalCases={data.total ?? 0}
-        selectedCases={selectedCases}
-        deselectCases={deselectCases}
-        selectedColumns={selectedColumns}
-        onSelectedColumnsChange={onSelectedColumnsChange}
-      />
       <EuiBasicTable
         className={classnames({ isSelectorView })}
         columns={columns}
