@@ -58,10 +58,10 @@ export function ErrorsWarningsContent({
   type: 'error' | 'warning';
   onErrorClick: (error: MonacoMessage) => void;
 }) {
-  const strings = getConstsByType(type, items.length);
+  const { label, color } = getConstsByType(type, items.length);
   return (
     <div style={{ width: 500 }}>
-      <EuiPopoverTitle paddingSize="s">{strings.label}</EuiPopoverTitle>
+      <EuiPopoverTitle paddingSize="s">{label}</EuiPopoverTitle>
       <EuiDescriptionList>
         {items.map((item, index) => {
           return (
@@ -78,7 +78,7 @@ export function ErrorsWarningsContent({
                 <EuiFlexItem grow={false}>
                   <EuiFlexGroup gutterSize="s" alignItems="center">
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type={type} color={strings.color} size="s" />
+                      <EuiIcon type={type} color={color} size="s" />
                     </EuiFlexItem>
                     <EuiFlexItem style={{ whiteSpace: 'nowrap' }}>
                       {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.lineNumber', {
@@ -112,18 +112,18 @@ export function ErrorsWarningsCompactViewPopover({
   popoverCSS: Interpolation<Theme>;
 }) {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-  const strings = getConstsByType(type, items.length);
+  const { color, message } = getConstsByType(type, items.length);
   return (
     <EuiPopover
       button={
         <EuiBadge
-          color={strings.color}
+          color={color}
           onClick={() => setIsPopoverOpen(true)}
-          onClickAriaLabel={strings.message}
+          onClickAriaLabel={message}
           iconType={type}
           iconSide="left"
           data-test-subj={`TextBasedLangEditor-inline-${type}-badge`}
-          title={strings.message}
+          title={message}
           css={css`
             cursor: pointer;
           `}
@@ -157,14 +157,14 @@ export function ErrorsWarningsFooterPopover({
   onErrorClick: (error: MonacoMessage) => void;
   isSpaceReduced?: boolean;
 }) {
-  const strings = getConstsByType(type, items.length);
+  const { color, message } = getConstsByType(type, items.length);
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
           <EuiIcon
             type={type}
-            color={strings.color}
+            color={color}
             size="s"
             onClick={() => {
               setIsPopoverOpen(!isPopoverOpen);
@@ -176,7 +176,7 @@ export function ErrorsWarningsFooterPopover({
             button={
               <EuiText
                 size="xs"
-                color={strings.color}
+                color={color}
                 css={css`
                   &:hover {
                     cursor: pointer;
@@ -187,7 +187,7 @@ export function ErrorsWarningsFooterPopover({
                   setIsPopoverOpen(!isPopoverOpen);
                 }}
               >
-                <p>{isSpaceReduced ? items.length : strings.message}</p>
+                <p>{isSpaceReduced ? items.length : message}</p>
               </EuiText>
             }
             ownFocus={false}
