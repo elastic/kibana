@@ -10,6 +10,7 @@ import { ProfilingESField } from './elasticsearch';
 import {
   Executable,
   FileID,
+  isErrorFrame,
   StackFrame,
   StackFrameID,
   StackTrace,
@@ -122,8 +123,7 @@ const createInlineTrace = (
 
   // Error frames only appear as first frame in a stacktrace.
   const start =
-    // eslint-disable-next-line no-bitwise
-    !showErrorFrames && trace.frame_ids.length > 0 && (trace.type_ids[0] & 0x80) !== 0 ? 1 : 0;
+    !showErrorFrames && trace.frame_ids.length > 0 && isErrorFrame(trace.type_ids[0]) ? 1 : 0;
 
   for (let i = start; i < trace.frame_ids.length; i++) {
     const frameID = trace.frame_ids[i];

@@ -33,7 +33,8 @@ export enum FrameType {
   Perl,
   JavaScript,
   PHPJIT,
-  Error = 0xFF,
+  ErrorFlag = 0x80,
+  Error = 0xff,
 }
 
 const frameTypeDescriptions = {
@@ -47,8 +48,14 @@ const frameTypeDescriptions = {
   [FrameType.Perl]: 'Perl',
   [FrameType.JavaScript]: 'JavaScript',
   [FrameType.PHPJIT]: 'PHP JIT',
+  [FrameType.ErrorFlag]: 'ErrorFlag',
   [FrameType.Error]: 'Error',
 };
+
+export function isErrorFrame(ft: FrameType): boolean {
+  // eslint-disable-next-line no-bitwise
+  return (ft & FrameType.ErrorFlag) !== 0;
+}
 
 /**
  * normalize the given frame type
@@ -57,7 +64,7 @@ const frameTypeDescriptions = {
  */
 export function normalizeFrameType(ft: FrameType): FrameType {
   // Normalize any frame type with error bit into our uniform error variant.
-  if (((ft as number) & 0x80) != 0) {
+  if (isErrorFrame(ft)) {
     return FrameType.Error;
   }
 
@@ -236,7 +243,7 @@ function getExeFileName(metadata: StackFrameMetadata) {
 export function getCalleeLabel(metadata: StackFrameMetadata) {
   const inlineLabel = metadata.Inline ? '-> ' : '';
   if (metadata.FrameType === FrameType.Error) {
-    return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`
+    return `Error: unwinding error code #${metadata.AddressOrLine.toString()}`;
   } else if (metadata.FunctionName !== '') {
     const sourceFilename = metadata.SourceFilename;
     const sourceURL = sourceFilename ? sourceFilename.split('/').pop() : '';
