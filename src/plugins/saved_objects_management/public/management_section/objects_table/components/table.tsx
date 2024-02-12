@@ -402,7 +402,9 @@ export class Table extends PureComponent<TableProps, TableState> {
               color="danger"
               onClick={onDelete}
               isDisabled={
-                selectedSavedObjects.length === 0 || !capabilities.savedObjectsManagement.delete
+                selectedSavedObjects.filter(
+                  ({ managed, meta: { hiddenType } }) => !managed && !hiddenType
+                ).length === 0 || !capabilities.savedObjectsManagement.delete
               }
               title={
                 capabilities.savedObjectsManagement.delete
