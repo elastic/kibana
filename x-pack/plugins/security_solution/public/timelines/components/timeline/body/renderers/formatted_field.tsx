@@ -12,6 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isNumber, isEmpty } from 'lodash/fp';
 import React from 'react';
 
+import type { BrowserField } from '../../../../../common/containers/source';
 import { SENTINEL_ONE_AGENT_ID_FIELD } from '../../../../../common/utils/sentinelone_alert_check';
 import { SentinelOneAgentStatus } from '../../../../../detections/components/host_isolation/sentinel_one_agent_status';
 import { EndpointAgentStatusById } from '../../../../../common/components/endpoint/endpoint_agent_status';
@@ -57,6 +58,7 @@ const FormattedFieldValueComponent: React.FC<{
   isAggregatable?: boolean;
   isObjectArray?: boolean;
   fieldFormat?: string;
+  fieldFromBrowserField?: BrowserField;
   fieldName: string;
   fieldType?: string;
   isButton?: boolean;
@@ -76,6 +78,7 @@ const FormattedFieldValueComponent: React.FC<{
   isAggregatable = false,
   fieldName,
   fieldType = '',
+  fieldFromBrowserField,
   isButton,
   isObjectArray = false,
   isDraggable = true,
@@ -240,6 +243,11 @@ const FormattedFieldValueComponent: React.FC<{
         iconSide={isButton ? 'right' : undefined}
       />
     );
+  } else if (
+    fieldName === SENTINEL_ONE_AGENT_ID_FIELD ||
+    fieldFromBrowserField?.name === SENTINEL_ONE_AGENT_ID_FIELD
+  ) {
+    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
   } else if (fieldName === AGENT_STATUS_FIELD_NAME) {
     return (
       <EndpointAgentStatusById
@@ -247,8 +255,6 @@ const FormattedFieldValueComponent: React.FC<{
         data-test-subj="endpointHostAgentStatus"
       />
     );
-  } else if (fieldName === SENTINEL_ONE_AGENT_ID_FIELD) {
-    return <SentinelOneAgentStatus agentId={String(value ?? '')} />;
   } else if (
     [
       RULE_REFERENCE_FIELD_NAME,
