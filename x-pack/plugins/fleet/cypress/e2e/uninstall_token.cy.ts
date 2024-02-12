@@ -78,7 +78,7 @@ describe('Uninstall token page', () => {
           cy.contains(`sudo elastic-agent uninstall --uninstall-token ${fetchedToken.token}`);
 
           cy.contains(
-            `Valid for the following agent policy:${fetchedToken.policy_name || ''} (${
+            `Valid for the following agent policy:${fetchedToken.policy_name || '-'} (${
               fetchedToken.policy_id
             })`
           );

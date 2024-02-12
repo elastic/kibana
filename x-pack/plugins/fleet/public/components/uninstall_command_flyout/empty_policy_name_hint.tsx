@@ -17,12 +17,15 @@ export const EMPTY_POLICY_NAME_HINT = i18n.translate(
 );
 
 export const EmptyPolicyNameHint = () => (
-  <EuiToolTip content={EMPTY_POLICY_NAME_HINT}>
-    <EuiIcon
-      type="questionInCircle"
-      color="subdued"
-      aria-label={EMPTY_POLICY_NAME_HINT}
-      data-test-subj="emptyPolicyNameHint"
-    />
-  </EuiToolTip>
+  <>
+    {'- '}
+    <EuiToolTip content={EMPTY_POLICY_NAME_HINT}>
+      <EuiIcon
+        type="questionInCircle"
+        color="subdued"
+        aria-label={EMPTY_POLICY_NAME_HINT}
+        data-test-subj="emptyPolicyNameHint"
+      />
+    </EuiToolTip>
+  </>
 );
