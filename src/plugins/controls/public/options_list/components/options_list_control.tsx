@@ -11,7 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, EuiToken } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -132,39 +132,46 @@ export const OptionsListControl = ({
                 : null}
             </>
           )}
+          <span className="optionsList__invalidToken">
+            <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
+          </span>
         </>
       ),
     };
   }, [selectedOptions, exclude, existsSelected, fieldFormatter, delimiter, invalidSelections]);
 
   const button = (
-    <EuiFilterButton
-      badgeColor="success"
-      iconType="arrowDown"
-      isLoading={debouncedLoading}
-      className={classNames('optionsList--filterBtn', {
-        'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
-        'optionsList--filterBtnPlaceholder': !hasSelections,
-      })}
-      data-test-subj={`optionsList-control-${id}`}
-      onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
-      isSelected={isPopoverOpen}
-      numActiveFilters={selectedOptionsCount}
-      hasActiveFilters={Boolean(selectedOptionsCount)}
-      aria-label={`${selectedOptions
-        ?.map((value) => {
-          const isInvalid = invalidSelections?.includes(value);
-          return `${
-            isInvalid ? OptionsListStrings.popover.getInvalidSelectionScreenReaderText() + ' ' : ''
-          }${fieldFormatter(value)}`;
-        })
-        .join(delimiter)}`}
-      textProps={{ className: 'optionsList--selectionText' }}
-    >
-      {hasSelections || existsSelected
-        ? selectionDisplayNode
-        : placeholder ?? OptionsListStrings.control.getPlaceholder()}
-    </EuiFilterButton>
+    <>
+      <EuiFilterButton
+        badgeColor="success"
+        iconType="arrowDown"
+        isLoading={debouncedLoading}
+        className={classNames('optionsList--filterBtn', {
+          'optionsList--filterBtnSingle': controlStyle !== 'twoLine',
+          'optionsList--filterBtnPlaceholder': !hasSelections,
+        })}
+        data-test-subj={`optionsList-control-${id}`}
+        onClick={() => optionsList.dispatch.setPopoverOpen(!isPopoverOpen)}
+        isSelected={isPopoverOpen}
+        numActiveFilters={selectedOptionsCount}
+        hasActiveFilters={Boolean(selectedOptionsCount)}
+        aria-label={`${selectedOptions
+          ?.map((value) => {
+            const isInvalid = invalidSelections?.includes(value);
+            return `${
+              isInvalid
+                ? OptionsListStrings.popover.getInvalidSelectionScreenReaderText() + ' '
+                : ''
+            }${fieldFormatter(value)}`;
+          })
+          .join(delimiter)}`}
+        textProps={{ className: 'optionsList--selectionText' }}
+      >
+        {hasSelections || existsSelected
+          ? selectionDisplayNode
+          : placeholder ?? OptionsListStrings.control.getPlaceholder()}
+      </EuiFilterButton>
+    </>
   );
 
   return error ? (

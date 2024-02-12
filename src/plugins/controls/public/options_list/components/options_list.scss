@@ -46,6 +46,10 @@
   font-weight: $euiFontWeightMedium;
 }
 
+.optionsList__invalidToken {
+  float: inline-end;
+}
+
 .optionsList__popoverOverride {
   @include euiBottomShadowMedium;
   filter: none; // overwrite the default popover shadow
