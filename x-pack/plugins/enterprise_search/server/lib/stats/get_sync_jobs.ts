@@ -45,10 +45,12 @@ export const fetchSyncJobsStats = async (
     // Idle syncs don't make sense for Crawler, because it does not have concept of "Idle" syncs at all.
     // We tried tracking idle syncs in a way similar to connectors, but it results in all crawler jobs
     // marked as idle.
-    const idleJobsCountResponse = isCrawler ? undefined : await client.asCurrentUser.count({
-      index: CONNECTORS_JOBS_INDEX,
-      query: getIdleJobsCountQuery(),
-    });
+    const idleJobsCountResponse = isCrawler
+      ? undefined
+      : await client.asCurrentUser.count({
+          index: CONNECTORS_JOBS_INDEX,
+          query: getIdleJobsCountQuery(),
+        });
 
     const errorResponse = await client.asCurrentUser.count({
       index: CONNECTORS_INDEX,
