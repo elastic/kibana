@@ -219,8 +219,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       /**
-       * When importing action connector id matches with an existing one type and config isn't checked.
-       * In fact importing connector can have different type and configuration.
+       * When importing an action connector, if its `id` matches with an existing one, the type and config isn't checked.
+       * In fact, the connector being imported can have a different type and configuration, and its creation will be skipped.
        */
       it('skips importing already existing action connectors', async () => {
         await createConnector(
