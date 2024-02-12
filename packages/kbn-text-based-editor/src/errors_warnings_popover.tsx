@@ -124,6 +124,9 @@ export function ErrorsWarningsCompactViewPopover({
           iconSide="left"
           data-test-subj={`TextBasedLangEditor-inline-${type}-badge`}
           title={strings.message}
+          css={css`
+            cursor: pointer;
+          `}
         >
           {items.length}
         </EuiBadge>
