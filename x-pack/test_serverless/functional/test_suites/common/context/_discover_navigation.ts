@@ -20,6 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'settings',
@@ -40,6 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.update({
         defaultIndex: 'logstash-*',
       });
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
