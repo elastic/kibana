@@ -7,10 +7,10 @@
 import * as React from 'react';
 import { IToasts } from '@kbn/core/public';
 import {
-  act,
   render,
   screen,
   cleanup,
+  waitFor,
   waitForElementToBeRemoved,
   fireEvent,
 } from '@testing-library/react';
@@ -180,9 +180,15 @@ describe('Rules list Bulk Disable', () => {
   });
 
   it('can bulk disable', async () => {
-    await act(async () => {
-      fireEvent.click(screen.getByTestId('bulkDisable'));
+    fireEvent.click(screen.getByTestId('bulkDisable'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
     });
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    await waitForElementToBeRemoved(() => screen.queryByTestId('bulkDisable'));
 
     const filter = bulkDisableRules.mock.calls[0][0].filter;
 
@@ -192,22 +198,24 @@ describe('Rules list Bulk Disable', () => {
     expect(filter.arguments[1].arguments[0].arguments[0].value).toEqual('alert.id');
     expect(filter.arguments[1].arguments[0].arguments[1].value).toEqual('alert:2');
 
-    expect(bulkDisableRules).toHaveBeenCalledWith(
-      expect.not.objectContaining({
-        ids: [],
-      })
-    );
+    expect(bulkDisableRules).toHaveBeenCalled();
+
     expect(screen.getByTestId('checkboxSelectRow-1').closest('tr')).not.toHaveClass(
       'euiTableRow-isSelected'
     );
-    expect(screen.queryByTestId('bulkDisable')).not.toBeInTheDocument();
   });
 
   describe('Toast', () => {
     it('should have success toast message', async () => {
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('bulkDisable'));
+      fireEvent.click(screen.getByTestId('bulkDisable'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
       });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('bulkDisable'));
 
       expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledTimes(1);
       expect(useKibanaMock().services.notifications.toasts.addSuccess).toHaveBeenCalledWith(
@@ -229,9 +237,15 @@ describe('Rules list Bulk Disable', () => {
         total: 10,
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('bulkDisable'));
+      fireEvent.click(screen.getByTestId('bulkDisable'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
       });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('bulkDisable'));
 
       expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledTimes(1);
       expect(useKibanaMock().services.notifications.toasts.addWarning).toHaveBeenCalledWith(
@@ -255,9 +269,15 @@ describe('Rules list Bulk Disable', () => {
         total: 1,
       });
 
-      await act(async () => {
-        fireEvent.click(screen.getByTestId('bulkDisable'));
+      fireEvent.click(screen.getByTestId('bulkDisable'));
+
+      await waitFor(() => {
+        expect(screen.getByTestId('untrackAlertsModal')).toBeInTheDocument();
       });
+
+      fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+      await waitForElementToBeRemoved(() => screen.queryByTestId('bulkDisable'));
 
       expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledTimes(1);
       expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(

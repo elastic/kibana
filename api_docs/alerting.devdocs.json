@@ -11457,6 +11457,21 @@
       },
       {
         "parentPluginId": "alerting",
+        "id": "def-common.RuleTypeMetaData",
+        "type": "Type",
+        "tags": [],
+        "label": "RuleTypeMetaData",
+        "description": [],
+        "signature": [
+          "{ [x: string]: unknown; }"
+        ],
+        "path": "x-pack/plugins/alerting/common/rule.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "alerting",
         "id": "def-common.RuleTypeParams",
         "type": "Type",
         "tags": [],
