@@ -11,7 +11,14 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import { EuiFilterButton, EuiFilterGroup, EuiInputPopover, EuiToken } from '@elastic/eui';
+import {
+  EuiFilterButton,
+  EuiFilterGroup,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiInputPopover,
+  EuiToken,
+} from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -99,43 +106,49 @@ export const OptionsListControl = ({
       hasSelections: !isEmpty(selectedOptions),
       selectedOptionsCount: selectedOptions?.length,
       selectionDisplayNode: (
-        <>
-          {exclude && (
-            <>
-              <span className="optionsList__negateLabel">
-                {existsSelected
-                  ? OptionsListStrings.control.getExcludeExists()
-                  : OptionsListStrings.control.getNegate()}
-              </span>{' '}
-            </>
-          )}
-          {existsSelected ? (
-            <span className={`optionsList__existsFilter`}>
-              {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
-            </span>
-          ) : (
-            <>
-              {selectedOptions?.length
-                ? selectedOptions.map((value: string, i, { length }) => {
-                    const text = `${fieldFormatter(value)}${i + 1 === length ? '' : delimiter} `;
-                    const isInvalid = invalidSelections?.includes(value);
-                    return (
-                      <span
-                        className={`optionsList__filter ${
-                          isInvalid ? 'optionsList__filterInvalid' : ''
-                        }`}
-                      >
-                        {text}
-                      </span>
-                    );
-                  })
-                : null}
-            </>
-          )}
-          <span className="optionsList__invalidToken">
+        <EuiFlexGroup alignItems="center" responsive={false}>
+          <EuiFlexItem>
+            <div>
+              {exclude && (
+                <>
+                  <span className="optionsList__negateLabel">
+                    {existsSelected
+                      ? OptionsListStrings.control.getExcludeExists()
+                      : OptionsListStrings.control.getNegate()}
+                  </span>{' '}
+                </>
+              )}
+              {existsSelected ? (
+                <span className={`optionsList__existsFilter`}>
+                  {OptionsListStrings.controlAndPopover.getExists(+Boolean(exclude))}
+                </span>
+              ) : (
+                <>
+                  {selectedOptions?.length
+                    ? selectedOptions.map((value: string, i, { length }) => {
+                        const text = `${fieldFormatter(value)}${
+                          i + 1 === length ? '' : delimiter
+                        } `;
+                        const isInvalid = invalidSelections?.includes(value);
+                        return (
+                          <span
+                            className={`optionsList__filter ${
+                              isInvalid ? 'optionsList__filterInvalid' : ''
+                            }`}
+                          >
+                            {text}
+                          </span>
+                        );
+                      })
+                    : null}
+                </>
+              )}
+            </div>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
-          </span>
-        </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     };
   }, [selectedOptions, exclude, existsSelected, fieldFormatter, delimiter, invalidSelections]);
