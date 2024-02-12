@@ -51,9 +51,9 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
    */
   dateField?: string;
   /*
-   * Geo field used to
-   * 1. narrow ES|QL requests by visible map area
-   * 2. narrow by spatial filters drawn on map
+   * Geo field used to narrow ES|QL requests by
+   * 1. by visible map area
+   * 2. spatial filters drawn on map
    */
   geoField?: string;
   narrowByGlobalSearch: boolean;
