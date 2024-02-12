@@ -50,13 +50,16 @@ export const ServicesContent = ({
       extraAction={<LinkToApmServices assetName={hostName} apmField={APM_HOST_FILTER_FIELD} />}
     >
       {error ? (
-        <EuiCallOut title="Error" color="danger" iconType="alert">
-          <p>
-            {error &&
-              i18n.translate('xpack.infra.assetDetails.services.getServicesRequestError', {
-                defaultMessage: 'An error occurred while fetching services.',
-              })}
-          </p>
+        <EuiCallOut
+          title={i18n.translate('xpack.infra.assetDetails.services.getServicesRequestErrorTitle', {
+            defaultMessage: 'Error',
+          })}
+          color="danger"
+          iconType="alert"
+        >
+          {i18n.translate('xpack.infra.assetDetails.services.getServicesRequestError', {
+            defaultMessage: 'An error occurred while fetching services.',
+          })}
         </EuiCallOut>
       ) : loading ? (
         <EuiLoadingSpinner size="m" />

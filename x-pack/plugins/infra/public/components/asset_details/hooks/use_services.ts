@@ -50,7 +50,7 @@ export function useServices(params: ServicesAPIRequest) {
   }, [makeRequest, request$]);
 
   return {
-    error: error || null,
+    error,
     loading,
     response,
     makeRequest,

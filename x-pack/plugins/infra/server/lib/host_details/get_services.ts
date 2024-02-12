@@ -8,6 +8,7 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { APMDataAccessConfig } from '@kbn/apm-data-access-plugin/server';
 import { termQuery } from '@kbn/observability-plugin/server';
+import { PROCESSOR_EVENT } from '@kbn/observability-shared-plugin/common/field_names/elasticsearch';
 import { ESSearchClient } from '../metrics/types';
 import {
   ServicesAPIRequest,
@@ -79,7 +80,7 @@ export const getServices = async (
         filter: [
           {
             term: {
-              'processor.event': 'metric',
+              [PROCESSOR_EVENT]: 'metric',
             },
           },
           {
