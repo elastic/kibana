@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginInitializerContext, Plugin } from '@kbn/core/server';
+import { PluginInitializerContext, Plugin, CoreSetup } from '@kbn/core/server';
 
+import { uiSettings } from './ui_settings';
 export class DevToolsServerPlugin implements Plugin<object, object> {
   constructor(initializerContext: PluginInitializerContext) {}
 
-  public setup() {
+  public setup(core: CoreSetup<object>) {
+    /**
+     * Register Dev Tools UI Settings
+     */
+    core.uiSettings.register(uiSettings);
     return {};
   }
 
