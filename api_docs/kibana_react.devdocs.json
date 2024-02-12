@@ -1165,6 +1165,18 @@
           },
           {
             "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
+          },
+          {
+            "plugin": "ml",
+            "path": "x-pack/plugins/ml/public/embeddables/single_metric_viewer/single_metric_viewer_embeddable.tsx"
+          },
+          {
+            "plugin": "ml",
             "path": "x-pack/plugins/ml/public/embeddables/anomaly_swimlane/anomaly_swimlane_embeddable.tsx"
           },
           {
