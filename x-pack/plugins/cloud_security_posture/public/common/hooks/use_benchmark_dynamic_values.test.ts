@@ -12,7 +12,7 @@ import { useCspIntegrationLink } from '../navigation/use_csp_integration_link';
 jest.mock('../navigation/use_csp_integration_link');
 
 describe('useBenchmarkDynamicValues', () => {
-  const setupMocks = (cspmIntegrationLink, kspmIntegrationLink) => {
+  const setupMocks = (cspmIntegrationLink: string, kspmIntegrationLink: string) => {
     useCspIntegrationLink
       .mockReturnValueOnce(cspmIntegrationLink)
       .mockReturnValueOnce(kspmIntegrationLink);
