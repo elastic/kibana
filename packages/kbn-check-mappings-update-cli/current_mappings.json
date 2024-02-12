@@ -2398,8 +2398,14 @@
   "query": {
     "dynamic": false,
     "properties": {
+      "appName": {
+        "type": "keyword"
+      },
       "description": {
         "type": "text"
+      },
+      "tags": {
+        "type": "keyword"
       },
       "title": {
         "type": "text"

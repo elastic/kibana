@@ -715,7 +715,9 @@
     "note"
   ],
   "query": [
+    "appName",
     "description",
+    "tags",
     "title",
     "titleKeyword"
   ],
