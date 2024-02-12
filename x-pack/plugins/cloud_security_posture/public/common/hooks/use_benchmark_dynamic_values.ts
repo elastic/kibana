@@ -67,7 +67,7 @@ export const useBenchmarkDynamicValues = () => {
    * //   integrationType: 'CSPM',
    * //   integrationName: 'AWS',
    * //   resourceName: 'Accounts',
-   * //   resourceCountLabel: '3 accounts',
+   * //   resourceCountLabel: 'accounts',
    * //   integrationLink: 'cspm-integration-link',
    * //   learnMoreLink: 'https://ela.st/cspm-get-started'
    * // }
