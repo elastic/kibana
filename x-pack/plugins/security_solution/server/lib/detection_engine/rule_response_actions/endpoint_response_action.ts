@@ -67,7 +67,6 @@ export const endpointResponseAction = async (
                   alert_ids,
                   parameters,
                   comment,
-                  agent_type: 'endpoint',
                 },
                 {
                   hosts,
@@ -105,7 +104,6 @@ export const endpointResponseAction = async (
                   command === 'kill-process' ? 'killProcess' : 'suspendProcess'
                 ](
                   {
-                    agent_type: 'endpoint',
                     comment,
                     endpoint_ids,
                     alert_ids,

@@ -26,7 +26,14 @@ import type {
   ResponseActionGetFileRequestBody,
   ExecuteActionRequestBody,
   UploadActionApiRequestBody,
+  BaseActionRequestBody,
 } from '../../../../../../common/api/endpoint';
+
+type OmitUnsupportedAttributes<T extends BaseActionRequestBody> = Omit<
+  T,
+  // We don't need agent type in the Response Action client because each client is initialized for only 1 agent type
+  'agent_type'
+>;
 
 /**
  * Additional options for response action methods that fall outside of the Request Body
@@ -54,46 +61,46 @@ export interface CommonResponseActionMethodOptions
  */
 export interface ResponseActionsClient {
   isolate: (
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: OmitUnsupportedAttributes<IsolationRouteRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails>;
 
   release: (
-    actionRequest: IsolationRouteRequestBody,
+    actionRequest: OmitUnsupportedAttributes<IsolationRouteRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails>;
 
   killProcess: (
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   suspendProcess: (
-    actionRequest: KillOrSuspendProcessRequestBody,
+    actionRequest: OmitUnsupportedAttributes<KillOrSuspendProcessRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
   runningProcesses: (
-    actionRequest: GetProcessesRequestBody,
+    actionRequest: OmitUnsupportedAttributes<GetProcessesRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<GetProcessesActionOutputContent>>;
 
   getFile: (
-    actionRequest: ResponseActionGetFileRequestBody,
+    actionRequest: OmitUnsupportedAttributes<ResponseActionGetFileRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>>;
 
   execute: (
-    actionRequest: ExecuteActionRequestBody,
+    actionRequest: OmitUnsupportedAttributes<ExecuteActionRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>>;
 
   upload: (
-    actionRequest: UploadActionApiRequestBody,
+    actionRequest: OmitUnsupportedAttributes<UploadActionApiRequestBody>,
     options?: CommonResponseActionMethodOptions
   ) => Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
 }
