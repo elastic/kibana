@@ -6,8 +6,18 @@
  * Side Public License, v 1.
  */
 
-export default function ({ loadTestFile }) {
-  describe('Saved queries', () => {
-    loadTestFile(require.resolve('./saved_queries'));
-  });
+import type { LogLevelId } from '@kbn/logging';
+
+/**
+ * @internal
+ */
+export interface BrowserLoggingConfig {
+  root: BrowserRootLoggerConfig;
+}
+
+/**
+ * @internal
+ */
+export interface BrowserRootLoggerConfig {
+  level: LogLevelId;
 }

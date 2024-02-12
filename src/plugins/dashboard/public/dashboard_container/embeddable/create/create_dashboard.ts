@@ -23,11 +23,13 @@ import {
   reactEmbeddableRegistryHasKey,
   ViewMode,
 } from '@kbn/embeddable-plugin/public';
-import { TimeRange } from '@kbn/es-query';
+import { compareFilters, Filter, TimeRange } from '@kbn/es-query';
 import { lazyLoadReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { cloneDeep, identity, omit, pickBy } from 'lodash';
-import { Subject } from 'rxjs';
+import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
+import { map, distinctUntilChanged, startWith } from 'rxjs/operators';
 import { v4 } from 'uuid';
+import { combineDashboardFiltersWithControlGroupFilters } from './controls/dashboard_control_group_integration';
 import { DashboardContainerInput, DashboardPanelState } from '../../../../common';
 import {
   DEFAULT_DASHBOARD_INPUT,
@@ -461,6 +463,45 @@ export const initializeDashboard = async ({
   untilDashboardReady().then((dashboard) =>
     setTimeout(() => dashboard.dispatch.setAnimatePanelTransforms(true), 500)
   );
+
+  // --------------------------------------------------------------------------------------
+  // Set parentApi.localFilters to include dashboardContainer filters and control group filters
+  // --------------------------------------------------------------------------------------
+  untilDashboardReady().then((dashboardContainer) => {
+    if (!dashboardContainer.controlGroup) {
+      return;
+    }
+
+    function getCombinedFilters() {
+      return combineDashboardFiltersWithControlGroupFilters(
+        dashboardContainer.getInput().filters ?? [],
+        dashboardContainer.controlGroup!
+      );
+    }
+
+    const localFilters = new BehaviorSubject<Filter[] | undefined>(getCombinedFilters());
+    dashboardContainer.localFilters = localFilters;
+
+    const inputFilters$ = dashboardContainer.getInput$().pipe(
+      startWith(dashboardContainer.getInput()),
+      map((input) => input.filters),
+      distinctUntilChanged((previous, current) => {
+        return compareFilters(previous ?? [], current ?? []);
+      })
+    );
+
+    // Can not use onFiltersPublished$ directly since it does not have an intial value and
+    // combineLatest will not emit until each observable emits at least one value
+    const controlGroupFilters$ = dashboardContainer.controlGroup.onFiltersPublished$.pipe(
+      startWith(dashboardContainer.controlGroup.getOutput().filters)
+    );
+
+    dashboardContainer.integrationSubscriptions.add(
+      combineLatest([inputFilters$, controlGroupFilters$]).subscribe(() => {
+        localFilters.next(getCombinedFilters());
+      })
+    );
+  });
 
   return { input: initialDashboardInput, searchSessionId: initialSearchSessionId };
 };
