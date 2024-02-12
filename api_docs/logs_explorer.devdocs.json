@@ -52,13 +52,60 @@
       },
       {
         "parentPluginId": "logsExplorer",
+        "id": "def-public.getDiscoverColumnsWithFallbackFieldsFromDisplayOptions",
+        "type": "Function",
+        "tags": [],
+        "label": "getDiscoverColumnsWithFallbackFieldsFromDisplayOptions",
+        "description": [],
+        "signature": [
+          "(displayOptions: ",
+          {
+            "pluginId": "logsExplorer",
+            "scope": "common",
+            "docId": "kibLogsExplorerPluginApi",
+            "section": "def-common.DisplayOptions",
+            "text": "DisplayOptions"
+          },
+          ") => string[] | undefined"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-public.getDiscoverColumnsWithFallbackFieldsFromDisplayOptions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "displayOptions",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "logsExplorer",
+                "scope": "common",
+                "docId": "kibLogsExplorerPluginApi",
+                "section": "def-common.DisplayOptions",
+                "text": "DisplayOptions"
+              }
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
         "id": "def-public.getDiscoverFiltersFromState",
         "type": "Function",
         "tags": [],
         "label": "getDiscoverFiltersFromState",
         "description": [],
         "signature": [
-          "(filters?: ",
+          "(index: string, filters?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -85,6 +132,21 @@
           {
             "parentPluginId": "logsExplorer",
             "id": "def-public.getDiscoverFiltersFromState.$1",
+            "type": "string",
+            "tags": [],
+            "label": "index",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/public/utils/convert_discover_app_state.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-public.getDiscoverFiltersFromState.$2",
             "type": "Array",
             "tags": [],
             "label": "filters",
@@ -106,7 +168,7 @@
           },
           {
             "parentPluginId": "logsExplorer",
-            "id": "def-public.getDiscoverFiltersFromState.$2",
+            "id": "def-public.getDiscoverFiltersFromState.$3",
             "type": "Object",
             "tags": [],
             "label": "controls",
@@ -329,6 +391,8 @@
                 "text": "DisplayOptions"
               },
               " & ",
+              "WithDataTableRecord",
+              " & ",
               "WithDiscoverStateContainer",
               ") | (",
               "WithDatasetSelection",
@@ -352,6 +416,8 @@
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
+              " & ",
+              "WithDataTableRecord",
               " & ",
               "WithDiscoverStateContainer",
               "), any, ",
@@ -447,6 +513,8 @@
                 "text": "DisplayOptions"
               },
               " & ",
+              "WithDataTableRecord",
+              " & ",
               "WithDiscoverStateContainer",
               ") | (",
               "WithDatasetSelection",
@@ -470,6 +538,8 @@
                 "section": "def-common.DisplayOptions",
                 "text": "DisplayOptions"
               },
+              " & ",
+              "WithDataTableRecord",
               " & ",
               "WithDiscoverStateContainer",
               "), any, ",
@@ -725,6 +795,8 @@
             "text": "DisplayOptions"
           },
           " & ",
+          "WithDataTableRecord",
+          " & ",
           "WithDiscoverStateContainer",
           ") | (",
           "WithDatasetSelection",
@@ -748,6 +820,8 @@
             "section": "def-common.DisplayOptions",
             "text": "DisplayOptions"
           },
+          " & ",
+          "WithDataTableRecord",
           " & ",
           "WithDiscoverStateContainer",
           ")"
@@ -1428,45 +1502,6 @@
       },
       {
         "parentPluginId": "logsExplorer",
-        "id": "def-common.GridColumnDisplayOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "GridColumnDisplayOptions",
-        "description": [],
-        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "logsExplorer",
-            "id": "def-common.GridColumnDisplayOptions.field",
-            "type": "string",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "logsExplorer",
-            "id": "def-common.GridColumnDisplayOptions.width",
-            "type": "number",
-            "tags": [],
-            "label": "width",
-            "description": [],
-            "signature": [
-              "number | undefined"
-            ],
-            "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "logsExplorer",
         "id": "def-common.GridDisplayOptions",
         "type": "Interface",
         "tags": [],
@@ -1657,6 +1692,21 @@
       },
       {
         "parentPluginId": "logsExplorer",
+        "id": "def-common.CONTENT_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "CONTENT_FIELD",
+        "description": [],
+        "signature": [
+          "\"content\""
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
         "id": "def-common.ControlPanels",
         "type": "Type",
         "tags": [],
@@ -1689,6 +1739,23 @@
           ">; } & { title?: string | undefined; }; }; }"
         ],
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.GridColumnDisplayOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "GridColumnDisplayOptions",
+        "description": [],
+        "signature": [
+          "DocumentFieldGridColumnOptions",
+          " | ",
+          "SmartFieldGridColumnOptions"
+        ],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/display_options/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1769,6 +1836,62 @@
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/control_panels/available_control_panels.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.CONTENT_FIELD_CONFIGURATION",
+        "type": "Object",
+        "tags": [],
+        "label": "CONTENT_FIELD_CONFIGURATION",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.CONTENT_FIELD_CONFIGURATION.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"smart-field\""
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.CONTENT_FIELD_CONFIGURATION.smartField",
+            "type": "string",
+            "tags": [],
+            "label": "smartField",
+            "description": [],
+            "signature": [
+              "\"content\""
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.CONTENT_FIELD_CONFIGURATION.fallbackFields",
+            "type": "Array",
+            "tags": [],
+            "label": "fallbackFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
@@ -2042,6 +2165,115 @@
         "path": "x-pack/plugins/observability_solution/logs_explorer/common/dataset_selection/types.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.RESOURCE_FIELD_CONFIGURATION",
+        "type": "Object",
+        "tags": [],
+        "label": "RESOURCE_FIELD_CONFIGURATION",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.RESOURCE_FIELD_CONFIGURATION.type",
+            "type": "string",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"smart-field\""
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.RESOURCE_FIELD_CONFIGURATION.smartField",
+            "type": "string",
+            "tags": [],
+            "label": "smartField",
+            "description": [],
+            "signature": [
+              "\"resource\""
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.RESOURCE_FIELD_CONFIGURATION.fallbackFields",
+            "type": "Array",
+            "tags": [],
+            "label": "fallbackFields",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.RESOURCE_FIELD_CONFIGURATION.width",
+            "type": "number",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsExplorer",
+        "id": "def-common.SMART_FALLBACK_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "SMART_FALLBACK_FIELDS",
+        "description": [],
+        "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.SMART_FALLBACK_FIELDS.CONTENT_FIELD",
+            "type": "Object",
+            "tags": [],
+            "label": "[CONTENT_FIELD]",
+            "description": [],
+            "signature": [
+              "SmartFieldGridColumnOptions"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsExplorer",
+            "id": "def-common.SMART_FALLBACK_FIELDS.RESOURCE_FIELD",
+            "type": "Object",
+            "tags": [],
+            "label": "[RESOURCE_FIELD]",
+            "description": [],
+            "signature": [
+              "SmartFieldGridColumnOptions"
+            ],
+            "path": "x-pack/plugins/observability_solution/logs_explorer/common/constants.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       }
     ]
