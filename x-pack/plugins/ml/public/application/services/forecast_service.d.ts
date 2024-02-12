@@ -32,3 +32,5 @@ export const mlForecastService: {
 
   getForecastDateRange: (job: Job, forecastId: string) => Promise<ForecastDateRange>;
 };
+
+export type MlForecastService = typeof mlForecastService;
