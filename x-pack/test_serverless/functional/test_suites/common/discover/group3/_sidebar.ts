@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '7 available fields. 2 meta fields.'
+            '6 available fields. 1 empty field. 2 meta fields.'
           );
         });
 
@@ -80,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('second updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '13 available fields. 3 meta fields.'
+            '10 available fields. 3 empty fields. 3 meta fields.'
           );
         });
 
@@ -125,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '30 available fields. 2 meta fields.'
+            '28 available fields. 2 empty fields. 2 meta fields.'
           );
         });
 
@@ -262,7 +262,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Initial Available fields
         const expectedInitialAvailableFields =
-          '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, id, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, meta.char, meta.related, meta.user.firstname, meta.user.lastname, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, spaces, type';
+          '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, spaces, type, url, utc_time, xss';
         let availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
           'available'
         );
@@ -279,12 +279,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
             'available'
           );
-          return availableFields.length === 53;
+          return availableFields.length === 48;
         });
 
-        expect(availableFields.join(', ')).to.be(
-          `${expectedInitialAvailableFields}, url, utc_time, xss`
-        );
+        expect(availableFields.join(', ')).to.be(`${expectedInitialAvailableFields}`);
 
         // Expand Meta section
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
@@ -336,7 +334,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('relatedContent');
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '48 available fields. 5 empty fields. 1 unmapped field. 3 meta fields.'
+          '48 available fields. 1 unmapped field. 5 empty fields. 3 meta fields.'
         );
       });
 

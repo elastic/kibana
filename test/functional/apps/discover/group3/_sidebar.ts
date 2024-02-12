@@ -315,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Initial Available fields
         const expectedInitialAvailableFields =
-          '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, id, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, meta.char, meta.related, meta.user.firstname, meta.user.lastname, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, spaces, type';
+          '@message, @tags, @timestamp, agent, bytes, clientip, extension, geo.coordinates, geo.dest, geo.src, geo.srcdest, headings, host, index, ip, links, machine.os, machine.ram, machine.ram_range, memory, nestedField.child, phpmemory, referer, relatedContent.article:modified_time, relatedContent.article:published_time, relatedContent.article:section, relatedContent.article:tag, relatedContent.og:description, relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.og:site_name, relatedContent.og:title, relatedContent.og:type, relatedContent.og:url, relatedContent.twitter:card, relatedContent.twitter:description, relatedContent.twitter:image, relatedContent.twitter:site, relatedContent.twitter:title, relatedContent.url, request, response, spaces, type, url, utc_time, xss';
         let availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
           'available'
         );
@@ -335,9 +335,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return availableFields.length === 48;
         });
 
-        expect(availableFields.join(', ')).to.be(
-          `${expectedInitialAvailableFields}, url, utc_time, xss`
-        );
+        expect(availableFields.join(', ')).to.be(`${expectedInitialAvailableFields}`);
 
         // Expand Meta section
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
