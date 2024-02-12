@@ -352,9 +352,48 @@ export const getCloudAccountsStats = (
   return cloudAccountsStats;
 };
 
-// const getAccountStatsBasedOnEnablesRule = async () => {
+const getAccountStatsBasedOnEnablesRule = async (
+  esClient: ElasticsearchClient,
+  encryptedSoClient: ISavedObjectsRepository,
+  accountQuery: SearchRequest,
+  logger: Logger
+): Promise<CloudSecurityAccountsStats[]> => {
+  const mutedRulesObject = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+  const benchmarkWithMutedRules = [
+    ...new Set(
+      Object.values(mutedRulesObject).map((item) => {
+        if (item.muted === true) return item.benchmark_id;
+      })
+    ),
+  ].filter(Boolean);
 
-// };
+  if (benchmarkWithMutedRules.length) {
+    const mutedRulesFilterQuery = await getMutedRulesFilterQuery(encryptedSoClient);
+
+    const enabledRulesQuery = {
+      ...accountQuery,
+      query: {
+        bool: {
+          must_not: mutedRulesFilterQuery,
+          must: {
+            terms: {
+              'rule.benchmark.id': benchmarkWithMutedRules,
+            },
+          },
+        },
+      },
+    };
+
+    const enabledRulesAccountsStatsResponse = await esClient.search<unknown, AccountsStats>(
+      enabledRulesQuery
+    );
+    const cloudAccountsStatsForEnabledRules = enabledRulesAccountsStatsResponse.aggregations
+      ? getCloudAccountsStats(enabledRulesAccountsStatsResponse.aggregations, logger)
+      : [];
+    return cloudAccountsStatsForEnabledRules;
+  }
+  return [];
+};
 
 export const getIndexAccountStats = async (
   esClient: ElasticsearchClient,
@@ -362,7 +401,7 @@ export const getIndexAccountStats = async (
   logger: Logger,
   index: string,
   getAccountQuery: (index: string) => SearchRequest
-) => {
+): Promise<CloudSecurityAccountsStats[]> => {
   const accountQuery = getAccountQuery(index);
 
   const accountsStatsResponse = await esClient.search<unknown, AccountsStats>(accountQuery);
@@ -371,52 +410,25 @@ export const getIndexAccountStats = async (
     ? getCloudAccountsStats(accountsStatsResponse.aggregations, logger)
     : [];
 
-  if (index === 'logs-cloud_security_posture.findings_latest-default') {
-    const mutedRulesObject = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
-    const benchmarkWithMutedRules = [
-      ...new Set(
-        Object.values(mutedRulesObject).map((item) => {
-          if (item.muted === true) return item.benchmark_id;
-        })
-      ),
-    ].filter(Boolean);
+  if (index === LATEST_FINDINGS_INDEX_DEFAULT_NS) {
+    const cloudAccountsStatsForEnabledRules = await getAccountStatsBasedOnEnablesRule(
+      esClient,
+      encryptedSoClient,
+      accountQuery,
+      logger
+    );
 
-    if (benchmarkWithMutedRules.length) {
-      const mutedRulesFilterQuery = await getMutedRulesFilterQuery(encryptedSoClient);
-
-      const enabledRulesQuery = {
-        ...accountQuery,
-        query: {
-          bool: {
-            must_not: mutedRulesFilterQuery,
-            must: {
-              terms: {
-                'rule.benchmark.id': benchmarkWithMutedRules,
-              },
-            },
-          },
-        },
-      };
-
-      const enabledRulesAccountsStatsResponse = await esClient.search<unknown, AccountsStats>(
-        enabledRulesQuery
+    cloudAccountsStatsForEnabledRules.forEach((statsEnabledRule) => {
+      const foundStatsIndex = cloudAccountsStats.findIndex(
+        (stats) => stats.account_id === statsEnabledRule.account_id
       );
-      const cloudAccountsStatsForEnabledRules = enabledRulesAccountsStatsResponse.aggregations
-        ? getCloudAccountsStats(enabledRulesAccountsStatsResponse.aggregations, logger)
-        : [];
-
-      cloudAccountsStatsForEnabledRules.forEach((statsEnabledRule) => {
-        const foundStatsIndex = cloudAccountsStats.findIndex(
-          (stats) => stats.account_id === statsEnabledRule.account_id
-        );
-        if (foundStatsIndex !== -1) {
-          // Update the object in cloudAccountsStats based on the object in cloudAccountsStatsForEnabledRules
-          cloudAccountsStats[foundStatsIndex]['posture_management_stats_enabled_rules'] =
-            statsEnabledRule['posture_management_stats'];
-          cloudAccountsStats[foundStatsIndex]['has_muted_rules'] = true;
-        }
-      });
-    }
+      if (foundStatsIndex !== -1) {
+        // Update the object in cloudAccountsStats based on the object in cloudAccountsStatsForEnabledRules
+        cloudAccountsStats[foundStatsIndex]['posture_management_stats_enabled_rules'] =
+          statsEnabledRule['posture_management_stats'];
+        cloudAccountsStats[foundStatsIndex]['has_muted_rules'] = true;
+      }
+    });
   }
   return cloudAccountsStats;
 };
