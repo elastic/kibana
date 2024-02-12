@@ -51,6 +51,7 @@ export const RuleAttributesExcludedFromAAD = [
   'nextRun',
   'revision',
   'running',
+  'alertDelay',
 ];
 
 // useful for Pick<RawAlert, RuleAttributesExcludedFromAAD> which is a
@@ -71,7 +72,8 @@ export type RuleAttributesExcludedFromAADType =
   | 'lastRun'
   | 'nextRun'
   | 'revision'
-  | 'running';
+  | 'running'
+  | 'alertDelay';
 
 export function setupSavedObjects(
   savedObjects: SavedObjectsServiceSetup,
