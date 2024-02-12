@@ -201,6 +201,7 @@ interface EditorFooterProps {
   editorIsInline?: boolean;
   isSpaceReduced?: boolean;
   isLoading?: boolean;
+  allowQueryCancellation?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -216,6 +217,7 @@ export const EditorFooter = memo(function EditorFooter({
   editorIsInline,
   isSpaceReduced,
   isLoading,
+  allowQueryCancellation,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isErrorPopoverOpen, setIsErrorPopoverOpen] = useState(false);
@@ -333,8 +335,8 @@ export const EditorFooter = memo(function EditorFooter({
                   size="s"
                   fill
                   onClick={runQuery}
-                  isLoading={isLoading}
-                  isDisabled={Boolean(disableSubmitAction)}
+                  isLoading={isLoading && !allowQueryCancellation}
+                  isDisabled={Boolean(disableSubmitAction && !allowQueryCancellation)}
                   data-test-subj="TextBasedLangEditor-run-query-button"
                   minWidth={isSpaceReduced ? false : undefined}
                 >
@@ -345,7 +347,11 @@ export const EditorFooter = memo(function EditorFooter({
                     justifyContent="spaceBetween"
                   >
                     <EuiFlexItem grow={false}>
-                      {isSpaceReduced
+                      {allowQueryCancellation && isLoading
+                        ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.cancel', {
+                            defaultMessage: 'Cancel',
+                          })
+                        : isSpaceReduced
                         ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
                             defaultMessage: 'Run',
                           })
@@ -361,7 +367,7 @@ export const EditorFooter = memo(function EditorFooter({
                         size="xs"
                         css={css`
                           border: 1px solid
-                            ${Boolean(disableSubmitAction)
+                            ${Boolean(disableSubmitAction && !allowQueryCancellation)
                               ? euiTheme.colors.disabled
                               : euiTheme.colors.emptyShade};
                           padding: 0 ${euiTheme.size.xs};
@@ -370,7 +376,7 @@ export const EditorFooter = memo(function EditorFooter({
                           border-radius: ${euiTheme.size.xs};
                         `}
                       >
-                        {COMMAND_KEY}⏎
+                        {allowQueryCancellation && isLoading ? 'X' : `${COMMAND_KEY}⏎`}
                       </EuiText>
                     </EuiFlexItem>
                   </EuiFlexGroup>
