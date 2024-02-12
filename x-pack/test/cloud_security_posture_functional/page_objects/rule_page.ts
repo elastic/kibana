@@ -23,6 +23,8 @@ export const RULES_ENABLED_FILTER = 'rules-enabled-filter';
 export const CIS_SECTION_FILTER = 'options-filter-popover-button-cis-section-multi-select-filter';
 export const RULE_NUMBER_FILTER = 'options-filter-popover-button-rule-number-multi-select-filter';
 export const RULE_NUMBER_FILTER_SEARCH_FIELD = 'rule-number-search-input';
+export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
+export const TAKE_ACTION_BUTTON = 'csp:take_action';
 
 export function RulePagePageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -109,6 +111,79 @@ export function RulePagePageProvider({ getService, getPageObjects }: FtrProvider
       const textField = await testSubjects.find(selector);
       await textField.type(value);
       await PageObjects.header.waitUntilLoadingHasFinished();
+    },
+
+    clickRulesNames: async (index: number) => {
+      const rulesNames = await testSubjects.findAll('csp_rules_table_row_item_name');
+      await rulesNames[index].click();
+    },
+
+    clickFlyoutEnableSwitchButton: async () => {
+      const rulesFlyoutEnableSwitchButton = await testSubjects.find(RULES_FLYOUT_SWITCH_BUTTON);
+      await rulesFlyoutEnableSwitchButton.click();
+    },
+
+    getEnableSwitchButtonState: async () => {
+      const rulesFlyoutEnableSwitchButton = await testSubjects.find(RULES_FLYOUT_SWITCH_BUTTON);
+      return await rulesFlyoutEnableSwitchButton.getAttribute('aria-checked');
+    },
+
+    clickTakeActionButton: async () => {
+      const takeActionButton = await testSubjects.find(TAKE_ACTION_BUTTON);
+      await takeActionButton.click();
+    },
+
+    clickTakeActionButtonOption: async (action: 'enable' | 'disable') => {
+      const takeActionOption = await testSubjects.find(
+        action + '-benchmark-rule-take-action-button'
+      );
+      await takeActionOption.click();
+    },
+
+    getCountersEmptyState: async () => {
+      return await testSubjects.exists('rules-counters-empty-state');
+    },
+
+    getPostureScoreCounter: async () => {
+      return await testSubjects.find('rules-counters-posture-score-counter');
+    },
+
+    clickPostureScoreButton: async () => {
+      const postureScoreButton = await testSubjects.find('rules-counters-posture-score-button');
+      await postureScoreButton.click();
+    },
+
+    getIntegrationsEvaluatedCounter: async () => {
+      return await testSubjects.find('rules-counters-integrations-evaluated-counter');
+    },
+
+    clickIntegrationsEvaluatedButton: async () => {
+      const integrationsEvaluatedButton = await testSubjects.find(
+        'rules-counters-integrations-evaluated-button'
+      );
+      await integrationsEvaluatedButton.click();
+    },
+
+    getFailedFindingsCounter: async () => {
+      return await testSubjects.find('rules-counters-failed-findings-counter');
+    },
+
+    clickFailedFindingsButton: async () => {
+      const failedFindingsButton = await testSubjects.find('rules-counters-failed-findings-button');
+      await failedFindingsButton.click();
+    },
+
+    getDisabledRulesCounter: async () => {
+      return await testSubjects.find('rules-counters-disabled-rules-counter');
+    },
+
+    clickDisabledRulesButton: async () => {
+      const disabledRulesButton = await testSubjects.find('rules-counters-disabled-rules-button');
+      await disabledRulesButton.click();
+    },
+
+    doesElementExist: async (selector: string) => {
+      return await testSubjects.exists(selector);
     },
   };
 

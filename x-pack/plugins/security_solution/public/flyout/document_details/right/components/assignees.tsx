@@ -130,7 +130,7 @@ export const Assignees: FC<AssigneesProps> = memo(
         {isPreview ? (
           getEmptyTagValue()
         ) : (
-          <>
+          <EuiFlexGroup gutterSize="none" responsive={false}>
             {assignedUsers && (
               <EuiFlexItem grow={false}>
                 <UsersAvatarsPanel userProfiles={assignedUsers} maxVisibleAvatars={2} />
@@ -159,7 +159,7 @@ export const Assignees: FC<AssigneesProps> = memo(
                 onAssigneesApply={onAssigneesApply}
               />
             </EuiFlexItem>
-          </>
+          </EuiFlexGroup>
         )}
       </EuiFlexGroup>
     );

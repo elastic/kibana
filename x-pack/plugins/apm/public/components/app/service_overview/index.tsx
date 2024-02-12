@@ -135,10 +135,11 @@ export function ServiceOverview() {
                     kuery={kuery}
                     environment={environment}
                     fixedHeight={true}
-                    isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
                     showPerPageOptions={false}
+                    numberOfTransactionsPerPage={5}
+                    showSparkPlots={!isSingleColumn}
                   />
                 </EuiPanel>
               </EuiFlexItem>
@@ -208,6 +209,7 @@ export function ServiceOverview() {
                           )}
                         </EuiLink>
                       }
+                      showSparkPlots={!isSingleColumn}
                     />
                   </EuiPanel>
                 </EuiFlexItem>

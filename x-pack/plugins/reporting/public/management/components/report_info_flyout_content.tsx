@@ -64,6 +64,7 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
   const memoryInMegabytes =
     info.metrics?.pdf?.memoryInMegabytes ?? info.metrics?.png?.memoryInMegabytes;
   const hasCsvRows = info.metrics?.csv?.rows != null;
+  const hasPagingStrategy = info.pagingStrategy != null;
   const hasScreenshot = USES_HEADLESS_JOB_TYPES.includes(info.jobtype);
   const hasPdfPagesMetric = info.metrics?.pdf?.pages != null;
 
@@ -114,6 +115,12 @@ export const ReportInfoFlyoutContent: FunctionComponent<Props> = ({ info }) => {
         defaultMessage: 'CSV rows',
       }),
       description: info.metrics?.csv?.rows?.toString() || NA,
+    },
+    hasPagingStrategy && {
+      title: i18n.translate('xpack.reporting.listing.infoPanel.csvSearchStrategy', {
+        defaultMessage: 'Search strategy',
+      }),
+      description: info.pagingStrategy || NA,
     },
 
     hasScreenshot && {

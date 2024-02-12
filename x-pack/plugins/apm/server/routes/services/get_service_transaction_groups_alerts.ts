@@ -9,6 +9,7 @@ import {
   kqlQuery,
   termQuery,
   rangeQuery,
+  wildcardQuery,
 } from '@kbn/observability-plugin/server';
 import {
   ALERT_RULE_PRODUCER,
@@ -47,6 +48,7 @@ export async function getServiceTransactionGroupsAlerts({
   start,
   end,
   environment,
+  searchQuery,
 }: {
   apmAlertsClient: ApmAlertsClient;
   kuery?: string;
@@ -56,6 +58,7 @@ export async function getServiceTransactionGroupsAlerts({
   start: number;
   end: number;
   environment?: string;
+  searchQuery?: string;
 }): Promise<ServiceTransactionGroupAlertsResponse> {
   const ALERT_RULE_PARAMETERS_AGGREGATION_TYPE = `${ALERT_RULE_PARAMETERS}.aggregationType`;
 
@@ -72,6 +75,7 @@ export async function getServiceTransactionGroupsAlerts({
           ...termQuery(SERVICE_NAME, serviceName),
           ...termQuery(TRANSACTION_TYPE, transactionType),
           ...environmentQuery(environment),
+          ...wildcardQuery(TRANSACTION_NAME, searchQuery),
         ],
         must: [
           {

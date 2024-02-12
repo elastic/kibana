@@ -9,8 +9,8 @@ import { IntegrationType } from './types';
 
 export class Integration {
   name: IntegrationType['name'];
-  title: IntegrationType['title'];
-  version: IntegrationType['version'];
+  title: string;
+  version: string;
   icons?: IntegrationType['icons'];
 
   private constructor(integration: Integration) {

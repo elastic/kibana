@@ -39,12 +39,12 @@ import type { CriticalityLevel } from '../../../../common/entity_analytics/asset
 interface Props {
   entity: Entity;
 }
-export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
+const AssetCriticalityComponent: React.FC<Props> = ({ entity }) => {
   const modal = useCriticalityModal();
   const criticality = useAssetCriticalityData(entity, modal);
   const { euiTheme } = useEuiTheme();
 
-  if (criticality.privileges.isLoading || !criticality.privileges.data?.has_all_required) {
+  if (criticality.privileges.isLoading || !criticality.privileges.data?.has_read_permissions) {
     return null;
   }
 
@@ -87,27 +87,29 @@ export const AssetCriticalitySelector: React.FC<Props> = ({ entity }) => {
                 />
               </EuiText>
             </EuiFlexItem>
-            <EuiFlexItem css={{ flexGrow: 'unset' }}>
-              <EuiButtonEmpty
-                data-test-subj="asset-criticality-change-btn"
-                iconType="arrowStart"
-                iconSide="left"
-                flush="right"
-                onClick={() => modal.toggle(true)}
-              >
-                {criticality.status === 'update' ? (
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.assetCriticality.changeButton"
-                    defaultMessage="Change"
-                  />
-                ) : (
-                  <FormattedMessage
-                    id="xpack.securitySolution.entityAnalytics.assetCriticality.createButton"
-                    defaultMessage="Create"
-                  />
-                )}
-              </EuiButtonEmpty>
-            </EuiFlexItem>
+            {criticality.privileges.data?.has_write_permissions && (
+              <EuiFlexItem css={{ flexGrow: 'unset' }}>
+                <EuiButtonEmpty
+                  data-test-subj="asset-criticality-change-btn"
+                  iconType="arrowStart"
+                  iconSide="left"
+                  flush="right"
+                  onClick={() => modal.toggle(true)}
+                >
+                  {criticality.status === 'update' ? (
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.assetCriticality.changeButton"
+                      defaultMessage="Change"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.securitySolution.entityAnalytics.assetCriticality.createButton"
+                      defaultMessage="Assign"
+                    />
+                  )}
+                </EuiButtonEmpty>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         )}
       </EuiAccordion>
@@ -195,3 +197,6 @@ const options: Array<EuiSuperSelectOption<CriticalityLevel>> = [
   option('important'),
   option('very_important'),
 ];
+
+export const AssetCriticalitySelector = React.memo(AssetCriticalityComponent);
+AssetCriticalitySelector.displayName = 'AssetCriticalitySelector';

@@ -166,7 +166,7 @@ export function ErrorGroupDetails() {
     [environment, kuery, serviceName, start, end, groupId]
   );
 
-  const { errorDistributionData, status: errorDistributionStatus } =
+  const { errorDistributionData, errorDistributionStatus } =
     useErrorGroupDistributionFetcher({
       serviceName,
       groupId,

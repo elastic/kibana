@@ -36,6 +36,7 @@ export interface ExpressionRendererParams extends IExpressionLoaderParams {
    * An observable which can be used to re-run the expression without destroying the component
    */
   reload$?: Observable<unknown>;
+  abortController?: AbortController;
 }
 
 interface ExpressionRendererState {
@@ -54,6 +55,7 @@ export function useExpressionRenderer(
     onEvent,
     onRender$,
     reload$,
+    abortController,
     ...loaderParams
   }: ExpressionRendererParams
 ): ExpressionRendererState {
@@ -76,6 +78,13 @@ export function useExpressionRenderer(
   const hasHandledErrorRef = useRef(false);
   // will call done() in LayoutEffect when done with rendering custom error state
   const errorRenderHandlerRef = useRef<IInterpreterRenderHandlers | null>(null);
+
+  useEffect(() => {
+    if (abortController?.signal)
+      abortController.signal.onabort = () => {
+        expressionLoaderRef.current?.cancel();
+      };
+  }, [abortController]);
 
   /* eslint-disable react-hooks/exhaustive-deps */
   // OK to ignore react-hooks/exhaustive-deps because options update is handled by calling .update()

@@ -18,6 +18,7 @@ import { useTimeRangeMetadata } from '../context/time_range_metadata/use_time_ra
  * @param {number} numBuckets - The number of buckets. Should be 20 for SparkPlots or 100 for Other charts.
 
  */
+
 export function usePreferredDataSourceAndBucketSize<
   TDocumentType extends
     | ApmDocumentType.ServiceTransactionMetric

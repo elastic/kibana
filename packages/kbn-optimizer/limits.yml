@@ -90,7 +90,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logExplorer: 50000
+  logsExplorer: 55000
   logsShared: 281060
   logstash: 53548
   management: 46112
@@ -105,7 +105,7 @@ pageLoadAssetSize:
   noDataPage: 5000
   observability: 115443
   observabilityAIAssistant: 25000
-  observabilityLogExplorer: 46650
+  observabilityLogsExplorer: 46650
   observabilityOnboarding: 19573
   observabilityShared: 72039
   osquery: 107090

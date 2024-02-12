@@ -16,6 +16,8 @@ import type {
 } from '@kbn/fleet-plugin/server';
 
 import type {
+  AgentPolicy,
+  NewAgentPolicy,
   NewPackagePolicy,
   PackagePolicy,
   UpdatePackagePolicy,
@@ -23,6 +25,11 @@ import type {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { InfoResponse } from '@elastic/elasticsearch/lib/api/types';
 import { AppFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import type {
+  PostAgentPolicyCreateCallback,
+  PostAgentPolicyUpdateCallback,
+} from '@kbn/fleet-plugin/server/types';
+import { validatePolicyAgainstAppFeatures } from './handlers/validate_policy_against_app_features';
 import { validateEndpointPackagePolicy } from './handlers/validate_endpoint_package_policy';
 import {
   isPolicySetToEventCollectionOnly,
@@ -104,6 +111,7 @@ export const getPackagePolicyCreateCallback = (
     }
 
     if (newPackagePolicy?.inputs) {
+      validatePolicyAgainstAppFeatures(newPackagePolicy.inputs, appFeatures);
       validateEndpointPackagePolicy(newPackagePolicy.inputs);
     }
     // Optional endpoint integration configuration
@@ -209,6 +217,9 @@ export const getPackagePolicyUpdateCallback = (
       logger
     );
 
+    // Validate that Endpoint Security policy uses only enabled App Features
+    validatePolicyAgainstAppFeatures(endpointIntegrationData.inputs, appFeatures);
+
     validateEndpointPackagePolicy(endpointIntegrationData.inputs);
 
     notifyProtectionFeatureUsage(
@@ -283,6 +294,54 @@ export const getPackagePolicyPostCreateCallback = (
       );
     }
     return packagePolicy;
+  };
+};
+
+const throwAgentTamperProtectionUnavailableError = (
+  logger: Logger,
+  policyName?: string,
+  policyId?: string
+): void => {
+  const agentTamperProtectionUnavailableError: Error & {
+    statusCode?: number;
+    apiPassThrough?: boolean;
+  } = new Error('Agent Tamper Protection is not allowed in current environment');
+  // Agent Policy Service will check for apiPassThrough and rethrow. Route handler will check for statusCode and overwrite.
+  agentTamperProtectionUnavailableError.statusCode = 403;
+  agentTamperProtectionUnavailableError.apiPassThrough = true;
+  logger.error(
+    `Policy [${policyName}:${policyId}] error: Agent Tamper Protection requires Complete Endpoint Security tier`
+  );
+  throw agentTamperProtectionUnavailableError;
+};
+
+export const getAgentPolicyCreateCallback = (
+  logger: Logger,
+  appFeatures: AppFeaturesService
+): PostAgentPolicyCreateCallback => {
+  return async (agentPolicy: NewAgentPolicy): Promise<NewAgentPolicy> => {
+    if (
+      agentPolicy.is_protected &&
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)
+    ) {
+      throwAgentTamperProtectionUnavailableError(logger, agentPolicy.name, agentPolicy.id);
+    }
+    return agentPolicy;
+  };
+};
+
+export const getAgentPolicyUpdateCallback = (
+  logger: Logger,
+  appFeatures: AppFeaturesService
+): PostAgentPolicyUpdateCallback => {
+  return async (agentPolicy: Partial<AgentPolicy>): Promise<Partial<AgentPolicy>> => {
+    if (
+      agentPolicy.is_protected &&
+      !appFeatures.isEnabled(AppFeatureSecurityKey.endpointAgentTamperProtection)
+    ) {
+      throwAgentTamperProtectionUnavailableError(logger, agentPolicy.name, agentPolicy.id);
+    }
+    return agentPolicy;
   };
 };
 

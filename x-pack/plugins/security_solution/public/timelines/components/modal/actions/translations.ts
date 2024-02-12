@@ -9,6 +9,24 @@ import { i18n } from '@kbn/i18n';
 import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
 import { TimelineType } from '../../../../../common/api/timeline';
 
+export const NEW_TIMELINE_BTN = i18n.translate(
+  'xpack.securitySolution.timeline.modal.newTimelineBtn',
+  {
+    defaultMessage: 'New',
+  }
+);
+
+export const NEW_TIMELINE = i18n.translate('xpack.securitySolution.timeline.modal.newTimeline', {
+  defaultMessage: 'New Timeline',
+});
+
+export const NEW_TEMPLATE_TIMELINE = i18n.translate(
+  'xpack.securitySolution.timeline.modal.newTimelineTemplate',
+  {
+    defaultMessage: 'New Timeline template',
+  }
+);
+
 export const OPEN_TIMELINE_BTN = i18n.translate(
   'xpack.securitySolution.timeline.modal.openTimelineBtn',
   {

@@ -223,7 +223,7 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
 };
 
 // Check the installed fleet server version
-const checkFleetServerVersion = (
+export const checkFleetServerVersion = (
   versionToUpgradeNumber: string,
   fleetServerAgents: Agent[],
   force = false
@@ -238,9 +238,13 @@ const checkFleetServerVersion = (
     return;
   }
 
-  if (!force && semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
-    throw new AgentRequestInvalidError(
-      `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
+  ) {
+    throw new Error(
+      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 

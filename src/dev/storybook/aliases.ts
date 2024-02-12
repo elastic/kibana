@@ -45,7 +45,7 @@ export const storybookAliases = {
   infra: 'x-pack/plugins/infra/.storybook',
   kibana_react: 'src/plugins/kibana_react/.storybook',
   lists: 'x-pack/plugins/lists/.storybook',
-  log_explorer: 'x-pack/plugins/log_explorer/.storybook',
+  logs_explorer: 'x-pack/plugins/observability_solution/logs_explorer/.storybook',
   management: 'packages/kbn-management/storybook/config',
   observability: 'x-pack/plugins/observability/.storybook',
   observability_ai_assistant: 'x-pack/plugins/observability_ai_assistant/.storybook',
