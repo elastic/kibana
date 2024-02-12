@@ -36,26 +36,34 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
-  const defaultFleetServerHost = await getDefaultFleetServerHost(soClient);
+  const serverlessDefaultFleetServerHost = await getFleetServerHost(
+    soClient,
+    SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+  );
+  console.log('----> serverlessDefaultFleetServerHost', serverlessDefaultFleetServerHost);
+  console.log(
+    '----> serverlessDefaultFleetServerHost.host_urls',
+    serverlessDefaultFleetServerHost.host_urls
+  );
   if (
-    defaultFleetServerHost === undefined ||
-    !isEqual(hostUrls, defaultFleetServerHost.host_urls)
+    serverlessDefaultFleetServerHost === undefined ||
+    !isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)
   ) {
     throw new FleetServerHostUnauthorizedError(
       `Fleet server host must have default URL in serverless${
-        defaultFleetServerHost ? ': ' + defaultFleetServerHost.host_urls : ''
+        serverlessDefaultFleetServerHost ? ': ' + serverlessDefaultFleetServerHost.host_urls : ''
       }`
     );
   }
 }
 
-async function getDefaultFleetServerHost(soClient: SavedObjectsClientContract) {
-  const res = await listFleetServerHosts(soClient);
-  const fleetServerHosts = res.items;
-  return fleetServerHosts.find(
-    (fleetServerHost) => fleetServerHost.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
-  );
-}
+// async function getServerlessDefaultFleetServerHost(soClient: SavedObjectsClientContract) {
+//   const res = await listFleetServerHosts(soClient);
+//   const fleetServerHosts = res.items;
+//   return fleetServerHosts.find(
+//     (fleetServerHost) => fleetServerHost.id === SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID
+//   );
+// }
 
 export const postFleetServerHost: RequestHandler<
   undefined,
