@@ -8,7 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
 import assert from 'assert';
-import type { WebElementWrapper } from '../../../../../../../test/functional/services/lib/web_element_wrapper';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -45,8 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     };
 
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       // create rollup data
       log.info(`loading ${testIndex} index...`);
       await esArchiver.loadIfNeeded(testArchive);

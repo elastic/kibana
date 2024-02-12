@@ -69,6 +69,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const ObservabilitySloAlertRequired = rt.type({
 });
+// prettier-ignore
 const ObservabilitySloAlertOptional = rt.partial({
   'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,

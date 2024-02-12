@@ -68,6 +68,7 @@ export const ToolbarPopover: React.FunctionComponent<ToolbarPopoverProps> = ({
             onClick={() => {
               setOpen(!open);
             }}
+            label={title}
             aria-label={title}
             isDisabled={isDisabled}
             groupPosition={groupPosition}

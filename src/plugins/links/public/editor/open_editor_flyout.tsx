@@ -8,14 +8,15 @@
 
 import React from 'react';
 import { skip, take } from 'rxjs/operators';
+import { v4 as uuidv4 } from 'uuid';
 
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { tracksOverlays } from '@kbn/embeddable-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
 import { OverlayRef } from '@kbn/core-mount-utils-browser';
+import { tracksOverlays } from '@kbn/presentation-containers';
 import { Link, LinksLayoutType } from '../../common/content_management';
 import { runSaveToLibrary } from '../content_management/save_to_library';
 import { LinksByReferenceInput, LinksEditorFlyoutReturn, LinksInput } from '../embeddable/types';
@@ -58,6 +59,8 @@ export async function openEditorFlyout(
   }
 
   return new Promise((resolve, reject) => {
+    const flyoutId = `linksEditorFlyout-${uuidv4()}`;
+
     const closeEditorFlyout = (editorFlyout: OverlayRef) => {
       if (overlayTracker) {
         overlayTracker.clearOverlays();
@@ -124,6 +127,7 @@ export async function openEditorFlyout(
     const editorFlyout = coreServices.overlays.openFlyout(
       toMountPoint(
         <LinksEditor
+          flyoutId={flyoutId}
           initialLinks={initialLinks}
           initialLayout={attributes?.layout}
           onClose={onCancel}
@@ -135,10 +139,11 @@ export async function openEditorFlyout(
         { theme: coreServices.theme, i18n: coreServices.i18n }
       ),
       {
+        id: flyoutId,
         maxWidth: 720,
         ownFocus: true,
-        outsideClickCloses: false,
         onClose: onCancel,
+        outsideClickCloses: false,
         className: 'linksPanelEditor',
         'data-test-subj': 'links--panelEditor--flyout',
       }

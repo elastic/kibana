@@ -1,0 +1,35 @@
+ROW
+
+Syntax
+```esql
+ROW column1 = value1[, ..., columnN = valueN]
+```
+
+Parameters
+columnX
+The column name.
+valueX
+The value for the column. Can be a literal, an expression, or a
+function.
+DescriptionThe
+```esql
+ROW source command produces a row with one or more columns with values
+```
+
+that you specify. This can be useful for testing.Examples
+```esql
+ROW a = 1, b = "two", c = null
+```
+
+Use square brackets to create multi-value columns:
+```esql
+ROW a = [2, 1]
+```
+
+```esql
+ROW supports the use of functions:
+```
+
+```esql
+ROW a = ROUND(1.23, 0)
+```

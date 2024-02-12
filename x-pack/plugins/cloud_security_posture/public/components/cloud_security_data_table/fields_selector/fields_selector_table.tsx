@@ -73,7 +73,7 @@ export const FieldsSelectorTable = ({
     return dataView.fields
       .getAll()
       .filter((field) => {
-        return field.name !== '@timestamp' && field.name !== '_index' && field.visualizable;
+        return field.name !== '_index' && field.visualizable;
       })
       .map((field) => ({
         id: field.name,

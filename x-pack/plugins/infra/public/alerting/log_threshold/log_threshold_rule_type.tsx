@@ -6,9 +6,9 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UrlService } from '@kbn/share-plugin/common/url_service';
+import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
 import {
   LOG_DOCUMENT_COUNT_RULE_TYPE_ID,
   PartialRuleParams,
@@ -44,7 +44,7 @@ const logThresholdDefaultRecoveryMessage = i18n.translate(
 
 export function createLogThresholdRuleType(
   core: InfraClientCoreSetup,
-  logsLocator: LocatorPublic<LogsLocatorParams>
+  urlService: UrlService
 ): ObservabilityRuleTypeModel<PartialRuleParams> {
   const ruleParamsExpression = createLazyComponentWithKibanaContext(
     core,
@@ -55,6 +55,8 @@ export function createLogThresholdRuleType(
     core,
     () => import('./components/alert_details_app_section')
   );
+
+  const { logsLocator } = getLogsLocatorsFromUrlService(urlService);
 
   return {
     id: LOG_DOCUMENT_COUNT_RULE_TYPE_ID,

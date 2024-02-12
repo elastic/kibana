@@ -88,6 +88,7 @@ export const getAllTimeline = memoizeOne(
             )
           : null,
       savedObjectId: timeline.savedObjectId,
+      savedSearchId: timeline.savedSearchId,
       status: timeline.status,
       title: timeline.title,
       updated: timeline.updated,

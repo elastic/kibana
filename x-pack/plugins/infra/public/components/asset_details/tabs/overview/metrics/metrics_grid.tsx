@@ -7,14 +7,14 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-import type { ChartModel } from '@kbn/lens-embeddable-utils';
+import type { LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import { Chart } from './chart';
 
 interface Props {
   assetName: string;
   dateRange: TimeRange;
   filterFieldName: string;
-  charts: ChartModel[];
+  charts: Array<LensConfig & { id: string }>;
   ['data-test-subj']: string;
 }
 

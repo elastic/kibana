@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
 import { MouseEvent, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import { useQueryParams } from './use_query_params';
 
 function addClickHandlers(
@@ -36,13 +37,14 @@ function getTitleFromBreadCrumbs(breadcrumbs: ChromeBreadcrumb[]) {
 
 export const useBreadcrumbs = (
   extraCrumbs: ChromeBreadcrumb[],
-  app?: { id: string; label: string }
+  app?: { id: string; label: string },
+  breadcrumbsAppendExtension?: ChromeBreadcrumbsAppendExtension
 ) => {
   const params = useQueryParams();
 
   const {
     services: {
-      chrome: { docTitle, setBreadcrumbs },
+      chrome: { docTitle, setBreadcrumbs, setBreadcrumbsAppendExtension },
       application: { getUrlForApp, navigateToUrl },
     },
   } = useKibana<{
@@ -51,6 +53,17 @@ export const useBreadcrumbs = (
   }>();
   const setTitle = docTitle.change;
   const appPath = getUrlForApp(app?.id ?? 'observability-overview') ?? '';
+
+  useEffect(() => {
+    if (breadcrumbsAppendExtension) {
+      setBreadcrumbsAppendExtension(breadcrumbsAppendExtension);
+    }
+    return () => {
+      if (breadcrumbsAppendExtension) {
+        setBreadcrumbsAppendExtension(undefined);
+      }
+    };
+  }, [breadcrumbsAppendExtension, setBreadcrumbsAppendExtension]);
 
   useEffect(() => {
     const breadcrumbs = [

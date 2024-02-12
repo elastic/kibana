@@ -32,6 +32,7 @@ export interface ReferenceMaps {
   variables: Map<string, ESQLVariable[]>;
   fields: Map<string, ESQLRealField>;
   policies: Map<string, ESQLPolicy>;
+  metadataFields: Set<string>;
 }
 
 export interface ValidationErrors {
@@ -46,7 +47,7 @@ export interface ValidationErrors {
   };
   wrongArgumentNumber: {
     message: string;
-    type: { fn: string; numArgs: number; passedArgs: number };
+    type: { fn: string; numArgs: number; passedArgs: number; exactly: number };
   };
   unknownColumn: {
     message: string;
@@ -64,9 +65,13 @@ export interface ValidationErrors {
     message: string;
     type: { name: string; argType: string };
   };
-  unsupportedFunction: {
+  unsupportedFunctionForCommand: {
     message: string;
     type: { name: string; command: string };
+  };
+  unsupportedFunctionForCommandOption: {
+    message: string;
+    type: { name: string; command: string; option: string };
   };
   shadowFieldType: {
     message: string;
@@ -108,13 +113,17 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  ccsNotSupportedForCommand: {
-    message: string;
-    type: { value: string };
-  };
   unsupportedFieldType: {
     message: string;
     type: { field: string };
+  };
+  unsupportedSetting: {
+    message: string;
+    type: { setting: string; expected: string };
+  };
+  unsupportedSettingCommandValue: {
+    message: string;
+    type: { command: string; value: string; expected: string };
   };
 }
 

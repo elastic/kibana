@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { EuiFlyout, EuiLoadingSpinner, EuiOverlayMask } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { I18nProvider } from '@kbn/i18n-react';
 import { Provider } from 'react-redux';
 import type { MiddlewareAPI, Dispatch, Action } from '@reduxjs/toolkit';
 import { css } from '@emotion/react';
@@ -117,6 +118,8 @@ export async function getEditLensConfiguration(
     isNewPanel,
     deletePanel,
     hidesSuggestions,
+    onApplyCb,
+    onCancelCb,
   }: EditLensConfigurationProps) => {
     if (!lensServices || !datasourceMap || !visualizationMap) {
       return <LoadingSpinnerWithOverlay />;
@@ -212,15 +215,19 @@ export async function getEditLensConfiguration(
       setCurrentAttributes,
       isNewPanel,
       deletePanel,
+      onApplyCb,
+      onCancelCb,
     };
 
     return getWrapper(
       <Provider store={lensStore}>
-        <KibanaContextProvider services={lensServices}>
-          <RootDragDropProvider>
-            <LensEditConfigurationFlyout {...configPanelProps} />
-          </RootDragDropProvider>
-        </KibanaContextProvider>
+        <I18nProvider>
+          <KibanaContextProvider services={lensServices}>
+            <RootDragDropProvider>
+              <LensEditConfigurationFlyout {...configPanelProps} />
+            </RootDragDropProvider>
+          </KibanaContextProvider>
+        </I18nProvider>
       </Provider>
     );
   };

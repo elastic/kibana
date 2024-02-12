@@ -58,7 +58,7 @@ const FlyoutFooterWPadding = styled(EuiFlyoutFooter)`
   padding: 16px 24px !important;
 `;
 
-const MAX_VIEW_AGENTS_COUNT = 2000;
+const MAX_VIEW_AGENTS_COUNT = 1000;
 
 export const AgentActivityFlyout: React.FunctionComponent<{
   onClose: () => void;

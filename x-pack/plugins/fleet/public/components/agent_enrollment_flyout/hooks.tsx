@@ -7,10 +7,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS } from '../../services/get_template_url_from_package_info';
-
-import { SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG } from '../../services/get_template_url_from_agent_policy';
-
 import type { PackagePolicy, AgentPolicy } from '../../types';
 import { sendGetOneAgentPolicy, useGetPackageInfoByKeyQuery, useStartServices } from '../../hooks';
 import {
@@ -18,9 +14,14 @@ import {
   FLEET_CLOUD_SECURITY_POSTURE_PACKAGE,
   FLEET_CLOUD_DEFEND_PACKAGE,
 } from '../../../common';
-import { getTemplateUrlFromPackageInfo, getCloudShellUrlFromAgentPolicy } from '../../services';
 
-import { getTemplateUrlFromAgentPolicy } from '../../services';
+import {
+  getTemplateUrlFromAgentPolicy,
+  getTemplateUrlFromPackageInfo,
+  getCloudShellUrlFromAgentPolicy,
+  SUPPORTED_TEMPLATES_URL_FROM_PACKAGE_INFO_INPUT_VARS,
+  SUPPORTED_TEMPLATES_URL_FROM_AGENT_POLICY_CONFIG,
+} from '../cloud_security_posture/services';
 
 import type {
   K8sMode,

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { dump } from '../../../utils/dump';
 import type { HapiReadableStream } from '../../../../types';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
-import { updateCases } from '../create/update_cases';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 import type { CreateActionPayload } from '../create/types';
 import type {
   ExecuteActionRequestBody,
@@ -33,9 +34,13 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
   SuspendProcessActionOutputContent,
+  ImmutableObject,
+  HostMetadataInterface,
 } from '../../../../../common/endpoint/types';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];
@@ -75,16 +80,19 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
       .getActionCreateService()
       .createAction(createPayload, agentIds.valid);
 
-    try {
-      await updateCases({
-        casesClient: this.options.casesClient,
-        endpointData: agentIds.hosts,
-        createActionPayload: createPayload,
-      });
-    } catch (err) {
-      // failures during update of cases should not cause the response action to fail. Just log error
-      this.log.warn(`failed to update cases: ${err.message}\n${dump(err)}`);
-    }
+    await this.updateCases({
+      command,
+      comment: options.comment,
+      caseIds: options.case_ids,
+      alertIds: options.alert_ids,
+      actionId: response.id,
+      hosts: agentIds.hosts.map((endpoint: ImmutableObject<HostMetadataInterface>) => {
+        return {
+          hostId: endpoint.agent.id,
+          hostname: endpoint.host.hostname,
+        };
+      }),
+    });
 
     return response as TResponse;
   }

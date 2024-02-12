@@ -11,6 +11,7 @@ import {
   savedObjectsClientMock,
   loggingSystemMock,
   savedObjectsRepositoryMock,
+  uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
@@ -63,6 +64,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   getAuthenticationAPIKey: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
   alertsService: null,
+  uiSettings: uiSettingsServiceMock.createStartContract(),
 };
 
 beforeEach(() => {
@@ -339,12 +341,14 @@ const aggregateResults = {
         ],
       },
       executionUuidCardinality: {
-        executionUuidCardinality: {
-          value: 374,
-        },
+        value: 374,
       },
     },
   },
+  hits: {
+    total: { value: 875, relation: 'eq' },
+    hits: [],
+  } as estypes.SearchHitsMetadata<unknown>,
 };
 
 function getRuleSavedObject(attributes: Partial<RawRule> = {}): SavedObject<RawRule> {

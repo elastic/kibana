@@ -45,7 +45,6 @@ type ServiceInstanceDetailedStatistics =
 export function getColumns({
   serviceName,
   kuery,
-  agentName,
   latencyAggregationType,
   detailedStatsLoading,
   detailedStatsData,
@@ -59,7 +58,6 @@ export function getColumns({
 }: {
   serviceName: string;
   kuery: string;
-  agentName?: string;
   latencyAggregationType?: LatencyAggregationType;
   detailedStatsLoading: boolean;
   detailedStatsData?: ServiceInstanceDetailedStatistics;
@@ -214,6 +212,7 @@ export function getColumns({
         { defaultMessage: 'CPU usage (avg.)' }
       ),
       align: RIGHT_ALIGNMENT,
+      sortable: true,
       render: (_, { serviceNodeName, cpuUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.cpuUsage;
@@ -241,7 +240,6 @@ export function getColumns({
           />
         );
       },
-      sortable: true,
     },
     {
       field: 'memoryUsage',
@@ -250,6 +248,7 @@ export function getColumns({
         { defaultMessage: 'Memory usage (avg.)' }
       ),
       align: RIGHT_ALIGNMENT,
+      sortable: true,
       render: (_, { serviceNodeName, memoryUsage }) => {
         const currentPeriodTimestamp =
           detailedStatsData?.currentPeriod?.[serviceNodeName]?.memoryUsage;
@@ -277,7 +276,6 @@ export function getColumns({
           />
         );
       },
-      sortable: true,
     },
     {
       width: '40px',
@@ -292,7 +290,10 @@ export function getColumns({
             anchorPosition="leftCenter"
             button={
               <EuiButtonIcon
-                aria-label="Edit"
+                aria-label={i18n.translate(
+                  'xpack.apm.getColumns.euiButtonIcon.editLabel',
+                  { defaultMessage: 'Edit' }
+                )}
                 data-test-subj={`instanceActionsButton_${instanceItem.serviceNodeName}`}
                 iconType="boxesHorizontal"
                 onClick={() =>

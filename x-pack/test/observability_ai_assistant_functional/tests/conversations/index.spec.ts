@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CreateChatCompletionRequest } from 'openai';
+import type OpenAI from 'openai';
 import {
   createLlmProxy,
   LlmProxy,
@@ -147,12 +147,18 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
               before(async () => {
                 const titleInterceptor = proxy.intercept(
                   'title',
-                  (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length === 1
+                  (body) =>
+                    (
+                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+                    ).functions?.find((fn) => fn.name === 'title_conversation') !== undefined
                 );
 
                 const conversationInterceptor = proxy.intercept(
                   'conversation',
-                  (body) => (JSON.parse(body) as CreateChatCompletionRequest).messages.length !== 1
+                  (body) =>
+                    (
+                      JSON.parse(body) as OpenAI.Chat.ChatCompletionCreateParamsNonStreaming
+                    ).functions?.find((fn) => fn.name === 'title_conversation') === undefined
                 );
 
                 await testSubjects.setValue(ui.pages.conversations.chatInput, 'hello');

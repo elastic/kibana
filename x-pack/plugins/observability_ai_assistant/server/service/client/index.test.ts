@@ -7,17 +7,26 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { DeeplyMockedKeys } from '@kbn/utility-types-jest';
-import { merge } from 'lodash';
+import { waitFor } from '@testing-library/react';
+import { last, merge, repeat } from 'lodash';
+import type OpenAI from 'openai';
 import { Subject } from 'rxjs';
-import { PassThrough, type Readable } from 'stream';
+import { EventEmitter, PassThrough, type Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { ObservabilityAIAssistantClient } from '.';
 import { createResourceNamesMap } from '..';
 import { MessageRole, type Message } from '../../../common';
-import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
+import { ObservabilityAIAssistantConnectorType } from '../../../common/connectors';
+import {
+  ChatCompletionChunkEvent,
+  ChatCompletionErrorCode,
+  MessageAddEvent,
+  StreamingChatResponseEventType,
+} from '../../../common/conversation_complete';
 import type { CreateChatCompletionResponseChunk } from '../../../public/types';
 import type { ChatFunctionClient } from '../chat_function_client';
 import type { KnowledgeBaseService } from '../knowledge_base_service';
+import { observableIntoStream } from '../util/observable_into_stream';
 
 type ChunkDelta = CreateChatCompletionResponseChunk['choices'][number]['delta'];
 
@@ -49,11 +58,13 @@ function createLlmSimulator() {
         choices: [
           {
             delta: msg,
+            index: 0,
+            finish_reason: null,
           },
         ],
       };
       await new Promise<void>((resolve, reject) => {
-        stream.write(`data: ${JSON.stringify(chunk)}\n`, undefined, (err) => {
+        stream.write(`data: ${JSON.stringify(chunk)}\n\n`, undefined, (err) => {
           return err ? reject(err) : resolve();
         });
       });
@@ -62,7 +73,7 @@ function createLlmSimulator() {
       if (stream.destroyed) {
         throw new Error('Stream is already destroyed');
       }
-      await new Promise((resolve) => stream.write('data: [DONE]', () => stream.end(resolve)));
+      await new Promise((resolve) => stream.write('data: [DONE]\n\n', () => stream.end(resolve)));
     },
     error: (error: Error) => {
       stream.destroy(error);
@@ -70,11 +81,12 @@ function createLlmSimulator() {
   };
 }
 
-describe('Observability AI Assistant service', () => {
+describe('Observability AI Assistant client', () => {
   let client: ObservabilityAIAssistantClient;
 
   const actionsClientMock: DeeplyMockedKeys<ActionsClient> = {
     execute: jest.fn(),
+    get: jest.fn(),
   } as any;
 
   const internalUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
@@ -84,14 +96,8 @@ describe('Observability AI Assistant service', () => {
   } as any;
 
   const currentUserEsClientMock: DeeplyMockedKeys<ElasticsearchClient> = {
-    search: jest.fn().mockResolvedValue({
-      hits: {
-        hits: [],
-      },
-    }),
-    fieldCaps: jest.fn().mockResolvedValue({
-      fields: [],
-    }),
+    search: jest.fn(),
+    fieldCaps: jest.fn(),
   } as any;
 
   const knowledgeBaseServiceMock: DeeplyMockedKeys<KnowledgeBaseService> = {
@@ -107,16 +113,38 @@ describe('Observability AI Assistant service', () => {
 
   const functionClientMock: DeeplyMockedKeys<ChatFunctionClient> = {
     executeFunction: jest.fn(),
-    getFunctions: jest.fn().mockReturnValue([]),
-    hasFunction: jest.fn().mockImplementation((name) => {
-      return name !== 'recall';
-    }),
+    getFunctions: jest.fn(),
+    hasFunction: jest.fn(),
   } as any;
 
   let llmSimulator: LlmSimulator;
 
   function createClient() {
-    jest.clearAllMocks();
+    jest.resetAllMocks();
+
+    functionClientMock.getFunctions.mockReturnValue([]);
+    functionClientMock.hasFunction.mockImplementation((name) => {
+      return name !== 'recall';
+    });
+
+    actionsClientMock.get.mockResolvedValue({
+      actionTypeId: ObservabilityAIAssistantConnectorType.OpenAI,
+      id: 'foo',
+      name: 'My connector',
+      isPreconfigured: false,
+      isDeprecated: false,
+      isSystemAction: false,
+    });
+
+    currentUserEsClientMock.search.mockResolvedValue({
+      hits: {
+        hits: [],
+      },
+    } as any);
+
+    currentUserEsClientMock.fieldCaps.mockResolvedValue({
+      fields: [],
+    } as any);
 
     return new ObservabilityAIAssistantClient({
       actionsClient: actionsClientMock,
@@ -158,6 +186,10 @@ describe('Observability AI Assistant service', () => {
     );
   }
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   describe('when completing a conversation without an initial conversation id', () => {
     let stream: Readable;
 
@@ -187,17 +219,21 @@ describe('Observability AI Assistant service', () => {
                 data: titleLlmSimulator.stream,
               });
             };
-            titleLlmPromiseReject = reject;
+            titleLlmPromiseReject = () => {
+              reject();
+            };
           });
         });
 
-      stream = await client.complete({
-        connectorId: 'foo',
-        messages: [system('This is a system message'), user('How many alerts do I have?')],
-        functionClient: functionClientMock,
-        signal: new AbortController().signal,
-        persist: true,
-      });
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          persist: true,
+        })
+      );
     });
 
     describe('when streaming the response from the LLM', () => {
@@ -241,8 +277,10 @@ describe('Observability AI Assistant service', () => {
         ]);
       });
 
-      it('incrementally streams the response to the client', () => {
+      it('incrementally streams the response to the client', async () => {
         expect(dataHandler).toHaveBeenCalledTimes(1);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
 
         expect(JSON.parse(dataHandler.mock.calls[0])).toEqual({
           id: expect.any(String),
@@ -270,7 +308,7 @@ describe('Observability AI Assistant service', () => {
               message: 'Unexpected error',
               stack: expect.any(String),
             },
-            type: StreamingChatResponseEventType.ConversationCompletionError,
+            type: StreamingChatResponseEventType.ChatCompletionError,
           });
         });
       });
@@ -449,18 +487,22 @@ describe('Observability AI Assistant service', () => {
         return {} as any;
       });
 
-      stream = await client.complete({
-        connectorId: 'foo',
-        messages: [system('This is a system message'), user('How many alerts do I have?')],
-        functionClient: functionClientMock,
-        signal: new AbortController().signal,
-        conversationId: 'my-conversation-id',
-        persist: true,
-      });
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          conversationId: 'my-conversation-id',
+          persist: true,
+        })
+      );
 
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({ content: 'Hello' });
 
@@ -546,18 +588,22 @@ describe('Observability AI Assistant service', () => {
         };
       });
 
-      stream = await client.complete({
-        connectorId: 'foo',
-        messages: [system('This is a system message'), user('How many alerts do I have?')],
-        functionClient: functionClientMock,
-        signal: new AbortController().signal,
-        title: 'My predefined title',
-        persist: true,
-      });
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          title: 'My predefined title',
+          persist: true,
+        })
+      );
 
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({ content: 'Hello' });
 
@@ -567,7 +613,7 @@ describe('Observability AI Assistant service', () => {
             error: {
               message: 'Connection unexpectedly closed',
             },
-          })}\n`,
+          })}\n\n`,
           resolve
         )
       );
@@ -580,10 +626,11 @@ describe('Observability AI Assistant service', () => {
     it('ends the stream and writes an error', async () => {
       expect(JSON.parse(dataHandler.mock.calls[1])).toEqual({
         error: {
+          code: ChatCompletionErrorCode.InternalError,
           message: 'Connection unexpectedly closed',
           stack: expect.any(String),
         },
-        type: StreamingChatResponseEventType.ConversationCompletionError,
+        type: StreamingChatResponseEventType.ChatCompletionError,
       });
     });
 
@@ -647,18 +694,22 @@ describe('Observability AI Assistant service', () => {
         });
       });
 
-      stream = await client.complete({
-        connectorId: 'foo',
-        messages: [system('This is a system message'), user('How many alerts do I have?')],
-        functionClient: functionClientMock,
-        signal: new AbortController().signal,
-        title: 'My predefined title',
-        persist: true,
-      });
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          title: 'My predefined title',
+          persist: true,
+        })
+      );
 
       dataHandler = jest.fn();
 
       stream.on('data', dataHandler);
+
+      await nextTick();
 
       await llmSimulator.next({
         content: 'Hello',
@@ -931,7 +982,7 @@ describe('Observability AI Assistant service', () => {
     });
 
     describe('and the function responds with an observable', () => {
-      let response$: Subject<CreateChatCompletionResponseChunk>;
+      let response$: Subject<ChatCompletionChunkEvent | MessageAddEvent>;
       beforeEach(async () => {
         response$ = new Subject();
         fnResponseResolve(response$);
@@ -956,18 +1007,25 @@ describe('Observability AI Assistant service', () => {
       describe('if the observable completes', () => {
         beforeEach(async () => {
           response$.next({
-            created: 0,
-            id: '',
-            model: 'gpt-4',
-            object: 'chat.completion.chunk',
-            choices: [
-              {
-                delta: {
-                  content: 'Hello',
-                },
-              },
-            ],
+            type: StreamingChatResponseEventType.ChatCompletionChunk,
+            message: {
+              content: 'Hello',
+            },
+            id: 'my-id',
           });
+
+          response$.next({
+            type: StreamingChatResponseEventType.MessageAdd,
+            message: {
+              '@timestamp': new Date().toString(),
+              message: {
+                role: MessageRole.Assistant,
+                content: 'Hello',
+              },
+            },
+            id: 'my-id',
+          });
+
           response$.complete();
 
           await finished(stream);
@@ -992,11 +1050,6 @@ describe('Observability AI Assistant service', () => {
               message: {
                 role: MessageRole.Assistant,
                 content: 'Hello',
-                function_call: {
-                  name: '',
-                  arguments: '',
-                  trigger: MessageRole.Assistant,
-                },
               },
             },
           });
@@ -1006,17 +1059,11 @@ describe('Observability AI Assistant service', () => {
       describe('if the observable errors out', () => {
         beforeEach(async () => {
           response$.next({
-            created: 0,
-            id: '',
-            model: 'gpt-4',
-            object: 'chat.completion.chunk',
-            choices: [
-              {
-                delta: {
-                  content: 'Hello',
-                },
-              },
-            ],
+            type: StreamingChatResponseEventType.ChatCompletionChunk,
+            message: {
+              content: 'Hello',
+            },
+            id: 'my-id',
           });
           response$.error(new Error('Unexpected error'));
 
@@ -1025,7 +1072,7 @@ describe('Observability AI Assistant service', () => {
 
         it('appends an error', () => {
           expect(JSON.parse(dataHandler.mock.lastCall!)).toEqual({
-            type: StreamingChatResponseEventType.ConversationCompletionError,
+            type: StreamingChatResponseEventType.ChatCompletionError,
             error: {
               message: 'Unexpected error',
               stack: expect.any(String),
@@ -1064,13 +1111,15 @@ describe('Observability AI Assistant service', () => {
         };
       });
 
-      stream = await client.complete({
-        connectorId: 'foo',
-        messages: [system('This is a system message'), user('How many alerts do I have?')],
-        functionClient: functionClientMock,
-        signal: new AbortController().signal,
-        persist: false,
-      });
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          persist: false,
+        })
+      );
 
       dataHandler = jest.fn();
 
@@ -1098,7 +1147,7 @@ describe('Observability AI Assistant service', () => {
             role: MessageRole.Assistant,
             function_call: {
               name: 'recall',
-              arguments: JSON.stringify({ queries: [], contexts: [] }),
+              arguments: JSON.stringify({ queries: [], categories: [] }),
               trigger: MessageRole.Assistant,
             },
           },
@@ -1146,6 +1195,212 @@ describe('Observability AI Assistant service', () => {
           },
         },
       });
+    });
+  });
+
+  describe('when the LLM keeps on calling a function and the limit has been exceeded', () => {
+    let stream: Readable;
+
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
+      client = createClient();
+
+      const onLlmCall = new EventEmitter();
+
+      function waitForNextLlmCall() {
+        return new Promise<void>((resolve) => onLlmCall.addListener('next', resolve));
+      }
+
+      actionsClientMock.execute.mockImplementation(async () => {
+        llmSimulator = createLlmSimulator();
+        onLlmCall.emit('next');
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.getFunctions.mockImplementation(() => [
+        {
+          definition: {
+            name: 'get_top_alerts',
+            contexts: ['core'],
+            description: '',
+            parameters: {},
+          },
+          respond: async () => {
+            return { content: 'Call this function again' };
+          },
+        },
+      ]);
+
+      functionClientMock.hasFunction.mockImplementation((name) => name === 'get_top_alerts');
+      functionClientMock.executeFunction.mockImplementation(async () => ({
+        content: 'Call this function again',
+      }));
+
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          title: 'My predefined title',
+          persist: true,
+        })
+      );
+
+      dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      async function requestAlertsFunctionCall() {
+        const body = JSON.parse(
+          (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
+        );
+
+        let nextLlmCallPromise: Promise<void>;
+
+        if (body.functions?.length) {
+          nextLlmCallPromise = waitForNextLlmCall();
+          await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+        } else {
+          nextLlmCallPromise = Promise.resolve();
+          await llmSimulator.next({ content: 'Looks like we are done here' });
+        }
+
+        await llmSimulator.complete();
+
+        await nextLlmCallPromise;
+      }
+
+      await nextTick();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await requestAlertsFunctionCall();
+
+      await finished(stream);
+    });
+
+    it('executed the function no more than three times', () => {
+      expect(functionClientMock.executeFunction).toHaveBeenCalledTimes(5);
+    });
+
+    it('does not give the LLM the choice to call a function anymore', () => {
+      const firstBody = JSON.parse(
+        (actionsClientMock.execute.mock.calls[0][0].params as any).subActionParams.body
+      );
+      const body = JSON.parse(
+        (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
+      );
+
+      expect(firstBody.functions.length).toBe(1);
+
+      expect(body.functions).toBeUndefined();
+    });
+  });
+
+  describe('when the function response exceeds the max no of tokens for one', () => {
+    let stream: Readable;
+
+    let dataHandler: jest.Mock;
+
+    beforeEach(async () => {
+      client = createClient();
+
+      let functionResponsePromiseResolve: Function | undefined;
+
+      actionsClientMock.execute.mockImplementation(async () => {
+        llmSimulator = createLlmSimulator();
+        return {
+          actionId: '',
+          status: 'ok',
+          data: llmSimulator.stream,
+        };
+      });
+
+      functionClientMock.getFunctions.mockImplementation(() => [
+        {
+          definition: {
+            name: 'get_top_alerts',
+            contexts: ['core'],
+            description: '',
+            parameters: {},
+          },
+          respond: async () => {
+            return { content: '' };
+          },
+        },
+      ]);
+
+      functionClientMock.hasFunction.mockImplementation((name) => name === 'get_top_alerts');
+
+      functionClientMock.executeFunction.mockImplementation(() => {
+        return new Promise((resolve) => {
+          functionResponsePromiseResolve = resolve;
+        });
+      });
+
+      stream = observableIntoStream(
+        await client.complete({
+          connectorId: 'foo',
+          messages: [system('This is a system message'), user('How many alerts do I have?')],
+          functionClient: functionClientMock,
+          signal: new AbortController().signal,
+          title: 'My predefined title',
+          persist: true,
+        })
+      );
+
+      dataHandler = jest.fn();
+
+      stream.on('data', dataHandler);
+
+      await nextTick();
+
+      await llmSimulator.next({ function_call: { name: 'get_top_alerts' } });
+
+      await llmSimulator.complete();
+
+      await waitFor(() => functionResponsePromiseResolve !== undefined);
+
+      functionResponsePromiseResolve!({
+        content: repeat('word ', 10000),
+      });
+
+      await waitFor(() => actionsClientMock.execute.mock.calls.length > 1);
+
+      await llmSimulator.next({ content: 'Looks like this was truncated' });
+
+      await llmSimulator.complete();
+
+      await finished(stream);
+    });
+
+    it('truncates the message', () => {
+      const body = JSON.parse(
+        (actionsClientMock.execute.mock.lastCall![0].params as any).subActionParams.body
+      ) as OpenAI.Chat.ChatCompletionCreateParams;
+
+      const parsed = JSON.parse(last(body.messages)!.content! as string);
+
+      expect(parsed).toEqual({
+        message: 'Function response exceeded the maximum length allowed and was truncated',
+        truncated: expect.any(String),
+      });
+
+      expect(parsed.truncated.includes('word ')).toBe(true);
     });
   });
 });

@@ -29,7 +29,7 @@ import {
 } from '@elastic/eui';
 import styled from 'styled-components';
 
-import { CodeEditor } from '@kbn/kibana-react-plugin/public';
+import { CodeEditor } from '@kbn/code-editor';
 
 import { useStartServices } from '../../../../../../../../hooks';
 

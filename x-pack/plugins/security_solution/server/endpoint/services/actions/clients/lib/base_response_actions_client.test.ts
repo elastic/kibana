@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+// eslint-disable-next-line max-classes-per-file
 import type { ResponseActionsClient } from './types';
 import type {
   ResponseActionsClientUpdateCasesOptions,
@@ -16,6 +17,7 @@ import type {
   ActionDetails,
   LogsEndpointAction,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../../../common/endpoint/types';
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
@@ -30,6 +32,8 @@ import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/consta
 import type { DeepMutable } from '../../../../../../common/endpoint/types/utility_types';
 import { set } from 'lodash';
 import { responseActionsClientMock } from '../mocks';
+import type { ResponseActionAgentType } from '../../../../../../common/endpoint/service/response_actions/constants';
+import { getResponseActionFeatureKey } from '../../../feature_usage/feature_keys';
 
 jest.mock('../../action_details_by_id', () => {
   const original = jest.requireActual('../../action_details_by_id');
@@ -43,6 +47,7 @@ jest.mock('../../action_details_by_id', () => {
 const getActionDetailsByIdMock = _getActionDetailsById as jest.Mock;
 
 describe('ResponseActionsClientImpl base class', () => {
+  let constructorOptions: ReturnType<typeof responseActionsClientMock.createConstructorOptions>;
   let esClient: ElasticsearchClientMock;
   let endpointAppContextService: EndpointAppContextService;
   let baseClassMock: MockClassWithExposedProtectedMembers;
@@ -50,7 +55,7 @@ describe('ResponseActionsClientImpl base class', () => {
   let logger: Logger;
 
   beforeEach(async () => {
-    const constructorOptions = responseActionsClientMock.createConstructorOptions();
+    constructorOptions = responseActionsClientMock.createConstructorOptions();
 
     esClient = constructorOptions.esClient;
     casesClient = constructorOptions.casesClient;
@@ -115,6 +120,7 @@ describe('ResponseActionsClientImpl base class', () => {
         caseIds: ['case-999'],
         alertIds: [KNOWN_ALERT_ID_1, KNOWN_ALERT_ID_2, KNOWN_ALERT_ID_3],
         comment: 'this is a case comment',
+        actionId: 'action-123',
         hosts: [
           {
             hostId: '1-2-3',
@@ -196,76 +202,29 @@ describe('ResponseActionsClientImpl base class', () => {
       expect(casesClient.attachments.bulkCreate).toHaveBeenLastCalledWith({
         attachments: [
           {
-            actions: {
+            externalReferenceAttachmentTypeId: 'endpoint',
+            externalReferenceId: 'action-123',
+            owner: 'securitySolution',
+            externalReferenceStorage: {
+              type: 'elasticSearchDoc',
+            },
+            type: 'externalReference',
+            externalReferenceMetadata: {
+              command: 'isolate',
+              comment: 'this is a case comment',
               targets: [
                 {
                   endpointId: '1-2-3',
                   hostname: 'foo-one',
+                  agentType: 'endpoint',
                 },
                 {
                   endpointId: '4-5-6',
                   hostname: 'foo-two',
+                  agentType: 'endpoint',
                 },
               ],
-              type: 'isolate',
             },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
-          },
-          {
-            actions: {
-              targets: [
-                {
-                  endpointId: '1-2-3',
-                  hostname: 'foo-one',
-                },
-                {
-                  endpointId: '4-5-6',
-                  hostname: 'foo-two',
-                },
-              ],
-              type: 'isolate',
-            },
-            comment: 'this is a case comment',
-            owner: 'securitySolution',
-            type: 'actions',
           },
         ],
         caseId: 'case-3',
@@ -275,7 +234,7 @@ describe('ResponseActionsClientImpl base class', () => {
     it('should not error if update to a case fails', async () => {
       (casesClient.attachments.bulkCreate as jest.Mock).mockImplementation(async (options) => {
         if (options.caseId === 'case-2') {
-          throw new Error('update filed to case-2');
+          throw new Error('update failed to case-2');
         }
       });
       await baseClassMock.updateCases(updateCasesOptions);
@@ -361,14 +320,29 @@ describe('ResponseActionsClientImpl base class', () => {
       await expect(
         baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
       ).resolves.toEqual(expectedIndexDoc);
+
+      expect(endpointAppContextService.getFeatureUsageService().notifyUsage).toHaveBeenCalledWith(
+        getResponseActionFeatureKey(indexDocOptions.command)
+      );
+    });
+
+    it('should notify feature usage', async () => {
+      await baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions);
+
+      expect(endpointAppContextService.getFeatureUsageService().notifyUsage).toHaveBeenCalledWith(
+        getResponseActionFeatureKey(indexDocOptions.command)
+      );
     });
 
     it('should set `EndpointActions.input_type` to the correct value', async () => {
+      const baseClassMock2 = new (class extends MockClassWithExposedProtectedMembers {
+        protected readonly agentType = 'sentinel_one';
+      })(constructorOptions);
       indexDocOptions.agent_type = 'sentinel_one';
       set(expectedIndexDoc, 'EndpointActions.input_type', 'sentinel_one');
 
       await expect(
-        baseClassMock.writeActionRequestToEndpointIndex(indexDocOptions)
+        baseClassMock2.writeActionRequestToEndpointIndex(indexDocOptions)
       ).resolves.toEqual(expectedIndexDoc);
     });
 
@@ -457,12 +431,14 @@ describe('ResponseActionsClientImpl base class', () => {
         '@timestamp': expect.any(String),
         EndpointActions: {
           action_id: '1-2-3',
+          input_type: 'endpoint',
           completed_at: expect.any(String),
+          started_at: expect.any(String),
           data: {
             command: 'isolate',
             comment: 'some comment',
+            output: undefined,
           },
-          started_at: expect.any(String),
         },
         agent: {
           id: '123',
@@ -470,7 +446,7 @@ describe('ResponseActionsClientImpl base class', () => {
         error: {
           message: 'test error',
         },
-      });
+      } as LogsEndpointActionResponse);
     });
 
     it('should throw ResponseActionsClientError if operation fails', async () => {
@@ -491,6 +467,8 @@ describe('ResponseActionsClientImpl base class', () => {
 });
 
 class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
+  protected readonly agentType: ResponseActionAgentType = 'endpoint';
+
   public async updateCases(options: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     return super.updateCases(options);
   }
@@ -507,7 +485,9 @@ class MockClassWithExposedProtectedMembers extends ResponseActionsClientImpl {
     return super.writeActionRequestToEndpointIndex(actionRequest);
   }
 
-  public async writeActionResponseToEndpointIndex<TOutputContent extends object = object>(
+  public async writeActionResponseToEndpointIndex<
+    TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
+  >(
     options: ResponseActionsClientWriteActionResponseToEndpointIndexOptions<TOutputContent>
   ): Promise<LogsEndpointActionResponse<TOutputContent>> {
     return super.writeActionResponseToEndpointIndex<TOutputContent>(options);

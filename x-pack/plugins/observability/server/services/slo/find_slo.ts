@@ -24,6 +24,7 @@ export class FindSLO {
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const sloSummaryList = await this.summarySearchClient.search(
       params.kqlQuery ?? '',
+      params.filters ?? '',
       toSort(params),
       toPagination(params)
     );
@@ -60,7 +61,7 @@ function toPagination(params: FindSLOParams): Pagination {
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }
 

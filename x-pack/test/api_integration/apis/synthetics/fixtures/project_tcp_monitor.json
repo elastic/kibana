@@ -3,7 +3,7 @@
   "keep_stale": true,
   "monitors": [
     {
-      "locations": [ "localhost" ],
+      "locations": [ "dev" ],
       "type": "tcp",
       "id": "gmail-smtp",
       "name": "GMail SMTP",
@@ -15,7 +15,7 @@
       "ssl.verification_mode": "strict"
     },
     {
-      "locations": [ "localhost" ],
+      "locations": [ "dev" ],
       "type": "tcp",
       "id": "always-down",
       "name": "Always Down",
@@ -26,7 +26,7 @@
       "hash": "ekrjelkjrelkjre"
     },
     {
-      "locations": [ "localhost" ],
+      "locations": [ "dev" ],
       "type": "tcp",
       "id": "always-down",
       "name": "Always Down",

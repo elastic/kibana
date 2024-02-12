@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { SLO_RESOURCES_VERSION } from '../../../common/slo/constants';
 
-export const getSLOMappingsTemplate = (name: string) => ({
+export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplateRequest => ({
   name,
   template: {
     mappings: {

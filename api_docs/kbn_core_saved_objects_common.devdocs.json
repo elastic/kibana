@@ -1548,14 +1548,6 @@
             "path": "x-pack/plugins/triggers_actions_ui/public/application/sections/rule_form/rule_reducer.ts"
           },
           {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
-            "plugin": "advancedSettings",
-            "path": "src/plugins/advanced_settings/public/management_app/lib/to_editable_config.ts"
-          },
-          {
             "plugin": "@kbn/core",
             "path": "src/core/types/index.ts"
           }
@@ -2401,6 +2393,10 @@
           {
             "plugin": "controls",
             "path": "src/plugins/controls/common/control_group/control_group_persistable_state.ts"
+          },
+          {
+            "plugin": "savedObjectsTagging",
+            "path": "x-pack/plugins/saved_objects_tagging/common/references.ts"
           },
           {
             "plugin": "savedObjectsTagging",

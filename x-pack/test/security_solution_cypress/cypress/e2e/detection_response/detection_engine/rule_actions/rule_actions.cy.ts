@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { RULE_NAME_HEADER } from '../../../../screens/rule_details';
 import { getIndexConnector } from '../../../../objects/connector';
 import { getSimpleCustomQueryRule } from '../../../../objects/rule';
 
@@ -23,6 +24,7 @@ import {
   fillAboutRuleAndContinue,
   fillDefineCustomRuleAndContinue,
   fillRuleAction,
+  fillRuleActionFilters,
   fillScheduleRuleAndContinue,
 } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
@@ -73,6 +75,36 @@ describe(
       }).then((response) => {
         expect(response.body.hits.hits[0]._source).to.deep.equal(expectedJson);
       });
+    });
+
+    it('Allows adding alerts filters for the action', function () {
+      visit(CREATE_RULE_URL);
+      fillDefineCustomRuleAndContinue(rule);
+      fillAboutRuleAndContinue(rule);
+      fillScheduleRuleAndContinue(rule);
+      fillRuleAction(actions);
+
+      // Fill out action filters
+      const alertsFilter = {
+        timeframe: {
+          days: [1, 3],
+          timezone: 'CET',
+          hours: {
+            start: '08:30',
+            end: '15:30',
+          },
+        },
+        query: {
+          kql: 'process.name : *',
+        },
+      };
+      fillRuleActionFilters(alertsFilter);
+
+      // Create the rule
+      createAndEnableRule();
+
+      // UI redirects to rule creation page of a created rule
+      cy.get(RULE_NAME_HEADER).should('contain', rule.name);
     });
   }
 );

@@ -8,7 +8,7 @@ import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { TooltipContent } from '../../../../../components/lens/metric_explanation/tooltip_content';
-import { Popover } from './popover';
+import { Popover } from '../common/popover';
 
 interface Props {
   label: string;

@@ -16,7 +16,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { CellTooltipWrapper } from '../../shared/components/cell_tooltip_wrapper';
 import type { DataProvider } from '../../../../../common/types';
-import { SeverityBadge } from '../../../../detections/components/rules/severity_badge';
+import { SeverityBadge } from '../../../../common/components/severity_badge';
 import { usePaginatedAlerts } from '../hooks/use_paginated_alerts';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { InvestigateInTimelineButton } from '../../../../common/components/event_details/table/investigate_in_timeline_button';

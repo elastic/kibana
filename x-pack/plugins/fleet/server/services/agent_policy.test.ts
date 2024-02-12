@@ -11,7 +11,13 @@ import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 
-import { PackagePolicyRestrictionRelatedError, FleetUnauthorizedError } from '../errors';
+import type { SavedObjectError } from '@kbn/core-saved-objects-common';
+
+import {
+  PackagePolicyRestrictionRelatedError,
+  FleetUnauthorizedError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../errors';
 import type {
   AgentPolicy,
   FullAgentPolicy,
@@ -20,7 +26,7 @@ import type {
 } from '../types';
 import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 
-import { AGENT_POLICY_INDEX } from '../../common';
+import { AGENT_POLICY_INDEX, SO_SEARCH_LIMIT } from '../../common';
 
 import { agentPolicyService } from './agent_policy';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
@@ -383,6 +389,18 @@ describe('agent policy', () => {
         savedObjectType: AGENT_POLICY_SAVED_OBJECT_TYPE,
       });
     });
+
+    it('should throw error if active agents are assigned to the policy', async () => {
+      (getAgentsByKuery as jest.Mock).mockResolvedValue({
+        agents: [],
+        total: 2,
+        page: 1,
+        perPage: 10,
+      });
+      await expect(agentPolicyService.delete(soClient, esClient, 'mocked')).rejects.toThrowError(
+        'Cannot delete an agent policy that is assigned to any active or inactive agents'
+      );
+    });
   });
 
   describe('bumpRevision', () => {
@@ -475,6 +493,26 @@ describe('agent policy', () => {
           },
         ],
       } as any);
+      soClient.get.mockImplementation((type, id, options): any => {
+        if (id === 'test1') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              data_output_id: 'output-id-123',
+              monitoring_output_id: 'output-id-another-output',
+            },
+          });
+        }
+        if (id === 'test2') {
+          return Promise.resolve({
+            id,
+            attributes: {
+              data_output_id: 'output-id-another-output',
+              monitoring_output_id: 'output-id-123',
+            },
+          });
+        }
+      });
 
       await agentPolicyService.removeOutputFromAll(soClient, esClient, 'output-id-123');
 
@@ -483,13 +521,15 @@ describe('agent policy', () => {
         expect.anything(),
         expect.anything(),
         'test1',
-        { data_output_id: null, monitoring_output_id: 'output-id-another-output' }
+        { data_output_id: null, monitoring_output_id: 'output-id-another-output' },
+        { skipValidation: true }
       );
       expect(mockedAgentPolicyServiceUpdate).toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
         'test2',
-        { data_output_id: 'output-id-another-output', monitoring_output_id: null }
+        { data_output_id: 'output-id-another-output', monitoring_output_id: null },
+        { skipValidation: true }
       );
     });
   });
@@ -601,6 +641,27 @@ describe('agent policy', () => {
       // soClient.update is called with updated values
       calledWith = soClient.update.mock.calls[1];
       expect(calledWith[2]).toHaveProperty('is_managed', true);
+    });
+
+    it('should throw a HostedAgentRestrictionRelated error if user enables "is_protected" for a managed policy', async () => {
+      jest.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      soClient.get.mockResolvedValue({
+        attributes: { is_managed: true },
+        id: 'mocked',
+        type: 'mocked',
+        references: [],
+      });
+
+      await expect(
+        agentPolicyService.update(soClient, esClient, 'test-id', {
+          is_protected: true,
+        })
+      ).rejects.toThrowError(
+        new HostedAgentPolicyRestrictionRelatedError('Cannot update is_protected')
+      );
     });
 
     it('should call audit logger', async () => {
@@ -947,6 +1008,95 @@ describe('agent policy', () => {
     });
   });
 
+  describe('turnOffAgentTamperProtections', () => {
+    const createPolicySO = (id: string, isProtected: boolean, error?: SavedObjectError) => ({
+      id,
+      type: AGENT_POLICY_SAVED_OBJECT_TYPE,
+      attributes: {
+        is_protected: isProtected,
+      },
+      references: [],
+      score: 1,
+      ...(error ? { error } : {}),
+    });
+
+    const createMockSoClientThatReturns = (policies: Array<ReturnType<typeof createPolicySO>>) => {
+      const mockSoClient = savedObjectsClientMock.create();
+
+      const resolvedValue = {
+        saved_objects: policies,
+        page: 1,
+        per_page: 10,
+        total: policies.length,
+      };
+      mockSoClient.find.mockResolvedValue(resolvedValue);
+      return mockSoClient;
+    };
+
+    it('should return if all policies are compliant', async () => {
+      const mockSoClient = createMockSoClientThatReturns([]);
+
+      expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
+        failedPolicies: [],
+        updatedPolicies: null,
+      });
+      expect(mockSoClient.bulkUpdate).not.toHaveBeenCalled();
+    });
+
+    it('should bulk update policies that are not compliant', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', true),
+        createPolicySO('policy2', true),
+        createPolicySO('policy3', false),
+      ]);
+
+      mockSoClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [createPolicySO('policy1', false), createPolicySO('policy2', false)],
+      });
+
+      const expectedResponse = expect.arrayContaining([
+        expect.objectContaining({
+          id: 'policy1',
+          attributes: expect.objectContaining({ is_protected: false }),
+        }),
+        expect.objectContaining({
+          id: 'policy2',
+          attributes: expect.objectContaining({ is_protected: false }),
+        }),
+      ]);
+
+      expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
+        failedPolicies: [],
+        updatedPolicies: expectedResponse,
+      });
+
+      expect(mockSoClient.bulkUpdate).toHaveBeenCalledWith(expectedResponse);
+    });
+
+    it('should return failed policies if bulk update fails', async () => {
+      const mockSoClient = createMockSoClientThatReturns([
+        createPolicySO('policy1', true),
+        createPolicySO('policy2', true),
+        createPolicySO('policy3', false),
+      ]);
+      mockSoClient.bulkUpdate.mockResolvedValueOnce({
+        saved_objects: [
+          createPolicySO('policy1', false, { error: 'Oops!', message: 'Ooops!', statusCode: 500 }),
+          createPolicySO('policy2', false),
+        ],
+      });
+      expect(await agentPolicyService.turnOffAgentTamperProtections(mockSoClient)).toEqual({
+        failedPolicies: [
+          expect.objectContaining({
+            id: 'policy1',
+            error: expect.objectContaining({ message: 'Ooops!' }),
+          }),
+        ],
+        updatedPolicies: [expect.objectContaining({ id: 'policy2' })],
+      });
+    });
+  });
+
   describe('deleteFleetServerPoliciesForPolicyId', () => {
     it('should call audit logger', async () => {
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -958,6 +1108,21 @@ describe('agent policy', () => {
       expect(mockedAuditLoggingService.writeCustomAuditLog).toHaveBeenCalledWith({
         message: 'User deleting policy [id=test-agent-policy]',
       });
+    });
+
+    it('should call deleteByQuery multiple time if there is more than 10000 .fleet-policies', async () => {
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: SO_SEARCH_LIMIT,
+      });
+      esClient.deleteByQuery.mockResolvedValueOnce({
+        deleted: 10,
+      });
+
+      await agentPolicyService.deleteFleetServerPoliciesForPolicyId(esClient, 'test-agent-policy');
+
+      expect(esClient.deleteByQuery).toBeCalledTimes(2);
     });
   });
 });

@@ -10,7 +10,7 @@ import deepEqual from 'fast-deep-equal';
 import { lastValueFrom } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTitle } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -300,22 +300,23 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   return (
     <Fragment>
-      <EuiTitle size="xs">
-        <h5>
+      <EuiFormRow
+        fullWidth
+        label={
           <FormattedMessage
             id="xpack.stackAlerts.esQuery.ui.selectDataViewPrompt"
             defaultMessage="Select a data view"
           />
-        </h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <DataViewSelectPopover
-        dependencies={{ dataViews, dataViewEditor }}
-        dataView={dataView}
-        metadata={props.metadata}
-        onSelectDataView={onSelectDataView}
-        onChangeMetaData={props.onChangeMetaData}
-      />
+        }
+      >
+        <DataViewSelectPopover
+          dependencies={{ dataViews, dataViewEditor }}
+          dataView={dataView}
+          metadata={props.metadata}
+          onSelectDataView={onSelectDataView}
+          onChangeMetaData={props.onChangeMetaData}
+        />
+      </EuiFormRow>
       {Boolean(dataView?.id) && (
         <>
           <EuiSpacer size="s" />

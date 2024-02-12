@@ -91,11 +91,12 @@ export const getPrComment = (
 
         const logsLink = artifactUrl ? ` [[logs]](${artifactUrl})` : '';
 
-        // job name could have #<number> in it, which Github will link to an issue, so we need to "escape" it with spans
-        return `* [[job]](${jobUrl})${logsLink} ${failure.jobName.replace(
-          '#',
-          '#<span></span>'
-        )} / ${failure.name}`;
+        // failure name could have #<number>, which Github will link to an issue or @<string>,
+        // which will send a notification so we need to "escape" it with spans
+        const failureString = `${failure.jobName} / ${failure.name}`
+          .replaceAll('#', '#<span></span>')
+          .replaceAll('@', '@<span></span>');
+        return `* [[job]](${jobUrl})${logsLink} ${failureString}`;
       })
       .join('\n')
   );

@@ -34,7 +34,7 @@ export function Cases({ permissions }: CasesProps) {
 
   const [selectedAlertId, setSelectedAlertId] = useState<string>('');
 
-  const [alertLoading, alert] = useFetchAlertDetail(selectedAlertId);
+  const [alertLoading, alertDetail] = useFetchAlertDetail(selectedAlertId);
 
   const handleFlyoutClose = () => setSelectedAlertId('');
 
@@ -65,10 +65,11 @@ export function Cases({ permissions }: CasesProps) {
         useFetchAlertData={useFetchAlertData}
       />
 
-      {alert && selectedAlertId !== '' && alertLoading === false ? (
+      {alertDetail && selectedAlertId !== '' && !alertLoading ? (
         <Suspense fallback={null}>
           <LazyAlertsFlyout
-            alert={alert}
+            alert={alertDetail.formatted}
+            rawAlert={alertDetail.raw}
             observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
             onClose={handleFlyoutClose}
           />

@@ -77,8 +77,10 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
+import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
+import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
@@ -104,9 +106,8 @@ export interface PluginsStart {
 export interface RouteDependencies {
   config: ConfigType;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
-
   getSavedObjectsService?(): SavedObjectsServiceStart;
-
+  globalConfigService: GlobalConfigService;
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
@@ -115,6 +116,7 @@ export interface RouteDependencies {
 export class EnterpriseSearchPlugin implements Plugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  private readonly globalConfigService: GlobalConfigService;
 
   /**
    * Exposed services
@@ -122,11 +124,19 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
+    this.globalConfigService = new GlobalConfigService();
     this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
+    {
+      capabilities,
+      elasticsearch,
+      http,
+      savedObjects,
+      getStartServices,
+      uiSettings,
+    }: CoreSetup<PluginsStart>,
     {
       usageCollection,
       security,
@@ -139,6 +149,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloud,
     }: PluginsSetup
   ) {
+    this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
@@ -185,7 +196,14 @@ export class EnterpriseSearchPlugin implements Plugin {
       async (request: KibanaRequest) => {
         const [, { spaces }] = await getStartServices();
 
-        const dependencies = { config, security, spaces, request, log, ml };
+        const dependencies = {
+          config,
+          security,
+          spaces,
+          request,
+          log,
+          ml,
+        };
 
         const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
         const showEnterpriseSearch =
@@ -228,7 +246,14 @@ export class EnterpriseSearchPlugin implements Plugin {
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
+    const dependencies = {
+      router,
+      config,
+      globalConfigService: this.globalConfigService,
+      log,
+      enterpriseSearchRequestHandler,
+      ml,
+    };
 
     registerConfigDataRoute(dependencies);
     if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
@@ -319,6 +344,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (globalSearch) {
       globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.basePath));
     }
   }
 

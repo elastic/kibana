@@ -47,6 +47,8 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/usage-collection-plugin",
     "@kbn/react-field",
+    "@kbn/code-editor",
+    "@kbn/esql-utils",
   ],
   "exclude": [
     "target/**/*",

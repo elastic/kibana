@@ -8,7 +8,7 @@
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { timelineActions } from '../../../../timelines/store';
@@ -70,7 +70,7 @@ const RowActionComponent = ({
 }: Props) => {
   const { data: timelineNonEcsData, ecs: ecsData, _id: eventId, _index: indexName } = data ?? {};
 
-  const { openFlyout } = useExpandableFlyoutContext();
+  const { openFlyout } = useExpandableFlyoutApi();
 
   const dispatch = useDispatch();
   const [isSecurityFlyoutEnabled] = useUiSetting$<boolean>(ENABLE_EXPANDABLE_FLYOUT_SETTING);

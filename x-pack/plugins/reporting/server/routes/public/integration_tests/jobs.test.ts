@@ -36,7 +36,7 @@ import { registerJobInfoRoutesPublic } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
-describe(`GET ${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
+describe(`Reporting Job Management Routes: Public`, () => {
   const reportingSymbol = Symbol('reporting');
   let server: SetupServerReturn['server'];
   let usageCounter: IUsageCounter;
@@ -135,114 +135,114 @@ describe(`GET ${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
     await server.stop();
   });
 
-  it('fails on malformed download IDs', async () => {
-    mockEsClient.search.mockResponseOnce(getHits());
-    registerJobInfoRoutesPublic(core);
+  describe('download report', () => {
+    it('fails on malformed download IDs', async () => {
+      mockEsClient.search.mockResponseOnce(getHits());
+      registerJobInfoRoutesPublic(core);
 
-    await server.start();
+      await server.start();
 
-    await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
-      .expect(400)
-      .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(
-          '"[request params.docId]: value has length [1] but it must have a minimum length of [3]."'
-        )
-      );
-  });
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/1`)
+        .expect(400)
+        .then(({ body }) =>
+          expect(body.message).toMatchInlineSnapshot(
+            '"[request params.docId]: value has length [1] but it must have a minimum length of [3]."'
+          )
+        );
+    });
 
-  it('fails on unauthenticated users', async () => {
-    mockStartDeps = await createMockPluginStart(
-      {
-        licensing: {
-          ...licensingMock.createStart(),
-          license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+    it('fails on unauthenticated users', async () => {
+      mockStartDeps = await createMockPluginStart(
+        {
+          licensing: {
+            ...licensingMock.createStart(),
+            license$: new BehaviorSubject({ isActive: true, isAvailable: true, type: 'gold' }),
+          },
+          security: { authc: { getCurrentUser: () => undefined } },
         },
-        security: { authc: { getCurrentUser: () => undefined } },
-      },
-      mockConfigSchema
-    );
-    core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
-    registerJobInfoRoutesPublic(core);
-
-    await server.start();
-
-    await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
-      .expect(401)
-      .then(({ body }) =>
-        expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
+        mockConfigSchema
       );
-  });
+      core = await createMockReportingCore(mockConfigSchema, mockSetupDeps, mockStartDeps);
+      registerJobInfoRoutesPublic(core);
 
-  it('returns 404 if job not found', async () => {
-    mockEsClient.search.mockResponseOnce(getHits());
-    registerJobInfoRoutesPublic(core);
+      await server.start();
 
-    await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dope`)
+        .expect(401)
+        .then(({ body }) =>
+          expect(body.message).toMatchInlineSnapshot(`"Sorry, you aren't authenticated"`)
+        );
+    });
 
-    await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
-      .expect(404);
-  });
+    it('returns 404 if job not found', async () => {
+      mockEsClient.search.mockResponseOnce(getHits());
+      registerJobInfoRoutesPublic(core);
 
-  it('returns a 403 if not a valid job type', async () => {
-    mockEsClient.search.mockResponseOnce(
-      getHits({
-        jobtype: 'invalidJobType',
-        payload: { title: 'invalid!' },
-      })
-    );
-    registerJobInfoRoutesPublic(core);
+      await server.start();
 
-    await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
+        .expect(404);
+    });
 
-    await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
-      .expect(403);
-  });
-
-  it('when a job is incomplete', async () => {
-    mockEsClient.search.mockResponseOnce(
-      getHits({
-        jobtype: 'unencodedJobType',
-        status: 'pending',
-        payload: { title: 'incomplete!' },
-      })
-    );
-    registerJobInfoRoutesPublic(core);
-
-    await server.start();
-    await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-      .expect(503)
-      .expect('Content-Type', 'text/plain; charset=utf-8')
-      .expect('Retry-After', '30')
-      .then(({ text }) => expect(text).toEqual('pending'));
-  });
-
-  it('when a job fails', async () => {
-    mockEsClient.search.mockResponse(
-      getHits({
-        jobtype: 'unencodedJobType',
-        status: 'failed',
-        output: { content: 'job failure message' },
-        payload: { title: 'failing job!' },
-      })
-    );
-    registerJobInfoRoutesPublic(core);
-
-    await server.start();
-    await supertest(httpSetup.server.listener)
-      .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
-      .expect(500)
-      .expect('Content-Type', 'application/json; charset=utf-8')
-      .then(({ body }) =>
-        expect(body.message).toEqual('Reporting generation failed: job failure message')
+    it('returns a 403 if not a valid job type', async () => {
+      mockEsClient.search.mockResponseOnce(
+        getHits({
+          jobtype: 'invalidJobType',
+          payload: { title: 'invalid!' },
+        })
       );
-  });
+      registerJobInfoRoutesPublic(core);
 
-  describe('successful downloads', () => {
+      await server.start();
+
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/poo`)
+        .expect(403);
+    });
+
+    it('when a job is incomplete', async () => {
+      mockEsClient.search.mockResponseOnce(
+        getHits({
+          jobtype: 'unencodedJobType',
+          status: 'pending',
+          payload: { title: 'incomplete!' },
+        })
+      );
+      registerJobInfoRoutesPublic(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
+        .expect(503)
+        .expect('Content-Type', 'text/plain; charset=utf-8')
+        .expect('Retry-After', '30')
+        .then(({ text }) => expect(text).toEqual('pending'));
+    });
+
+    it('when a job fails', async () => {
+      mockEsClient.search.mockResponse(
+        getHits({
+          jobtype: 'unencodedJobType',
+          status: 'failed',
+          output: { content: 'job failure message' },
+          payload: { title: 'failing job!' },
+        })
+      );
+      registerJobInfoRoutesPublic(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .get(`${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}/dank`)
+        .expect(500)
+        .expect('Content-Type', 'application/json; charset=utf-8')
+        .then(({ body }) =>
+          expect(body.message).toEqual('Reporting generation failed: job failure message')
+        );
+    });
+
     it('when a known job-type is complete', async () => {
       mockEsClient.search.mockResponseOnce(getCompleteHits());
       registerJobInfoRoutesPublic(core);
@@ -290,6 +290,30 @@ describe(`GET ${PUBLIC_ROUTES.JOBS.DOWNLOAD_PREFIX}`, () => {
         counterName: 'delete /api/reporting/jobs/delete/{docId}:unencodedJobType',
         counterType: 'reportingApi',
       });
+    });
+  });
+
+  describe('delete report', () => {
+    it('handles content stream errors', async () => {
+      stream = new Readable({
+        read() {
+          this.push('test');
+          this.push(null);
+        },
+      }) as typeof stream;
+      stream.end = jest.fn().mockImplementation((_name, _encoding, callback) => {
+        callback(new Error('An error occurred in ending the content stream'));
+      });
+
+      (getContentStream as jest.MockedFunction<typeof getContentStream>).mockResolvedValue(stream);
+      mockEsClient.search.mockResponseOnce(getCompleteHits());
+      registerJobInfoRoutesPublic(core);
+
+      await server.start();
+      await supertest(httpSetup.server.listener)
+        .delete('/api/reporting/jobs/delete/denk')
+        .expect(500)
+        .expect('Content-Type', 'application/json; charset=utf-8');
     });
   });
 });

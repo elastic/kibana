@@ -18,6 +18,8 @@ export type LogDocument = Fields &
     'data_stream.type': string;
     'data_stream.dataset': string;
     message?: string;
+    'error.message'?: string;
+    'event.original'?: string;
     'event.dataset': string;
     'log.level'?: string;
     'host.name'?: string;
@@ -27,11 +29,16 @@ export type LogDocument = Fields &
     'orchestrator.cluster.name'?: string;
     'orchestrator.cluster.id'?: string;
     'orchestrator.resource.id'?: string;
+    'orchestrator.namespace'?: string;
+    'container.name'?: string;
     'cloud.provider'?: string;
     'cloud.region'?: string;
     'cloud.availability_zone'?: string;
     'cloud.project.id'?: string;
     'cloud.instance.id'?: string;
+    'error.stack_trace'?: string;
+    'error.exception.stacktrace'?: string;
+    'error.log.stacktrace'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

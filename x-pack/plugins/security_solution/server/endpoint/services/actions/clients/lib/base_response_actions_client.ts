@@ -9,11 +9,15 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import { v4 as uuidv4 } from 'uuid';
-import { AttachmentType } from '@kbn/cases-plugin/common';
-import type { BulkCreateArgs } from '@kbn/cases-plugin/server/client/attachments/types';
+import { AttachmentType, ExternalReferenceStorageType } from '@kbn/cases-plugin/common';
+import type { CaseAttachments } from '@kbn/cases-plugin/public/types';
+
 import type { EndpointAppContextService } from '../../../../endpoint_app_context_services';
 import { APP_ID } from '../../../../../../common';
-import type { ResponseActionsApiCommandNames } from '../../../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getActionDetailsById } from '../../action_details_by_id';
 import { ResponseActionsClientError, ResponseActionsNotSupportedError } from '../errors';
 import {
@@ -42,6 +46,7 @@ import type {
   LogsEndpointAction,
   EndpointActionDataParameterTypes,
   LogsEndpointActionResponse,
+  EndpointActionResponseDataOutput,
 } from '../../../../../../common/endpoint/types';
 import type {
   IsolationRouteRequestBody,
@@ -52,7 +57,9 @@ import type {
   ResponseActionsRequestBody,
 } from '../../../../../../common/api/endpoint';
 import type { CreateActionPayload } from '../../create/types';
-import { dump } from '../../../../utils/dump';
+import { stringify } from '../../../../utils/stringify';
+import { CASE_ATTACHMENT_ENDPOINT_TYPE_ID } from '../../../../../../common/constants';
+import { EMPTY_COMMENT } from '../../../../utils/translations';
 
 export interface ResponseActionsClientOptions {
   endpointService: EndpointAppContextService;
@@ -75,6 +82,8 @@ export interface ResponseActionsClientUpdateCasesOptions {
   alertIds?: string[];
   /** Comment to include in the Case attachment */
   comment?: string;
+  /** The id of the action that was taken */
+  actionId: string;
 }
 
 export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
@@ -82,7 +91,7 @@ export type ResponseActionsClientWriteActionRequestToEndpointIndexOptions =
     Pick<CreateActionPayload, 'command' | 'hosts' | 'rule_id' | 'rule_name'>;
 
 export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
-  TOutputContent extends object = object
+  TOutputContent extends EndpointActionResponseDataOutput = EndpointActionResponseDataOutput
 > = {
   agentId: LogsEndpointActionResponse['agent']['id'];
   actionId: string;
@@ -92,8 +101,10 @@ export type ResponseActionsClientWriteActionResponseToEndpointIndexOptions<
 /**
  * Base class for a Response Actions client
  */
-export class ResponseActionsClientImpl implements ResponseActionsClient {
+export abstract class ResponseActionsClientImpl implements ResponseActionsClient {
   protected readonly log: Logger;
+
+  protected abstract readonly agentType: ResponseActionAgentType;
 
   constructor(protected readonly options: ResponseActionsClientOptions) {
     this.log = options.endpointService.createLogger(
@@ -113,6 +124,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
     caseIds = [],
     alertIds = [],
     comment = '',
+    actionId,
   }: ResponseActionsClientUpdateCasesOptions): Promise<void> {
     if (caseIds.length === 0 && alertIds.length === 0) {
       this.log.debug(`Nothing to do. 'caseIds' and 'alertIds' are empty`);
@@ -158,37 +170,48 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       return;
     }
 
-    this.log.debug(`Updating cases:\n${dump(allCases)}`);
+    this.log.debug(`Updating cases:\n${stringify(allCases)}`);
 
-    // Create an attachment for each case that includes info. about the response actions taken against the hosts
-    const attachments = allCases.map(() => ({
-      type: AttachmentType.actions,
-      comment,
-      actions: {
-        targets: hosts.map(({ hostId: endpointId, hostname }) => ({ endpointId, hostname })),
-        type: command,
+    const attachments: CaseAttachments = [
+      {
+        type: AttachmentType.externalReference,
+        externalReferenceId: actionId,
+        externalReferenceStorage: {
+          type: ExternalReferenceStorageType.elasticSearchDoc,
+        },
+        externalReferenceAttachmentTypeId: CASE_ATTACHMENT_ENDPOINT_TYPE_ID,
+        externalReferenceMetadata: {
+          targets: hosts.map(({ hostId: endpointId, hostname }) => {
+            return {
+              endpointId,
+              hostname,
+              agentType: this.agentType,
+            };
+          }),
+          command,
+          comment: comment || EMPTY_COMMENT,
+        },
+        owner: APP_ID,
       },
-      owner: APP_ID,
-    })) as BulkCreateArgs['attachments'];
+    ];
 
     const casesUpdateResponse = await Promise.all(
-      allCases.map((caseId) =>
-        casesClient.attachments
-          .bulkCreate({
+      allCases.map(async (caseId) => {
+        try {
+          return await casesClient.attachments.bulkCreate({
             caseId,
             attachments,
-          })
-          .catch((err) => {
-            // Log any error, BUT: do not fail execution
-            this.log.warn(
-              `Attempt to update case ID [${caseId}] failed: ${err.message}\n${dump(err)}`
-            );
-            return null;
-          })
-      )
+          });
+        } catch (err) {
+          this.log.warn(
+            `Attempt to update case ID [${caseId}] failed: ${err.message}\n${stringify(err)}`
+          );
+          return null;
+        }
+      })
     );
 
-    this.log.debug(`Update to cases done:\n${dump(casesUpdateResponse)}`);
+    this.log.debug(`Update to cases done:\n${stringify(casesUpdateResponse)}`);
   }
 
   /**
@@ -213,6 +236,8 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
   protected async writeActionRequestToEndpointIndex(
     actionRequest: ResponseActionsClientWriteActionRequestToEndpointIndexOptions
   ): Promise<LogsEndpointAction> {
+    this.notifyUsage(actionRequest.command);
+
     const doc: LogsEndpointAction = {
       '@timestamp': new Date().toISOString(),
       agent: {
@@ -222,7 +247,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
         action_id: uuidv4(),
         expiration: getActionRequestExpiration(),
         type: 'INPUT_ACTION',
-        input_type: actionRequest.agent_type ?? 'endpoint',
+        input_type: this.agentType,
         data: {
           command: actionRequest.command,
           comment: actionRequest.comment ?? undefined,
@@ -274,7 +299,10 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
    * @param options
    * @protected
    */
-  protected async writeActionResponseToEndpointIndex<TOutputContent extends object = object>({
+  protected async writeActionResponseToEndpointIndex<
+    // Default type purposely set to empty object in order to ensure proper types are used when calling the method
+    TOutputContent extends EndpointActionResponseDataOutput = Record<string, never>
+  >({
     actionId,
     error,
     agentId,
@@ -290,6 +318,7 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       },
       EndpointActions: {
         action_id: actionId,
+        input_type: this.agentType,
         started_at: timestamp,
         completed_at: timestamp,
         data,
@@ -297,10 +326,10 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       error,
     };
 
-    this.log.debug(`Writing response action response:\n${dump(doc)}`);
+    this.log.debug(`Writing response action response:\n${stringify(doc)}`);
 
     await this.options.esClient
-      .index<LogsEndpointActionResponse>({
+      .index<LogsEndpointActionResponse<TOutputContent>>({
         index: ENDPOINT_ACTION_RESPONSES_INDEX,
         document: doc,
         refresh: 'wait_for',
@@ -314,6 +343,20 @@ export class ResponseActionsClientImpl implements ResponseActionsClient {
       });
 
     return doc;
+  }
+
+  protected notifyUsage(responseAction: ResponseActionsApiCommandNames): void {
+    const usageService = this.options.endpointService.getFeatureUsageService();
+    const featureKey = usageService.getResponseActionFeatureKey(responseAction);
+
+    if (!featureKey) {
+      this.log.warn(
+        `Response action [${responseAction}] does not have a usage feature key defined!`
+      );
+      return;
+    }
+
+    usageService.notifyUsage(featureKey);
   }
 
   public async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
