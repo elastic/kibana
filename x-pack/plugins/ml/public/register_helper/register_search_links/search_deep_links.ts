@@ -89,7 +89,7 @@ function createDeepLinks(
     getModelManagementDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!mlCapabilities.isDFAEnabled && !mlCapabilities.isNLPEnabled) return null;
 
-      const deepLinks = [
+      const deepLinks: Array<AppDeepLink<LinkId>> = [
         {
           id: 'nodesOverview',
           title: i18n.translate('xpack.ml.deepLink.trainedModels', {
