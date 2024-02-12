@@ -1061,5 +1061,66 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         }
       );
     });
+
+    describe('Viewing rule changes in JSON diff view', { tags: TEST_ENV_TAGS }, () => {
+      it('User can see changes in a side-by-side JSON diff view', () => {
+        clickRuleUpdatesTab();
+
+        openRuleUpdatePreview(OUTDATED_RULE_1['security-rule'].name);
+        assertSelectedPreviewTab('JSON view');
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('Base version')
+          .as('baseVersionColumnHeading');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('Elastic update')
+          .as('elasticUpdateColumnHeading');
+
+        cy.get('@baseVersionColumnHeading').should('be.visible');
+        cy.get('@elasticUpdateColumnHeading').should('be.visible');
+
+        /* "Base version" should be the left column, "Elastic update" should be the right column. */
+        cy.get('@baseVersionColumnHeading').then(($baseVersionColumnHeading) => {
+          const baseVersionLeftOffset = $baseVersionColumnHeading.offset()?.left || 0;
+          cy.get('@elasticUpdateColumnHeading').then(($elasticUpdateColumnHeading) => {
+            const elasticUpdateLeftOffset = $elasticUpdateColumnHeading.offset()?.left || 0;
+            expect(baseVersionLeftOffset).to.be.lessThan(elasticUpdateLeftOffset);
+          });
+        });
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 1').as('baseVersionValue');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 2').as('updateVersionValue');
+
+        cy.get('@baseVersionValue').should('be.visible');
+        cy.get('@updateVersionValue').should('be.visible');
+
+        /*
+          "Base version" version value should be displayed in the left column, 
+          "Elastic update" version value should be displayed the right column.
+        */
+        cy.get('@baseVersionValue').then(($baseVersionValue) => {
+          const baseVersionLeftOffset = $baseVersionValue.offset()?.left || 0;
+          cy.get('@updateVersionValue').then(($updateVersionValue) => {
+            const updateVersionLeftOffset = $updateVersionValue.offset()?.left || 0;
+            expect(baseVersionLeftOffset).to.be.lessThan(updateVersionLeftOffset);
+          });
+        });
+
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('"name": "Outdated rule 1"')
+          .should('be.visible');
+
+        /* Select another rule without closing the preview for the current rule */
+        openRuleUpdatePreview(OUTDATED_RULE_2['security-rule'].name);
+
+        /* Make sure the JSON diff is displayed for the newly selected rule */
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('"name": "Outdated rule 2"')
+          .should('be.visible');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
+          .contains('"name": "Outdated rule 1"')
+          .should('not.exist');
+      });
+    });
   });
 });
