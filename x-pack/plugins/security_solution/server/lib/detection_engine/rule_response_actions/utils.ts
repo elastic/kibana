@@ -6,6 +6,7 @@
  */
 
 import { get } from 'lodash';
+import { FIELD_NOT_EXIST } from '../../../endpoint/services/actions/create/validate';
 import type { AlertAgent, AlertWithAgent, AlertsAction } from './types';
 import type { ProcessesParams } from '../../../../common/api/detection_engine';
 
@@ -90,7 +91,7 @@ export const getErrorProcessAlerts = (
               ...currentValue?.hosts,
               [agentId]: { name: name || hostName || '', id: agentId },
             },
-            error: errorField,
+            error: FIELD_NOT_EXIST(errorField),
           },
         },
       };
