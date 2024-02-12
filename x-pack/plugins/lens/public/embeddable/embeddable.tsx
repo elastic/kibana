@@ -916,9 +916,7 @@ export class Embeddable
 
     if (this.isTextBasedLanguage()) {
       this.updateInput({
-        disabledActions: [
-          'OPEN_FLYOUT_ADD_DRILLDOWN'
-        ],
+        disabledActions: ['OPEN_FLYOUT_ADD_DRILLDOWN'],
       });
     }
 
