@@ -4110,6 +4110,10 @@
               },
               {
                 "plugin": "enterpriseSearch",
+                "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/connectors.ts"
+              },
+              {
+                "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/enterprise_search/crawler/crawler_multiple_schedules.ts"
               },
               {
@@ -9777,6 +9781,42 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IStaticAssets.prependPublicUrl",
+            "type": "Function",
+            "tags": [
+              "note"
+            ],
+            "label": "prependPublicUrl",
+            "description": [
+              "\nWill return an href, either a path for or full URL with the provided path\nappended to the static assets public base path.\n\nUseful for instances were you need to render your own HTML page and link to\ncertain static assets.\n"
+            ],
+            "signature": [
+              "(pathname: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server/src/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.IStaticAssets.prependPublicUrl.$1",
+                "type": "string",
+                "tags": [],
+                "label": "pathname",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server/src/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -14819,6 +14859,10 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",

@@ -113,6 +113,7 @@ export function registerQueryFunction({
             type: 'boolean',
           },
         },
+        required: ['switch'],
       } as const,
     },
     async ({ messages, connectorId }, signal) => {
@@ -129,54 +130,58 @@ export function registerQueryFunction({
       const source$ = (
         await client.chat('classify_esql', {
           connectorId,
-          messages: withEsqlSystemMessage(
-            `Use the classify_esql function to classify the user's request
-            and get more information about specific functions and commands
-            you think are candidates for answering the question.
-            
+          messages: withEsqlSystemMessage().concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.User,
+              content: `Use the classify_esql function to classify the user's request
+              in the user message before this.
+              and get more information about specific functions and commands
+              you think are candidates for answering the question.
               
-            Examples for functions and commands:
-            Do you need to group data? Request \`STATS\`.
-            Extract data? Request \`DISSECT\` AND \`GROK\`.
-            Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
+              Examples for functions and commands:
+              Do you need to group data? Request \`STATS\`.
+              Extract data? Request \`DISSECT\` AND \`GROK\`.
+              Convert a column based on a set of conditionals? Request \`EVAL\` and \`CASE\`.
 
-            For determining the intention of the user, the following options are available:
+              For determining the intention of the user, the following options are available:
 
-            ${VisualizeESQLUserIntention.generateQueryOnly}: the user only wants to generate the query,
-            but not run it.
+              ${VisualizeESQLUserIntention.generateQueryOnly}: the user only wants to generate the query,
+              but not run it.
 
-            ${VisualizeESQLUserIntention.executeAndReturnResults}: the user wants to execute the query,
-            and have the assistant return/analyze/summarize the results. they don't need a
-            visualization.
+              ${VisualizeESQLUserIntention.executeAndReturnResults}: the user wants to execute the query,
+              and have the assistant return/analyze/summarize the results. they don't need a
+              visualization.
 
-            ${VisualizeESQLUserIntention.visualizeAuto}: The user wants to visualize the data from the
-            query, but wants us to pick the best visualization type, or their preferred
-            visualization is unclear.
+              ${VisualizeESQLUserIntention.visualizeAuto}: The user wants to visualize the data from the
+              query, but wants us to pick the best visualization type, or their preferred
+              visualization is unclear.
 
-            These intentions will display a specific visualization:
-            ${VisualizeESQLUserIntention.visualizeBar}
-            ${VisualizeESQLUserIntention.visualizeDonut}
-            ${VisualizeESQLUserIntention.visualizeHeatmap}
-            ${VisualizeESQLUserIntention.visualizeLine}
-            ${VisualizeESQLUserIntention.visualizeTagcloud}
-            ${VisualizeESQLUserIntention.visualizeTreemap}
-            ${VisualizeESQLUserIntention.visualizeWaffle}
-            ${VisualizeESQLUserIntention.visualizeXy}
+              These intentions will display a specific visualization:
+              ${VisualizeESQLUserIntention.visualizeBar}
+              ${VisualizeESQLUserIntention.visualizeDonut}
+              ${VisualizeESQLUserIntention.visualizeHeatmap}
+              ${VisualizeESQLUserIntention.visualizeLine}
+              ${VisualizeESQLUserIntention.visualizeTagcloud}
+              ${VisualizeESQLUserIntention.visualizeTreemap}
+              ${VisualizeESQLUserIntention.visualizeWaffle}
+              ${VisualizeESQLUserIntention.visualizeXy}
 
-            Some examples:
-            "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-            "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
-            "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              Some examples:
+              "Show me the avg of x" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Show me the results of y" => ${VisualizeESQLUserIntention.executeAndReturnResults}
+              "Display the sum of z" => ${VisualizeESQLUserIntention.executeAndReturnResults}
 
-            "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
-            "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
-            "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+              "I want a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
+              "... Just show me the query" => ${VisualizeESQLUserIntention.generateQueryOnly}
+              "Create a query that ..." => ${VisualizeESQLUserIntention.generateQueryOnly}
 
-            "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
-            "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
-            "I want to see a heat map of ..." => ${VisualizeESQLUserIntention.visualizeHeatmap}
-            `
-          ),
+              "Show me the avg of x over time" => ${VisualizeESQLUserIntention.visualizeAuto}
+              "I want a bar chart of ... " => ${VisualizeESQLUserIntention.visualizeBar}
+              "I want to see a heat map of ..." => ${VisualizeESQLUserIntention.visualizeHeatmap}
+              `,
+            },
+          }),
           signal,
           functions: [
             {
@@ -184,6 +189,9 @@ export function registerQueryFunction({
               description: `Use this function to determine:
               - what ES|QL functions and commands are candidates for answering the user's question
               - whether the user has requested a query, and if so, it they want it to be executed, or just shown.
+
+              All parameters are required. Make sure the functions and commands you request are available in the
+              system message.
               `,
               parameters: {
                 type: 'object',
@@ -217,6 +225,10 @@ export function registerQueryFunction({
       ).pipe(concatenateChatCompletionChunks());
 
       const response = await lastValueFrom(source$);
+
+      if (!response.message.function_call.arguments) {
+        throw new Error('LLM did not call classify_esql function');
+      }
 
       const args = JSON.parse(response.message.function_call.arguments) as {
         commands: string[];

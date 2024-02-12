@@ -245,7 +245,7 @@ export class AbstractLayer implements ILayer {
     const sourceDisplayName = source
       ? await source.getDisplayName()
       : await this.getSource().getDisplayName();
-    return sourceDisplayName || `Layer ${this._descriptor.id}`;
+    return sourceDisplayName || this._descriptor.id;
   }
 
   async getAttributions(): Promise<Attribution[]> {

@@ -49,6 +49,7 @@ import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 export type { CreateChatCompletionResponseChunk } from '../common/types';
 export type { PendingMessage };
+export type { ChatFlyoutSecondSlotHandler };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
@@ -76,8 +77,7 @@ export interface ObservabilityAIAssistantChatService {
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler,
-    chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
 }
 
@@ -95,7 +95,6 @@ export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (op
   arguments: TArguments;
   response: TResponse;
   onActionClick: ChatActionClickHandler;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<
