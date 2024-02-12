@@ -14,6 +14,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./tour'));
 
     describe('Metrics UI', function () {
+      this.tags('skipFirefox');
       loadTestFile(require.resolve('./home_page'));
       loadTestFile(require.resolve('./metrics_source_configuration'));
       loadTestFile(require.resolve('./metrics_anomalies'));
