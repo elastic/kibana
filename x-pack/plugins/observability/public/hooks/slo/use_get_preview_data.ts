@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetPreviewDataResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { GetPreviewDataResponse, Indicator, Objective } from '@kbn/slo-schema';
 import { useQuery } from '@tanstack/react-query';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
@@ -19,17 +19,21 @@ export interface UseGetPreviewData {
 }
 
 export function useGetPreviewData({
-  slo,
   isValid,
   range,
+  indicator,
+  objective,
+  groupBy,
+  instanceId,
 }: {
   isValid: boolean;
-  slo: SLOWithSummaryResponse;
+  groupBy?: string;
+  instanceId?: string;
+  objective?: Objective;
+  indicator: Indicator;
   range: { start: number; end: number };
 }): UseGetPreviewData {
   const { http } = useKibana().services;
-  const indicator = slo.indicator;
-  const objective = slo.objective;
 
   const { isInitialLoading, isLoading, isError, isSuccess, data } = useQuery({
     queryKey: sloKeys.preview(indicator, range),
@@ -40,8 +44,8 @@ export function useGetPreviewData({
           body: JSON.stringify({
             indicator,
             range,
-            groupBy: slo.groupBy,
-            instanceId: slo.instanceId,
+            groupBy,
+            instanceId,
             ...(objective ? { objective } : null),
           }),
           signal,

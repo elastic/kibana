@@ -57,7 +57,13 @@ export function EventsChartPanel({ slo, range }: Props) {
     isDateHistogram: true,
   });
 
-  const { isLoading, data } = useGetPreviewData({ isValid: true, slo, range });
+  const { isLoading, data } = useGetPreviewData({
+    range,
+    isValid: true,
+    indicator: slo.indicator,
+    groupBy: slo.groupBy,
+    instanceId: slo.instanceId,
+  });
 
   const dateFormat = uiSettings.get('dateFormat');
 
