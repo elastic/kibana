@@ -136,18 +136,26 @@ export const useChatSend = ({
   );
 
   const handleRegenerateResponse = useCallback(async () => {
-    await removeLastMessage(currentConversation.id);
+    // remove last message from the local state immediately
+    setCurrentConversation({
+      ...currentConversation,
+      messages: currentConversation.messages.slice(0, -1),
+    });
+
+    const updatedMessages = (await removeLastMessage(currentConversation.id)) ?? [];
 
     const rawResponse = await sendMessages({
       apiConfig: currentConversation.apiConfig,
       http,
+      // do not send any new messages, the previous conversation is already stored
       messages: [],
       conversationId: currentConversation.id,
     });
+
     const responseMessage: Message = getMessageFromRawResponse(rawResponse);
     setCurrentConversation({
       ...currentConversation,
-      messages: [...currentConversation.messages, responseMessage],
+      messages: [...updatedMessages, responseMessage],
     });
   }, [currentConversation, http, removeLastMessage, sendMessages, setCurrentConversation]);
 

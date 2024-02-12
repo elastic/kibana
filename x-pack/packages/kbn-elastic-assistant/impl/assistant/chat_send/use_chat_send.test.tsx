@@ -95,14 +95,14 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();
-      const appendMessageSend = appendMessage.mock.calls[0][0];
-      const appendMessageResponse = appendMessage.mock.calls[1][0];
-      expect(appendMessageSend.message.content).toEqual(
-        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
+      const appendMessageSend = setCurrentConversation.mock.calls[1][0].messages[0];
+      const appendMessageResponse = setCurrentConversation.mock.calls[1][0].messages[1];
+      expect(appendMessageSend.content).toEqual(
+        `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n  ${promptText}`
       );
-      expect(appendMessageSend.message.role).toEqual('user');
-      expect(appendMessageResponse.message.content).toEqual(robotMessage.response);
-      expect(appendMessageResponse.message.role).toEqual('assistant');
+      expect(appendMessageSend.role).toEqual('user');
+      expect(appendMessageResponse.content).toEqual(robotMessage.response);
+      expect(appendMessageResponse.role).toEqual('assistant');
     });
   });
   it('handleButtonSendMessage sends message with only provided prompt text and context already exists in convo history', async () => {
@@ -119,7 +119,8 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();
-      expect(appendMessage.mock.calls[0][0].message.content).toEqual(`\n\n${promptText}`);
+      const messages = setCurrentConversation.mock.calls[0][0].messages;
+      expect(messages[messages.length - 1].content).toEqual(`\n  ${promptText}`);
     });
   });
   it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
@@ -135,7 +136,8 @@ describe('use chat send', () => {
 
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();
-      expect(appendMessage.mock.calls[0][0].message.content).toEqual(robotMessage.response);
+      const messages = setCurrentConversation.mock.calls[1][0].messages;
+      expect(messages[messages.length - 1].content).toEqual(robotMessage.response);
     });
   });
 });

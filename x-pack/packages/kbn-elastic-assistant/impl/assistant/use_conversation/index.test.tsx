@@ -52,24 +52,6 @@ describe('useConversation', () => {
 
     jest.clearAllMocks();
   });
-  it('should append a message to an existing conversation when called with valid conversationId and message', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => <TestProviders>{children}</TestProviders>,
-      });
-      await waitForNextUpdate();
-      appendConversationMessagesApi.mockResolvedValue({
-        messages: [message, anotherMessage, message],
-      });
-
-      const appendResult = await result.current.appendMessage({
-        conversationId: welcomeConvo.id,
-        message,
-      });
-      expect(appendResult).toHaveLength(3);
-      expect(appendResult![2]).toEqual(message);
-    });
-  });
 
   it('should report telemetry when a message has been sent', async () => {
     await act(async () => {
@@ -94,7 +76,8 @@ describe('useConversation', () => {
 
       appendConversationMessagesApi.mockResolvedValue([message, anotherMessage, message]);
       await result.current.appendMessage({
-        conversationId: welcomeConvo.id,
+        id: 'longuuid',
+        title: welcomeConvo.id,
         message,
       });
       expect(reportAssistantMessageSent).toHaveBeenCalledWith({
@@ -212,33 +195,6 @@ describe('useConversation', () => {
       const removeResult = await result.current.removeLastMessage('new-convo');
 
       expect(removeResult).toEqual([message]);
-    });
-  });
-
-  it('amendMessage updates the last message of conversation[] for a given conversationId with provided content', async () => {
-    await act(async () => {
-      const { result, waitForNextUpdate } = renderHook(() => useConversation(), {
-        wrapper: ({ children }) => (
-          <TestProviders providerContext={{ http: httpMock }}>{children}</TestProviders>
-        ),
-      });
-      await waitForNextUpdate();
-
-      await result.current.amendMessage({
-        conversationId: 'new-convo',
-        content: 'hello world',
-      });
-
-      expect(appendConversationMessagesApi).toHaveBeenCalledWith({
-        conversationId: mockConvo.id,
-        http: httpMock,
-        messages: [
-          {
-            ...anotherMessage,
-            content: 'hello world',
-          },
-        ],
-      });
     });
   });
 });

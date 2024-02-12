@@ -68,21 +68,15 @@ export interface AssistantProviderProps {
   docLinks: Omit<DocLinksStart, 'links'>;
   children: React.ReactNode;
   getComments: ({
-    amendMessage,
     currentConversation,
     isFetchingResponse,
+    refetchCurrentConversation,
     regenerateMessage,
     showAnonymizedValues,
   }: {
-    amendMessage: ({
-      conversationId,
-      content,
-    }: {
-      conversationId: string;
-      content: string;
-    }) => Promise<void>;
     currentConversation: Conversation;
     isFetchingResponse: boolean;
+    refetchCurrentConversation: () => void;
     regenerateMessage: (conversationId: string) => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];
@@ -117,18 +111,12 @@ export interface UseAssistantContext {
   getComments: ({
     currentConversation,
     showAnonymizedValues,
-    amendMessage,
+    refetchCurrentConversation,
     isFetchingResponse,
   }: {
     currentConversation: Conversation;
     isFetchingResponse: boolean;
-    amendMessage: ({
-      conversationId,
-      content,
-    }: {
-      conversationId: string;
-      content: string;
-    }) => Promise<void>;
+    refetchCurrentConversation: () => void;
     regenerateMessage: () => void;
     showAnonymizedValues: boolean;
   }) => EuiCommentProps[];

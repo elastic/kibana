@@ -13,6 +13,7 @@ import {
   ConnectorExecutionParams,
   ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { handleStreamStorage } from './parse_stream';
 
 export interface Props {
   onMessageSent: (content: string) => void;
@@ -55,16 +56,14 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  const readable = get('data', actionResult) as Readable;
-  readable.read().then(({ done, value }) => {
-    if (done) {
-      onMessageSent(value);
-    }
-  });
 
+  const readable = get('data', actionResult) as Readable;
   if (typeof readable?.read !== 'function') {
     throw new Error('Action result status is error: result is not streamable');
   }
+
+  // do not await, blocks stream for UI
+  handleStreamStorage(readable, request.body.llmType, onMessageSent);
 
   return readable.pipe(new PassThrough());
 };

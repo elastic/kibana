@@ -54,7 +54,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           headers: { 'Content-Type': 'application/json' },
           method: 'POST',
           signal: undefined,
@@ -74,7 +74,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"conversationId":"test","isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           method: 'POST',
           asResponse: true,
           rawResponse: true,
@@ -100,7 +100,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"replacements":{"auuid":"real.hostname"},"size":30}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","replacements":{"auuid":"real.hostname"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"llmType":"openai","alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"size":30}',
           headers: {
             'Content-Type': 'application/json',
           },
@@ -123,7 +123,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false,"llmType":"openai"}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -146,7 +146,7 @@ describe('API tests', () => {
       expect(mockHttp.fetch).toHaveBeenCalledWith(
         '/internal/elastic_assistant/actions/connector/foo/_execute',
         {
-          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"conversationId":"test","isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true,"llmType":"openai"}',
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

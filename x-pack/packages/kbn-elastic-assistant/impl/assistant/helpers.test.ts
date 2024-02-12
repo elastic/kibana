@@ -242,7 +242,6 @@ describe('getBlockBotConversation', () => {
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
         size: 10,
       };
 
@@ -257,7 +256,6 @@ describe('getBlockBotConversation', () => {
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
         size: 10,
       };
 
@@ -267,7 +265,6 @@ describe('getBlockBotConversation', () => {
         alertsIndexPattern: 'indexPattern',
         allow: ['a', 'b', 'c'],
         allowReplacement: ['b', 'c'],
-        replacements: { key: 'value' },
         size: 10,
       });
     });

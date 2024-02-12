@@ -15,6 +15,7 @@ import {
   getFormattedMessageContent,
   getOptionalRequestParams,
   hasParsableResponse,
+  llmTypeDictionary,
 } from '../helpers';
 export * from './conversations';
 
@@ -78,6 +79,7 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
+  const llmType = llmTypeDictionary[apiConfig.connectorTypeTitle ?? 'OpenAI'];
   // TODO: Remove in part 3 of streaming work for security solution
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
@@ -91,29 +93,18 @@ export const fetchConnectorExecuteAction = async ({
     size,
   });
 
-  const requestBody = isStream
-    ? {
-        params: {
-          subActionParams: body,
-          subAction: 'invokeStream',
-        },
-        conversationId,
-        replacements,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
-        ...optionalRequestParams,
-      }
-    : {
-        params: {
-          subActionParams: body,
-          subAction: 'invokeAI',
-        },
-        conversationId,
-        replacements,
-        isEnabledKnowledgeBase,
-        isEnabledRAGAlerts,
-        ...optionalRequestParams,
-      };
+  const requestBody = {
+    params: {
+      subActionParams: body,
+      subAction: isStream ? 'invokeStream' : 'invokeAI',
+    },
+    conversationId,
+    replacements,
+    isEnabledKnowledgeBase,
+    isEnabledRAGAlerts,
+    llmType,
+    ...optionalRequestParams,
+  };
 
   try {
     if (isStream) {

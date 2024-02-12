@@ -149,7 +149,7 @@ describe('useSettingsUpdater', () => {
       await result.current.saveSettings();
 
       expect(mockHttp.fetch).toHaveBeenCalledWith(
-        '/api/elastic_assistant/conversations/_bulk_action',
+        '/api/elastic_assistant/current_user/conversations/_bulk_action',
         {
           method: 'POST',
           version: '2023-10-31',

@@ -32,10 +32,6 @@ interface AppendMessageProps {
   title: string;
   message: Message;
 }
-interface AmendMessageProps {
-  conversationId: string;
-  content: string;
-}
 
 interface AppendReplacementsProps {
   conversationId: string;
@@ -54,7 +50,6 @@ interface SetApiConfigProps {
 
 interface UseConversation {
   appendMessage: ({ id, title, message }: AppendMessageProps) => Promise<Message[] | undefined>;
-  amendMessage: ({ conversationId, content }: AmendMessageProps) => Promise<void>;
   appendReplacements: ({
     conversationId,
     replacements,
@@ -102,27 +97,6 @@ export const useConversation = (): UseConversation => {
         });
       }
       return messages;
-    },
-    [http]
-  );
-
-  /**
-   * Updates the last message of conversation[] for a given conversationId with provided content
-   */
-  const amendMessage = useCallback(
-    async ({ conversationId, content }: AmendMessageProps) => {
-      const prevConversation = await getConversationById({ http, id: conversationId });
-      if (prevConversation != null) {
-        const { messages } = prevConversation;
-        const message = messages[messages.length - 1];
-        const updatedMessages = message ? [{ ...message, content }] : [];
-
-        await appendConversationMessages({
-          http,
-          conversationId,
-          messages: updatedMessages,
-        });
-      }
     },
     [http]
   );
@@ -275,7 +249,6 @@ export const useConversation = (): UseConversation => {
   );
 
   return {
-    amendMessage,
     appendMessage,
     appendReplacements,
     clearConversation,

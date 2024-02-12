@@ -24,7 +24,7 @@ const currentConversation = {
 };
 const showAnonymizedValues = false;
 const testProps = {
-  amendMessage: jest.fn(),
+  refetchCurrentConversation: jest.fn(),
   regenerateMessage: jest.fn(),
   isFetchingResponse: false,
   currentConversation,

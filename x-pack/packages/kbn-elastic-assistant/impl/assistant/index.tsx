@@ -98,8 +98,7 @@ const AssistantComponent: React.FC<Props> = ({
     baseConversations,
   } = useAssistantContext();
 
-  const { amendMessage, getDefaultConversation, getConversation, deleteConversation } =
-    useConversation();
+  const { getDefaultConversation, getConversation, deleteConversation } = useConversation();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
     Record<string, SelectedPromptContext>
@@ -479,7 +478,7 @@ const AssistantComponent: React.FC<Props> = ({
           comments={getComments({
             currentConversation,
             showAnonymizedValues,
-            amendMessage,
+            refetchCurrentConversation,
             regenerateMessage: handleRegenerateResponse,
             isFetchingResponse: isLoadingChatSend,
           })}
@@ -509,7 +508,7 @@ const AssistantComponent: React.FC<Props> = ({
       </>
     ),
     [
-      amendMessage,
+      refetchCurrentConversation,
       currentConversation,
       editingSystemPromptId,
       getComments,

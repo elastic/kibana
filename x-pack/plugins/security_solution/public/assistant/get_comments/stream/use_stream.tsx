@@ -10,7 +10,7 @@ import type { Subscription } from 'rxjs';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
-  amendMessage: (message: string) => void;
+  refetchCurrentConversation: () => void;
   isError: boolean;
   content?: string;
   connectorTypeTitle: string;
@@ -31,16 +31,17 @@ interface UseStream {
 /**
  * A hook that takes a ReadableStreamDefaultReader and returns an object with properties and functions
  * that can be used to handle streaming data from a readable stream
- * @param amendMessage - handles the amended message
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
+ * @param connectorTypeTitle - the title of the connector type
+ * @param refetchCurrentConversation - refetch the current conversation
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
  * @param isError - indicates whether the reader response is an error message or not
  */
 export const useStream = ({
-  amendMessage,
   content,
   connectorTypeTitle,
   reader,
+  refetchCurrentConversation,
   isError,
 }: UseStreamProps): UseStream => {
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
@@ -57,8 +58,9 @@ export const useStream = ({
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();
     setLoading(false);
-    amendMessage(pendingMessage ?? '');
-  }, [amendMessage, pendingMessage, subscription]);
+    refetchCurrentConversation();
+  }, [refetchCurrentConversation, subscription]);
+
   const [complete, setComplete] = useState(false);
   useEffect(() => {
     if (complete) {

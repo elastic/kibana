@@ -15,49 +15,49 @@ import { MessagePanel } from './message_panel';
 import { MessageText } from './message_text';
 
 interface Props {
-  amendMessage: (message: string) => Promise<void>;
   content?: string;
   isError?: boolean;
   isFetching?: boolean;
-  isLastComment: boolean;
+  isControlsEnabled?: boolean;
   index: number;
   connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
+  refetchCurrentConversation: () => void;
   regenerateMessage: () => void;
   transformMessage: (message: string) => ContentMessage;
 }
 
 export const StreamComment = ({
-  amendMessage,
   content,
   connectorTypeTitle,
   index,
+  isControlsEnabled = false,
   isError = false,
   isFetching = false,
-  isLastComment,
   reader,
+  refetchCurrentConversation,
   regenerateMessage,
   transformMessage,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
-    amendMessage,
+    refetchCurrentConversation,
     content,
     connectorTypeTitle,
     reader,
     isError,
   });
 
-  const currentState = useRef({ isStreaming, pendingMessage, amendMessage });
+  const currentState = useRef({ isStreaming, pendingMessage, refetchCurrentConversation });
 
   useEffect(() => {
-    currentState.current = { isStreaming, pendingMessage, amendMessage };
-  }, [amendMessage, isStreaming, pendingMessage]);
+    currentState.current = { isStreaming, pendingMessage, refetchCurrentConversation };
+  }, [refetchCurrentConversation, isStreaming, pendingMessage]);
 
   useEffect(
     () => () => {
-      // if the component is unmounted while streaming, amend the message with the pending message
-      if (currentState.current.isStreaming && currentState.current.pendingMessage.length > 0) {
-        currentState.current.amendMessage(currentState.current.pendingMessage ?? '');
+      // if the component is unmounted while streaming, fetch the convo to get the completed stream
+      if (currentState.current.isStreaming) {
+        currentState.current.refetchCurrentConversation();
       }
     },
     // store values in currentState to detect true unmount
@@ -74,10 +74,10 @@ export const StreamComment = ({
     [isFetching, isLoading, isStreaming]
   );
   const controls = useMemo(() => {
-    if (reader == null || !isLastComment) {
+    if (!isControlsEnabled) {
       return;
     }
-    if (isAnythingLoading) {
+    if (isAnythingLoading && reader) {
       return (
         <StopGeneratingButton
           onClick={() => {
@@ -93,7 +93,7 @@ export const StreamComment = ({
         </EuiFlexItem>
       </EuiFlexGroup>
     );
-  }, [isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
+  }, [isAnythingLoading, isControlsEnabled, reader, regenerateMessage, setComplete]);
 
   return (
     <MessagePanel
