@@ -12,7 +12,11 @@ import { type AppDeepLink } from '@kbn/core/public';
 import { ML_PAGES } from '../../../common/constants/locator';
 import type { MlCapabilities } from '../../shared';
 
-function createDeepLinks(mlCapabilities: MlCapabilities, isFullLicense: boolean) {
+function createDeepLinks(
+  mlCapabilities: MlCapabilities,
+  isFullLicense: boolean,
+  isServerless: boolean
+) {
   return {
     getOverviewLinkDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!mlCapabilities.isADEnabled && !mlCapabilities.isDFAEnabled) return null;
@@ -85,28 +89,33 @@ function createDeepLinks(mlCapabilities: MlCapabilities, isFullLicense: boolean)
     getModelManagementDeepLink: (): AppDeepLink<LinkId> | null => {
       if (!mlCapabilities.isDFAEnabled && !mlCapabilities.isNLPEnabled) return null;
 
+      const deepLinks = [
+        {
+          id: 'nodesOverview',
+          title: i18n.translate('xpack.ml.deepLink.trainedModels', {
+            defaultMessage: 'Trained Models',
+          }),
+          path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
+        },
+      ];
+
+      if (!isServerless) {
+        deepLinks.push({
+          id: 'nodes',
+          title: i18n.translate('xpack.ml.deepLink.nodes', {
+            defaultMessage: 'Nodes',
+          }),
+          path: `/${ML_PAGES.NODES}`,
+        });
+      }
+
       return {
         id: 'modelManagement',
         title: i18n.translate('xpack.ml.deepLink.modelManagement', {
           defaultMessage: 'Model Management',
         }),
         path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-        deepLinks: [
-          {
-            id: 'nodesOverview',
-            title: i18n.translate('xpack.ml.deepLink.trainedModels', {
-              defaultMessage: 'Trained Models',
-            }),
-            path: `/${ML_PAGES.TRAINED_MODELS_MANAGE}`,
-          },
-          {
-            id: 'nodes',
-            title: i18n.translate('xpack.ml.deepLink.nodes', {
-              defaultMessage: 'Nodes',
-            }),
-            path: `/${ML_PAGES.NODES}`,
-          },
-        ],
+        deepLinks,
       };
     },
 
@@ -253,9 +262,10 @@ function createDeepLinks(mlCapabilities: MlCapabilities, isFullLicense: boolean)
 
 export function getDeepLinks(
   isFullLicense: boolean,
-  mlCapabilities: MlCapabilities
+  mlCapabilities: MlCapabilities,
+  isServerless: boolean
 ): Array<AppDeepLink<LinkId>> {
-  const links = createDeepLinks(mlCapabilities, isFullLicense);
+  const links = createDeepLinks(mlCapabilities, isFullLicense, isServerless);
   return Object.values(links)
     .map((link) => link())
     .filter((link): link is AppDeepLink<LinkId> => link !== null);

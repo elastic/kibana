@@ -70,6 +70,9 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    visibleIn: someVisible || !!capabilities[sloFeatureId]?.read ? ['sideNav', 'globalSearch'] : [],
+    visibleIn:
+      someVisible || !!capabilities[sloFeatureId]?.read
+        ? ['sideNav', 'globalSearch', 'home', 'kibanaOverview']
+        : [],
   }));
 }
