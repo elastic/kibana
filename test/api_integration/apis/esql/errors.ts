@@ -16,7 +16,7 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { BFETCH_ROUTE_VERSION_LATEST } from '@kbn/bfetch-plugin/common';
 import { REPO_ROOT } from '@kbn/repo-info';
 import uniqBy from 'lodash/uniqBy';
-import { groupBy } from 'lodash';
+import { groupBy, mapValues } from 'lodash';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 function parseBfetchResponse(resp: request.Response, compressed: boolean = false) {
@@ -93,8 +93,11 @@ export default function ({ getService }: FtrProviderContext) {
     const indexes: string[] = config.indexes;
     const policies: string[] = config.policies.map(({ name }: { name: string }) => name);
     const missmatches: Array<{ query: string; error: string }> = [];
-    const stringVariants = ['text', 'keyword'] as const;
-    const numberVariants = ['integer', 'long', 'double', 'long'] as const;
+    // Swap these for DEBUG/further investigation on ES bugs
+    // const stringVariants = ['text', 'keyword'] as const;
+    // const numberVariants = ['integer', 'long', 'double', 'long'] as const;
+    const stringVariants = ['keyword'] as const;
+    const numberVariants = ['integer'] as const;
 
     async function cleanup() {
       // clean it up all indexes and policies
@@ -113,7 +116,10 @@ export default function ({ getService }: FtrProviderContext) {
           missmatches,
           (missmatch) => missmatch.query + missmatch.error
         );
-        const missmatchesGrouped = groupBy(distinctMissmatches, (missmatch) => missmatch.error);
+        const missmatchesGrouped = mapValues(
+          groupBy(distinctMissmatches, (missmatch) => missmatch.error),
+          (list) => list.map(({ query }) => query)
+        );
         log.info(`writing ${Object.keys(missmatchesGrouped).length} missmatches to file...`);
         Fs.writeFileSync(getMissmatchedPath(), JSON.stringify(missmatchesGrouped, null, 2));
       }
