@@ -2768,6 +2768,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.ignoreMissingComponentTemplates",
+            "type": "Array",
+            "tags": [],
+            "label": "ignoreMissingComponentTemplates",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.version",
             "type": "number",
             "tags": [],
@@ -3215,6 +3229,20 @@
             "type": "Array",
             "tags": [],
             "label": "composed_of",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateSerialized.ignore_missing_component_templates",
+            "type": "Array",
+            "tags": [],
+            "label": "ignore_missing_component_templates",
             "description": [],
             "signature": [
               "string[] | undefined"
