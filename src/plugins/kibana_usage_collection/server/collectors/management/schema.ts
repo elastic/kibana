@@ -628,4 +628,8 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'keyword',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'devTools:enableDockedConsole': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
 };

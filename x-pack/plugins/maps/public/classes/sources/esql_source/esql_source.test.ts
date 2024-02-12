@@ -11,6 +11,7 @@ import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 describe('getSupportedShapeTypes', () => {
   test('should return point for geo_point column', async () => {
     const descriptor = ESQLSource.createDescriptor({
+      dataViewId: '1234',
       esql: 'from kibana_sample_data_logs | keep geo.coordinates | limit 10000',
       columns: [
         {
@@ -25,6 +26,7 @@ describe('getSupportedShapeTypes', () => {
 
   test('should return all geometry types for geo_shape column', async () => {
     const descriptor = ESQLSource.createDescriptor({
+      dataViewId: '1234',
       esql: 'from world_countries | keep geometry | limit 10000',
       columns: [
         {
@@ -43,6 +45,7 @@ describe('getSupportedShapeTypes', () => {
 
   test('should fallback to point when geometry column can not be found', async () => {
     const descriptor = ESQLSource.createDescriptor({
+      dataViewId: '1234',
       esql: 'from world_countries | keep geometry | limit 10000',
     });
     const esqlSource = new ESQLSource(descriptor);
