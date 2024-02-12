@@ -57,8 +57,7 @@ export class StackConnectorsPlugin implements Plugin<void, void> {
             if (observabilityAIAssistant.found) {
               const fakeRawRequest: FakeRawRequest = {
                 headers: {
-                  authorization:
-                    'ApiKey R2Q4dm5ZMEJnbzRmclpmV0l0LWo6R215QkJhV1RSVzYzM1ZxWG9QS2h4dw==',
+                  authorization: 'ApiKey ==',
                 },
                 path: '/',
               };
