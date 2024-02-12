@@ -93,13 +93,12 @@ export function ProfilingTopNFunctions({
           <HostnamesFilterWarning hostNames={data?.hostNames} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <ProfilingTopNFunctionsLink
-              kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-            />
-          </div>
+          <ProfilingTopNFunctionsLink
+            kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            justifyContent="flexEnd"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

@@ -78,13 +78,12 @@ export function ProfilingFlamegraph({
           <HostnamesFilterWarning hostNames={data?.hostNames} />
         </EuiFlexItem>
         <EuiFlexItem>
-          <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-            <ProfilingFlamegraphLink
-              kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
-              rangeFrom={rangeFrom}
-              rangeTo={rangeTo}
-            />
-          </div>
+          <ProfilingFlamegraphLink
+            kuery={mergeKueries([`(${hostNamesKueryFormat})`, kuery])}
+            rangeFrom={rangeFrom}
+            rangeTo={rangeTo}
+            justifyContent="flexEnd"
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer />

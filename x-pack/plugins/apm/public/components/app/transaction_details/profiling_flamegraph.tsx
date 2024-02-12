@@ -67,13 +67,12 @@ export function ProfilingFlamegraph({
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <ProfilingFlamegraphLink
-          kuery={kuery}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-        />
-      </div>
+      <ProfilingFlamegraphLink
+        kuery={kuery}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        justifyContent="flexEnd"
+      />
       <EuiSpacer />
       <ProfilingFlamegraphChart data={data} status={status} />
     </>

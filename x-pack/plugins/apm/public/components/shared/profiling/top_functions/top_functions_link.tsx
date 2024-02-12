@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingPlugin } from '../../../../hooks/use_profiling_plugin';
@@ -14,27 +19,33 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  justifyContent?: EuiFlexGroupProps['justifyContent'];
 }
 
 export function ProfilingTopNFunctionsLink({
   kuery,
   rangeFrom,
   rangeTo,
+  justifyContent = 'flexStart',
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
   return (
-    <EuiLink
-      data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
-      href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
-        kuery,
-        rangeFrom,
-        rangeTo,
-      })}
-    >
-      {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
-        defaultMessage: 'Go to Universal Profiling Functions',
-      })}
-    </EuiLink>
+    <EuiFlexGroup justifyContent={justifyContent}>
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
+          href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
+            kuery,
+            rangeFrom,
+            rangeTo,
+          })}
+        >
+          {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
+            defaultMessage: 'Go to Universal Profiling Functions',
+          })}
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

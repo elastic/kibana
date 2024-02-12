@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { EuiLink } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexGroupProps,
+  EuiFlexItem,
+  EuiLink,
+} from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useProfilingPlugin } from '../../../../hooks/use_profiling_plugin';
@@ -14,22 +19,32 @@ interface Props {
   kuery: string;
   rangeFrom: string;
   rangeTo: string;
+  justifyContent?: EuiFlexGroupProps['justifyContent'];
 }
 
-export function ProfilingFlamegraphLink({ kuery, rangeFrom, rangeTo }: Props) {
+export function ProfilingFlamegraphLink({
+  kuery,
+  rangeFrom,
+  rangeTo,
+  justifyContent = 'flexStart',
+}: Props) {
   const { profilingLocators } = useProfilingPlugin();
   return (
-    <EuiLink
-      data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
-      href={profilingLocators?.flamegraphLocator.getRedirectUrl({
-        kuery,
-        rangeFrom,
-        rangeTo,
-      })}
-    >
-      {i18n.translate('xpack.apm.profiling.flamegraph.link', {
-        defaultMessage: 'Go to Universal Profiling Flamegraph',
-      })}
-    </EuiLink>
+    <EuiFlexGroup justifyContent={justifyContent}>
+      <EuiFlexItem grow={false}>
+        <EuiLink
+          data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
+          href={profilingLocators?.flamegraphLocator.getRedirectUrl({
+            kuery,
+            rangeFrom,
+            rangeTo,
+          })}
+        >
+          {i18n.translate('xpack.apm.profiling.flamegraph.link', {
+            defaultMessage: 'Go to Universal Profiling Flamegraph',
+          })}
+        </EuiLink>
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }

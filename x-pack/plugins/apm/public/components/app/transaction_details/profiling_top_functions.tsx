@@ -69,13 +69,12 @@ export function ProfilingTopNFunctions({
 
   return (
     <>
-      <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
-        <ProfilingTopNFunctionsLink
-          kuery={kuery}
-          rangeFrom={rangeFrom}
-          rangeTo={rangeTo}
-        />
-      </div>
+      <ProfilingTopNFunctionsLink
+        kuery={kuery}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        justifyContent="flexEnd"
+      />
       <EuiSpacer />
       <EmbeddableFunctions
         data={data}

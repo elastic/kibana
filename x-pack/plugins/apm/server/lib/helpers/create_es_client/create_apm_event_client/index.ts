@@ -343,7 +343,7 @@ export class APMEventClient {
     });
   }
 
-  getIndexFromProcessorEvent(processorEvent: ProcessorEvent) {
+  getIndicesFromProcessorEvent(processorEvent: ProcessorEvent) {
     return processorEventsToIndex([processorEvent], this.indices);
   }
 }

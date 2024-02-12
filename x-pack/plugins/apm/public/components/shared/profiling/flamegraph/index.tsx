@@ -33,13 +33,11 @@ export function ProfilingFlamegraphChart({ data, status }: Props) {
           }
         />
       ) : (
-        <div>
-          <EmbeddableFlamegraph
-            data={data}
-            isLoading={isPending(status)}
-            height="35vh"
-          />
-        </div>
+        <EmbeddableFlamegraph
+          data={data}
+          isLoading={isPending(status)}
+          height="35vh"
+        />
       )}
     </>
   );

@@ -238,16 +238,14 @@ const transactionsFlamegraphRoute = createApmServerRoute({
         environment,
       } = params.query;
 
-      // TODO: This will be used once the ES bug is fixed
-      const indices = apmEventClient.getIndexFromProcessorEvent(
+      const indices = apmEventClient.getIndicesFromProcessorEvent(
         ProcessorEvent.transaction
       );
-      console.log('### caue  handler:  index:', indices);
 
       return await profilingDataAccessStart?.services.fetchFlamechartData({
         core,
         esClient: esClient.asCurrentUser,
-        indices: ['traces-apm-default'],
+        indices,
         stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
         totalSeconds: end - start,
         query: {
@@ -318,18 +316,16 @@ const transactionsFunctionsRoute = createApmServerRoute({
       } = params.query;
       const { serviceName } = params.path;
 
-      // TODO: This will be used once the ES bug is fixed
-      const indices = apmEventClient.getIndexFromProcessorEvent(
+      const indices = apmEventClient.getIndicesFromProcessorEvent(
         ProcessorEvent.transaction
       );
-      console.log('### caue  handler:  index:', indices);
 
       return profilingDataAccessStart?.services.fetchFunction({
         core,
         esClient: esClient.asCurrentUser,
         startIndex,
         endIndex,
-        indices: ['traces-apm-default'],
+        indices,
         stacktraceIdsField: TRANSACTION_PROFILER_STACK_TRACE_IDS,
         totalSeconds: end - start,
         query: {

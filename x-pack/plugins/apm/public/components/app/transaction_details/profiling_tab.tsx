@@ -5,6 +5,8 @@
  * 2.0.
  */
 import {
+  EuiFlexGroup,
+  EuiFlexItem,
   EuiLoadingSpinner,
   EuiSpacer,
   EuiTabbedContent,
@@ -12,7 +14,6 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import { ProfilingEmptyState } from '@kbn/observability-shared-plugin/public';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
@@ -90,14 +91,11 @@ function ProfilingTab() {
 
   if (isLoading) {
     return (
-      <div
-        css={css`
-          display: flex;
-          justify-content: center;
-        `}
-      >
-        <EuiLoadingSpinner size="m" />
-      </div>
+      <EuiFlexGroup alignItems="center" justifyContent="center">
+        <EuiFlexItem grow={false}>
+          <EuiLoadingSpinner size="m" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 
