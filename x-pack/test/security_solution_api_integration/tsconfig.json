@@ -2,16 +2,19 @@
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
     "outDir": "target/types",
-    "types": ["node", "jest","@kbn/ambient-ftr-types"]
+    "types": ["node", "jest", "@kbn/ambient-ftr-types"]
   },
   "include": [
     "**/*",
     "../../../typings/**/*",
     "../../../packages/kbn-test/types/ftr_globals/**/*",
-  ], 
-  "exclude": [
-    "target/**/*"
+    "../common/utils/connectors/create_connector.ts",
+    "../common/utils/connectors/delete_connector.ts",
+    "../common/utils/connectors/get_connector.ts",
+    "../common/utils/connectors/index.ts",
+    "../common/utils/get_space_prefix.ts"
   ],
+  "exclude": ["target/**/*"],
   "kbn_references": [
     { "path": "../../test_serverless/tsconfig.json" },
     { "path": "../../test_serverless/api_integration/**/*" },
@@ -41,6 +44,6 @@
     "@kbn/safer-lodash-set",
     "@kbn/stack-connectors-plugin",
     "@kbn/ftr-common-functional-services",
-    "@kbn/actions-plugin",
+    "@kbn/actions-plugin"
   ]
 }

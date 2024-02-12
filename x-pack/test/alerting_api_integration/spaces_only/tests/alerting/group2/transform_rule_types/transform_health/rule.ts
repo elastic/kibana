@@ -20,6 +20,7 @@ import {
   EVENT_ACTION,
 } from '@kbn/rule-data-utils';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../../common/utils/connectors';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { Spaces } from '../../../../../scenarios';
 
@@ -84,6 +85,26 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     let connectorId: string;
     const transformId = 'test_transform_01';
     const destinationIndex = generateDestIndex(transformId);
+    const createIndexConnector = async () => {
+      const id = await createConnector(
+        supertest,
+        {
+          name: 'index action for transform health FT',
+          connector_type_id: CONNECTOR_TYPE_ID,
+          config: {
+            index: ES_TEST_OUTPUT_INDEX_NAME,
+          },
+          secrets: {},
+        },
+        { spaceId: Spaces.space1.id }
+      );
+
+      log.debug(`Connector with id "${id}" has been created.`);
+
+      objectRemover.add(Spaces.space1.id, id, 'connector', 'actions');
+
+      return id;
+    };
 
     beforeEach(async () => {
       await esTestIndexTool.destroy();
@@ -97,7 +118,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
-      connectorId = await createConnector();
+      connectorId = await createIndexConnector();
 
       await transform.api.createIndices(destinationIndex);
       await createTransform(transformId);
@@ -207,31 +228,6 @@ export default function ruleTests({ getService }: FtrProviderContext) {
 
     async function stopTransform(id: string) {
       await transform.api.stopTransform(id);
-    }
-
-    async function createConnector(): Promise<string> {
-      log.debug('Creating a connector...');
-      // @ts-ignore
-      const { statusCode, body: createdConnector } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          name: 'index action for transform health FT',
-          connector_type_id: CONNECTOR_TYPE_ID,
-          config: {
-            index: ES_TEST_OUTPUT_INDEX_NAME,
-          },
-          secrets: {},
-        });
-
-      expect(statusCode).to.be(200);
-
-      log.debug(`Connector with id "${createdConnector.id}" has been created.`);
-
-      const resultId = createdConnector.id;
-      objectRemover.add(Spaces.space1.id, resultId, 'connector', 'actions');
-
-      return resultId;
     }
   });
 }

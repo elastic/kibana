@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../common/utils/connectors';
 import { getEventLog, ObjectRemover } from '../../../../../common/lib';
 import { EmailDomainsAllowed } from '../../config';
 
@@ -19,6 +20,22 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
   const objectRemover = new ObjectRemover(supertest);
   const from = `bob@${EmailDomainsAllowed[0]}`;
   const to = [`jim@${EmailDomainsAllowed[0]}`];
+  const createEmailConnector = async () => {
+    const id = await createConnector(supertest, {
+      name: `An email connector from ${__filename}`,
+      connector_type_id: '.email',
+      config: {
+        service: '__json',
+        from,
+        hasAuth: false,
+      },
+      secrets: {},
+    });
+
+    objectRemover.add('default', id, 'connector', 'actions');
+
+    return id;
+  };
 
   describe('email using html', () => {
     afterEach(async () => {
@@ -72,13 +89,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
     });
 
     it('fails as http execution', async () => {
-      const { body: connBody, status: connStatus } = await createConnector(
-        supertest,
-        objectRemover,
-        from
-      );
-      expect(connStatus).to.be(200);
-      const connId = connBody.id;
+      const connId = await createEmailConnector();
 
       await supertest
         .post(`/api/actions/connector/${connId}/_execute`)
@@ -100,13 +111,7 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
     });
 
     it('fails as action execution', async () => {
-      const { body: connBody, status: connStatus } = await createConnector(
-        supertest,
-        objectRemover,
-        from
-      );
-      expect(connStatus).to.be(200);
-      const connId = connBody.id;
+      const connId = await createEmailConnector();
 
       const ruleParams = {
         enabled: true,
@@ -158,30 +163,4 @@ export default function emailNotificationTest({ getService }: FtrProviderContext
       expect(event?.error?.message).to.be('HTML email can only be sent via notifications');
     });
   });
-}
-
-async function createConnector(
-  supertest: ReturnType<FtrProviderContext['getService']>,
-  objectRemover: ObjectRemover,
-  from: string
-): Promise<{ status: number; body: any }> {
-  const connector: any = {
-    name: `An email connector from ${__filename}`,
-    connector_type_id: '.email',
-    config: {
-      service: '__json',
-      from,
-      hasAuth: false,
-    },
-  };
-  const { status, body } = await supertest
-    .post('/api/actions/connector')
-    .set('kbn-xsrf', 'foo')
-    .send(connector);
-
-  if (status === 200) {
-    objectRemover.add('default', body.id, 'connector', 'actions');
-  }
-
-  return { status, body };
 }

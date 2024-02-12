@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { SuperTest, Test } from 'supertest';
 import expect from '@kbn/expect';
 
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
@@ -13,6 +14,7 @@ import { STACK_AAD_INDEX_NAME } from '@kbn/stack-alerts-plugin/server/rule_types
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../../common/utils/connectors';
 import { getUrlPrefix, ObjectRemover, getEventLog } from '../../../../../../common/lib';
 import { createEsDocumentsWithGroups } from '../../../create_test_data';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
@@ -40,6 +42,27 @@ export default function ruleTests({ getService }: FtrProviderContext) {
     retry,
     `.internal.alerts-${STACK_AAD_INDEX_NAME}.alerts-default-000001`
   );
+  const createIndexConnector = async (
+    kbnSupertest: SuperTest<Test>,
+    objectRemover: ObjectRemover
+  ) => {
+    const id = await createConnector(
+      kbnSupertest,
+      {
+        name: 'index connector for index threshold FT',
+        connector_type_id: CONNECTOR_TYPE_ID,
+        config: {
+          index: ES_TEST_OUTPUT_INDEX_NAME,
+        },
+        secrets: {},
+      },
+      { spaceId: Spaces.space1.id }
+    );
+
+    objectRemover.add(Spaces.space1.id, id, 'connector', 'actions');
+
+    return id;
+  };
 
   describe('rule', async () => {
     let endDate: string;
@@ -53,7 +76,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexToolOutput.destroy();
       await esTestIndexToolOutput.setup();
 
-      connectorId = await createConnector(supertest, objectRemover);
+      connectorId = await createIndexConnector(supertest, objectRemover);
 
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
@@ -711,28 +734,4 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       return ruleId;
     }
   });
-}
-
-async function createConnector(supertest: any, objectRemover: ObjectRemover): Promise<string> {
-  const { statusCode, body: createdConnector } = await supertest
-    .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
-    .set('kbn-xsrf', 'foo')
-    .send({
-      name: 'index connector for index threshold FT',
-      connector_type_id: CONNECTOR_TYPE_ID,
-      config: {
-        index: ES_TEST_OUTPUT_INDEX_NAME,
-      },
-      secrets: {},
-    });
-
-  // will print the error body, if an error occurred
-  // if (statusCode !== 200) console.log(createdConnector);
-
-  expect(statusCode).to.be(200);
-
-  const connectorId = createdConnector.id;
-  objectRemover.add(Spaces.space1.id, connectorId, 'connector', 'actions');
-
-  return connectorId;
 }

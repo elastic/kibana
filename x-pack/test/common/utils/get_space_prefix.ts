@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export function getUrlPrefix(spaceId: string) {
-  return spaceId && spaceId !== 'default' ? `/s/${spaceId}` : ``;
+export function getSpaceUrlPrefix(spaceId = 'default'): string {
+  return spaceId !== 'default' ? `/s/${spaceId}` : '';
 }

@@ -11,10 +11,10 @@ import expect from '@kbn/expect';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+import { createConnector, deleteAllConnectors } from '../../../../../common/utils/connectors';
 import { postCaseReq } from '../../../../common/lib/mock';
 import {
   createCaseWithConnector,
-  createConnector,
   getJiraConnector,
   getServiceNowSimulationServer,
   getCaseUserActionStats,
@@ -42,7 +42,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     afterEach(async () => {
       await deleteAllCaseItems(es);
-      await actionsRemover.removeAll();
+      await deleteAllConnectors(supertest);
     });
 
     after(async () => {
@@ -50,21 +50,14 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     it('connectors are counted in total_other_actions', async () => {
-      const [{ postedCase, connector: serviceNowConnector }, jiraConnector] = await Promise.all([
+      const [{ postedCase, connector: serviceNowConnector }, jiraConnectorId] = await Promise.all([
         createCaseWithConnector({
           supertest,
           serviceNowSimulatorURL,
           actionsRemover,
         }),
-        createConnector({
-          supertest,
-          req: {
-            ...getJiraConnector(),
-          },
-        }),
+        createConnector(supertest, getJiraConnector()),
       ]);
-
-      actionsRemover.add('default', jiraConnector.id, 'action', 'actions');
 
       const theCase = await pushCase({
         supertest,
@@ -80,7 +73,7 @@ export default ({ getService }: FtrProviderContext): void => {
               id: theCase.id,
               version: theCase.version,
               connector: {
-                id: jiraConnector.id,
+                id: jiraConnectorId,
                 name: 'Jira',
                 type: ConnectorTypes.jira,
                 fields: { issueType: 'Task', priority: null, parent: null },

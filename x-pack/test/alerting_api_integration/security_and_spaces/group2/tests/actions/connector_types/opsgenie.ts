@@ -13,11 +13,26 @@ import {
 } from '@kbn/actions-simulators-plugin/server/opsgenie_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../common/utils/connectors';
 
 // eslint-disable-next-line import/no-default-export
 export default function opsgenieTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const createOpsgenieConnector = async (url: string) => {
+    const id = await createConnector(supertest, {
+      name: 'An Opsgenie simulator',
+      connector_type_id: '.opsgenie',
+      config: {
+        apiUrl: url,
+      },
+      secrets: {
+        apiKey: '123',
+      },
+    });
+
+    return id;
+  };
 
   describe('Opsgenie', () => {
     describe('action creation', () => {
@@ -150,7 +165,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           simulatorUrl = await simulator.start();
-          opsgenieActionId = await createConnector(simulatorUrl);
+          opsgenieActionId = await createOpsgenieConnector(simulatorUrl);
         });
 
         after(() => {
@@ -512,7 +527,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           before(async () => {
             simulatorUrl = await simulator.start();
             createAlertUrl = createUrlString(simulatorUrl, 'v2/alerts');
-            opsgenieActionId = await createConnector(simulatorUrl);
+            opsgenieActionId = await createOpsgenieConnector(simulatorUrl);
           });
 
           after(() => {
@@ -672,7 +687,7 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             simulatorUrl = await simulator.start();
-            opsgenieActionId = await createConnector(simulatorUrl);
+            opsgenieActionId = await createOpsgenieConnector(simulatorUrl);
           });
 
           after(() => {
@@ -728,25 +743,6 @@ export default function opsgenieTest({ getService }: FtrProviderContext) {
           });
         });
       });
-
-      const createConnector = async (url: string) => {
-        const { body } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'An Opsgenie simulator',
-            connector_type_id: '.opsgenie',
-            config: {
-              apiUrl: url,
-            },
-            secrets: {
-              apiKey: '123',
-            },
-          })
-          .expect(200);
-
-        return body.id;
-      };
     });
   });
 }

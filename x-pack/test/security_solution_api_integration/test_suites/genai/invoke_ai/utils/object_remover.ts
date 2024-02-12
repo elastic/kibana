@@ -9,7 +9,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { getUrlPrefix } from './space_test_utils';
+import { getSpaceUrlPrefix } from '../../../../../common/utils/get_space_prefix';
 
 interface ObjectToRemove {
   spaceId: string;
@@ -42,7 +42,9 @@ export class ObjectRemover {
       this.objectsToRemove.map(({ spaceId, id, type, plugin, isInternal }) => {
         return this.supertest
           .delete(
-            `${getUrlPrefix(spaceId)}/${isInternal ? 'internal' : 'api'}/${plugin}/${type}/${id}`
+            `${getSpaceUrlPrefix(spaceId)}/${
+              isInternal ? 'internal' : 'api'
+            }/${plugin}/${type}/${id}`
           )
           .set('kbn-xsrf', 'foo')
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')

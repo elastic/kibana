@@ -18,12 +18,12 @@ import {
   BulkActionTypeEnum,
   BulkActionEditTypeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
+import { createConnector } from '../../../../../../common/utils/connectors';
 import {
   binaryToString,
   createLegacyRuleAction,
   getLegacyActionSO,
   getSimpleRule,
-  getWebHookAction,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
@@ -39,6 +39,7 @@ import {
 } from '../../../../../../common/utils/security_solution';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -57,12 +58,6 @@ export default ({ getService }: FtrProviderContext): void => {
       .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '2023-10-31');
-
-  const createConnector = async (payload: Record<string, unknown>) =>
-    (await supertest.post('/api/actions/action').set('kbn-xsrf', 'true').send(payload).expect(200))
-      .body;
-
-  const createWebHookConnector = () => createConnector(getWebHookAction());
 
   // Failing: See https://github.com/elastic/kibana/issues/173804
   describe('@ess perform_bulk_action - ESS specific logic', () => {
@@ -411,7 +406,10 @@ export default ({ getService }: FtrProviderContext): void => {
               createRule(supertest, log, getSimpleRule(ruleId, true)),
             ]);
             // create a new connector
-            const webHookConnector = await createWebHookConnector();
+            const webHookConnectorId = await createConnector(
+              supertest,
+              getWebHookConnectorParams()
+            );
 
             await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
 
@@ -434,7 +432,7 @@ export default ({ getService }: FtrProviderContext): void => {
                       actions: [
                         {
                           ...webHookActionMock,
-                          id: webHookConnector.id,
+                          id: webHookConnectorId,
                         },
                       ],
                     },

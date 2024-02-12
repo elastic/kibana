@@ -9,10 +9,93 @@ import expect from '@kbn/expect';
 
 import { BedrockSimulator } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { OpenAISimulator } from '@kbn/actions-simulators-plugin/server/openai_simulation';
+import { createConnector, CreateConnectorBody } from '../../../../../common/utils/connectors';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { postActionsClientExecute } from '../utils/post_actions_client_execute';
 import { ObjectRemover } from '../utils/object_remover';
-import { createConnector } from '../utils/create_connector';
+
+export default ({ getService }: FtrProviderContext) => {
+  const supertest = getService('supertest');
+  const objectRemover = new ObjectRemover(supertest);
+  const configService = getService('config');
+
+  // @skipInQA tag because the simulators do not work in the QA env
+  describe('@ess @serverless @skipInQA Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
+    after(() => {
+      objectRemover.removeAll();
+    });
+
+    describe('With Bedrock connector', () => {
+      const simulator = new BedrockSimulator({
+        proxy: {
+          config: configService.get('kbnTestServer.serverArgs'),
+        },
+      });
+      let apiUrl: string;
+      let bedrockConnectorId: string;
+
+      before(async () => {
+        apiUrl = await simulator.start();
+        bedrockConnectorId = await createConnector(
+          supertest,
+          getBedrockConnectorParams({ apiUrl })
+        );
+        objectRemover.add('default', bedrockConnectorId, 'connector', 'actions');
+      });
+
+      after(() => {
+        simulator.close();
+      });
+      it('should execute a chat completion', async () => {
+        const response = await postActionsClientExecute(bedrockConnectorId, mockRequest, supertest);
+
+        const expected = {
+          connector_id: bedrockConnectorId,
+          data: 'Hello there! How may I assist you today?',
+          status: 'ok',
+        };
+
+        expect(response.body).to.eql(expected);
+      });
+    });
+
+    describe('With OpenAI connector', () => {
+      const simulator = new OpenAISimulator({
+        returnError: false,
+        proxy: {
+          config: configService.get('kbnTestServer.serverArgs'),
+        },
+      });
+      let apiUrl: string;
+      let openaiConnectorId: string;
+
+      before(async () => {
+        apiUrl = await simulator.start();
+        openaiConnectorId = await createConnector(supertest, getOpenAIConnectorParams({ apiUrl }));
+        objectRemover.add('default', openaiConnectorId, 'connector', 'actions');
+      });
+
+      after(() => {
+        simulator.close();
+      });
+      it('should execute a chat completion', async () => {
+        const response = await postActionsClientExecute(
+          openaiConnectorId,
+          { ...mockRequest, llmType: 'openai' },
+          supertest
+        );
+
+        const expected = {
+          connector_id: openaiConnectorId,
+          data: 'Hello there! How may I assist you today?',
+          status: 'ok',
+        };
+
+        expect(response.body).to.eql(expected);
+      });
+    });
+  });
+};
 
 const mockRequest = {
   params: {
@@ -39,80 +122,31 @@ const mockRequest = {
   llmType: 'bedrock',
 };
 
-export default ({ getService }: FtrProviderContext) => {
-  const supertest = getService('supertest');
-  const objectRemover = new ObjectRemover(supertest);
-  const configService = getService('config');
+function getBedrockConnectorParams({ apiUrl }: { apiUrl: string }): CreateConnectorBody {
+  return {
+    name: 'A bedrock action',
+    connector_type_id: '.bedrock',
+    secrets: {
+      accessKey: 'bedrockAccessKey',
+      secret: 'bedrockSecret',
+    },
+    config: {
+      defaultModel: 'anthropic.claude-v2',
+      apiUrl,
+    },
+  };
+}
 
-  // @skipInQA tag because the simulators do not work in the QA env
-  describe('@ess @serverless @skipInQA Basic Security AI Assistant Invoke AI [non-streaming, non-LangChain]', async () => {
-    after(() => {
-      objectRemover.removeAll();
-    });
-
-    describe('With Bedrock connector', () => {
-      const simulator = new BedrockSimulator({
-        proxy: {
-          config: configService.get('kbnTestServer.serverArgs'),
-        },
-      });
-      let apiUrl: string;
-      let bedrockActionId: string;
-
-      before(async () => {
-        apiUrl = await simulator.start();
-        bedrockActionId = await createConnector(supertest, objectRemover, apiUrl, 'bedrock');
-      });
-
-      after(() => {
-        simulator.close();
-      });
-      it('should execute a chat completion', async () => {
-        const response = await postActionsClientExecute(bedrockActionId, mockRequest, supertest);
-
-        const expected = {
-          connector_id: bedrockActionId,
-          data: 'Hello there! How may I assist you today?',
-          status: 'ok',
-        };
-
-        expect(response.body).to.eql(expected);
-      });
-    });
-
-    describe('With OpenAI connector', () => {
-      const simulator = new OpenAISimulator({
-        returnError: false,
-        proxy: {
-          config: configService.get('kbnTestServer.serverArgs'),
-        },
-      });
-      let apiUrl: string;
-      let openaiActionId: string;
-
-      before(async () => {
-        apiUrl = await simulator.start();
-        openaiActionId = await createConnector(supertest, objectRemover, apiUrl, 'openai');
-      });
-
-      after(() => {
-        simulator.close();
-      });
-      it('should execute a chat completion', async () => {
-        const response = await postActionsClientExecute(
-          openaiActionId,
-          { ...mockRequest, llmType: 'openai' },
-          supertest
-        );
-
-        const expected = {
-          connector_id: openaiActionId,
-          data: 'Hello there! How may I assist you today?',
-          status: 'ok',
-        };
-
-        expect(response.body).to.eql(expected);
-      });
-    });
-  });
-};
+function getOpenAIConnectorParams({ apiUrl }: { apiUrl: string }): CreateConnectorBody {
+  return {
+    name: 'An openai action',
+    connector_type_id: '.gen-ai',
+    secrets: {
+      apiKey: 'genAiApiKey',
+    },
+    config: {
+      apiProvider: 'OpenAI',
+      apiUrl,
+    },
+  };
+}

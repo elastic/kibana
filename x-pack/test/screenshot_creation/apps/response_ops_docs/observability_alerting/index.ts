@@ -22,7 +22,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     let emailConnectorId: string;
     before(async () => {
       await browser.setWindowSize(1920, 1080);
-      ({ id: emailConnectorId } = await actions.api.createConnector({
+      emailConnectorId = await actions.api.createConnector({
         name: emailConnectorName,
         config: {
           service: 'other',
@@ -35,7 +35,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           password: 'supersecret',
         },
         connectorTypeId: '.email',
-      }));
+      });
       ({ id: mtRuleId } = await rules.api.createRule({
         consumer: 'infrastructure',
         name: metricThresholdRuleName,

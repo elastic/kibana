@@ -13,6 +13,7 @@ import {
 } from '@kbn/actions-simulators-plugin/server/d3security_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../common/utils/connectors';
 
 const connectorTypeId = '.d3security';
 const name = 'A D3 Security action';
@@ -25,19 +26,15 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
 
-  const createConnector = async (url: string) => {
-    const { body } = await supertest
-      .post('/api/actions/connector')
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name,
-        connector_type_id: connectorTypeId,
-        config: { url },
-        secrets,
-      })
-      .expect(200);
+  const createD3SecurityConnector = async (url: string) => {
+    const id = await createConnector(supertest, {
+      name,
+      connector_type_id: connectorTypeId,
+      config: { url },
+      secrets,
+    });
 
-    return body.id;
+    return id;
   };
 
   describe('D3Security', () => {
@@ -158,7 +155,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const url = await simulator.start();
-          d3SecurityActionId = await createConnector(url);
+          d3SecurityActionId = await createD3SecurityConnector(url);
         });
 
         after(() => {
@@ -216,7 +213,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             url = await simulator.start();
-            d3SecurityActionId = await createConnector(url);
+            d3SecurityActionId = await createD3SecurityConnector(url);
           });
 
           after(() => {
@@ -268,7 +265,7 @@ export default function d3SecurityTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             const url = await simulator.start();
-            d3SecurityActionId = await createConnector(url);
+            d3SecurityActionId = await createD3SecurityConnector(url);
           });
 
           after(() => {

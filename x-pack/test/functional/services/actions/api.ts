@@ -6,6 +6,11 @@
  */
 
 import { FtrProviderContext } from '../../ftr_provider_context';
+import {
+  createConnector as _createConnector_,
+  deleteConnector as _deleteConnector_,
+  deleteAllConnectors as _deleteAllConnectors_,
+} from '../../../common/utils/connectors';
 
 export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
   const kbnSupertest = getService('supertest');
@@ -17,47 +22,33 @@ export function ActionsAPIServiceProvider({ getService }: FtrProviderContext) {
       config,
       secrets,
       connectorTypeId,
-      additionalRequestHeaders,
     }: {
       name: string;
       config: Record<string, unknown>;
       secrets: Record<string, unknown>;
       connectorTypeId: string;
       additionalRequestHeaders?: object;
-    }) {
-      const { body: createdAction } = await kbnSupertest
-        .post(`/api/actions/connector`)
-        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
-        .send({
-          name,
-          config,
-          secrets,
-          connector_type_id: connectorTypeId,
-        })
-        .expect(200);
-
-      return createdAction;
+    }): Promise<string> {
+      return await _createConnector_(kbnSupertest, {
+        name,
+        connector_type_id: connectorTypeId,
+        config,
+        secrets,
+      });
     },
 
-    async deleteConnector(id: string, additionalRequestHeaders?: object) {
+    async deleteConnector(id: string) {
       log.debug(`Deleting connector with id '${id}'...`);
-      const rsp = kbnSupertest
-        .delete(`/api/actions/connector/${id}`)
-        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
-        .expect(204, '');
+
+      const response = await _deleteConnector_(kbnSupertest, id).expect(204, '');
+
       log.debug('> Connector deleted.');
-      return rsp;
+
+      return response;
     },
 
-    async deleteAllConnectors(additionalRequestHeaders?: object) {
-      const { body } = await kbnSupertest
-        .get(`/api/actions/connectors`)
-        .set({ ...additionalRequestHeaders, 'kbn-xsrf': 'foo' })
-        .expect(200);
-
-      for (const connector of body) {
-        await this.deleteConnector(connector.id, additionalRequestHeaders);
-      }
+    async deleteAllConnectors() {
+      await _deleteAllConnectors_(kbnSupertest);
     },
   };
 }

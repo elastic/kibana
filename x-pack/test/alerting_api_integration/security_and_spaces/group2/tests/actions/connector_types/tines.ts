@@ -16,6 +16,7 @@ import {
 } from '@kbn/actions-simulators-plugin/server/tines_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { createConnector } from '../../../../../../common/utils/connectors';
 
 const connectorTypeId = '.tines';
 const name = 'A tines action';
@@ -35,20 +36,19 @@ const webhook = {
 export default function tinesTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const configService = getService('config');
+  const createTinesConnector = async (url: string) => {
+    const id = await createConnector(supertest, {
+      name: 'An Opsgenie simulator',
+      connector_type_id: '.opsgenie',
+      config: {
+        apiUrl: url,
+      },
+      secrets: {
+        apiKey: '123',
+      },
+    });
 
-  const createConnector = async (url: string) => {
-    const { body } = await supertest
-      .post('/api/actions/connector')
-      .set('kbn-xsrf', 'foo')
-      .send({
-        name,
-        connector_type_id: connectorTypeId,
-        config: { url },
-        secrets,
-      })
-      .expect(200);
-
-    return body.id;
+    return id;
   };
 
   describe('Tines', () => {
@@ -169,7 +169,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
 
         before(async () => {
           const url = await simulator.start();
-          tinesActionId = await createConnector(url);
+          tinesActionId = await createTinesConnector(url);
         });
 
         after(() => {
@@ -364,7 +364,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             url = await simulator.start();
-            tinesActionId = await createConnector(url);
+            tinesActionId = await createTinesConnector(url);
           });
 
           after(() => {
@@ -479,7 +479,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
 
           before(async () => {
             const url = await simulator.start();
-            tinesActionId = await createConnector(url);
+            tinesActionId = await createTinesConnector(url);
           });
 
           after(() => {

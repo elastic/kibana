@@ -37,14 +37,14 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     before(async () => {
       // Create server log connector
       await browser.setWindowSize(1920, 1080);
-      ({ id: serverLogConnectorId } = await actions.api.createConnector({
+      serverLogConnectorId = await actions.api.createConnector({
         name: 'my-server-log-connector',
         config: {},
         secrets: {},
         connectorTypeId: '.server-log',
-      }));
+      });
       // Create email connector
-      ({ id: emailConnectorId } = await actions.api.createConnector({
+      emailConnectorId = await actions.api.createConnector({
         name: emailConnectorName,
         config: {
           service: 'other',
@@ -57,7 +57,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
           password: 'supersecret',
         },
         connectorTypeId: '.email',
-      }));
+      });
       // Create index threshold rule
       ({ id: itRuleId } = await rules.api.createRule({
         consumer: 'alerts',

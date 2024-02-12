@@ -21,11 +21,11 @@ export const createSlackConnectorAndObjectRemover = async ({
   const objectRemover = new ObjectRemover(supertest);
 
   const testData = getTestActionData();
-  const createdAction = await createSlackConnector({
+  const connectorId = await createSlackConnector({
     name: testData.name,
     getService,
   });
-  objectRemover.add(createdAction.id, 'action', 'actions');
+  objectRemover.add(connectorId, 'action', 'actions');
 
   return objectRemover;
 };
@@ -38,14 +38,13 @@ export const createSlackConnector = async ({
   getService: FtrProviderContext['getService'];
 }) => {
   const actions = getService('actions');
-  const connector = await actions.api.createConnector({
+
+  return await actions.api.createConnector({
     name,
     config: {},
     secrets: { webhookUrl: 'https://test.com' },
     connectorTypeId: '.slack',
   });
-
-  return connector;
 };
 
 export const getConnectorByName = async (

@@ -20,7 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('email connector', function () {
     let emailConnectorId: string;
     before(async () => {
-      ({ id: emailConnectorId } = await actions.api.createConnector({
+      emailConnectorId = await actions.api.createConnector({
         name: emailConnectorName,
         config: {
           service: 'other',
@@ -33,7 +33,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           password: 'supersecret',
         },
         connectorTypeId: '.email',
-      }));
+      });
     });
 
     beforeEach(async () => {

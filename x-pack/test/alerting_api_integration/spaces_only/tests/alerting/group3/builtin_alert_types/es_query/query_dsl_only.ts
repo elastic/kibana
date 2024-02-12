@@ -13,7 +13,7 @@ import { FtrProviderContext } from '../../../../../../common/ftr_provider_contex
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
 import {
-  createConnector,
+  createIndexConnector,
   CreateRuleParams,
   ES_GROUPS_TO_WRITE,
   ES_TEST_DATA_STREAM_NAME,
@@ -45,7 +45,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       await esTestIndexToolOutput.destroy();
       await esTestIndexToolOutput.setup();
 
-      connectorId = await createConnector(supertest, objectRemover, ES_TEST_OUTPUT_INDEX_NAME);
+      connectorId = await createIndexConnector(supertest, objectRemover, ES_TEST_OUTPUT_INDEX_NAME);
 
       // write documents in the future, figure out the end date
       const endDateMillis = Date.now() + (RULE_INTERVALS_TO_WRITE - 1) * RULE_INTERVAL_MILLIS;
