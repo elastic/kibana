@@ -175,6 +175,11 @@ export const allowedExperimentalValues = Object.freeze({
   sentinelOneManualHostActionsEnabled: true,
 
   /*
+   * Enables experimental Crowdstrike integration data to be available in Analyzer
+   */
+  crowdstrikeDataInAnalyzerEnabled: false,
+
+  /*
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
