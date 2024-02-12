@@ -74,6 +74,96 @@
     "interfaces": [
       {
         "parentPluginId": "discover",
+        "id": "def-public.DataDocumentsMsg",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataDocumentsMsg",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "discover",
+            "scope": "public",
+            "docId": "kibDiscoverPluginApi",
+            "section": "def-public.DataDocumentsMsg",
+            "text": "DataDocumentsMsg"
+          },
+          " extends ",
+          "DataMsg"
+        ],
+        "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DataDocumentsMsg.result",
+            "type": "Array",
+            "tags": [],
+            "label": "result",
+            "description": [],
+            "signature": [
+              "DataTableRecord",
+              "[] | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DataDocumentsMsg.textBasedQueryColumns",
+            "type": "Array",
+            "tags": [],
+            "label": "textBasedQueryColumns",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressions",
+                "scope": "common",
+                "docId": "kibExpressionsPluginApi",
+                "section": "def-common.DatatableColumn",
+                "text": "DatatableColumn"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DataDocumentsMsg.textBasedHeaderWarning",
+            "type": "string",
+            "tags": [],
+            "label": "textBasedHeaderWarning",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discover",
+            "id": "def-public.DataDocumentsMsg.interceptedWarnings",
+            "type": "Array",
+            "tags": [],
+            "label": "interceptedWarnings",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning",
+              "[] | undefined"
+            ],
+            "path": "src/plugins/discover/public/application/main/services/discover_data_state_container.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "discover",
         "id": "def-public.DiscoverAppState",
         "type": "Interface",
         "tags": [],
