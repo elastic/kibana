@@ -84,7 +84,7 @@ const EndpointActionCalloutComponent = ({ basePath, editDisabled }: EndpointCall
           <EuiText size={'xs'}>
             <FormattedMessage
               id="xpack.securitySolution.responseActionsList.endpoint.processesCautionDescription"
-              defaultMessage="Only select this option if you’re certain that you want to automatically terminate the process running this host"
+              defaultMessage="Only select this option if you’re certain that you want to automatically terminate the process running on a host."
             />
           </EuiText>
         </EuiCallOut>

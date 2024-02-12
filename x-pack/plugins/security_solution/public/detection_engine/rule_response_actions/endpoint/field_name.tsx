@@ -54,15 +54,21 @@ const FieldNameFieldComponent = ({
 
   const renderEntityIdNote = useMemo(() => {
     const contains = fieldValue?.includes('entity_id');
+
     if (contains) {
       return (
         <FormattedMessage
-          id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
+          id="xpack.securitySolution.responseActions.endpoint.entityIdDescription"
           defaultMessage="Entity_id is an Elastic Defend agent specific field, if the alert does not come from Elastic Defend agent we will not be able to send the action."
         />
       );
     }
-    return null;
+    return (
+      <FormattedMessage
+        id="xpack.securitySolution.responseActions.endpoint.fieldDescription"
+        defaultMessage="Choose a different alert field to identify the process to terminate."
+      />
+    );
   }, [fieldValue]);
 
   const CONFIG = useMemo(() => {

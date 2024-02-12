@@ -26,7 +26,7 @@ const OverwriteFieldComponent = ({
       label: (
         <FormattedMessage
           id="xpack.securitySolution.responseActions.endpoint.overwriteFieldLabel"
-          defaultMessage="Use {pid} as process identifier"
+          defaultMessage="Use the alert's {pid} value to identify the process to terminate."
           values={{
             // eslint-disable-next-line react/jsx-no-literals
             pid: <strong>process.pid</strong>,
