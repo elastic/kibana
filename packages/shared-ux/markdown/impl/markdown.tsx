@@ -15,6 +15,7 @@ import {
   getDefaultEuiMarkdownPlugins,
 } from '@elastic/eui';
 import React, { useState } from 'react';
+import { useEffect } from 'react';
 
 export type MarkdownProps = Partial<
   Omit<EuiMarkdownEditorProps, 'editorId' | 'uiPlugins' | 'markdownFormatProps'>
@@ -29,6 +30,10 @@ export type MarkdownProps = Partial<
    * allow opt in to default EUI link validation behavior, see {@link https://eui.elastic.co/#/editors-syntax/markdown-plugins#link-validation-security}
    */
   validateLinks?: boolean;
+  /**
+   * provides a way to signal to a parent component that the component rendered successfully
+   */
+  onRender?: () => void;
   defaultValue?: string;
   markdownContent?: string;
   ariaLabelContent?: string;
@@ -44,6 +49,7 @@ export const Markdown = ({
   markdownContent,
   children,
   className,
+  onRender,
   openLinksInNewTab = true,
   defaultValue = '',
   placeholder = '',
@@ -54,6 +60,11 @@ export const Markdown = ({
   ...restProps
 }: MarkdownProps) => {
   const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    // onRender will be called after each render to signal, that we are done with rendering.
+    onRender?.();
+  }, [onRender]);
 
   const { parsingPlugins, processingPlugins, uiPlugins } = getDefaultEuiMarkdownPlugins({
     exclude: enableTooltipSupport ? undefined : ['tooltip'],
