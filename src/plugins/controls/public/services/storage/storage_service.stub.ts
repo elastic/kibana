@@ -6,7 +6,12 @@
  * Side Public License, v 1.
  */
 
-export const storageServiceFactory = () => {
+import { PluginServiceFactory } from '@kbn/presentation-util-plugin/public';
+import { ControlsStorageService } from './types';
+
+type StorageServiceFactory = PluginServiceFactory<ControlsStorageService>;
+
+export const storageServiceFactory: StorageServiceFactory = () => {
   return {
     getShowInvalidSelectionWarning: () => false,
     setShowInvalidSelectionWarning: (value: boolean) => null,
