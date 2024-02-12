@@ -88,34 +88,28 @@ const Filters = ({ filters, dataViewId, index, 'data-test-subj': dataTestSubj }:
 
   const flattenedFilters = mapAndFlattenFilters(filters);
 
-  const FiltersWrapper = styled.div`
-    max-width: 600px;
-  `;
-
   return (
-    <FiltersWrapper>
-      <EuiFlexGroup wrap responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
-        {flattenedFilters.map((filter, idx) => {
-          const displayContent = filter.meta.alias ? (
-            filter.meta.alias
-          ) : (
-            <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
-          );
-          return (
-            <EuiFlexItem
-              grow={false}
-              key={`filter-${idx}`}
-              css={{ width: '100%' }}
-              data-test-subj={`filterItem-${filter.meta.key}`}
-            >
-              <EuiBadgeWrap color="hollow">
-                {indexPattern != null ? displayContent : <EuiLoadingSpinner size="m" />}
-              </EuiBadgeWrap>
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGroup>
-    </FiltersWrapper>
+    <EuiFlexGroup wrap responsive={false} gutterSize="xs" data-test-subj={dataTestSubj}>
+      {flattenedFilters.map((filter, idx) => {
+        const displayContent = filter.meta.alias ? (
+          filter.meta.alias
+        ) : (
+          <FilterBadgeGroup filters={[filter]} dataViews={[indexPattern]} />
+        );
+        return (
+          <EuiFlexItem
+            grow={false}
+            key={`filter-${idx}`}
+            css={{ width: '100%' }}
+            data-test-subj={`filterItem-${filter.meta.key}`}
+          >
+            <EuiBadgeWrap color="hollow">
+              {indexPattern != null ? displayContent : <EuiLoadingSpinner size="m" />}
+            </EuiBadgeWrap>
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
   );
 };
 
