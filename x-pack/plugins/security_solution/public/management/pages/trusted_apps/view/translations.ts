@@ -169,13 +169,13 @@ export const CONFIRM_WARNING_MODAL_LABELS = {
     defaultMessage:
       'Using a "*" or a "?" in the value and with the "IS" operator can make the entry ineffective. Change the operator to ‘matches’ to ensure wildcards run properly. Select “cancel” to revise your entry, or "add" to continue with entry in its current state.',
   }),
-  confirmButtonText: i18n.translate(
+  confirmButton: i18n.translate(
     'xpack.securitySolution.trustedapps.confirmWarningModal.confirmButtonText',
     {
       defaultMessage: 'Add',
     }
   ),
-  cancelButtonText: i18n.translate(
+  cancelButton: i18n.translate(
     'xpack.securitySolution.trustedapps.confirmWarningModal.cancelButtonText',
     {
       defaultMessage: 'Cancel',

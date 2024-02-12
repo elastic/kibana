@@ -283,7 +283,7 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
         onChange({
           item: updatedFormValues,
           isValid: updatedValidationResult.isValid,
-          confirmModal: updatedValidationResult.extraWarning
+          confirmModalLabels: updatedValidationResult.extraWarning
             ? CONFIRM_WARNING_MODAL_LABELS
             : undefined,
         });

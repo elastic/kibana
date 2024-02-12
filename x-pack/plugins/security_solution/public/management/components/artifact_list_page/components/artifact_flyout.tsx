@@ -272,12 +272,12 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [isSubmittingData, onClose, setUrlParams, urlParams]);
 
     const handleFormComponentOnChange: ArtifactFormComponentProps['onChange'] = useCallback(
-      ({ item: updatedItem, isValid, confirmModal }) => {
+      ({ item: updatedItem, isValid, confirmModalLabels }) => {
         if (isMounted()) {
           setFormState({
             item: updatedItem,
             isValid,
-            confirmModal,
+            confirmModalLabels,
           });
         }
       },
@@ -319,7 +319,7 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
               setExternalIsSubmittingData(false);
             }
           });
-      } else if (formState.confirmModal) {
+      } else if (formState.confirmModalLabels) {
         setShowConfirmModal(true);
       } else {
         submitData(formState.item).then(handleSuccess);
@@ -327,23 +327,33 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
     }, [
       formMode,
       formState.item,
-      formState.confirmModal,
+      formState.confirmModalLabels,
       handleSuccess,
       isMounted,
       submitData,
       submitHandler,
     ]);
 
-    const confirmModal = (
-      <ArtifactConfirmModal
-        title="hi"
-        body="body"
-        confirmButton="Add"
-        cancelButton="Cancel"
-        onSuccess={() => console.log('success')}
-        onCancel={() => setShowConfirmModal(false)}
-      />
+    const confirmModalOnSuccess = useCallback(
+      () => submitData(formState.item).then(handleSuccess),
+      [submitData, formState.item, handleSuccess]
     );
+
+    const confirmModal = useMemo(() => {
+      if (formState.confirmModalLabels) {
+        const { title, body, confirmButton, cancelButton } = formState.confirmModalLabels;
+        return (
+          <ArtifactConfirmModal
+            title={title}
+            body={body}
+            confirmButton={confirmButton}
+            cancelButton={cancelButton}
+            onSuccess={confirmModalOnSuccess}
+            onCancel={() => setShowConfirmModal(false)}
+          />
+        );
+      }
+    }, [formState, confirmModalOnSuccess]);
 
     // If we don't have the actual Artifact data yet for edit (in initialization phase - ex. came in with an
     // ID in the url that was not in the list), then retrieve it now

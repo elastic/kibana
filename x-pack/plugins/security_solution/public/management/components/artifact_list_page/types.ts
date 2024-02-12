@@ -40,14 +40,12 @@ export interface ArtifactFormComponentProps {
 export interface ArtifactFormComponentOnChangeCallbackProps {
   isValid: boolean;
   item: ExceptionListItemSchema | CreateExceptionListItemSchema;
-  confirmModal?: ArtifactConfirmModalProps;
+  confirmModalLabels?: ArtifactConfirmModalLabelProps;
 }
 
-export interface ArtifactConfirmModalProps {
+export interface ArtifactConfirmModalLabelProps {
   title: string;
   body: string;
   confirmButton: string;
   cancelButton: string;
-  onSuccess: () => void;
-  onCancel: () => void;
 }
