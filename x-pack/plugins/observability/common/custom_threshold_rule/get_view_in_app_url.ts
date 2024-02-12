@@ -6,9 +6,9 @@
  */
 
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
-import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import type { CustomThresholdExpressionMetric } from './types';
 
 export interface GetViewInAppUrlArgs {
@@ -16,7 +16,7 @@ export interface GetViewInAppUrlArgs {
   endedAt?: string;
   startedAt?: string;
   filter?: string;
-  logsExplorerLocator?: LocatorPublic<DiscoverAppLocatorParams>;
+  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
   metrics?: CustomThresholdExpressionMetric[];
 }
 

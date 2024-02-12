@@ -78,6 +78,7 @@ export function ChipWithPopover({
         font-size: ${xsFontSize};
         display: flex;
         justify-content: center;
+        ${shouldRenderPopover && `margin-right: 4px; margin-top: -3px;`}
         cursor: pointer;
       `}
       style={style}

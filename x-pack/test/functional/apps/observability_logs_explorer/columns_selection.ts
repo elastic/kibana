@@ -58,9 +58,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               mode: 'absolute',
             },
             columns: [
-              { field: 'resource' },
-              { field: 'content' },
-              { field: 'data_stream.namespace' },
+              {
+                smartField: 'resource',
+                type: 'smart-field',
+                fallbackFields: ['host.name', 'service.name'],
+              },
+              {
+                smartField: 'content',
+                type: 'smart-field',
+                fallbackFields: ['message'],
+              },
+              { field: 'data_stream.namespace', type: 'document-field' },
             ],
           },
         });
