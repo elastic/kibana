@@ -28,7 +28,6 @@ Array [
       },
     ],
     "dataView": undefined,
-    "filterQuery": "",
     "groupBy": Array [
       "host.hostname",
     ],
@@ -45,6 +44,13 @@ Array [
       ],
       "timeSize": 15,
       "timeUnit": "m",
+    },
+    "searchConfiguration": Object {
+      "index": "mockedIndex",
+      "query": Object {
+        "language": "kuery",
+        "query": "host.hostname: Users-System.local and service.type: system",
+      },
     },
     "seriesType": "bar_stacked",
     "timeRange": Object {
