@@ -39,6 +39,8 @@ export const useGetSentinelOneAgentStatus = (
       sentinelOneManualHostActionsEnabled &&
       isEmpty(agentIds.filter((agentId) => agentId.trim().length))
     ),
+    // TODO: update this to use a function instead of a number
+    refetchInterval: 2000,
     queryFn: () =>
       http
         .get<{ data: AgentStatusApiResponse['data'] }>(ENDPOINT_AGENT_STATUS_ROUTE, {

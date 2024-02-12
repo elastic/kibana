@@ -43,7 +43,6 @@ type ResponderInfoProps =
       agentType: Exclude<ResponseActionAgentType, 'endpoint'>;
       capabilities: ImmutableArray<string>;
       platform: string;
-      lastCheckin: string;
     });
 
 export const useWithShowResponder = (): ShowResponseActionsConsole => {
@@ -109,7 +108,6 @@ export const useWithShowResponder = (): ShowResponseActionsConsole => {
                 <HeaderSentinelOneInfo
                   agentId={agentId}
                   hostName={hostName}
-                  lastCheckin={props.lastCheckin}
                   platform={props.platform}
                 />
               );
