@@ -362,7 +362,7 @@ export const EndpointList = () => {
     isAutoRefreshEnabled,
     patternsError,
     metadataTransformStats,
-    initialized,
+    isInitialized,
   } = useEndpointSelector(selector);
   const getHostPendingActions = useEndpointSelector(getEndpointPendingActionsCallback);
   const {
@@ -553,9 +553,8 @@ export const EndpointList = () => {
   );
 
   const mutableListData = useMemo(() => [...listData], [listData]);
-
   const renderTableOrEmptyState = useMemo(() => {
-    if (!initialized) {
+    if (!isInitialized) {
       return (
         <ManagementEmptyStateWrapper>
           <EuiEmptyPrompt
@@ -625,7 +624,7 @@ export const EndpointList = () => {
       );
     }
   }, [
-    initialized,
+    isInitialized,
     listError,
     endpointsExist,
     canReadEndpointList,
@@ -647,10 +646,14 @@ export const EndpointList = () => {
     handleCreatePolicyClick,
   ]);
 
+  const hideHeader = useMemo(
+    () => !(endpointsExist && isInitialized && !listError),
+    [endpointsExist, isInitialized, listError]
+  );
   return (
     <AdministrationListPage
       data-test-subj="endpointPage"
-      hideHeader={!endpointsExist || !initialized || !!listError}
+      hideHeader={hideHeader}
       title={
         <FormattedMessage
           id="xpack.securitySolution.endpoint.list.pageTitle"
@@ -666,7 +669,7 @@ export const EndpointList = () => {
       headerBackComponent={<BackToPolicyListButton backLink={routeState.backLink} />}
     >
       {hasSelectedEndpoint && <EndpointDetailsFlyout />}
-      {initialized && !listError && (
+      {isInitialized && !listError && (
         <>
           <TransformFailedCallout
             metadataTransformStats={metadataTransformStats}
@@ -696,7 +699,7 @@ export const EndpointList = () => {
           <EuiSpacer size="m" />
         </>
       )}
-      {hasListData && initialized && !listError && (
+      {hasListData && (
         <>
           <EuiText color="subdued" size="xs" data-test-subj="endpointListTableTotal">
             {totalItemCount > MAX_PAGINATED_ITEM + 1 ? (

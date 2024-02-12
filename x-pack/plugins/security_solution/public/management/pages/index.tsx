@@ -91,7 +91,6 @@ export const ManagementContainer = memo(() => {
 
   // Lets wait until we can verify permissions
   if (loading) {
-    // return <EuiLoadingSpinner />;
     return (
       <ManagementEmptyStateWrapper>
         <EuiEmptyPrompt

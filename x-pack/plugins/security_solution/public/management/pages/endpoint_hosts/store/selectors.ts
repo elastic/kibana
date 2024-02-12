@@ -55,7 +55,7 @@ export const policyItems = (state: Immutable<EndpointState>) => state.policyItem
 
 export const policyItemsLoading = (state: Immutable<EndpointState>) => state.policyItemsLoading;
 
-export const initialized = (state: Immutable<EndpointState>) => state.initialized;
+export const isInitialized = (state: Immutable<EndpointState>) => state.isInitialized;
 
 export const selectedPolicyId = (state: Immutable<EndpointState>) => state.selectedPolicyId;
 export const endpointPackageInfo = (state: Immutable<EndpointState>) => state.endpointPackageInfo;
