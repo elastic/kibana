@@ -2240,7 +2240,7 @@
           "defaultModel": {
             "type": "string",
             "description": "The generative artificial intelligence model for Amazon Bedrock to use. Current support is for the Anthropic Claude models.\n",
-            "default": "anthropic.claude-v2"
+            "default": "anthropic.claude-v2:1"
           }
         }
       },

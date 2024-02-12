@@ -314,15 +314,29 @@ export class TaskManagerRunner implements TaskRunner {
     const apmTrans = apm.startTransaction(this.taskType, TASK_MANAGER_RUN_TRANSACTION_TYPE, {
       childOf: this.instance.task.traceparent,
     });
+    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     // Validate state
-    const validatedTaskInstance = this.validateTaskState(this.instance.task);
+    const stateValidationResult = this.validateTaskState(this.instance.task);
+
+    if (stateValidationResult.error) {
+      const processedResult = await withSpan({ name: 'process result', type: 'task manager' }, () =>
+        this.processResult(
+          asErr({
+            error: stateValidationResult.error,
+            state: stateValidationResult.taskInstance.state,
+            shouldValidate: false,
+          }),
+          stopTaskTimer()
+        )
+      );
+      if (apmTrans) apmTrans.end('failure');
+      return processedResult;
+    }
 
     const modifiedContext = await this.beforeRun({
-      taskInstance: validatedTaskInstance,
+      taskInstance: stateValidationResult.taskInstance,
     });
-
-    const stopTaskTimer = startTaskTimerWithEventLoopMonitoring(this.eventLoopDelayConfig);
 
     this.onTaskEvent(
       asTaskManagerStatEvent(
@@ -411,11 +425,12 @@ export class TaskManagerRunner implements TaskRunner {
   private validateTaskState(taskInstance: ConcreteTaskInstance) {
     const { taskType, id } = taskInstance;
     try {
-      const validatedTask = this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
-      return validatedTask;
+      const validatedTaskInstance =
+        this.taskValidator.getValidatedTaskInstanceFromReading(taskInstance);
+      return { taskInstance: validatedTaskInstance, error: null };
     } catch (error) {
       this.logger.warn(`Task (${taskType}/${id}) has a validation error: ${error.message}`);
-      throw error;
+      return { taskInstance, error };
     }
   }
 
@@ -518,7 +533,7 @@ export class TaskManagerRunner implements TaskRunner {
                     error: new Error('Task timeout'),
                     addDuration: this.definition.timeout,
                   })) ?? null,
-            // This is a safe convertion as we're setting the startAt above
+            // This is a safe conversion as we're setting the startAt above
           },
           { validate: false }
         )) as ConcreteTaskInstanceWithStartedAt
@@ -723,6 +738,7 @@ export class TaskManagerRunner implements TaskRunner {
       this.instance = asRan(this.instance.task);
       await this.removeTask();
     } else {
+      const { shouldValidate = true } = unwrap(result);
       this.instance = asRan(
         await this.bufferedTaskStore.update(
           defaults(
@@ -735,7 +751,7 @@ export class TaskManagerRunner implements TaskRunner {
             },
             taskWithoutEnabled(this.instance.task)
           ),
-          { validate: true }
+          { validate: shouldValidate }
         )
       );
     }

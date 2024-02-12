@@ -18,6 +18,7 @@ export const getPublicStateFromContext = (
   return {
     table: context.table,
     flyout: context.flyout,
+    filters: context.filters,
   };
 };
 
@@ -38,5 +39,9 @@ export const getContextFromPublicState = (
   flyout: {
     ...DEFAULT_CONTEXT.flyout,
     ...publicState.flyout,
+  },
+  filters: {
+    ...DEFAULT_CONTEXT.filters,
+    ...publicState.filters,
   },
 });
