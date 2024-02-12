@@ -47,6 +47,14 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
       const payload = await jobsQuery.getDocumentPayload(doc);
       const { contentType, content, filename, statusCode } = payload;
 
+      // event tracking
+      const completedAt = doc.completed_at;
+      const timeSinceCompleted = completedAt
+        ? new Date(Date.now()).valueOf() - new Date(completedAt).valueOf()
+        : undefined;
+      const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+      eventTracker?.downloadReport({ timeSinceCompleted });
+
       if (!contentType || !ALLOWED_JOB_CONTENT_TYPES.includes(contentType)) {
         return res.badRequest({
           body: `Unsupported content-type of ${contentType} specified by job output`,
@@ -108,6 +116,14 @@ export const commonJobsRouteHandlerFactory = (reporting: ReportingCore) => {
         });
 
         await jobsQuery.delete(docIndex, docId);
+
+        // event tracking
+        const completedAt = doc.completed_at;
+        const timeSinceCompleted = completedAt
+          ? new Date(Date.now()).valueOf() - new Date(completedAt).valueOf()
+          : undefined;
+        const eventTracker = reporting.getEventTracker(docId, doc.jobtype, doc.payload.objectType);
+        eventTracker?.deleteReport({ timeSinceCompleted });
 
         return res.ok({
           body: { deleted: true },

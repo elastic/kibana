@@ -99,6 +99,7 @@ describe('Execute Report Task', () => {
     const store = await mockReporting.getStore();
     store.setReportError = jest.fn(() => Promise.resolve({} as any));
     const task = new ExecuteReportTask(mockReporting, configType, logger);
+    // @ts-expect-error private method
     task._claimJob = jest.fn(() =>
       Promise.resolve({ _id: 'test', jobtype: 'noop', status: 'pending' } as SavedReport)
     );

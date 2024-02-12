@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 
 import { IKibanaResponse, kibanaResponseFactory } from '@kbn/core/server';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import { JobId, ReportApiJSON } from '@kbn/reporting-common/types';
 import { i18n } from '@kbn/i18n';
 import { Counters } from '..';
 import { ReportingCore } from '../../..';
@@ -26,7 +26,7 @@ type JobManagementResponseHandler = (doc: ReportApiJSON) => Promise<IKibanaRespo
 export const jobManagementPreRouting = async (
   reporting: ReportingCore,
   res: typeof kibanaResponseFactory,
-  docId: string,
+  jobId: JobId,
   user: ReportingUser,
   counters: Counters,
   cb: JobManagementResponseHandler
@@ -38,7 +38,7 @@ export const jobManagementPreRouting = async (
 
   const jobsQuery = jobsQueryFactory(reporting);
 
-  const doc = await jobsQuery.get(user, docId);
+  const doc = await jobsQuery.get(user, jobId);
   if (!doc) {
     return res.notFound();
   }

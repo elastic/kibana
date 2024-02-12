@@ -50,6 +50,7 @@ import {
   isExecutionError,
   mapToReportingError,
 } from '../../../common/errors/map_to_reporting_error';
+import { EventTracker } from '../../usage';
 import type { ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';
@@ -103,8 +104,9 @@ export class ExecuteReportTask implements ReportingTask {
   private taskManagerStart?: TaskManagerStartContract;
   private kibanaId?: string;
   private kibanaName?: string;
-  private store?: ReportingStore;
   private exportTypesRegistry: ExportTypesRegistry;
+  private store?: ReportingStore;
+  private _eventTracker?: EventTracker;
 
   constructor(
     private reporting: ReportingCore,
@@ -146,12 +148,26 @@ export class ExecuteReportTask implements ReportingTask {
     return this.taskManagerStart;
   }
 
+  private getEventTracker(report: Report) {
+    if (this._eventTracker) {
+      return this._eventTracker;
+    }
+
+    const eventTracker = this.reporting.getEventTracker(
+      report._id,
+      report.jobtype,
+      report.payload.objectType
+    );
+    this._eventTracker = eventTracker;
+    return this._eventTracker;
+  }
+
   private getJobContentEncoding(jobType: string) {
     const exportType = this.exportTypesRegistry.getByJobType(jobType);
     return exportType.jobContentEncoding;
   }
 
-  public async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
+  private async _claimJob(task: ReportTaskParams): Promise<SavedReport> {
     if (this.kibanaId == null) {
       throw new Error(`Kibana instance ID is undefined!`);
     }
@@ -218,6 +234,12 @@ export class ExecuteReportTask implements ReportingTask {
         `[process_expiration: ${expirationTime}]`
     );
 
+    // event tracking
+    const eventTracker = this.getEventTracker(report);
+    eventTracker?.claimJob({
+      timeSinceCreation: m.valueOf() - new Date(report.created_at).valueOf(),
+    });
+
     const resp = await store.setReportClaimed(claimedReport, doc);
     claimedReport._seq_no = resp._seq_no;
     claimedReport._primary_term = resp._primary_term;
@@ -241,11 +263,22 @@ export class ExecuteReportTask implements ReportingTask {
 
     // update the report in the store
     const store = await this.getStore();
-    const completedTime = moment().toISOString();
+    const completedTime = moment();
     const doc: ReportFailedFields = {
-      completed_at: completedTime,
+      completed_at: completedTime.toISOString(),
       output: docOutput ?? null,
     };
+
+    // event tracking
+    const startedAt = report.started_at;
+    const eventTracker = this.getEventTracker(report);
+    eventTracker?.failJob({
+      timeSinceClaimed: startedAt
+        ? completedTime.valueOf() - new Date(startedAt).valueOf()
+        : undefined,
+      errorCode: docOutput?.error_code,
+      errorMessage: error?.message,
+    });
 
     return await store.setReportFailed(report, doc);
   }
@@ -293,7 +326,7 @@ export class ExecuteReportTask implements ReportingTask {
     return docOutput;
   }
 
-  public async _performJob(
+  private async _performJob(
     task: ReportTaskParams,
     taskInstanceFields: TaskInstanceFields,
     cancellationToken: CancellationToken,
@@ -314,7 +347,7 @@ export class ExecuteReportTask implements ReportingTask {
     );
   }
 
-  public async _completeJob(
+  private async _completeJob(
     report: SavedReport,
     output: CompletedReportOutput
   ): Promise<SavedReport> {
@@ -322,11 +355,11 @@ export class ExecuteReportTask implements ReportingTask {
 
     this.logger.debug(`Saving ${report.jobtype} to ${docId}.`);
 
-    const completedTime = moment().toISOString();
+    const completedTime = moment();
     const docOutput = this._formatOutput(output);
     const store = await this.getStore();
     const doc = {
-      completed_at: completedTime,
+      completed_at: completedTime.toISOString(),
       metrics: output.metrics,
       output: docOutput,
     };
@@ -337,6 +370,23 @@ export class ExecuteReportTask implements ReportingTask {
     this.logger.info(`Saved ${report.jobtype} job ${docId}`);
     report._seq_no = resp._seq_no;
     report._primary_term = resp._primary_term;
+
+    // event tracking
+    const startedAt = report.started_at;
+    const eventTracker = this.getEventTracker(report);
+    eventTracker?.completeJob({
+      byteSize: docOutput.size,
+      timeSinceClaimed: startedAt
+        ? completedTime.valueOf() - new Date(startedAt).valueOf()
+        : undefined,
+      pdfPages: docOutput.metrics?.pdf?.pages,
+      // screenshotPixels: docOutput.metrics?.screenshot?.pixels, // FIXME: doesn't exist yet
+      // screenshotLayout: docOutput.metrics?.screenshot?.layout, // FIXME: doesn't exist yet
+      csvRows: docOutput.metrics?.csv?.rows,
+      // csvColumns: docOutput.metrics?.csv?.columns, // FIXME: doesn't exist yet
+      warnings: docOutput.warnings,
+    });
+
     return report;
   }
 
