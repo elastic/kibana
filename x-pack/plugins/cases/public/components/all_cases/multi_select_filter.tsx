@@ -76,6 +76,7 @@ interface UseFilterParams<T extends string, K extends string = string> {
   renderOption?: (option: FilterOption<T, K>) => React.ReactNode;
   selectedOptionKeys?: string[];
   transparentBackground?: boolean;
+  isLoading: boolean;
 }
 export const MultiSelectFilter = <T extends string, K extends string = string>({
   buttonLabel,
@@ -89,6 +90,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
   selectedOptionKeys = [],
   renderOption,
   transparentBackground,
+  isLoading,
 }: UseFilterParams<T, K>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -101,13 +103,14 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
     const newSelectedOptions = selectedOptionKeys.filter((selectedOptionKey) =>
       rawOptions.some(({ key: optionKey }) => optionKey === selectedOptionKey)
     );
-    if (!isEqual(newSelectedOptions, selectedOptionKeys)) {
+
+    if (!isEqual(newSelectedOptions, selectedOptionKeys) && !isLoading) {
       onChange({
         filterId: id,
         selectedOptionKeys: newSelectedOptions,
       });
     }
-  }, [selectedOptionKeys, rawOptions, id, onChange]);
+  }, [selectedOptionKeys, rawOptions, id, onChange, isLoading]);
 
   const _onChange = (newOptions: Array<FilterOption<T, K>>) => {
     const newSelectedOptions = getEuiSelectableCheckedOptions(newOptions);

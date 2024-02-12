@@ -26,9 +26,9 @@ export const subscribeToDiscoverState =
       throw new Error('Failed to subscribe to the Discover state: no state container in context.');
     }
 
-    const { appState } = context.discoverStateContainer;
+    const { appState, dataState } = context.discoverStateContainer;
 
-    const subscription = appState.state$.subscribe({
+    const appStateSubscription = appState.state$.subscribe({
       next: (newAppState) => {
         if (isEmpty(newAppState)) {
           return;
@@ -41,8 +41,20 @@ export const subscribeToDiscoverState =
       },
     });
 
+    const dataStateSubscription = dataState.data$.documents$.subscribe({
+      next: (newDataState) => {
+        if (!isEmpty(newDataState?.result)) {
+          send({
+            type: 'RECEIVE_DISCOVER_DATA_STATE',
+            dataState: newDataState.result,
+          });
+        }
+      },
+    });
+
     return () => {
-      subscription.unsubscribe();
+      appStateSubscription.unsubscribe();
+      dataStateSubscription.unsubscribe();
     };
   };
 
@@ -65,6 +77,19 @@ export const updateContextFromDiscoverAppState = actions.assign<
         },
       },
       ...getQueryStateFromDiscoverAppState(event.appState),
+    };
+  }
+
+  return {};
+});
+
+export const updateContextFromDiscoverDataState = actions.assign<
+  LogsExplorerControllerContext,
+  LogsExplorerControllerEvent
+>((context, event) => {
+  if ('dataState' in event && event.type === 'RECEIVE_DISCOVER_DATA_STATE') {
+    return {
+      rows: event.dataState,
     };
   }
 
