@@ -577,10 +577,9 @@ export class AbstractLayer implements ILayer {
 
   getGeoFieldNames(): string[] {
     const source = this.getSource();
-    if (!hasESSourceMethod(source, 'getGeoFieldName')) {
-      return [];
-    }
-    const geoFieldName = source.getGeoFieldName();
+    const geoFieldName = hasESSourceMethod(source, 'getGeoFieldName')
+      ? source.getGeoFieldName()
+      : undefined;
     return geoFieldName ? [geoFieldName] : [];
   }
 
