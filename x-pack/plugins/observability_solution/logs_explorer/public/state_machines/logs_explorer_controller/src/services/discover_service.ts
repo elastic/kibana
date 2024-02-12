@@ -8,6 +8,10 @@
 import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
+import {
+  getDiscoverColumnsWithFallbackFieldsFromDisplayOptions,
+  getDiscoverFiltersFromState,
+} from '../../../../utils/convert_discover_app_state';
 import { DataViewSelection, isDataViewSelection } from '../../../../../common/dataset_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
@@ -129,11 +133,12 @@ export const redirectToDiscover = ({
   datasetSelection: DataViewSelection;
 }) => {
   return discover.locator?.navigate({
+    breakdownField: context.chart.breakdownField ?? undefined,
+    columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(context),
+    dataViewSpec: datasetSelection.selection.dataView.toDataviewSpec(),
     filters: context.filters,
     query: context.query,
     refreshInterval: context.refreshInterval,
     timeRange: context.time,
-    breakdownField: context.chart.breakdownField ?? undefined,
-    dataViewSpec: datasetSelection.selection.dataView.toDataviewSpec(),
   });
 };
