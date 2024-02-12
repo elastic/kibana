@@ -15,14 +15,15 @@ export function defineAuthorizationRoutes(params: RouteDefinitionParams) {
   // The reset session endpoint is registered with httpResources and should remain public in serverless
   resetSessionPageRoutes(params);
 
-  if (params.config.ui.roleManagementEnabled !== false) {
-    defineRolesRoutes(params);
-  }
-
   // In the serverless environment, roles, privileges, and permissions are managed internally and only
   // exposed to users and administrators via control plane UI, eliminating the need for any public HTTP APIs.
   if (params.buildFlavor !== 'serverless') {
     definePrivilegesRoutes(params);
     defineShareSavedObjectPermissionRoutes(params);
+    defineRolesRoutes(params);
+  } else {
+    if (params?.config?.ui?.roleManagementEnabled) {
+      defineRolesRoutes(params);
+    }
   }
 }
