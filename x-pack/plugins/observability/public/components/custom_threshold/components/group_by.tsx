@@ -6,26 +6,26 @@
  */
 
 import { EuiComboBox } from '@elastic/eui';
+import { DataViewFieldBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 
 import React, { useCallback } from 'react';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
-import { DerivedIndexPattern } from '../types';
+
+export type MetricsExplorerFields = Array<DataViewFieldBase & { aggregatable: boolean }>;
+
+export type GroupBy = string | null | string[];
+export interface GroupByOptions {
+  groupBy: GroupBy;
+}
 
 interface Props {
-  options: MetricsExplorerOptions;
-  onChange: (groupBy: string | null | string[]) => void;
-  fields: DerivedIndexPattern['fields'];
+  options: GroupByOptions;
+  onChange: (groupBy: GroupBy) => void;
+  fields: MetricsExplorerFields;
   errorOptions?: string[];
 }
 
-export function MetricsExplorerGroupBy({
-  options,
-  onChange,
-  fields,
-  errorOptions,
-  ...rest
-}: Props) {
+export function GroupBy({ options, onChange, fields, errorOptions, ...rest }: Props) {
   const handleChange = useCallback(
     (selectedOptions: Array<{ label: string }>) => {
       const groupBy = selectedOptions.map((option) => option.label);

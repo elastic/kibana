@@ -16,6 +16,7 @@ import { isTextBasedQuery } from '../application/main/utils/is_text_based_query'
 import { SearchProps } from './saved_search_embeddable';
 
 interface SavedSearchEmbeddableComponentProps {
+  fetchedSampleSize: number;
   searchProps: SearchProps;
   useLegacyTable: boolean;
   query?: AggregateQuery | Query;
@@ -25,6 +26,7 @@ const DiscoverDocTableEmbeddableMemoized = React.memo(DiscoverDocTableEmbeddable
 const DiscoverGridEmbeddableMemoized = React.memo(DiscoverGridEmbeddable);
 
 export function SavedSearchEmbeddableComponent({
+  fetchedSampleSize,
   searchProps,
   useLegacyTable,
   query,
@@ -34,6 +36,7 @@ export function SavedSearchEmbeddableComponent({
     return (
       <DiscoverDocTableEmbeddableMemoized
         {...(searchProps as DocTableEmbeddableProps)} // TODO later: remove the type casting to prevent unexpected errors due to missing props!
+        sampleSizeState={fetchedSampleSize}
         isPlainRecord={isPlainRecord}
       />
     );
@@ -41,9 +44,9 @@ export function SavedSearchEmbeddableComponent({
   return (
     <DiscoverGridEmbeddableMemoized
       {...(searchProps as DiscoverGridEmbeddableProps)} // TODO later: remove the type casting to prevent unexpected errors due to missing props!
+      sampleSizeState={fetchedSampleSize}
       loadingState={searchProps.isLoading ? DataLoadingState.loading : DataLoadingState.loaded}
       showFullScreenButton={false}
-      showColumnTokens
       query={query}
       className="unifiedDataTable"
     />

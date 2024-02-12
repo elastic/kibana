@@ -28,6 +28,7 @@ export interface FiltersBuilderProps {
   hideOr?: boolean;
   disabled?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
+  filtersCount?: number;
 }
 
 const rootLevelConditionType = BooleanRelation.AND;
@@ -43,6 +44,7 @@ function FiltersBuilder({
   hideOr = false,
   disabled = false,
   suggestionsAbstraction,
+  filtersCount,
 }: FiltersBuilderProps) {
   const filtersRef = useRef(filters);
   const [state, dispatch] = useReducer(FiltersBuilderReducer, { filters });
@@ -135,7 +137,12 @@ function FiltersBuilder({
         }}
       >
         <EuiDragDropContext onDragEnd={onDragEnd} onDragUpdate={onDragActive}>
-          <FilterGroup filters={state.filters} booleanRelation={rootLevelConditionType} path={''} />
+          <FilterGroup
+            filters={state.filters}
+            booleanRelation={rootLevelConditionType}
+            path={''}
+            filtersCount={filtersCount}
+          />
         </EuiDragDropContext>
       </FiltersBuilderContextType.Provider>
     </div>

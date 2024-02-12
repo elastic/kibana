@@ -146,7 +146,7 @@ export const SourceSelection: FC = () => {
                 type: 'index-pattern',
                 getIconForSavedObject: () => 'indexPatternApp',
                 name: i18n.translate(
-                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.indexPattern',
+                  'xpack.ml.dataFrame.analytics.create.searchSelection.savedObjectType.dataView',
                   {
                     defaultMessage: 'Data view',
                   }

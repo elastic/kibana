@@ -7,6 +7,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { SettingsProps } from '@elastic/charts';
 import { Chart, BarSeries, Axis, Position, ScaleType, Settings } from '@elastic/charts';
 import { getOr, get, isNumber } from 'lodash/fp';
@@ -118,7 +119,11 @@ export const BarChartBaseComponent = ({
 
   return chartConfigs.width && chartConfigs.height ? (
     <Chart>
-      <Settings {...settings} showLegend={settings.showLegend && !forceHiddenLegend} />
+      <Settings
+        {...settings}
+        showLegend={settings.showLegend && !forceHiddenLegend}
+        locale={i18n.getLocale()}
+      />
       {data.map((series) => {
         const barSeriesKey = series.key;
         return checkIfAllTheDataInTheSeriesAreValid(series) ? (

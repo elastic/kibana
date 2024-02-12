@@ -28,11 +28,11 @@ import {
 import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
-import { ILayer, LayerIcon } from '../layer';
+import { ILayer, LayerIcon, LayerMessage } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
-export function isLayerGroup(layer: ILayer) {
+export function isLayerGroup(layer: ILayer): layer is LayerGroup {
   return layer instanceof LayerGroup;
 }
 
@@ -110,12 +110,6 @@ export class LayerGroup implements ILayer {
 
   isPreviewLayer(): boolean {
     return !!this._descriptor.__isPreviewLayer;
-  }
-
-  supportsElasticsearchFilters(): boolean {
-    return this.getChildren().some((child) => {
-      return child.supportsElasticsearchFilters();
-    });
   }
 
   async supportsFitToBounds(): Promise<boolean> {
@@ -284,6 +278,10 @@ export class LayerGroup implements ILayer {
   }
 
   isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible()) {
+      return false;
+    }
+
     return this._children.some((child) => {
       return child.isLayerLoading(zoom);
     });
@@ -295,11 +293,36 @@ export class LayerGroup implements ILayer {
     });
   }
 
-  getErrors(): string {
-    const firstChildWithError = this._children.find((child) => {
-      return child.hasErrors();
+  getErrors(): LayerMessage[] {
+    return this.hasErrors()
+      ? [
+          {
+            title: i18n.translate('xpack.maps.layerGroup.childrenErrorMessage', {
+              defaultMessage: `An error occurred when loading nested layers`,
+            }),
+            body: '',
+          },
+        ]
+      : [];
+  }
+
+  hasWarnings(): boolean {
+    return this._children.some((child) => {
+      return child.hasWarnings();
     });
-    return firstChildWithError ? firstChildWithError.getErrors() : '';
+  }
+
+  getWarnings(): LayerMessage[] {
+    return this.hasWarnings()
+      ? [
+          {
+            title: i18n.translate('xpack.maps.layerGroup.incompleteResultsWarning', {
+              defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
+            }),
+            body: '',
+          },
+        ]
+      : [];
   }
 
   async syncData(syncContext: DataRequestContext) {

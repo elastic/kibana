@@ -17,11 +17,11 @@ import React, { useCallback, useMemo } from 'react';
 import type { DashboardCapabilities } from '@kbn/dashboard-plugin/common/types';
 import { DashboardListingTable, LEGACY_DASHBOARD_APP_ID } from '@kbn/dashboard-plugin/public';
 import { LandingLinksImageCards } from '@kbn/security-solution-navigation/landing_links';
-import { useObservable } from 'react-use';
+import { useContractComponents } from '../../../common/hooks/use_contract_component';
 import { SecuritySolutionPageWrapper } from '../../../common/components/page_wrapper';
 import { SpyRoute } from '../../../common/utils/route/spy_routes';
 import { SecurityPageName } from '../../../../common/constants';
-import { useCapabilities, useKibana, useNavigateTo } from '../../../common/lib/kibana';
+import { useCapabilities, useNavigateTo } from '../../../common/lib/kibana';
 import { useRootNavLink } from '../../../common/links/nav_links';
 import { Title } from '../../../common/components/header_page/title';
 import { LinkButton } from '../../../common/components/links/helpers';
@@ -83,8 +83,7 @@ const Header: React.FC<{ canCreateDashboard: boolean }> = ({ canCreateDashboard 
 };
 
 export const DashboardsLandingPage = () => {
-  const { getComponent$ } = useKibana().services;
-  const dashboardLandingCallout = useObservable(getComponent$('dashboardsLandingCallout'));
+  const { DashboardsLandingCallout } = useContractComponents();
   const { links = [] } = useRootNavLink(SecurityPageName.dashboards) ?? {};
   const urlState = useGlobalQueryString();
   const { show: canReadDashboard, createNew: canCreateDashboard } =
@@ -122,9 +121,9 @@ export const DashboardsLandingPage = () => {
       <Header canCreateDashboard={canCreateDashboard} />
       <EuiSpacer size="xl" />
 
-      {dashboardLandingCallout && (
+      {DashboardsLandingCallout && (
         <>
-          {dashboardLandingCallout}
+          <DashboardsLandingCallout />
           <EuiSpacer size="xl" />
         </>
       )}

@@ -7,8 +7,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ContentManagementExamplesPlugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { ContentManagementExamplesPlugin } = await import('./plugin');
   return new ContentManagementExamplesPlugin(initializerContext);
 }

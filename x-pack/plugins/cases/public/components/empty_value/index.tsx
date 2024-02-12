@@ -20,12 +20,12 @@ EmptyWrapper.displayName = 'EmptyWrapper';
 export const getEmptyValue = () => '—';
 export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 
-export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
+export const getEmptyCellValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
 export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
 
 export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
   if (item == null) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   } else if (isString(item) && item === '') {
     return getEmptyStringTag();
   } else {
@@ -40,7 +40,7 @@ export const getOrEmptyTag = (path: string, item: unknown): JSX.Element => {
 
 export const getOrEmptyTagFromValue = (value: string | number | null | undefined): JSX.Element => {
   if (value == null) {
-    return getEmptyTagValue();
+    return getEmptyCellValue();
   } else if (value === '') {
     return getEmptyStringTag();
   } else {

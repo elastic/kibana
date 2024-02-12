@@ -26,15 +26,20 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { ConnectorStatus } from '@kbn/search-connectors';
+import { ConnectorConfigurationComponent, ConnectorStatus } from '@kbn/search-connectors';
+
+import { Status } from '../../../../../../common/types/api';
 
 import { BetaConnectorCallout } from '../../../../shared/beta/beta_connector_callout';
 import { useCloudDetails } from '../../../../shared/cloud_details/cloud_details';
 import { docLinks } from '../../../../shared/doc_links';
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
+import { HttpLogic } from '../../../../shared/http/http_logic';
+import { LicensingLogic } from '../../../../shared/licensing';
 import { EuiButtonTo, EuiLinkTo } from '../../../../shared/react_router_helpers';
 
 import { GenerateConnectorApiKeyApiLogic } from '../../../api/connector/generate_connector_api_key_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../../api/connector/update_connector_configuration_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { isConnectorIndex } from '../../../utils/indices';
 
@@ -45,7 +50,6 @@ import { IndexViewLogic } from '../index_view_logic';
 import { SearchIndexTabId } from '../search_index';
 
 import { ApiKeyConfig } from './api_key_configuration';
-import { ConnectorConfigurationConfig } from './connector_configuration_config';
 import { ConnectorNameAndDescription } from './connector_name_and_description/connector_name_and_description';
 import { BETA_CONNECTORS, CONNECTORS, getConnectorTemplate } from './constants';
 import { NativeConnectorConfiguration } from './native_connector_configuration/native_connector_configuration';
@@ -56,6 +60,10 @@ export const ConnectorConfiguration: React.FC = () => {
   const { indexName } = useValues(IndexNameLogic);
   const { recheckIndex } = useActions(IndexViewLogic);
   const cloudContext = useCloudDetails();
+  const { hasPlatinumLicense } = useValues(LicensingLogic);
+  const { status } = useValues(ConnectorConfigurationApiLogic);
+  const { makeRequest } = useActions(ConnectorConfigurationApiLogic);
+  const { http } = useValues(HttpLogic);
 
   if (!isConnectorIndex(index)) {
     return <></>;
@@ -87,7 +95,12 @@ export const ConnectorConfiguration: React.FC = () => {
               steps={[
                 {
                   children: (
-                    <ApiKeyConfig indexName={indexName} hasApiKey={!!index.connector.api_key_id} />
+                    <ApiKeyConfig
+                      indexName={indexName}
+                      hasApiKey={!!index.connector.api_key_id}
+                      isNative={false}
+                      secretId={null}
+                    />
                   ),
                   status: hasApiKey ? 'complete' : 'incomplete',
                   title: i18n.translate(
@@ -114,29 +127,8 @@ export const ConnectorConfiguration: React.FC = () => {
                     <>
                       <EuiText size="s">
                         <FormattedMessage
-                          id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.secondParagraph"
-                          defaultMessage="The connectors repository contains several {link}. Use our framework to accelerate developing connectors for custom data sources."
-                          values={{
-                            link: (
-                              <EuiLink
-                                href="https://github.com/elastic/connectors-python/tree/main/connectors"
-                                target="_blank"
-                                external
-                              >
-                                {i18n.translate(
-                                  'xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.clientExamplesLink',
-                                  { defaultMessage: 'connector client examples' }
-                                )}
-                              </EuiLink>
-                            ),
-                          }}
-                        />
-                      </EuiText>
-                      <EuiSpacer />
-                      <EuiText size="s">
-                        <FormattedMessage
                           id="xpack.enterpriseSearch.content.indices.configurationConnector.connectorPackage.description.thirdParagraph"
-                          defaultMessage="In this step, you will need to clone or fork the repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
+                          defaultMessage="In this step, you will need to clone or fork the Elastic connectors repository, and copy the generated API key and connector ID to the associated {link}. The connector ID will identify this connector to Search. The service type will determine which type of data source the connector is configured for."
                           values={{
                             link: (
                               <EuiLink
@@ -183,14 +175,29 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.deployConnector.title',
                     {
-                      defaultMessage: 'Deploy connector',
+                      defaultMessage: 'Deploy connector service',
                     }
                   ),
                   titleSize: 'xs',
                 },
                 {
                   children: (
-                    <ConnectorConfigurationConfig>
+                    <ConnectorConfigurationComponent
+                      connector={index.connector}
+                      hasPlatinumLicense={hasPlatinumLicense}
+                      isLoading={status === Status.LOADING}
+                      saveConfig={(configuration) =>
+                        makeRequest({
+                          configuration,
+                          connectorId: index.connector.id,
+                          indexName: index.name,
+                        })
+                      }
+                      subscriptionLink={docLinks.licenseManagement}
+                      stackManagementLink={http.basePath.prepend(
+                        '/app/management/stack/license_management'
+                      )}
+                    >
                       {!index.connector.status ||
                       index.connector.status === ConnectorStatus.CREATED ? (
                         <EuiCallOut
@@ -238,7 +245,7 @@ export const ConnectorConfiguration: React.FC = () => {
                           )}
                         />
                       )}
-                    </ConnectorConfigurationConfig>
+                    </ConnectorConfigurationComponent>
                   ),
                   status:
                     index.connector.status === ConnectorStatus.CONNECTED
@@ -247,7 +254,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.enhance.title',
                     {
-                      defaultMessage: 'Enhance your connector client',
+                      defaultMessage: 'Configure your connector client',
                     }
                   ),
                   titleSize: 'xs',
@@ -296,7 +303,7 @@ export const ConnectorConfiguration: React.FC = () => {
                   title: i18n.translate(
                     'xpack.enterpriseSearch.content.indices.configurationConnector.steps.schedule.title',
                     {
-                      defaultMessage: 'Advanced configuration',
+                      defaultMessage: 'Sync your data',
                     }
                   ),
                   titleSize: 'xs',

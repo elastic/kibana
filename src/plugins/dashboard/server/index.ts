@@ -7,7 +7,6 @@
  */
 
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import { DashboardPlugin } from './plugin';
 import { configSchema, ConfigSchema } from '../config';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
@@ -20,7 +19,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
 //  This exports static code and TypeScript types,
 //  as well as, Kibana Platform `plugin()` initializer.
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { DashboardPlugin } = await import('./plugin');
   return new DashboardPlugin(initializerContext);
 }
 

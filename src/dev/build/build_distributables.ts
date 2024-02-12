@@ -26,6 +26,7 @@ export interface BuildOptions {
   createGenericFolders: boolean;
   createPlatformFolders: boolean;
   createArchives: boolean;
+  createCdnAssets: boolean;
   createRpmPackage: boolean;
   createDebPackage: boolean;
   createDockerUBI: boolean;
@@ -33,6 +34,7 @@ export interface BuildOptions {
   createDockerCloud: boolean;
   createDockerServerless: boolean;
   createDockerContexts: boolean;
+  createDockerFIPS: boolean;
   versionQualifier: string | undefined;
   targetAllPlatforms: boolean;
   withExamplePlugins: boolean;
@@ -113,6 +115,10 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
     await run(Tasks.AssertPathLength);
     await run(Tasks.AssertNoUUID);
   }
+  // control w/ --skip-cdn-assets
+  if (options.createCdnAssets) {
+    await run(Tasks.CreateCdnAssets);
+  }
 
   /**
    * package platform-specific builds into archives
@@ -156,6 +162,11 @@ export async function buildDistributables(log: ToolingLog, options: BuildOptions
   if (options.createDockerServerless) {
     // control w/ --docker-images and --skip-docker-serverless
     await run(Tasks.CreateDockerServerless);
+  }
+
+  if (options.createDockerFIPS) {
+    // control w/ --docker-images or --skip-docker-fips or --skip-os-packages
+    await run(Tasks.CreateDockerFIPS);
   }
 
   if (options.createDockerContexts) {

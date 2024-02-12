@@ -13,12 +13,21 @@ import semverGt from 'semver/functions/gt';
 import semverMajor from 'semver/functions/major';
 import semverMinor from 'semver/functions/minor';
 
+import moment from 'moment';
+
 import type { PostAgentUpgradeResponse } from '../../../common/types';
 import type { PostAgentUpgradeRequestSchema, PostBulkAgentUpgradeRequestSchema } from '../../types';
 import * as AgentService from '../../services/agents';
 import { appContextService } from '../../services';
-import { defaultFleetErrorHandler } from '../../errors';
-import { isAgentUpgradeable } from '../../../common/services';
+import { defaultFleetErrorHandler, AgentRequestInvalidError } from '../../errors';
+import {
+  getRecentUpgradeInfoForAgent,
+  AGENT_UPGRADE_COOLDOWN_IN_MIN,
+  isAgentUpgrading,
+  getNotUpgradeableMessage,
+  isAgentUpgradeableToVersion,
+  differsOnlyInPatch,
+} from '../../../common/services';
 import { getMaxVersion } from '../../../common/services/get_min_max_version';
 import { getAgentById } from '../../services/agents';
 import type { Agent } from '../../types';
@@ -67,6 +76,24 @@ export const postAgentUpgradeHandler: RequestHandler<
       }
     }
 
+    const { hasBeenUpgradedRecently, timeToWaitMs } = getRecentUpgradeInfoForAgent(agent);
+    const timeToWaitString = moment
+      .utc(moment.duration(timeToWaitMs).asMilliseconds())
+      .format('mm[m]ss[s]');
+
+    if (hasBeenUpgradedRecently) {
+      return response.customError({
+        statusCode: 429,
+        body: {
+          message: `agent ${request.params.agentId} was upgraded less than ${AGENT_UPGRADE_COOLDOWN_IN_MIN} minutes ago. Please wait ${timeToWaitString} before trying again to ensure the upgrade will not be rolled back.`,
+        },
+        headers: {
+          // retry-after expects seconds
+          'retry-after': Math.ceil(timeToWaitMs / 1000).toString(),
+        },
+      });
+    }
+
     if (agent.unenrollment_started_at || agent.unenrolled_at) {
       return response.customError({
         statusCode: 400,
@@ -75,11 +102,25 @@ export const postAgentUpgradeHandler: RequestHandler<
         },
       });
     }
-    if (!force && !isAgentUpgradeable(agent, latestAgentVersion, version)) {
+
+    if (!force && isAgentUpgrading(agent)) {
       return response.customError({
         statusCode: 400,
         body: {
-          message: `agent ${request.params.agentId} is not upgradeable`,
+          message: `agent ${request.params.agentId} is already upgrading`,
+        },
+      });
+    }
+
+    if (!force && !isAgentUpgradeableToVersion(agent, version)) {
+      return response.customError({
+        statusCode: 400,
+        body: {
+          message: `Agent ${request.params.agentId} is not upgradeable: ${getNotUpgradeableMessage(
+            agent,
+            latestAgentVersion,
+            version
+          )}`,
         },
       });
     }
@@ -152,14 +193,19 @@ export const postBulkAgentsUpgradeHandler: RequestHandler<
 export const checkKibanaVersion = (version: string, kibanaVersion: string, force = false) => {
   // get version number only in case "-SNAPSHOT" is in it
   const kibanaVersionNumber = semverCoerce(kibanaVersion)?.version;
-  if (!kibanaVersionNumber) throw new Error(`kibanaVersion ${kibanaVersionNumber} is not valid`);
+  if (!kibanaVersionNumber)
+    throw new AgentRequestInvalidError(`KibanaVersion ${kibanaVersionNumber} is not valid`);
   const versionToUpgradeNumber = semverCoerce(version)?.version;
   if (!versionToUpgradeNumber)
-    throw new Error(`version to upgrade ${versionToUpgradeNumber} is not valid`);
+    throw new AgentRequestInvalidError(`Version to upgrade ${versionToUpgradeNumber} is not valid`);
 
-  if (!force && semverGt(versionToUpgradeNumber, kibanaVersionNumber)) {
-    throw new Error(
-      `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, kibanaVersionNumber) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, kibanaVersionNumber)
+  ) {
+    throw new AgentRequestInvalidError(
+      `Cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the installed kibana version ${kibanaVersionNumber}`
     );
   }
 
@@ -170,14 +216,14 @@ export const checkKibanaVersion = (version: string, kibanaVersion: string, force
 
   // When force is enabled, only the major and minor versions are checked
   if (force && !(kibanaMajorGt || kibanaMajorEqMinorGte)) {
-    throw new Error(
-      `cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the installed kibana version ${kibanaVersionNumber}`
+    throw new AgentRequestInvalidError(
+      `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the installed kibana version ${kibanaVersionNumber}`
     );
   }
 };
 
 // Check the installed fleet server version
-const checkFleetServerVersion = (
+export const checkFleetServerVersion = (
   versionToUpgradeNumber: string,
   fleetServerAgents: Agent[],
   force = false
@@ -192,7 +238,11 @@ const checkFleetServerVersion = (
     return;
   }
 
-  if (!force && semverGt(versionToUpgradeNumber, maxFleetServerVersion)) {
+  if (
+    !force &&
+    semverGt(versionToUpgradeNumber, maxFleetServerVersion) &&
+    !differsOnlyInPatch(versionToUpgradeNumber, maxFleetServerVersion)
+  ) {
     throw new Error(
       `cannot upgrade agent to ${versionToUpgradeNumber} because it is higher than the latest fleet server version ${maxFleetServerVersion}`
     );
@@ -206,8 +256,8 @@ const checkFleetServerVersion = (
 
   // When force is enabled, only the major and minor versions are checked
   if (force && !(fleetServerMajorGt || fleetServerMajorEqMinorGte)) {
-    throw new Error(
-      `cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
+    throw new AgentRequestInvalidError(
+      `Cannot force upgrade agent to ${versionToUpgradeNumber} because it does not satisfy the major and minor of the latest fleet server version ${maxFleetServerVersion}`
     );
   }
 };

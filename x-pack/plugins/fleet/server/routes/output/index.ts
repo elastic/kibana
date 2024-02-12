@@ -12,6 +12,7 @@ import { API_VERSIONS } from '../../../common/constants';
 import { OUTPUT_API_ROUTES } from '../../constants';
 import {
   DeleteOutputRequestSchema,
+  GetLatestOutputHealthRequestSchema,
   GetOneOutputRequestSchema,
   GetOutputsRequestSchema,
   PostOutputRequestSchema,
@@ -25,6 +26,7 @@ import {
   postOutputHandler,
   putOutputHandler,
   postLogstashApiKeyHandler,
+  getLatestOutputHealth,
 } from './handler';
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
@@ -114,5 +116,20 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         validate: false,
       },
       postLogstashApiKeyHandler
+    );
+
+  router.versioned
+    .get({
+      path: OUTPUT_API_ROUTES.GET_OUTPUT_HEALTH_PATTERN,
+      fleetAuthz: {
+        fleet: { all: true },
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetLatestOutputHealthRequestSchema },
+      },
+      getLatestOutputHealth
     );
 };

@@ -37,6 +37,7 @@ export class DataViewsStorage extends SOContentStorage<DataViewCrudTypes> {
         'runtimeFieldMap',
         'allowNoIndex',
         'name',
+        'allowHidden',
       ],
       mSearchAdditionalSearchFields: ['name'],
       logger,

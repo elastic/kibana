@@ -93,10 +93,7 @@ describe('OsCgroupMetricsCollector', () => {
     await collector.collect();
 
     expect(gatherV2CgroupMetrics).toHaveBeenCalledTimes(1);
-    expect(gatherV2CgroupMetrics).toHaveBeenCalledWith({
-      cpuAcctPath: '/groupname',
-      cpuPath: '/groupname',
-    });
+    expect(gatherV2CgroupMetrics).toHaveBeenCalledWith('/groupname');
     expect(gatherV1CgroupMetrics).toHaveBeenCalledTimes(0);
   });
 

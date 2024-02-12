@@ -1311,36 +1311,6 @@
       },
       {
         "parentPluginId": "@kbn/cell-actions",
-        "id": "def-common.COPY_CELL_ACTION_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "COPY_CELL_ACTION_TYPE",
-        "description": [],
-        "signature": [
-          "\"cellAction-copy\""
-        ],
-        "path": "packages/kbn-cell-actions/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cell-actions",
-        "id": "def-common.FILTER_CELL_ACTION_TYPE",
-        "type": "string",
-        "tags": [],
-        "label": "FILTER_CELL_ACTION_TYPE",
-        "description": [],
-        "signature": [
-          "\"cellAction-filter\""
-        ],
-        "path": "packages/kbn-cell-actions/src/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cell-actions",
         "id": "def-common.UseDataGridColumnsCellActions",
         "type": "Type",
         "tags": [],

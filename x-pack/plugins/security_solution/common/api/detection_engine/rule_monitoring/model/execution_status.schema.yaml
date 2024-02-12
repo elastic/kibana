@@ -22,3 +22,6 @@ components:
         - partial failure
         - failed
         - succeeded
+
+    RuleExecutionStatusOrder:
+      type: integer

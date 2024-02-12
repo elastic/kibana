@@ -18,11 +18,13 @@ export const ML_INTERNAL_BASE_PATH = '/internal/ml';
 export const ML_EXTERNAL_BASE_PATH = '/api/ml';
 
 export type MlFeatures = Record<'ad' | 'dfa' | 'nlp', boolean>;
+export type CompatibleModule = 'security' | 'observability' | 'search';
 
 export interface ConfigSchema {
   ad?: { enabled: boolean };
   dfa?: { enabled: boolean };
   nlp?: { enabled: boolean };
+  compatibleModuleType?: CompatibleModule;
 }
 
 export function initEnabledFeatures(enabledFeatures: MlFeatures, config: ConfigSchema) {

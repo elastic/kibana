@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
+import {
+  kqlQuery,
+  rangeQuery,
+  wildcardQuery,
+} from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
@@ -44,6 +48,8 @@ interface AggregationParams {
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
+  searchQuery: string | undefined;
 }
 
 export interface ServiceTransactionStatsResponse {
@@ -70,13 +76,18 @@ export async function getServiceTransactionStats({
   randomSampler,
   documentType,
   rollupInterval,
+  useDurationSummary,
+  searchQuery,
 }: AggregationParams): Promise<ServiceTransactionStatsResponse> {
   const outcomes = getOutcomeAggregation(documentType);
 
   const metrics = {
     avg_duration: {
       avg: {
-        field: getDurationFieldForTransactions(documentType),
+        field: getDurationFieldForTransactions(
+          documentType,
+          useDurationSummary
+        ),
       },
     },
     ...outcomes,
@@ -103,6 +114,7 @@ export async function getServiceTransactionStats({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
               ...serviceGroupWithOverflowQuery(serviceGroup),
+              ...wildcardQuery(SERVICE_NAME, searchQuery),
             ],
           },
         },
@@ -184,6 +196,6 @@ export async function getServiceTransactionStats({
         };
       }) ?? [],
     serviceOverflowCount:
-      response.aggregations?.sample?.overflowCount.value || 0,
+      response.aggregations?.sample?.overflowCount?.value || 0,
   };
 }

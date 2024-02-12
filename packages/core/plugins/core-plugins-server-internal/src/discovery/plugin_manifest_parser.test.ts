@@ -19,6 +19,7 @@ const packageInfo: PackageInfo = {
   branch: 'master',
   buildNum: 1,
   buildSha: '',
+  buildShaShort: '',
   version: '7.0.0-alpha1',
   dist: false,
   buildDate: new Date('2023-05-15T23:12:09.000Z'),
@@ -59,7 +60,7 @@ test('return error when manifest content is not a valid JSON', async () => {
   });
 
   await expect(parseManifest(pluginPath, packageInfo)).rejects.toMatchObject({
-    message: `Unexpected token o in JSON at position 1 (invalid-manifest, ${pluginManifestPath})`,
+    message: `Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${pluginManifestPath})`,
     type: PluginDiscoveryErrorType.InvalidManifest,
     path: pluginManifestPath,
   });
@@ -388,6 +389,7 @@ test('set defaults for all missing optional fields', async () => {
     optionalPlugins: [],
     requiredPlugins: [],
     requiredBundles: [],
+    runtimePluginDependencies: [],
     server: true,
     ui: false,
     owner: { name: 'foo' },
@@ -407,6 +409,7 @@ test('return all set optional fields as they are in manifest', async () => {
           type: 'preboot',
           requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
           optionalPlugins: ['some-optional-plugin'],
+          runtimePluginDependencies: ['runtime-plugin-dependency'],
           ui: true,
           owner: { name: 'foo' },
           enabledOnAnonymousPages: true,
@@ -424,6 +427,7 @@ test('return all set optional fields as they are in manifest', async () => {
     optionalPlugins: ['some-optional-plugin'],
     requiredBundles: [],
     requiredPlugins: ['some-required-plugin', 'some-required-plugin-2'],
+    runtimePluginDependencies: ['runtime-plugin-dependency'],
     server: false,
     ui: true,
     owner: { name: 'foo' },
@@ -458,6 +462,7 @@ test('return manifest when plugin expected Kibana version matches actual version
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
+    runtimePluginDependencies: [],
     server: true,
     ui: false,
     owner: { name: 'foo' },
@@ -491,6 +496,7 @@ test('return manifest when plugin expected Kibana version is `kibana`', async ()
     optionalPlugins: [],
     requiredPlugins: ['some-required-plugin'],
     requiredBundles: [],
+    runtimePluginDependencies: [],
     server: true,
     ui: true,
     owner: { name: 'foo' },

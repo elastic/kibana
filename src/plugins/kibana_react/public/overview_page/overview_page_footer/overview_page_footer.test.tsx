@@ -10,7 +10,7 @@ import React from 'react';
 import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
-jest.mock('../../app_links', () => ({
+jest.mock('@kbn/shared-ux-link-redirect-app', () => ({
   RedirectAppLinks: jest.fn((element: JSX.Element) => element),
 }));
 

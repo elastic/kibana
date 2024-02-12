@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { FeaturesPlugin } from './plugin';
 
 // These exports are part of public Features plugin contract, any change in signature of exported
 // functions or removal of exports should be considered as a breaking change. Ideally we should
@@ -23,5 +22,7 @@ export type {
 export { KibanaFeature, ElasticsearchFeature } from '../common';
 export type { PluginSetupContract, PluginStartContract } from './plugin';
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new FeaturesPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { FeaturesPlugin } = await import('./plugin');
+  return new FeaturesPlugin(initializerContext);
+};

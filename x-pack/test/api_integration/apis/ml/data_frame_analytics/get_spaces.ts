@@ -207,7 +207,6 @@ export default ({ getService }: FtrProviderContext) => {
           `Expected 0 map elements, got ${body.elements.length}`
         );
         expect(body.details).to.eql({});
-        expect(body.error).to.eql(`No known job with id '${jobIdSpace1}'`);
       });
     });
   });

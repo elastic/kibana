@@ -7,7 +7,6 @@
 
 import { partition } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import type {
   SuggestionRequest,
   TableSuggestionColumn,
@@ -24,6 +23,7 @@ import { isPartitionShape } from '../../../common/visualizations';
 import type { PieChartType } from '../../../common/types';
 import { PartitionChartsMeta } from './partition_charts_meta';
 import { layerTypes } from '../..';
+import { getColorMappingDefaults } from '../../utils';
 
 function hasIntervalScale(columns: TableSuggestionColumn[]) {
   return columns.some((col) => col.operation.scale === 'interval');
@@ -142,7 +142,7 @@ export function suggestions({
                 metrics: metricColumnIds,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+                  ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : state.layers[0].colorMapping,
@@ -157,7 +157,7 @@ export function suggestions({
                 nestedLegend: false,
                 layerType: layerTypes.DATA,
                 colorMapping: !mainPalette
-                  ? { ...DEFAULT_COLOR_MAPPING_CONFIG }
+                  ? getColorMappingDefaults()
                   : mainPalette?.type === 'colorMapping'
                   ? mainPalette.value
                   : undefined,
@@ -239,12 +239,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.treemap.icon,
-      // hide treemap suggestions from bottom bar, but keep them for chart switcher
-      hide:
-        table.changeType === 'reduced' ||
-        !state ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === PieChartTypes.TREEMAP),
+      hide: table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -292,11 +287,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.mosaic.icon,
-      hide:
-        groups.length !== 2 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'mosaic'),
+      hide: groups.length !== 2 || table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -341,11 +332,7 @@ export function suggestions({
         ],
       },
       previewIcon: PartitionChartsMeta.waffle.icon,
-      hide:
-        groups.length !== 1 ||
-        table.changeType === 'reduced' ||
-        hasIntervalScale(groups) ||
-        (state && state.shape === 'waffle'),
+      hide: groups.length !== 1 || table.changeType === 'reduced' || hasIntervalScale(groups),
     });
   }
 
@@ -359,7 +346,12 @@ export function suggestions({
     .sort((a, b) => b.score - a.score)
     .map((suggestion) => ({
       ...suggestion,
-      hide: shouldHideSuggestion || incompleteConfiguration || suggestion.hide,
+      hide:
+        // avoid to suggest the same shape if already used
+        (state && state.shape === suggestion.state.shape) ||
+        shouldHideSuggestion ||
+        incompleteConfiguration ||
+        suggestion.hide,
       incomplete: incompleteConfiguration,
     }));
 }

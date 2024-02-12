@@ -36,25 +36,30 @@ export const useCreateOrUpdateException = (): ReturnUseCreateOrUpdateException =
     const abortCtrl = new AbortController();
 
     const onCreateOrUpdateExceptionItem: CreateOrUpdateExceptionItemsFunc = async (items) => {
-      setIsLoading(true);
-      const itemsAdded = await Promise.all(
-        items.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
-          if ('id' in item && item.id != null) {
-            const formattedExceptionItem = formatExceptionItemForUpdate(item);
-            return updateExceptionListItem({
-              listItem: formattedExceptionItem,
-            });
-          } else {
-            return addExceptionListItem({
-              listItem: item,
-            });
-          }
-        })
-      );
+      try {
+        setIsLoading(true);
+        const itemsAdded = await Promise.all(
+          items.map((item: ExceptionListItemSchema | CreateExceptionListItemSchema) => {
+            if ('id' in item && item.id != null) {
+              const formattedExceptionItem = formatExceptionItemForUpdate(item);
+              return updateExceptionListItem({
+                listItem: formattedExceptionItem,
+              });
+            } else {
+              return addExceptionListItem({
+                listItem: item,
+              });
+            }
+          })
+        );
 
-      setIsLoading(false);
+        setIsLoading(false);
 
-      return itemsAdded;
+        return itemsAdded;
+      } catch (e) {
+        setIsLoading(false);
+        throw e;
+      }
     };
 
     addOrUpdateExceptionRef.current = onCreateOrUpdateExceptionItem;

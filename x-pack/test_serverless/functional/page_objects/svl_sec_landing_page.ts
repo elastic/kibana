@@ -12,7 +12,7 @@ export function SvlSecLandingPageProvider({ getService }: FtrProviderContext) {
 
   return {
     async assertSvlSecSideNavExists() {
-      await testSubjects.existOrFail('securitySolutionNavHeading');
+      await testSubjects.existOrFail('securitySolutionSideNav');
     },
   };
 }

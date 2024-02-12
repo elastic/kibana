@@ -6,6 +6,7 @@
  */
 
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ProjectAPIKeyResponse } from '../../../../../server/routes/monitor_cruds/get_api_key';
 import { apiService } from '../../../../utils/api_service';
 import {
   EncryptedSyntheticsMonitor,
@@ -61,10 +62,12 @@ export const getDecryptedMonitorAPI = async ({ id }: { id: string }): Promise<Sy
     SyntheticsMonitorCodec
   );
 
-export const fetchProjectAPIKey = async (): Promise<{
-  apiKey: { encoded: string };
-}> => {
-  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_APIKEY);
+export const fetchProjectAPIKey = async (
+  accessToElasticManagedLocations: boolean
+): Promise<ProjectAPIKeyResponse> => {
+  return await apiService.get(SYNTHETICS_API_URLS.SYNTHETICS_PROJECT_APIKEY, {
+    accessToElasticManagedLocations,
+  });
 };
 
 export const deletePackagePolicy = async (

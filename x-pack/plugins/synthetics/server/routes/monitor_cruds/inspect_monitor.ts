@@ -25,7 +25,6 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
       hideParams: schema.maybe(schema.boolean()),
     }),
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { savedObjectsClient, server, syntheticsMonitorClient, request, spaceId, response } =
       routeContext;
@@ -54,8 +53,13 @@ export const inspectSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =
     );
 
     const canSave =
-      Boolean((await server.coreStart?.capabilities.resolveCapabilities(request)).uptime.save) ??
-      false;
+      Boolean(
+        (
+          await server.coreStart?.capabilities.resolveCapabilities(request, {
+            capabilityPath: 'uptime.*',
+          })
+        ).uptime.save
+      ) ?? false;
 
     try {
       const newMonitorId = id ?? uuidV4();

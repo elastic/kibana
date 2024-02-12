@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { DataViewsContract } from '@kbn/data-views-plugin/common';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import { ensurePatternFormat } from '../../../../common/utils/sourcerer';
 import type { SourcererDataView, RunTimeMappings } from '../../store/sourcerer/model';
 import { getDataViewStateFromIndexFields } from '../source/use_data_view';
 
 export const getSourcererDataView = async (
   dataViewId: string,
-  dataViewsService: DataViewsContract,
+  dataViewsService: DataViewsServicePublic,
   refreshFields = false
 ): Promise<SourcererDataView> => {
   const dataView = await dataViewsService.get(dataViewId, true, refreshFields);

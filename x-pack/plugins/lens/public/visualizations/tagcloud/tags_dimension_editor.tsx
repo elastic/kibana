@@ -28,11 +28,10 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { useState, MutableRefObject, useCallback } from 'react';
-import { PalettePicker } from '@kbn/coloring/src/shared_components/coloring/palette_picker';
 import { useDebouncedValue } from '@kbn/visualization-ui-components';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import type { TagcloudState } from './types';
-import { PalettePanelContainer } from '../../shared_components';
+import { PalettePanelContainer, PalettePicker } from '../../shared_components';
 import { FramePublicAPI } from '../../types';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 
@@ -97,6 +96,7 @@ export function TagsDimensionEditor({
         defaultMessage: 'Color mapping',
       })}
       style={{ alignItems: 'center' }}
+      fullWidth
     >
       <EuiFlexGroup
         alignItems="center"

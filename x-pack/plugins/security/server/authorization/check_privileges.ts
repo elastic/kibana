@@ -9,8 +9,6 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { pick, transform, uniq } from 'lodash';
 
 import type { IClusterClient, KibanaRequest } from '@kbn/core/server';
-
-import { ResourceSerializer } from './resource_serializer';
 import type {
   CheckPrivileges,
   CheckPrivilegesOptions,
@@ -21,9 +19,11 @@ import type {
   CheckUserProfilesPrivilegesResponse,
   HasPrivilegesResponse,
   HasPrivilegesResponseApplication,
-} from './types';
+} from '@kbn/security-plugin-types-server';
+import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
+
+import { ResourceSerializer } from './resource_serializer';
 import { validateEsPrivilegeResponse } from './validate_es_response';
-import { GLOBAL_RESOURCE } from '../../common/constants';
 
 interface CheckPrivilegesActions {
   login: string;
@@ -144,13 +144,11 @@ export function checkPrivilegesFactory(
       const indexPrivileges = Object.entries(hasPrivilegesResponse.index ?? {}).reduce<
         CheckPrivilegesResponse['privileges']['elasticsearch']['index']
       >((acc, [index, indexResponse]) => {
-        return {
-          ...acc,
-          [index]: Object.entries(indexResponse).map(([privilege, authorized]) => ({
-            privilege,
-            authorized,
-          })),
-        };
+        acc[index] = Object.entries(indexResponse).map(([privilege, authorized]) => ({
+          privilege,
+          authorized,
+        }));
+        return acc;
       }, {});
 
       // we need to filter out the non requested privileges from the response

@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type { SortOrder } from '../../../common/ui';
+import type * as rt from 'io-ts';
+import type { FilterOptions, QueryParams, SortOrder } from '../../../common/ui';
+import type { AllCasesURLQueryParamsRt } from './schema';
 
-export const CASES_TABLE_PERPAGE_VALUES = [10, 25, 50, 100];
+export const CASES_TABLE_PER_PAGE_VALUES = [10, 25, 50, 100];
 
 export interface EuiBasicTableSortTypes {
   field: string;
@@ -26,3 +28,27 @@ export interface Solution {
   label: string;
   iconType: string;
 }
+
+export interface CasesColumnSelection {
+  field: string;
+  name: string;
+  isChecked: boolean;
+}
+
+type SupportedFilterOptionsInURL = Pick<
+  FilterOptions,
+  'search' | 'severity' | 'status' | 'tags' | 'assignees' | 'category'
+>;
+
+export interface AllCasesTableState {
+  filterOptions: FilterOptions;
+  queryParams: QueryParams;
+}
+
+export interface AllCasesURLState {
+  filterOptions: Partial<SupportedFilterOptionsInURL> &
+    Partial<Pick<FilterOptions, 'customFields'>>;
+  queryParams: Partial<QueryParams>;
+}
+
+export type AllCasesURLQueryParams = rt.TypeOf<typeof AllCasesURLQueryParamsRt>;

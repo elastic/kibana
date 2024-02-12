@@ -50,7 +50,7 @@ export function RuleDetailsPage() {
   const {
     application: { capabilities, navigateToUrl },
     charts: {
-      theme: { useChartsBaseTheme, useChartsTheme },
+      theme: { useChartsBaseTheme },
     },
     http: { basePath },
     share: {
@@ -70,7 +70,6 @@ export function RuleDetailsPage() {
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
 
-  const theme = useChartsTheme();
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
@@ -85,6 +84,7 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       href: basePath.prepend(paths.observability.alerts),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       href: basePath.prepend(paths.observability.rules),
@@ -103,7 +103,7 @@ export function RuleDetailsPage() {
 
     return urlTabId && [RULE_DETAILS_EXECUTION_TAB, RULE_DETAILS_ALERTS_TAB].includes(urlTabId)
       ? (urlTabId as TabId)
-      : RULE_DETAILS_EXECUTION_TAB;
+      : RULE_DETAILS_ALERTS_TAB;
   });
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>();
@@ -233,7 +233,7 @@ export function RuleDetailsPage() {
 
         <EuiFlexItem style={{ minWidth: 350 }}>
           <AlertSummaryWidget
-            chartProps={{ theme, baseTheme }}
+            chartProps={{ baseTheme }}
             featureIds={featureIds}
             onClick={handleAlertSummaryWidgetClick}
             timeRange={alertSummaryWidgetTimeRange}

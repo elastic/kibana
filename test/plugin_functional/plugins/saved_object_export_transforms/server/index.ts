@@ -8,4 +8,4 @@
 
 import { SavedObjectExportTransformsPlugin } from './plugin';
 
-export const plugin = () => new SavedObjectExportTransformsPlugin();
+export const plugin = async () => new SavedObjectExportTransformsPlugin();

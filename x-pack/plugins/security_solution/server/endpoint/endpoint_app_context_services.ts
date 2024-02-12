@@ -9,6 +9,7 @@ import type {
   ElasticsearchClient,
   KibanaRequest,
   Logger,
+  LoggerFactory,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { ExceptionListClient, ListsServerExtensionRegistrar } from '@kbn/lists-plugin/server';
@@ -23,6 +24,8 @@ import type { PluginStartContract as AlertsPluginStartContract } from '@kbn/aler
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { FleetActionsClientInterface } from '@kbn/fleet-plugin/server/services/actions/types';
 import {
+  getAgentPolicyCreateCallback,
+  getAgentPolicyUpdateCallback,
   getPackagePolicyCreateCallback,
   getPackagePolicyDeleteCallback,
   getPackagePolicyPostCreateCallback,
@@ -52,6 +55,7 @@ import type { AppFeaturesService } from '../lib/app_features_service/app_feature
 export interface EndpointAppContextServiceSetupContract {
   securitySolutionRequestContextFactory: IRequestContextFactory;
   cloud: CloudSetup;
+  loggerFactory: LoggerFactory;
 }
 
 export interface EndpointAppContextServiceStartContract {
@@ -118,6 +122,15 @@ export class EndpointAppContextService {
       } = dependencies;
 
       registerIngestCallback(
+        'agentPolicyCreate',
+        getAgentPolicyCreateCallback(logger, appFeaturesService)
+      );
+      registerIngestCallback(
+        'agentPolicyUpdate',
+        getAgentPolicyUpdateCallback(logger, appFeaturesService)
+      );
+
+      registerIngestCallback(
         'packagePolicyCreate',
         getPackagePolicyCreateCallback(
           logger,
@@ -170,6 +183,14 @@ export class EndpointAppContextService {
     }
 
     return this.startDependencies.fleetAuthzService;
+  }
+
+  public createLogger(...contextParts: string[]) {
+    if (!this.setupDependencies?.loggerFactory) {
+      throw new EndpointAppContentServicesNotStartedError();
+    }
+
+    return this.setupDependencies.loggerFactory.get(...contextParts);
   }
 
   public async getEndpointAuthz(request: KibanaRequest): Promise<EndpointAuthz> {

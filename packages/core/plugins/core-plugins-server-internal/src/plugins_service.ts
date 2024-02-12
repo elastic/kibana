@@ -43,7 +43,7 @@ export type DiscoveredPlugins = {
 };
 
 /** @internal */
-export interface PluginsServiceSetup {
+export interface InternalPluginsServiceSetup {
   /** Indicates whether or not plugins were initialized. */
   initialized: boolean;
   /** Setup contracts returned by plugins. */
@@ -51,7 +51,7 @@ export interface PluginsServiceSetup {
 }
 
 /** @internal */
-export interface PluginsServiceStart {
+export interface InternalPluginsServiceStart {
   /** Start contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
 }
@@ -72,7 +72,9 @@ export interface PluginsServiceDiscoverDeps {
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
+export class PluginsService
+  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
+{
   private readonly log: Logger;
   private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
@@ -199,7 +201,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.log.debug('Stopping plugins service');
 
     if (!this.arePrebootPluginsStopped) {
-      this.arePrebootPluginsStopped = false;
+      this.arePrebootPluginsStopped = true;
       await this.prebootPluginsSystem.stopPlugins();
     }
 
@@ -325,6 +327,10 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     }
 
     // Add the plugins to the Plugin System if enabled and its dependencies are met
+    const disabledPlugins = [];
+    const disabledDependants = [];
+    const disabledDependantsCauses = new Set<string>();
+
     for (const [pluginName, { plugin, isEnabled }] of pluginEnableStatuses) {
       this.validatePluginDependencies(plugin, pluginEnableStatuses);
 
@@ -337,17 +343,26 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
           this.standardPluginsSystem.addPlugin(plugin);
         }
       } else if (isEnabled) {
-        this.log.info(
-          `Plugin "${pluginName}" has been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${pluginEnablement.missingOrIncompatibleDependencies.join(
-            ', '
-          )}]`
+        disabledDependants.push(pluginName);
+        pluginEnablement.missingOrIncompatibleDependencies.forEach((dependency) =>
+          disabledDependantsCauses.add(dependency)
         );
       } else {
-        this.log.info(`Plugin "${pluginName}" is disabled.`);
+        disabledPlugins.push(pluginName);
       }
     }
 
     this.log.debug(`Discovered ${pluginEnableStatuses.size} plugins.`);
+    if (disabledPlugins.length) {
+      this.log.info(`The following plugins are disabled: "${disabledPlugins}".`);
+    }
+    if (disabledDependants.length) {
+      this.log.info(
+        `Plugins "${disabledDependants}" have been disabled since the following direct or transitive dependencies are missing, disabled, or have incompatible types: [${Array.from(
+          disabledDependantsCauses
+        )}].`
+      );
+    }
   }
 
   /** Throws an error if the plugin's dependencies are invalid. */
@@ -433,10 +448,16 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     uiPluginInternalInfo: Map<PluginName, InternalPluginInfo>
   ) {
     for (const [pluginName, pluginInfo] of uiPluginInternalInfo) {
-      deps.http.registerStaticDir(
+      /**
+       * Serve UI from sha-scoped and not-sha-scoped paths to allow time for plugin code to migrate
+       * Eventually we only want to serve from the sha scoped path
+       */
+      [
+        deps.http.staticAssets.getPluginServerPath(pluginName, '{path*}'),
         `/plugins/${pluginName}/assets/{path*}`,
-        pluginInfo.publicAssetsDir
-      );
+      ].forEach((path) => {
+        deps.http.registerStaticDir(path, pluginInfo.publicAssetsDir);
+      });
     }
   }
 }

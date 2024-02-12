@@ -11,7 +11,7 @@ import React from 'react';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { FeatureTableExpandedRow } from './feature_table_expanded_row';
-import type { Role } from '../../../../../../../common/model';
+import type { Role } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { PrivilegeFormCalculator } from '../privilege_form_calculator';

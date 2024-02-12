@@ -5,22 +5,8 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { Agent } from '../../common/shared_imports';
-
-interface BaseDataPoint {
-  key: string;
-  doc_count: number;
-}
-
-interface AggDataPoint extends estypes.AggregationsTermsAggregateBase {
-  buckets: AggregationDataPoint[];
-}
-
-export type AggregationDataPoint = BaseDataPoint & {
-  [key: string]: AggDataPoint;
-};
 
 export interface Group {
   id: string;
@@ -44,6 +30,7 @@ export interface AgentSelection {
   allAgentsSelected: boolean;
   platformsSelected: string[];
   policiesSelected: string[];
+  offlineAgentsSelected?: boolean;
 }
 
 interface BaseGroupOption {

@@ -16,7 +16,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionType } from '../../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -94,7 +94,7 @@ const RuleActionsOverflowComponent = ({
                   return;
                 }
                 const result = await executeBulkAction({
-                  type: BulkActionType.duplicate,
+                  type: BulkActionTypeEnum.duplicate,
                   ids: [rule.id],
                   duplicatePayload: {
                     include_exceptions:
@@ -156,7 +156,7 @@ const RuleActionsOverflowComponent = ({
 
                 startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 await executeBulkAction({
-                  type: BulkActionType.delete,
+                  type: BulkActionTypeEnum.delete,
                   ids: [rule.id],
                 });
 

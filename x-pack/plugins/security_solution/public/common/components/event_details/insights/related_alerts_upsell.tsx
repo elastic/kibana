@@ -6,17 +6,11 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiText } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { SubscriptionLink } from '@kbn/subscription-tracking';
-import type { SubscriptionContextData } from '@kbn/subscription-tracking';
 import { INSIGHTS_UPSELL } from './translations';
-
-const subscriptionContext: SubscriptionContextData = {
-  feature: 'alert-details-insights',
-  source: 'security__alert-details-flyout',
-};
+import { useKibana } from '../../../lib/kibana';
 
 const UpsellContainer = euiStyled.div`
   border: 1px solid ${({ theme }) => theme.eui.euiColorLightShade};
@@ -29,6 +23,7 @@ const StyledIcon = euiStyled(EuiIcon)`
 `;
 
 export const RelatedAlertsUpsell = React.memo(() => {
+  const { application } = useKibana().services;
   return (
     <UpsellContainer>
       <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -37,13 +32,15 @@ export const RelatedAlertsUpsell = React.memo(() => {
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiText size="s">
-            <SubscriptionLink
+            <EuiLink
               color="subdued"
               target="_blank"
-              subscriptionContext={subscriptionContext}
+              href={application.getUrlForApp('management', {
+                path: 'stack/license_management/home',
+              })}
             >
               {INSIGHTS_UPSELL}
-            </SubscriptionLink>
+            </EuiLink>
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>

@@ -32,7 +32,7 @@ For the most up-to-date API details, refer to the
   (Optional, string) An identifier for the space. If `space_id` is not provided in the URL, the default space is used.
 
 `<type>`::
-  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`, `config`.
+  (Required, string) Valid options include `visualization`, `dashboard`, `search`, `index-pattern`.
 
 `<id>`::
   (Optional, string) Specifies an ID instead of using a randomly generated ID.

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { Agent, AgentPolicy } from '../../../../types';
@@ -216,7 +216,7 @@ describe('TableRowActions', () => {
       expect(res).toBeEnabled();
     });
 
-    it('should render a disabled action button if agent version is latest', async () => {
+    it('should render an enabled action button if agent version is latest', async () => {
       const res = renderAndGetUpgradeButton({
         agent: {
           active: true,
@@ -229,7 +229,7 @@ describe('TableRowActions', () => {
       });
 
       expect(res).not.toBe(null);
-      expect(res).not.toBeEnabled();
+      expect(res).toBeEnabled();
     });
   });
 });

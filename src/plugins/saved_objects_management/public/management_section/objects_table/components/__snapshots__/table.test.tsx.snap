@@ -32,7 +32,6 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           iconType="trash"
           isDisabled={true}
           onClick={[Function]}
-          size="m"
           title="Unable to delete saved objects"
         >
           <FormattedMessage
@@ -45,12 +44,10 @@ exports[`Table prevents saved objects from being deleted 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
-              color="primary"
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -102,11 +99,9 @@ exports[`Table prevents saved objects from being deleted 1`] = `
             labelType="label"
           >
             <EuiButton
-              color="primary"
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -272,7 +267,6 @@ exports[`Table should render normally 1`] = `
           iconType="trash"
           isDisabled={false}
           onClick={[Function]}
-          size="m"
         >
           <FormattedMessage
             defaultMessage="Delete"
@@ -284,12 +278,10 @@ exports[`Table should render normally 1`] = `
           anchorPosition="downCenter"
           button={
             <EuiButton
-              color="primary"
               iconSide="right"
               iconType="arrowDown"
               isDisabled={false}
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"
@@ -341,11 +333,9 @@ exports[`Table should render normally 1`] = `
             labelType="label"
           >
             <EuiButton
-              color="primary"
               fill={true}
               iconType="exportAction"
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Export"

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { NoParametersRequestSchema } from './common/base';
 
 export const GetProcessesRouteRequestSchema = NoParametersRequestSchema;
+export type GetProcessesRequestBody = TypeOf<typeof GetProcessesRouteRequestSchema.body>;

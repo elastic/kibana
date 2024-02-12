@@ -51,13 +51,14 @@ import { DimensionDataExtraEditor, DimensionEditor } from './dimension_editor';
 import { LayerSettings } from './layer_settings';
 import { checkTableForContainsSmallValues } from './render_helpers';
 import { DatasourcePublicAPI } from '../..';
-import { nonNullable } from '../../utils';
+import { nonNullable, getColorMappingDefaults } from '../../utils';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const metricLabel = i18n.translate('xpack.lens.pie.groupMetricLabelSingular', {
   defaultMessage: 'Metric',
 });
 
-function newLayerState(layerId: string, colorMapping: ColorMapping.Config): PieLayerState {
+function newLayerState(layerId: string, colorMapping?: ColorMapping.Config): PieLayerState {
   return {
     layerId,
     primaryGroups: [],
@@ -168,9 +169,7 @@ export const getPieVisualization = ({
         layers: [
           newLayerState(
             addNewLayer(),
-            mainPalette?.type === 'colorMapping'
-              ? mainPalette.value
-              : { ...DEFAULT_COLOR_MAPPING_CONFIG }
+            mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults()
           ),
         ],
         palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
@@ -286,6 +285,7 @@ export const getPieVisualization = ({
         case PieChartTypes.MOSAIC:
           return {
             ...primaryGroupConfigBaseProps,
+            requiredMinDimensionCount: 1,
             groupLabel: i18n.translate('xpack.lens.pie.verticalAxisLabel', {
               defaultMessage: 'Vertical axis',
             }),
@@ -773,5 +773,12 @@ export const getPieVisualization = ({
         },
       ],
     };
+  },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    return getColorMappingTelemetryEvents(
+      state?.layers[0]?.colorMapping,
+      prevState?.layers[0]?.colorMapping
+    );
   },
 });

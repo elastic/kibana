@@ -17,6 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
+
   describe('fleet_list_agent', () => {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/fleet/agents');
@@ -156,6 +157,7 @@ export default function ({ getService }: FtrProviderContext) {
             dataset: 'elastic_agent.elastic_agent',
           },
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component1' },
           system: {
             process: {
               memory: {
@@ -176,6 +178,7 @@ export default function ({ getService }: FtrProviderContext) {
         document: {
           '@timestamp': new Date(now - 1 * 60 * 1000).toISOString(),
           elastic_agent: { id: 'agent1', process: 'elastic_agent' },
+          component: { id: 'component2' },
           data_stream: {
             namespace: 'default',
             type: 'metrics',

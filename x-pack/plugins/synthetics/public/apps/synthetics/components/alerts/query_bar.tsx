@@ -8,7 +8,6 @@
 import React, { useEffect, useState } from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../common/constants';
@@ -38,15 +37,10 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
 
   const {
     appName,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    data,
     dataViews,
-    unifiedSearch,
-    storage,
-    usageCollection,
+    unifiedSearch: {
+      ui: { QueryStringInput },
+    },
   } = services;
 
   const [inputVal, setInputVal] = useState<string>(query);
@@ -85,17 +79,6 @@ export const AlertQueryBar = ({ query = '', onChange }: Props) => {
           defaultMessage: 'Filter using kql syntax',
         })}
         appName={appName}
-        deps={{
-          unifiedSearch,
-          data,
-          dataViews,
-          storage,
-          notifications,
-          http,
-          docLinks,
-          uiSettings,
-          usageCollection,
-        }}
       />
     </EuiFlexItem>
   );

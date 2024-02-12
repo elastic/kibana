@@ -7,11 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback, useMemo } from 'react';
-import {
-  EuiPopover,
-  EuiHeaderLink,
-  EuiContextMenu,
+import { EuiPopover, EuiHeaderLink, EuiContextMenu } from '@elastic/eui';
+import type {
   EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -22,6 +21,118 @@ import { AlertFlyout as CustomThresholdAlertFlyout } from '../../custom_threshol
 import { InfraClientStartDeps } from '../../../types';
 
 type VisibleFlyoutType = 'inventory' | 'metricThreshold' | 'customThreshold';
+
+interface ContextMenuEntries {
+  items: EuiContextMenuPanelItemDescriptor[];
+  panels: EuiContextMenuPanelDescriptor[];
+}
+
+function useInfrastructureMenu(
+  onCreateRuleClick: (flyoutType: VisibleFlyoutType) => void
+): ContextMenuEntries {
+  const { featureFlags } = usePluginConfig();
+
+  return useMemo(() => {
+    if (!featureFlags.inventoryThresholdAlertRuleEnabled) {
+      return { items: [], panels: [] };
+    }
+
+    return {
+      items: [
+        {
+          'data-test-subj': 'inventory-alerts-menu-option',
+          name: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
+            defaultMessage: 'Infrastructure',
+          }),
+          panel: 1,
+        },
+      ],
+      panels: [
+        {
+          id: 1,
+          title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
+            defaultMessage: 'Infrastructure rules',
+          }),
+          items: [
+            {
+              'data-test-subj': 'inventory-alerts-create-rule',
+              name: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
+                defaultMessage: 'Create inventory rule',
+              }),
+              onClick: () => onCreateRuleClick('inventory'),
+            },
+          ],
+        },
+      ],
+    };
+  }, [featureFlags.inventoryThresholdAlertRuleEnabled, onCreateRuleClick]);
+}
+
+function useMetricsMenu(
+  onCreateRuleClick: (flyoutType: VisibleFlyoutType) => void
+): ContextMenuEntries {
+  const { featureFlags } = usePluginConfig();
+
+  return useMemo(() => {
+    if (!featureFlags.metricThresholdAlertRuleEnabled) {
+      return { items: [], panels: [] };
+    }
+
+    return {
+      items: [
+        {
+          'data-test-subj': 'metrics-threshold-alerts-menu-option',
+          name: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
+            defaultMessage: 'Metrics',
+          }),
+          panel: 2,
+        },
+      ],
+      panels: [
+        {
+          id: 2,
+          title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
+            defaultMessage: 'Metrics rules',
+          }),
+          items: [
+            {
+              'data-test-subj': 'metrics-threshold-alerts-create-rule',
+              name: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
+                defaultMessage: 'Create threshold rule',
+              }),
+              onClick: () => onCreateRuleClick('metricThreshold'),
+            },
+          ],
+        },
+      ],
+    };
+  }, [featureFlags.metricThresholdAlertRuleEnabled, onCreateRuleClick]);
+}
+
+function useCustomThresholdMenu(
+  onCreateRuleClick: (flyoutType: VisibleFlyoutType) => void
+): ContextMenuEntries {
+  const { featureFlags } = usePluginConfig();
+
+  return useMemo(() => {
+    if (!featureFlags.customThresholdAlertsEnabled) {
+      return { items: [], panels: [] };
+    }
+
+    return {
+      items: [
+        {
+          'data-test-subj': 'custom-threshold-alerts-menu-option',
+          name: i18n.translate('xpack.infra.alerting.customThresholdDropdownMenu', {
+            defaultMessage: 'Create custom threshold rule',
+          }),
+          onClick: () => onCreateRuleClick('customThreshold'),
+        },
+      ],
+      panels: [],
+    };
+  }, [featureFlags.customThresholdAlertsEnabled, onCreateRuleClick]);
+}
 
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
@@ -34,8 +145,6 @@ export const MetricsAlertDropdown = () => {
     () => Boolean(uiCapabilities?.infrastructure?.save),
     [uiCapabilities]
   );
-  const { featureFlags } = usePluginConfig();
-
   const closeFlyout = useCallback(() => setVisibleFlyoutType(null), [setVisibleFlyoutType]);
 
   const closePopover = useCallback(() => {
@@ -45,49 +154,18 @@ export const MetricsAlertDropdown = () => {
   const togglePopover = useCallback(() => {
     setPopoverOpen(!popoverOpen);
   }, [setPopoverOpen, popoverOpen]);
-  const infrastructureAlertsPanel = useMemo(
-    () => ({
-      id: 1,
-      title: i18n.translate('xpack.infra.alerting.infrastructureDropdownTitle', {
-        defaultMessage: 'Infrastructure rules',
-      }),
-      items: [
-        {
-          'data-test-subj': 'inventory-alerts-create-rule',
-          name: i18n.translate('xpack.infra.alerting.createInventoryRuleButton', {
-            defaultMessage: 'Create inventory rule',
-          }),
-          onClick: () => {
-            closePopover();
-            setVisibleFlyoutType('inventory');
-          },
-        },
-      ],
-    }),
-    [setVisibleFlyoutType, closePopover]
+
+  const onCreateRuleClick = useCallback(
+    (flyoutType: VisibleFlyoutType) => {
+      closePopover();
+      setVisibleFlyoutType(flyoutType);
+    },
+    [closePopover]
   );
 
-  const metricsAlertsPanel = useMemo(
-    () => ({
-      id: 2,
-      title: i18n.translate('xpack.infra.alerting.metricsDropdownTitle', {
-        defaultMessage: 'Metrics rules',
-      }),
-      items: [
-        {
-          'data-test-subj': 'metrics-threshold-alerts-create-rule',
-          name: i18n.translate('xpack.infra.alerting.createThresholdRuleButton', {
-            defaultMessage: 'Create threshold rule',
-          }),
-          onClick: () => {
-            closePopover();
-            setVisibleFlyoutType('metricThreshold');
-          },
-        },
-      ],
-    }),
-    [setVisibleFlyoutType, closePopover]
-  );
+  const infrastructureMenu = useInfrastructureMenu(onCreateRuleClick);
+  const metricsMenu = useMetricsMenu(onCreateRuleClick);
+  const customThresholdMenu = useCustomThresholdMenu(onCreateRuleClick);
 
   const manageRulesLinkProps = observability.useRulesLink();
 
@@ -102,56 +180,27 @@ export const MetricsAlertDropdown = () => {
     [manageRulesLinkProps]
   );
 
-  const firstPanelMenuItems: EuiContextMenuPanelDescriptor['items'] = useMemo(
-    () =>
-      canCreateAlerts
-        ? [
-            {
-              'data-test-subj': 'inventory-alerts-menu-option',
-              name: i18n.translate('xpack.infra.alerting.infrastructureDropdownMenu', {
-                defaultMessage: 'Infrastructure',
-              }),
-              panel: 1,
-            },
-            {
-              'data-test-subj': 'metrics-threshold-alerts-menu-option',
-              name: i18n.translate('xpack.infra.alerting.metricsDropdownMenu', {
-                defaultMessage: 'Metrics',
-              }),
-              panel: 2,
-            },
-            ...(featureFlags.customThresholdAlertsEnabled
-              ? [
-                  {
-                    'data-test-subj': 'custom-threshold-alerts-menu-option',
-                    name: i18n.translate('xpack.infra.alerting.customThresholdDropdownMenu', {
-                      defaultMessage: 'Create custom threshold rule',
-                    }),
-                    onClick: () => {
-                      closePopover();
-                      setVisibleFlyoutType('customThreshold');
-                    },
-                  },
-                ]
-              : []),
-            manageAlertsMenuItem,
-          ]
-        : [manageAlertsMenuItem],
-    [canCreateAlerts, closePopover, featureFlags.customThresholdAlertsEnabled, manageAlertsMenuItem]
-  );
-
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(
-    () =>
-      [
-        {
-          id: 0,
-          title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
-            defaultMessage: 'Alerts and rules',
-          }),
-          items: firstPanelMenuItems,
-        },
-      ].concat(canCreateAlerts ? [infrastructureAlertsPanel, metricsAlertsPanel] : []),
-    [infrastructureAlertsPanel, metricsAlertsPanel, firstPanelMenuItems, canCreateAlerts]
+    () => [
+      {
+        id: 0,
+        title: i18n.translate('xpack.infra.alerting.alertDropdownTitle', {
+          defaultMessage: 'Alerts and rules',
+        }),
+        items: canCreateAlerts
+          ? [
+              ...infrastructureMenu.items,
+              ...metricsMenu.items,
+              ...customThresholdMenu.items,
+              manageAlertsMenuItem,
+            ]
+          : [manageAlertsMenuItem],
+      },
+      ...(canCreateAlerts
+        ? [...infrastructureMenu.panels, ...metricsMenu.panels, ...customThresholdMenu.panels]
+        : []),
+    ],
+    [canCreateAlerts, infrastructureMenu, metricsMenu, customThresholdMenu, manageAlertsMenuItem]
   );
 
   return (

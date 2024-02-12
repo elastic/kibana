@@ -6,11 +6,7 @@
  */
 import { IKibanaResponse } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
-import {
-  isRefResult,
-  isFullScreenshot,
-  RefResult,
-} from '../../../../common/runtime_types/ping/synthetics';
+import { isRefResult, RefResult } from '../../../../common/runtime_types/ping/synthetics';
 import { UMServerLibs } from '../../lib/lib';
 import {
   getJourneyScreenshot,
@@ -19,7 +15,9 @@ import {
 import { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 
-export type ClientContract = Buffer | { screenshotRef: RefResult };
+export interface ClientContract {
+  screenshotRef: RefResult;
+}
 
 function getSharedHeaders(stepName: string, totalSteps: number) {
   return {
@@ -30,7 +28,7 @@ function getSharedHeaders(stepName: string, totalSteps: number) {
 }
 
 export const createJourneyScreenshotRoute: UMRestApiRouteFactory<ClientContract> = (
-  libs: UMServerLibs
+  _libs: UMServerLibs
 ) => ({
   method: 'GET',
   path: API_URLS.JOURNEY_SCREENSHOT,
@@ -58,15 +56,7 @@ export const journeyScreenshotHandler = async ({
     stepIndex,
   });
 
-  if (isFullScreenshot(result) && typeof result.synthetics?.blob !== 'undefined') {
-    return response.ok({
-      body: Buffer.from(result.synthetics.blob, 'base64'),
-      headers: {
-        'content-type': result.synthetics.blob_mime || 'image/png', // falls back to 'image/png' for earlier versions of synthetics
-        ...getSharedHeaders(result.synthetics.step.name, result.totalSteps),
-      },
-    });
-  } else if (isRefResult(result)) {
+  if (isRefResult(result)) {
     return response.ok({
       body: {
         screenshotRef: result,

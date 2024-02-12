@@ -22,10 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const transform = getService('transform');
   const pageObjects = getPageObjects(['discover']);
 
-  describe('creation_index_pattern', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/151889
+  // Failing: See https://github.com/elastic/kibana/issues/151811
+  describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await transform.testResources.setKibanaTimeZoneToUTC();
 
       await transform.securityUI.loginAsTransformPowerUser();
@@ -33,7 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
       await transform.securityUI.logout();
     });
 
@@ -271,7 +273,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               legend: '7 categories',
               colorStats: [
                 { color: '#000000', percentage: 20 },
-                { color: '#54B399', percentage: 75 },
+                { color: '#54B399', percentage: 80 },
               ],
             },
             {
@@ -509,7 +511,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       describe(`${testData.suiteTitle}`, function () {
         after(async () => {
           await transform.api.deleteIndices(testData.destinationIndex);
-          await transform.testResources.deleteIndexPatternByTitle(testData.destinationIndex);
+          await transform.testResources.deleteDataViewByTitle(testData.destinationIndex);
         });
 
         it('loads the wizard for the source data', async () => {
@@ -527,7 +529,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.sourceSelection.selectSource(testData.source);
         });
 
-        it('navigates through the wizard and sets all needed fields', async () => {
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176697
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176698
+        it.skip('navigates through the wizard and sets all needed fields', async () => {
           await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
 
@@ -727,9 +731,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.wizard.assertTransformDescriptionValue('');
           await transform.wizard.setTransformDescription(testData.transformDescription);
 
-          await transform.testExecution.logTestStep('inputs the destination index');
+          await transform.testExecution.logTestStep(
+            'should default the set destination index to job id switch to true'
+          );
+          await transform.wizard.assertDestIndexSameAsIdSwitchExists();
+          await transform.wizard.assertDestIndexSameAsIdCheckState(true);
+
+          await transform.testExecution.logTestStep('should input the destination index');
+          await transform.wizard.setDestIndexSameAsIdCheckState(false);
           await transform.wizard.assertDestinationIndexInputExists();
-          await transform.wizard.assertDestinationIndexValue('');
+          await transform.wizard.assertDestinationIndexValue(testData.transformId);
           await transform.wizard.setDestinationIndex(testData.destinationIndex);
 
           await transform.testExecution.logTestStep('displays the create data view switch');

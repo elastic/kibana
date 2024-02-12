@@ -8,22 +8,15 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
-import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { AssetDetailPage } from './asset_detail_page';
 import { MetricDetailPage } from './metric_detail_page';
 import { MetricsTimeProvider } from './hooks/use_metrics_time';
 
 export const NodeDetail = () => {
   const {
-    params: { type: nodeType, node: nodeName },
-  } = useRouteMatch<{ type: InventoryItemType; node: string }>();
-
-  useMetricsBreadcrumbs([
-    {
-      text: nodeName,
-    },
-  ]);
+    params: { type: nodeType },
+  } = useRouteMatch<{ type: InventoryItemType }>();
 
   return (
     <EuiErrorBoundary>

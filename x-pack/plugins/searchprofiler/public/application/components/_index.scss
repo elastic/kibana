@@ -5,22 +5,3 @@ $badgeSize: $euiSize * 5.5;
 @import 'percentage_badge/percentage_badge';
 @import 'profile_query_editor/profile_query_editor';
 @import 'profile_tree/index';
-
-.prfDevTool__main__emptyTreePlaceholder {
-  h1 {
-    font-size: $euiSizeL;
-    color: $euiColorMediumShade;
-  }
-  p {
-    font-size: $euiSize;
-    color: $euiColorMediumShade;
-  }
-  h1,
-  p {
-    cursor: default;
-    user-select: none;
-  }
-  // Slight offset from the top.
-  margin: 5% 0 auto;
-  text-align: center;
-}

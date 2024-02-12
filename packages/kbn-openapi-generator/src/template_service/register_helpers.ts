@@ -35,10 +35,19 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('defined', (val) => {
     return val !== undefined;
   });
+  handlebarsInstance.registerHelper('first', (val) => {
+    return Array.isArray(val) ? val[0] : val;
+  });
+  handlebarsInstance.registerHelper('isSingle', (val) => {
+    return Array.isArray(val) && val.length === 1;
+  });
   /**
    * Check if the OpenAPI schema is unknown
    */
   handlebarsInstance.registerHelper('isUnknown', (val: object) => {
     return !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val);
+  });
+  handlebarsInstance.registerHelper('startsWithSpecialChar', (val: string) => {
+    return /^[^a-zA-Z0-9]/.test(val);
   });
 }

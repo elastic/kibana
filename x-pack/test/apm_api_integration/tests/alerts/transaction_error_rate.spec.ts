@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmRuleType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
 import { transactionErrorRateActionVariables } from '@kbn/apm-plugin/server/routes/alerts/rule_types/transaction_error_rate/register_transaction_error_rate_rule_type';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
@@ -15,17 +15,13 @@ import {
   createApmRule,
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  deleteAlertsByRuleId,
-  clearKibanaApmEventLog,
-  deleteRuleById,
   ApmAlertFields,
   getIndexAction,
   createIndexConnector,
-  deleteActionConnector,
 } from './helpers/alerting_api_helper';
-import { cleanupAllState } from './helpers/cleanup_state';
+import { cleanupRuleAndAlertState } from './helpers/cleanup_rule_and_alert_state';
 import { waitForAlertsForRule } from './helpers/wait_for_alerts_for_rule';
-import { waitForRuleStatus } from './helpers/wait_for_rule_status';
+import { waitForActiveRule } from './helpers/wait_for_active_rule';
 import { waitForIndexConnectorResults } from './helpers/wait_for_index_connector_results';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
@@ -37,9 +33,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const synthtraceEsClient = getService('synthtraceEsClient');
 
   registry.when('transaction error rate alert', { config: 'basic', archives: [] }, () => {
-    before(async () => {
-      cleanupAllState({ es, supertest });
-
+    before(() => {
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
         .instance('instance');
@@ -72,16 +66,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               .success(),
           ];
         });
-      await synthtraceEsClient.index(events);
+      return synthtraceEsClient.index(events);
     });
 
     after(async () => {
-      try {
-        await synthtraceEsClient.clean();
-        await clearKibanaApmEventLog(es);
-      } catch (e) {
-        logger.info('Could not clean up apm event log', e);
-      }
+      await synthtraceEsClient.clean();
     });
 
     describe('create rule without kql query', () => {
@@ -121,21 +110,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       after(async () => {
-        try {
-          await deleteActionConnector({ supertest, es, actionId });
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule or action connector', e);
-        }
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('checks if rule is active', async () => {
-        const ruleStatus = await waitForRuleStatus({
-          ruleId,
-          expectedStatus: 'active',
-          supertest,
-        });
+        const ruleStatus = await waitForActiveRule({ ruleId, supertest });
         expect(ruleStatus).to.be('active');
       });
 
@@ -221,7 +200,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       let ruleId: string;
       let alerts: ApmAlertFields[];
 
-      before(async () => {
+      beforeEach(async () => {
         const createdRule = await createApmRule({
           supertest,
           ruleTypeId: ApmRuleType.TransactionErrorRate,
@@ -253,13 +232,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         alerts = await waitForAlertsForRule({ es, ruleId });
       });
 
-      after(async () => {
-        try {
-          await deleteRuleById({ supertest, ruleId });
-          await deleteAlertsByRuleId({ es, ruleId });
-        } catch (e) {
-          logger.info('Could not delete rule', e);
-        }
+      afterEach(async () => {
+        await cleanupRuleAndAlertState({ es, supertest, logger });
       });
 
       it('indexes alert document with all group-by fields', async () => {

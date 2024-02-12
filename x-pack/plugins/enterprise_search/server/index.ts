@@ -8,9 +8,8 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
 
-import { EnterpriseSearchPlugin } from './plugin';
-
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { EnterpriseSearchPlugin } = await import('./plugin');
   return new EnterpriseSearchPlugin(initializerContext);
 };
 

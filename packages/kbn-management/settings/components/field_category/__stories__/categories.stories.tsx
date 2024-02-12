@@ -40,16 +40,36 @@ export default {
 } as ComponentMeta<typeof Component>;
 
 export const Categories: Story<Params> = (params) => {
-  const { onClearQuery, isSavingEnabled, onFieldChange, unsavedChanges, categorizedFields } =
-    useCategoryStory(params);
+  const {
+    onClearQuery,
+    isSavingEnabled,
+    onFieldChange,
+    unsavedChanges,
+    categorizedFields,
+    categoryCounts,
+  } = useCategoryStory(params);
 
   return (
     <FieldCategoryProvider
       showDanger={action('showDanger')}
       links={{ deprecationKey: 'link/to/deprecation/docs' }}
+      validateChange={async (key, value) => {
+        action(`validateChange`)({
+          key,
+          value,
+        });
+        return { successfulValidation: true, valid: true };
+      }}
     >
       <Component
-        {...{ categorizedFields, onFieldChange, unsavedChanges, onClearQuery, isSavingEnabled }}
+        {...{
+          categorizedFields,
+          categoryCounts,
+          onFieldChange,
+          unsavedChanges,
+          onClearQuery,
+          isSavingEnabled,
+        }}
       />
     </FieldCategoryProvider>
   );

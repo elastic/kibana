@@ -8,4 +8,4 @@
 
 import { SavedObjectsHiddenTypePlugin } from './plugin';
 
-export const plugin = () => new SavedObjectsHiddenTypePlugin();
+export const plugin = async () => new SavedObjectsHiddenTypePlugin();

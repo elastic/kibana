@@ -24,12 +24,14 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
   showAddAgent?: boolean;
   defaultIsOpen?: boolean;
   upgradePackagePolicyHref?: string;
+  from?: 'fleet-policy-list' | undefined;
 }> = ({
   agentPolicy,
   packagePolicy,
   showAddAgent,
   upgradePackagePolicyHref,
   defaultIsOpen = false,
+  from,
 }) => {
   const [isEnrollmentFlyoutOpen, setIsEnrollmentFlyoutOpen] = useState(false);
   const { getHref } = useLink();
@@ -80,9 +82,9 @@ export const PackagePolicyActionsMenu: React.FunctionComponent<{
       data-test-subj="PackagePolicyActionsEditItem"
       disabled={!canWriteIntegrationPolicies || !agentPolicy}
       icon="pencil"
-      href={getHref('integration_policy_edit', {
+      href={`${getHref('integration_policy_edit', {
         packagePolicyId: packagePolicy.id,
-      })}
+      })}${from ? `?from=${from}` : ''}`}
       key="packagePolicyEdit"
     >
       <FormattedMessage

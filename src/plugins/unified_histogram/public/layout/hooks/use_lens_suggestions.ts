@@ -7,6 +7,7 @@
  */
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { removeDropCommandsFromESQLQuery } from '@kbn/esql-utils';
 import {
   AggregateQuery,
   isOfAggregateQueryType,
@@ -14,12 +15,12 @@ import {
   Query,
   TimeRange,
 } from '@kbn/es-query';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import { LensSuggestionsApi, Suggestion } from '@kbn/lens-plugin/public';
 import { isEqual } from 'lodash';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { computeInterval } from './compute_interval';
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
+import { shouldDisplayHistogram } from '../helpers';
 
 export const useLensSuggestions = ({
   dataView,
@@ -41,6 +42,7 @@ export const useLensSuggestions = ({
   timeRange?: TimeRange;
   lensSuggestionsApi: LensSuggestionsApi;
   onSuggestionChange?: (suggestion: Suggestion | undefined) => void;
+  table?: Datatable;
 }) => {
   const suggestions = useMemo(() => {
     const context = {
@@ -56,12 +58,13 @@ export const useLensSuggestions = ({
     const [firstSuggestion] = allSuggestions;
 
     return { firstSuggestion, allSuggestions };
-  }, [dataView, isPlainRecord, lensSuggestionsApi, query, columns]);
+  }, [dataView, columns, query, isPlainRecord, lensSuggestionsApi]);
 
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
-  const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
-  const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
+  const currentSuggestion = originalSuggestion || suggestions.firstSuggestion;
 
+  const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
+  const histogramQuery = useRef<AggregateQuery | undefined>();
   const histogramSuggestion = useMemo(() => {
     if (
       !currentSuggestion &&
@@ -71,22 +74,13 @@ export const useLensSuggestions = ({
       getAggregateQueryMode(query) === 'esql' &&
       timeRange
     ) {
-      let queryHasTransformationalCommands = false;
-      if ('esql' in query) {
-        TRANSFORMATIONAL_COMMANDS.forEach((command: string) => {
-          if (query.esql.toLowerCase().includes(command)) {
-            queryHasTransformationalCommands = true;
-            return;
-          }
-        });
-      }
-
-      if (queryHasTransformationalCommands) return undefined;
+      const isOnHistogramMode = shouldDisplayHistogram(query);
+      if (!isOnHistogramMode) return undefined;
 
       const interval = computeInterval(timeRange, data);
       const language = getAggregateQueryMode(query);
-      const histogramQuery = `${query[language]}
-        | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats rows = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
+      const safeQuery = removeDropCommandsFromESQLQuery(query[language]);
+      const esqlQuery = `${safeQuery} | EVAL timestamp=DATE_TRUNC(${interval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp | rename timestamp as \`${dataView.timeFieldName} every ${interval}\``;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
@@ -99,23 +93,24 @@ export const useLensSuggestions = ({
             },
           },
           {
-            id: 'rows',
-            name: 'rows',
+            id: 'results',
+            name: 'results',
             meta: {
               type: 'number',
             },
           },
         ] as DatatableColumn[],
         query: {
-          esql: histogramQuery,
+          esql: esqlQuery,
         },
       };
       const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (sug.length) {
+        histogramQuery.current = { esql: esqlQuery };
         return sug[0];
       }
-      return undefined;
     }
+    histogramQuery.current = undefined;
     return undefined;
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
@@ -142,6 +137,7 @@ export const useLensSuggestions = ({
     currentSuggestion: histogramSuggestion ?? currentSuggestion,
     suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
     isOnHistogramMode: Boolean(histogramSuggestion),
+    histogramQuery: histogramQuery.current ? histogramQuery.current : undefined,
   };
 };
 

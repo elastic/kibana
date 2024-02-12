@@ -9,6 +9,7 @@
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
@@ -23,6 +24,7 @@ interface SetupDeps {
 }
 
 interface StartDeps {
+  analytics: AnalyticsServiceStart;
   i18n: I18nStart;
   overlays: OverlayStart;
   theme: ThemeServiceStart;
@@ -39,12 +41,12 @@ export class ToastsService {
     return this.api!;
   }
 
-  public start({ eventReporter, i18n, overlays, theme, targetDomElement }: StartDeps) {
+  public start({ eventReporter, analytics, i18n, overlays, theme, targetDomElement }: StartDeps) {
     this.api!.start({ overlays, i18n, theme });
     this.targetDomElement = targetDomElement;
 
     render(
-      <KibanaRenderContextProvider i18n={i18n} theme={theme}>
+      <KibanaRenderContextProvider analytics={analytics} i18n={i18n} theme={theme}>
         <GlobalToastList
           dismissToast={(toastId: string) => this.api!.remove(toastId)}
           toasts$={this.api!.get$()}

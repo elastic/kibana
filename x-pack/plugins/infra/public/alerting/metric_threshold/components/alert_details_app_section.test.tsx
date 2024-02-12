@@ -24,6 +24,9 @@ const mockedChartStartContract = chartPluginMock.createStartContract();
 jest.mock('@kbn/observability-alert-details', () => ({
   AlertAnnotation: () => {},
   AlertActiveTimeRangeAnnotation: () => {},
+}));
+
+jest.mock('@kbn/observability-get-padded-alert-time-range-util', () => ({
   getPaddedAlertTimeRange: () => ({
     from: '2023-03-28T10:43:13.802Z',
     to: '2023-03-29T13:14:09.581Z',

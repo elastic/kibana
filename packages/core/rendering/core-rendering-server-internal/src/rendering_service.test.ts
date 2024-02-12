@@ -11,6 +11,7 @@ import {
   bootstrapRendererMock,
   getSettingValueMock,
   getStylesheetPathsMock,
+  getBrowserLoggingConfigMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -32,6 +33,7 @@ const INJECTED_METADATA = {
   version: expect.any(String),
   branch: expect.any(String),
   buildNumber: expect.any(Number),
+  logging: expect.any(Object),
   env: {
     mode: {
       name: expect.any(String),
@@ -180,9 +182,40 @@ function renderTestCases(
       expect(getStylesheetPathsMock).toHaveBeenCalledWith({
         darkMode: true,
         themeVersion: 'v8',
-        basePath: '/mock-server-basepath',
+        baseHref: '/mock-server-basepath',
         buildNum: expect.any(Number),
       });
+    });
+
+    it('renders "core" CDN url injected', async () => {
+      const userSettings = { 'theme:darkMode': { userValue: true } };
+      uiSettings.client.getUserProvided.mockResolvedValue(userSettings);
+      (mockRenderingPrebootDeps.http.staticAssets.getHrefBase as jest.Mock).mockImplementation(
+        () => 'http://foo.bar:1773'
+      );
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" with logging config injected', async () => {
+      const loggingConfig = {
+        root: {
+          level: 'info',
+        },
+      };
+      getBrowserLoggingConfigMock.mockReturnValue(loggingConfig);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.logging).toEqual(loggingConfig);
     });
   });
 }
@@ -233,7 +266,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -259,7 +292,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -283,7 +316,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -307,7 +340,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -331,7 +364,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -355,7 +388,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: false,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -379,7 +412,7 @@ function renderDarkModeTestCases(
         expect(getStylesheetPathsMock).toHaveBeenCalledWith({
           darkMode: true,
           themeVersion: 'v8',
-          basePath: '/mock-server-basepath',
+          baseHref: '/mock-server-basepath',
           buildNum: expect.any(Number),
         });
       });
@@ -403,8 +436,9 @@ describe('RenderingService', () => {
     jest.clearAllMocks();
     service = new RenderingService(mockRenderingServiceParams);
 
-    getSettingValueMock.mockImplementation((settingName: string) => settingName);
-    getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getSettingValueMock.mockReset().mockImplementation((settingName: string) => settingName);
+    getStylesheetPathsMock.mockReset().mockReturnValue(['/style-1.css', '/style-2.css']);
+    getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
   });
 
   describe('preboot()', () => {

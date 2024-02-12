@@ -60,8 +60,8 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
-        observabilityLogExplorer: {
-          pathname: '/app/observability-log-explorer',
+        observabilityLogsExplorer: {
+          pathname: '/app/observability-logs-explorer',
         },
         management: {
           pathname: '/app/management',
@@ -69,14 +69,46 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         indexManagement: {
           pathname: '/app/management/data/index_management',
         },
+        ingestPipelines: {
+          pathname: '/app/management/ingest/ingest_pipelines',
+        },
+        transform: {
+          pathname: '/app/management/data/transform',
+        },
         connectors: {
           pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
+        },
+        triggersActions: {
+          pathname: '/app/management/insightsAndAlerting/triggersActions',
         },
         settings: {
           pathname: '/app/management/kibana/settings',
         },
         login: {
           pathname: '/login',
+        },
+        reportingManagement: {
+          pathname: '/app/management/insightsAndAlerting/reporting',
+        },
+        securitySolution: {
+          pathname: '/app/security',
+        },
+        dashboard: {
+          pathname: '/app/dashboards',
+        },
+        discover: {
+          pathname: '/app/discover',
+        },
+        context: {
+          pathname: '/app/discover',
+          hash: '/context',
+        },
+        searchProfiler: {
+          pathname: '/app/dev_tools',
+          hash: '/searchprofiler',
+        },
+        maintenanceWindows: {
+          pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
         },
       },
       // choose where screenshots should be saved

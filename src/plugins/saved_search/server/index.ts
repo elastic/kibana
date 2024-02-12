@@ -7,9 +7,10 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
-import { SavedSearchServerPlugin } from './plugin';
 
 export { getSavedSearch } from './services/saved_searches';
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new SavedSearchServerPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { SavedSearchServerPlugin } = await import('./plugin');
+  return new SavedSearchServerPlugin(initContext);
+};

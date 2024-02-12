@@ -5,20 +5,21 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import {
   Collector,
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { FeaturesAvailability } from '.';
+import { ExportTypesRegistry } from '../lib';
+import { createMockReportingCore } from '../test_helpers';
 import {
   getReportingUsageCollector,
   registerReportingUsageCollector,
 } from './reporting_usage_collector';
-import { ExportTypesRegistry } from '../lib';
 
 const getLicenseMock =
   (licenseType = 'gold') =>

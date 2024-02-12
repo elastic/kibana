@@ -12,7 +12,7 @@ import { enableInspectEsQueries } from '@kbn/observability-plugin/public';
 import { useInspectorContext } from '@kbn/observability-shared-plugin/public';
 import { useKibanaServices } from '../../../../hooks/use_kibana_services';
 
-export function UxInspectorHeaderLink() {
+export function UxInspectorHeaderLink({ isDev }: { isDev: boolean }) {
   const { inspectorAdapters } = useInspectorContext();
   const { uiSettings, inspector } = useKibanaServices();
 
@@ -22,7 +22,7 @@ export function UxInspectorHeaderLink() {
     inspector.open(inspectorAdapters);
   };
 
-  if (!isInspectorEnabled) {
+  if (!isInspectorEnabled && !isDev) {
     return null;
   }
 

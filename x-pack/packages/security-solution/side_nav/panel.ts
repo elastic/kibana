@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { SolutionSideNavPanel } from './src/solution_side_nav_panel';
+export { SolutionSideNavPanelContent } from './src/solution_side_nav_panel';

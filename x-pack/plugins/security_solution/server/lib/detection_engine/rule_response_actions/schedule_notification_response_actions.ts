@@ -6,40 +6,48 @@
  */
 
 import { each } from 'lodash';
+import type { ExperimentalFeatures } from '../../../../common';
 import type { EndpointAppContextService } from '../../../endpoint/endpoint_app_context_services';
 import type { SetupPlugins } from '../../../plugin_contract';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 import { osqueryResponseAction } from './osquery_response_action';
 import { endpointResponseAction } from './endpoint_response_action';
 import type { ScheduleNotificationActions } from '../rule_types/types';
-import type { Alert, AlertWithAgent } from './types';
+import type { AlertWithAgent, Alert } from './types';
 
 interface ScheduleNotificationResponseActionsService {
   endpointAppContextService: EndpointAppContextService;
   osqueryCreateActionService?: SetupPlugins['osquery']['createActionService'];
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const getScheduleNotificationResponseActionsService =
   ({
     osqueryCreateActionService,
     endpointAppContextService,
+    experimentalFeatures,
   }: ScheduleNotificationResponseActionsService) =>
   ({ signals, responseActions }: ScheduleNotificationActions) => {
     const alerts = (signals as Alert[]).filter((alert) => alert.agent?.id) as AlertWithAgent[];
 
     each(responseActions, (responseAction) => {
       if (
-        responseAction.actionTypeId === RESPONSE_ACTION_TYPES.OSQUERY &&
+        responseAction.actionTypeId === ResponseActionTypesEnum['.osquery'] &&
         osqueryCreateActionService
       ) {
         osqueryResponseAction(responseAction, osqueryCreateActionService, {
           alerts,
         });
       }
-      if (responseAction.actionTypeId === RESPONSE_ACTION_TYPES.ENDPOINT) {
-        endpointResponseAction(responseAction, endpointAppContextService, {
-          alerts,
-        });
+      if (responseAction.actionTypeId === ResponseActionTypesEnum['.endpoint']) {
+        endpointResponseAction(
+          responseAction,
+          endpointAppContextService,
+          {
+            alerts,
+          },
+          experimentalFeatures
+        );
       }
     });
   };

@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import React, { type FC } from 'react';
+import React, { useState, type FC } from 'react';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -13,17 +13,68 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiText,
+  EuiLink,
+  EuiPopover,
 } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-export const DeploymentDetailsCloudIdInput: FC<{ cloudId: string }> = ({ cloudId }) => {
+const LearnMoreLink: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => (
+  <EuiLink href={learnMoreUrl}>
+    {i18n.translate('cloud.deploymentDetails.cloudIDLabelToolip.learnMoreLink', {
+      defaultMessage: 'Learn more',
+    })}
+  </EuiLink>
+);
+
+const Label: FC<{ learnMoreUrl: string }> = ({ learnMoreUrl }) => {
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
   return (
-    <EuiFormRow
-      label={i18n.translate('cloud.deploymentDetails.cloudIDLabel', {
-        defaultMessage: 'Cloud ID',
-      })}
-      fullWidth
-    >
+    <EuiFlexGroup css={{ minWidth: 200, height: 16 }} alignItems="center" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiText size="xs" css={{ fontWeight: 600 }}>
+          {i18n.translate('cloud.deploymentDetails.cloudIDLabel', {
+            defaultMessage: 'Cloud ID',
+          })}
+        </EuiText>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiPopover
+          button={
+            <EuiButtonIcon
+              iconType="questionInCircle"
+              onClick={() => {
+                setIsPopoverOpen(true);
+              }}
+            />
+          }
+          isOpen={isPopoverOpen}
+          closePopover={() => {
+            setIsPopoverOpen(false);
+          }}
+          anchorPosition="upCenter"
+        >
+          <p style={{ width: 270 }}>
+            <FormattedMessage
+              id="cloud.deploymentDetails.cloudIDLabelToolip"
+              defaultMessage="Get started with Elastic Agent or Logstash quickly. The Cloud ID simplifies sending data to Elastic. {link}"
+              values={{ link: <LearnMoreLink learnMoreUrl={learnMoreUrl} /> }}
+            />
+          </p>
+        </EuiPopover>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const DeploymentDetailsCloudIdInput: FC<{ cloudId: string; learnMoreUrl: string }> = ({
+  cloudId,
+  learnMoreUrl,
+}) => {
+  return (
+    <EuiFormRow label={<Label learnMoreUrl={learnMoreUrl} />} fullWidth>
       <EuiFlexGroup gutterSize="s">
         <EuiFlexItem>
           <EuiFieldText

@@ -7,10 +7,13 @@
 
 import type { CustomFieldsConfiguration, CaseCustomFields } from '../../../common/types/domain';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import type { CasesSearchRequest } from '../../../common/types/api';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 import {
   validateCustomFieldKeysAgainstConfiguration,
   validateCustomFieldTypesInRequest,
   validateRequiredCustomFields,
+  validateSearchCasesCustomFields,
 } from './validators';
 
 describe('validators', () => {
@@ -26,7 +29,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              value: ['this is a text field value', 'this is second'],
+              value: 'this is a text field value',
             },
             {
               key: 'second_key',
@@ -97,7 +100,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'first label',
               required: false,
             },
             {
@@ -109,7 +112,7 @@ describe('validators', () => {
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: first_key"`
+        `"The following custom fields have the wrong type in the request: \\"first label\\""`
       );
     });
 
@@ -130,7 +133,7 @@ describe('validators', () => {
             {
               key: 'third_key',
               type: CustomFieldTypes.TEXT,
-              value: ['abc'],
+              value: 'abc',
             },
           ],
 
@@ -138,25 +141,59 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'first label',
               required: false,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'second label',
               required: false,
             },
             {
               key: 'third_key',
               type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
+              label: 'third label',
               required: false,
             },
           ] as CustomFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The following custom fields have the wrong type in the request: first_key,second_key,third_key"`
+        `"The following custom fields have the wrong type in the request: \\"first label\\", \\"second label\\", \\"third label\\""`
+      );
+    });
+
+    it('throws with label unknown for missing custom field labels', () => {
+      expect(() =>
+        validateCustomFieldTypesInRequest({
+          requestCustomFields: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TOGGLE,
+              value: true,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TEXT,
+              value: 'foobar',
+            },
+          ],
+
+          customFieldsConfiguration: [
+            {
+              key: 'first_key',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            },
+            {
+              key: 'second_key',
+              type: CustomFieldTypes.TEXT,
+              required: false,
+            },
+          ] as CustomFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"The following custom fields have the wrong type in the request: \\"Unknown\\""`
       );
     });
 
@@ -187,7 +224,7 @@ describe('validators', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT as const,
-              value: ['this is a text field value', 'this is second'],
+              value: 'this is a text field value',
             },
             {
               key: 'second_key',
@@ -300,7 +337,7 @@ describe('validators', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT as const,
-          value: ['this is a text field value', 'this is second'],
+          value: 'this is a text field value',
         },
         {
           key: 'second_key',
@@ -311,6 +348,32 @@ describe('validators', () => {
       expect(() =>
         validateRequiredCustomFields({
           requestCustomFields,
+          customFieldsConfiguration,
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw if all missing required custom fields have default values', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'foo',
+          required: true,
+          defaultValue: 'default value',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'foo',
+          required: true,
+          defaultValue: false,
+        },
+      ];
+
+      expect(() =>
+        validateRequiredCustomFields({
+          requestCustomFields: [],
           customFieldsConfiguration,
         })
       ).not.toThrow();
@@ -343,7 +406,7 @@ describe('validators', () => {
       expect(() => validateRequiredCustomFields({})).not.toThrow();
     });
 
-    it('throws if there are missing required custom fields', () => {
+    it('throws if there are missing required custom fields without a default value', () => {
       const requestCustomFields: CaseCustomFields = [
         {
           key: 'second_key',
@@ -355,7 +418,7 @@ describe('validators', () => {
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT,
-          label: 'foo',
+          label: 'missing field 1',
           required: true,
         },
         {
@@ -363,6 +426,14 @@ describe('validators', () => {
           type: CustomFieldTypes.TOGGLE,
           label: 'foo',
           required: true,
+          defaultValue: null,
+        },
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'foo',
+          required: true,
+          defaultValue: 'default value',
         },
       ];
       expect(() =>
@@ -370,10 +441,12 @@ describe('validators', () => {
           requestCustomFields,
           customFieldsConfiguration,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Missing required custom fields without default value configured: \\"missing field 1\\""`
+      );
     });
 
-    it('throws if required custom fields have null value', () => {
+    it('throws if required custom fields with default have null value', () => {
       const requestCustomFields: CaseCustomFields = [
         {
           key: 'second_key',
@@ -383,15 +456,36 @@ describe('validators', () => {
       ];
       const customFieldsConfiguration: CustomFieldsConfiguration = [
         {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          label: 'foo',
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'missing field 2',
           required: true,
+          defaultValue: true,
         },
+      ];
+      expect(() =>
+        validateRequiredCustomFields({
+          requestCustomFields,
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 2\\""`
+      );
+    });
+
+    it('throws if required custom fields without default have null value', () => {
+      const requestCustomFields: CaseCustomFields = [
         {
           key: 'second_key',
           type: CustomFieldTypes.TOGGLE,
-          label: 'foo',
+          value: null,
+        },
+      ];
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'missing field 2',
           required: true,
         },
       ];
@@ -401,7 +495,7 @@ describe('validators', () => {
           customFieldsConfiguration,
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"Missing required custom fields: first_key,second_key"`
+        `"Invalid value \\"null\\" supplied for the following required custom fields: \\"missing field 2\\""`
       );
     });
 
@@ -420,11 +514,18 @@ describe('validators', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
     });
 
-    it('throws if configuration has required fields but request has no custom fields', () => {
+    it('throws if all missing required custom fields do not have default values', () => {
       const customFieldsConfiguration: CustomFieldsConfiguration = [
         {
           key: 'first_key',
           type: CustomFieldTypes.TEXT,
+          label: 'missing field 1',
+          required: true,
+          defaultValue: null,
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
           label: 'foo',
           required: true,
         },
@@ -433,7 +534,162 @@ describe('validators', () => {
         validateRequiredCustomFields({
           customFieldsConfiguration,
         })
-      ).toThrowErrorMatchingInlineSnapshot(`"Missing required custom fields: first_key"`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Missing required custom fields without default value configured: \\"missing field 1\\", \\"foo\\""`
+      );
+    });
+
+    it('throws if some missing required custom fields do not have default values', () => {
+      const customFieldsConfiguration: CustomFieldsConfiguration = [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'missing field 1',
+          required: true,
+          defaultValue: 'default value',
+        },
+        {
+          key: 'second_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'foo',
+          required: true,
+        },
+      ];
+      expect(() =>
+        validateRequiredCustomFields({
+          customFieldsConfiguration,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Missing required custom fields without default value configured: \\"foo\\""`
+      );
+    });
+  });
+
+  describe('validateSearchCasesCustomFields', () => {
+    beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    const customFieldsConfiguration: CustomFieldsConfiguration = [
+      {
+        key: 'first_key',
+        type: CustomFieldTypes.TEXT,
+        label: 'Text field',
+        required: true,
+      },
+      {
+        key: 'second_key',
+        type: CustomFieldTypes.TOGGLE,
+        label: 'Toggle field',
+        required: true,
+      },
+    ];
+
+    const customFields: CasesSearchRequest['customFields'] = {
+      second_key: [true],
+    };
+
+    it('does not throw when custom fields are correct', () => {
+      const newConfig = [
+        ...customFieldsConfiguration,
+        {
+          key: 'third_key',
+          type: CustomFieldTypes.TOGGLE,
+          label: 'Another toggle field',
+          required: false,
+        },
+      ];
+
+      const newCustomFields = { ...customFields, third_key: [false] };
+
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration: newConfig,
+          customFields: newCustomFields,
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw when multiple custom fields', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields,
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw when custom fields are empty', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: {},
+        })
+      ).not.toThrow();
+    });
+
+    it('does not throw when custom field value is null', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { second_key: [null] },
+        })
+      ).not.toThrow();
+    });
+
+    it('throws error when custom fields configurations is empty', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration: [],
+          customFields,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"No custom fields configured."`);
+    });
+
+    it('throws error when custom fields key does not match with configuration', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { random_key: [true] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Invalid custom field key: random_key."`);
+    });
+
+    it('throws error when custom field is not filterable', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { first_key: ['hello'] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Filtering by custom field of type text is not allowed."`
+      );
+    });
+
+    it('throws error when custom field is searched with invalid value', () => {
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: { second_key: ['foobar', true, 1234] },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"Unsupported filtering value for custom field of type toggle."`
+      );
+    });
+
+    it('throws error when custom fields reach maximum', () => {
+      let customFieldsMax = {};
+
+      for (let i = 0; i <= MAX_CUSTOM_FIELDS_PER_CASE + 1; i++) {
+        customFieldsMax = { ...customFieldsMax, [`test_key_${i}`]: [true] };
+      }
+
+      expect(() =>
+        validateSearchCasesCustomFields({
+          customFieldsConfiguration,
+          customFields: customFieldsMax,
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"Maximum 10 customFields are allowed."`);
     });
   });
 });

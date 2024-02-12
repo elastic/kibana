@@ -7,8 +7,10 @@
 
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
+import { paths } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -16,6 +18,7 @@ type ServerError = IHttpFetchError<ResponseErrorBody>;
 
 export function useUpdateSlo() {
   const {
+    application: { navigateToUrl },
     http,
     notifications: { toasts },
   } = useKibana().services;
@@ -25,7 +28,7 @@ export function useUpdateSlo() {
     UpdateSLOResponse,
     ServerError,
     { sloId: string; slo: UpdateSLOInput },
-    { previousData?: FindSLOResponse; queryKey?: QueryKey }
+    { previousData?: FindSLOResponse; queryKey?: QueryKey; sloId: string }
   >(
     ['updateSlo'],
     ({ sloId, slo }) => {
@@ -33,33 +36,9 @@ export function useUpdateSlo() {
       return http.put<UpdateSLOResponse>(`/api/observability/slos/${sloId}`, { body });
     },
     {
-      onMutate: async ({ sloId, slo }) => {
-        await queryClient.cancelQueries({ queryKey: sloKeys.lists(), exact: false });
-
-        const queriesData = queryClient.getQueriesData<FindSLOResponse>({
-          queryKey: sloKeys.lists(),
-          exact: false,
-        });
-        const [queryKey, previousData] = queriesData?.at(0) ?? [];
-
-        const updatedItem = { ...slo, id: sloId };
-        const optimisticUpdate = {
-          page: previousData?.page ?? 1,
-          perPage: previousData?.perPage ?? 25,
-          total: previousData?.total ? previousData.total : 1,
-          results: [
-            ...(previousData?.results?.filter((result) => result.id !== sloId) ?? []),
-            updatedItem,
-          ],
-        };
-
-        if (queryKey) {
-          queryClient.setQueryData(queryKey, optimisticUpdate);
-        }
-
-        return { previousData, queryKey };
-      },
       onSuccess: (_data, { slo: { name } }) => {
+        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+
         toasts.addSuccess(
           i18n.translate('xpack.observability.slo.update.successNotification', {
             defaultMessage: 'Successfully updated {name}',
@@ -67,20 +46,17 @@ export function useUpdateSlo() {
           })
         );
       },
-      onError: (error, { slo: { name } }, context) => {
-        if (context?.previousData && context?.queryKey) {
-          queryClient.setQueryData(context.queryKey, context.previousData);
-        }
-
+      onError: (error, { slo, sloId }, context) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate('xpack.observability.slo.update.errorNotification', {
             defaultMessage: 'Something went wrong when updating {name}',
-            values: { name },
+            values: { name: slo.name },
           }),
         });
-      },
-      onSettled: () => {
-        queryClient.invalidateQueries({ queryKey: sloKeys.lists(), exact: false });
+
+        navigateToUrl(
+          http.basePath.prepend(paths.observability.sloEditWithEncodedForm(sloId, encode(slo)))
+        );
       },
     }
   );

@@ -118,7 +118,12 @@ function applyAutomaticAllPrivilegeGrants(
   allPrivileges.forEach((allPrivilege) => {
     if (allPrivilege) {
       allPrivilege.savedObject.all = uniq([...allPrivilege.savedObject.all, 'telemetry']);
-      allPrivilege.savedObject.read = uniq([...allPrivilege.savedObject.read, 'config', 'url']);
+      allPrivilege.savedObject.read = uniq([
+        ...allPrivilege.savedObject.read,
+        'config',
+        'config-global',
+        'url',
+      ]);
     }
   });
 }
@@ -131,6 +136,7 @@ function applyAutomaticReadPrivilegeGrants(
       readPrivilege.savedObject.read = uniq([
         ...readPrivilege.savedObject.read,
         'config',
+        'config-global',
         'telemetry',
         'url',
       ]);

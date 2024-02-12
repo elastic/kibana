@@ -8,7 +8,13 @@
 import { HttpSetup } from '@kbn/core-http-browser';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
-import { fetchConnectorExecuteAction, FetchConnectorExecuteAction } from './api';
+import {
+  deleteKnowledgeBase,
+  fetchConnectorExecuteAction,
+  FetchConnectorExecuteAction,
+  getKnowledgeBaseStatus,
+  postKnowledgeBase,
+} from './api';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 
@@ -27,137 +33,310 @@ const apiConfig: Conversation['apiConfig'] = {
 const messages: Message[] = [
   { content: 'This is a test', role: 'user', timestamp: new Date().toLocaleString() },
 ];
-
-describe('fetchConnectorExecuteAction', () => {
+const fetchConnectorArgs: FetchConnectorExecuteAction = {
+  isEnabledRAGAlerts: false,
+  apiConfig,
+  isEnabledKnowledgeBase: true,
+  assistantStreamingEnabled: true,
+  http: mockHttp,
+  messages,
+  onNewReplacements: jest.fn(),
+};
+describe('API tests', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('calls the internal assistant API when assistantLangChain is true', async () => {
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: true,
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
+  describe('fetchConnectorExecuteAction', () => {
+    it('calls the internal assistant API when isEnabledKnowledgeBase is true', async () => {
+      await fetchConnectorExecuteAction(fetchConnectorArgs);
 
-    await fetchConnectorExecuteAction(testProps);
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":false}',
+          headers: { 'Content-Type': 'application/json' },
+          method: 'POST',
+          signal: undefined,
+        }
+      );
+    });
 
-    expect(mockHttp.fetch).toHaveBeenCalledWith(
-      '/internal/elastic_assistant/actions/connector/foo/_execute',
-      {
-        body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"}}',
-        headers: { 'Content-Type': 'application/json' },
-        method: 'POST',
-        signal: undefined,
-      }
-    );
-  });
+    it('calls the actions connector api with streaming when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+      };
 
-  it('calls the actions connector api when assistantLangChain is false', async () => {
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: false,
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
+      await fetchConnectorExecuteAction(testProps);
 
-    await fetchConnectorExecuteAction(testProps);
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeStream"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          method: 'POST',
+          asResponse: true,
+          rawResponse: true,
+          signal: undefined,
+        }
+      );
+    });
 
-    expect(mockHttp.fetch).toHaveBeenCalledWith('/api/actions/connector/foo/_execute', {
-      body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"}}',
-      headers: { 'Content-Type': 'application/json' },
-      method: 'POST',
-      signal: undefined,
+    it('calls the actions connector with the expected optional request parameters', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledRAGAlerts: true,
+        alertsIndexPattern: '.alerts-security.alerts-default',
+        allow: ['a', 'b', 'c'],
+        allowReplacement: ['b', 'c'],
+        replacements: { auuid: 'real.hostname' },
+        size: 30,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":true,"isEnabledRAGAlerts":true,"alertsIndexPattern":".alerts-security.alerts-default","allow":["a","b","c"],"allowReplacement":["b","c"],"replacements":{"auuid":"real.hostname"},"size":30}',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          method: 'POST',
+          signal: undefined,
+        }
+      );
+    });
+
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is false when isEnabledKnowledgeBase is false', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+        assistantStreamingEnabled: false,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":false}',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: undefined,
+        }
+      );
+    });
+
+    it('calls the actions connector api with invoke when assistantStreamingEnabled is true when isEnabledKnowledgeBase is false and isEnabledRAGAlerts is true', async () => {
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+        isEnabledRAGAlerts: true,
+      };
+
+      await fetchConnectorExecuteAction(testProps);
+
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/actions/connector/foo/_execute',
+        {
+          body: '{"params":{"subActionParams":{"model":"gpt-4","messages":[{"role":"user","content":"This is a test"}],"n":1,"stop":null,"temperature":0.2},"subAction":"invokeAI"},"isEnabledKnowledgeBase":false,"isEnabledRAGAlerts":true}',
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          signal: undefined,
+        }
+      );
+    });
+
+    it('returns API_ERROR when the response status is error and langchain is on', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
+      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
+
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+    });
+
+    it('returns API_ERROR + error message on non streaming responses', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'error',
+        service_message: 'an error message',
+      });
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+        assistantStreamingEnabled: false,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({
+        response: `${API_ERROR}\n\nan error message`,
+        isStream: false,
+        isError: true,
+      });
+    });
+
+    it('returns API_ERROR when the response status is error, langchain is off, and response is not a reader', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({
+        response: `${API_ERROR}\n\nCould not get reader from response`,
+        isStream: false,
+        isError: true,
+      });
+    });
+
+    it('returns API_ERROR when the response is error, langchain is off, and response is a reader', async () => {
+      const mockReader = jest.fn();
+      (mockHttp.fetch as jest.Mock).mockRejectedValue({
+        response: { body: { getReader: jest.fn().mockImplementation(() => mockReader) } },
+      });
+      const testProps: FetchConnectorExecuteAction = {
+        ...fetchConnectorArgs,
+        isEnabledKnowledgeBase: false,
+      };
+
+      const result = await fetchConnectorExecuteAction(testProps);
+
+      expect(result).toEqual({
+        response: mockReader,
+        isStream: true,
+        isError: true,
+      });
+    });
+
+    it('returns API_ERROR when there are no choices', async () => {
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
+
+      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
+
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
+    });
+
+    it('returns the value of the action_input property when isEnabledKnowledgeBase is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
+      const response = '```json\n{"action_input": "value from action_input"}\n```';
+
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'ok',
+        data: response,
+      });
+
+      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
+
+      expect(result).toEqual({
+        response: 'value from action_input',
+        isStream: false,
+        isError: false,
+      });
+    });
+
+    it('returns the original content when isEnabledKnowledgeBase is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
+      const response = '```json\n{"some_key": "some value"}\n```';
+
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'ok',
+        data: response,
+      });
+
+      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
+
+      expect(result).toEqual({ response, isStream: false, isError: false });
+    });
+
+    it('returns the original when isEnabledKnowledgeBase is true, and `content` is not JSON', async () => {
+      const response = 'plain text content';
+
+      (mockHttp.fetch as jest.Mock).mockResolvedValue({
+        status: 'ok',
+        data: response,
+      });
+
+      const result = await fetchConnectorExecuteAction(fetchConnectorArgs);
+
+      expect(result).toEqual({ response, isStream: false, isError: false });
     });
   });
 
-  it('returns API_ERROR when the response status is not ok', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
+  const knowledgeBaseArgs = {
+    resource: 'a-resource',
+    http: mockHttp,
+  };
+  describe('getKnowledgeBaseStatus', () => {
+    it('calls the knowledge base API when correct resource path', async () => {
+      await getKnowledgeBaseStatus(knowledgeBaseArgs);
 
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: false,
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
-
-    const result = await fetchConnectorExecuteAction(testProps);
-
-    expect(result).toEqual({ response: API_ERROR, isError: true });
-  });
-
-  it('returns API_ERROR when there are no choices', async () => {
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'ok', data: '' });
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: false,
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
-
-    const result = await fetchConnectorExecuteAction(testProps);
-
-    expect(result).toEqual({ response: API_ERROR, isError: true });
-  });
-
-  it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
-    const response = '```json\n{"action_input": "value from action_input"}\n```';
-
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: response,
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/knowledge_base/a-resource',
+        {
+          method: 'GET',
+          signal: undefined,
+        }
+      );
     });
+    it('returns error when error is an error', async () => {
+      const error = 'simulated error';
+      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
+        throw new Error(error);
+      });
 
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: true, // <-- requires response parsing
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
-
-    const result = await fetchConnectorExecuteAction(testProps);
-
-    expect(result).toEqual({ response: 'value from action_input', isError: false });
+      await expect(getKnowledgeBaseStatus(knowledgeBaseArgs)).resolves.toThrowError(
+        'simulated error'
+      );
+    });
   });
 
-  it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
-    const response = '```json\n{"some_key": "some value"}\n```';
+  describe('postKnowledgeBase', () => {
+    it('calls the knowledge base API when correct resource path', async () => {
+      await postKnowledgeBase(knowledgeBaseArgs);
 
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: response,
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/knowledge_base/a-resource',
+        {
+          method: 'POST',
+          signal: undefined,
+        }
+      );
     });
+    it('returns error when error is an error', async () => {
+      const error = 'simulated error';
+      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
+        throw new Error(error);
+      });
 
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: true, // <-- requires response parsing
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
-
-    const result = await fetchConnectorExecuteAction(testProps);
-
-    expect(result).toEqual({ response, isError: false });
+      await expect(postKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+    });
   });
 
-  it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
-    const response = 'plain text content';
+  describe('deleteKnowledgeBase', () => {
+    it('calls the knowledge base API when correct resource path', async () => {
+      await deleteKnowledgeBase(knowledgeBaseArgs);
 
-    (mockHttp.fetch as jest.Mock).mockResolvedValue({
-      status: 'ok',
-      data: response,
+      expect(mockHttp.fetch).toHaveBeenCalledWith(
+        '/internal/elastic_assistant/knowledge_base/a-resource',
+        {
+          method: 'DELETE',
+          signal: undefined,
+        }
+      );
     });
+    it('returns error when error is an error', async () => {
+      const error = 'simulated error';
+      (mockHttp.fetch as jest.Mock).mockImplementation(() => {
+        throw new Error(error);
+      });
 
-    const testProps: FetchConnectorExecuteAction = {
-      assistantLangChain: true, // <-- requires response parsing
-      http: mockHttp,
-      messages,
-      apiConfig,
-    };
-
-    const result = await fetchConnectorExecuteAction(testProps);
-
-    expect(result).toEqual({ response, isError: false });
+      await expect(deleteKnowledgeBase(knowledgeBaseArgs)).resolves.toThrowError('simulated error');
+    });
   });
 });

@@ -10,14 +10,15 @@ import {
   DISCOVER_CONTAINER,
   DISCOVER_DATA_GRID_UPDATING,
   DISCOVER_DATA_VIEW_SWITCHER,
-  DISCOVER_ESQL_INPUT,
   GET_DISCOVER_COLUMN_TOGGLE_BTN,
   DISCOVER_FIELD_SEARCH,
   DISCOVER_DATA_VIEW_EDITOR_FLYOUT,
   DISCOVER_FIELD_LIST_LOADING,
   DISCOVER_ESQL_EDITABLE_INPUT,
+  DISCOVER_ESQL_INPUT_EXPAND,
 } from '../screens/discover';
 import { GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON } from '../screens/search_bar';
+import { goToEsqlTab } from './timeline';
 
 export const switchDataViewTo = (dataviewName: string) => {
   openDataViewSwitcher();
@@ -44,22 +45,31 @@ export const waitForDiscoverGridToLoad = () => {
   cy.get(DISCOVER_FIELD_LIST_LOADING).should('not.exist');
 };
 
-export const selectCurrentDiscoverEsqlQuery = (discoverEsqlInput = DISCOVER_ESQL_INPUT) => {
-  cy.get(discoverEsqlInput).click();
-  cy.get(discoverEsqlInput).focused();
-  cy.get(discoverEsqlInput).type(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
+export const fillEsqlQueryBar = (query: string) => {
+  // eslint-disable-next-line cypress/no-force
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(query, { force: true });
+};
+
+export const selectCurrentDiscoverEsqlQuery = (
+  discoverEsqlInput = DISCOVER_ESQL_EDITABLE_INPUT
+) => {
+  goToEsqlTab();
+  // eslint-disable-next-line cypress/no-force
+  cy.get(discoverEsqlInput).click({ force: true });
+  // eslint-disable-next-line cypress/no-force
+  cy.get(DISCOVER_ESQL_INPUT_EXPAND).click({ force: true });
+  fillEsqlQueryBar(Cypress.platform === 'darwin' ? '{cmd+a}' : '{ctrl+a}');
 };
 
 export const addDiscoverEsqlQuery = (esqlQuery: string) => {
   // ESQL input uses the monaco editor which doesn't allow for traditional input updates
   selectCurrentDiscoverEsqlQuery(DISCOVER_ESQL_EDITABLE_INPUT);
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).clear();
-  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).type(`${esqlQuery}`);
+  fillEsqlQueryBar(esqlQuery);
   cy.get(DISCOVER_ESQL_EDITABLE_INPUT).blur();
-  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).realClick();
+  cy.get(GET_LOCAL_SEARCH_BAR_SUBMIT_BUTTON(DISCOVER_CONTAINER)).click();
 };
 
-export const convertNBSPToSP = (str: string) => {
+export const convertEditorNonBreakingSpaceToSpace = (str: string) => {
   return str.replaceAll(String.fromCharCode(160), ' ');
 };
 
@@ -72,7 +82,7 @@ export const verifyDiscoverEsqlQuery = (esqlQueryToVerify: string) => {
    * https://github.com/cypress-io/cypress/issues/15863#issuecomment-816746693
    */
   const unicodeReplacedQuery = esqlQueryToVerify.replaceAll(' ', '\u00b7');
-  cy.get(DISCOVER_ESQL_INPUT).should('include.text', unicodeReplacedQuery);
+  cy.get(DISCOVER_ESQL_EDITABLE_INPUT).should(($input) => $input.val() === unicodeReplacedQuery);
 };
 
 export const submitDiscoverSearchBar = () => {

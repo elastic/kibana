@@ -14,7 +14,8 @@ type AnyApmDocumentType =
   | ApmDocumentType.TransactionEvent
   | ApmDocumentType.ServiceDestinationMetric
   | ApmDocumentType.ServiceSummaryMetric
-  | ApmDocumentType.ErrorEvent;
+  | ApmDocumentType.ErrorEvent
+  | ApmDocumentType.SpanEvent;
 
 export interface ApmDataSource<
   TDocumentType extends AnyApmDocumentType = AnyApmDocumentType

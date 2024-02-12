@@ -6,10 +6,17 @@
  */
 
 import type { PluginInitializer, Plugin } from '@kbn/core/server';
+import { CloudSetup } from '@kbn/cloud-plugin/server';
 import { initRoutes } from './init_routes';
 
-export const plugin: PluginInitializer<void, void> = (): Plugin => ({
-  setup: (core) => initRoutes(core),
+export interface PluginSetupDependencies {
+  cloud?: CloudSetup;
+}
+
+export const plugin: PluginInitializer<void, void, PluginSetupDependencies> = async (
+  context
+): Promise<Plugin> => ({
+  setup: (core, plugins: PluginSetupDependencies) => initRoutes(context, core, plugins),
   start: () => {},
   stop: () => {},
 });

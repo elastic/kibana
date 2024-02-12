@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
+import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-plugin/common';
 import expect from '@kbn/expect';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const { dashboardControls, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'dashboard',
@@ -50,8 +51,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         to: 'Dec 3, 2018 @ 00:00:00.000',
       });
       await dashboard.navigateToApp();
-      await dashboardControls.enableControlsLab();
-      await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
@@ -76,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
+          additionalSettings: { step: 10 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
         await dashboard.clearUnsavedChanges();
@@ -96,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
           width: 'medium',
+          additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
@@ -114,6 +115,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         const newTitle = 'Average ticket price';
         await dashboardControls.editExistingControl(secondId);
+        await dashboardControls.controlsEditorVerifySupportedControlTypes({
+          supportedTypes: [OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL],
+          selectedType: RANGE_SLIDER_CONTROL,
+        });
         await dashboardControls.controlEditorSetTitle(newTitle);
         await dashboardControls.controlEditorSetWidth('large');
         await dashboardControls.controlEditorSave();
@@ -130,7 +135,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await saveButton.isEnabled()).to.be(true);
         await dashboardControls.controlsEditorSetDataView('kibana_sample_data_flights');
         expect(await saveButton.isEnabled()).to.be(false);
-        await dashboardControls.controlsEditorSetfield('dayOfWeek', RANGE_SLIDER_CONTROL);
+        await dashboardControls.controlsEditorSetfield('dayOfWeek');
+        await dashboardControls.controlsEditorSetControlType(RANGE_SLIDER_CONTROL);
         await dashboardControls.controlEditorSave();
         await dashboardControls.rangeSliderWaitForLoading(firstId);
         await dashboardControls.validateRange('placeholder', firstId, '0', '6');
@@ -171,6 +177,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.rangeSliderWaitForLoading(secondId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1000');
+        await dashboard.clearUnsavedChanges();
+      });
+
+      it('can select a range on a defined step interval using arrow keys', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
+        );
+
+        // use arrow key to set lower bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '300', '');
+
+        // use arrow key to set lower bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        await dashboardControls.validateRange('value', secondId, '200', '');
+
+        await dashboardControls.rangeSliderSetUpperBound(secondId, '800');
+
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__upperBoundFieldNumber`
+        );
+
+        // use arrow key to set upper bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '200', '900');
+
+        // use arrow key to set upper bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        await dashboardControls.validateRange('value', secondId, '200', '800');
+
         await dashboard.clearUnsavedChanges();
       });
 

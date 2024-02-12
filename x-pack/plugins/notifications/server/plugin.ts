@@ -7,14 +7,23 @@
 
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
 import type {
-  NotificationsPluginSetupDeps,
-  NotificationsPluginStartDeps,
-  NotificationsPluginStart,
+  NotificationsServerSetupDependencies,
+  NotificationsServerStartDependencies,
+  NotificationsServerStart,
+  NotificationsServerSetup,
 } from './types';
 import type { NotificationsConfigType } from './config';
 import { EmailServiceProvider } from './services/connectors_email_service_provider';
 
-export class NotificationsPlugin implements Plugin<void, NotificationsPluginStart> {
+export class NotificationsPlugin
+  implements
+    Plugin<
+      NotificationsServerSetup,
+      NotificationsServerStart,
+      NotificationsServerSetupDependencies,
+      NotificationsServerStartDependencies
+    >
+{
   private emailServiceProvider: EmailServiceProvider;
 
   constructor(initializerContext: PluginInitializerContext<NotificationsConfigType>) {
@@ -24,11 +33,11 @@ export class NotificationsPlugin implements Plugin<void, NotificationsPluginStar
     );
   }
 
-  public setup(_core: CoreSetup, plugins: NotificationsPluginSetupDeps) {
+  public setup(_core: CoreSetup, plugins: NotificationsServerSetupDependencies) {
     this.emailServiceProvider.setup(plugins);
   }
 
-  public start(_core: CoreStart, plugins: NotificationsPluginStartDeps) {
+  public start(_core: CoreStart, plugins: NotificationsServerStartDependencies) {
     const emailStartContract = this.emailServiceProvider.start(plugins);
 
     return {

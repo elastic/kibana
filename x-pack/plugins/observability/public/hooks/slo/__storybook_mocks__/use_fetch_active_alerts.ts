@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ActiveAlerts, UseFetchActiveAlerts } from '../use_fetch_active_alerts';
+import { UseFetchActiveAlerts } from '../use_fetch_active_alerts';
+import { ActiveAlerts } from '../active_alerts';
 
 export const useFetchActiveAlerts = ({
   sloIdsAndInstanceIds = [],

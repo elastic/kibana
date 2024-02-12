@@ -12,5 +12,6 @@
   ],
   "kbn_references": [
     "@kbn/shared-ux-page-kibana-no-data-types",
+    "@kbn/no-data-page-plugin",
   ]
 }

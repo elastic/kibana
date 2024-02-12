@@ -77,7 +77,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         listProps={{ onFocusBadge: false, isVirtualized: false }}
         onChange={(newSuggestions, _, changedOption) => {
           setSelectableOptions(newSuggestions);
-          optionsList.dispatch.deselectOption(changedOption.label);
+          optionsList.dispatch.deselectOption(changedOption.key ?? changedOption.label);
         }}
       >
         {(list) => list}

@@ -8,6 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
+import { dataViewSpecSchema } from '@kbn/data-views-plugin/server/rest_api_routes/schema';
 import { i18n } from '@kbn/i18n';
 import { IRuleTypeAlerts, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { IBasePath, Logger } from '@kbn/core/server';
@@ -15,15 +16,9 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { LicenseType } from '@kbn/licensing-plugin/server';
-import { LocatorPublic } from '@kbn/share-plugin/common';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
-import { searchConfigurationSchema } from './types';
-import {
-  AlertsLocatorParams,
-  observabilityFeatureId,
-  observabilityPaths,
-} from '../../../../common';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { observabilityFeatureId, observabilityPaths } from '../../../../common';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -38,15 +33,15 @@ import {
   tagsActionVariableDescription,
   timestampActionVariableDescription,
   valueActionVariableDescription,
-} from './messages';
+  viewInAppUrlActionVariableDescription,
+} from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
 import {
-  createMetricThresholdExecutor,
-  FIRED_ACTIONS,
-  NO_DATA_ACTIONS,
+  createCustomThresholdExecutor,
+  CustomThresholdLocators,
 } from './custom_threshold_executor';
+import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import { ObservabilityConfig } from '../../..';
-import { METRIC_EXPLORER_AGGREGATIONS } from '../../../../common/custom_threshold_rule/constants';
 
 export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   context: THRESHOLD_RULE_REGISTRATION_CONTEXT,
@@ -54,6 +49,24 @@ export const MetricsRulesTypeAlertDefinition: IRuleTypeAlerts = {
   useEcs: true,
   useLegacyAlerts: false,
 };
+
+export const searchConfigurationSchema = schema.object({
+  index: schema.oneOf([schema.string(), dataViewSpecSchema]),
+  query: schema.object({
+    language: schema.string({
+      validate: validateKQLStringFilter,
+    }),
+    query: schema.string(),
+  }),
+  filter: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        meta: schema.recordOf(schema.string(), schema.any()),
+      })
+    )
+  ),
+});
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
 
@@ -63,7 +76,7 @@ export function thresholdRuleType(
   config: ObservabilityConfig,
   logger: Logger,
   ruleDataClient: IRuleDataClient,
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>
+  locators: CustomThresholdLocators
 ) {
   const baseCriterion = {
     threshold: schema.arrayOf(schema.number()),
@@ -71,34 +84,18 @@ export function thresholdRuleType(
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };
-
-  const nonCountCriterion = schema.object({
-    ...baseCriterion,
-    metric: schema.string(),
-    aggType: oneOfLiterals(METRIC_EXPLORER_AGGREGATIONS),
-    metrics: schema.never(),
-    equation: schema.never(),
-    label: schema.never(),
-  });
-
-  const countCriterion = schema.object({
-    ...baseCriterion,
-    aggType: schema.literal('count'),
-    metric: schema.never(),
-    metrics: schema.never(),
-    equation: schema.never(),
-    label: schema.never(),
-  });
+  const allowedAggregators = Object.values(Aggregators);
+  allowedAggregators.splice(Object.values(Aggregators).indexOf(Aggregators.COUNT), 1);
 
   const customCriterion = schema.object({
     ...baseCriterion,
-    aggType: schema.literal('custom'),
+    aggType: schema.maybe(schema.literal('custom')),
     metric: schema.never(),
     metrics: schema.arrayOf(
       schema.oneOf([
         schema.object({
           name: schema.string(),
-          aggType: oneOfLiterals(['avg', 'sum', 'max', 'min', 'cardinality']),
+          aggType: oneOfLiterals(allowedAggregators),
           field: schema.string(),
           filter: schema.never(),
         }),
@@ -118,31 +115,38 @@ export function thresholdRuleType(
     label: schema.maybe(schema.string()),
   });
 
+  const paramsSchema = schema.object(
+    {
+      criteria: schema.arrayOf(customCriterion),
+      groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
+      alertOnNoData: schema.maybe(schema.boolean()),
+      alertOnGroupDisappear: schema.maybe(schema.boolean()),
+      searchConfiguration: searchConfigurationSchema,
+    },
+    { unknowns: 'allow' }
+  );
+
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Custom threshold (Technical Preview)',
+      defaultMessage: 'Custom threshold (Beta)',
     }),
+    fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(
-            schema.oneOf([countCriterion, nonCountCriterion, customCriterion])
-          ),
-          groupBy: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-          alertOnNoData: schema.maybe(schema.boolean()),
-          alertOnGroupDisappear: schema.maybe(schema.boolean()),
-          searchConfiguration: searchConfigurationSchema,
-        },
-        { unknowns: 'allow' }
-      ),
+      params: paramsSchema,
     },
-    defaultActionGroupId: FIRED_ACTIONS.id,
-    actionGroups: [FIRED_ACTIONS, NO_DATA_ACTIONS],
+    schemas: {
+      params: {
+        type: 'config-schema' as const,
+        schema: paramsSchema,
+      },
+    },
+    defaultActionGroupId: FIRED_ACTION.id,
+    actionGroups: [FIRED_ACTION, NO_DATA_ACTION],
     minimumLicenseRequired: 'basic' as LicenseType,
     isExportable: true,
     executor: createLifecycleRuleExecutor(
-      createMetricThresholdExecutor({ alertsLocator, basePath, logger, config })
+      createCustomThresholdExecutor({ basePath, logger, config, locators })
     ),
     doesSetRecoveryContext: true,
     actionVariables: {
@@ -162,6 +166,7 @@ export function thresholdRuleType(
         { name: 'orchestrator', description: orchestratorActionVariableDescription },
         { name: 'labels', description: labelsActionVariableDescription },
         { name: 'tags', description: tagsActionVariableDescription },
+        { name: 'viewInAppUrl', description: viewInAppUrlActionVariableDescription },
       ],
     },
     useSavedObjectReferences: {

@@ -14,6 +14,7 @@ export interface FeatureTypeUsage {
   legacy_notifications_disabled: number;
   notifications_enabled: number;
   notifications_disabled: number;
+  legacy_investigation_fields: number;
 }
 
 export interface RulesTypeUsage {
@@ -46,6 +47,7 @@ export interface RuleMetric {
   cases_count_total: number;
   has_legacy_notification: boolean;
   has_notification: boolean;
+  has_legacy_investigation_field: boolean;
 }
 
 /**

@@ -7,16 +7,33 @@
 
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { createEditChangePointChartsPanelAction } from './edit_change_point_charts_panel';
-import type { AiopsCoreSetup } from '../plugin';
+import {
+  categorizeFieldTrigger,
+  CATEGORIZE_FIELD_TRIGGER,
+} from '@kbn/ml-ui-actions/src/aiops/ui_actions';
 
-export function registerAiopsUiActions(uiActions: UiActionsSetup, core: AiopsCoreSetup) {
+import type { CoreStart } from '@kbn/core/public';
+import type { AiopsPluginStartDeps } from '../types';
+import { createEditChangePointChartsPanelAction } from './edit_change_point_charts_panel';
+import { createCategorizeFieldAction } from '../components/log_categorization';
+
+export function registerAiopsUiActions(
+  uiActions: UiActionsSetup,
+  coreStart: CoreStart,
+  pluginStart: AiopsPluginStartDeps
+) {
   // Initialize actions
   const editChangePointChartPanelAction = createEditChangePointChartsPanelAction(
-    core.getStartServices
+    coreStart,
+    pluginStart
   );
-  // Register actions
-  uiActions.registerAction(editChangePointChartPanelAction);
-  // Assign and register triggers
-  uiActions.attachAction(CONTEXT_MENU_TRIGGER, editChangePointChartPanelAction.id);
+  // // Register actions and triggers
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, editChangePointChartPanelAction);
+
+  uiActions.registerTrigger(categorizeFieldTrigger);
+
+  uiActions.addTriggerAction(
+    CATEGORIZE_FIELD_TRIGGER,
+    createCategorizeFieldAction(coreStart, pluginStart)
+  );
 }

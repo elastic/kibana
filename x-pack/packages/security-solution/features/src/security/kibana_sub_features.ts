@@ -528,8 +528,7 @@ const executeActionSubFeature: SubFeatureConfig = {
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.executeOperations.description',
     {
-      // TODO: Update this description before 8.8 FF
-      defaultMessage: 'Perform script execution on the endpoint.',
+      defaultMessage: 'Perform script execution response actions in the response console.',
     }
   ),
   privilegeGroups: [

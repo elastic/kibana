@@ -10,7 +10,7 @@ import { EmbeddableToDashboardDrilldown } from './embeddable_to_dashboard_drilld
 import { AbstractDashboardDrilldownConfig as Config } from '../abstract_dashboard_drilldown';
 import { savedObjectsServiceMock } from '@kbn/core/public/mocks';
 import { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';
-import { DashboardAppLocatorParams } from '@kbn/dashboard-plugin/public';
+import { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
 import { StartDependencies } from '../../../plugin';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public/core';
 import { EnhancedEmbeddableContext } from '@kbn/embeddable-enhanced-plugin/public';
@@ -95,7 +95,7 @@ describe('.execute() & getHref', () => {
           uiActionsEnhanced: {},
           dashboard: {
             locator: {
-              getLocation: async (params: DashboardAppLocatorParams) => {
+              getLocation: async (params: DashboardLocatorParams) => {
                 return await definition.getLocation(params);
               },
             },

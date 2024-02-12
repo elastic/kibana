@@ -383,5 +383,5 @@ export const EXPERIMENTAL_LABEL = i18n.translate('xpack.cases.badge.experimental
 
 export const EXPERIMENTAL_DESC = i18n.translate('xpack.cases.badge.experimentalDesc', {
   defaultMessage:
-    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will take a best effort approach to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+    'This functionality is in technical preview and may be changed or removed completely in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
 });

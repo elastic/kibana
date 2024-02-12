@@ -9,7 +9,7 @@ import { EuiLink, EuiLinkAnchorProps } from '@elastic/eui';
 import { IBasePath } from '@kbn/core/public';
 import React from 'react';
 import url from 'url';
-import { InfraAppId } from '@kbn/infra-plugin/public';
+import { InfraAppId } from '@kbn/observability-shared-plugin/public/infra';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { fromQuery } from './url_helpers';
 

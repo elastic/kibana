@@ -42,7 +42,6 @@ export const useLoadConnectors = ({
     {
       retry: false,
       keepPreviousData: true,
-      // staleTime: STALE_TIME,
       onError: (error: ServerError) => {
         if (error.name !== 'AbortError') {
           toasts?.addError(

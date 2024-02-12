@@ -95,6 +95,13 @@ export const ALERTS_HEADERS_RISK_SCORE = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_ASSIGNEES = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.assigneesTitle',
+  {
+    defaultMessage: 'Assignees',
+  }
+);
+
 export const ALERTS_HEADERS_THRESHOLD_COUNT = i18n.translate(
   'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.thresholdCount',
   {
@@ -130,10 +137,45 @@ export const ALERTS_HEADERS_NEW_TERMS_FIELDS = i18n.translate(
   }
 );
 
+export const ALERTS_HEADERS_HOST_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.hostRiskLevel',
+  {
+    defaultMessage: 'Host Risk Level',
+  }
+);
+
+export const ALERTS_HEADERS_USER_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.userRiskLevel',
+  {
+    defaultMessage: 'User Risk Level',
+  }
+);
+
+export const ALERTS_HEADERS_HOST_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.hostCriticality',
+  {
+    defaultMessage: 'Host Criticality',
+  }
+);
+
+export const ALERTS_HEADERS_USER_CRITICALITY = i18n.translate(
+  'xpack.securitySolution.eventsViewer.alerts.defaultHeaders.userCriticality',
+  {
+    defaultMessage: 'User Criticality',
+  }
+);
+
 export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineTitle',
   {
     defaultMessage: 'Investigate in timeline',
+  }
+);
+
+export const ACTION_CANNOT_INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.cannotInvestigateInTimelineTitle',
+  {
+    defaultMessage: 'Please navigate to a page with timeline to investigate',
   }
 );
 

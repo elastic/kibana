@@ -12,6 +12,8 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getUnallowedFieldValuesRoute } from './get_unallowed_field_values';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   getUnallowedFieldValues: jest.fn(),
@@ -20,6 +22,8 @@ jest.mock('../lib', () => ({
 describe('getUnallowedFieldValuesRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
+  let logger: MockedLogger;
+
   const req = requestMock.create({
     method: 'post',
     path: GET_UNALLOWED_FIELD_VALUES,
@@ -37,8 +41,9 @@ describe('getUnallowedFieldValuesRoute route', () => {
 
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
+    logger = loggerMock.create();
 
-    getUnallowedFieldValuesRoute(server.router);
+    getUnallowedFieldValuesRoute(server.router, logger);
   });
 
   test('Returns unallowedValues', async () => {
@@ -107,11 +112,13 @@ describe('getUnallowedFieldValuesRoute route', () => {
 
 describe('request validation', () => {
   let server: ReturnType<typeof serverMock.create>;
+  let logger: MockedLogger;
 
   beforeEach(() => {
     server = serverMock.create();
+    logger = loggerMock.create();
 
-    getUnallowedFieldValuesRoute(server.router);
+    getUnallowedFieldValuesRoute(server.router, logger);
   });
 
   test('disallows invalid pattern', () => {

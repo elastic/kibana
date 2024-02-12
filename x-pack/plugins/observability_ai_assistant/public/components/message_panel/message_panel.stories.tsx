@@ -71,7 +71,7 @@ export const ContentFailed: ComponentStoryObj<typeof Component> = {
         onActionClick={async () => {}}
       />
     ),
-    error: new Error(),
+    error: true,
   },
 };
 
@@ -111,7 +111,7 @@ export const Controls: ComponentStoryObj<typeof Component> = {
         onActionClick={async () => {}}
       />
     ),
-    error: new Error(),
+    error: true,
     controls: <FeedbackButtons onClickFeedback={() => {}} />,
   },
 };

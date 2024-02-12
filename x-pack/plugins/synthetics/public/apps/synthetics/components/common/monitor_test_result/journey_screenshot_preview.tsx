@@ -61,7 +61,9 @@ export const JourneyScreenshotPreview: React.FC<StepImagePopoverProps> = ({
   );
 
   const onImgClick = useCallback(
-    (_evt: MouseEvent<HTMLImageElement>) => {
+    (evt: MouseEvent<HTMLImageElement>) => {
+      // needed to prevent propagation to the table row click
+      evt.stopPropagation();
       setIsImageEverClicked(true);
       setIsImageDialogOpen(true);
       setIsImagePopoverOpen(false);

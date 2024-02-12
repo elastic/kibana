@@ -11,7 +11,8 @@
     "**/*.ts"
   ],
   "kbn_references": [
-    "@kbn/std"
+    "@kbn/std",
+    "@kbn/io-ts-utils"
   ],
   "exclude": [
     "target/**/*",

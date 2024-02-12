@@ -60,4 +60,7 @@ export const observabilityAlertFeatureIds: ValidFeatureId[] = [
 export const observabilityRuleCreationValidConsumers: RuleCreationValidConsumer[] = [
   AlertConsumers.INFRASTRUCTURE,
   AlertConsumers.LOGS,
+  AlertConsumers.OBSERVABILITY,
 ];
+
+export const EventsAsUnit = 'events';

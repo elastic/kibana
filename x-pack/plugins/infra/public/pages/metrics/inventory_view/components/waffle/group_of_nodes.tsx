@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import {
   InfraWaffleMapBounds,
   InfraWaffleMapGroupOfNodes,
@@ -16,7 +17,6 @@ import {
 } from '../../../../../lib/lib';
 import { GroupName } from './group_name';
 import { Node } from './node';
-import { InventoryItemType } from '../../../../../../common/inventory_models/types';
 import { useAssetDetailsFlyoutState } from '../../hooks/use_asset_details_flyout_url_state';
 
 interface Props {

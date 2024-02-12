@@ -6,6 +6,8 @@
  */
 
 import * as rt from 'io-ts';
+import { v5 } from 'uuid';
+import { IdFormat, JobType } from '../http_api/latest';
 
 export const bucketSpan = 900000;
 
@@ -13,14 +15,32 @@ export const categoriesMessageField = 'message';
 
 export const partitionField = 'event.dataset';
 
-export const getJobIdPrefix = (spaceId: string, sourceId: string) =>
-  `kibana-logs-ui-${spaceId}-${sourceId}-`;
+const ID_NAMESPACE = 'f91b78c0-fdd3-425d-a4ba-4c028fe57e0f';
 
-export const getJobId = (spaceId: string, logViewId: string, jobType: string) =>
-  `${getJobIdPrefix(spaceId, logViewId)}${jobType}`;
+export const getJobIdPrefix = (spaceId: string, sourceId: string, idFormat: IdFormat) => {
+  if (idFormat === 'legacy') {
+    return `kibana-logs-ui-${spaceId}-${sourceId}-`;
+  } else {
+    // A UUID is 36 characters but based on the ML job names for logs, our limit is 32 characters
+    // Thus we remove the 4 dashes
+    const uuid = v5(`${spaceId}-${sourceId}`, ID_NAMESPACE).replaceAll('-', '');
+    return `logs-${uuid}-`;
+  }
+};
 
-export const getDatafeedId = (spaceId: string, logViewId: string, jobType: string) =>
-  `datafeed-${getJobId(spaceId, logViewId, jobType)}`;
+export const getJobId = (
+  spaceId: string,
+  logViewId: string,
+  idFormat: IdFormat,
+  jobType: JobType
+) => `${getJobIdPrefix(spaceId, logViewId, idFormat)}${jobType}`;
+
+export const getDatafeedId = (
+  spaceId: string,
+  logViewId: string,
+  idFormat: IdFormat,
+  jobType: JobType
+) => `datafeed-${getJobId(spaceId, logViewId, idFormat, jobType)}`;
 
 export const datasetFilterRT = rt.union([
   rt.strict({

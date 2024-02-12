@@ -33,7 +33,7 @@ export const buildExecutor = <
     const subAction = params.subAction;
     const subActionParams = params.subActionParams;
 
-    const service = new connector.Service({
+    const service = connector.getService({
       connector: { id: actionId, type: connector.id },
       config,
       secrets,

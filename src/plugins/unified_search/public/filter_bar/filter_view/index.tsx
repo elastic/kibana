@@ -11,6 +11,7 @@ import { i18n } from '@kbn/i18n';
 import React, { FC } from 'react';
 import { Filter, isFilterPinned } from '@kbn/es-query';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { stringHash } from '@kbn/ml-string-hash';
 import type { FilterLabelStatus } from '../filter_item/filter_item';
 import { FilterBadge } from '../../filter_badge';
 
@@ -103,7 +104,7 @@ export const FilterView: FC<Props> = ({
       hideAlias={hideAlias}
       {...badgeProps}
       {...rest}
-      data-test-subj={`filter-badge-'${innerText}' ${rest['data-test-subj']}`}
+      data-test-subj={`filter-badge-${stringHash(innerText || '')} ${rest['data-test-subj']}`}
     />
   );
 

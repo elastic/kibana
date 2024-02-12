@@ -186,7 +186,11 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
     packages: schema.arrayOf(
       schema.oneOf([
         schema.string(),
-        schema.object({ name: schema.string(), version: schema.string() }),
+        schema.object({
+          name: schema.string(),
+          version: schema.string(),
+          prerelease: schema.maybe(schema.boolean()),
+        }),
       ]),
       { minSize: 1 }
     ),
@@ -246,4 +250,17 @@ export const DeletePackageRequestSchemaDeprecated = {
       force: schema.boolean(),
     })
   ),
+};
+
+export const GetInputsRequestSchema = {
+  params: schema.object({
+    pkgName: schema.string(),
+    pkgVersion: schema.string(),
+  }),
+  query: schema.object({
+    format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')], {
+      defaultValue: 'json',
+    }),
+    prerelease: schema.maybe(schema.boolean()),
+  }),
 };

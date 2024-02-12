@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createMLTestDashboardIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -85,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteMLTestDashboard();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     for (const testData of testDataList) {
@@ -541,6 +541,39 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               expectedAttachment,
               6
             );
+          });
+        });
+
+        describe('Use anomaly table action to view in Discover', function () {
+          beforeEach(async () => {
+            await ml.navigation.navigateToAnomalyExplorer(
+              testData.jobConfig.job_id,
+              {
+                from: '2016-02-07T00%3A00%3A00.000Z',
+                to: '2016-02-11T23%3A59%3A54.000Z',
+              },
+              () => elasticChart.setNewChartUiDebugFlag(true)
+            );
+
+            await ml.commonUI.waitForMlLoadingIndicatorToDisappear();
+            await ml.commonUI.waitForDatePickerIndicatorLoaded();
+            await ml.swimLane.waitForSwimLanesToLoad();
+          });
+
+          it('should render the anomaly table', async () => {
+            await ml.testExecution.logTestStep('displays the anomalies table');
+            await ml.anomaliesTable.assertTableExists();
+
+            await ml.testExecution.logTestStep('anomalies table is not empty');
+            await ml.anomaliesTable.assertTableNotEmpty();
+          });
+
+          it('should click the Discover action in the anomaly table', async () => {
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonExists(0);
+            await ml.anomaliesTable.scrollRowIntoView(0);
+            await ml.anomaliesTable.assertAnomalyActionsMenuButtonEnabled(0, true);
+            await ml.anomaliesTable.assertAnomalyActionDiscoverButtonExists(0);
+            await ml.anomaliesTable.ensureAnomalyActionDiscoverButtonClicked(0);
           });
         });
       });

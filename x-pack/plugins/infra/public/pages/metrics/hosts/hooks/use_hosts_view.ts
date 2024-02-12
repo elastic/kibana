@@ -12,7 +12,7 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import createContainer from 'constate';
 import { BoolQuery } from '@kbn/es-query';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
@@ -41,10 +41,11 @@ const BASE_INFRA_METRICS_PATH = '/api/metrics/infra';
 export const useHostsView = () => {
   const { sourceId } = useSourceContext();
   const {
-    services: { http },
+    services: { http, data, telemetry },
   } = useKibanaContextForPlugin();
   const { buildQuery, parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const abortCtrlRef = useRef(new AbortController());
+  const [searchSessionId, setSearchSessionId] = useState(() => data.search.session.start());
 
   const baseRequest = useMemo(
     () =>
@@ -58,14 +59,26 @@ export const useHostsView = () => {
   );
 
   const [state, refetch] = useAsyncFn(
-    () => {
+    async () => {
       abortCtrlRef.current.abort();
       abortCtrlRef.current = new AbortController();
 
-      return http.post<GetInfraMetricsResponsePayload>(`${BASE_INFRA_METRICS_PATH}`, {
-        signal: abortCtrlRef.current.signal,
-        body: JSON.stringify(baseRequest),
-      });
+      const start = performance.now();
+      const metricsResponse = await http.post<GetInfraMetricsResponsePayload>(
+        `${BASE_INFRA_METRICS_PATH}`,
+        {
+          signal: abortCtrlRef.current.signal,
+          body: JSON.stringify(baseRequest),
+        }
+      );
+      const duration = performance.now() - start;
+      telemetry?.reportPerformanceMetricEvent(
+        'infra_hosts_table_load',
+        duration,
+        { key1: 'data_load', value1: duration },
+        { limit: searchCriteria.limit }
+      );
+      return metricsResponse;
     },
     [baseRequest, http],
     { loading: true }
@@ -73,15 +86,16 @@ export const useHostsView = () => {
 
   useEffect(() => {
     refetch();
-  }, [refetch]);
+    setSearchSessionId(data.search.session.start());
+  }, [data.search.session, refetch]);
 
   const { value, error, loading } = state;
 
   return {
-    requestTs: baseRequest.requestTs,
     loading,
     error,
     hostNodes: value?.nodes ?? [],
+    searchSessionId,
   };
 };
 
@@ -102,7 +116,7 @@ const createInfraMetricsRequest = ({
   sourceId: string;
   dateRange: StringDateRange;
   limit: number;
-}): GetInfraMetricsRequestBodyPayload & { requestTs: number } => ({
+}): GetInfraMetricsRequestBodyPayload => ({
   type: 'host',
   query: esQuery,
   range: {
@@ -112,5 +126,4 @@ const createInfraMetricsRequest = ({
   metrics: HOST_TABLE_METRICS,
   limit,
   sourceId,
-  requestTs: Date.now(),
 });

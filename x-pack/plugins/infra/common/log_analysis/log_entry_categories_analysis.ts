@@ -8,15 +8,15 @@
 import * as rt from 'io-ts';
 import { sortRT } from './log_analysis_results';
 
-export const logEntryCategoriesJobTypeRT = rt.keyof({
-  'log-entry-categories-count': null,
-});
+export const logEntryCategoriesJobTypeRT = rt.literal('log-entry-categories-count');
 
 export type LogEntryCategoriesJobType = rt.TypeOf<typeof logEntryCategoriesJobTypeRT>;
 
 export const logEntryCategoriesJobTypes: LogEntryCategoriesJobType[] = [
   'log-entry-categories-count',
 ];
+
+export const logEntryCategoriesJobType: LogEntryCategoriesJobType = 'log-entry-categories-count';
 
 export const logEntryCategoryDatasetRT = rt.type({
   name: rt.string,

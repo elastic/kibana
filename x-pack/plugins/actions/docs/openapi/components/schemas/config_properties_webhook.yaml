@@ -27,8 +27,9 @@ properties:
     description: >
       If `true`, a user name and password must be provided for login type authentication.
   headers:
-    type: object
-    nullable: true
+    type:
+      - "object"
+      - "null"
     description: A set of key-value pairs sent as headers with the request.
   method:
     type: string

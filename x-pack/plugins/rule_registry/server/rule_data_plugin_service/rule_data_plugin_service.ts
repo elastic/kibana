@@ -11,7 +11,11 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { PublicFrameworkAlertsService, DataStreamAdapter } from '@kbn/alerting-plugin/server';
+import {
+  PublicFrameworkAlertsService,
+  DataStreamAdapter,
+  InstallShutdownError,
+} from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
 import { type IRuleDataClient, RuleDataClient, WaitResult } from '../rule_data_client';
 import { IndexInfo } from './index_info';
@@ -158,7 +162,12 @@ export class RuleDataService implements IRuleDataService {
       .installCommonResources()
       .then(() => right('ok' as const))
       .catch((e) => {
-        this.options.logger.error(e);
+        if (e instanceof InstallShutdownError) {
+          this.options.logger.debug(e.message);
+        } else {
+          this.options.logger.error(e);
+        }
+
         return left(e); // propagates it to the index initialization phase
       });
 
@@ -203,7 +212,11 @@ export class RuleDataService implements IRuleDataService {
         const clusterClient = await this.options.getClusterClient();
         return right(clusterClient);
       } catch (e) {
-        this.options.logger.error(e);
+        if (e instanceof InstallShutdownError) {
+          this.options.logger.debug(e.message);
+        } else {
+          this.options.logger.error(e);
+        }
         return left(e);
       }
     };

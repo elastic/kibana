@@ -8,7 +8,6 @@
 
 import {
   EuiHeader,
-  EuiHeaderLink,
   EuiHeaderLogo,
   EuiHeaderSection,
   EuiHeaderSectionItem,
@@ -36,7 +35,7 @@ import React, { useCallback } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { debounceTime, Observable, of } from 'rxjs';
 import { useHeaderActionMenuMounter } from '../header/header_action_menu';
-import { HeaderBreadcrumbs } from '../header/header_breadcrumbs';
+import { Breadcrumbs } from './breadcrumbs';
 import { HeaderHelpMenu } from '../header/header_help_menu';
 import { HeaderNavControls } from '../header/header_nav_controls';
 import { HeaderTopBanner } from '../header/header_top_banner';
@@ -51,6 +50,7 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       min-width: 56px; /* 56 = 40 + 8 + 8 */
       padding: 0 ${size.s};
       cursor: pointer;
+      margin-left: -${size.s}; // to get equal spacing between .euiCollapsibleNavButtonWrapper, logo and breadcrumbs
     `,
     logo: css`
       min-width: 0; /* overrides min-width: 40px */
@@ -62,12 +62,17 @@ const getHeaderCss = ({ size }: EuiThemeComputed) => ({
       top: 2px;
     `,
   },
-  projectName: {
-    link: css`
-      /* TODO: make header layout more flexible? */
-      max-width: 320px;
-    `,
-  },
+  leftHeaderSection: css`
+    // needed to enable breadcrumbs truncation
+    min-width: 0;
+    flex-shrink: 1;
+  `,
+  breadcrumbsSectionItem: css`
+    min-width: 0; // needed to enable breadcrumbs truncation
+  `,
+  redirectAppLinksContainer: css`
+    min-width: 0; // needed to enable breadcrumbs truncation
+  `,
 });
 
 type HeaderCss = ReturnType<typeof getHeaderCss>;
@@ -76,11 +81,6 @@ const headerStrings = {
   logo: {
     ariaLabel: i18n.translate('core.ui.primaryNav.goToHome.ariaLabel', {
       defaultMessage: 'Go to home page',
-    }),
-  },
-  cloud: {
-    linkToProjects: i18n.translate('core.ui.primaryNav.cloud.linkToProjects', {
-      defaultMessage: 'Projects',
     }),
   },
   nav: {
@@ -101,8 +101,6 @@ export interface Props {
   helpSupportUrl$: Observable<string>;
   helpMenuLinks$: Observable<ChromeHelpMenuLink[]>;
   homeHref$: Observable<string | undefined>;
-  projectsUrl$: Observable<string | undefined>;
-  projectName$: Observable<string | undefined>;
   kibanaVersion: string;
   application: InternalApplicationStart;
   loadingCount$: ReturnType<HttpStart['getLoadingCount$']>;
@@ -110,6 +108,7 @@ export interface Props {
   navControlsCenter$: Observable<ChromeNavControl[]>;
   navControlsRight$: Observable<ChromeNavControl[]>;
   prependBasePath: (url: string) => string;
+  toggleSideNav: (isCollapsed: boolean) => void;
 }
 
 const LOADING_DEBOUNCE_TIME = 80;
@@ -172,11 +171,10 @@ export const ProjectHeader = ({
   children,
   prependBasePath,
   docLinks,
+  toggleSideNav,
   ...observables
 }: Props) => {
   const headerActionMenuMounter = useHeaderActionMenuMounter(observables.actionMenu$);
-  const projectsUrl = useObservable(observables.projectsUrl$);
-  const projectName = useObservable(observables.projectName$);
   const { euiTheme } = useEuiTheme();
   const headerCss = getHeaderCss(euiTheme);
   const { logo: logoCss } = headerCss;
@@ -194,9 +192,9 @@ export const ProjectHeader = ({
       <header data-test-subj="kibanaProjectHeader">
         <div id="globalHeaderBars" data-test-subj="headerGlobalNav" className="header__bars">
           <EuiHeader position="fixed" className="header__firstBar">
-            <EuiHeaderSection grow={false}>
+            <EuiHeaderSection grow={false} css={headerCss.leftHeaderSection}>
               <Router history={application.history}>
-                <ProjectNavigation>{children}</ProjectNavigation>
+                <ProjectNavigation toggleSideNav={toggleSideNav}>{children}</ProjectNavigation>
               </Router>
 
               <EuiHeaderSectionItem>
@@ -209,23 +207,12 @@ export const ProjectHeader = ({
                 />
               </EuiHeaderSectionItem>
 
-              <EuiHeaderSectionItem>
-                <HeaderNavControls navControls$={observables.navControlsLeft$} />
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
-                <EuiHeaderLink
-                  href={projectsUrl}
-                  data-test-subj={'projectsLink'}
-                  css={headerCss.projectName.link}
+              <EuiHeaderSectionItem css={headerCss.breadcrumbsSectionItem}>
+                <RedirectAppLinks
+                  coreStart={{ application }}
+                  css={headerCss.redirectAppLinksContainer}
                 >
-                  {projectName ?? headerStrings.cloud.linkToProjects}
-                </EuiHeaderLink>
-              </EuiHeaderSectionItem>
-
-              <EuiHeaderSectionItem>
-                <RedirectAppLinks coreStart={{ application }}>
-                  <HeaderBreadcrumbs breadcrumbs$={observables.breadcrumbs$} />
+                  <Breadcrumbs breadcrumbs$={observables.breadcrumbs$} />
                 </RedirectAppLinks>
               </EuiHeaderSectionItem>
             </EuiHeaderSection>

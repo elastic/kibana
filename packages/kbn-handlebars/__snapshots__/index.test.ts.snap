@@ -42,7 +42,7 @@ HandlebarsEnvironment {
     "isFunction": [Function],
     "toString": [Function],
   },
-  "VERSION": "4.7.7",
+  "VERSION": "4.7.8",
   "VM": Object {
     "__esModule": true,
     "checkRevision": [Function],

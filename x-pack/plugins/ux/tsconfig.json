@@ -7,6 +7,7 @@
     "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
+    "server/**/*",
     "typings/**/*",
     "public/**/*.json",
   ],
@@ -40,6 +41,8 @@
     "@kbn/observability-shared-plugin",
     "@kbn/shared-ux-router",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/config-schema",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [
     "target/**/*",

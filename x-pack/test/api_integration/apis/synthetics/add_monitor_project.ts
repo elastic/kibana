@@ -9,7 +9,10 @@ import expect from '@kbn/expect';
 import { ConfigKey, ProjectMonitorsRequest } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
+import {
+  ELASTIC_MANAGED_LOCATIONS_DISABLED,
+  REQUEST_TOO_LARGE,
+} from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   PROFILE_VALUES_ENUM,
@@ -132,6 +135,18 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404);
     });
 
+    it('project monitors - returns forbidden if no access to public locations', async () => {
+      const project = `test-project-${uuidv4()}`;
+
+      await monitorTestService.generateProjectAPIKey(false);
+      const response = await monitorTestService.addProjectMonitors(
+        project,
+        projectMonitors.monitors
+      );
+      expect(response.status).to.eql(403);
+      expect(response.body.message).to.eql(ELASTIC_MANAGED_LOCATIONS_DISABLED);
+    });
+
     it('project monitors - handles browser monitors', async () => {
       const successfulMonitors = [projectMonitors.monitors[0]];
       const project = `test-project-${uuidv4()}`;
@@ -191,9 +206,9 @@ export default function ({ getService }: FtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'localhost',
+                id: 'dev',
                 isServiceManaged: true,
-                label: 'Local Synthetics Service',
+                label: 'Dev Service',
               },
             ],
             name: 'check if title is present',
@@ -374,9 +389,9 @@ export default function ({ getService }: FtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'localhost',
+                id: 'dev',
                 isServiceManaged: true,
-                label: 'Local Synthetics Service',
+                label: 'Dev Service',
               },
             ],
             max_redirects: '0',
@@ -494,9 +509,9 @@ export default function ({ getService }: FtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'localhost',
+                id: 'dev',
                 isServiceManaged: true,
-                label: 'Local Synthetics Service',
+                label: 'Dev Service',
               },
             ],
             name: monitor.name,
@@ -604,9 +619,9 @@ export default function ({ getService }: FtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: 'localhost',
+                id: 'dev',
                 isServiceManaged: true,
-                label: 'Local Synthetics Service',
+                label: 'Dev Service',
               },
               {
                 geo: {
@@ -738,7 +753,7 @@ export default function ({ getService }: FtrProviderContext) {
                   match: 'check if title is present',
                 },
                 id: projectMonitors.monitors[0].id,
-                locations: ['localhost'],
+                locations: ['dev'],
                 name: 'check if title is present',
                 params: {},
                 playwrightOptions: {
@@ -1799,8 +1814,8 @@ export default function ({ getService }: FtrProviderContext) {
         updatedMonitorsResponse.forEach((response) => {
           expect(response.body.monitors[0].locations).eql([
             {
-              id: 'localhost',
-              label: 'Local Synthetics Service',
+              id: 'dev',
+              label: 'Dev Service',
               geo: { lat: 0, lon: 0 },
               isServiceManaged: true,
             },
@@ -1902,7 +1917,7 @@ export default function ({ getService }: FtrProviderContext) {
                 enabled: false,
                 hash: 'ekrjelkjrelkjre',
                 id: projectMonitors.monitors[0].id,
-                locations: ['localhost'],
+                locations: ['dev'],
                 name: 'My Monitor 3',
                 response: {
                   include_body: 'always',
@@ -2127,7 +2142,7 @@ export default function ({ getService }: FtrProviderContext) {
                 timeout: '80s',
                 type: 'http',
                 urls: ['http://localhost:9200'],
-                locations: ['localhost'],
+                locations: ['dev'],
                 params: {
                   testGlobalParam2: 'testGlobalParamOverwrite',
                   testLocal1: 'testLocalParamsValue',

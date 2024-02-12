@@ -27,4 +27,5 @@ export interface AgentPolicyInfo {
   agents: number;
   status: string;
   description?: string;
+  namespace?: string;
 }

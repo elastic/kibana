@@ -18,38 +18,37 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
+  const toasts = getService('toasts');
 
   describe('Cases persistable attachments', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
+        await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.load(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
         await svlObltNavigation.navigateToLandingPage();
-
         await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'dashboards' });
 
         await dashboard.clickNewDashboard();
-
         await lens.createAndAddLensFromDashboard({});
-
         await dashboard.waitForRenderComplete();
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
 
         await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
         );
 
+        await kibanaServer.savedObjects.cleanStandardList();
         await svlCommonPage.forceLogout();
       });
 
@@ -72,8 +71,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('create-case-submit');
 
         await cases.common.expectToasterToContain(`${caseTitle} has been updated`);
-
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');
@@ -101,12 +100,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.click('embeddablePanelAction-embeddable_addToExistingCase');
 
         // verify that solution filter is not visible
-        await testSubjects.missingOrFail('solution-filter-popover-button');
+        await testSubjects.missingOrFail('options-filter-popover-button-owner');
 
         await testSubjects.click(`cases-table-row-select-${theCase.id}`);
 
         await cases.common.expectToasterToContain(`${theCaseTitle} has been updated`);
         await testSubjects.click('toaster-content-case-view-link');
+        await toasts.dismissAllToastsWithChecks();
 
         if (await testSubjects.exists('appLeaveConfirmModal')) {
           await testSubjects.exists('confirmModalConfirmButton');

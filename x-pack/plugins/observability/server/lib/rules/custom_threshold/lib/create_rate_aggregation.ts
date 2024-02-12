@@ -7,7 +7,6 @@
 
 import moment from 'moment';
 import { calculateRateTimeranges } from '../utils';
-
 export const createRateAggsBucketScript = (
   timeframe: { start: number; end: number },
   id: string
@@ -20,18 +19,19 @@ export const createRateAggsBucketScript = (
     [id]: {
       bucket_script: {
         buckets_path: {
-          first: `currentPeriod['all']>${id}_first_bucket.maxValue`,
-          second: `currentPeriod['all']>${id}_second_bucket.maxValue`,
+          first: `${id}_first_bucket.maxValue`,
+          second: `${id}_second_bucket.maxValue`,
         },
-        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: null`,
+        script: `params.second > 0.0 && params.first > 0.0 && params.second > params.first ? (params.second - params.first) / ${intervalInSeconds}: 0`,
       },
     },
   };
 };
 
 export const createRateAggsBuckets = (
-  timeframe: { start: number; end: number; timeFieldName: string },
+  timeframe: { start: number; end: number },
   id: string,
+  timeFieldName: string,
   field: string
 ) => {
   const { firstBucketRange, secondBucketRange } = calculateRateTimeranges({
@@ -43,7 +43,7 @@ export const createRateAggsBuckets = (
     [`${id}_first_bucket`]: {
       filter: {
         range: {
-          [timeframe.timeFieldName]: {
+          [timeFieldName]: {
             gte: moment(firstBucketRange.from).toISOString(),
             lt: moment(firstBucketRange.to).toISOString(),
           },
@@ -54,7 +54,7 @@ export const createRateAggsBuckets = (
     [`${id}_second_bucket`]: {
       filter: {
         range: {
-          [timeframe.timeFieldName]: {
+          [timeFieldName]: {
             gte: moment(secondBucketRange.from).toISOString(),
             lt: moment(secondBucketRange.to).toISOString(),
           },

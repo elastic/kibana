@@ -8,7 +8,15 @@
 
 import PropTypes from 'prop-types';
 import React, { Component } from 'react';
-import { keys, EuiFlexGroup, EuiFlexItem, EuiButton, EuiText, EuiSwitch } from '@elastic/eui';
+import {
+  keys,
+  EuiFlexGroup,
+  EuiIcon,
+  EuiFlexItem,
+  EuiButton,
+  EuiText,
+  EuiSwitch,
+} from '@elastic/eui';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { pluck } from 'rxjs/operators';
 
@@ -200,7 +208,7 @@ class VisEditorVisualizationUI extends Component {
               defaultMessage: 'Press up/down to adjust the chart size',
             })}
           >
-            <i className="fa fa-ellipsis-h" />
+            <EuiIcon type="grab" />
           </button>
         </div>
       </div>

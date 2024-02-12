@@ -7,7 +7,6 @@ exports[`IndexPatternsMissingPrompt renders correctly against snapshot 1`] = `
       color="primary"
       fill={true}
       href="/test/base/path/app/management/kibana/dataViews"
-      size="m"
       target="_blank"
     >
       Configure index patterns

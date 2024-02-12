@@ -25,7 +25,7 @@ import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { isEqual } from 'lodash';
 import { type AccessorConfig, DimensionTrigger } from '@kbn/visualization-ui-components';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DEFAULT_COLOR_MAPPING_CONFIG, getColorsFromMapping } from '@kbn/coloring';
+import { getColorsFromMapping } from '@kbn/coloring';
 import useObservable from 'react-use/lib/useObservable';
 import { generateId } from '../../id_generator';
 import {
@@ -34,6 +34,7 @@ import {
   isOperationFromTheSameGroup,
   nonNullable,
   renewIDs,
+  getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
 import { XyToolbar } from './xy_config_panel';
@@ -114,6 +115,7 @@ import { createAnnotationActions } from './annotations/actions';
 import { AddLayerButton } from './add_layer';
 import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
+import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 
 const XY_ID = 'lnsXY';
 
@@ -281,9 +283,7 @@ export const getXyVisualization = ({
             layerType: LayerTypes.DATA,
             palette: mainPalette?.type === 'legacyPalette' ? mainPalette.value : undefined,
             colorMapping:
-              mainPalette?.type === 'colorMapping'
-                ? mainPalette.value
-                : { ...DEFAULT_COLOR_MAPPING_CONFIG },
+              mainPalette?.type === 'colorMapping' ? mainPalette.value : getColorMappingDefaults(),
           },
         ],
       }
@@ -967,6 +967,15 @@ export const getXyVisualization = ({
 
   getVisualizationInfo(state, frame) {
     return getVisualizationInfo(state, frame, paletteService, fieldFormats);
+  },
+
+  getTelemetryEventsOnSave(state, prevState) {
+    const dataLayers = getDataLayers(state.layers);
+    const prevLayers = prevState ? getDataLayers(prevState.layers) : undefined;
+    return dataLayers.flatMap((l) => {
+      const prevLayer = prevLayers?.find((prevL) => prevL.layerId === l.layerId);
+      return getColorMappingTelemetryEvents(l.colorMapping, prevLayer?.colorMapping);
+    });
   },
 });
 

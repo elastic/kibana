@@ -50,8 +50,7 @@ export function useSwimlaneInputResolver(
   services: [CoreStart, MlStartDependencies, AnomalySwimlaneServices],
   chartWidth: number,
   fromPage: number,
-  renderCallbacks: {
-    onRenderComplete: () => void;
+  reportingCallbacks: {
     onLoading: () => void;
     onError: (error: Error) => void;
   }
@@ -131,7 +130,7 @@ export function useSwimlaneInputResolver(
         tap(setIsLoading.bind(null, true)),
         debounceTime(FETCH_RESULTS_DEBOUNCE_MS),
         tap(() => {
-          renderCallbacks.onLoading();
+          reportingCallbacks.onLoading();
         }),
         switchMap(([explorerJobs, input, bucketInterval, fromPageInput, perPageFromState]) => {
           if (!explorerJobs) {
@@ -246,17 +245,10 @@ export function useSwimlaneInputResolver(
 
   useEffect(() => {
     if (error) {
-      renderCallbacks.onError(error);
+      reportingCallbacks.onError(error);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [error]);
-
-  useEffect(() => {
-    if (swimlaneData) {
-      renderCallbacks.onRenderComplete();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [swimlaneData]);
 
   return [
     swimlaneType,

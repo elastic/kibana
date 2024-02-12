@@ -63,11 +63,10 @@ export const ConversationSelector: React.FC<Props> = React.memo(
     shouldDisableKeyboardShortcut = () => false,
     isDisabled = false,
   }) => {
-    const { allSystemPrompts } = useAssistantContext();
+    const { allSystemPrompts, conversations } = useAssistantContext();
 
     const { deleteConversation, setConversation } = useConversation();
 
-    const { conversations } = useAssistantContext();
     const conversationIds = useMemo(() => Object.keys(conversations), [conversations]);
     const conversationOptions = useMemo<ConversationSelectorOption[]>(() => {
       return Object.values(conversations).map((conversation) => ({
@@ -203,6 +202,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
           className={'parentFlexGroup'}
           component={'span'}
           justifyContent="spaceBetween"
+          data-test-subj={`convo-option-${label}`}
         >
           <EuiFlexItem
             component={'span'}
@@ -232,6 +232,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
                     e.stopPropagation();
                     onDelete(label);
                   }}
+                  data-test-subj="delete-option"
                   css={css`
                     visibility: hidden;
                     .parentFlexGroup:hover & {
@@ -255,6 +256,7 @@ export const ConversationSelector: React.FC<Props> = React.memo(
         `}
       >
         <EuiComboBox
+          data-test-subj="conversation-selector"
           aria-label={i18n.CONVERSATION_SELECTOR_ARIA_LABEL}
           customOptionText={`${i18n.CONVERSATION_SELECTOR_CUSTOM_OPTION_TEXT} {searchValue}`}
           placeholder={i18n.CONVERSATION_SELECTOR_PLACE_HOLDER}

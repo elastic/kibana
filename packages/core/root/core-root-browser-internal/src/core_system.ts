@@ -7,7 +7,6 @@
  */
 
 import { filter, firstValueFrom } from 'rxjs';
-import type { LogLevelId } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import {
   InjectedMetadataService,
@@ -112,8 +111,7 @@ export class CoreSystem {
 
     this.rootDomElement = rootDomElement;
 
-    const logLevel: LogLevelId = injectedMetadata.env.mode.dev ? 'all' : 'warn';
-    this.loggingSystem = new BrowserLoggingSystem({ logLevel });
+    this.loggingSystem = new BrowserLoggingSystem(injectedMetadata.logging);
 
     this.injectedMetadata = new InjectedMetadataService({
       injectedMetadata,
@@ -140,8 +138,9 @@ export class CoreSystem {
     this.chrome = new ChromeService({
       browserSupportsCsp,
       kibanaVersion: injectedMetadata.version,
+      coreContext: this.coreContext,
     });
-    this.docLinks = new DocLinksService();
+    this.docLinks = new DocLinksService(this.coreContext);
     this.rendering = new RenderingService();
     this.application = new ApplicationService();
     this.integrations = new IntegrationsService();
@@ -216,17 +215,17 @@ export class CoreSystem {
       // Setup FatalErrorsService and it's dependencies first so that we're
       // able to render any errors.
       const injectedMetadata = this.injectedMetadata.setup();
+      const analytics = this.analytics.setup({ injectedMetadata });
       const theme = this.theme.setup({ injectedMetadata });
 
       this.fatalErrorsSetup = this.fatalErrors.setup({
         injectedMetadata,
+        analytics,
         theme,
         i18n: this.i18n.getContext(),
       });
       await this.integrations.setup();
       this.docLinks.setup();
-
-      const analytics = this.analytics.setup({ injectedMetadata });
 
       this.registerLoadedKibanaEventType(analytics);
 
@@ -300,11 +299,12 @@ export class CoreSystem {
 
       const overlays = this.overlay.start({
         i18n,
+        analytics,
         theme,
         uiSettings,
         targetDomElement: overlayTargetDomElement,
       });
-      const notifications = await this.notifications.start({
+      const notifications = this.notifications.start({
         analytics,
         i18n,
         overlays,
@@ -312,7 +312,13 @@ export class CoreSystem {
         targetDomElement: notificationsTargetDomElement,
       });
       const customBranding = this.customBranding.start();
-      const application = await this.application.start({ http, theme, overlays, customBranding });
+      const application = await this.application.start({
+        http,
+        theme,
+        overlays,
+        customBranding,
+        analytics,
+      });
 
       const executionContext = this.executionContext.start({
         curApp$: application.currentAppId$,
@@ -362,6 +368,7 @@ export class CoreSystem {
       this.rendering.start({
         application,
         chrome,
+        analytics,
         i18n,
         overlays,
         theme,

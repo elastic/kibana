@@ -27,7 +27,7 @@ export const initTlsAlertType: AlertTypeInitializer = ({
   id: SYNTHETICS_ALERT_RULE_TYPES.TLS,
   iconClass: 'uptimeApp',
   documentationUrl(docLinks) {
-    return `${docLinks.links.observability.tlsCertificate}`;
+    return `${docLinks.links.observability.syntheticsAlerting}`;
   },
   ruleParamsExpression: (params: RuleTypeParamsExpressionProps<TLSParams>) => (
     <TLSAlert

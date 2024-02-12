@@ -11,15 +11,14 @@ export const LOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   'xpack.securitySolution.timeline.properties.lockDatePickerTooltip',
   {
     defaultMessage:
-      'Disable syncing of date/time range between the currently viewed page and your timeline',
+      'Click to disable syncing of query time range with the current page’s time range',
   }
 );
 
 export const UNLOCK_SYNC_MAIN_DATE_PICKER_TOOL_TIP = i18n.translate(
   'xpack.securitySolution.timeline.properties.unlockDatePickerTooltip',
   {
-    defaultMessage:
-      'Enable syncing of date/time range between the currently viewed page and your timeline',
+    defaultMessage: 'Click to sync the query time range with the current page’s time range.',
   }
 );
 

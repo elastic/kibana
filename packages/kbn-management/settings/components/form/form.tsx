@@ -8,11 +8,12 @@
 
 import React, { Fragment } from 'react';
 
-import type { FieldDefinition } from '@kbn/management-settings-types';
+import type { FieldDefinition, CategoryCounts } from '@kbn/management-settings-types';
 import { FieldCategories } from '@kbn/management-settings-components-field-category';
 import { UnsavedFieldChange, OnFieldChangeFn } from '@kbn/management-settings-types';
 import { isEmpty } from 'lodash';
 import { categorizeFields } from '@kbn/management-settings-utilities';
+import { UiSettingsScope } from '@kbn/core-ui-settings-common';
 import { BottomBar } from './bottom_bar';
 import { useSave } from './use_save';
 
@@ -24,6 +25,12 @@ export interface FormProps {
   fields: FieldDefinition[];
   /** True if saving settings is enabled, false otherwise. */
   isSavingEnabled: boolean;
+  /** Contains the number of registered settings in each category. */
+  categoryCounts: CategoryCounts;
+  /** Handler for the "clear search" link. */
+  onClearQuery: () => void;
+  /** {@link UiSettingsScope} of the settings in this form. */
+  scope: UiSettingsScope;
 }
 
 /**
@@ -31,7 +38,7 @@ export interface FormProps {
  * @param props The {@link FormProps} for the {@link Form} component.
  */
 export const Form = (props: FormProps) => {
-  const { fields, isSavingEnabled } = props;
+  const { fields, isSavingEnabled, categoryCounts, onClearQuery, scope } = props;
 
   const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
     {}
@@ -40,17 +47,27 @@ export const Form = (props: FormProps) => {
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   const unsavedChangesCount = Object.keys(unsavedChanges).length;
+
+  const scopeUnsavedChanges = Object.keys(unsavedChanges)
+    .filter((id) => fields.some((field) => field.id === id))
+    .reduce((obj: Record<string, UnsavedFieldChange>, key) => {
+      obj[key] = unsavedChanges[key];
+      return obj;
+    }, {});
+
+  const hiddenChangesCount = unsavedChangesCount - Object.keys(scopeUnsavedChanges).length;
+
   const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   const clearAllUnsaved = () => {
     setUnsavedChanges({});
   };
 
-  const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved });
+  const saveChanges = useSave({ fields, clearChanges: clearAllUnsaved, scope });
 
   const saveAll = async () => {
     setIsLoading(true);
-    await saveChanges(unsavedChanges);
+    await saveChanges(scopeUnsavedChanges);
     setIsLoading(false);
   };
 
@@ -66,13 +83,17 @@ export const Form = (props: FormProps) => {
 
   const categorizedFields = categorizeFields(fields);
 
-  /** TODO - Querying is not enabled yet. */
-  const onClearQuery = () => {};
-
   return (
     <Fragment>
       <FieldCategories
-        {...{ categorizedFields, isSavingEnabled, onFieldChange, onClearQuery, unsavedChanges }}
+        {...{
+          categorizedFields,
+          categoryCounts,
+          isSavingEnabled,
+          onFieldChange,
+          onClearQuery,
+          unsavedChanges,
+        }}
       />
       {!isEmpty(unsavedChanges) && (
         <BottomBar
@@ -81,6 +102,7 @@ export const Form = (props: FormProps) => {
           hasInvalidChanges={hasInvalidChanges}
           isLoading={isLoading}
           unsavedChangesCount={unsavedChangesCount}
+          hiddenChangesCount={hiddenChangesCount}
         />
       )}
     </Fragment>

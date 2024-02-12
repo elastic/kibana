@@ -16,6 +16,7 @@ import {
   KibanaResponseFactory,
   IKibanaResponse,
 } from '@kbn/core/server';
+import { FullValidationConfig } from '@kbn/core-http-server';
 import { UptimeEsClient } from '../lib';
 import { SyntheticsServerSetup, UptimeRequestHandlerContext } from '../types';
 import { SyntheticsMonitorClient } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -31,7 +32,9 @@ export type SyntheticsRequest = KibanaRequest<
 export interface UMServerRoute<T> {
   method: 'GET' | 'PUT' | 'POST' | 'DELETE';
   writeAccess?: boolean;
+  writeAccessOverride?: boolean;
   handler: T;
+  validation?: FullValidationConfig<any, any, any>;
   streamHandler?: (
     context: UptimeRequestHandlerContext,
     request: SyntheticsRequest,
@@ -57,13 +60,17 @@ export type UMKibanaRoute = UMRouteDefinition<
 
 export type SyntheticsRestApiRouteFactory<
   ClientContract = any,
-  QueryParams = Record<string, any>
-> = () => SyntheticsRoute<ClientContract, QueryParams>;
+  Params = any,
+  Query = Record<string, any>,
+  Body = any
+> = () => SyntheticsRoute<ClientContract, Params, Query, Body>;
 
 export type SyntheticsRoute<
   ClientContract = unknown,
-  QueryParams = Record<string, any>
-> = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, QueryParams>>;
+  Params = Record<string, any>,
+  Query = Record<string, any>,
+  Body = any
+> = UMRouteDefinition<SyntheticsRouteHandler<ClientContract, Params, Query, Body>>;
 
 export type SyntheticsRouteWrapper = (
   uptimeRoute: SyntheticsRoute<Record<string, unknown>>,
@@ -81,10 +88,14 @@ export interface UptimeRouteContext {
   subject?: Subject<unknown>;
 }
 
-export interface RouteContext<Query = Record<string, any>> {
+export interface RouteContext<
+  Params = Record<string, any>,
+  Query = Record<string, any>,
+  Body = any
+> {
   uptimeEsClient: UptimeEsClient;
   context: UptimeRequestHandlerContext;
-  request: KibanaRequest<Record<string, any>, Query, Record<string, any>>;
+  request: KibanaRequest<Params, Query, Body>;
   response: KibanaResponseFactory;
   savedObjectsClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
@@ -93,7 +104,12 @@ export interface RouteContext<Query = Record<string, any>> {
   spaceId: string;
 }
 
-export type SyntheticsRouteHandler<ClientContract = unknown, QueryParams = Record<string, any>> = ({
+export type SyntheticsRouteHandler<
+  ClientContract,
+  Params = Record<string, any>,
+  Query = Record<string, any>,
+  Body = any
+> = ({
   uptimeEsClient,
   context,
   request,
@@ -101,4 +117,4 @@ export type SyntheticsRouteHandler<ClientContract = unknown, QueryParams = Recor
   server,
   savedObjectsClient,
   subject: Subject,
-}: RouteContext<QueryParams>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;
+}: RouteContext<Params, Query, Body>) => Promise<IKibanaResponse<ClientContract> | ClientContract>;

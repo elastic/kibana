@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 
 // Some metrics in the UI are in a different unit that what we store in ES.
 export const convertMetricValue = (metric: SnapshotMetricType, value: number) => {

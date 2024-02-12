@@ -40,6 +40,7 @@ export const ML_PAGES = {
    * Page: Data Visualizer
    * Open index data visualizer viewer page
    */
+  DATA_VISUALIZER_ESQL: 'datavisualizer/esql',
   DATA_VISUALIZER_INDEX_VIEWER: 'jobs/new_job/datavisualizer',
   ANOMALY_DETECTION_CREATE_JOB: 'jobs/new_job',
   ANOMALY_DETECTION_CREATE_JOB_RECOGNIZER: 'jobs/new_job/recognize',
@@ -55,6 +56,7 @@ export const ML_PAGES = {
   ANOMALY_DETECTION_CREATE_JOB_SELECT_TYPE: 'jobs/new_job/step/job_type',
   ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX: 'jobs/new_job/step/index_or_search',
   ANOMALY_DETECTION_CREATE_JOB_FROM_LENS: 'jobs/new_job/from_lens',
+  ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS: 'jobs/new_job/from_pattern_analysis',
   ANOMALY_DETECTION_CREATE_JOB_FROM_MAP: 'jobs/new_job/from_map',
   ANOMALY_DETECTION_MODULES_VIEW_OR_CREATE: 'modules/check_view_or_create',
   SETTINGS: 'settings',

@@ -20,3 +20,10 @@
 - name: 'some_metric_field'
   type: integer
   metric_type: gauge
+- name: test.metrics.*.counter
+  type: object
+  object_type: double
+  object_type_mapping_type: "*"
+  metric_type: counter
+  description: >
+    Istiod counter metric

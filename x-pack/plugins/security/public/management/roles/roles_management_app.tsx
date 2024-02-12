@@ -15,7 +15,7 @@ import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-pl
 import type { RegisterManagementAppArgs } from '@kbn/management-plugin/public';
 import { Route, Router } from '@kbn/shared-ux-router';
 
-import type { SecurityLicense } from '../../../common/licensing';
+import type { SecurityLicense } from '../../../common';
 import {
   Breadcrumb,
   BreadcrumbsProvider,

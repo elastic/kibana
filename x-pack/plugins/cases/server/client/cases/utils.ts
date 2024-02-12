@@ -16,6 +16,7 @@ import type {
   Case,
   CaseAssignees,
   CaseAttributes,
+  CaseCustomField,
   ConnectorMappings,
   ConnectorMappingSource,
   ConnectorMappingTarget,
@@ -25,6 +26,7 @@ import type {
 } from '../../../common/types/domain';
 import { CaseStatuses, UserActionTypes, AttachmentType } from '../../../common/types/domain';
 import type {
+  CasePostRequest,
   CaseRequestCustomFields,
   CaseUserActionsDeprecatedResponse,
 } from '../../../common/types/api';
@@ -468,15 +470,39 @@ export const fillMissingCustomFields = ({
   const customFieldsKeys = new Set(customFields.map((customField) => customField.key));
   const missingCustomFields: CaseRequestCustomFields = [];
 
+  // only populate with the default value required custom fields missing from the request
   for (const confCustomField of customFieldsConfiguration) {
     if (!customFieldsKeys.has(confCustomField.key)) {
-      missingCustomFields.push({
-        key: confCustomField.key,
-        type: confCustomField.type,
-        value: null,
-      });
+      if (confCustomField?.defaultValue !== null && confCustomField?.defaultValue !== undefined) {
+        missingCustomFields.push({
+          key: confCustomField.key,
+          type: confCustomField.type,
+          value: confCustomField.defaultValue,
+        } as CaseCustomField);
+      } else if (!confCustomField.required) {
+        missingCustomFields.push({
+          key: confCustomField.key,
+          type: confCustomField.type,
+          value: null,
+        } as CaseCustomField);
+      } // else, missing required custom fields without default are not touched
     }
   }
 
   return [...customFields, ...missingCustomFields];
 };
+
+export const normalizeCreateCaseRequest = (
+  request: CasePostRequest,
+  customFieldsConfiguration?: CustomFieldsConfiguration
+) => ({
+  ...request,
+  title: request.title.trim(),
+  description: request.description.trim(),
+  category: request.category?.trim() ?? null,
+  tags: request.tags?.map((tag) => tag.trim()) ?? [],
+  customFields: fillMissingCustomFields({
+    customFields: request.customFields,
+    customFieldsConfiguration,
+  }),
+});

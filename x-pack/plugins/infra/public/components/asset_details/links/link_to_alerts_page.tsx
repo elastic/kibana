@@ -58,7 +58,7 @@ export const LinkToAlertsHomePage = () => {
   const linkToAlertsPage = http.basePath.prepend(ALERTS_PATH);
 
   return (
-    <RedirectAppLinks coreStart={services}>
+    <RedirectAppLinks coreStart={services} style={{ display: 'inline-block' }}>
       <EuiLink data-test-subj="assetDetailsTooltipDocumentationLink" href={linkToAlertsPage}>
         <FormattedMessage
           id="xpack.infra.assetDetails.table.tooltip.alertsLink"

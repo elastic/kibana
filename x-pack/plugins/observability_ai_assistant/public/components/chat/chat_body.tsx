@@ -5,39 +5,54 @@
  * 2.0.
  */
 
-import React, { useEffect, useRef, useState } from 'react';
-import { last } from 'lodash';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
+import { css, keyframes } from '@emotion/css';
 import {
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
-  EuiLoadingSpinner,
   EuiPanel,
   EuiSpacer,
+  useEuiTheme,
+  euiScrollBarStyles,
 } from '@elastic/eui';
-import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { Message } from '../../../common/types';
-import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { useTimeline } from '../../hooks/use_timeline';
+import { euiThemeVars } from '@kbn/ui-theme';
+import { i18n } from '@kbn/i18n';
+import { findLastIndex } from 'lodash';
+import { VisualizeESQLUserIntention } from '../../../common/functions/visualize_esql';
+import { ChatState } from '../../hooks/use_chat';
+import { useConversation } from '../../hooks/use_conversation';
 import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
-import { ExperimentalFeatureBanner } from './experimental_feature_banner';
-import { InitialSetupPanel } from './initial_setup_panel';
-import { IncorrectLicensePanel } from './incorrect_license_panel';
+import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
+import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
+import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
-import { ChatPromptEditor } from './chat_prompt_editor';
+import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { ChatTimeline } from './chat_timeline';
-import { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { Feedback } from '../feedback_buttons';
+import { IncorrectLicensePanel } from './incorrect_license_panel';
+import { WelcomeMessage } from './welcome_message';
+import { ChatActionClickHandler, ChatActionClickType } from './types';
+import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
+import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
+import { TELEMETRY, sendEvent } from '../../analytics';
+import { FlyoutWidthMode } from './chat_flyout';
 
-const timelineClassName = css`
-  overflow-y: auto;
+const fullHeightClassName = css`
+  height: 100%;
 `;
 
-const loadingSpinnerContainerClassName = css`
-  align-self: center;
+const timelineClassName = (scrollBarStyles: string) => css`
+  overflow-y: auto;
+  ${scrollBarStyles}
+`;
+
+const promptEditorClassname = css`
+  overflow: hidden;
+  transition: height ${euiThemeVars.euiAnimSpeedFast} ${euiThemeVars.euiAnimSlightResistance};
 `;
 
 const incorrectLicenseContainer = css`
@@ -45,48 +60,74 @@ const incorrectLicenseContainer = css`
   padding: ${euiThemeVars.euiPanelPaddingModifiers.paddingMedium};
 `;
 
+const chatBodyContainerClassNameWithError = css`
+  align-self: center;
+`;
+
+const promptEditorContainerClassName = css`
+  padding-top: 12px;
+  padding-bottom: 8px;
+`;
+
+const fadeInAnimation = keyframes`
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+`;
+
+const animClassName = css`
+  height: 100%;
+  opacity: 0;
+  animation: ${fadeInAnimation} ${euiThemeVars.euiAnimSpeedNormal}
+    ${euiThemeVars.euiAnimSlightBounce} ${euiThemeVars.euiAnimSpeedNormal} forwards;
+`;
+
+const PADDING_AND_BORDER = 32;
+
 export function ChatBody({
-  title,
-  loading,
-  messages,
   connectors,
-  knowledgeBase,
-  connectorsManagementHref,
-  modelsManagementHref,
-  conversationId,
   currentUser,
+  flyoutWidthMode,
+  initialConversationId,
+  initialMessages,
+  initialTitle,
+  knowledgeBase,
+  showLinkToConversationsApp,
   startedFrom,
-  onChatUpdate,
-  onChatComplete,
-  onSaveTitle,
+  onConversationUpdate,
+  onToggleFlyoutWidthMode,
 }: {
-  title: string;
-  loading: boolean;
-  messages: Message[];
   connectors: UseGenAIConnectorsResult;
-  knowledgeBase: UseKnowledgeBaseResult;
-  connectorsManagementHref: string;
-  modelsManagementHref: string;
-  conversationId?: string;
   currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  flyoutWidthMode?: FlyoutWidthMode;
+  initialTitle?: string;
+  initialMessages?: Message[];
+  initialConversationId?: string;
+  knowledgeBase: UseKnowledgeBaseResult;
+  showLinkToConversationsApp: boolean;
   startedFrom?: StartedFrom;
-  onChatUpdate: (messages: Message[]) => void;
-  onChatComplete: (messages: Message[]) => void;
-  onSaveTitle: (title: string) => void;
+  onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
+  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
+  const euiTheme = useEuiTheme();
+  const scrollBarStyles = euiScrollBarStyles(euiTheme);
 
   const chatService = useObservabilityAIAssistantChatService();
 
-  const timeline = useTimeline({
+  const { conversation, messages, next, state, stop, saveTitle } = useConversation({
+    initialConversationId,
+    initialMessages,
+    initialTitle,
     chatService,
-    connectors,
-    currentUser,
-    messages,
-    startedFrom,
-    onChatUpdate,
-    onChatComplete,
+    connectorId: connectors.selectedConnector,
+    onConversationUpdate,
   });
 
   const timelineContainerRef = useRef<HTMLDivElement | null>(null);
@@ -94,8 +135,23 @@ export function ChatBody({
   let footer: React.ReactNode;
 
   const isLoading = Boolean(
-    connectors.loading || knowledgeBase.status.loading || last(timeline.items)?.loading
+    connectors.loading ||
+      knowledgeBase.status.loading ||
+      state === ChatState.Loading ||
+      conversation.loading
   );
+
+  let title = conversation.value?.conversation.title || initialTitle;
+
+  if (!title) {
+    if (!connectors.selectedConnector) {
+      title = ASSISTANT_SETUP_TITLE;
+    } else if (!hasCorrectLicense && !initialConversationId) {
+      title = UPGRADE_LICENSE_TITLE;
+    } else {
+      title = EMPTY_CONVERSATION_TITLE;
+    }
+  }
 
   const containerClassName = css`
     max-height: 100%;
@@ -108,6 +164,28 @@ export function ChatBody({
 
   const isAtBottom = (parent: HTMLElement) =>
     parent.scrollTop + parent.clientHeight >= parent.scrollHeight;
+
+  const [promptEditorHeight, setPromptEditorHeight] = useState<number>(0);
+
+  const handleFeedback = (message: Message, feedback: Feedback) => {
+    if (conversation.value?.conversation && 'user' in conversation.value) {
+      sendEvent(chatService.analytics, {
+        type: TELEMETRY.observability_ai_assistant_chat_feedback,
+        payload: {
+          messageWithFeedback: { message, feedback },
+          conversation: conversation.value,
+        },
+      });
+    }
+  };
+
+  const handleChangeHeight = useCallback((editorHeight: number) => {
+    if (editorHeight === 0) {
+      setPromptEditorHeight(0);
+    } else {
+      setPromptEditorHeight(editorHeight + PADDING_AND_BORDER);
+    }
+  }, []);
 
   useEffect(() => {
     const parent = timelineContainerRef.current?.parentElement;
@@ -139,12 +217,78 @@ export function ChatBody({
   });
 
   const handleCopyConversation = () => {
-    const content = JSON.stringify({ title, messages });
+    const content = JSON.stringify({ title: initialTitle, messages });
 
     navigator.clipboard?.writeText(content || '');
   };
 
-  if (!hasCorrectLicense && !conversationId) {
+  const handleActionClick: ChatActionClickHandler = (payload) => {
+    setStickToBottom(true);
+    switch (payload.type) {
+      case ChatActionClickType.executeEsqlQuery:
+        next(
+          messages.concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'execute_query',
+                arguments: JSON.stringify({
+                  query: payload.query,
+                }),
+                trigger: MessageRole.User,
+              },
+            },
+          })
+        );
+        break;
+      case ChatActionClickType.updateVisualization:
+        const visualizeQueryMessagesIndex = messages.findIndex(
+          ({ message }) => message.name === 'visualize_query'
+        );
+        next(
+          messages.slice(0, visualizeQueryMessagesIndex).concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'visualize_query',
+                arguments: JSON.stringify({
+                  query: payload.query,
+                  userOverrides: payload.userOverrides,
+                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                }),
+                trigger: MessageRole.User,
+              },
+            },
+          })
+        );
+        break;
+      case ChatActionClickType.visualizeEsqlQuery:
+        next(
+          messages.concat({
+            '@timestamp': new Date().toISOString(),
+            message: {
+              role: MessageRole.Assistant,
+              content: '',
+              function_call: {
+                name: 'visualize_query',
+                arguments: JSON.stringify({
+                  query: payload.query,
+                  intention: VisualizeESQLUserIntention.visualizeAuto,
+                }),
+                trigger: MessageRole.User,
+              },
+            },
+          })
+        );
+        break;
+    }
+  };
+
+  if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
         <EuiFlexItem grow className={incorrectLicenseContainer}>
@@ -155,59 +299,94 @@ export function ChatBody({
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatPromptEditor loading={isLoading} disabled onSubmit={timeline.onSubmit} />
+            <PromptEditor
+              hidden={connectors.loading || connectors.connectors?.length === 0}
+              loading={isLoading}
+              disabled
+              onChangeHeight={setPromptEditorHeight}
+              onSubmit={(message) => {
+                next(messages.concat(message));
+              }}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
+            />
             <EuiSpacer size="s" />
           </EuiPanel>
         </EuiFlexItem>
       </>
     );
-  } else if (connectors.loading || knowledgeBase.status.loading) {
-    footer = (
-      <EuiFlexItem className={loadingSpinnerContainerClassName}>
-        <EuiLoadingSpinner />
-      </EuiFlexItem>
-    );
-  } else if (connectors.connectors?.length === 0 && !conversationId) {
-    footer = (
-      <InitialSetupPanel
-        connectors={connectors}
-        connectorsManagementHref={connectorsManagementHref}
-        knowledgeBase={knowledgeBase}
-        startedFrom={startedFrom}
-      />
-    );
+  } else if (!conversation.value && conversation.loading) {
+    footer = null;
   } else {
     footer = (
       <>
-        <EuiFlexItem grow className={timelineClassName}>
-          <div ref={timelineContainerRef}>
-            <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-              <ChatTimeline
-                items={timeline.items}
-                knowledgeBase={knowledgeBase}
-                onEdit={timeline.onEdit}
-                onFeedback={timeline.onFeedback}
-                onRegenerate={timeline.onRegenerate}
-                onStopGenerating={timeline.onStopGenerating}
-                onActionClick={(payload) => {
-                  setStickToBottom(true);
-                  return timeline.onActionClick(payload);
-                }}
-              />
+        <EuiFlexItem grow className={timelineClassName(scrollBarStyles)}>
+          <div ref={timelineContainerRef} className={fullHeightClassName}>
+            <EuiPanel
+              grow
+              hasBorder={false}
+              hasShadow={false}
+              paddingSize="m"
+              className={animClassName}
+            >
+              {connectors.connectors?.length === 0 || messages.length === 1 ? (
+                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
+              ) : (
+                <ChatTimeline
+                  startedFrom={startedFrom}
+                  messages={messages}
+                  knowledgeBase={knowledgeBase}
+                  chatService={chatService}
+                  currentUser={currentUser}
+                  chatState={state}
+                  hasConnector={!!connectors.connectors?.length}
+                  onEdit={(editedMessage, newMessage) => {
+                    setStickToBottom(true);
+                    const indexOf = messages.indexOf(editedMessage);
+                    next(messages.slice(0, indexOf).concat(newMessage));
+                  }}
+                  onFeedback={handleFeedback}
+                  onRegenerate={(message) => {
+                    next(reverseToLastUserMessage(messages, message));
+                  }}
+                  onSendTelemetry={(eventWithPayload) =>
+                    sendEvent(chatService.analytics, eventWithPayload)
+                  }
+                  onStopGenerating={() => {
+                    stop();
+                  }}
+                  onActionClick={handleActionClick}
+                />
+              )}
             </EuiPanel>
           </div>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+
+        <EuiFlexItem
+          grow={false}
+          className={promptEditorClassname}
+          style={{ height: promptEditorHeight }}
+        >
           <EuiHorizontalRule margin="none" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m">
-            <ChatPromptEditor
-              loading={isLoading}
+          <EuiPanel
+            hasBorder={false}
+            hasShadow={false}
+            paddingSize="m"
+            color="subdued"
+            className={promptEditorContainerClassName}
+          >
+            <PromptEditor
               disabled={!connectors.selectedConnector || !hasCorrectLicense}
+              hidden={connectors.loading || connectors.connectors?.length === 0}
+              loading={isLoading}
+              onChangeHeight={handleChangeHeight}
+              onSendTelemetry={(eventWithPayload) =>
+                sendEvent(chatService.analytics, eventWithPayload)
+              }
               onSubmit={(message) => {
                 setStickToBottom(true);
-                return timeline.onSubmit(message);
+                return next(messages.concat(message));
               }}
             />
             <EuiSpacer size="s" />
@@ -217,27 +396,73 @@ export function ChatBody({
     );
   }
 
+  if (conversation.error) {
+    return (
+      <EuiFlexGroup
+        direction="column"
+        gutterSize="none"
+        className={containerClassName}
+        justifyContent="center"
+      >
+        <EuiFlexItem grow={false} className={chatBodyContainerClassNameWithError}>
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationTitle', {
+              defaultMessage: 'Conversation not found',
+            })}
+            iconType="warning"
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
+              defaultMessage:
+                'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
+              values: { conversationId: initialConversationId },
+            })}
+          </EuiCallOut>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  }
+
   return (
     <EuiFlexGroup direction="column" gutterSize="none" className={containerClassName}>
-      {connectors.selectedConnector ? (
-        <EuiFlexItem grow={false}>
-          <ExperimentalFeatureBanner />
-        </EuiFlexItem>
-      ) : null}
-
-      <EuiFlexItem grow={false}>
+      <EuiFlexItem
+        grow={false}
+        className={conversation.error ? chatBodyContainerClassNameWithError : undefined}
+      >
+        {conversation.error ? (
+          <EuiCallOut
+            color="danger"
+            title={i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationTitle', {
+              defaultMessage: 'Conversation not found',
+            })}
+            iconType="warning"
+          >
+            {i18n.translate('xpack.observabilityAiAssistant.couldNotFindConversationContent', {
+              defaultMessage:
+                'Could not find a conversation with id {conversationId}. Make sure the conversation exists and you have access to it.',
+              values: { conversationId: initialConversationId },
+            })}
+          </EuiCallOut>
+        ) : null}
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} css={{ paddingRight: showLinkToConversationsApp ? '24px' : '0' }}>
         <ChatHeader
           connectors={connectors}
-          conversationId={conversationId}
-          connectorsManagementHref={connectorsManagementHref}
-          modelsManagementHref={modelsManagementHref}
-          knowledgeBase={knowledgeBase}
-          licenseInvalid={!hasCorrectLicense && !conversationId}
-          loading={loading}
-          startedFrom={startedFrom}
+          conversationId={
+            conversation.value?.conversation && 'id' in conversation.value.conversation
+              ? conversation.value.conversation.id
+              : undefined
+          }
+          flyoutWidthMode={flyoutWidthMode}
+          licenseInvalid={!hasCorrectLicense && !initialConversationId}
+          loading={isLoading}
+          showLinkToConversationsApp={showLinkToConversationsApp}
           title={title}
           onCopyConversation={handleCopyConversation}
-          onSaveTitle={onSaveTitle}
+          onSaveTitle={(newTitle) => {
+            saveTitle(newTitle);
+          }}
+          onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
@@ -246,4 +471,20 @@ export function ChatBody({
       {footer}
     </EuiFlexGroup>
   );
+}
+
+// Exported for testing only
+export function reverseToLastUserMessage(messages: Message[], message: Message) {
+  // Drop messages after and including the one marked for regeneration
+  const indexOf = messages.indexOf(message);
+  const previousMessages = messages.slice(0, indexOf);
+
+  // Go back to the last written user message to fully regenerate function calls
+  const lastUserMessageIndex = findLastIndex(
+    previousMessages,
+    (aMessage: Message) => aMessage.message.role === 'user' && !aMessage.message.name
+  );
+  const nextMessages = previousMessages.slice(0, lastUserMessageIndex + 1);
+
+  return nextMessages;
 }

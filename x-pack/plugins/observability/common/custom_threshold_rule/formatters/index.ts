@@ -14,7 +14,7 @@ import { InfraWaffleMapDataFormat } from './types';
 
 export const FORMATTERS = {
   number: formatNumber,
-  // Because the implimentation for formatting large numbers is the same as formatting
+  // Because the implementation for formatting large numbers is the same as formatting
   // bytes we are re-using the same code, we just format the number using the abbreviated number format.
   abbreviatedNumber: createBytesFormatter(InfraWaffleMapDataFormat.abbreviatedNumber),
   // bytes in bytes formatted string out

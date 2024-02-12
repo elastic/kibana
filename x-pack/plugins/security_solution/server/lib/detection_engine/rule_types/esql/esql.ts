@@ -148,6 +148,7 @@ export const esqlExecutor = async ({
 
       if (bulkCreateResult.alertsWereTruncated) {
         result.warningMessages.push(getMaxSignalsWarning());
+        break;
       }
 
       // no more results will be found

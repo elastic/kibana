@@ -29,6 +29,7 @@ export const EnterpriseSearchOverview: React.FC<InitialAppData> = ({
   const incompatibleVersions = !!(
     config.host && isVersionMismatch(enterpriseSearchVersion, kibanaVersion)
   );
+
   const showView = () => {
     if (incompatibleVersions) {
       return (

@@ -266,7 +266,7 @@ function compileCondition(description, compiledObject) {
       return new RegExp(description.lines_regex, 'm').test(lines);
     }, compiledObject);
   } else {
-    throw 'unknown condition type - got: ' + JSON.stringify(description);
+    throw new Error(`unknown condition type - got: ${JSON.stringify(description)}`);
   }
 }
 

@@ -7,5 +7,7 @@
  */
 
 export function getGeneratedFilePath(sourcePath: string) {
-  return sourcePath.replace(/\..+$/, '.gen.ts');
+  // Remove any double extension like `.schema.yaml` or `.schema.yml` and replace with `.gen.ts`
+  const secondToLastDot = sourcePath.lastIndexOf('.', sourcePath.lastIndexOf('.') - 1);
+  return `${sourcePath.substring(0, secondToLastDot)}.gen.ts`;
 }

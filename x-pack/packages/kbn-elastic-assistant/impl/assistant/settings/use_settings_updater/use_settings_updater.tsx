@@ -34,6 +34,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const {
     allQuickPrompts,
     allSystemPrompts,
+    assistantTelemetry,
     conversations,
     defaultAllow,
     defaultAllowReplacement,
@@ -92,10 +93,27 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
     setConversations(updatedConversationSettings);
+    const didUpdateKnowledgeBase =
+      knowledgeBase.isEnabledKnowledgeBase !== updatedKnowledgeBaseSettings.isEnabledKnowledgeBase;
+    const didUpdateRAGAlerts =
+      knowledgeBase.isEnabledRAGAlerts !== updatedKnowledgeBaseSettings.isEnabledRAGAlerts;
+    if (didUpdateKnowledgeBase || didUpdateRAGAlerts) {
+      assistantTelemetry?.reportAssistantSettingToggled({
+        ...(didUpdateKnowledgeBase
+          ? { isEnabledKnowledgeBase: updatedKnowledgeBaseSettings.isEnabledKnowledgeBase }
+          : {}),
+        ...(didUpdateRAGAlerts
+          ? { isEnabledRAGAlerts: updatedKnowledgeBaseSettings.isEnabledRAGAlerts }
+          : {}),
+      });
+    }
     setKnowledgeBase(updatedKnowledgeBaseSettings);
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
+    assistantTelemetry,
+    knowledgeBase.isEnabledRAGAlerts,
+    knowledgeBase.isEnabledKnowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
     setConversations,

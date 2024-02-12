@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
+import { waitForEuiPopoverOpen, waitForEuiPopoverClose } from '@elastic/eui/lib/test/rtl';
 import { AddDataProviderPopover } from '../add_data_provider_popover';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { TestProvidersComponent } from '../../../../../common/mock/test_providers';
 import { mockBrowserFields } from '../../../../../common/containers/source/mock';
 
@@ -29,9 +30,7 @@ describe('Testing AddDataProviderPopover', () => {
     );
 
     clickOnAddField();
-    await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeVisible();
-    });
+    await waitForEuiPopoverOpen();
   });
 
   it('Test Popover goes away after clicking again on add field', async () => {
@@ -42,14 +41,9 @@ describe('Testing AddDataProviderPopover', () => {
     );
 
     clickOnAddField();
-    await waitFor(() => {
-      expect(screen.getByRole('dialog')).toBeVisible();
-    });
+    await waitForEuiPopoverOpen();
 
     clickOnAddField();
-
-    await waitFor(() => {
-      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    });
+    await waitForEuiPopoverClose();
   });
 });

@@ -25,6 +25,7 @@ interface Props {
   onClickViewAgents?: () => void;
   agentCount: number;
   showLoading?: boolean;
+  isLongEnrollment?: boolean;
 }
 
 interface UsePollingAgentCountOptions {
@@ -97,6 +98,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   onClickViewAgents,
   agentCount,
   showLoading = false,
+  isLongEnrollment = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
@@ -139,10 +141,17 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           color="primary"
           iconType={EuiLoadingSpinner}
           title={
-            <FormattedMessage
-              id="xpack.fleet.agentEnrollment.loading.listening"
-              defaultMessage="Listening for agent..."
-            />
+            isLongEnrollment ? (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
+                defaultMessage="Listening for agent... this can take several minutes"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.agentEnrollment.loading.listening"
+                defaultMessage="Listening for agent"
+              />
+            )
           }
         />
         <EuiSpacer size="m" />

@@ -10,13 +10,10 @@ import type { EuiCommentProps } from '@elastic/eui';
 import { EuiAvatar, EuiBadge, EuiMarkdownFormat, EuiText, EuiTextAlign } from '@elastic/eui';
 // eslint-disable-next-line @kbn/eslint/module_migration
 import styled from 'styled-components';
-import {
-  ActionConnector,
-  ConnectorAddModal,
-} from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 
 import { ActionType } from '@kbn/triggers-actions-ui-plugin/public';
-import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
+import { AddConnectorModal } from '../add_connector_modal';
 import { WELCOME_CONVERSATION } from '../../assistant/use_conversation/sample_conversations';
 import { Conversation, Message } from '../../..';
 import { useLoadActionTypes } from '../use_load_action_types';
@@ -134,7 +131,7 @@ export const useConnectorSetup = ({
         (message?.presentation?.stream ?? false) && currentMessageIndex !== length - 1;
       return (
         <StreamingText
-          text={message.content}
+          text={message.content ?? ''}
           delay={enableStreaming ? 50 : 0}
           onStreamingComplete={
             isLastMessage ? onHandleLastMessageStreamingComplete : onHandleMessageStreamingComplete
@@ -204,7 +201,7 @@ export const useConnectorSetup = ({
         conversationId: conversation.id,
         message: {
           role: 'assistant',
-          content: 'Connector setup complete!',
+          content: i18n.CONNECTOR_SETUP_COMPLETE,
           timestamp: new Date().toLocaleString(),
         },
       });
@@ -233,6 +230,7 @@ export const useConnectorSetup = ({
             <EuiTextAlign textAlign="center">
               <EuiBadge
                 color="hollow"
+                data-test-subj="skip-setup-button"
                 onClick={handleSkipSetup}
                 onClickAriaLabel={i18n.CONNECTOR_SETUP_SKIP}
               >
@@ -241,20 +239,14 @@ export const useConnectorSetup = ({
             </EuiTextAlign>
           </SkipEuiText>
         )}
-        {isConnectorModalVisible && !selectedActionType && (
-          <ActionTypeSelectorModal
+        {isConnectorModalVisible && (
+          <AddConnectorModal
+            actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
-            actionTypeRegistry={actionTypeRegistry}
             onClose={() => setIsConnectorModalVisible(false)}
-            onSelect={(actionType: ActionType) => setSelectedActionType(actionType)}
-          />
-        )}
-        {isConnectorModalVisible && selectedActionType && (
-          <ConnectorAddModal
-            actionType={selectedActionType}
-            onClose={() => setIsConnectorModalVisible(false)}
-            postSaveEventHandler={onSaveConnector}
-            actionTypeRegistry={actionTypeRegistry}
+            onSaveConnector={onSaveConnector}
+            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+            selectedActionType={selectedActionType}
           />
         )}
       </div>

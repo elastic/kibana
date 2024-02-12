@@ -270,6 +270,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         await testSubjects.existOrFail('rulesList');
         await observability.alerts.rulesPage.clickRuleStatusDropDownMenu();
         await observability.alerts.rulesPage.clickDisableFromDropDownMenu();
+
+        await testSubjects.click('confirmModalConfirmButton');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+
         await retry.waitFor('The rule to be disabled', async () => {
           const tableRows = await find.allByCssSelector('.euiTableRow');
           const rows = await getRulesList(tableRows);
@@ -297,9 +301,42 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
           'Create rule button',
           async () => await testSubjects.exists('createRuleButton')
         );
+        await retry.waitFor(
+          'Create rule button is enabled',
+          async () => await testSubjects.isEnabled('createRuleButton')
+        );
       });
 
       it(`shows the no permission prompt when the user has no permissions`, async () => {
+        // We kept this test to make sure that the stack management rule page
+        // is showing the right prompt corresponding to the right privileges.
+        // Knowing that o11y alert page won't come up if you do not have any
+        // kind of privileges to o11y
+        await observability.users.setTestUserRole({
+          elasticsearch: {
+            cluster: [],
+            indices: [],
+            run_as: [],
+          },
+          kibana: [
+            {
+              base: [],
+              feature: {
+                discover: ['read'],
+              },
+              spaces: ['*'],
+            },
+          ],
+        });
+        await observability.alerts.common.navigateToRulesPage();
+        await retry.waitFor(
+          'No permissions prompt',
+          async () => await testSubjects.exists('noPermissionPrompt')
+        );
+        await observability.users.restoreDefaultTestUserRole();
+      });
+
+      it(`shows the rules list in read-only mode when the user only has read permissions`, async () => {
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
             logs: ['read'],
@@ -307,10 +344,13 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         );
         await observability.alerts.common.navigateToRulesPage();
         await retry.waitFor(
-          'No permissions prompt',
-          async () => await testSubjects.exists('noPermissionPrompt')
+          'Read-only rules list is visible',
+          async () => await testSubjects.exists('rulesList')
         );
-
+        await retry.waitFor(
+          'Create rule button is disabled',
+          async () => !(await testSubjects.isEnabled('createRuleButton'))
+        );
         await observability.users.restoreDefaultTestUserRole();
       });
     });

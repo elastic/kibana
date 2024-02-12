@@ -34,6 +34,7 @@ interface SearchBaseInput extends EmbeddableInput {
   sort?: SortOrder[];
   rowHeight?: number;
   rowsPerPage?: number;
+  sampleSize?: number;
 }
 
 export type SavedSearchByValueAttributes = Omit<SavedSearchAttributes, 'description'> & {

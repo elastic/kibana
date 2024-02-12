@@ -142,7 +142,7 @@ describe('useTimelineEvents', () => {
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
           totalCount: -1,
-          updatedAt: 0,
+          refreshedAt: 0,
         },
       ]);
     });
@@ -174,7 +174,7 @@ describe('useTimelineEvents', () => {
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
           totalCount: 32,
-          updatedAt: result.current[1].updatedAt,
+          refreshedAt: result.current[1].refreshedAt,
         },
       ]);
     });
@@ -217,7 +217,7 @@ describe('useTimelineEvents', () => {
           pageInfo: result.current[1].pageInfo,
           refetch: result.current[1].refetch,
           totalCount: 32,
-          updatedAt: result.current[1].updatedAt,
+          refreshedAt: result.current[1].refreshedAt,
         },
       ]);
     });

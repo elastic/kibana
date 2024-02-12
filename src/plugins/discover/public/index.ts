@@ -17,6 +17,7 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export type { ISearchEmbeddable, SearchInput } from './embeddable';
 export type { DiscoverAppState } from './application/main/services/discover_app_state_container';
 export type { DiscoverStateContainer } from './application/main/services/discover_state';
+export type { DataDocumentsMsg } from './application/main/services/discover_data_state_container';
 export type { DiscoverContainerProps } from './components/discover_container';
 export type {
   CustomizationCallback,
@@ -26,9 +27,11 @@ export type {
   DiscoverCustomization,
   DiscoverCustomizationService,
   FlyoutCustomization,
+  FlyoutContentProps,
   SearchBarCustomization,
   UnifiedHistogramCustomization,
   TopNavCustomization,
 } from './customizations';
 export { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './embeddable';
 export { loadSharingDataHelpers } from './utils';
+export { LogsExplorerTabs, type LogsExplorerTabsProps } from './components/logs_explorer_tabs';

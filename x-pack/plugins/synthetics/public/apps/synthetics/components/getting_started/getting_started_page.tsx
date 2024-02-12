@@ -32,9 +32,8 @@ import {
   cleanMonitorListState,
 } from '../../state';
 import { MONITOR_ADD_ROUTE } from '../../../../../common/constants/ui';
-import { PrivateLocation } from '../../../../../common/runtime_types';
 import { SimpleMonitorForm } from './simple_monitor_form';
-import { AddLocationFlyout } from '../settings/private_locations/add_location_flyout';
+import { AddLocationFlyout, NewLocation } from '../settings/private_locations/add_location_flyout';
 
 export const GettingStartedPage = () => {
   const dispatch = useDispatch();
@@ -111,7 +110,7 @@ export const GettingStartedOnPrem = () => {
 
   const { onSubmit, privateLocations, loading } = usePrivateLocationsAPI();
 
-  const handleSubmit = (formData: PrivateLocation) => {
+  const handleSubmit = (formData: NewLocation) => {
     onSubmit(formData);
   };
 

@@ -6,7 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { I18nStart } from '@kbn/core-i18n-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import React, { FC } from 'react';
 
 import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
@@ -15,6 +16,8 @@ import { KibanaEuiProvider, type KibanaEuiProviderProps } from './eui_provider';
 export interface KibanaRootContextProviderProps extends KibanaEuiProviderProps {
   /** The `I18nStart` API from `CoreStart`. */
   i18n: I18nStart;
+  /** The `AnalyticsServiceStart` API from `CoreStart`. */
+  analytics?: AnalyticsServiceStart;
 }
 
 /**

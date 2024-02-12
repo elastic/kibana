@@ -16,6 +16,7 @@ export function readCliArgs(argv: string[]) {
   const flags = getopts(argv, {
     boolean: [
       'skip-archives',
+      'skip-cdn-assets',
       'skip-initialize',
       'skip-generic-folders',
       'skip-platform-folders',
@@ -32,6 +33,7 @@ export function readCliArgs(argv: string[]) {
       'skip-docker-ubuntu',
       'skip-docker-cloud',
       'skip-docker-serverless',
+      'skip-docker-fips',
       'release',
       'skip-node-download',
       'skip-cloud-dependencies-download',
@@ -132,6 +134,7 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
+    createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:
@@ -141,6 +144,7 @@ export function readCliArgs(argv: string[]) {
       isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-serverless']),
     createDockerUBI: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-ubi']),
     createDockerContexts: !Boolean(flags['skip-docker-contexts']),
+    createDockerFIPS: isOsPackageDesired('docker-images') && !Boolean(flags['skip-docker-fips']),
     targetAllPlatforms: Boolean(flags['all-platforms']),
     eprRegistry: flags['epr-registry'],
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),

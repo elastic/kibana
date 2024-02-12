@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import React from 'react';
+import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { screen, waitFor } from '@testing-library/react';
-
-import { render } from '../../utils/test_helper';
-import { useKibana } from '../../utils/kibana_react';
-import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
-import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
-import { useLicense } from '../../hooks/use_license';
-import { SlosWelcomePage } from './slos_welcome';
+import React from 'react';
+import Router from 'react-router-dom';
+import { paths } from '../../../common/locators/paths';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../../common/locators/paths';
+import { useFetchSloGlobalDiagnosis } from '../../hooks/slo/use_fetch_global_diagnosis';
+import { useFetchSloList } from '../../hooks/slo/use_fetch_slo_list';
+import { useLicense } from '../../hooks/use_license';
+import { useKibana } from '../../utils/kibana_react';
+import { render } from '../../utils/test_helper';
+import { SlosWelcomePage } from './slos_welcome';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useParams: jest.fn(),
+}));
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
@@ -33,16 +39,19 @@ const useGlobalDiagnosisMock = useFetchSloGlobalDiagnosis as jest.Mock;
 
 const mockNavigate = jest.fn();
 
+const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
+
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
-      theme: {},
       application: { navigateToUrl: mockNavigate },
+      theme: {},
       http: {
         basePath: {
           prepend: (url: string) => url,
         },
       },
+      observabilityAIAssistant: mockObservabilityAIAssistant,
     },
   });
 };
@@ -52,11 +61,14 @@ describe('SLOs Welcome Page', () => {
     jest.clearAllMocks();
     mockKibana();
     useCapabilitiesMock.mockReturnValue({ hasWriteCapabilities: true, hasReadCapabilities: true });
+    jest
+      .spyOn(Router, 'useLocation')
+      .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
   });
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useGlobalDiagnosisMock.mockReturnValue({
         data: {
@@ -82,7 +94,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, emptySloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -146,7 +158,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
         useGlobalDiagnosisMock.mockReturnValue({
           data: {
             userPrivileges: {

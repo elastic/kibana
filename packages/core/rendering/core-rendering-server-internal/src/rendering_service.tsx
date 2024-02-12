@@ -29,7 +29,7 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getStylesheetPaths } from './render_utils';
+import { getSettingValue, getStylesheetPaths, getBrowserLoggingConfig } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
@@ -55,7 +55,7 @@ export class RenderingService {
         router,
         renderer: bootstrapRendererFactory({
           uiPlugins,
-          serverBasePath: http.basePath.serverBasePath,
+          baseHref: http.staticAssets.getHrefBase(),
           packageInfo: this.coreContext.env.packageInfo,
           auth: http.auth,
         }),
@@ -79,7 +79,7 @@ export class RenderingService {
       router: http.createRouter<InternalRenderingRequestHandlerContext>(''),
       renderer: bootstrapRendererFactory({
         uiPlugins,
-        serverBasePath: http.basePath.serverBasePath,
+        baseHref: http.staticAssets.getHrefBase(),
         packageInfo: this.coreContext.env.packageInfo,
         auth: http.auth,
         userSettingsService: userSettings,
@@ -114,6 +114,7 @@ export class RenderingService {
       packageInfo: this.coreContext.env.packageInfo,
     };
     const buildNum = env.packageInfo.buildNum;
+    const staticAssetsHrefBase = http.staticAssets.getHrefBase();
     const basePath = http.basePath.get(request);
     const { serverBasePath, publicBaseUrl } = http.basePath;
 
@@ -180,15 +181,17 @@ export class RenderingService {
     const stylesheetPaths = getStylesheetPaths({
       darkMode,
       themeVersion,
-      basePath: serverBasePath,
+      baseHref: staticAssetsHrefBase,
       buildNum,
     });
+
+    const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
 
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      uiPublicUrl: `${basePath}/ui`,
+      uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       i18n: i18n.translate,
       locale: i18n.getLocale(),
@@ -208,10 +211,13 @@ export class RenderingService {
         basePath,
         serverBasePath,
         publicBaseUrl,
+        assetsHrefBase: staticAssetsHrefBase,
+        logging: loggingConfig,
         env,
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
         i18n: {
+          // TODO: Make this load as part of static assets!
           translationsUrl: `${basePath}/translations/${i18n.getLocale()}.json`,
         },
         theme: {

@@ -16,7 +16,7 @@ import type {
   PluginSetupContract as AlertingPluginSetup,
   PluginStartContract as AlertingPluginStart,
 } from '@kbn/alerting-plugin/server';
-import type { CasesStart } from '@kbn/cases-plugin/server';
+import type { CasesStart, CasesSetup } from '@kbn/cases-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -41,11 +41,13 @@ import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import type { PluginSetup as UnifiedSearchServerPluginSetup } from '@kbn/unified-search-plugin/server';
+import type { ElasticAssistantPluginStart } from '@kbn/elastic-assistant-plugin/server';
 import type { AppFeaturesService } from './lib/app_features_service/app_features_service';
 import type { ExperimentalFeatures } from '../common';
 
 export interface SecuritySolutionPluginSetupDependencies {
   alerting: AlertingPluginSetup;
+  cases: CasesSetup;
   cloud: CloudSetup;
   data: DataPluginSetup;
   encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
@@ -61,7 +63,7 @@ export interface SecuritySolutionPluginSetupDependencies {
   usageCollection?: UsageCollectionPluginSetup;
   licensing: LicensingPluginSetup;
   osquery: OsqueryPluginSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   unifiedSearch: UnifiedSearchServerPluginSetup;
 }
 
@@ -72,6 +74,7 @@ export interface SecuritySolutionPluginStartDependencies {
   cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPluginStart;
   dataViews: DataViewsPluginStart;
+  elasticAssistant: ElasticAssistantPluginStart;
   eventLog: IEventLogClientService;
   fleet?: FleetPluginStart;
   licensing: LicensingPluginStart;

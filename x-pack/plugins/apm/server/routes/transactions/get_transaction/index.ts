@@ -6,10 +6,11 @@
  */
 
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 
 export async function getTransaction({
   transactionId,
@@ -26,7 +27,12 @@ export async function getTransaction({
 }) {
   const resp = await apmEventClient.search('get_transaction', {
     apm: {
-      events: [ProcessorEvent.transaction],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: false,

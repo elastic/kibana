@@ -370,7 +370,7 @@ export function LayerPanels(
             }
           },
           registerLibraryAnnotationGroup: registerLibraryAnnotationGroupFunction,
-          isInlineEditing: Boolean(props?.setIsInlineFlyoutFooterVisible),
+          isInlineEditing: Boolean(props?.setIsInlineFlyoutVisible),
         })}
     </EuiForm>
   );

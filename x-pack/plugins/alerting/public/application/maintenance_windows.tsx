@@ -78,7 +78,7 @@ export const renderApp = ({
 }) => {
   const { element, history, theme$ } = mountParams;
   const i18nCore = core.i18n;
-  const isDarkMode = core.uiSettings.get('theme:darkMode');
+  const isDarkMode = core.theme.getTheme().darkMode;
 
   const queryClient = new QueryClient();
 

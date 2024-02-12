@@ -7,7 +7,7 @@
 import { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  DataStream,
+  MonitorTypeEnum,
   MonitorFields,
   ScheduleUnit,
   SourceType,
@@ -25,7 +25,6 @@ describe('SyntheticsPrivateLocation', () => {
   const mockPrivateLocation: PrivateLocationAttributes = {
     id: 'policyId',
     label: 'Test Location',
-    concurrentMonitors: 1,
     agentPolicyId: 'policyId',
     isServiceManaged: false,
   };
@@ -161,7 +160,7 @@ describe('SyntheticsPrivateLocation', () => {
   it('formats monitors stream properly', () => {
     const test = formatSyntheticsPolicy(
       testMonitorPolicy,
-      DataStream.BROWSER,
+      MonitorTypeEnum.BROWSER,
       dummyBrowserConfig,
       {}
     );
@@ -261,7 +260,7 @@ const dummyBrowserConfig: Partial<MonitorFields> & {
   fields: Record<string, string | boolean>;
   fields_under_root: boolean;
 } = {
-  type: DataStream.BROWSER,
+  type: MonitorTypeEnum.BROWSER,
   enabled: true,
   schedule: { unit: ScheduleUnit.MINUTES, number: '10' },
   'service.name': 'test service',

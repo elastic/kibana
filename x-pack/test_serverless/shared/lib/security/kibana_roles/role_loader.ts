@@ -55,7 +55,6 @@ export class RoleAndUserLoader<R extends Record<string, Role> = Record<string, R
         `Unknown role: [${String(name)}]. Valid values are: [${Object.keys(this.roles).join(', ')}]`
       );
     }
-
     const roleName = role.name;
     const roleNames = [roleName];
     if (additionalRoleName) {

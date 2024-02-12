@@ -95,6 +95,7 @@ export const PostBulkAgentUnenrollRequestSchema = {
     force: schema.maybe(schema.boolean()),
     revoke: schema.maybe(schema.boolean()),
     batchSize: schema.maybe(schema.number()),
+    includeInactive: schema.maybe(schema.boolean()),
   }),
 };
 

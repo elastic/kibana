@@ -8,7 +8,9 @@
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('KQL', () => {
+  describe('KQL', function () {
+    this.tags(['esGate']);
+
     loadTestFile(require.resolve('./kql_telemetry'));
   });
 }

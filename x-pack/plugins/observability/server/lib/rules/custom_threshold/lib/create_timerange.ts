@@ -6,26 +6,25 @@
  */
 
 import moment from 'moment';
-import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 
 export const createTimerange = (
   interval: number,
-  aggType: Aggregators,
-  timeframe?: { end: number; start?: number },
-  lastPeriodEnd?: number
+  timeframe: { end: string; start: string },
+  lastPeriodEnd?: number,
+  isRateAgg?: boolean
 ) => {
-  const to = moment(timeframe ? timeframe.end : Date.now()).valueOf();
+  const end = moment(timeframe.end).valueOf();
+  let start = moment(timeframe.start).valueOf();
 
-  // Rate aggregations need 5 buckets worth of data
-  const minimumBuckets = aggType === Aggregators.RATE ? 2 : 1;
-  const calculatedFrom = lastPeriodEnd ? lastPeriodEnd - interval : to - interval * minimumBuckets;
+  const minimumBuckets = isRateAgg ? 2 : 1;
 
-  // Use either the timeframe.start when the start is less then calculatedFrom
-  // OR use the calculatedFrom
-  const from =
-    timeframe && timeframe.start && timeframe.start <= calculatedFrom
-      ? timeframe.start
-      : calculatedFrom;
+  interval = interval * minimumBuckets;
+  start = start - interval;
 
-  return { start: from, end: to };
+  // Use lastPeriodEnd - interval when it's less than start
+  if (lastPeriodEnd && lastPeriodEnd - interval < start) {
+    start = lastPeriodEnd - interval;
+  }
+
+  return { start, end };
 };

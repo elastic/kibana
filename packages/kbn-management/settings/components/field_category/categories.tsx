@@ -8,7 +8,11 @@
 
 import React from 'react';
 
-import { CategorizedFields, UnsavedFieldChanges } from '@kbn/management-settings-types';
+import {
+  CategorizedFields,
+  UnsavedFieldChanges,
+  CategoryCounts,
+} from '@kbn/management-settings-types';
 
 import { FieldRow, FieldRowProps } from '@kbn/management-settings-components-field-row';
 import { FieldCategory, type FieldCategoryProps } from './category';
@@ -21,6 +25,7 @@ export interface FieldCategoriesProps
     Pick<FieldRowProps, 'onFieldChange' | 'isSavingEnabled'> {
   /** Categorized fields for display. */
   categorizedFields: CategorizedFields;
+  categoryCounts: CategoryCounts;
   /** And unsaved changes currently managed by the parent component. */
   unsavedChanges?: UnsavedFieldChanges;
 }
@@ -33,6 +38,7 @@ export interface FieldCategoriesProps
  */
 export const FieldCategories = ({
   categorizedFields,
+  categoryCounts,
   unsavedChanges = {},
   onClearQuery,
   isSavingEnabled,
@@ -40,7 +46,11 @@ export const FieldCategories = ({
 }: FieldCategoriesProps) => (
   <>
     {Object.entries(categorizedFields).map(([category, { count, fields }]) => (
-      <FieldCategory key={category} fieldCount={count} {...{ category, onClearQuery }}>
+      <FieldCategory
+        key={category}
+        fieldCount={categoryCounts[category]}
+        {...{ category, onClearQuery }}
+      >
         {fields.map((field) => (
           <FieldRow
             key={field.id}

@@ -142,6 +142,15 @@ A list of action types that are enabled. It defaults to `["*"]`, enabling all ty
 +
 Disabled action types will not appear as an option when creating new connectors, but existing connectors and actions of that type will remain in {kib} and will not function.
 
+`xpack.actions.microsoftExchangeUrl`::
+The URL for the Microsoft Azure Active Directory endpoint to use for MS Exchange email authentication. Default: `https://login.microsoftonline.com`.
+
+`xpack.actions.microsoftGraphApiUrl`::
+The URL for the Microsoft Graph API endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/v1.0`.
+
+`xpack.actions.microsoftGraphApiScope`::
+The URL for the Microsoft Graph API scope endpoint to use for MS Exchange email authentication. Default: `https://graph.microsoft.com/.default`.
+
 `xpack.actions.proxyUrl` {ess-icon}::
 Specifies the proxy URL to use, if using a proxy for actions. By default, no proxy is used.
 +
@@ -267,6 +276,7 @@ For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI API provider
 A configuration URL that varies by connector:
 +
 --
+* For an <<bedrock-action-type,{bedrock} connector>>, specifies the {bedrock} request URL.
 * For a <<openai-action-type,OpenAI connector>>, specifies the OpenAI request URL.
 * For a <<resilient-action-type,{ibm-r} connector>>, specifies the {ibm-r} instance URL.
 * For a <<jira-action-type,Jira connector>>, specifies the Jira instance URL.
@@ -327,7 +337,12 @@ NOTE: If you are using the `xpack.actions.allowedHosts` setting, make sure the h
 For a <<cases-webhook-action-type,{webhook-cm} connector>>, specifies a string from the response body of the create case method that corresponds to the external service identifier.
 
 `xpack.actions.preconfigured.<connector-id>.config.defaultModel`::
-For a <<openai-action-type,OpenAI connector>>, specifies the default model to use for requests. It is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
+The default model to use for requests, which varies by connector:
++
+--
+* For an <<bedrock-action-type,{bedrock} connector>>, current support is for the Anthropic Claude models. Defaults to `anthropic.claude-v2:1`.
+* For a <<openai-action-type,OpenAI connector>>, it is optional and applicable only when `xpack.actions.preconfigured.<connector-id>.config.apiProvider` is `OpenAI`.
+--
 
 `xpack.actions.preconfigured.<connector-id>.config.executionTimeField`::
 For an <<index-action-type,index connector>>, a field that indicates when the document was indexed.
@@ -463,6 +478,9 @@ Sensitive configuration details, such as username, password, and keys, which are
 +
 TIP: Sensitive properties, such as passwords, should be stored in the <<creating-keystore,{kib} keystore>>.
 
+`xpack.actions.preconfigured.<connector-id>.secrets.accessKey`::
+For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS access key for authentication.
+
 `xpack.actions.preconfigured.<connector-id>.secrets.apikey`::
 An API key secret that varies by connector:
 +
@@ -517,6 +535,9 @@ For a <<servicenow-action-type,{sn-itsm}>>, <<servicenow-sir-action-type,{sn-sir
 `xpack.actions.preconfigured.<connector-id>.secrets.routingKey`::
 For a <<pagerduty-action-type,PagerDuty connector>>, specifies the 32 character PagerDuty Integration Key for an integration on a service, also referred to as the routing key.
 
+`xpack.actions.preconfigured.<connector-id>.secrets.secret`::
+For an <<bedrock-action-type,{bedrock} connector>>, specifies the AWS secret for authentication.
+
 `xpack.actions.preconfigured.<connector-id>.secrets.secretsUrl`::
 For an <<xmatters-action-type,xMatters connector>> with URL authentication, specifies the request URL for the Elastic Alerts trigger in xMatters with the API key included in the URL.
 It is used only when `xpack.actions.preconfigured.<connector-id>.config.usesBasic` is `false`.
@@ -569,7 +590,7 @@ Specifies whether to skip writing alerts and scheduling actions if rule
 processing was cancelled due to a timeout. Default: `true`. This setting can be
 overridden by individual rule types.
 
-`xpack.alerting.rules.maxScheduledPerMinute` {ess-icon}::
+`xpack.alerting.rules.maxScheduledPerMinute`::
 Specifies the maximum number of rules to run per minute. Default: 10000
 
 `xpack.alerting.rules.minimumScheduleInterval.value` {ess-icon}::

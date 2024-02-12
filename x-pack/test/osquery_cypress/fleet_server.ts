@@ -6,40 +6,52 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import execa from 'execa';
-import { runFleetServerIfNeeded } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/fleet_server';
+import { KbnClient } from '@kbn/test';
+import {
+  StartedFleetServer,
+  startFleetServer,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
 import { Manager } from './resource_manager';
+import { getLatestAvailableAgentVersion } from './utils';
 
 export class FleetManager extends Manager {
-  private fleetContainerId?: string;
-  private log: ToolingLog;
+  private fleetServer: StartedFleetServer | undefined = undefined;
 
-  constructor(log: ToolingLog) {
+  constructor(
+    private readonly kbnClient: KbnClient,
+    private readonly log: ToolingLog,
+    private readonly port: number
+  ) {
     super();
-    this.log = log;
   }
 
   public async setup(): Promise<void> {
-    const fleetServerConfig = await runFleetServerIfNeeded();
+    const version = await getLatestAvailableAgentVersion(this.kbnClient);
+    this.fleetServer = await startFleetServer({
+      kbnClient: this.kbnClient,
+      logger: this.log,
+      port: this.port,
+      force: true,
+      version,
+    });
 
-    if (!fleetServerConfig) {
-      throw new Error('Fleet server config not found');
+    if (!this.fleetServer) {
+      throw new Error('Fleet server was not started');
     }
-
-    this.fleetContainerId = fleetServerConfig.fleetServerContainerId;
   }
 
   public cleanup() {
     super.cleanup();
 
     this.log.info('Removing old fleet config');
-    if (this.fleetContainerId) {
+    if (this.fleetServer) {
       this.log.info('Closing fleet process');
 
       try {
-        execa.sync('docker', ['kill', this.fleetContainerId]);
+        this.fleetServer.stopNow();
       } catch (err) {
         this.log.error('Error closing fleet server process');
+        this.log.verbose(err);
       }
       this.log.info('Fleet server process closed');
     }

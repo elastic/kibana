@@ -1,0 +1,120 @@
+
+++++
+<div class="tabs" data-tab-group="tiles-json-tab-group-name">
+  <div role="tablist" aria-label="Request and response to the Tile Service for a JSON asset">
+    <button role="tab"
+            aria-selected="true"
+            aria-controls="tiles-json-tab-group-curl"
+            id="tiles-json-group-curl">
+      Curl Example
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-json-tab-group-request"
+            id="tiles-json-group-request"
+            tabindex="-1">
+      Request
+    </button>
+    <button role="tab"
+            aria-selected="false"
+            aria-controls="tiles-json-tab-group-response"
+            id="tiles-json-group-response"
+            tabindex="-2">
+      Response
+    </button>
+  </div>
+  <div tabindex="0"
+       role="tabpanel"
+       id="tiles-json-tab-group-curl"
+       aria-labelledby="tiles-json-group-curl">
+++++
+[%collapsible]
+====
+[source,bash,subs="attributes"]
+----------------------------------
+curl -I 'https://tiles.maps.elastic.co/v{minor-version}/manifest?elastic_tile_service_tos=agree&my_app_name=kibana&my_app_version={version}' \
+-H 'User-Agent: curl/7.81.0' \
+-H 'Accept: */*' \
+-H 'Accept-Encoding: gzip, deflate, br'
+----------------------------------
+
+Server response
+
+[source,regex]
+----------------------------------
+HTTP/2 200 
+server: BaseHTTP/0.6 Python/3.11.4
+date: Mon, 20 Nov 2023 15:08:46 GMT
+content-type: application/json; charset=utf-8
+elastic-api-version: 2023-10-31
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+content-encoding: gzip
+vary: Accept-Encoding
+x-varnish: 844076 5416505
+accept-ranges: bytes
+varnish-age: 85285
+cache-control: private, max-age=86400
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+----------------------------------
+====
+++++
+  </div>
+  <div tabindex="1"
+       role="tabpanel"
+       id="tiles-json-tab-group-request"
+       aria-labelledby="tiles-json-group-request"
+       hidden="">
+++++
+[source,regex,subs="attributes"]
+----------------------------------
+Host: tiles.maps.elastic.co
+User-Agent: Mozilla/5.0 (X11; Ubuntu; Linux x86_64; rv:109.0) Gecko/20100101 Firefox/119.0
+Accept: */*
+Accept-Language: en-US,en;q=0.5
+Accept-Encoding: gzip, deflate, br
+Referer: {ems-headers-url}/app/maps/map
+Origin: {ems-headers-url}
+Connection: keep-alive
+Sec-Fetch-Dest: empty
+Sec-Fetch-Mode: cors
+Sec-Fetch-Site: cross-site
+Pragma: no-cache
+Cache-Control: no-cache
+TE: trailers
+----------------------------------
+++++
+  </div>
+  <div tabindex="2"
+       role="tabpanel"
+       id="tiles-json-tab-group-response"
+       aria-labelledby="tiles-json-group-response"
+       hidden="">
+++++
+[source,regex]
+----------------------------------
+server: BaseHTTP/0.6 Python/3.11.4
+date: Mon, 20 Nov 2023 17:53:10 GMT
+content-type: application/json; charset=utf-8
+elastic-api-version: 2023-10-31
+access-control-allow-origin: *
+access-control-allow-methods: GET, OPTIONS, HEAD
+access-control-allow-headers: Origin, Accept, Content-Type, kbn-version, elastic-api-version
+access-control-expose-headers: etag
+content-encoding: gzip
+vary: Accept-Encoding
+x-varnish: 8848609 1142291
+accept-ranges: bytes
+varnish-age: 65725
+cache-control: private, max-age=86400
+content-length: 341
+via: 1.1 varnish (Varnish/7.0), 1.1 google
+alt-svc: h3=":443"; ma=2592000,h3-29=":443"; ma=2592000
+----------------------------------
+++++
+  </div>
+</div>
+++++

@@ -18,8 +18,6 @@ get:
               $ref: '../components/schemas/action_response_properties.yaml' 
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
 
 post:
   summary: Creates a connector.
@@ -59,8 +57,3 @@ post:
       $ref: '../components/responses/200_actions.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601
-

@@ -6,6 +6,14 @@
  */
 
 import React from 'react';
+import {
+  render,
+  screen,
+  waitFor,
+  waitForElementToBeRemoved,
+  fireEvent,
+} from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { act } from 'react-dom/test-utils';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
@@ -51,7 +59,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
 }));
 
 const mockAPIs = {
-  bulkEnableRules: jest.fn(),
+  bulkEnableRules: jest.fn().mockResolvedValue({ errors: [] }),
   bulkDisableRules: jest.fn(),
   snoozeRule: jest.fn(),
   unsnoozeRule: jest.fn(),
@@ -103,35 +111,33 @@ describe('rule status panel', () => {
   it('should disable the rule when picking disable in the dropdown', async () => {
     const rule = mockRule({ enabled: true });
     const bulkDisableRules = jest.fn();
-    const wrapper = mountWithIntl(
-      <RuleStatusPanelWithProvider
-        {...mockAPIs}
-        rule={rule}
-        isEditable
-        healthColor="primary"
-        statusMessage="Ok"
-        requestRefresh={requestRefresh}
-        bulkDisableRules={bulkDisableRules}
-      />
+    render(
+      <IntlProvider locale="en">
+        <RuleStatusPanelWithProvider
+          {...mockAPIs}
+          rule={rule}
+          isEditable
+          healthColor="primary"
+          statusMessage="Ok"
+          requestRefresh={requestRefresh}
+          bulkDisableRules={bulkDisableRules}
+        />
+      </IntlProvider>
     );
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
-    actionsElem.simulate('click');
 
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
+    if (screen.queryByTestId('centerJustifiedSpinner')) {
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+    }
 
-    await act(async () => {
-      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
-      actionsMenuItemElem.at(1).simulate('click');
-      await nextTick();
-    });
+    fireEvent.click(screen.getByTestId('ruleStatusDropdownBadge'));
 
-    expect(bulkDisableRules).toHaveBeenCalledTimes(1);
+    fireEvent.click(screen.getByTestId('statusDropdownDisabledItem'));
+
+    fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
+
+    expect(screen.queryByRole('progressbar')).toBeInTheDocument();
+
+    await waitFor(() => expect(bulkDisableRules).toHaveBeenCalledTimes(1));
   });
 
   it('if rule is already disabled should do nothing when picking disable in the dropdown', async () => {
@@ -160,7 +166,7 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(1).simulate('click');
       await nextTick();
     });
@@ -170,7 +176,6 @@ describe('rule status panel', () => {
 
   it('should enable the rule when picking enable in the dropdown', async () => {
     const rule = mockRule({ enabled: false });
-    const bulkEnableRules = jest.fn();
     const wrapper = mountWithIntl(
       <RuleStatusPanelWithProvider
         {...mockAPIs}
@@ -179,7 +184,6 @@ describe('rule status panel', () => {
         healthColor="primary"
         statusMessage="Ok"
         requestRefresh={requestRefresh}
-        bulkEnableRules={bulkEnableRules}
       />
     );
     const actionsElem = wrapper
@@ -194,12 +198,12 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
 
-    expect(bulkEnableRules).toHaveBeenCalledTimes(1);
+    expect(mockAPIs.bulkEnableRules).toHaveBeenCalledTimes(1);
   });
 
   it('if rule is already enabled should do nothing when picking enable in the dropdown', async () => {
@@ -228,62 +232,11 @@ describe('rule status panel', () => {
 
     await act(async () => {
       const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
+      const actionsMenuItemElem = actionsMenuElem.first().find('button.euiContextMenuItem');
       actionsMenuItemElem.at(0).simulate('click');
       await nextTick();
     });
 
     expect(bulkEnableRules).toHaveBeenCalledTimes(0);
-  });
-
-  it('should show the loading spinner when the rule enabled switch was clicked and the server responded with some delay', async () => {
-    const rule = mockRule({
-      enabled: true,
-    });
-
-    const bulkDisableRules = jest.fn(async () => {
-      await new Promise((resolve) => setTimeout(resolve, 6000));
-    }) as any;
-
-    const wrapper = mountWithIntl(
-      <RuleStatusPanelWithProvider
-        {...mockAPIs}
-        rule={rule}
-        isEditable
-        healthColor="primary"
-        statusMessage="Ok"
-        requestRefresh={requestRefresh}
-        bulkDisableRules={bulkDisableRules}
-      />
-    );
-
-    const actionsElem = wrapper
-      .find('[data-test-subj="statusDropdown"] .euiBadge__childButton')
-      .first();
-    actionsElem.simulate('click');
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    await act(async () => {
-      const actionsMenuElem = wrapper.find('[data-test-subj="ruleStatusMenu"]');
-      const actionsMenuItemElem = actionsMenuElem.first().find('.euiContextMenuItem');
-      actionsMenuItemElem.at(1).simulate('click');
-    });
-
-    await act(async () => {
-      await nextTick();
-      wrapper.update();
-    });
-
-    await act(async () => {
-      expect(bulkDisableRules).toHaveBeenCalled();
-      expect(
-        wrapper.find('[data-test-subj="statusDropdown"] .euiBadge__childButton .euiLoadingSpinner')
-          .length
-      ).toBeGreaterThan(0);
-    });
   });
 });

@@ -56,7 +56,7 @@ export const createReduxTools = <
   const dispatch: ReduxToolsSetters<ReduxStateType, ReducerType> = Object.keys(reducers).reduce(
     (acc, key: keyof ReducerType) => {
       const sliceAction =
-        slice.actions[key as keyof CaseReducerActions<SliceCaseReducers<ReduxStateType>>];
+        slice.actions[key as keyof CaseReducerActions<SliceCaseReducers<ReduxStateType>, string>];
       acc[key] = (payload) => store.dispatch(sliceAction(payload));
       return acc;
     },

@@ -26,6 +26,9 @@ Object {
   "kibana.alert.reason": Array [
     "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
   ],
+  "kibana.alert.reason.text": Array [
+    "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
+  ],
   "kibana.alert.rule.category": Array [
     "Failed transaction rate threshold",
   ],
@@ -107,6 +110,9 @@ Object {
     "opbeans-go_ENVIRONMENT_NOT_DEFINED_request",
   ],
   "kibana.alert.reason": Array [
+    "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
+  ],
+  "kibana.alert.reason.text": Array [
     "Failed transactions is 50% in the last 5 mins for service: opbeans-go, env: Not defined, type: request. Alert when > 30%.",
   ],
   "kibana.alert.rule.category": Array [

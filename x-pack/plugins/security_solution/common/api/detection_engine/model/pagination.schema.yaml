@@ -1,0 +1,31 @@
+openapi: 3.0.0
+info:
+  title: Pagination Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    Page:
+      type: integer
+      minimum: 1
+      description: Page number
+    PerPage:
+      type: integer
+      minimum: 0
+      description: Number of items per page
+    PaginationResult:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/Page'
+        per_page:
+          $ref: '#/components/schemas/PerPage'
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of items
+      required:
+        - page
+        - per_page
+        - total

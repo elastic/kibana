@@ -8,11 +8,9 @@
 
 export {
   FieldPicker,
-  TruncatedLabel,
   NameInput,
   DebouncedInput,
   useDebouncedValue,
-  TooltipWrapper,
   ColorPicker,
   IconSelect,
   IconSelectSetting,

@@ -18,6 +18,7 @@ import {
   EuiSelect,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
 import { SlmPolicyPayload } from '../../../../../common/types';
 import { TIME_UNITS } from '../../../../../common/constants';
 import { StepProps } from '.';
@@ -102,6 +103,12 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
               }}
               data-test-subj="expireAfterValueInput"
               min={0}
+              aria-label={i18n.translate(
+                'xpack.snapshotRestore.policyForm.stepRetention.expireAfterAriaLabel',
+                {
+                  defaultMessage: 'Expiration time input',
+                }
+              )}
             />
           </EuiFlexItem>
           <EuiFlexItem>
@@ -116,6 +123,12 @@ export const PolicyStepRetention: React.FunctionComponent<StepProps> = ({
                 });
               }}
               data-test-subj="expireAfterUnitSelect"
+              aria-label={i18n.translate(
+                'xpack.snapshotRestore.policyForm.stepRetention.expireAfterUnitsAriaLabel',
+                {
+                  defaultMessage: 'Expiration time units selection',
+                }
+              )}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

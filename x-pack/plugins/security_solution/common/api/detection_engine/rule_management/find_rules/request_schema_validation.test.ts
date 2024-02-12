@@ -5,19 +5,19 @@
  * 2.0.
  */
 
-import type { FindRulesRequestQuery } from './find_rules_route';
+import type { FindRulesRequestQueryInput } from './find_rules_route.gen';
 import { validateFindRulesRequestQuery } from './request_schema_validation';
 
 describe('Find rules request schema, additional validation', () => {
   describe('validateFindRulesRequestQuery', () => {
     test('You can have an empty sort_field and empty sort_order', () => {
-      const schema: FindRulesRequestQuery = {};
+      const schema: FindRulesRequestQueryInput = {};
       const errors = validateFindRulesRequestQuery(schema);
       expect(errors).toEqual([]);
     });
 
     test('You can have both a sort_field and and a sort_order', () => {
-      const schema: FindRulesRequestQuery = {
+      const schema: FindRulesRequestQueryInput = {
         sort_field: 'name',
         sort_order: 'asc',
       };
@@ -26,7 +26,7 @@ describe('Find rules request schema, additional validation', () => {
     });
 
     test('You cannot have sort_field without sort_order', () => {
-      const schema: FindRulesRequestQuery = {
+      const schema: FindRulesRequestQueryInput = {
         sort_field: 'name',
       };
       const errors = validateFindRulesRequestQuery(schema);
@@ -36,7 +36,7 @@ describe('Find rules request schema, additional validation', () => {
     });
 
     test('You cannot have sort_order without sort_field', () => {
-      const schema: FindRulesRequestQuery = {
+      const schema: FindRulesRequestQueryInput = {
         sort_order: 'asc',
       };
       const errors = validateFindRulesRequestQuery(schema);

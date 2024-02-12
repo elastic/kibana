@@ -5,14 +5,20 @@
  * 2.0.
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useMemo, useState } from 'react';
-import { FieldState } from '@kbn/advanced-settings-plugin/public';
-import { toEditableConfig } from '@kbn/advanced-settings-plugin/public';
+import React, { useMemo, useState } from 'react';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
+import { getFieldDefinition } from '@kbn/management-settings-field-definition';
+import type {
+  FieldDefinition,
+  OnFieldChangeFn,
+  UiSettingMetadata,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
+import { normalizeSettings } from '@kbn/management-settings-utilities';
 import { ObservabilityApp } from '../../typings/common';
 
-function getEditableConfig({
+function getSettingsFields({
   settingsKeys,
   uiSettings,
 }: {
@@ -23,67 +29,62 @@ function getEditableConfig({
     return {};
   }
   const uiSettingsDefinition = uiSettings.getAll();
-  const config: Record<string, ReturnType<typeof toEditableConfig>> = {};
+  const normalizedSettings = normalizeSettings(uiSettingsDefinition);
+  const fields: Record<string, FieldDefinition> = {};
 
   settingsKeys.forEach((key) => {
-    const settingDef = uiSettingsDefinition?.[key];
-    if (settingDef) {
-      const editableConfig = toEditableConfig({
-        def: settingDef,
-        name: key,
-        value: settingDef.userValue,
-        isCustom: uiSettings.isCustom(key),
-        isOverridden: uiSettings.isOverridden(key),
+    const setting: UiSettingMetadata = normalizedSettings[key];
+    if (setting) {
+      const field = getFieldDefinition({
+        id: key,
+        setting,
+        params: { isCustom: uiSettings.isCustom(key), isOverridden: uiSettings.isOverridden(key) },
       });
-      config[key] = editableConfig;
+      fields[key] = field;
     }
   });
-  return config;
+  return fields;
 }
 
 export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[]) {
-  const { services } = useKibana();
+  const {
+    services: { settings },
+  } = useKibana();
 
-  const { uiSettings } = services;
   const [isSaving, setIsSaving] = useState(false);
   const [forceReloadSettings, setForceReloadSettings] = useState(0);
-  const [unsavedChanges, setUnsavedChanges] = useState<Record<string, FieldState>>({});
-
-  const settingsEditableConfig = useMemo(
-    () => {
-      return getEditableConfig({ settingsKeys, uiSettings });
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [uiSettings, settingsKeys, forceReloadSettings]
+  const [unsavedChanges, setUnsavedChanges] = React.useState<Record<string, UnsavedFieldChange>>(
+    {}
   );
 
-  function handleFieldChange(key: string, fieldState: FieldState) {
-    setUnsavedChanges((state) => {
-      const newState = { ...state };
-      const { value, defVal } = settingsEditableConfig[key];
-      const currentValue = value === undefined ? defVal : value;
-      if (currentValue === fieldState.value) {
-        // Delete property from unsaved object if user changes it to the value that was already saved
-        delete newState[key];
-      } else {
-        newState[key] = fieldState;
-      }
-      return newState;
-    });
-  }
+  const fields = useMemo(
+    () => {
+      return getSettingsFields({ settingsKeys, uiSettings: settings?.client });
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [settings, settingsKeys, forceReloadSettings]
+  );
+
+  const handleFieldChange: OnFieldChangeFn = (id, change) => {
+    if (!change) {
+      const { [id]: unsavedChange, ...rest } = unsavedChanges;
+      setUnsavedChanges(rest);
+      return;
+    }
+    setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
+  };
 
   function cleanUnsavedChanges() {
     setUnsavedChanges({});
   }
 
   async function saveAll() {
-    if (uiSettings && !isEmpty(unsavedChanges)) {
+    if (settings && !isEmpty(unsavedChanges)) {
       try {
         setIsSaving(true);
-        const arr = Object.entries(unsavedChanges).map(([key, fieldState]) =>
-          uiSettings.set(key, fieldState.value)
+        const arr = Object.entries(unsavedChanges).map(([key, value]) =>
+          settings.client.set(key, value.unsavedValue)
         );
-
         await Promise.all(arr);
         setForceReloadSettings((state) => ++state);
         cleanUnsavedChanges();
@@ -94,7 +95,7 @@ export function useEditableSettings(app: ObservabilityApp, settingsKeys: string[
   }
 
   return {
-    settingsEditableConfig,
+    fields,
     unsavedChanges,
     handleFieldChange,
     saveAll,

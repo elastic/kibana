@@ -6,9 +6,16 @@
  * Side Public License, v 1.
  */
 
+import { firstValueFrom } from 'rxjs';
 import UiSharedDepsNpm from '@kbn/ui-shared-deps-npm';
 import * as UiSharedDepsSrc from '@kbn/ui-shared-deps-src';
+import type { IConfigService } from '@kbn/config';
+import type { BrowserLoggingConfig } from '@kbn/core-logging-common-internal';
 import type { UiSettingsParams, UserProvidedValues } from '@kbn/core-ui-settings-common';
+import {
+  config as loggingConfigDef,
+  type LoggingConfigWithBrowserType,
+} from '@kbn/core-logging-server-internal';
 
 export const getSettingValue = <T>(
   settingName: string,
@@ -22,33 +29,44 @@ export const getSettingValue = <T>(
   return convert(value);
 };
 
+export const getBundlesHref = (baseHref: string): string => `${baseHref}/bundles`;
+
 export const getStylesheetPaths = ({
   themeVersion,
   darkMode,
-  basePath,
+  baseHref,
   buildNum,
 }: {
   themeVersion: UiSharedDepsNpm.ThemeVersion;
   darkMode: boolean;
   buildNum: number;
-  basePath: string;
+  baseHref: string;
 }) => {
-  const regularBundlePath = `${basePath}/${buildNum}/bundles`;
+  const bundlesHref = getBundlesHref(baseHref);
   return [
     ...(darkMode
       ? [
-          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
+          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.darkCssDistFilename(
             themeVersion
           )}`,
-          `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/ui/legacy_dark_theme.min.css`,
+          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+          `${baseHref}/ui/legacy_dark_theme.min.css`,
         ]
       : [
-          `${regularBundlePath}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
+          `${bundlesHref}/kbn-ui-shared-deps-npm/${UiSharedDepsNpm.lightCssDistFilename(
             themeVersion
           )}`,
-          `${regularBundlePath}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
-          `${basePath}/ui/legacy_light_theme.min.css`,
+          `${bundlesHref}/kbn-ui-shared-deps-src/${UiSharedDepsSrc.cssDistFilename}`,
+          `${baseHref}/ui/legacy_light_theme.min.css`,
         ]),
   ];
+};
+
+export const getBrowserLoggingConfig = async (
+  configService: IConfigService
+): Promise<BrowserLoggingConfig> => {
+  const loggingConfig = await firstValueFrom(
+    configService.atPath<LoggingConfigWithBrowserType>(loggingConfigDef.path)
+  );
+  return loggingConfig.browser;
 };

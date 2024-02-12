@@ -44,7 +44,7 @@ export const getPopover = (wrapper: ReactWrapper) => wrapper.find('EuiPopover');
 
 export const getPortal = (wrapper: ReactWrapper) => wrapper.find('EuiPortal');
 
-export const getContextMenu = (wrapper: ReactWrapper) => wrapper.find('EuiContextMenu');
+export const getContextMenu = (wrapper: ReactWrapper) => wrapper.find('EuiContextMenuClass');
 
 export const getContextMenuItems = (wrapper: ReactWrapper) => wrapper.find('EuiContextMenuItem');
 

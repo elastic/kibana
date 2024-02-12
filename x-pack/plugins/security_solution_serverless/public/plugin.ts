@@ -7,7 +7,6 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 
-import { getSecurityGetStartedComponent } from './get_started';
 import { getDashboardsLandingCallout } from './components/dashboards_landing_callout';
 import type {
   SecuritySolutionServerlessPluginSetup,
@@ -24,6 +23,8 @@ import {
   parseExperimentalConfigValue,
   type ExperimentalFeatures,
 } from '../common/experimental_features';
+import { getCloudUrl, getProjectFeaturesUrl } from './navigation/links/util';
+import { setOnboardingSettings } from './onboarding';
 
 export class SecuritySolutionServerlessPlugin
   implements
@@ -53,7 +54,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupNavigation(core, setupDeps, this.experimentalFeatures);
+    setupNavigation(core, setupDeps);
     return {};
   }
 
@@ -69,11 +70,17 @@ export class SecuritySolutionServerlessPlugin
     registerUpsellings(securitySolution.getUpselling(), productTypes, services);
 
     securitySolution.setComponents({
-      getStarted: getSecurityGetStartedComponent(services, productTypes),
-      dashboardsLandingCallout: getDashboardsLandingCallout(services),
+      DashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
-
-    startNavigation(services, this.config);
+    securitySolution.setOnboardingPageSettings.setProductTypes(productTypes);
+    securitySolution.setOnboardingPageSettings.setProjectFeaturesUrl(
+      getProjectFeaturesUrl(services.cloud)
+    );
+    securitySolution.setOnboardingPageSettings.setProjectsUrl(
+      getCloudUrl('projects', services.cloud)
+    );
+    setOnboardingSettings(services);
+    startNavigation(services);
     setRoutes(services);
 
     return {};

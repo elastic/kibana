@@ -11,6 +11,9 @@ import React, { useCallback } from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ChartSizeSpec } from '@kbn/chart-expressions-common';
+import { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
+import { Interpolation, Theme, css } from '@emotion/react';
 import {
   DatasourceMap,
   FramePublicAPI,
@@ -25,22 +28,20 @@ import {
   useLensDispatch,
   updateVisualizationState,
   DatasourceStates,
-  VisualizationState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
   selectVisualizationState,
 } from '../../../state_management';
-import { WorkspaceTitle } from './title';
 import { LensInspector } from '../../../lens_inspector_service';
+import { WorkspaceTitle } from './title';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
   framePublicAPI: FramePublicAPI;
-  visualizationState: VisualizationState['state'];
   visualizationMap: VisualizationMap;
   visualizationId: string | null;
   datasourceMap: DatasourceMap;
@@ -48,15 +49,37 @@ export interface WorkspacePanelWrapperProps {
   isFullscreen: boolean;
   lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
+  displayOptions: ChartSizeSpec | undefined;
 }
+
+const unitToCSSUnit: Record<ChartSizeUnit, string> = {
+  pixels: 'px',
+  percentage: '%',
+};
+
+const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
+  return {
+    aspectRatio: `${x}/${y}`,
+    ...(y > x
+      ? {
+          height: '100%',
+          width: 'auto',
+        }
+      : {
+          height: 'auto',
+          width: '100%',
+        }),
+  };
+};
 
 export function VisualizationToolbar(props: {
   activeVisualization: Visualization | null;
   framePublicAPI: FramePublicAPI;
+  isFixedPosition?: boolean;
 }) {
   const dispatchLens = useLensDispatch();
   const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization } = props;
+  const { activeVisualization, isFixedPosition } = props;
   const setVisualizationState = useCallback(
     (newState: unknown) => {
       if (!activeVisualization) {
@@ -77,7 +100,12 @@ export function VisualizationToolbar(props: {
   return (
     <>
       {ToolbarComponent && (
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          className={classNames({
+            'lnsVisualizationToolbar--fixed': isFixedPosition,
+          })}
+        >
           {ToolbarComponent({
             frame: props.framePublicAPI,
             state: visualization.state,
@@ -92,12 +120,12 @@ export function VisualizationToolbar(props: {
 export function WorkspacePanelWrapper({
   children,
   framePublicAPI,
-  visualizationState,
   visualizationId,
   visualizationMap,
   datasourceMap,
   isFullscreen,
   getUserMessages,
+  displayOptions,
 }: WorkspacePanelWrapperProps) {
   const dispatchLens = useLensDispatch();
 
@@ -106,6 +134,34 @@ export function WorkspacePanelWrapper({
 
   const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
+
+  const aspectRatio = displayOptions?.aspectRatio;
+  const maxDimensions = displayOptions?.maxDimensions;
+  const minDimensions = displayOptions?.minDimensions;
+
+  let visDimensionsCSS: Interpolation<Theme> = {};
+
+  if (aspectRatio) {
+    visDimensionsCSS = getAspectRatioStyles(aspectRatio ?? maxDimensions);
+  }
+
+  if (maxDimensions) {
+    visDimensionsCSS.maxWidth = maxDimensions.x
+      ? `${maxDimensions.x.value}${unitToCSSUnit[maxDimensions.x.unit]}`
+      : '';
+    visDimensionsCSS.maxHeight = maxDimensions.y
+      ? `${maxDimensions.y.value}${unitToCSSUnit[maxDimensions.y.unit]}`
+      : '';
+  }
+
+  if (minDimensions) {
+    visDimensionsCSS.minWidth = minDimensions.x
+      ? `${minDimensions.x.value}${unitToCSSUnit[minDimensions.x.unit]}`
+      : '';
+    visDimensionsCSS.minHeight = minDimensions.y
+      ? `${minDimensions.y.value}${unitToCSSUnit[minDimensions.y.unit]}`
+      : '';
+  }
 
   return (
     <EuiPageTemplate
@@ -184,6 +240,7 @@ export function WorkspacePanelWrapper({
           </EuiFlexGroup>
         </EuiPageTemplate.Section>
       )}
+
       <EuiPageTemplate.Section
         grow={true}
         paddingSize="none"
@@ -193,10 +250,32 @@ export function WorkspacePanelWrapper({
         className={classNames('lnsWorkspacePanelWrapper stretch-for-sharing', {
           'lnsWorkspacePanelWrapper--fullscreen': isFullscreen,
         })}
+        css={{ height: '100%' }}
         color="transparent"
       >
-        <WorkspaceTitle />
-        {children}
+        <EuiFlexGroup
+          gutterSize="none"
+          alignItems="center"
+          justifyContent="center"
+          direction="column"
+          css={css`
+            height: 100%;
+          `}
+        >
+          <EuiFlexItem
+            data-test-subj="lnsWorkspacePanelWrapper__innerContent"
+            grow={false}
+            css={{
+              flexGrow: 0,
+              height: '100%',
+              width: '100%',
+              ...visDimensionsCSS,
+            }}
+          >
+            <WorkspaceTitle />
+            {children}
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiPageTemplate.Section>
     </EuiPageTemplate>
   );

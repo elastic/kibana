@@ -16,6 +16,10 @@ describe('FilterExpanded', function () {
 
   const mockSeries = { ...mockUxSeries, filters };
 
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('render', async () => {
     const initSeries = { filters };
     mockAppDataView();

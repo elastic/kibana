@@ -7,7 +7,11 @@
  */
 
 export { UnifiedDataTable, DataLoadingState } from './src/components/data_table';
-export type { UnifiedDataTableProps } from './src/components/data_table';
+export type {
+  UnifiedDataTableProps,
+  UnifiedDataTableRenderCustomToolbar,
+  UnifiedDataTableRenderCustomToolbarProps,
+} from './src/components/data_table';
 export { getDisplayedColumns } from './src/utils/columns';
 export { getTextBasedColumnTypes } from './src/utils/get_column_types';
 export { ROWS_HEIGHT_OPTIONS } from './src/constants';
@@ -21,3 +25,5 @@ export { getRowsPerPageOptions } from './src/utils/rows_per_page';
 export { popularizeField } from './src/utils/popularize_field';
 
 export { useColumns } from './src/hooks/use_data_grid_columns';
+export { OPEN_DETAILS, SELECT_ROW } from './src/components/data_table_columns';
+export { DataTableRowControl } from './src/components/data_table_row_control';

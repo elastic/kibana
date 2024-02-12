@@ -8,6 +8,7 @@
 export const convertStringToTitle = (name: string) => {
   return name
     .split('_')
+    .filter((word) => word.length > 0)
     .map((word) => {
       return word[0].toUpperCase() + word.substring(1);
     })

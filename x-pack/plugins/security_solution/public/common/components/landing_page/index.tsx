@@ -6,13 +6,12 @@
  */
 
 import React, { memo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
-import { useKibana } from '../../lib/kibana';
+import { useSourcererDataView } from '../../containers/sourcerer';
+import { Onboarding } from './onboarding';
 
 export const LandingPageComponent = memo(() => {
-  const { getComponent$ } = useKibana().services;
-  const GetStartedComponent = useObservable(getComponent$('getStarted'));
-  return <>{GetStartedComponent}</>;
+  const { indicesExist } = useSourcererDataView();
+  return <Onboarding indicesExist={indicesExist} />;
 });
 
 LandingPageComponent.displayName = 'LandingPageComponent';

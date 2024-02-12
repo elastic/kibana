@@ -159,10 +159,7 @@ export class ObjectType<P extends Props = any> extends Type<ObjectResultType<P>>
       ...newProps,
     }).reduce((memo, [key, value]) => {
       if (value !== null && value !== undefined) {
-        return {
-          ...memo,
-          [key]: value,
-        };
+        (memo as Record<string, unknown>)[key] = value;
       }
       return memo;
     }, {} as ExtendedProps<P, NP>);

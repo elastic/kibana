@@ -6,10 +6,11 @@
  */
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { getSearchTransactionsEvents } from '.';
 import { APMEventClient } from '../create_es_client/create_apm_event_client';
 import { SearchAggregatedTransactionSetting } from '../../../../common/aggregated_transactions';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { APMConfig } from '../../..';
 
 export async function getIsUsingTransactionEvents({
@@ -63,7 +64,12 @@ async function getHasTransactions({
 }) {
   const response = await apmEventClient.search('get_has_transactions', {
     apm: {
-      events: [ProcessorEvent.transaction],
+      sources: [
+        {
+          documentType: ApmDocumentType.TransactionEvent,
+          rollupInterval: RollupInterval.None,
+        },
+      ],
     },
     body: {
       track_total_hits: 1,

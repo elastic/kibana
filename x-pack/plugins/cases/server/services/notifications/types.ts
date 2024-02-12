@@ -8,12 +8,12 @@
 import type { CaseAssignees } from '../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 
-export interface NotifyArgs {
+export interface NotifyAssigneesArgs {
   assignees: CaseAssignees;
   theCase: CaseSavedObjectTransformed;
 }
 
 export interface NotificationService {
-  notifyAssignees: (args: NotifyArgs) => Promise<void>;
-  bulkNotifyAssignees: (args: NotifyArgs[]) => Promise<void>;
+  notifyAssignees: (args: NotifyAssigneesArgs) => Promise<void>;
+  bulkNotifyAssignees: (args: NotifyAssigneesArgs[]) => Promise<void>;
 }

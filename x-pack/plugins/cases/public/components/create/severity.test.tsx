@@ -15,7 +15,7 @@ import { Severity } from './severity';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import userEvent from '@testing-library/user-event';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 
 let globalForm: FormHook;
@@ -31,7 +31,9 @@ const MockHookWrapperComponent: React.FC = ({ children }) => {
 
   return <Form form={form}>{children}</Form>;
 };
-describe('Severity form field', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/175934
+// FLAKY: https://github.com/elastic/kibana/issues/175935
+describe.skip('Severity form field', () => {
   let appMockRender: AppMockRenderer;
   beforeEach(() => {
     appMockRender = createAppMockRenderer();

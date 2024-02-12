@@ -6,7 +6,7 @@
  */
 
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { InventoryItemType } from '../../common/inventory_models/types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 
 interface InfraopsSum {
   infraopsHosts: number;

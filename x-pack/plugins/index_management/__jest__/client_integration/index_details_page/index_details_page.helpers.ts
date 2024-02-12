@@ -14,7 +14,7 @@ import {
 import { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 
-import { IndexDetailsSection } from '../../../common/constants';
+import { IndexDetailsTabId } from '../../../common/constants';
 import { IndexDetailsPage } from '../../../public/application/sections/home/index_list/details_page';
 import { WithAppDependencies } from '../helpers';
 import { testIndexName } from './mocks';
@@ -35,7 +35,8 @@ export interface IndexDetailsPageTestBed extends TestBed {
   routerMock: typeof reactRouterMock;
   actions: {
     getHeader: () => string;
-    clickIndexDetailsTab: (tab: IndexDetailsSection) => Promise<void>;
+    clickIndexDetailsTab: (tab: IndexDetailsTabId) => Promise<void>;
+    getIndexDetailsTabs: () => string[];
     getActiveTabContent: () => string;
     mappings: {
       getCodeBlockContent: () => string;
@@ -77,10 +78,16 @@ export interface IndexDetailsPageTestBed extends TestBed {
       isWarningDisplayed: () => boolean;
     };
     overview: {
-      indexStatsContentExists: () => boolean;
-      indexDetailsContentExists: () => boolean;
+      storageDetailsExist: () => boolean;
+      getStorageDetailsContent: () => string;
+      statusDetailsExist: () => boolean;
+      getStatusDetailsContent: () => string;
+      aliasesDetailsExist: () => boolean;
+      getAliasesDetailsContent: () => string;
+      dataStreamDetailsExist: () => boolean;
+      getDataStreamDetailsContent: () => string;
+      reloadDataStreamDetails: () => Promise<void>;
       addDocCodeBlockExists: () => boolean;
-      extensionSummaryExists: (index: number) => boolean;
     };
   };
 }
@@ -119,11 +126,17 @@ export const setup = async ({
     return component.find('[data-test-subj="indexDetailsHeader"] h1').text();
   };
 
-  const clickIndexDetailsTab = async (tab: IndexDetailsSection) => {
+  const clickIndexDetailsTab = async (tab: IndexDetailsTabId) => {
     await act(async () => {
       find(`indexDetailsTab-${tab}`).simulate('click');
     });
     component.update();
+  };
+
+  const getIndexDetailsTabs = () => {
+    return component
+      .find('div[role="tablist"] button[data-test-subj^="indexDetailsTab"]')
+      .map((tab) => tab.text());
   };
 
   const getActiveTabContent = () => {
@@ -131,17 +144,38 @@ export const setup = async ({
   };
 
   const overview = {
-    indexStatsContentExists: () => {
-      return exists('overviewTabIndexStats');
+    storageDetailsExist: () => {
+      return exists('indexDetailsStorage');
     },
-    indexDetailsContentExists: () => {
-      return exists('overviewTabIndexDetails');
+    getStorageDetailsContent: () => {
+      return find('indexDetailsStorage').text();
+    },
+    statusDetailsExist: () => {
+      return exists('indexDetailsStatus');
+    },
+    getStatusDetailsContent: () => {
+      return find('indexDetailsStatus').text();
+    },
+    aliasesDetailsExist: () => {
+      return exists('indexDetailsAliases');
+    },
+    getAliasesDetailsContent: () => {
+      return find('indexDetailsAliases').text();
+    },
+    dataStreamDetailsExist: () => {
+      return exists('indexDetailsDataStream');
+    },
+    getDataStreamDetailsContent: () => {
+      return find('indexDetailsDataStream').text();
+    },
+    reloadDataStreamDetails: async () => {
+      await act(async () => {
+        find('indexDetailsDataStreamReload').simulate('click');
+      });
+      component.update();
     },
     addDocCodeBlockExists: () => {
       return exists('codeBlockControlsPanel');
-    },
-    extensionSummaryExists: (index: number) => {
-      return exists(`extensionsSummary-${index}`);
     },
   };
 
@@ -284,6 +318,7 @@ export const setup = async ({
     actions: {
       getHeader,
       clickIndexDetailsTab,
+      getIndexDetailsTabs,
       getActiveTabContent,
       mappings,
       settings,

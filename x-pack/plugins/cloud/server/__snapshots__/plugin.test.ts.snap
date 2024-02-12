@@ -21,6 +21,7 @@ Object {
   "serverless": Object {
     "projectId": undefined,
     "projectName": undefined,
+    "projectType": undefined,
   },
   "trialEndDate": undefined,
 }

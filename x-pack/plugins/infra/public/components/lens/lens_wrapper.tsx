@@ -4,24 +4,21 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useState, useRef, useCallback, useMemo } from 'react';
-
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import type { TimeRange } from '@kbn/es-query';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { LensAttributes } from '@kbn/lens-embeddable-utils';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { ChartLoadingProgress, ChartPlaceholder } from './chart_placeholder';
-import { parseDateRange } from '../../utils/datemath';
 import type { LensWrapperProps } from './types';
 
 export const LensWrapper = ({
   attributes,
   dateRange,
   filters,
-  lastReloadRequestTime,
+  searchSessionId,
   loading = false,
   onLoad,
   query,
@@ -35,8 +32,8 @@ export const LensWrapper = ({
     attributes,
     dateRange,
     filters,
-    lastReloadRequestTime,
     query,
+    searchSessionId,
   });
 
   const ref = useRef<HTMLDivElement>(null);
@@ -64,8 +61,8 @@ export const LensWrapper = ({
         attributes,
         dateRange,
         filters,
-        lastReloadRequestTime,
         query,
+        searchSessionId,
       });
     }
   }, [
@@ -73,8 +70,8 @@ export const LensWrapper = ({
     dateRange,
     filters,
     intersectionObserverEntry?.isIntersecting,
-    lastReloadRequestTime,
     query,
+    searchSessionId,
   ]);
 
   const handleOnLoad = useCallback(
@@ -82,6 +79,7 @@ export const LensWrapper = ({
       if (!embeddableLoaded) {
         setEmbeddableLoaded(true);
       }
+
       if (onLoad) {
         onLoad(isLoading);
       }
@@ -89,13 +87,6 @@ export const LensWrapper = ({
     [embeddableLoaded, onLoad]
   );
 
-  const parsedDateRange: TimeRange = useMemo(() => {
-    const { from = state.dateRange.from, to = state.dateRange.to } = parseDateRange(
-      state.dateRange
-    );
-
-    return { from, to };
-  }, [state.dateRange]);
   const isLoading = loading || !state.attributes;
 
   return (
@@ -119,12 +110,12 @@ export const LensWrapper = ({
             {isLoading && <ChartLoadingProgress hasTopMargin={!props.hidePanelTitles} />}
             <EmbeddableComponentMemo
               {...props}
+              searchSessionId={state.searchSessionId}
               attributes={state.attributes}
               filters={state.filters}
-              lastReloadRequestTime={state.lastReloadRequestTime}
               onLoad={handleOnLoad}
               query={state.query}
-              timeRange={parsedDateRange}
+              timeRange={dateRange}
               viewMode={ViewMode.VIEW}
             />
           </>

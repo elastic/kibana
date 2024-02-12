@@ -222,28 +222,6 @@ export default function ({ getService }: FtrProviderContext) {
         verifyErrorResponse(resp.body, 400, 'Request must contain a kbn-xsrf header.');
       });
 
-      it('should return 400 when unknown index type is provided', async () => {
-        const resp = await supertest
-          .post(`/internal/search/ese`)
-          .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-          // TODO: API requests in Serverless require internal request headers
-          .set(svlCommonApi.getInternalRequestHeader())
-          .set('kbn-xsrf', 'foo')
-          .send({
-            indexType: 'baad',
-            params: {
-              body: {
-                query: {
-                  match_all: {},
-                },
-              },
-            },
-          })
-          .expect(400);
-
-        verifyErrorResponse(resp.body, 400, 'Unknown indexType');
-      });
-
       it('should return 400 if invalid id is provided', async () => {
         const resp = await supertest
           .post(`/internal/search/ese/123`)
@@ -380,7 +358,10 @@ export default function ({ getService }: FtrProviderContext) {
           .set('kbn-xsrf', 'foo')
           .send()
           .expect(400);
-        verifyErrorResponse(resp.body, 400, 'illegal_argument_exception', true);
+        expect(resp.body.statusCode).to.be(400);
+        expect(resp.body.message).to.include.string('illegal_argument_exception');
+        expect(resp.body).to.have.property('attributes');
+        expect(resp.body.attributes).to.have.property('root_cause');
       });
 
       it('should delete an in-progress search', async function () {

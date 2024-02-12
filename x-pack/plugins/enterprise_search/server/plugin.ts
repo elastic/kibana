@@ -50,6 +50,7 @@ import {
 } from '../common/guided_onboarding/search_guide_config';
 
 import { registerTelemetryUsageCollector as registerASTelemetryUsageCollector } from './collectors/app_search/telemetry';
+import { registerTelemetryUsageCollector as registerCNTelemetryUsageCollector } from './collectors/connectors/telemetry';
 import { registerTelemetryUsageCollector as registerESTelemetryUsageCollector } from './collectors/enterprise_search/telemetry';
 import { registerTelemetryUsageCollector as registerWSTelemetryUsageCollector } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
@@ -64,10 +65,10 @@ import {
 import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
+import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
-import { registerCreateAPIKeyRoute } from './routes/enterprise_search/create_api_key';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
@@ -76,8 +77,10 @@ import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
 import { workplaceSearchTelemetryType } from './saved_objects/workplace_search/telemetry';
 
+import { GlobalConfigService } from './services/global_config_service';
 import { uiSettings as enterpriseSearchUISettings } from './ui_settings';
 
+import { getIndicesSearchResultProvider } from './utils/indices_search_result_provider';
 import { getSearchResultProvider } from './utils/search_result_provider';
 
 import { ConfigType } from '.';
@@ -87,7 +90,7 @@ interface PluginsSetup {
   customIntegrations?: CustomIntegrationsPluginSetup;
   features: FeaturesPluginSetup;
   globalSearch: GlobalSearchPluginSetup;
-  guidedOnboarding: GuidedOnboardingPluginSetup;
+  guidedOnboarding?: GuidedOnboardingPluginSetup;
   logsShared: LogsSharedPluginSetup;
   ml?: MlPluginSetup;
   security: SecurityPluginSetup;
@@ -104,6 +107,7 @@ export interface RouteDependencies {
   config: ConfigType;
   enterpriseSearchRequestHandler: IEnterpriseSearchRequestHandler;
   getSavedObjectsService?(): SavedObjectsServiceStart;
+  globalConfigService: GlobalConfigService;
   log: Logger;
   ml?: MlPluginSetup;
   router: IRouter;
@@ -112,17 +116,27 @@ export interface RouteDependencies {
 export class EnterpriseSearchPlugin implements Plugin {
   private readonly config: ConfigType;
   private readonly logger: Logger;
+  private readonly globalConfigService: GlobalConfigService;
+
   /**
    * Exposed services
    */
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ConfigType>();
+    this.globalConfigService = new GlobalConfigService();
     this.logger = initializerContext.logger.get();
   }
 
   public setup(
-    { capabilities, http, savedObjects, getStartServices, uiSettings }: CoreSetup<PluginsStart>,
+    {
+      capabilities,
+      elasticsearch,
+      http,
+      savedObjects,
+      getStartServices,
+      uiSettings,
+    }: CoreSetup<PluginsStart>,
     {
       usageCollection,
       security,
@@ -135,6 +149,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       cloud,
     }: PluginsSetup
   ) {
+    this.globalConfigService.setup(elasticsearch.legacy.config$, cloud);
     const config = this.config;
     const log = this.logger;
     const PLUGIN_IDS = [
@@ -177,49 +192,68 @@ export class EnterpriseSearchPlugin implements Plugin {
     /**
      * Register user access to the Enterprise Search plugins
      */
-    capabilities.registerSwitcher(async (request: KibanaRequest) => {
-      const [, { spaces }] = await getStartServices();
+    capabilities.registerSwitcher(
+      async (request: KibanaRequest) => {
+        const [, { spaces }] = await getStartServices();
 
-      const dependencies = { config, security, spaces, request, log, ml };
+        const dependencies = {
+          config,
+          security,
+          spaces,
+          request,
+          log,
+          ml,
+        };
 
-      const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
-      const showEnterpriseSearch =
-        hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
+        const { hasAppSearchAccess, hasWorkplaceSearchAccess } = await checkAccess(dependencies);
+        const showEnterpriseSearch =
+          hasAppSearchAccess || hasWorkplaceSearchAccess || !config.canDeployEntSearch;
 
-      return {
-        navLinks: {
-          enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
-          enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchAISearch: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
-          enterpriseSearchElasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          searchExperiences: showEnterpriseSearch,
-        },
-        catalogue: {
-          enterpriseSearch: showEnterpriseSearch,
-          enterpriseSearchContent: showEnterpriseSearch,
-          enterpriseSearchAnalytics: showEnterpriseSearch,
-          enterpriseSearchApplications: showEnterpriseSearch,
-          enterpriseSearchAISearch: showEnterpriseSearch,
-          enterpriseSearchVectorSearch: showEnterpriseSearch,
-          enterpriseSearchElasticsearch: showEnterpriseSearch,
-          appSearch: hasAppSearchAccess && config.canDeployEntSearch,
-          workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
-          searchExperiences: showEnterpriseSearch,
-        },
-      };
-    });
+        return {
+          navLinks: {
+            enterpriseSearch: showEnterpriseSearch,
+            enterpriseSearchContent: showEnterpriseSearch,
+            enterpriseSearchAnalytics: showEnterpriseSearch,
+            enterpriseSearchApplications: showEnterpriseSearch,
+            enterpriseSearchAISearch: showEnterpriseSearch,
+            enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchElasticsearch: showEnterpriseSearch,
+            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            searchExperiences: showEnterpriseSearch,
+          },
+          catalogue: {
+            enterpriseSearch: showEnterpriseSearch,
+            enterpriseSearchContent: showEnterpriseSearch,
+            enterpriseSearchAnalytics: showEnterpriseSearch,
+            enterpriseSearchApplications: showEnterpriseSearch,
+            enterpriseSearchAISearch: showEnterpriseSearch,
+            enterpriseSearchVectorSearch: showEnterpriseSearch,
+            enterpriseSearchElasticsearch: showEnterpriseSearch,
+            appSearch: hasAppSearchAccess && config.canDeployEntSearch,
+            workplaceSearch: hasWorkplaceSearchAccess && config.canDeployEntSearch,
+            searchExperiences: showEnterpriseSearch,
+          },
+        };
+      },
+      {
+        capabilityPath: ['navLinks.*', 'catalogue.*'],
+      }
+    );
 
     /**
      * Register routes
      */
     const router = http.createRouter();
     const enterpriseSearchRequestHandler = new EnterpriseSearchRequestHandler({ config, log });
-    const dependencies = { router, config, log, enterpriseSearchRequestHandler, ml };
+    const dependencies = {
+      router,
+      config,
+      globalConfigService: this.globalConfigService,
+      log,
+      enterpriseSearchRequestHandler,
+      ml,
+    };
 
     registerConfigDataRoute(dependencies);
     if (config.canDeployEntSearch) registerAppSearchRoutes(dependencies);
@@ -236,7 +270,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     });
 
     getStartServices().then(([, { security: securityStart }]) => {
-      registerCreateAPIKeyRoute(dependencies, securityStart);
+      registerApiKeysRoutes(dependencies, securityStart);
     });
 
     /**
@@ -254,6 +288,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
       if (usageCollection) {
         registerESTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
+        registerCNTelemetryUsageCollector(usageCollection);
         if (config.canDeployEntSearch) {
           registerASTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
           registerWSTelemetryUsageCollector(usageCollection, savedObjectsStarted, this.logger);
@@ -294,13 +329,13 @@ export class EnterpriseSearchPlugin implements Plugin {
      * Register a config for the search guide
      */
     if (config.canDeployEntSearch) {
-      guidedOnboarding.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     }
     if (config.hasWebCrawler) {
-      guidedOnboarding.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {
-      guidedOnboarding.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
+      guidedOnboarding?.registerGuideConfig(databaseSearchGuideId, databaseSearchGuideConfig);
     }
 
     /**
@@ -309,6 +344,7 @@ export class EnterpriseSearchPlugin implements Plugin {
 
     if (globalSearch) {
       globalSearch.registerResultProvider(getSearchResultProvider(http.basePath, config));
+      globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.basePath));
     }
   }
 

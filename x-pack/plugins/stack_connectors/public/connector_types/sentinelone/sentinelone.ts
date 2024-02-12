@@ -11,15 +11,16 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
 import {
   SENTINELONE_CONNECTOR_ID,
   SENTINELONE_TITLE,
   SUB_ACTION,
 } from '../../../common/sentinelone/constants';
 import type {
+  SentinelOneActionParams,
   SentinelOneConfig,
   SentinelOneSecrets,
-  SentinelOneActionParams,
 } from '../../../common/sentinelone/types';
 
 interface ValidationErrors {
@@ -31,10 +32,16 @@ export function getConnectorType(): ConnectorTypeModel<
   SentinelOneSecrets,
   SentinelOneActionParams
 > {
+  const isSentinelOneBetaBadgeEnabled = getIsExperimentalFeatureEnabled(
+    'sentinelOneConnectorOnBeta'
+  );
+
   return {
     id: SENTINELONE_CONNECTOR_ID,
     actionTypeTitle: SENTINELONE_TITLE,
     iconClass: lazy(() => import('./logo')),
+    isBeta: isSentinelOneBetaBadgeEnabled ? true : undefined,
+    isExperimental: isSentinelOneBetaBadgeEnabled ? undefined : true,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.sentinelone.config.selectMessageText',
       {
@@ -53,12 +60,14 @@ export function getConnectorType(): ConnectorTypeModel<
       // The internal "subAction" param should always be valid, ensure it is only if "subActionParams" are valid
       if (!subAction) {
         errors.subAction.push(translations.ACTION_REQUIRED);
-      } else if (!(subAction in SUB_ACTION)) {
+      } else if (!Object.values(SUB_ACTION).includes(subAction)) {
         errors.subAction.push(translations.INVALID_ACTION);
       }
       return { errors };
     },
     actionConnectorFields: lazy(() => import('./sentinelone_connector')),
-    actionParamsFields: lazy(() => import('./sentinelone_params')),
+    actionParamsFields: lazy(() => import('./sentinelone_params_empty')),
+    // TODO: Enable once we add support for automated response actions
+    // actionParamsFields: lazy(() => import('./sentinelone_params')),
   };
 }

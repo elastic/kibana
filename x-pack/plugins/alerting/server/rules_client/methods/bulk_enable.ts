@@ -11,7 +11,8 @@ import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule } from '../../types';
+import { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
+import { RawRule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -19,11 +20,11 @@ import {
   buildKueryNodeFilter,
   getAndValidateCommonBulkOptions,
 } from '../common';
+import { getRuleCircuitBreakerErrorMessage } from '../../../common';
 import {
   getAuthorizationFilter,
   checkAuthorizationAndGetTotal,
   getAlertFromRaw,
-  scheduleTask,
   updateMeta,
   createNewAPIKeySet,
   migrateLegacyActions,
@@ -31,6 +32,7 @@ import {
 import { RulesClientContext, BulkOperationError, BulkOptions } from '../types';
 import { validateScheduleLimit } from '../../application/rule/methods/get_schedule_frequency';
 import { RuleAttributes } from '../../data/rule/types';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 const getShouldScheduleTask = async (
   context: RulesClientContext,
@@ -117,7 +119,7 @@ const bulkEnableRulesWithOCC = async (
       await context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>(
         {
           filter: filter ? nodeBuilder.and([filter, additionalFilter]) : additionalFilter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
@@ -126,6 +128,7 @@ const bulkEnableRulesWithOCC = async (
 
   const rulesFinderRules: Array<SavedObjectsFindResult<RawRule>> = [];
   const rulesToEnable: Array<SavedObjectsBulkUpdateObject<RawRule>> = [];
+  const tasksToSchedule: TaskInstanceWithDeprecatedFields[] = [];
   const errors: BulkOperationError[] = [];
   const ruleNameToRuleIdMapping: Record<string, string> = {};
   const username = await context.getUserName();
@@ -143,13 +146,18 @@ const bulkEnableRulesWithOCC = async (
         .filter((rule) => !rule.attributes.enabled)
         .map((rule) => rule.attributes.schedule?.interval);
 
-      try {
-        await validateScheduleLimit({
-          context,
-          updatedInterval,
+      const validationPayload = await validateScheduleLimit({
+        context,
+        updatedInterval,
+      });
+
+      if (validationPayload) {
+        scheduleValidationError = getRuleCircuitBreakerErrorMessage({
+          interval: validationPayload.interval,
+          intervalAvailable: validationPayload.intervalAvailable,
+          action: 'bulkEnable',
+          rules: updatedInterval.length,
         });
-      } catch (error) {
-        scheduleValidationError = `Error validating enable rule data - ${error.message}`;
       }
 
       await pMap(rulesFinderRules, async (rule) => {
@@ -201,6 +209,7 @@ const bulkEnableRulesWithOCC = async (
               error: null,
               warning: null,
             },
+            scheduledTaskId: rule.id,
           });
 
           const shouldScheduleTask = await getShouldScheduleTask(
@@ -208,24 +217,29 @@ const bulkEnableRulesWithOCC = async (
             rule.attributes.scheduledTaskId
           );
 
-          let scheduledTaskId;
           if (shouldScheduleTask) {
-            const scheduledTask = await scheduleTask(context, {
+            tasksToSchedule.push({
               id: rule.id,
-              consumer: rule.attributes.consumer,
-              ruleTypeId: rule.attributes.alertTypeId,
-              schedule: rule.attributes.schedule as IntervalSchedule,
-              throwOnConflict: false,
+              taskType: `alerting:${rule.attributes.alertTypeId}`,
+              schedule: rule.attributes.schedule,
+              params: {
+                alertId: rule.id,
+                spaceId: context.spaceId,
+                consumer: rule.attributes.consumer,
+              },
+              state: {
+                previousStartedAt: null,
+                alertTypeState: {},
+                alertInstances: {},
+              },
+              scope: ['alerting'],
+              enabled: false, // we create the task as disabled, taskManager.bulkEnable will enable them by randomising their schedule datetime
             });
-            scheduledTaskId = scheduledTask.id;
           }
 
           rulesToEnable.push({
             ...rule,
-            attributes: {
-              ...updatedAttributes,
-              ...(scheduledTaskId ? { scheduledTaskId } : undefined),
-            },
+            attributes: updatedAttributes,
             ...(migratedActions.hasLegacyActions
               ? { references: migratedActions.resultedReferences }
               : {}),
@@ -235,7 +249,7 @@ const bulkEnableRulesWithOCC = async (
             ruleAuditEvent({
               action: RuleAuditAction.ENABLE,
               outcome: 'unknown',
-              savedObject: { type: 'alert', id: rule.id },
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
             })
           );
         } catch (error) {
@@ -256,6 +270,12 @@ const bulkEnableRulesWithOCC = async (
       });
     }
   );
+
+  if (tasksToSchedule.length > 0) {
+    await withSpan({ name: 'taskManager.bulkSchedule', type: 'tasks' }, () =>
+      context.taskManager.bulkSchedule(tasksToSchedule)
+    );
+  }
 
   const result = await withSpan(
     { name: 'unsecuredSavedObjectsClient.bulkCreate', type: 'rules' },

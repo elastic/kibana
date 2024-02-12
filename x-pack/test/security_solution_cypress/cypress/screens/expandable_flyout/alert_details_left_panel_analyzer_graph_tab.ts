@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/tabs/test_ids';
-import { ANALYZER_GRAPH_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/left/components/test_ids';
+import { VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/tabs/test_ids';
+import { ANALYZER_GRAPH_TEST_ID } from '@kbn/security-solution-plugin/public/flyout/document_details/left/components/test_ids';
 import { getDataTestSubjectSelector } from '../../helpers/common';
 
 export const DOCUMENT_DETAILS_FLYOUT_VISUALIZE_TAB_GRAPH_ANALYZER_BUTTON =

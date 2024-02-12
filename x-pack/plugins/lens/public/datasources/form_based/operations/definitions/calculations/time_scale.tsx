@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { NORMALIZE_BY_UNIT_ID, NORMALIZE_BY_UNIT_NAME } from '@kbn/lens-formula-docs';
 import type {
   FormattedIndexPatternColumn,
   ReferenceBasedIndexPatternColumn,
@@ -15,19 +16,9 @@ import type { OperationDefinition } from '..';
 import { combineErrorMessages, getFormatFromPreviousColumn } from '../helpers';
 import { FormBasedLayer } from '../../../types';
 
-type OverallMetricIndexPatternColumn<T extends string> = FormattedIndexPatternColumn &
-  ReferenceBasedIndexPatternColumn & {
-    operationType: T;
-  };
-
-export type OverallSumIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_sum'>;
-export type OverallMinIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_min'>;
-export type OverallMaxIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_max'>;
-export type OverallAverageIndexPatternColumn = OverallMetricIndexPatternColumn<'overall_average'>;
-
 export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
   ReferenceBasedIndexPatternColumn & {
-    operationType: 'normalize_by_unit';
+    operationType: typeof NORMALIZE_BY_UNIT_ID;
     params: {
       unit?: string;
     };
@@ -35,11 +26,9 @@ export type TimeScaleIndexPatternColumn = FormattedIndexPatternColumn &
 
 export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn, 'fullReference'> =
   {
-    type: 'normalize_by_unit',
+    type: NORMALIZE_BY_UNIT_ID,
     priority: 1,
-    displayName: i18n.translate('xpack.lens.indexPattern.timeScale', {
-      defaultMessage: 'Normalize by unit',
-    }),
+    displayName: NORMALIZE_BY_UNIT_NAME,
     input: 'fullReference',
     selectionStyle: 'hidden',
     requiredReferences: [
@@ -56,8 +45,8 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
         scale: 'ratio',
       };
     },
-    getDefaultLabel: (column, indexPattern, columns) => {
-      return 'normalize_by_unit';
+    getDefaultLabel: (column, columns, indexPattern) => {
+      return NORMALIZE_BY_UNIT_ID;
     },
     toExpression: (layer, columnId) => {
       const currentColumn = layer.columns[columnId] as unknown as TimeScaleIndexPatternColumn;
@@ -85,9 +74,9 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     buildColumn: ({ referenceIds, previousColumn, layer, indexPattern }, columnParams) => {
       return {
-        label: 'Normalize by unit',
+        label: NORMALIZE_BY_UNIT_NAME,
         dataType: 'number',
-        operationType: 'normalize_by_unit',
+        operationType: NORMALIZE_BY_UNIT_ID,
         isBucketed: false,
         scale: 'ratio',
         references: referenceIds,
@@ -102,13 +91,7 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     getErrorMessage: (layer: FormBasedLayer, columnId: string) => {
       return combineErrorMessages([
-        getErrorsForDateReference(
-          layer,
-          columnId,
-          i18n.translate('xpack.lens.indexPattern.timeScale', {
-            defaultMessage: 'Normalize by unit',
-          })
-        ),
+        getErrorsForDateReference(layer, columnId, NORMALIZE_BY_UNIT_NAME),
         !(layer.columns[columnId] as TimeScaleIndexPatternColumn).params.unit
           ? [
               i18n.translate('xpack.lens.indexPattern.timeScale.missingUnit', {
@@ -129,21 +112,4 @@ export const timeScaleOperation: OperationDefinition<TimeScaleIndexPatternColumn
     },
     filterable: false,
     shiftable: false,
-    documentation: {
-      section: 'calculation',
-      signature: i18n.translate('xpack.lens.indexPattern.time_scale', {
-        defaultMessage: 'metric: number, unit: s|m|h|d|w|M|y',
-      }),
-      description: i18n.translate('xpack.lens.indexPattern.time_scale.documentation.markdown', {
-        defaultMessage: `
-
-This advanced function is useful for normalizing counts and sums to a specific time interval. It allows for integration with metrics that are stored already normalized to a specific time interval.
-
-This function can only be used if there's a date histogram function used in the current chart.
-
-Example: A ratio comparing an already normalized metric to another metric that needs to be normalized.
-\`normalize_by_unit(counter_rate(max(system.diskio.write.bytes)), unit='s') / last_value(apache.status.bytes_per_second)\`
-      `,
-      }),
-    },
   };

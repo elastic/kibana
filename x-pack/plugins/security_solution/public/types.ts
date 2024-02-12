@@ -25,7 +25,7 @@ import type {
   TriggersAndActionsUIPublicPluginSetup as TriggersActionsSetup,
   TriggersAndActionsUIPublicPluginStart as TriggersActionsStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { CasesUiStart, CasesUiSetup } from '@kbn/cases-plugin/public';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
@@ -81,8 +81,9 @@ import type { BreadcrumbsNav } from './common/breadcrumbs/types';
 import type { TopValuesPopoverService } from './app/components/top_values_popover/top_values_popover_service';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { DeepLinksFormatter } from './common/links/deep_links';
-import type { DataQualityPanelConfig } from './overview/types';
-import type { SetComponents, GetComponent$ } from './contract_components';
+import type { SetComponents, GetComponents$ } from './contract_components';
+import type { ConfigSettings } from '../common/config_settings';
+import type { OnboardingPageService } from './app/components/onboarding/onboarding_page_service';
 
 export interface SetupPlugins {
   cloud?: CloudSetup;
@@ -92,6 +93,7 @@ export interface SetupPlugins {
   triggersActionsUi: TriggersActionsSetup;
   usageCollection?: UsageCollectionSetup;
   ml?: MlPluginSetup;
+  cases?: CasesUiSetup;
 }
 
 /**
@@ -111,7 +113,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
@@ -147,15 +149,15 @@ export interface StartPluginsDependencies extends StartPlugins {
 
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
-  isSidebarEnabled$: Observable<boolean>;
-  getComponent$: GetComponent$;
+  getComponents$: GetComponents$;
   upselling: UpsellingService;
-  dataQualityPanelConfig: DataQualityPanelConfig | undefined;
+  onboarding: OnboardingPageService;
 }
 
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
     apm: ApmBase;
@@ -181,25 +183,21 @@ export interface PluginSetup {
   experimentalFeatures: ExperimentalFeatures;
   setAppLinksSwitcher: (appLinksSwitcher: AppLinksSwitcher) => void;
   setDeepLinksFormatter: (deepLinksFormatter: DeepLinksFormatter) => void;
-  setDataQualityPanelConfig: (dataQualityPanelConfig: DataQualityPanelConfig) => void;
 }
 
 export interface PluginStart {
   getNavLinks$: () => Observable<NavigationLink[]>;
   setExtraRoutes: (extraRoutes: RouteProps[]) => void;
-  setIsSidebarEnabled: (isSidebarEnabled: boolean) => void;
   setComponents: SetComponents;
   getBreadcrumbsNav$: () => Observable<BreadcrumbsNav>;
   getUpselling: () => UpsellingService;
-}
-
-export interface AppObservableLibs {
-  kibana: CoreStart;
+  setOnboardingPageSettings: OnboardingPageService;
 }
 
 export type InspectResponse = Inspect & { response: string[] };
 
 export const CASES_SUB_PLUGIN_KEY = 'cases';
+
 export interface SubPlugins {
   [CASES_SUB_PLUGIN_KEY]: Cases;
   alerts: Detections;

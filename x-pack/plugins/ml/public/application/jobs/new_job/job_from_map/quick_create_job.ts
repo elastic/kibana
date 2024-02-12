@@ -162,7 +162,7 @@ export class QuickGeoJobCreator extends QuickJobCreatorBase {
     }
   }
 
-  async createGeoJob({
+  private async createGeoJob({
     dataViewId,
     sourceDataView,
     from,

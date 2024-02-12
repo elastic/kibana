@@ -15,6 +15,8 @@ import type { FieldRowProps } from '@kbn/management-settings-components-field-ro
 import { css } from '@emotion/react';
 import { ClearQueryLink, ClearQueryLinkProps } from './clear_query_link';
 
+export const DATA_TEST_SUBJ_SETTINGS_CATEGORY = 'settingsCategory';
+
 /**
  * Props for a {@link FieldCategory} component.
  */
@@ -53,7 +55,9 @@ export const FieldCategory = (props: FieldCategoryProps) => {
         <EuiFlexGroup alignItems="baseline">
           <EuiFlexItem grow={false}>
             <EuiTitle>
-              <h2>{getCategoryName(category)}</h2>
+              <h2 data-test-subj={`${DATA_TEST_SUBJ_SETTINGS_CATEGORY}-${category}`}>
+                {getCategoryName(category)}
+              </h2>
             </EuiTitle>
           </EuiFlexItem>
           <EuiFlexItem>

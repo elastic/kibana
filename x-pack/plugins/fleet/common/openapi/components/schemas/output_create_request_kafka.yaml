@@ -7,6 +7,8 @@ properties:
     type: boolean
   is_default_monitoring:
     type: boolean
+  is_internal:
+    type: boolean
   name:
     type: string
   type:
@@ -122,6 +124,17 @@ properties:
     type: number
   required_acks:
     type: number
+  secrets:
+    type: object
+    properties:
+      password:
+        type: string
+      ssl:
+        type: object
+        properties:
+          key:
+            type: string
+
 required:
   - name
   - type

@@ -21,6 +21,7 @@ const mockedResponse: StatusResponse = {
     build_number: 12,
     build_snapshot: false,
     build_date: '2023-05-15T23:12:09.000Z',
+    build_flavor: 'traditional',
   },
   status: {
     overall: {
@@ -76,6 +77,8 @@ const mockedResponse: StatusResponse = {
           total_in_bytes: 0,
         },
         resident_set_size_in_bytes: 1,
+        array_buffers_in_bytes: 1,
+        external_in_bytes: 1,
       },
       event_loop_delay: 1,
       event_loop_delay_histogram: mocked.createHistogram(),
@@ -96,6 +99,8 @@ const mockedResponse: StatusResponse = {
             total_in_bytes: 0,
           },
           resident_set_size_in_bytes: 1,
+          array_buffers_in_bytes: 1,
+          external_in_bytes: 1,
         },
         event_loop_delay: 1,
         event_loop_delay_histogram: mocked.createHistogram(),

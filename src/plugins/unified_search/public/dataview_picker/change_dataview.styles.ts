@@ -6,15 +6,24 @@
  * Side Public License, v 1.
  */
 
-export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 280;
+import { calculateWidthFromEntries } from '@kbn/calculate-width-from-char-count';
+import { DataViewListItemEnhanced } from './dataview_list';
 
-export const changeDataViewStyles = ({ fullWidth }: { fullWidth?: boolean }) => {
+const MIN_WIDTH = 300;
+
+export const changeDataViewStyles = ({
+  fullWidth,
+  dataViewsList,
+}: {
+  fullWidth?: boolean;
+  dataViewsList: DataViewListItemEnhanced[];
+}) => {
   return {
     trigger: {
-      maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
+      maxWidth: fullWidth ? undefined : MIN_WIDTH,
     },
     popoverContent: {
-      width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+      width: calculateWidthFromEntries(dataViewsList, ['name', 'id'], { minWidth: MIN_WIDTH }),
     },
   };
 };

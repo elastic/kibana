@@ -8,8 +8,10 @@
 import moment from 'moment';
 import Boom from '@hapi/boom';
 import { SavedObjectsUtils } from '@kbn/core/server';
+import { buildEsQuery, Filter } from '@kbn/es-query';
 import { generateMaintenanceWindowEvents } from '../../lib/generate_maintenance_window_events';
 import type { MaintenanceWindowClientContext } from '../../../../../common';
+import { getScopedQueryErrorMessage } from '../../../../../common';
 import type { MaintenanceWindow } from '../../types';
 import type { CreateMaintenanceWindowParams } from './types';
 import {
@@ -25,12 +27,43 @@ export async function createMaintenanceWindow(
 ): Promise<MaintenanceWindow> {
   const { data } = params;
   const { savedObjectsClient, getModificationMetadata, logger } = context;
-  const { title, duration, rRule, categoryIds } = data;
+  const { title, duration, rRule, categoryIds, scopedQuery } = data;
 
   try {
     createMaintenanceWindowParamsSchema.validate(params);
   } catch (error) {
     throw Boom.badRequest(`Error validating create maintenance window data - ${error.message}`);
+  }
+
+  let scopedQueryWithGeneratedValue = scopedQuery;
+  try {
+    if (scopedQuery) {
+      const dsl = JSON.stringify(
+        buildEsQuery(
+          undefined,
+          [{ query: scopedQuery.kql, language: 'kuery' }],
+          scopedQuery.filters as Filter[]
+        )
+      );
+      scopedQueryWithGeneratedValue = {
+        ...scopedQuery,
+        dsl,
+      };
+    }
+  } catch (error) {
+    throw Boom.badRequest(
+      `Error validating create maintenance window data - ${getScopedQueryErrorMessage(
+        error.message
+      )}`
+    );
+  }
+
+  if (scopedQueryWithGeneratedValue) {
+    if (data.categoryIds?.length !== 1) {
+      throw Boom.badRequest(
+        `Error validating create maintenance window data - scoped query must be accompanied by 1 category ID`
+      );
+    }
   }
 
   const id = SavedObjectsUtils.generateId();
@@ -43,6 +76,7 @@ export async function createMaintenanceWindow(
     enabled: true,
     expirationDate,
     categoryIds,
+    scopedQuery: scopedQueryWithGeneratedValue,
     rRule: rRule as MaintenanceWindow['rRule'],
     duration,
     events,

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { Comparator, InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import { SnapshotMetricType } from '../../../../../common/inventory_models/types';
 import { createConditionScript } from './create_condition_script';
 
 const EMPTY_SHOULD_WARN = {

@@ -1,0 +1,147 @@
+{
+  "id": "@kbn/calculate-width-from-char-count",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/calculate-width-from-char-count",
+        "id": "def-common.calculateWidthFromCharCount",
+        "type": "Function",
+        "tags": [],
+        "label": "calculateWidthFromCharCount",
+        "description": [],
+        "signature": [
+          "(labelLength: number, overridesPanelWidths: Partial<",
+          "LIMITS",
+          "> | undefined) => number"
+        ],
+        "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/calculate-width-from-char-count",
+            "id": "def-common.calculateWidthFromCharCount.$1",
+            "type": "number",
+            "tags": [],
+            "label": "labelLength",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/calculate-width-from-char-count",
+            "id": "def-common.calculateWidthFromCharCount.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "overridesPanelWidths",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "LIMITS",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_char_count.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/calculate-width-from-char-count",
+        "id": "def-common.calculateWidthFromEntries",
+        "type": "Function",
+        "tags": [],
+        "label": "calculateWidthFromEntries",
+        "description": [],
+        "signature": [
+          "(entries: string[] | Record<string, any>[], labelKeys: string[] | undefined, overridesPanelWidths: Partial<",
+          "LIMITS",
+          "> | undefined) => number"
+        ],
+        "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/calculate-width-from-char-count",
+            "id": "def-common.calculateWidthFromEntries.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "entries",
+            "description": [],
+            "signature": [
+              "string[] | Record<string, any>[]"
+            ],
+            "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/calculate-width-from-char-count",
+            "id": "def-common.calculateWidthFromEntries.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "labelKeys",
+            "description": [],
+            "signature": [
+              "string[] | undefined"
+            ],
+            "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/calculate-width-from-char-count",
+            "id": "def-common.calculateWidthFromEntries.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "overridesPanelWidths",
+            "description": [],
+            "signature": [
+              "Partial<",
+              "LIMITS",
+              "> | undefined"
+            ],
+            "path": "packages/kbn-calculate-width-from-char-count/src/calculate_width_from_entries.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

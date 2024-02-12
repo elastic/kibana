@@ -110,7 +110,7 @@ const esqlLanguagePlugin = () => {
 
 export function MessageText({ loading, content, onActionClick }: Props) {
   const containerClassName = css`
-    overflow-wrap: break-word;
+    overflow-wrap: anywhere;
   `;
 
   const onActionClickRef = useRef(onActionClick);

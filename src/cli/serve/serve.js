@@ -18,6 +18,8 @@ import { getConfigFromFiles } from '@kbn/config';
 
 const DEV_MODE_PATH = '@kbn/cli-dev-mode';
 const DEV_MODE_SUPPORTED = canRequire(DEV_MODE_PATH);
+const MOCK_IDP_PLUGIN_PATH = '@kbn/mock-idp-plugin/common';
+const MOCK_IDP_PLUGIN_SUPPORTED = canRequire(MOCK_IDP_PLUGIN_PATH);
 
 function canRequire(path) {
   try {
@@ -109,6 +111,35 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions) {
   if (opts.dev) {
     if (opts.serverless) {
       setServerlessKibanaDevServiceAccountIfPossible(get, set, opts);
+
+      // Configure realm if supported (ES only supports SAML when run with SSL)
+      if (opts.ssl && MOCK_IDP_PLUGIN_SUPPORTED) {
+        // Ensure the plugin is loaded in dynamically to exclude from production build
+        // eslint-disable-next-line import/no-dynamic-require
+        const { MOCK_IDP_REALM_NAME } = require(MOCK_IDP_PLUGIN_PATH);
+
+        if (has('server.basePath')) {
+          console.log(
+            `Custom base path is not supported when running in Serverless, it will be removed.`
+          );
+          _.unset(rawConfig, 'server.basePath');
+        }
+
+        set(`xpack.security.authc.providers.saml.${MOCK_IDP_REALM_NAME}`, {
+          order: Number.MAX_SAFE_INTEGER,
+          realm: MOCK_IDP_REALM_NAME,
+          icon: 'user',
+          description: 'Continue as Test User',
+          hint: 'Allows testing serverless user roles',
+        });
+        // Add basic realm since defaults won't be applied when a provider has been configured
+        if (!has('xpack.security.authc.providers.basic')) {
+          set('xpack.security.authc.providers.basic.basic', {
+            order: 0,
+            enabled: true,
+          });
+        }
+      }
     }
 
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
@@ -274,7 +305,9 @@ export default function (program) {
       // We can tell users they only have to run with `yarn start --run-examples` to get those
       // local links to work.  Similar to what we do for "View in Console" links in our
       // elastic.co links.
-      basePath: opts.runExamples ? false : !!opts.basePath,
+      // We also want to run without base path when running in serverless mode so that Elasticsearch can
+      // connect to Kibana's mock identity provider.
+      basePath: opts.runExamples || isServerlessMode ? false : !!opts.basePath,
       optimize: !!opts.optimize,
       disableOptimizer: !opts.optimizer,
       oss: !!opts.oss,

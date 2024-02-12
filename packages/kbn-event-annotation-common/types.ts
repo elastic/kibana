@@ -8,7 +8,7 @@
 
 import { $Values } from 'utility-types';
 import { DataViewSpec, KibanaQueryOutput } from '@kbn/data-plugin/common';
-import { UserContentCommonSchema } from '@kbn/content-management-table-list-view-table';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 import type { LineStyle } from '@kbn/visualization-ui-components';
 import { AvailableAnnotationIcons } from '.';
 

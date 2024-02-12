@@ -31,21 +31,22 @@ import {
 import { QUERY_TAB_BUTTON, TIMELINE_DATA_PROVIDERS_CONTAINER } from '../../../screens/timeline';
 import { waitForAlerts } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 import { investigateDashboardItemInTimeline } from '../../../tasks/dashboards/common';
 import { waitToNavigateAwayFrom } from '../../../tasks/kibana_navigation';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
-import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
+import { kqlSearch } from '../../../tasks/security_header';
 import { createNewTimeline } from '../../../tasks/timeline';
 import { ALERTS_URL, DASHBOARDS_URL, DETECTION_AND_RESPONSE_URL } from '../../../urls/navigation';
 
 const TEST_USER_NAME = 'test';
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 
-describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('Detection response view', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
+    deleteAlertsAndRules();
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     createRule(getNewRule());
   });
 
@@ -61,18 +62,14 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
-
-      clearSearchBar();
     });
 
     it(`finds the host when filtering with KQL search bar query`, () => {
       kqlSearch(`host.name : ${SIEM_KIBANA_HOST_NAME}{enter}`);
 
       cy.get(HOST_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
-      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
-      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
-
-      clearSearchBar();
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 1);
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '1Open');
     });
 
     it(`filters out the users with KQL search bar query`, () => {
@@ -81,18 +78,14 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.length', 0);
       cy.get(ALERTS_DONUT_CHART).first().should('have.text', 'Open');
-
-      clearSearchBar();
     });
 
     it(`finds the user when filtering with KQL search bar query`, () => {
       kqlSearch(`user.name : ${TEST_USER_NAME}{enter}`);
 
       cy.get(USER_TABLE_ROW_TOTAL_ALERTS).should('have.length', 1);
-      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 2);
-      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '2Open');
-
-      clearSearchBar();
+      cy.get(RULE_TABLE_ROW_TOTAL_ALERTS).should('have.text', 1);
+      cy.get(ALERTS_DONUT_CHART).first().should('include.text', '1Open');
     });
   });
 
@@ -237,7 +230,7 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
                 expect(url.pathname.endsWith(ALERTS_URL)).eq(true);
               });
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alert`);
               cy.get(CONTROL_FRAMES).should('have.length', 2);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');
@@ -262,7 +255,7 @@ describe('Detection response view', { tags: ['@ess', '@brokenInServerless'] }, (
               cy.get(USER_TABLE_ROW_SEV(severityVal)).click();
               waitToNavigateAwayFrom(DASHBOARDS_URL);
               waitForAlerts();
-              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alerts`);
+              cy.get(ALERTS_COUNT).should('be.visible').should('have.text', `${alertCount} alert`);
               cy.get(CONTROL_FRAMES).should('have.length', 3);
               cy.get(OPTION_LIST_LABELS).eq(0).should('have.text', `Status`);
               cy.get(OPTION_LIST_VALUES(0)).should('have.text', 'open1');

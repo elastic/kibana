@@ -16,9 +16,6 @@ export const defaultSourceConfiguration: InfraSourceConfiguration = {
     type: 'index_name',
     indexName: LOGS_INDEX_PATTERN,
   },
-  fields: {
-    message: ['message', '@message'],
-  },
   inventoryDefaultView: '0',
   metricsExplorerDefaultView: '0',
   logColumns: [

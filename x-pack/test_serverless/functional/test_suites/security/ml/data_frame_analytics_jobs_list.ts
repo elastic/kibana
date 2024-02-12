@@ -13,12 +13,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage']);
   const dfaJobId = 'iph_outlier_permission';
 
-  describe('Data frame analytics jobs list', () => {
+  describe('Data frame analytics jobs list', function () {
+    // Error: Failed to delete all indices with pattern [.ml-*]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.login();
 
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ihp_outlier');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ihp_outlier', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_ihp_outlier', '@timestamp');
 
       await ml.api.createDataFrameAnalyticsJob(
         ml.commonConfig.getDFAIhpOutlierDetectionJobConfig(dfaJobId)

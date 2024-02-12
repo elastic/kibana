@@ -15,6 +15,7 @@ import { useGetActionLicense } from '../../containers/use_get_action_license';
 import { connectorsMock, useGetCasesMockState } from '../../containers/mock';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useGetTags } from '../../containers/use_get_tags';
+import { useGetCategories } from '../../containers/use_get_categories';
 import { useGetCases } from '../../containers/use_get_cases';
 import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get_current_user_profile';
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
@@ -22,6 +23,7 @@ import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
+jest.mock('../../containers/use_get_categories');
 jest.mock('../../containers/use_get_action_license', () => {
   return {
     useGetActionLicense: jest.fn(),
@@ -62,6 +64,10 @@ describe('AllCases', () => {
 
   beforeAll(() => {
     (useGetTags as jest.Mock).mockReturnValue({ data: ['coke', 'pepsi'], refetch: jest.fn() });
+    (useGetCategories as jest.Mock).mockReturnValue({
+      data: ['beverages', 'snacks'],
+      refetch: jest.fn(),
+    });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
     useGetActionLicenseMock.mockReturnValue(defaultActionLicense);
     useGetCasesMock.mockReturnValue(defaultGetCases);

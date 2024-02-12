@@ -24,8 +24,10 @@ export function getMapsVisTypeAlias() {
   });
 
   return {
-    aliasApp: APP_ID,
-    aliasPath: `/${MAP_PATH}`,
+    alias: {
+      app: APP_ID,
+      path: `/${MAP_PATH}`,
+    },
     name: APP_ID,
     title: APP_NAME,
     description: appDescription,
@@ -37,7 +39,7 @@ export function getMapsVisTypeAlias() {
         searchFields: ['title^3'],
         client: getMapClient,
         toListItem(mapItem: MapItem) {
-          const { id, type, updatedAt, attributes } = mapItem;
+          const { id, type, updatedAt, attributes, managed } = mapItem;
           const { title, description } = attributes;
 
           return {
@@ -45,8 +47,11 @@ export function getMapsVisTypeAlias() {
             title,
             description,
             updatedAt,
-            editUrl: getEditPath(id),
-            editApp: APP_ID,
+            managed,
+            editor: {
+              editUrl: getEditPath(id),
+              editApp: APP_ID,
+            },
             icon: APP_ICON,
             stage: 'production' as VisualizationStage,
             savedObjectType: type,

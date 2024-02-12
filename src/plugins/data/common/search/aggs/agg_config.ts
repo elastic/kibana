@@ -144,9 +144,10 @@ export class AggConfig {
       }
 
       if (aggParam.deserialize) {
-        const isTyped = _.isFunction(aggParam.valueType);
+        const valueType = aggParam.getValueType?.(this);
+        const isTyped = _.isFunction(valueType);
 
-        const isType = isTyped && val instanceof aggParam.valueType;
+        const isType = isTyped && val instanceof valueType;
         const isObject = !isTyped && _.isObject(val);
         const isDeserialized = isType || isObject;
 

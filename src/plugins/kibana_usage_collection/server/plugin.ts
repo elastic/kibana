@@ -152,7 +152,19 @@ export class KibanaUsageCollectionPlugin implements Plugin {
         .getAllTypes()
         .map(({ name }) => name);
     };
-    registerSavedObjectsCountUsageCollector(usageCollection, getAllSavedObjectTypes);
+
+    const getSoClientWithHiddenIndices = async () => {
+      const coreStart = await coreStartPromise;
+
+      const allSoTypes = await getAllSavedObjectTypes();
+      return coreStart.savedObjects.createInternalRepository(allSoTypes);
+    };
+
+    registerSavedObjectsCountUsageCollector(
+      usageCollection,
+      getAllSavedObjectTypes,
+      getSoClientWithHiddenIndices
+    );
     registerManagementUsageCollector(usageCollection, getUiSettingsClient);
     registerUiMetricUsageCollector(usageCollection, registerType, getSavedObjectsClient);
     registerApplicationUsageCollector(

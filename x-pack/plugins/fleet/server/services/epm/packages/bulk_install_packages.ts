@@ -19,7 +19,10 @@ import type { BulkInstallResponse, IBulkInstallPackageError } from './install';
 
 interface BulkInstallPackagesParams {
   savedObjectsClient: SavedObjectsClientContract;
-  packagesToInstall: Array<string | { name: string; version: string }>;
+  packagesToInstall: Array<
+    | string
+    | { name: string; version?: string; prerelease?: boolean; skipDataStreamRollover?: boolean }
+  >;
   esClient: ElasticsearchClient;
   force?: boolean;
   spaceId: string;
@@ -41,11 +44,35 @@ export async function bulkInstallPackages({
 
   const packagesResults = await Promise.allSettled(
     packagesToInstall.map(async (pkg) => {
-      if (typeof pkg !== 'string') {
-        return Promise.resolve(pkg);
+      if (typeof pkg === 'string') {
+        return Registry.fetchFindLatestPackageOrThrow(pkg, {
+          prerelease,
+        }).then((pkgRes) => ({
+          name: pkgRes.name,
+          version: pkgRes.version,
+          prerelease: undefined,
+          skipDataStreamRollover: undefined,
+        }));
+      }
+      if (pkg.version !== undefined) {
+        return Promise.resolve(
+          pkg as {
+            name: string;
+            version: string;
+            prerelease?: boolean;
+            skipDataStreamRollover?: boolean;
+          }
+        );
       }
 
-      return Registry.fetchFindLatestPackageOrThrow(pkg, { prerelease });
+      return Registry.fetchFindLatestPackageOrThrow(pkg.name, {
+        prerelease: prerelease || pkg.prerelease,
+      }).then((pkgRes) => ({
+        name: pkgRes.name,
+        version: pkgRes.version,
+        prerelease: pkg.prerelease,
+        skipDataStreamRollover: pkg.skipDataStreamRollover,
+      }));
     })
   );
 
@@ -83,7 +110,7 @@ export async function bulkInstallPackages({
           result: {
             assets: [...installedEs, ...installedKibana],
             status: 'already_installed',
-            installType: installedPackageResult.installType,
+            installType: 'unknown',
           } as InstallResult,
         };
       }
@@ -97,8 +124,9 @@ export async function bulkInstallPackages({
         installSource: 'registry',
         spaceId,
         force,
-        prerelease,
+        prerelease: prerelease || ('prerelease' in pkgKeyProps && pkgKeyProps.prerelease),
         authorizationHeader,
+        skipDataStreamRollover: pkgKeyProps.skipDataStreamRollover,
       });
 
       if (installResult.error) {

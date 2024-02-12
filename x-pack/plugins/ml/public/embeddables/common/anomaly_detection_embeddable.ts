@@ -33,14 +33,7 @@ export abstract class AnomalyDetectionEmbeddable<
     private dataViewsService: DataViewsContract,
     parent?: IContainer
   ) {
-    super(
-      initialInput,
-      {
-        defaultTitle: initialInput.title,
-        defaultDescription: initialInput.description,
-      } as Output,
-      parent
-    );
+    super(initialInput, {} as Output, parent);
 
     this.initializeOutput(initialInput).finally(() => {
       this.setInitializationFinished();

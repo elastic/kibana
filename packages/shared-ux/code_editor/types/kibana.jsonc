@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/code-editor-types",
-  "owner": "@elastic/appex-sharedux"
-}

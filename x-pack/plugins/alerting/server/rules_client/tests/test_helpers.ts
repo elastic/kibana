@@ -7,6 +7,7 @@
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import type { SavedObject } from '@kbn/core-saved-objects-server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
 
 export const savedObjectWith500Error = {
   id: 'id2',
@@ -30,7 +31,7 @@ export const savedObjectWith409Error = {
 
 export const defaultRule = {
   id: 'id1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
     name: 'fakeName',
     consumer: 'fakeConsumer',
@@ -44,8 +45,13 @@ export const defaultRule = {
 
 export const defaultRuleForBulkDelete = {
   id: 'id1',
-  type: 'alert',
+  type: RULE_SAVED_OBJECT_TYPE,
   attributes: {
+    tags: ['ups'],
+    params: { param: 1 },
+    muteAll: false,
+    mutedInstanceIds: [],
+    revision: 1,
     name: 'fakeName',
     consumer: 'fakeConsumer',
     alertTypeId: 'fakeType',
@@ -69,7 +75,7 @@ export const siemRule1 = {
   id: 'siem-id1',
 };
 
-export const siemRuleForBulkDelete1 = {
+export const siemRuleForBulkOps1 = {
   ...defaultRuleForBulkDelete,
   attributes: {
     ...defaultRuleForBulkDelete.attributes,
@@ -80,6 +86,11 @@ export const siemRuleForBulkDelete1 = {
 
 export const siemRule2 = {
   ...siemRule1,
+  id: 'siem-id2',
+};
+
+export const siemRuleForBulkOps2 = {
+  ...siemRuleForBulkOps1,
   id: 'siem-id2',
 };
 
@@ -116,7 +127,7 @@ export const enabledRule3 = {
   },
 };
 
-export const enabledRuleForBulkDelete1 = {
+export const enabledRuleForBulkOps1 = {
   ...defaultRuleForBulkDelete,
   attributes: {
     ...defaultRuleForBulkDelete.attributes,
@@ -126,7 +137,7 @@ export const enabledRuleForBulkDelete1 = {
   },
 };
 
-export const enabledRuleForBulkDelete2 = {
+export const enabledRuleForBulkOps2 = {
   ...defaultRuleForBulkDelete,
   id: 'id2',
   attributes: {
@@ -137,7 +148,7 @@ export const enabledRuleForBulkDelete2 = {
   },
 };
 
-export const enabledRuleForBulkDelete3 = {
+export const enabledRuleForBulkOps3 = {
   ...defaultRuleForBulkDelete,
   id: 'id3',
   attributes: {
@@ -204,6 +215,61 @@ export const disabledRuleWithAction2 = {
   },
 };
 
+export const disabledRuleForBulkDisable1 = {
+  ...defaultRuleForBulkDelete,
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: false,
+    scheduledTaskId: 'id1',
+    apiKey: Buffer.from('123:abc').toString('base64'),
+  },
+};
+
+export const disabledRuleForBulkDisable2 = {
+  ...defaultRuleForBulkDelete,
+  id: 'id2',
+  attributes: {
+    ...defaultRuleForBulkDelete.attributes,
+    enabled: false,
+    scheduledTaskId: 'id2',
+    apiKey: Buffer.from('321:abc').toString('base64'),
+  },
+};
+
+export const disabledRuleForBulkWithAction1 = {
+  ...disabledRuleForBulkDisable1,
+  attributes: {
+    ...disabledRuleForBulkDisable1.attributes,
+    actions: [
+      {
+        group: 'default',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+};
+
+export const disabledRuleForBulkWithAction2 = {
+  ...disabledRuleForBulkDisable2,
+  attributes: {
+    ...disabledRuleForBulkDisable2.attributes,
+    actions: [
+      {
+        group: 'default',
+        actionTypeId: '1',
+        actionRef: '1',
+        params: {
+          foo: true,
+        },
+      },
+    ],
+  },
+};
+
 export const returnedRule1 = {
   actions: [],
   alertTypeId: 'fakeType',
@@ -256,6 +322,11 @@ export const returnedRuleForBulkDelete1 = {
   },
   scheduledTaskId: 'id1',
   snoozeSchedule: [],
+  tags: ['ups'],
+  params: { param: 1 },
+  muteAll: false,
+  mutedInstanceIds: [],
+  revision: 1,
 };
 
 export const returnedRuleForBulkDelete2 = {
@@ -276,6 +347,11 @@ export const returnedRuleForBulkDelete2 = {
   },
   scheduledTaskId: 'id2',
   snoozeSchedule: [],
+  tags: ['ups'],
+  params: { param: 1 },
+  muteAll: false,
+  mutedInstanceIds: [],
+  revision: 1,
 };
 
 export const returnedRuleForBulkDelete3 = {
@@ -297,6 +373,21 @@ export const returnedRuleForBulkDelete3 = {
   },
   scheduledTaskId: 'id3',
   snoozeSchedule: [],
+  tags: ['ups'],
+  params: { param: 1 },
+  muteAll: false,
+  mutedInstanceIds: [],
+  revision: 1,
+};
+
+export const returnedRuleForBulkDisable1 = {
+  ...returnedRuleForBulkDelete1,
+  enabled: false,
+};
+
+export const returnedRuleForBulkDisable2 = {
+  ...returnedRuleForBulkDelete2,
+  enabled: false,
 };
 
 export const returnedDisabledRule1 = {

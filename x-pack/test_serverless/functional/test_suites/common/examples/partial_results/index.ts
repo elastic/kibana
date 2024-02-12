@@ -12,10 +12,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects(['common', 'svlCommonPage']);
 
-  describe('Partial Results Example', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/167643
+  describe.skip('Partial Results Example', function () {
     before(async () => {
-      // TODO: Serverless tests require login first
-      await PageObjects.svlCommonPage.login();
+      await PageObjects.svlCommonPage.loginAsAdmin();
       await PageObjects.common.navigateToApp('partialResultsExample');
 
       const element = await testSubjects.find('example-help');

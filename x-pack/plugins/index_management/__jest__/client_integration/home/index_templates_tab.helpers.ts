@@ -34,7 +34,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     const actions = ['edit', 'clone', 'delete'];
     const { component } = testBed;
 
-    return component.find('.euiContextMenuItem').at(actions.indexOf(action));
+    return component.find('button.euiContextMenuItem').at(actions.indexOf(action));
   };
 
   /**
@@ -67,7 +67,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     component.update();
   };
 
-  const clickTemplateAction = (
+  const clickTemplateAction = async (
     templateName: TemplateDeserialized['name'],
     action: 'edit' | 'clone' | 'delete'
   ) => {
@@ -76,8 +76,8 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
 
     clickActionMenu(templateName);
 
-    act(() => {
-      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+    await act(async () => {
+      component.find('button.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
     });
     component.update();
   };
@@ -100,9 +100,9 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     find('closeDetailsButton').simulate('click');
   };
 
-  const toggleViewItem = (view: 'managed' | 'cloudManaged' | 'system') => {
+  const toggleViewItem = (view: 'managed' | 'deprecated' | 'cloudManaged' | 'system') => {
     const { find, component } = testBed;
-    const views = ['managed', 'cloudManaged', 'system'];
+    const views = ['managed', 'deprecated', 'cloudManaged', 'system'];
 
     // First open the pop over
     act(() => {

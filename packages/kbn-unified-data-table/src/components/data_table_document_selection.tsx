@@ -6,14 +6,13 @@
  * Side Public License, v 1.
  */
 import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
-import classNames from 'classnames';
 import {
-  EuiButtonEmpty,
   EuiCheckbox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
   EuiCopy,
   EuiDataGridCellValueElementProps,
+  EuiDataGridToolbarControl,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
@@ -182,26 +181,20 @@ export function DataTableDocumentToolbarBtn({
       isOpen={isSelectionPopoverOpen}
       panelPaddingSize="none"
       button={
-        <EuiButtonEmpty
-          size="xs"
-          color="text"
+        <EuiDataGridToolbarControl
           iconType="documents"
           onClick={toggleSelectionToolbar}
           data-selected-documents={selectedDocs.length}
           data-test-subj="dscGridSelectionBtn"
           isSelected={isFilterActive}
-          className={classNames({
-            // eslint-disable-next-line @typescript-eslint/naming-convention
-            euiDataGrid__controlBtn: true,
-            'euiDataGrid__controlBtn--active': isFilterActive,
-          })}
+          badgeContent={selectedDocs.length}
         >
           <FormattedMessage
-            id="unifiedDataTable.selectedDocumentsNumber"
-            defaultMessage="{nr} documents selected"
-            values={{ nr: selectedDocs.length }}
+            id="unifiedDataTable.selectedRowsButtonLabel"
+            defaultMessage="Selected"
+            description="Selected documents"
           />
-        </EuiButtonEmpty>
+        </EuiDataGridToolbarControl>
       }
     >
       {isSelectionPopoverOpen && <EuiContextMenuPanel items={getMenuItems()} />}

@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ModelDefinitionResponse, GetElserOptions } from '@kbn/ml-trained-models-utils';
+import type {
+  ModelDefinitionResponse,
+  GetModelDownloadConfigOptions,
+} from '@kbn/ml-trained-models-utils';
 import { type TrainedModelsApiService } from './ml_api_service/trained_models';
 
 export class ElasticModels {
@@ -17,7 +20,7 @@ export class ElasticModels {
    * If any of the ML nodes run a different OS rather than Linux, or the CPU architecture isn't x86_64,
    * a portable version of the model is returned.
    */
-  public async getELSER(options?: GetElserOptions): Promise<ModelDefinitionResponse> {
+  public async getELSER(options?: GetModelDownloadConfigOptions): Promise<ModelDefinitionResponse> {
     return await this.trainedModels.getElserConfig(options);
   }
 }

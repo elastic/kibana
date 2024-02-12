@@ -13,11 +13,13 @@ import { useEuiTheme } from '@elastic/eui';
 import type { UseEuiTheme } from '@elastic/eui';
 import type { CoreTheme } from '@kbn/core/public';
 import { toMountPoint } from './to_mount_point';
+import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 
 describe('toMountPoint', () => {
   let euiTheme: UseEuiTheme;
   const i18n = i18nServiceMock.createStartContract();
+  const analytics = analyticsServiceMock.createAnalyticsServiceStart();
 
   const InnerComponent: FC = () => {
     const theme = useEuiTheme();
@@ -39,7 +41,7 @@ describe('toMountPoint', () => {
 
   it('exposes the euiTheme when `theme$` is provided', async () => {
     const theme = { theme$: of<CoreTheme>({ darkMode: true }) };
-    const mount = toMountPoint(<InnerComponent />, { theme, i18n });
+    const mount = toMountPoint(<InnerComponent />, { theme, i18n, analytics });
 
     const targetEl = document.createElement('div');
     mount(targetEl);
@@ -52,7 +54,7 @@ describe('toMountPoint', () => {
   it('propagates changes of the theme$ observable', async () => {
     const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: true });
 
-    const mount = toMountPoint(<InnerComponent />, { theme: { theme$ }, i18n });
+    const mount = toMountPoint(<InnerComponent />, { theme: { theme$ }, i18n, analytics });
 
     const targetEl = document.createElement('div');
     mount(targetEl);

@@ -1,0 +1,369 @@
+{
+  "id": "@kbn/custom-icons",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.AgentIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "AgentIcon",
+        "description": [],
+        "signature": [
+          "({ agentName, size = 'l', ...props }: ",
+          {
+            "pluginId": "@kbn/custom-icons",
+            "scope": "common",
+            "docId": "kibKbnCustomIconsPluginApi",
+            "section": "def-common.AgentIconProps",
+            "text": "AgentIconProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.AgentIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ agentName, size = 'l', ...props }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/custom-icons",
+                "scope": "common",
+                "docId": "kibKbnCustomIconsPluginApi",
+                "section": "def-common.AgentIconProps",
+                "text": "AgentIconProps"
+              }
+            ],
+            "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.CloudProviderIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "CloudProviderIcon",
+        "description": [],
+        "signature": [
+          "({ cloudProvider, ...props }: ",
+          {
+            "pluginId": "@kbn/custom-icons",
+            "scope": "common",
+            "docId": "kibKbnCustomIconsPluginApi",
+            "section": "def-common.CloudProviderIconProps",
+            "text": "CloudProviderIconProps"
+          },
+          ") => JSX.Element"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.CloudProviderIcon.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ cloudProvider, ...props }",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/custom-icons",
+                "scope": "common",
+                "docId": "kibKbnCustomIconsPluginApi",
+                "section": "def-common.CloudProviderIconProps",
+                "text": "CloudProviderIconProps"
+              }
+            ],
+            "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.getAgentIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "getAgentIcon",
+        "description": [],
+        "signature": [
+          "(agentName: string | undefined, isDarkMode: boolean) => string"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.getAgentIcon.$1",
+            "type": "string",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.getAgentIcon.$2",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDarkMode",
+            "description": [],
+            "signature": [
+              "boolean"
+            ],
+            "path": "packages/kbn-custom-icons/src/components/agent_icon/get_agent_icon.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.getCloudProviderIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "getCloudProviderIcon",
+        "description": [],
+        "signature": [
+          "(cloudProvider: ",
+          {
+            "pluginId": "@kbn/custom-icons",
+            "scope": "common",
+            "docId": "kibKbnCustomIconsPluginApi",
+            "section": "def-common.CloudProvider",
+            "text": "CloudProvider"
+          },
+          ") => \"cloudSunny\" | \"logoAWS\" | \"logoAzure\" | \"logoGCP\""
+        ],
+        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.getCloudProviderIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloudProvider",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/custom-icons",
+                "scope": "common",
+                "docId": "kibKbnCustomIconsPluginApi",
+                "section": "def-common.CloudProvider",
+                "text": "CloudProvider"
+              }
+            ],
+            "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.getServerlessIcon",
+        "type": "Function",
+        "tags": [],
+        "label": "getServerlessIcon",
+        "description": [],
+        "signature": [
+          "(serverlessType: ",
+          {
+            "pluginId": "@kbn/elastic-agent-utils",
+            "scope": "common",
+            "docId": "kibKbnElasticAgentUtilsPluginApi",
+            "section": "def-common.ServerlessType",
+            "text": "ServerlessType"
+          },
+          " | undefined) => string"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/agent_icon/get_serverless_icon.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.getServerlessIcon.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "serverlessType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/elastic-agent-utils",
+                "scope": "common",
+                "docId": "kibKbnElasticAgentUtilsPluginApi",
+                "section": "def-common.ServerlessType",
+                "text": "ServerlessType"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-custom-icons/src/components/agent_icon/get_serverless_icon.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.AgentIconProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "AgentIconProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/custom-icons",
+            "scope": "common",
+            "docId": "kibKbnCustomIconsPluginApi",
+            "section": "def-common.AgentIconProps",
+            "text": "AgentIconProps"
+          },
+          " extends Omit<",
+          "EuiIconProps",
+          ", \"type\">"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.AgentIconProps.agentName",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "agentName",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/elastic-agent-utils",
+                "scope": "common",
+                "docId": "kibKbnElasticAgentUtilsPluginApi",
+                "section": "def-common.AgentName",
+                "text": "AgentName"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-custom-icons/src/components/agent_icon/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.CloudProviderIconProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "CloudProviderIconProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/custom-icons",
+            "scope": "common",
+            "docId": "kibKbnCustomIconsPluginApi",
+            "section": "def-common.CloudProviderIconProps",
+            "text": "CloudProviderIconProps"
+          },
+          " extends Omit<",
+          "EuiIconProps",
+          ", \"type\">"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/custom-icons",
+            "id": "def-common.CloudProviderIconProps.cloudProvider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "cloudProvider",
+            "description": [],
+            "signature": [
+              "\"aws\" | \"azure\" | \"gcp\" | \"unknownProvider\" | null | undefined"
+            ],
+            "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/custom-icons",
+        "id": "def-common.CloudProvider",
+        "type": "Type",
+        "tags": [],
+        "label": "CloudProvider",
+        "description": [],
+        "signature": [
+          "\"aws\" | \"azure\" | \"gcp\" | \"unknownProvider\" | null | undefined"
+        ],
+        "path": "packages/kbn-custom-icons/src/components/cloud_provider_icon/get_cloud_provider_icon.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

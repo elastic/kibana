@@ -24,14 +24,15 @@ import { ExpandableContent } from '../../../components/expandable_content';
 import { MetadataHeader } from './metadata_header';
 import { MetadataExplanationMessage } from '../../../components/metadata_explanation';
 import { MetadataSectionTitle } from '../../../components/section_titles';
+import { CollapsibleSection } from '../section/collapsible_section';
 
 interface MetadataSummaryProps {
   metadata: InfraMetadata | null;
-  metadataLoading: boolean;
+  loading: boolean;
 }
 interface MetadataSummaryWrapperProps {
   visibleMetadata: MetadataData[];
-  metadataLoading: boolean;
+  loading: boolean;
 }
 
 export interface MetadataData {
@@ -70,7 +71,7 @@ const metadataData = (metadataInfo: InfraMetadata['info']): MetadataData[] => [
 ];
 
 const MetadataSummaryListWrapper = ({
-  metadataLoading,
+  loading: metadataLoading,
   visibleMetadata,
 }: MetadataSummaryWrapperProps) => {
   const { showTab } = useTabSwitcherContext();
@@ -80,12 +81,13 @@ const MetadataSummaryListWrapper = ({
   };
 
   return (
-    <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap justifyContent="spaceBetween">
-        <EuiFlexGroup alignItems="flexStart">
-          <MetadataSectionTitle />
-        </EuiFlexGroup>
-        <EuiFlexItem grow={false} key="metadata-link">
+    <EuiFlexGroup gutterSize="s" justifyContent="spaceBetween" direction="column" wrap>
+      <CollapsibleSection
+        title={MetadataSectionTitle}
+        collapsible
+        data-test-subj="infraAssetDetailsMetadataCollapsible"
+        id="metadata"
+        extraAction={
           <EuiButtonEmpty
             data-test-subj="infraAssetDetailsMetadataShowAllButton"
             onClick={onClick}
@@ -93,48 +95,48 @@ const MetadataSummaryListWrapper = ({
             flush="both"
             iconSide="right"
             iconType="sortRight"
+            key="metadata-link"
           >
             <FormattedMessage
               id="xpack.infra.assetDetailsEmbeddable.metadataSummary.showAllMetadataButton"
               defaultMessage="Show all"
             />
           </EuiButtonEmpty>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <MetadataExplanationMessage />
-      <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems="flexStart">
-        {visibleMetadata.map(
-          (metadataValue) =>
-            metadataValue && (
-              <EuiFlexItem key={metadataValue.field}>
-                <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
-                  <MetadataHeader metadataValue={metadataValue} />
-                  <EuiDescriptionListDescription>
-                    {metadataLoading ? (
-                      <EuiLoadingSpinner />
-                    ) : (
-                      <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
-                    )}
-                  </EuiDescriptionListDescription>
-                </EuiDescriptionList>
-              </EuiFlexItem>
-            )
-        )}
-      </EuiFlexGroup>
-    </>
+        }
+      >
+        <>
+          <MetadataExplanationMessage />
+          <EuiSpacer size="s" />
+          <EuiFlexGroup>
+            {visibleMetadata
+              .filter((metadataValue) => metadataValue)
+              .map((metadataValue) => (
+                <EuiFlexItem key={metadataValue.field} grow={false}>
+                  <EuiDescriptionList data-test-subj="infraMetadataSummaryItem" compressed>
+                    <MetadataHeader metadataValue={metadataValue} />
+                    <EuiDescriptionListDescription>
+                      {metadataLoading && !metadataValue.value ? (
+                        <EuiLoadingSpinner />
+                      ) : (
+                        <ExpandableContent values={metadataValue.value ?? NOT_AVAILABLE_LABEL} />
+                      )}
+                    </EuiDescriptionListDescription>
+                  </EuiDescriptionList>
+                </EuiFlexItem>
+              ))}
+          </EuiFlexGroup>
+        </>
+      </CollapsibleSection>
+    </EuiFlexGroup>
   );
 };
-export const MetadataSummaryList = ({ metadata, metadataLoading }: MetadataSummaryProps) => (
+export const MetadataSummaryList = ({ metadata, loading }: MetadataSummaryProps) => (
   <MetadataSummaryListWrapper
     visibleMetadata={[...metadataData(metadata?.info), ...extendedMetadata(metadata?.info)]}
-    metadataLoading={metadataLoading}
+    loading={loading}
   />
 );
 
-export const MetadataSummaryListCompact = ({ metadata, metadataLoading }: MetadataSummaryProps) => (
-  <MetadataSummaryListWrapper
-    visibleMetadata={metadataData(metadata?.info)}
-    metadataLoading={metadataLoading}
-  />
+export const MetadataSummaryListCompact = ({ metadata, loading }: MetadataSummaryProps) => (
+  <MetadataSummaryListWrapper visibleMetadata={metadataData(metadata?.info)} loading={loading} />
 );

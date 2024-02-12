@@ -6,7 +6,7 @@
  */
 
 import { fold, map } from 'fp-ts/lib/Either';
-import { constant, identity } from 'fp-ts/lib/function';
+import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { failure } from 'io-ts/lib/PathReporter';
 import { inRange } from 'lodash';
@@ -21,13 +21,11 @@ import {
   InfraSource,
   InfraSourceConfiguration,
   InfraStaticSourceConfiguration,
-  SourceConfigurationConfigFileProperties,
-  sourceConfigurationConfigFilePropertiesRT,
 } from '../../../common/source_configuration/source_configuration';
 import { SourceConfigurationSavedObjectRT } from '.';
 import { InfraConfig } from '../..';
 import { defaultSourceConfiguration } from './defaults';
-import { AnomalyThresholdRangeError, NotFoundError } from './errors';
+import { AnomalyThresholdRangeError } from './errors';
 import {
   extractSavedObjectReferences,
   resolveSavedObjectReferences,
@@ -43,7 +41,6 @@ interface Libs {
 export type IInfraSources = Pick<InfraSources, keyof InfraSources>;
 
 export class InfraSources {
-  private internalSourceConfigurations: Map<string, InfraStaticSourceConfiguration> = new Map();
   private readonly libs: Libs;
 
   constructor(libs: Libs) {
@@ -54,29 +51,14 @@ export class InfraSources {
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string
   ): Promise<InfraSource> {
-    const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-    const savedSourceConfiguration = await this.getInternalSourceConfiguration(sourceId)
-      .then((internalSourceConfiguration) => ({
-        id: sourceId,
-        version: undefined,
-        updatedAt: undefined,
-        origin: 'internal' as 'internal',
-        configuration: mergeSourceConfiguration(
-          staticDefaultSourceConfiguration,
-          internalSourceConfiguration
-        ),
+    const savedSourceConfiguration = await this.getSavedSourceConfiguration(
+      savedObjectsClient,
+      sourceId
+    )
+      .then((result) => ({
+        ...result,
+        configuration: mergeSourceConfiguration(defaultSourceConfiguration, result.configuration),
       }))
-      .catch((err) =>
-        err instanceof NotFoundError
-          ? this.getSavedSourceConfiguration(savedObjectsClient, sourceId).then((result) => ({
-              ...result,
-              configuration: mergeSourceConfiguration(
-                staticDefaultSourceConfiguration,
-                result.configuration
-              ),
-            }))
-          : Promise.reject(err)
-      )
       .catch((err) =>
         SavedObjectsErrorHelpers.isNotFoundError(err)
           ? Promise.resolve({
@@ -84,7 +66,7 @@ export class InfraSources {
               version: undefined,
               updatedAt: undefined,
               origin: 'fallback' as 'fallback',
-              configuration: staticDefaultSourceConfiguration,
+              configuration: defaultSourceConfiguration,
             })
           : Promise.reject(err)
       );
@@ -107,36 +89,16 @@ export class InfraSources {
     return sourceConfiguration;
   }
 
-  public async getAllSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
-    const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
-
-    const savedSourceConfigurations = await this.getAllSavedSourceConfigurations(
-      savedObjectsClient
-    );
-
-    return savedSourceConfigurations.map((savedSourceConfiguration) => ({
-      ...savedSourceConfiguration,
-      configuration: mergeSourceConfiguration(
-        staticDefaultSourceConfiguration,
-        savedSourceConfiguration.configuration
-      ),
-    }));
-  }
-
   public async createSourceConfiguration(
     savedObjectsClient: SavedObjectsClientContract,
     sourceId: string,
     source: InfraSavedSourceConfiguration
   ) {
-    const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
     const { anomalyThreshold } = source;
     if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
       throw new AnomalyThresholdRangeError('Anomaly threshold must be 1-100');
 
-    const newSourceConfiguration = mergeSourceConfiguration(
-      staticDefaultSourceConfiguration,
-      source
-    );
+    const newSourceConfiguration = mergeSourceConfiguration(defaultSourceConfiguration, source);
     const { attributes, references } = extractSavedObjectReferences(newSourceConfiguration);
 
     const createdSourceConfiguration = convertSavedObjectToSavedSourceConfiguration(
@@ -154,7 +116,7 @@ export class InfraSources {
     return {
       ...createdSourceConfiguration,
       configuration: mergeSourceConfiguration(
-        staticDefaultSourceConfiguration,
+        defaultSourceConfiguration,
         createdSourceConfiguration.configuration
       ),
     };
@@ -172,7 +134,6 @@ export class InfraSources {
     sourceId: string,
     sourceProperties: InfraSavedSourceConfiguration
   ) {
-    const staticDefaultSourceConfiguration = await this.getStaticDefaultSourceConfiguration();
     const { anomalyThreshold } = sourceProperties;
 
     if (anomalyThreshold && !inRange(anomalyThreshold, 0, 101))
@@ -210,40 +171,10 @@ export class InfraSources {
     return {
       ...updatedSourceConfiguration,
       configuration: mergeSourceConfiguration(
-        staticDefaultSourceConfiguration,
+        defaultSourceConfiguration,
         updatedSourceConfiguration.configuration
       ),
     };
-  }
-
-  public async defineInternalSourceConfiguration(
-    sourceId: string,
-    sourceProperties: InfraStaticSourceConfiguration
-  ) {
-    this.internalSourceConfigurations.set(sourceId, sourceProperties);
-  }
-
-  public async getInternalSourceConfiguration(sourceId: string) {
-    const internalSourceConfiguration = this.internalSourceConfigurations.get(sourceId);
-
-    if (!internalSourceConfiguration) {
-      throw new NotFoundError(
-        `Failed to load internal source configuration: no configuration "${sourceId}" found.`
-      );
-    }
-
-    return internalSourceConfiguration;
-  }
-
-  private async getStaticDefaultSourceConfiguration() {
-    const staticSourceConfiguration: SourceConfigurationConfigFileProperties['sources']['default'] =
-      pipe(
-        sourceConfigurationConfigFilePropertiesRT.decode(this.libs.config),
-        map(({ sources: { default: defaultConfiguration } }) => defaultConfiguration),
-        fold(constant({}), identity)
-      );
-
-    return mergeSourceConfiguration(defaultSourceConfiguration, staticSourceConfiguration);
   }
 
   private async getSavedSourceConfiguration(
@@ -257,14 +188,6 @@ export class InfraSources {
 
     return convertSavedObjectToSavedSourceConfiguration(savedObject);
   }
-
-  private async getAllSavedSourceConfigurations(savedObjectsClient: SavedObjectsClientContract) {
-    const savedObjects = await savedObjectsClient.find({
-      type: infraSourceConfigurationSavedObjectName,
-    });
-
-    return savedObjects.saved_objects.map(convertSavedObjectToSavedSourceConfiguration);
-  }
 }
 
 export const mergeSourceConfiguration = (
@@ -275,10 +198,6 @@ export const mergeSourceConfiguration = (
     (previousSourceConfiguration, currentSourceConfiguration) => ({
       ...previousSourceConfiguration,
       ...currentSourceConfiguration,
-      fields: {
-        ...previousSourceConfiguration.fields,
-        ...currentSourceConfiguration.fields,
-      },
     }),
     first
   );

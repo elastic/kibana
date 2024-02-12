@@ -22,6 +22,7 @@ describe('buildModelVersionTransformFn', () => {
   const createContext = (): SavedObjectModelTransformationContext => ({
     log: loggerMock.create(),
     modelVersion: 42,
+    namespaceType: 'single',
   });
 
   const createDoc = <T = any>(attributes: T = {} as T): SavedObjectModelTransformationDoc<T> => ({

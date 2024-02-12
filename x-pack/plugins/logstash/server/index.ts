@@ -6,6 +6,8 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { LogstashPlugin } from './plugin';
 
-export const plugin = (context: PluginInitializerContext) => new LogstashPlugin(context);
+export const plugin = async (context: PluginInitializerContext) => {
+  const { LogstashPlugin } = await import('./plugin');
+  return new LogstashPlugin(context);
+};

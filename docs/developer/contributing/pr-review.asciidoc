@@ -118,7 +118,7 @@ Inflammatory feedback such as "this is crap" isn't feedback at all. It's both me
 Establishing a comprehensive checklist for all of the things that should happen in all possible pull requests is impractical, but that doesn't mean we lack a concrete set of minimum requirements that we can enumerate. The following items should be double checked for any pull request:
 
 * CLA check passes
-* Jenkins job runs and passes
+* CI job runs and passes
 * Adheres to the spirit of our various styleguides
 * Has thorough unit test coverage
 * Automated tests provide high confidence the change continues to work without manual verification

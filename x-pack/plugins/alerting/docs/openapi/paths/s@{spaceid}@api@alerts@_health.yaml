@@ -26,7 +26,8 @@ get:
                     properties:
                       status:
                         type: string
-                        example: ok
+                        examples:
+                          - ok
                         enum:
                          - error
                          - ok
@@ -34,14 +35,16 @@ get:
                       timestamp:
                         type: string
                         format: date-time
-                        example: "2023-01-13T01:28:00.280Z"
+                        examples:
+                          - "2023-01-13T01:28:00.280Z"
                   executionHealth:
                     type: object
                     description: The timestamp and status of the alert execution.
                     properties:
                       status:
                         type: string
-                        example: ok
+                        examples:
+                          - ok
                         enum:
                          - error
                          - ok
@@ -49,14 +52,16 @@ get:
                       timestamp:
                         type: string
                         format: date-time
-                        example: "2023-01-13T01:28:00.280Z"
+                        examples:
+                          - "2023-01-13T01:28:00.280Z"
                   readHealth:
                     type: object
                     description: The timestamp and status of the alert reading events.
                     properties:
                       status:
                         type: string
-                        example: ok
+                        examples:
+                          - ok
                         enum:
                          - error
                          - ok
@@ -64,20 +69,21 @@ get:
                       timestamp:
                         type: string
                         format: date-time
-                        example: "2023-01-13T01:28:00.280Z"
+                        examples:
+                          - "2023-01-13T01:28:00.280Z"
               hasPermanentEncryptionKey:
                 type: boolean
                 description: If `false`, the encrypted saved object plugin does not have a permanent encryption key.
-                example: true
+                examples:
+                  - true
               isSufficientlySecure:
                 type: boolean
                 description: If `false`, security is enabled but TLS is not.
-                example: true
+                examples:
+                  - true
     '401':
       description: Authorization information is missing or invalid.
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-servers:
-  - url: https://localhost:5601

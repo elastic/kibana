@@ -10,6 +10,7 @@ import {
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,
 } from '@kbn/core/server';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 
 export interface BulkDeleteRulesSoParams {
   savedObjectsClient: SavedObjectsClientContract;
@@ -23,7 +24,7 @@ export const bulkDeleteRulesSo = (
   const { savedObjectsClient, ids, savedObjectsBulkDeleteOptions } = params;
 
   return savedObjectsClient.bulkDelete(
-    ids.map((id) => ({ id, type: 'alert' })),
+    ids.map((id) => ({ id, type: RULE_SAVED_OBJECT_TYPE })),
     savedObjectsBulkDeleteOptions
   );
 };

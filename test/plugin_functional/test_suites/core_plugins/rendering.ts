@@ -102,6 +102,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // Ensure that your change does not unintentionally expose any sensitive values!
         'console.autocompleteDefinitions.endpointsAvailability (alternatives)',
         'console.ui.enabled (boolean)',
+        'console.ui.embeddedEnabled (boolean)',
         'dashboard.allowByValueEmbeddables (boolean)',
         'unifiedSearch.autocomplete.querySuggestions.enabled (boolean)',
         'unifiedSearch.autocomplete.valueSuggestions.enabled (boolean)',
@@ -213,6 +214,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.apm.featureFlags.migrationToFleetAvailable (any)',
         'xpack.apm.featureFlags.sourcemapApiAvailable (any)',
         'xpack.apm.featureFlags.storageExplorerAvailable (any)',
+        'xpack.apm.featureFlags.profilingIntegrationAvailable (boolean)',
         'xpack.apm.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
         'xpack.assetManager.alphaEnabled (boolean)',
         'xpack.observability_onboarding.serverless.enabled (any)', // It's a boolean (any because schema.conditional)
@@ -238,7 +240,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.cloud_integrations.full_story.org_id (any)',
         // No PII. Just the list of event types we want to forward to FullStory.
         'xpack.cloud_integrations.full_story.eventTypesAllowlist (array)',
-        'xpack.cloud_integrations.gain_sight.org_id (any)',
+        'xpack.cloud_integrations.full_story.pageVarsDebounceTime (duration)',
         'xpack.cloud.id (string)',
         'xpack.cloud.organization_url (string)',
         'xpack.cloud.billing_url (string)',
@@ -249,12 +251,12 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         // can't be used to infer urls or customer id from the outside
         'xpack.cloud.serverless.project_id (string)',
         'xpack.cloud.serverless.project_name (string)',
+        'xpack.cloud.serverless.project_type (string)',
         'xpack.discoverEnhanced.actions.exploreDataInChart.enabled (boolean)',
         'xpack.discoverEnhanced.actions.exploreDataInContextMenu.enabled (boolean)',
         'xpack.fleet.agents.enabled (boolean)',
         'xpack.fleet.enableExperimental (array)',
         'xpack.fleet.internal.activeAgentsSoftLimit (number)',
-        'xpack.fleet.internal.disableProxies (boolean)',
         'xpack.fleet.internal.fleetServerStandalone (boolean)',
         'xpack.fleet.internal.onlyAllowAgentUpgradeToKnownVersions (boolean)',
         'xpack.fleet.developer.maxAgentPoliciesWithInactivityTimeout (number)',
@@ -266,27 +268,23 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.index_management.enableIndexActions (any)',
         'xpack.index_management.enableLegacyTemplates (any)',
         'xpack.index_management.enableIndexStats (any)',
+        'xpack.index_management.editableIndexSettings (any)',
+        'xpack.index_management.enableDataStreamsStorageColumn (any)',
         'xpack.infra.sources.default.fields.message (array)',
         /**
-         * xpack.infra.featureFlags.customThresholdAlertsEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
-        'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
-        /**
-         * xpack.infra.featureFlags.logsUIEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
-        'xpack.infra.featureFlags.logsUIEnabled (any)',
-        /**
-         * xpack.infra.featureFlags.metricsExplorerEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
+         * Feature flags bellow are conditional based on traditional/serverless offering
+         * and will all resolve to xpack.infra.featureFlags.* (boolean)
          */
         'xpack.infra.featureFlags.metricsExplorerEnabled (any)',
-        /**
-         * xpack.infra.featureFlags.osqueryEnabled is conditional based on traditional/serverless offering
-         * and will resolve to (boolean)
-         */
+        'xpack.infra.featureFlags.customThresholdAlertsEnabled (any)',
         'xpack.infra.featureFlags.osqueryEnabled (any)',
+        'xpack.infra.featureFlags.inventoryThresholdAlertRuleEnabled (any)',
+        'xpack.infra.featureFlags.metricThresholdAlertRuleEnabled (any)',
+        'xpack.infra.featureFlags.logThresholdAlertRuleEnabled (any)',
+        'xpack.infra.featureFlags.logsUIEnabled (any)',
+        'xpack.infra.featureFlags.alertsAndRulesDropdownEnabled (any)',
+        'xpack.infra.featureFlags.profilingEnabled (boolean)',
+
         'xpack.license_management.ui.enabled (boolean)',
         'xpack.maps.preserveDrawingBuffer (boolean)',
         'xpack.maps.showMapsInspectorAdapter (boolean)',
@@ -316,6 +314,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.spaces.allowFeatureVisibility (any)',
         'xpack.securitySolution.enableExperimental (array)',
         'xpack.securitySolution.prebuiltRulesPackageVersion (string)',
+        'xpack.securitySolution.offeringSettings (record)',
         'xpack.snapshot_restore.slm_ui.enabled (boolean)',
         'xpack.snapshot_restore.ui.enabled (boolean)',
         'xpack.stack_connectors.enableExperimental (array)',
@@ -331,7 +330,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.observability.unsafe.alertDetails.observability.enabled (boolean)',
         'xpack.observability.unsafe.thresholdRule.enabled (any)', // conditional, is actually a boolean
         'xpack.observability_onboarding.ui.enabled (boolean)',
-        'xpack.observabilityLogExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
+        'xpack.observabilityLogsExplorer.navigation.showAppLink (any)', // conditional, is actually a boolean
       ];
       // We don't assert that actualExposedConfigKeys and expectedExposedConfigKeys are equal, because test failure messages with large
       // arrays are hard to grok. Instead, we take the difference between the two arrays and assert them separately, that way it's

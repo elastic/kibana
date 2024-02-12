@@ -20,6 +20,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
 import moment from 'moment';
 import React, { useCallback, useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import { useTimelineChartTheme } from '../../../../utils/use_timeline_chart_theme';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
@@ -164,7 +165,11 @@ export const MetricsExplorerChart = ({
               domain={domain}
             />
             <Tooltip {...tooltipProps} />
-            <Settings onBrushEnd={handleTimeChange} baseTheme={chartTheme.baseTheme} />
+            <Settings
+              onBrushEnd={handleTimeChange}
+              baseTheme={chartTheme.baseTheme}
+              locale={i18n.getLocale()}
+            />
           </Chart>
         ) : options.metrics.length > 0 ? (
           <MetricsExplorerEmptyChart />

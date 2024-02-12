@@ -86,7 +86,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/categorization_small');
-      await ml.testResources.createIndexPatternIfNeeded('ft_categorization_small', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_categorization_small', '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle('ft_categorization_small');
+      await ml.testResources.deleteDataViewByTitle('ft_categorization_small');
     });
 
     it('job creation loads the categorization wizard for the source data', async () => {

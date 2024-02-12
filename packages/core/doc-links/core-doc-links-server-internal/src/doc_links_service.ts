@@ -12,16 +12,16 @@ import type { DocLinksServiceSetup, DocLinksServiceStart } from '@kbn/core-doc-l
 
 /** @internal */
 export class DocLinksService {
-  private readonly kibanaBranch: string;
   private docLinks?: DocLinksServiceSetup;
 
-  constructor(core: CoreContext) {
-    this.kibanaBranch = core.env.packageInfo.branch;
-  }
+  constructor(private readonly coreContext: CoreContext) {}
 
   public setup(): DocLinksServiceSetup {
-    const docMeta = getDocLinksMeta({ kibanaBranch: this.kibanaBranch });
-    const docLinks = getDocLinks({ kibanaBranch: this.kibanaBranch });
+    const kibanaBranch = this.coreContext.env.packageInfo.branch;
+    const buildFlavor = this.coreContext.env.packageInfo.buildFlavor;
+
+    const docMeta = getDocLinksMeta({ kibanaBranch, buildFlavor });
+    const docLinks = getDocLinks({ kibanaBranch, buildFlavor });
     this.docLinks = {
       ...docMeta,
       links: docLinks,

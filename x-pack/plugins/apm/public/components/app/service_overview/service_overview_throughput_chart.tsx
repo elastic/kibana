@@ -16,7 +16,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePreviousPeriodLabel } from '../../../hooks/use_previous_period_text';
 import { isTimeComparison } from '../../shared/time_comparison/get_comparison_options';
-import { ApmMlDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
+import { AnomalyDetectorType } from '../../../../common/anomaly_detection/apm_ml_detectors';
 import { asExactTransactionRate } from '../../../../common/utils/formatters';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useEnvironmentsContext } from '../../../context/environments_context/use_environments_context';
@@ -57,7 +57,7 @@ export function ServiceOverviewThroughputChart({
   const { environment } = useEnvironmentsContext();
 
   const preferredAnomalyTimeseries = usePreferredServiceAnomalyTimeseries(
-    ApmMlDetectorType.txThroughput
+    AnomalyDetectorType.txThroughput
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });

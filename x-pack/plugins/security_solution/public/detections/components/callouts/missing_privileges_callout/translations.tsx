@@ -75,7 +75,7 @@ export const missingPrivilegesCallOutBody = ({
             />
             <ul>
               {indexPrivileges.map(([index, missingPrivileges]) => (
-                <li key={index}>{missingIndexPrivileges(index, missingPrivileges)}</li>
+                <li key={index}>{missingPrivilegesMessage(index, missingPrivileges)}</li>
               ))}
             </ul>
           </>
@@ -140,6 +140,19 @@ const getPrivilegesExplanation = (missingPrivileges: string[], index: string) =>
     .join(' ');
 };
 
+const missingPrivilegesMessage = (index: string, privileges: string[]) => {
+  // .lists and .items are data streams, so we will show it in the message
+  if (
+    [DEFAULT_LISTS_INDEX, DEFAULT_ITEMS_INDEX].some((dataStreamName) =>
+      index.startsWith(dataStreamName)
+    )
+  ) {
+    return missingDataStreamPrivileges(index, privileges);
+  }
+
+  return missingIndexPrivileges(index, privileges);
+};
+
 const missingIndexPrivileges = (index: string, privileges: string[]) => (
   <FormattedMessage
     id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingIndexPrivileges"
@@ -148,6 +161,18 @@ const missingIndexPrivileges = (index: string, privileges: string[]) => (
       privileges: <CommaSeparatedValues values={privileges} />,
       index: <EuiCode>{index}</EuiCode>,
       explanation: getPrivilegesExplanation(privileges, index),
+    }}
+  />
+);
+
+const missingDataStreamPrivileges = (dataStream: string, privileges: string[]) => (
+  <FormattedMessage
+    id="xpack.securitySolution.detectionEngine.missingPrivilegesCallOut.messageBody.missingDataStreamPrivileges"
+    defaultMessage="Missing {privileges} privileges for the {dataStream} data stream. {explanation}"
+    values={{
+      privileges: <CommaSeparatedValues values={privileges} />,
+      dataStream: <EuiCode>{dataStream}</EuiCode>,
+      explanation: getPrivilegesExplanation(privileges, dataStream),
     }}
   />
 );

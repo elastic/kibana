@@ -37,6 +37,7 @@ describe('class Screenshots', () => {
     mockLogger = loggerMock.create();
 
     mockConfig = {
+      enabled: true,
       networkPolicy: {
         enabled: false,
         rules: [],
@@ -117,6 +118,7 @@ describe('class Screenshots', () => {
         format: 'png',
         layout: { id: 'preserve_layout' },
         urls: ['/app/home/test'],
+        taskInstanceFields: { startedAt: null, retryAt: null },
       };
 
       const observe = screenshotsInstance.getScreenshots(options);
@@ -150,6 +152,7 @@ describe('class Screenshots', () => {
         format: 'png',
         layout: { id: 'preserve_layout' },
         urls: ['/app/home/test'],
+        taskInstanceFields: { startedAt: null, retryAt: null },
       };
 
       const observe = screenshotsInstance.getScreenshots(options);

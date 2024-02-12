@@ -9,8 +9,6 @@ import {
   ConnectorStatus,
   DisplayType,
   FieldType,
-  FilteringPolicy,
-  FilteringRuleRule,
   FilteringValidationState,
   SyncStatus,
 } from '@kbn/search-connectors';
@@ -44,6 +42,7 @@ export const apiIndex: ApiViewIndex = {
 export const connectorIndex: ConnectorViewIndex = {
   connector: {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: {
       foo: {
         default_value: '',
@@ -87,8 +86,8 @@ export const connectorIndex: ConnectorViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -111,8 +110,8 @@ export const connectorIndex: ConnectorViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -174,6 +173,7 @@ export const connectorIndex: ConnectorViewIndex = {
 export const crawlerIndex: CrawlerViewIndex = {
   connector: {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: {
       foo: {
         default_value: '',
@@ -217,8 +217,8 @@ export const crawlerIndex: CrawlerViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },
@@ -241,8 +241,8 @@ export const crawlerIndex: CrawlerViewIndex = {
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: expect.any(String),
               value: '.*',
             },

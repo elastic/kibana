@@ -12,6 +12,7 @@ import { UniformImportsRule } from './src/rules/uniform_imports';
 import { ExportsMovedPackagesRule } from './src/rules/exports_moved_packages';
 import { NoUnusedImportsRule } from './src/rules/no_unused_imports';
 import { NoBoundaryCrossingRule } from './src/rules/no_boundary_crossing';
+import { RequireImportRule } from './src/rules/require_import';
 
 /**
  * Custom ESLint rules, add `'@kbn/eslint-plugin-imports'` to your eslint config to use them
@@ -23,4 +24,5 @@ export const rules = {
   exports_moved_packages: ExportsMovedPackagesRule,
   no_unused_imports: NoUnusedImportsRule,
   no_boundary_crossing: NoBoundaryCrossingRule,
+  require_import: RequireImportRule,
 };

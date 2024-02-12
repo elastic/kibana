@@ -10,10 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { ISearchSource, EsQuerySortValue, SortDirection } from '@kbn/data-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import {
-  getSearchResponseInterceptedWarnings,
-  type SearchResponseInterceptedWarning,
-} from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { convertTimeValueToIso } from './date_conversion';
 import { IntervalValue } from './generate_intervals';
@@ -47,7 +44,7 @@ export async function fetchHitsInInterval(
   services: DiscoverServices
 ): Promise<{
   rows: DataTableRecord[];
-  interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+  interceptedWarnings: SearchResponseWarning[];
 }> {
   const range: RangeQuery = {
     format: 'strict_date_optional_time',
@@ -100,12 +97,14 @@ export async function fetchHitsInInterval(
   const { rawResponse } = await lastValueFrom(fetch$);
   const dataView = searchSource.getField('index');
   const rows = rawResponse.hits?.hits.map((hit) => buildDataTableRecord(hit, dataView!));
+  const interceptedWarnings: SearchResponseWarning[] = [];
+  services.data.search.showWarnings(adapter, (warning) => {
+    interceptedWarnings.push(warning);
+    return true; // suppress the default behaviour
+  });
 
   return {
     rows: rows ?? [],
-    interceptedWarnings: getSearchResponseInterceptedWarnings({
-      services,
-      adapter,
-    }),
+    interceptedWarnings,
   };
 }

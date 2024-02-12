@@ -38,7 +38,7 @@ import { UserAvatar, UserProfilesPopover } from '@kbn/user-profile-components';
 import { ApiKeyFlyout } from './api_key_flyout';
 import { ApiKeysEmptyPrompt } from './api_keys_empty_prompt';
 import { InvalidateProvider } from './invalidate_provider';
-import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common/model';
+import type { ApiKey, AuthenticatedUser, RestApiKey } from '../../../../common';
 import { Breadcrumb } from '../../../components/breadcrumb';
 import { SelectableTokenField } from '../../../components/token_field';
 import { useCapabilities } from '../../../components/use_capabilities';
@@ -159,7 +159,7 @@ export const APIKeysGridPage: FunctionComponent = () => {
             description={
               <FormattedMessage
                 id="xpack.security.management.apiKeys.table.apiKeysAllDescription"
-                defaultMessage="Allow external services to access the Elastic Stack on behalf of a user."
+                defaultMessage="Allow external services to access your Elastic Stack."
               />
             }
             rightSideItems={
@@ -353,12 +353,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     },
     {
       field: 'type',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.typeColumnName"
-          defaultMessage="Type"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.typeColumnName', {
+        defaultMessage: 'Type',
+      }),
       sortable: true,
       render: (type: CategorizedApiKey['type']) => <ApiKeyBadge type={type} />,
     }
@@ -367,12 +364,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   if (canManageApiKeys || usernameFilters.length > 1) {
     columns.push({
       field: 'username',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.ownerColumnName"
-          defaultMessage="Owner"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.ownerColumnName', {
+        defaultMessage: 'Owner',
+      }),
       sortable: true,
       render: (username: CategorizedApiKey['username']) => <UsernameWithIcon username={username} />,
     });
@@ -381,12 +375,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
   columns.push(
     {
       field: 'creation',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.createdColumnName"
-          defaultMessage="Created"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.createdColumnName', {
+        defaultMessage: 'Created',
+      }),
       sortable: true,
       mobileOptions: {
         show: false,
@@ -406,12 +397,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
     },
     {
       field: 'expiration',
-      name: (
-        <FormattedMessage
-          id="xpack.security.management.apiKeys.table.statusColumnName"
-          defaultMessage="Status"
-        />
-      ),
+      name: i18n.translate('xpack.security.management.apiKeys.table.statusColumnName', {
+        defaultMessage: 'Status',
+      }),
       sortable: true,
       render: (expiration: number) => <ApiKeyStatus expiration={expiration} />,
     }
@@ -422,12 +410,9 @@ export const ApiKeysTable: FunctionComponent<ApiKeysTableProps> = ({
       width: `${24 + 2 * 8}px`,
       actions: [
         {
-          name: (
-            <FormattedMessage
-              id="xpack.security.management.apiKeys.table.deleteAction"
-              defaultMessage="Delete"
-            />
-          ),
+          name: i18n.translate('xpack.security.management.apiKeys.table.deleteAction', {
+            defaultMessage: 'Delete',
+          }),
           description: i18n.translate('xpack.security.management.apiKeys.table.deleteDescription', {
             defaultMessage: 'Delete this API key',
           }),
@@ -571,7 +556,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-            defaultMessage="Personal"
+            defaultMessage="User"
           />
         </EuiFilterButton>
       ) : null}
@@ -593,7 +578,7 @@ export const TypesFilterButton: FunctionComponent<TypesFilterButtonProps> = ({
         >
           <FormattedMessage
             id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-            defaultMessage="Cross-Cluster"
+            defaultMessage="Cross-cluster"
           />
         </EuiFilterButton>
       ) : null}
@@ -786,7 +771,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       <EuiBadge color="hollow" iconType="cluster">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.crossClusterLabel"
-          defaultMessage="Cross-Cluster"
+          defaultMessage="Cross-cluster"
         />
       </EuiBadge>
     </EuiToolTip>
@@ -818,7 +803,7 @@ export const ApiKeyBadge: FunctionComponent<ApiKeyBadgeProps> = ({ type }) => {
       <EuiBadge color="hollow" iconType="user">
         <FormattedMessage
           id="xpack.security.accountManagement.apiKeyBadge.restTitle"
-          defaultMessage="Personal"
+          defaultMessage="User"
         />
       </EuiBadge>
     </EuiToolTip>

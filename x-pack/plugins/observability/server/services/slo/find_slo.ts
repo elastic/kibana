@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FindSLOParams, FindSLOResponse, findSLOResponseSchema } from '@kbn/slo-schema';
+import { FindSLOParams, FindSLOResponse, findSLOResponseSchema, Pagination } from '@kbn/slo-schema';
 import { SLO, SLOWithSummary } from '../../domain/models';
 import { IllegalArgumentError } from '../../errors';
 import { SLORepository } from './slo_repository';
-import { Pagination, SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
+import { SLOSummary, Sort, SummarySearchClient } from './summary_search_client';
 
 const DEFAULT_PAGE = 1;
 const DEFAULT_PER_PAGE = 25;
@@ -24,6 +24,7 @@ export class FindSLO {
   public async execute(params: FindSLOParams): Promise<FindSLOResponse> {
     const sloSummaryList = await this.summarySearchClient.search(
       params.kqlQuery ?? '',
+      params.filters ?? '',
       toSort(params),
       toPagination(params)
     );
@@ -55,12 +56,12 @@ function toPagination(params: FindSLOParams): Pagination {
   const perPage = Number(params.perPage);
 
   if (!isNaN(perPage) && perPage > MAX_PER_PAGE) {
-    throw new IllegalArgumentError('perPage limit to 5000');
+    throw new IllegalArgumentError(`perPage limit set to ${MAX_PER_PAGE}`);
   }
 
   return {
     page: !isNaN(page) && page >= 1 ? page : DEFAULT_PAGE,
-    perPage: !isNaN(perPage) && perPage >= 1 ? perPage : DEFAULT_PER_PAGE,
+    perPage: !isNaN(perPage) && perPage >= 0 ? perPage : DEFAULT_PER_PAGE,
   };
 }
 

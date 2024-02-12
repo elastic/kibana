@@ -17,6 +17,7 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
+import { AlertingConfig } from './config';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -30,6 +31,7 @@ beforeEach(() => {
   jest.clearAllMocks();
   mockedLicenseState = licenseStateMock.create();
   ruleTypeRegistryParams = {
+    config: {} as AlertingConfig,
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
@@ -38,6 +40,7 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    latestRuleVersion: 1,
   };
 });
 
@@ -582,6 +585,63 @@ describe('Create Lifecycle', () => {
 
       expect(alertsService.register).not.toHaveBeenCalled();
     });
+
+    test('registers rule with no overwrite on producer', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+      expect(registry.get('test').producer).toEqual('alerts');
+    });
+  });
+
+  describe('register() with overwriteProducer', () => {
+    test('registers rule and overwrite producer', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        config: { rules: { overwriteProducer: 'observability' } } as unknown as AlertingConfig,
+      });
+      registry.register(ruleType);
+      expect(registry.get('test').producer).toEqual('observability');
+    });
   });
 
   describe('get()', () => {
@@ -723,6 +783,7 @@ describe('Create Lifecycle', () => {
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
+            "fieldsForAAD": undefined,
             "hasAlertsMappings": true,
             "hasFieldsForAAD": false,
             "id": "test",
@@ -850,6 +911,16 @@ describe('Create Lifecycle', () => {
       expect(() =>
         ruleTypeRegistry.ensureRuleTypeEnabled('test')
       ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    });
+  });
+
+  describe('getLatestRuleVersion', () => {
+    test('should return the latest rule version', async () => {
+      const ruleTypeRegistry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        latestRuleVersion: 5,
+      });
+      expect(ruleTypeRegistry.getLatestRuleVersion()).toBe(5);
     });
   });
 });

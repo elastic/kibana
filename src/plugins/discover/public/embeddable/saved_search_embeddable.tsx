@@ -45,15 +45,11 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { CellActionsProvider } from '@kbn/cell-actions';
-import {
-  getSearchResponseInterceptedWarnings,
-  type SearchResponseInterceptedWarning,
-} from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
 import {
   DOC_HIDE_TIME_COLUMN_SETTING,
   DOC_TABLE_LEGACY,
-  SAMPLE_SIZE_SETTING,
   SEARCH_FIELDS_FROM_SOURCE,
   SHOW_FIELD_STATISTICS,
   SORT_DEFAULT_ORDER_SETTING,
@@ -65,6 +61,7 @@ import { VIEW_MODE, getDefaultRowsPerPage } from '../../common/constants';
 import type { ISearchEmbeddable, SearchInput, SearchOutput } from './types';
 import type { DiscoverServices } from '../build_services';
 import { getSortForEmbeddable, SortPair } from '../utils/sorting';
+import { getMaxAllowedSampleSize, getAllowedSampleSize } from '../utils/get_allowed_sample_size';
 import { SEARCH_EMBEDDABLE_TYPE, SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID } from './constants';
 import { SavedSearchEmbeddableComponent } from './saved_search_embeddable_component';
 import { handleSourceColumnState } from '../utils/state_helpers';
@@ -89,10 +86,11 @@ export type SearchProps = Partial<UnifiedDataTableProps> &
     filter?: (field: DataViewField, value: string[], operator: string) => void;
     hits?: DataTableRecord[];
     totalHitCount?: number;
-    interceptedWarnings?: SearchResponseInterceptedWarning[];
+    interceptedWarnings?: SearchResponseWarning[];
     onMoveColumn?: (column: string, index: number) => void;
     onUpdateRowHeight?: (rowHeight?: number) => void;
     onUpdateRowsPerPage?: (rowsPerPage?: number) => void;
+    onUpdateSampleSize?: (sampleSize?: number) => void;
   };
 
 export interface SearchEmbeddableConfig {
@@ -119,13 +117,14 @@ export class SavedSearchEmbeddable
 
   private abortController?: AbortController;
   private savedSearch: SavedSearch | undefined;
-  private panelTitle: string = '';
+  private panelTitleInternal: string = '';
   private filtersSearchSource!: ISearchSource;
   private prevTimeRange?: TimeRange;
   private prevFilters?: Filter[];
   private prevQuery?: Query;
   private prevSort?: SortOrder[];
   private prevSearchSessionId?: string;
+  private prevSampleSizeInput?: number;
   private searchProps?: SearchProps;
   private initialized?: boolean;
   private node?: HTMLElement;
@@ -145,9 +144,9 @@ export class SavedSearchEmbeddable
     };
 
     this.subscription = this.getUpdated$().subscribe(() => {
-      const titleChanged = this.output.title && this.panelTitle !== this.output.title;
+      const titleChanged = this.output.title && this.panelTitleInternal !== this.output.title;
       if (titleChanged) {
-        this.panelTitle = this.output.title || '';
+        this.panelTitleInternal = this.output.title || '';
       }
       if (!this.searchProps) {
         return;
@@ -181,7 +180,7 @@ export class SavedSearchEmbeddable
         unwrapResult
       );
 
-      this.panelTitle = this.getCurrentTitle();
+      this.panelTitleInternal = this.getCurrentTitle();
 
       await this.initializeOutput();
 
@@ -256,6 +255,10 @@ export class SavedSearchEmbeddable
     return isTextBasedQuery(query);
   };
 
+  private getFetchedSampleSize = (searchProps: SearchProps): number => {
+    return getAllowedSampleSize(searchProps.sampleSizeState, this.services.uiSettings);
+  };
+
   private fetch = async () => {
     const savedSearch = this.savedSearch;
     const searchProps = this.searchProps;
@@ -276,9 +279,9 @@ export class SavedSearchEmbeddable
       savedSearch.searchSource,
       searchProps.dataView,
       searchProps.sort,
+      this.getFetchedSampleSize(searchProps),
       useNewFieldsApi,
       {
-        sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
         sortDir: this.services.uiSettings.get(SORT_DEFAULT_ORDER_SETTING),
       }
     );
@@ -331,6 +334,7 @@ export class SavedSearchEmbeddable
           this.services.data,
           this.services.expressions,
           this.services.inspector,
+          this.abortController.signal,
           this.input.filters,
           this.input.query
         );
@@ -374,10 +378,12 @@ export class SavedSearchEmbeddable
       );
 
       if (this.inspectorAdapters.requests) {
-        searchProps.interceptedWarnings = getSearchResponseInterceptedWarnings({
-          services: this.services,
-          adapter: this.inspectorAdapters.requests,
+        const interceptedWarnings: SearchResponseWarning[] = [];
+        this.services.data.search.showWarnings(this.inspectorAdapters.requests, (warning) => {
+          interceptedWarnings.push(warning);
+          return true; // suppress the default behaviour
         });
+        searchProps.interceptedWarnings = interceptedWarnings;
       }
 
       this.updateOutput({
@@ -471,7 +477,6 @@ export class SavedSearchEmbeddable
         });
         this.updateInput({ sort: sortOrderArr });
       },
-      sampleSize: this.services.uiSettings.get(SAMPLE_SIZE_SETTING),
       onFilter: async (field, value, operator) => {
         let filters = generateFilters(
           this.services.filterManager,
@@ -501,6 +506,10 @@ export class SavedSearchEmbeddable
       rowsPerPageState: this.input.rowsPerPage || savedSearch.rowsPerPage,
       onUpdateRowsPerPage: (rowsPerPage) => {
         this.updateInput({ rowsPerPage });
+      },
+      sampleSizeState: this.input.sampleSize || savedSearch.sampleSize,
+      onUpdateSampleSize: (sampleSize) => {
+        this.updateInput({ sampleSize });
       },
       cellActionsTriggerId: SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER_ID,
     };
@@ -546,6 +555,7 @@ export class SavedSearchEmbeddable
       !isEqual(this.prevQuery, this.input.query) ||
       !isEqual(this.prevTimeRange, this.getTimeRange()) ||
       !isEqual(this.prevSort, this.input.sort) ||
+      this.prevSampleSizeInput !== this.input.sampleSize ||
       this.prevSearchSessionId !== this.input.searchSessionId
     );
   }
@@ -556,6 +566,7 @@ export class SavedSearchEmbeddable
     }
     return (
       this.input.rowsPerPage !== searchProps.rowsPerPageState ||
+      this.input.sampleSize !== searchProps.sampleSizeState ||
       (this.input.columns && !isEqual(this.input.columns, searchProps.columns))
     );
   }
@@ -581,13 +592,15 @@ export class SavedSearchEmbeddable
 
     searchProps.columns = columnState.columns;
     searchProps.sort = this.getSort(this.input.sort || savedSearch.sort, searchProps?.dataView);
-    searchProps.sharedItemTitle = this.panelTitle;
-    searchProps.searchTitle = this.panelTitle;
+    searchProps.sharedItemTitle = this.panelTitleInternal;
+    searchProps.searchTitle = this.panelTitleInternal;
     searchProps.rowHeightState = this.input.rowHeight || savedSearch.rowHeight;
     searchProps.rowsPerPageState =
       this.input.rowsPerPage ||
       savedSearch.rowsPerPage ||
       getDefaultRowsPerPage(this.services.uiSettings);
+    searchProps.maxAllowedSampleSize = getMaxAllowedSampleSize(this.services.uiSettings);
+    searchProps.sampleSizeState = this.input.sampleSize || savedSearch.sampleSize;
     searchProps.filters = savedSearch.searchSource.getField('filter') as Filter[];
     searchProps.savedSearchId = savedSearch.id;
 
@@ -606,6 +619,7 @@ export class SavedSearchEmbeddable
       this.prevTimeRange = this.getTimeRange();
       this.prevSearchSessionId = this.input.searchSessionId;
       this.prevSort = this.input.sort;
+      this.prevSampleSizeInput = this.input.sampleSize;
       this.searchProps = searchProps;
 
       await this.fetch();
@@ -691,7 +705,10 @@ export class SavedSearchEmbeddable
         >
           <KibanaContextProvider services={searchProps.services}>
             <CellActionsProvider getTriggerCompatibleActions={getTriggerCompatibleActions}>
-              <SavedSearchEmbeddableComponent {...props} />
+              <SavedSearchEmbeddableComponent
+                {...props}
+                fetchedSampleSize={this.getFetchedSampleSize(props.searchProps)}
+              />
             </CellActionsProvider>
           </KibanaContextProvider>
         </KibanaRenderContextProvider>,
@@ -730,11 +747,7 @@ export class SavedSearchEmbeddable
     }
   }
 
-  public getSavedSearch(): SavedSearch {
-    if (!this.savedSearch) {
-      throw new Error('Saved search not defined');
-    }
-
+  public getSavedSearch(): SavedSearch | undefined {
     return this.savedSearch;
   }
 
@@ -745,7 +758,7 @@ export class SavedSearchEmbeddable
   /**
    * @returns Local/panel-level array of filters for Saved Search embeddable
    */
-  public async getFilters() {
+  public getFilters() {
     return mapAndFlattenFilters(
       (this.savedSearch?.searchSource.getFields().filter as Filter[]) ?? []
     );
@@ -754,7 +767,7 @@ export class SavedSearchEmbeddable
   /**
    * @returns Local/panel-level query for Saved Search embeddable
    */
-  public async getQuery() {
+  public getQuery() {
     return this.savedSearch?.searchSource.getFields().query;
   }
 

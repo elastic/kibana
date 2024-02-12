@@ -6,6 +6,7 @@
  */
 
 import type { ChartSizeArray } from '@elastic/charts';
+import { i18n } from '@kbn/i18n';
 import { Axis, Chart, HistogramBarSeries, Position, Settings, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
 import React, { useMemo } from 'react';
@@ -81,6 +82,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 showLegendExtra={showLegend}
                 theme={theme}
                 baseTheme={baseTheme}
+                locale={i18n.getLocale()}
               />
 
               <Axis id={xAxisId} position={Position.Bottom} tickFormat={tickFormat} />
@@ -93,6 +95,7 @@ export const AlertsHistogram = React.memo<AlertsHistogramProps>(
                 yScaleType={ScaleType.Linear}
                 xAccessor="x"
                 yAccessors={yAccessors}
+                stackAccessors={['true']}
                 splitSeriesAccessors={splitSeriesAccessors}
                 data={data}
               />

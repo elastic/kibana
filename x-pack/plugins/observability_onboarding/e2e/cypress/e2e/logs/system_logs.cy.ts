@@ -11,6 +11,19 @@ describe('[Logs onboarding] System logs', () => {
       cy.deleteIntegration('system');
     });
 
+    describe('when user clicks on back button', () => {
+      beforeEach(() => {
+        cy.loginAsViewerUser();
+        cy.visitKibana('/app/observabilityOnboarding/systemLogs');
+      });
+
+      it('navigates to observability logs onboarding page', () => {
+        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+
+        cy.url().should('include', '/app/observabilityOnboarding');
+      });
+    });
+
     describe('when user is missing privileges', () => {
       beforeEach(() => {
         cy.loginAsViewerUser();
@@ -660,11 +673,11 @@ describe('[Logs onboarding] System logs', () => {
         cy.visitKibana('/app/observabilityOnboarding/systemLogs');
       });
 
-      it('when users clicks on Explore logs they navigate to log explorer - All logs', () => {
+      it('when users clicks on Explore logs they navigate to logs explorer - All logs', () => {
         cy.wait('@systemIntegrationInstall');
         cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
 
-        cy.url().should('include', '/app/observability-log-explorer');
+        cy.url().should('include', '/app/observability-logs-explorer');
         cy.get('button').contains('All logs').should('exist');
       });
     });
@@ -679,11 +692,11 @@ describe('[Logs onboarding] System logs', () => {
         cy.visitKibana('/app/observabilityOnboarding/systemLogs');
       });
 
-      it('when users clicks on Explore logs they navigate to log explorer and System integration is selected', () => {
+      it('when users clicks on Explore logs they navigate to logs explorer and System integration is selected', () => {
         cy.wait('@systemIntegrationInstall');
         cy.getByTestSubj('obltOnboardingExploreLogs').should('exist').click();
 
-        cy.url().should('include', '/app/observability-log-explorer');
+        cy.url().should('include', '/app/observability-logs-explorer');
         cy.get('button').contains('[System] syslog').should('exist');
       });
     });

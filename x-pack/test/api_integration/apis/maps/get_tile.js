@@ -191,5 +191,33 @@ export default function ({ getService }) {
         .responseType('blob')
         .expect(404);
     });
+
+    it('should return elasticsearch error', async () => {
+      const tileUrlParams = getTileUrlParams({
+        ...defaultParams,
+        requestBody: {
+          ...defaultParams.requestBody,
+          query: {
+            error_query: {
+              indices: [
+                {
+                  error_type: 'exception',
+                  message: 'local shard failure message 123',
+                  name: 'logstash-*',
+                },
+              ],
+            },
+          },
+        },
+      });
+      const resp = await supertest
+        .get(`/internal/maps/mvt/getTile/2/1/1.pbf?${tileUrlParams}`)
+        .set('kbn-xsrf', 'kibana')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(400);
+
+      expect(resp.body.error.reason).to.be('all shards failed');
+    });
   });
 }

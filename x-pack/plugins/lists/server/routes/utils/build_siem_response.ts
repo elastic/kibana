@@ -49,7 +49,7 @@ export class SiemResponseFactory {
   constructor(private response: KibanaResponseFactory) {}
 
   // eslint-disable-next-line @typescript-eslint/explicit-function-return-type
-  error<T>({ statusCode, body, headers }: CustomHttpResponseOptions<T>) {
+  error<T>({ statusCode, body, headers, bypassErrorFormat }: CustomHttpResponseOptions<T>) {
     // KibanaResponse is not exported so we cannot use a return type here and that is why the linter is turned off above
     const contentType: CustomHttpResponseOptions<T>['headers'] = {
       'content-type': 'application/json',
@@ -59,10 +59,14 @@ export class SiemResponseFactory {
       ...(headers ?? {}),
     };
 
+    const formattedBody = bypassErrorFormat
+      ? body
+      : { message: body ?? statusToErrorMessage(statusCode) };
+
     return this.response.custom({
       body: Buffer.from(
         JSON.stringify({
-          message: body ?? statusToErrorMessage(statusCode),
+          ...formattedBody,
           status_code: statusCode,
         })
       ),

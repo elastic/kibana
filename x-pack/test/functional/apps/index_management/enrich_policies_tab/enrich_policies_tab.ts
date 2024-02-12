@@ -79,7 +79,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.clickEnrichPolicyAt(0);
       // Verify url is stateful
       const url = await browser.getCurrentUrl();
-      expect(url).to.contain(`/enrich_policies?policy=${ENRICH_POLICY_NAME}`);
+      expect(url).to.contain('/enrich_policies?policy=');
       // Assert that flyout is opened
       expect(await testSubjects.exists('policyDetailsFlyout')).to.be(true);
       // Close flyout

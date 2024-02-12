@@ -71,6 +71,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             threshold: {
               enabled: {
@@ -107,6 +114,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             eql: {
               enabled: { type: 'long', _meta: { description: 'Number of eql rules enabled' } },
@@ -134,6 +148,13 @@ export const registerCollector: RegisterCollector = ({
               notifications_disabled: {
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
+              },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
               },
             },
             machine_learning: {
@@ -171,6 +192,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             threat_match: {
               enabled: {
@@ -206,6 +234,13 @@ export const registerCollector: RegisterCollector = ({
               notifications_disabled: {
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
+              },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
               },
             },
             new_terms: {
@@ -243,6 +278,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             elastic_total: {
               enabled: { type: 'long', _meta: { description: 'Number of elastic rules enabled' } },
@@ -274,6 +316,13 @@ export const registerCollector: RegisterCollector = ({
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
               },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
+              },
             },
             custom_total: {
               enabled: { type: 'long', _meta: { description: 'Number of custom rules enabled' } },
@@ -301,6 +350,13 @@ export const registerCollector: RegisterCollector = ({
               notifications_disabled: {
                 type: 'long',
                 _meta: { description: 'Number of notifications enabled' },
+              },
+              legacy_investigation_fields: {
+                type: 'long',
+                _meta: {
+                  description:
+                    'Number of rules using the legacy investigation fields type introduced only in 8.10 ESS',
+                },
               },
             },
           },

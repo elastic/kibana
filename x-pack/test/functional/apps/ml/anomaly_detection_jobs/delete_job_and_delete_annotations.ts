@@ -20,10 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   const remoteName = 'ftr-remote:';
-  const indexPatternName = 'ft_farequote';
-  const indexPatternString = config.get('esTestCluster.ccs')
-    ? remoteName + indexPatternName
-    : indexPatternName;
+  const esIndexPatternName = 'ft_farequote';
+  const esIndexPatternString = config.get('esTestCluster.ccs')
+    ? remoteName + esIndexPatternName
+    : esIndexPatternName;
 
   const testSetupJobConfigs = [SINGLE_METRIC_JOB_CONFIG, MULTI_METRIC_JOB_CONFIG];
 
@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(esIndexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(esIndexPatternString);
     });
 
     for (const { suiteTitle, jobId, deleteAnnotations, expectedAnnotations } of testConfigs) {

@@ -41,14 +41,14 @@ export const bulkDeleteRulesRoute = ({
           const { filter, ids } = body;
 
           try {
-            const bulkDeleteResults = await rulesClient.bulkDeleteRules({
+            const bulkDeleteResult = await rulesClient.bulkDeleteRules({
               filter,
               ids,
             });
             const resultBody: BulkDeleteRulesResponseV1<RuleParamsV1> = {
               body: {
-                ...bulkDeleteResults,
-                rules: bulkDeleteResults.rules.map((rule) => {
+                ...bulkDeleteResult,
+                rules: bulkDeleteResult.rules.map((rule) => {
                   // TODO (http-versioning): Remove this cast, this enables us to move forward
                   // without fixing all of other solution types
                   return transformRuleToRuleResponseV1<RuleParamsV1>(rule as Rule<RuleParamsV1>);

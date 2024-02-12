@@ -12,6 +12,7 @@ import {
   Chart,
   LineAnnotation,
   LineSeries,
+  PartialTheme,
   Position,
   ScaleType,
   Settings,
@@ -22,6 +23,7 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { EuiCallOut, EuiLoadingChart, EuiSpacer, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { i18n } from '@kbn/i18n';
 import { VisualizeOptions } from '../../../../models/visualize_options';
 import { ThresholdWatch } from '../../../../models/watch/threshold_watch';
 
@@ -32,7 +34,7 @@ import { comparators } from '../../../../models/watch/comparators';
 import { SectionError, Error } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
 
-const customTheme = () => {
+const customTheme = (): PartialTheme => {
   return {
     lineSeriesStyle: {
       line: {
@@ -89,7 +91,7 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 export const WatchVisualization = () => {
   const { createTimeBuckets, theme, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartsTheme = theme.useChartsTheme();
+  const chartBaseTheme = theme.useChartsBaseTheme();
   const {
     index,
     timeField,
@@ -215,11 +217,13 @@ export const WatchVisualization = () => {
         {watchVisualizationDataKeys.length ? (
           <Chart size={['100%', 300]} renderer="canvas">
             <Settings
-              theme={[customTheme(), chartsTheme]}
+              theme={[customTheme()]}
+              baseTheme={chartBaseTheme}
               xDomain={domain}
               showLegend={!!watch.termField}
               showLegendExtra
               legendPosition={Position.Bottom}
+              locale={i18n.getLocale()}
             />
             <Axis
               id="bottom"

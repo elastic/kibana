@@ -9,6 +9,9 @@
 import { css } from '@emotion/react';
 
 export const redirectAppLinksStyles = css({
-  display: 'flex',
+  display: 'inherit',
+  height: 'inherit',
+  width: 'inherit',
   flex: '1',
+  flexFlow: 'column nowrap',
 });

@@ -32,7 +32,6 @@ export const ADD_THREAT_INTELLIGENCE_DATA_PATH = `/app/integrations/browse/threa
 export const DEFAULT_BYTES_FORMAT = 'format:bytes:defaultPattern' as const;
 export const DEFAULT_DATE_FORMAT = 'dateFormat' as const;
 export const DEFAULT_DATE_FORMAT_TZ = 'dateFormat:tz' as const;
-export const DEFAULT_DARK_MODE = 'theme:darkMode' as const;
 export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
@@ -60,7 +59,6 @@ export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
-export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
@@ -167,6 +165,10 @@ export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as con
 /** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
 export const ENABLE_EXPANDABLE_FLYOUT_SETTING = 'securitySolution:enableExpandableFlyout' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
+export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
+  'securitySolution:excludeColdAndFrozenTiersInAnalyzer' as const;
+
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
 
@@ -261,6 +263,12 @@ export const RISK_ENGINE_STATUS_URL = `${RISK_ENGINE_URL}/status`;
 export const RISK_ENGINE_INIT_URL = `${RISK_ENGINE_URL}/init`;
 export const RISK_ENGINE_ENABLE_URL = `${RISK_ENGINE_URL}/enable`;
 export const RISK_ENGINE_DISABLE_URL = `${RISK_ENGINE_URL}/disable`;
+export const RISK_ENGINE_PRIVILEGES_URL = `${RISK_ENGINE_URL}/privileges`;
+export const RISK_ENGINE_SETTINGS_URL = `${RISK_ENGINE_URL}/settings`;
+
+export const ASSET_CRITICALITY_URL = `/internal/asset_criticality`;
+export const ASSET_CRITICALITY_PRIVILEGES_URL = `/internal/asset_criticality/privileges`;
+export const ASSET_CRITICALITY_STATUS_URL = `${ASSET_CRITICALITY_URL}/status`;
 
 /**
  * Public Risk Score routes
@@ -277,6 +285,8 @@ export const INTERNAL_TAGS_URL = `/internal/tags`;
 export const INTERNAL_DETECTION_ENGINE_URL = '/internal/detection_engine' as const;
 export const DETECTION_ENGINE_ALERTS_INDEX_URL =
   `${INTERNAL_DETECTION_ENGINE_URL}/signal/index` as const;
+export const DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL =
+  `${INTERNAL_DETECTION_ENGINE_URL}/users/_find` as const;
 
 /**
  * Telemetry detection endpoint for any previews requested of what data we are
@@ -294,6 +304,7 @@ export const TIMELINE_DRAFT_URL = `${TIMELINE_URL}/_draft` as const;
 export const TIMELINE_EXPORT_URL = `${TIMELINE_URL}/_export` as const;
 export const TIMELINE_IMPORT_URL = `${TIMELINE_URL}/_import` as const;
 export const TIMELINE_PREPACKAGED_URL = `${TIMELINE_URL}/_prepackaged` as const;
+export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
@@ -316,6 +327,8 @@ export const DETECTION_ENGINE_SIGNALS_MIGRATION_STATUS_URL =
 export const DETECTION_ENGINE_SIGNALS_FINALIZE_MIGRATION_URL =
   `${DETECTION_ENGINE_SIGNALS_URL}/finalize_migration` as const;
 export const DETECTION_ENGINE_ALERT_TAGS_URL = `${DETECTION_ENGINE_SIGNALS_URL}/tags` as const;
+export const DETECTION_ENGINE_ALERT_ASSIGNEES_URL =
+  `${DETECTION_ENGINE_SIGNALS_URL}/assignees` as const;
 
 export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
@@ -326,12 +339,12 @@ export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
 export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
 
 /**
-  Licensing requirements
+ Licensing requirements
  */
 export const MINIMUM_ML_LICENSE = 'platinum' as const;
 
 /**
-  Machine Learning constants
+ Machine Learning constants
  */
 export const ML_GROUP_ID = 'security' as const;
 export const LEGACY_ML_GROUP_ID = 'siem' as const;
@@ -430,7 +443,9 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.9',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.11',
+  TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  TIMELINE: 'securitySolution.timeline.newFeaturesTour.v8.12',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -446,13 +461,6 @@ export enum BulkActionsDryRunErrCode {
   MACHINE_LEARNING_INDEX_PATTERN = 'MACHINE_LEARNING_INDEX_PATTERN',
   ESQL_INDEX_PATTERN = 'ESQL_INDEX_PATTERN',
 }
-
-export const RISKY_HOSTS_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/host-risk-score.html';
-export const RISKY_USERS_DOC_LINK =
-  'https://www.elastic.co/guide/en/security/current/user-risk-score.html';
-export const DETECTION_ENTITY_DASHBOARD =
-  'https://www.elastic.co/guide/en/security/current/detection-entity-dashboard.html';
 
 export const MAX_NUMBER_OF_NEW_TERMS_FIELDS = 3;
 
@@ -507,3 +515,13 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+/**
+ * Max length for the comments within security solution
+ */
+export const MAX_COMMENT_LENGTH = 30000 as const;
+
+/**
+ * Cases external attachment IDs
+ */
+export const CASE_ATTACHMENT_ENDPOINT_TYPE_ID = 'endpoint' as const;

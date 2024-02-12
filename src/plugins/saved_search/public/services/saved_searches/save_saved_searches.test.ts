@@ -34,6 +34,7 @@ describe('saveSavedSearch', () => {
       sharingSavedObjectProps: {
         outcome: 'aliasMatch',
       },
+      managed: false,
     } as SavedSearch;
   });
 
@@ -128,6 +129,7 @@ describe('saveSavedSearch', () => {
         refreshInterval: undefined,
         rowHeight: undefined,
         rowsPerPage: undefined,
+        sampleSize: undefined,
         sort: [],
         timeRange: undefined,
         timeRestore: false,
@@ -162,6 +164,7 @@ describe('saveSavedSearch', () => {
         refreshInterval: undefined,
         rowHeight: undefined,
         rowsPerPage: undefined,
+        sampleSize: undefined,
         timeRange: undefined,
         sort: [],
         title: 'title',
@@ -211,6 +214,7 @@ describe('saveSavedSearch', () => {
         refreshInterval: undefined,
         rowHeight: undefined,
         rowsPerPage: undefined,
+        sampleSize: undefined,
         sort: [],
         timeRange: undefined,
         timeRestore: false,

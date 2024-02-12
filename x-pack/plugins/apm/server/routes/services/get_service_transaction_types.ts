@@ -63,6 +63,10 @@ export async function getServiceTransactionTypes({
     params
   );
   const transactionTypes =
-    aggregations?.types.buckets.map((bucket) => bucket.key as string) || [];
+    aggregations?.types.buckets
+      .map((bucket) => bucket.key as string)
+      // we exclude page-exit transactions because they are not relevant for the apm app
+      // and are only used for the INP values
+      .filter((value) => value !== 'page-exit') || [];
   return { transactionTypes };
 }

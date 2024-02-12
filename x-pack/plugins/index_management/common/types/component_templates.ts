@@ -8,19 +8,24 @@
 import { IndexSettings } from './indices';
 import { Aliases } from './aliases';
 import { Mappings } from './mappings';
+import { DataStream, DataRetention } from '.';
 
 export interface ComponentTemplateSerialized {
   template: {
     settings?: IndexSettings;
     aliases?: Aliases;
     mappings?: Mappings;
+    lifecycle?: DataStream['lifecycle'];
   };
   version?: number;
+  deprecated?: boolean;
   _meta?: { [key: string]: any };
+  lifecycle?: DataRetention;
 }
 
 export interface ComponentTemplateDeserialized extends ComponentTemplateSerialized {
   name: string;
+  isDeprecated?: boolean;
   _kbnMeta: {
     usedBy: string[];
     isManaged: boolean;
@@ -39,6 +44,7 @@ export interface ComponentTemplateListItem {
   hasAliases: boolean;
   hasSettings: boolean;
   isManaged: boolean;
+  isDeprecated?: boolean;
 }
 
 export interface ComponentTemplateDatastreams {

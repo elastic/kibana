@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { GroupByField } from '../common/group_by_field';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
@@ -32,11 +33,13 @@ const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
 export function CustomMetricIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
-  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
-    useFetchIndexPatternFields(index);
-  const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const partitionByFields = indexFields.filter((field) => field.aggregatable);
-  const metricFields = indexFields.filter((field) =>
+
+  const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
+    indexPatternString: index,
+  });
+
+  const timestampFields = dataView?.fields.filter((field) => field.type === 'date');
+  const metricFields = dataView?.fields.filter((field) =>
     SUPPORTED_METRIC_FIELD_TYPES.includes(field.type)
   );
 
@@ -58,7 +61,7 @@ export function CustomMetricIndicatorTypeForm() {
           </EuiFlexItem>
           <EuiFlexItem>
             <IndexFieldSelector
-              indexFields={timestampFields}
+              indexFields={timestampFields ?? []}
               name="indicator.params.timestampField"
               label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
                 defaultMessage: 'Timestamp field',
@@ -120,7 +123,7 @@ export function CustomMetricIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <MetricIndicator
             type="good"
-            metricFields={metricFields}
+            metricFields={metricFields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -141,7 +144,7 @@ export function CustomMetricIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <MetricIndicator
             type="total"
-            metricFields={metricFields}
+            metricFields={metricFields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -150,28 +153,7 @@ export function CustomMetricIndicatorTypeForm() {
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
 
-        <IndexFieldSelector
-          indexFields={partitionByFields}
-          name="groupBy"
-          label={
-            <span>
-              {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-                defaultMessage: 'Partition by',
-              })}{' '}
-              <EuiIconTip
-                content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
-                  defaultMessage: 'Create individual SLOs for each value of the selected field.',
-                })}
-                position="top"
-              />
-            </span>
-          }
-          placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-            defaultMessage: 'Select an optional field to partition by',
-          })}
-          isLoading={!!index && isIndexFieldsLoading}
-          isDisabled={!index}
-        />
+        <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
         <DataPreviewChart />
       </EuiFlexGroup>

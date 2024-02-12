@@ -3,7 +3,7 @@ from os import path
 from build_util import (
   runcmd,
   runcmdsilent,
-  md5_file,
+  sha256_file,
 )
 
 # This file builds Chromium headless on Linux.
@@ -96,11 +96,11 @@ if arch_name != 'arm64':
   shutil.move('out/headless/headless_shell', 'out/headless/headless_shell_raw')
   runcmd('strip -o out/headless/headless_shell out/headless/headless_shell_raw')
 
-# Create the zip and generate the md5 hash using filenames like:
+# Create the zip and generate the sha256 hash using filenames like:
 # chromium-4747cc2-linux_x64.zip
 base_filename = 'out/headless/chromium-' + base_version + '-locales-' + platform.system().lower() + '_' + arch_name
 zip_filename = base_filename + '.zip'
-md5_filename = base_filename + '.md5'
+sha256_filename = base_filename + '.sha256'
 
 print('Creating '  + path.join(src_path, zip_filename))
 archive = zipfile.ZipFile(zip_filename, mode='w', compression=zipfile.ZIP_DEFLATED)
@@ -118,9 +118,9 @@ archive.write(en_us_locale_file_path, path.join(path_prefix, 'locales', en_us_lo
 
 archive.close()
 
-print('Creating ' + path.join(src_path, md5_filename))
-with open (md5_filename, 'w') as f:
-  f.write(md5_file(zip_filename))
+print('Creating ' + path.join(src_path, sha256_filename))
+with open (sha256_filename, 'w') as f:
+  f.write(sha256_file(zip_filename))
 
 runcmd('gsutil cp ' + path.join(src_path, zip_filename) + ' gs://headless_shell_staging')
-runcmd('gsutil cp ' + path.join(src_path, md5_filename) + ' gs://headless_shell_staging')
+runcmd('gsutil cp ' + path.join(src_path, sha256_filename) + ' gs://headless_shell_staging')

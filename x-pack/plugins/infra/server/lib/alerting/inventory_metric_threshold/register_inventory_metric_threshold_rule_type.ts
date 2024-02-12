@@ -12,6 +12,12 @@ import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alertin
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import {
+  InventoryItemType,
+  SnapshotMetricType,
+  SnapshotMetricTypeKeys,
+} from '@kbn/metrics-data-access-plugin/common';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
+import {
   Comparator,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
 } from '../../../../common/alerting/metrics';
@@ -19,11 +25,6 @@ import {
   SnapshotCustomAggregation,
   SNAPSHOT_CUSTOM_AGGREGATIONS,
 } from '../../../../common/http_api/snapshot_api';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-  SnapshotMetricTypeKeys,
-} from '../../../../common/inventory_models/types';
 import { InfraBackendLibs } from '../../infra_types';
 import {
   alertDetailUrlActionVariableDescription,
@@ -81,28 +82,41 @@ const groupActionVariableDescription = i18n.translate(
   }
 );
 
-export async function registerMetricInventoryThresholdRuleType(
+export async function registerInventoryThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
+  if (!featureFlags.inventoryThresholdAlertRuleEnabled) {
+    return;
+  }
+
+  const paramsSchema = schema.object(
+    {
+      criteria: schema.arrayOf(condition),
+      nodeType: schema.string() as Type<InventoryItemType>,
+      filterQuery: schema.maybe(
+        schema.string({ validate: validateIsStringElasticsearchJSONFilter })
+      ),
+      sourceId: schema.string(),
+      alertOnNoData: schema.maybe(schema.boolean()),
+    },
+    { unknowns: 'allow' }
+  );
+
   alertingPlugin.registerType({
     id: METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
     name: i18n.translate('xpack.infra.metrics.inventory.alertName', {
       defaultMessage: 'Inventory',
     }),
     validate: {
-      params: schema.object(
-        {
-          criteria: schema.arrayOf(condition),
-          nodeType: schema.string() as Type<InventoryItemType>,
-          filterQuery: schema.maybe(
-            schema.string({ validate: validateIsStringElasticsearchJSONFilter })
-          ),
-          sourceId: schema.string(),
-          alertOnNoData: schema.maybe(schema.boolean()),
-        },
-        { unknowns: 'allow' }
-      ),
+      params: paramsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema',
+        schema: paramsSchema,
+      },
     },
     defaultActionGroupId: FIRED_ACTIONS_ID,
     doesSetRecoveryContext: true,

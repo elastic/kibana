@@ -182,6 +182,7 @@
     "GetIngestPipelines",
     "GetTrainedModelDownloadList",
     "GetElserConfig",
+    "InstallElasticTrainedModel",
 
     "Alerting",
     "PreviewAlert",

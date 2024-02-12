@@ -1,0 +1,50 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`PipelinePanel renders 1`] = `
+<FlyoutPanel
+  title="Pipeline"
+>
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "setting",
+          "name": "Pipeline setting",
+        },
+        Object {
+          "field": "value",
+          "name": "Value",
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "setting": "Pipeline name",
+          "value": "name",
+        },
+        Object {
+          "setting": "Extract binary content",
+          "value": true,
+        },
+        Object {
+          "setting": "Reduce whitespace",
+          "value": true,
+        },
+        Object {
+          "setting": "Machine learning inference",
+          "value": true,
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    responsive={true}
+    tableLayout="fixed"
+  />
+</FlyoutPanel>
+`;

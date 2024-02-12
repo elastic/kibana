@@ -37,7 +37,7 @@ export const SELECT_MESSAGE = i18n.translate(
 export const ACTION_TYPE_TITLE = i18n.translate(
   'xpack.stackConnectors.components.slack_api.connectorTypeTitle',
   {
-    defaultMessage: 'Send to Slack',
+    defaultMessage: 'Slack',
   }
 );
 export const ALLOWED_CHANNELS = i18n.translate(
@@ -69,3 +69,17 @@ export const ERROR_INVALID_CHANNELS = (invalidChannels: string[]) =>
       channels: invalidChannels.join(', '),
     },
   });
+
+export const JSON_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.error.slackBlockkitJsonRequired',
+  {
+    defaultMessage: 'Block kit must be valid JSON.',
+  }
+);
+
+export const BLOCKS_REQUIRED = i18n.translate(
+  'xpack.stackConnectors.components.slack_api.error.slackBlockkitBlockRequired',
+  {
+    defaultMessage: `JSON must contain field "blocks".`,
+  }
+);

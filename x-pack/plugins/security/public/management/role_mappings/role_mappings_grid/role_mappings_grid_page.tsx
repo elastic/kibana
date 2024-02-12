@@ -32,7 +32,7 @@ import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { EmptyPrompt } from './empty_prompt';
-import type { Role, RoleMapping } from '../../../../common/model';
+import type { Role, RoleMapping } from '../../../../common';
 import { DisabledBadge, EnabledBadge } from '../../badges';
 import {
   EDIT_ROLE_MAPPING_PATH,
@@ -74,7 +74,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     readOnly: false,
   };
 
-  private tableRef: React.RefObject<EuiInMemoryTable<RoleMapping>>;
   constructor(props: any) {
     super(props);
     this.state = {
@@ -85,7 +84,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
       selectedItems: [],
       error: undefined,
     };
-    this.tableRef = React.createRef();
   }
 
   public componentDidMount() {
@@ -226,6 +224,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           selectedItems: newSelectedItems,
         });
       },
+      selected: selectedItems,
     };
 
     const search = {
@@ -237,13 +236,7 @@ export class RoleMappingsGridPage extends Component<Props, State> {
           {(deleteRoleMappingsPrompt) => {
             return (
               <EuiButton
-                onClick={() =>
-                  deleteRoleMappingsPrompt(
-                    selectedItems,
-                    this.onRoleMappingsDeleted,
-                    this.onRoleMappingsDeleteCancel
-                  )
-                }
+                onClick={() => deleteRoleMappingsPrompt(selectedItems, this.onRoleMappingsDeleted)}
                 color="danger"
                 data-test-subj="bulkDeleteActionButton"
               >
@@ -298,7 +291,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
                 loading={loadState === 'loadingTable'}
                 message={message}
                 isSelectable={true}
-                ref={this.tableRef}
                 rowProps={() => {
                   return {
                     'data-test-subj': 'roleMappingRow',
@@ -497,10 +489,6 @@ export class RoleMappingsGridPage extends Component<Props, State> {
     if (roleMappings.length) {
       this.reloadRoleMappings();
     }
-  };
-
-  private onRoleMappingsDeleteCancel = () => {
-    this.tableRef.current?.setSelection([]);
   };
 
   private async checkPrivileges() {

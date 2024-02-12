@@ -30,11 +30,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.header.waitUntilLoadingHasFinished();
       });
 
-      it('should have menu item to create a custom threshold alert', async () => {
-        await pageObjects.infraHome.clickAlertsAndRules();
-        await pageObjects.infraHome.ensurePopoverOpened();
-        await pageObjects.infraHome.ensureCustomThresholdAlertMenuItemIsVisible();
-        await pageObjects.infraHome.clickAlertsAndRules();
+      it('is hidden', async () => {
+        await pageObjects.infraHome.ensureAlertsAndRulesDropdownIsMissing();
       });
     });
   });

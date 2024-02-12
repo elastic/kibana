@@ -16,9 +16,9 @@ import {
   getRulesSchemaMock,
 } from '../../../../common/api/detection_engine/model/rule_schema/mocks';
 import {
-  BulkActionType,
-  BulkActionEditType,
-} from '../../../../common/api/detection_engine/rule_management/bulk_actions/bulk_actions_route';
+  BulkActionTypeEnum,
+  BulkActionEditTypeEnum,
+} from '../../../../common/api/detection_engine/rule_management';
 import { rulesMock } from '../logic/mock';
 import type { FindRulesReferencedByExceptionsListProp } from '../logic/types';
 
@@ -701,7 +701,9 @@ describe('Detections Rules API', () => {
     });
 
     test('passes a query', async () => {
-      await performBulkAction({ bulkAction: { type: BulkActionType.enable, query: 'some query' } });
+      await performBulkAction({
+        bulkAction: { type: BulkActionTypeEnum.enable, query: 'some query' },
+      });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/api/detection_engine/rules/_bulk_action',
@@ -720,7 +722,7 @@ describe('Detections Rules API', () => {
 
     test('passes ids', async () => {
       await performBulkAction({
-        bulkAction: { type: BulkActionType.disable, ids: ['ruleId1', 'ruleId2'] },
+        bulkAction: { type: BulkActionTypeEnum.disable, ids: ['ruleId1', 'ruleId2'] },
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
@@ -741,10 +743,10 @@ describe('Detections Rules API', () => {
     test('passes edit payload', async () => {
       await performBulkAction({
         bulkAction: {
-          type: BulkActionType.edit,
+          type: BulkActionTypeEnum.edit,
           ids: ['ruleId1'],
           editPayload: [
-            { type: BulkActionEditType.add_index_patterns, value: ['some-index-pattern'] },
+            { type: BulkActionEditTypeEnum.add_index_patterns, value: ['some-index-pattern'] },
           ],
         },
       });
@@ -767,7 +769,7 @@ describe('Detections Rules API', () => {
 
     test('executes dry run', async () => {
       await performBulkAction({
-        bulkAction: { type: BulkActionType.disable, query: 'some query' },
+        bulkAction: { type: BulkActionTypeEnum.disable, query: 'some query' },
         dryRun: true,
       });
 
@@ -787,7 +789,7 @@ describe('Detections Rules API', () => {
     test('returns result', async () => {
       const result = await performBulkAction({
         bulkAction: {
-          type: BulkActionType.disable,
+          type: BulkActionTypeEnum.disable,
           query: 'some query',
         },
       });

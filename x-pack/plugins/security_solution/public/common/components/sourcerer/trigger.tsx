@@ -7,9 +7,9 @@
 
 import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
-import { EuiToolTip } from '@elastic/eui';
+import { EuiToolTip, EuiButton } from '@elastic/eui';
 import * as i18n from './translations';
-import { getTooltipContent, StyledBadge, StyledButton } from './helpers';
+import { getTooltipContent, StyledBadge, StyledButtonEmpty } from './helpers';
 import type { ModifiedTypes } from './use_pick_index_patterns';
 
 interface Props {
@@ -68,12 +68,17 @@ export const TriggerComponent: FC<Props> = ({
     }
   }, [isModified]);
 
+  const Button = useMemo(
+    () => (isTimelineSourcerer ? EuiButton : StyledButtonEmpty),
+    [isTimelineSourcerer]
+  );
+
   const trigger = useMemo(
     () => (
-      <StyledButton
+      <Button
         aria-label={i18n.DATA_VIEW}
         data-test-subj={isTimelineSourcerer ? 'timeline-sourcerer-trigger' : 'sourcerer-trigger'}
-        flush="left"
+        color="primary"
         iconSide="right"
         iconType="arrowDown"
         disabled={disabled}
@@ -83,9 +88,9 @@ export const TriggerComponent: FC<Props> = ({
       >
         {i18n.DATA_VIEW}
         {!disabled && badge}
-      </StyledButton>
+      </Button>
     ),
-    [disabled, badge, isTimelineSourcerer, loading, onClick]
+    [disabled, badge, isTimelineSourcerer, loading, onClick, Button]
   );
 
   const tooltipContent = useMemo(

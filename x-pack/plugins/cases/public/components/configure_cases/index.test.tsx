@@ -647,7 +647,7 @@ describe('ConfigureCases', () => {
       appMockRender.render(<ConfigureCases />);
 
       expect(
-        screen.getByTestId(`custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`)
+        screen.getByTestId(`custom-field-${customFieldsMock[0].key}-${customFieldsMock[0].type}`)
       ).toBeInTheDocument();
     });
 
@@ -666,7 +666,7 @@ describe('ConfigureCases', () => {
 
       for (const field of customFieldsConfigurationMock) {
         expect(
-          within(list).getByTestId(`custom-field-${field.label}-${field.type}`)
+          within(list).getByTestId(`custom-field-${field.key}-${field.type}`)
         ).toBeInTheDocument();
       }
     });
@@ -701,7 +701,11 @@ describe('ConfigureCases', () => {
             fields: null,
           },
           closureType: 'close-by-user',
-          customFields: [{ ...customFieldsConfigurationMock[1] }],
+          customFields: [
+            { ...customFieldsConfigurationMock[1] },
+            { ...customFieldsConfigurationMock[2] },
+            { ...customFieldsConfigurationMock[3] },
+          ],
           id: '',
           version: '',
         });
@@ -728,9 +732,7 @@ describe('ConfigureCases', () => {
       expect(await screen.findByTestId('custom-field-flyout')).toBeInTheDocument();
 
       userEvent.paste(screen.getByTestId('custom-field-label-input'), '!!');
-
-      userEvent.click(screen.getByTestId('text-custom-field-options'));
-
+      userEvent.click(screen.getByTestId('text-custom-field-required'));
       userEvent.click(screen.getByTestId('custom-field-flyout-save'));
 
       await waitFor(() => {
@@ -744,11 +746,15 @@ describe('ConfigureCases', () => {
           closureType: 'close-by-user',
           customFields: [
             {
-              ...customFieldsConfigurationMock[0],
+              key: customFieldsConfigurationMock[0].key,
+              type: customFieldsConfigurationMock[0].type,
               label: `${customFieldsConfigurationMock[0].label}!!`,
               required: !customFieldsConfigurationMock[0].required,
+              defaultValue: customFieldsConfigurationMock[0].defaultValue,
             },
             { ...customFieldsConfigurationMock[1] },
+            { ...customFieldsConfigurationMock[2] },
+            { ...customFieldsConfigurationMock[3] },
           ],
           id: '',
           version: '',

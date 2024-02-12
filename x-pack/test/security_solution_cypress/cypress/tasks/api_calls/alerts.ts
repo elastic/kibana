@@ -9,7 +9,7 @@ import {
   RuleObjectId,
   RuleSignatureId,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const DEFAULT_ALERTS_INDEX_PATTERN = '.alerts-security.alerts-*';
 

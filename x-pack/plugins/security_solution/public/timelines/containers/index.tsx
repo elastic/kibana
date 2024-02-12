@@ -23,7 +23,7 @@ import type { inputsModel } from '../../common/store';
 import type { RunTimeMappings } from '../../common/store/sourcerer/model';
 import { useKibana } from '../../common/lib/kibana';
 import { createFilter } from '../../common/containers/helpers';
-import { timelineActions } from '../store/timeline';
+import { timelineActions } from '../store';
 import { detectionsTimelineIds } from './helpers';
 import { getInspectResponse } from '../../helpers';
 import type {
@@ -54,7 +54,7 @@ export interface TimelineArgs {
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  updatedAt: number;
+  refreshedAt: number;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -176,7 +176,6 @@ export const useTimelineEventsHandler = ({
       clearSignalsState();
 
       if (id === TimelineId.active) {
-        activeTimeline.setExpandedDetail({});
         activeTimeline.setActivePage(newActivePage);
       }
       setActivePage(newActivePage);
@@ -190,13 +189,6 @@ export const useTimelineEventsHandler = ({
     }
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
-
-  const setUpdated = useCallback(
-    (updatedAt: number) => {
-      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
-    },
-    [dispatch, id]
-  );
 
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
@@ -212,14 +204,8 @@ export const useTimelineEventsHandler = ({
     },
     events: [],
     loadPage: wrappedLoadPage,
-    updatedAt: 0,
+    refreshedAt: 0,
   });
-
-  useEffect(() => {
-    if (timelineResponse.updatedAt !== 0) {
-      setUpdated(timelineResponse.updatedAt);
-    }
-  }, [setUpdated, timelineResponse.updatedAt]);
 
   const timelineSearch = useCallback(
     async (
@@ -255,10 +241,9 @@ export const useTimelineEventsHandler = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
-                    updatedAt: Date.now(),
+                    refreshedAt: Date.now(),
                   };
                   if (id === TimelineId.active) {
-                    activeTimeline.setExpandedDetail({});
                     activeTimeline.setPageName(pageName);
                     if (request.language === 'eql') {
                       activeTimeline.setEqlRequest(request as TimelineEqlRequestOptionsInput);
@@ -442,7 +427,7 @@ export const useTimelineEventsHandler = ({
         },
         events: [],
         loadPage: wrappedLoadPage,
-        updatedAt: 0,
+        refreshedAt: 0,
       });
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);

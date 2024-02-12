@@ -5,39 +5,18 @@
  * 2.0.
  */
 
-import { SearchResponseBody } from '@elastic/elasticsearch/lib/api/types';
-
 import { schema } from '@kbn/config-schema';
 
+import { fetchSearchResults } from '@kbn/search-index-documents/lib';
+
 import { ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } from '../../../common/constants';
+
 import { ErrorCode } from '../../../common/types/error_codes';
 
-import { fetchSearchResults } from '../../lib/fetch_search_results';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
-
-const calculateMeta = (searchResults: SearchResponseBody, page: number, size: number) => {
-  let totalResults = 0;
-  if (searchResults.hits.total === null || searchResults.hits.total === undefined) {
-    totalResults = 0;
-  } else if (typeof searchResults.hits.total === 'number') {
-    totalResults = searchResults.hits.total;
-  } else {
-    totalResults = searchResults.hits.total.value;
-  }
-  const totalPages = Math.ceil(totalResults / size) || 1;
-
-  return {
-    page: {
-      current: page,
-      size: searchResults.hits.hits.length,
-      total_pages: (Number.isFinite(totalPages) && totalPages) || 1,
-      total_results: totalResults,
-    },
-  };
-};
 
 export function registerSearchRoute({ router, log }: RouteDependencies) {
   router.post(
@@ -64,21 +43,14 @@ export function registerSearchRoute({ router, log }: RouteDependencies) {
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const indexName = decodeURIComponent(request.params.index_name);
       const searchQuery = request.body.searchQuery;
-      const { client } = (await context.core).elasticsearch;
+      const client = (await context.core).elasticsearch.client.asCurrentUser;
       const { page = 0, size = ENTERPRISE_SEARCH_DOCUMENTS_DEFAULT_DOC_COUNT } = request.query;
       const from = page * size;
       try {
-        const searchResults: SearchResponseBody = await fetchSearchResults(
-          client,
-          indexName,
-          searchQuery,
-          from,
-          size
-        );
+        const searchResults = await fetchSearchResults(client, indexName, searchQuery, from, size);
 
         return response.ok({
           body: {
-            meta: calculateMeta(searchResults, page, size),
             results: searchResults,
           },
           headers: { 'content-type': 'application/json' },

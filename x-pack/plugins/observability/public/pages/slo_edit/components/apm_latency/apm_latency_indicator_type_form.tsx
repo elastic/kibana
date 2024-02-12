@@ -9,12 +9,12 @@ import { EuiFieldNumber, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiIconTip } fro
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
+import { GroupByField } from '../common/group_by_field';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useFetchApmIndex } from '../../../../hooks/slo/use_fetch_apm_indices';
-import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
 import { FieldSelector } from '../apm_common/field_selector';
 import { DataPreviewChart } from '../common/data_preview_chart';
-import { IndexFieldSelector } from '../common/index_field_selector';
 import { QueryBuilder } from '../common/query_builder';
 
 export function ApmLatencyIndicatorTypeForm() {
@@ -27,9 +27,9 @@ export function ApmLatencyIndicatorTypeForm() {
     }
   }, [setValue, apmIndex]);
 
-  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
-    useFetchIndexPatternFields(apmIndex);
-  const partitionByFields = indexFields.filter((field) => field.aggregatable);
+  const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
+    indexPatternString: apmIndex,
+  });
 
   return (
     <EuiFlexGroup direction="column" gutterSize="l">
@@ -176,28 +176,7 @@ export function ApmLatencyIndicatorTypeForm() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      <IndexFieldSelector
-        indexFields={partitionByFields}
-        name="groupBy"
-        label={
-          <span>
-            {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-              defaultMessage: 'Partition by',
-            })}{' '}
-            <EuiIconTip
-              content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
-                defaultMessage: 'Create individual SLOs for each value of the selected field.',
-              })}
-              position="top"
-            />
-          </span>
-        }
-        placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-          defaultMessage: 'Select an optional field to partition by',
-        })}
-        isLoading={!!apmIndex && isIndexFieldsLoading}
-        isDisabled={!apmIndex}
-      />
+      <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
       <DataPreviewChart />
     </EuiFlexGroup>

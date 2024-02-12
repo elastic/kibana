@@ -15,13 +15,9 @@ import { useFetchSloDetails } from '../../hooks/slo/use_fetch_slo_details';
 import { BurnRateRuleParams, WindowSchema } from '../../typings';
 import { SloSelector } from './slo_selector';
 import { ValidationBurnRateRuleResult } from './validation';
-import { createNewWindow, Windows, calculateMaxBurnRateThreshold } from './windows';
-import {
-  ALERT_ACTION,
-  HIGH_PRIORITY_ACTION,
-  LOW_PRIORITY_ACTION,
-  MEDIUM_PRIORITY_ACTION,
-} from '../../../common/constants';
+import { createNewWindow, Windows } from './windows';
+import { BURN_RATE_DEFAULTS } from './constants';
+import { AlertTimeTable } from './alert_time_table';
 
 type Props = Pick<
   RuleTypeParamsExpressionProps<BurnRateRuleParams>,
@@ -31,62 +27,30 @@ type Props = Pick<
 
 export function BurnRateRuleEditor(props: Props) {
   const { setRuleParams, ruleParams, errors } = props;
-  const { isLoading: loadingInitialSlo, slo: initialSlo } = useFetchSloDetails({
+  const { data: initialSlo } = useFetchSloDetails({
     sloId: ruleParams?.sloId,
   });
 
   const [selectedSlo, setSelectedSlo] = useState<SLOResponse | undefined>(undefined);
+  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(ruleParams?.windows || []);
 
   useEffect(() => {
-    const hasInitialSlo = !loadingInitialSlo && initialSlo !== undefined;
-    setSelectedSlo(hasInitialSlo ? initialSlo : undefined);
-  }, [loadingInitialSlo, initialSlo, setRuleParams]);
+    setSelectedSlo(initialSlo);
+    setWindowDefs((previous) => {
+      if (previous.length > 0) {
+        return previous;
+      }
+      return createDefaultWindows(initialSlo);
+    });
+  }, [initialSlo]);
 
   const onSelectedSlo = (slo: SLOResponse | undefined) => {
     setSelectedSlo(slo);
+    setWindowDefs(() => {
+      return createDefaultWindows(slo);
+    });
     setRuleParams('sloId', slo?.id);
   };
-
-  const [windowDefs, setWindowDefs] = useState<WindowSchema[]>(
-    ruleParams?.windows || [
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 14.4,
-        longWindow: { value: 1, unit: 'h' },
-        shortWindow: { value: 5, unit: 'm' },
-        actionGroup: ALERT_ACTION.id,
-      }),
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 6,
-        longWindow: { value: 6, unit: 'h' },
-        shortWindow: { value: 30, unit: 'm' },
-        actionGroup: HIGH_PRIORITY_ACTION.id,
-      }),
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 3,
-        longWindow: { value: 24, unit: 'h' },
-        shortWindow: { value: 120, unit: 'm' },
-        actionGroup: MEDIUM_PRIORITY_ACTION.id,
-      }),
-      createNewWindow(selectedSlo, {
-        burnRateThreshold: 1,
-        longWindow: { value: 72, unit: 'h' },
-        shortWindow: { value: 360, unit: 'm' },
-        actionGroup: LOW_PRIORITY_ACTION.id,
-      }),
-    ]
-  );
-
-  // When the SLO changes, recalculate the max burn rates
-  useEffect(() => {
-    setWindowDefs((previous) =>
-      previous.map((windowDef) => {
-        return {
-          ...windowDef,
-          maxBurnRateThreshold: calculateMaxBurnRateThreshold(windowDef.longWindow, selectedSlo),
-        };
-      })
-    );
-  }, [selectedSlo]);
 
   useEffect(() => {
     setRuleParams('windows', windowDefs);
@@ -95,7 +59,11 @@ export function BurnRateRuleEditor(props: Props) {
   return (
     <>
       <EuiTitle size="xs">
-        <h5>Choose a SLO to monitor</h5>
+        <h5>
+          {i18n.translate('xpack.observability.burnRateRuleEditor.h5.chooseASLOToMonitorLabel', {
+            defaultMessage: 'Choose a SLO to monitor',
+          })}
+        </h5>
       </EuiTitle>
       <EuiSpacer size="s" />
       <SloSelector initialSlo={selectedSlo} onSelected={onSelectedSlo} errors={errors.sloId} />
@@ -107,24 +75,29 @@ export function BurnRateRuleEditor(props: Props) {
             size="s"
             title={i18n.translate('xpack.observability.slo.rules.groupByMessage', {
               defaultMessage:
-                'The SLO you selected has been created with a partition on "{groupByField}". This rule will monitor and generate an alert for every instance found in the partition field.',
+                'The SLO you selected has been created with a group-by on "{groupByField}". This rule will monitor and generate an alert for every instance found in the group-by field.',
               values: { groupByField: selectedSlo.groupBy },
             })}
           />
         </>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>Define multiple burn rate windows</h5>
-      </EuiTitle>
-      <EuiSpacer size="s" />
-      <Windows
-        slo={selectedSlo}
-        windows={windowDefs}
-        onChange={setWindowDefs}
-        errors={errors.windows}
-      />
-      <EuiSpacer size="m" />
+      {selectedSlo && (
+        <>
+          <Windows
+            slo={selectedSlo}
+            windows={windowDefs}
+            onChange={setWindowDefs}
+            errors={errors.windows}
+          />
+          <AlertTimeTable slo={selectedSlo} windows={windowDefs} />
+        </>
+      )}
     </>
   );
+}
+
+function createDefaultWindows(slo: SLOResponse | undefined) {
+  const burnRateDefaults = slo ? BURN_RATE_DEFAULTS[slo.timeWindow.duration] : [];
+  return burnRateDefaults.map((partialWindow) => createNewWindow(slo, partialWindow));
 }

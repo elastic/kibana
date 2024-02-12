@@ -19,5 +19,5 @@ export type {
   BulkDeleteRulesRequestBody as BulkDeleteRulesRequestBodyV1,
 } from './types/v1';
 
-export { validateCommonBulkOptions } from './validation/latest';
-export { validateCommonBulkOptions as validateCommonBulkOptionsV1 } from './validation/v1';
+export { validateBulkDeleteRulesBody } from './validation/latest';
+export { validateBulkDeleteRulesBody as validateBulkDeleteRulesBodyV1 } from './validation/v1';

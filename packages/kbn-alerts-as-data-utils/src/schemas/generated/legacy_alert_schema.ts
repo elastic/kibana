@@ -68,6 +68,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const LegacyAlertRequired = rt.type({
 });
+// prettier-ignore
 const LegacyAlertOptional = rt.partial({
   'ecs.version': schemaString,
   'kibana.alert.risk_score': schemaNumber,
@@ -96,6 +97,7 @@ const LegacyAlertOptional = rt.partial({
   'kibana.alert.suppression.terms.value': schemaStringArray,
   'kibana.alert.system_status': schemaString,
   'kibana.alert.workflow_reason': schemaString,
+  'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_user': schemaString,
 });
 

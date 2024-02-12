@@ -8,6 +8,8 @@
 import { IRouter } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { GetKnowledgeBaseStatusResponse } from '@kbn/elastic-assistant';
+
+import { getKbResource } from './get_kb_resource';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -20,6 +22,7 @@ import { ESQL_DOCS_LOADED_QUERY, ESQL_RESOURCE, KNOWLEDGE_BASE_INDEX_PATTERN } f
  * Get the status of the Knowledge Base index, pipeline, and resources (collection of documents)
  *
  * @param router IRouter for registering routes
+ * @param getElser Function to get the default Elser ID
  */
 export const getKnowledgeBaseStatusRoute = (
   router: IRouter<ElasticAssistantRequestHandlerContext>,
@@ -39,20 +42,22 @@ export const getKnowledgeBaseStatusRoute = (
     },
     async (context, request, response) => {
       const resp = buildResponse(response);
-      const logger = (await context.elasticAssistant).logger;
+      const assistantContext = await context.elasticAssistant;
+      const logger = assistantContext.logger;
+      const telemetry = assistantContext.telemetry;
 
       try {
-        const kbResource =
-          request.params.resource != null ? decodeURIComponent(request.params.resource) : undefined;
-
         // Get a scoped esClient for finding the status of the Knowledge Base index, pipeline, and documents
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
         const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+        const kbResource = getKbResource(request);
         const esStore = new ElasticsearchStore(
           esClient,
           KNOWLEDGE_BASE_INDEX_PATTERN,
           logger,
-          elserId
+          telemetry,
+          elserId,
+          kbResource
         );
 
         const indexExists = await esStore.indexExists();

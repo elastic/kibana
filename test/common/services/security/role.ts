@@ -18,7 +18,10 @@ export class Role {
     const { data, status, statusText } = await this.kibanaServer.request({
       path: `/api/security/role/${name}`,
       method: 'PUT',
-      body: role,
+      body: {
+        kibana: role.kibana,
+        elasticsearch: role.elasticsearch,
+      },
       retries: 0,
     });
     if (status !== 204) {

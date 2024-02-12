@@ -17,7 +17,7 @@ export const useIsGuidedOnboardingActive = (packageName?: string): boolean => {
   const { guidedOnboarding } = useStartServices();
   const isGuidedOnboardingActiveForIntegration = useObservable(
     // if guided onboarding is not available, return false
-    guidedOnboarding.guidedOnboardingApi
+    guidedOnboarding?.guidedOnboardingApi
       ? guidedOnboarding.guidedOnboardingApi.isGuidedOnboardingActiveForIntegration$(packageName)
       : of(false)
   );

@@ -6,7 +6,8 @@
  */
 
 import { getBuckets } from './get_buckets';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { ApmDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 
 describe('get buckets', () => {
   let clientSpy: jest.Mock;
@@ -42,6 +43,11 @@ describe('get buckets', () => {
 
   it('should limit query results to error documents', () => {
     const query = clientSpy.mock.calls[0][1];
-    expect(query.apm.events).toEqual([ProcessorEvent.error]);
+    expect(query.apm.sources).toEqual([
+      {
+        documentType: ApmDocumentType.ErrorEvent,
+        rollupInterval: RollupInterval.None,
+      },
+    ]);
   });
 });

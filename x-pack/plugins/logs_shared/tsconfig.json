@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
   },
   "include": ["../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*", "types/**/*"],
   "exclude": ["target/**/*"],
@@ -27,5 +27,8 @@
     "@kbn/core-http-browser",
     "@kbn/ui-actions-plugin",
     "@kbn/observability-ai-assistant-plugin",
+    "@kbn/deeplinks-observability",
+    "@kbn/share-plugin",
+    "@kbn/shared-ux-utility"
   ]
 }

@@ -18,6 +18,7 @@ describe('configureTextCustomFieldFactory ', () => {
     expect(builder).toEqual({
       id: 'text',
       label: 'Text',
+      getEuiTableColumn: expect.any(Function),
       build: expect.any(Function),
     });
   });

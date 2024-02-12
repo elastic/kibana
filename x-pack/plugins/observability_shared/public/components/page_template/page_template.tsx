@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiSideNavItemType, EuiPageSectionProps, EuiErrorBoundary } from '@elastic/eui';
+import { EuiSideNavItemType, EuiPageSectionProps } from '@elastic/eui';
 import { _EuiPageBottomBarProps } from '@elastic/eui/src/components/page_template/bottom_bar/page_bottom_bar';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
@@ -14,6 +14,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import {
   KibanaPageTemplate,
   KibanaPageTemplateKibanaProvider,
@@ -23,6 +24,7 @@ import type {
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template';
 import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
+import { SearchBarPortal } from './search_bar_portal';
 import { ObservabilityTour } from '../tour';
 import { NavNameWithBadge, hideBadge } from './nav_name_with_badge';
 import { NavNameWithBetaBadge } from './nav_name_with_beta_badge';
@@ -36,6 +38,7 @@ export type WrappedPageTemplateProps = Pick<
   pageSectionProps?: EuiPageSectionProps;
   bottomBar?: React.ReactNode;
   bottomBarProps?: _EuiPageBottomBarProps;
+  topSearchBar?: React.ReactNode;
 };
 
 export interface NavigationEntry {
@@ -101,6 +104,7 @@ export function ObservabilityPageTemplate({
   bottomBarProps,
   pageSectionProps,
   guidedOnboardingApi,
+  topSearchBar,
   ...pageTemplateProps
 }: ObservabilityPageTemplateProps): React.ReactElement | null {
   const sections = useObservable(navigationSections$, []);
@@ -208,15 +212,18 @@ export function ObservabilityPageTemplate({
                   : undefined
               }
             >
-              <EuiErrorBoundary>
-                <KibanaPageTemplate.Section
-                  component="div"
-                  alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
-                  {...pageSectionProps}
-                >
-                  {children}
-                </KibanaPageTemplate.Section>
-              </EuiErrorBoundary>
+              <KibanaErrorBoundaryProvider analytics={services.analytics}>
+                <KibanaErrorBoundary>
+                  <KibanaPageTemplate.Section
+                    component="div"
+                    alignment={pageTemplateProps.isEmptyState ? 'center' : 'top'}
+                    {...pageSectionProps}
+                  >
+                    {topSearchBar && <SearchBarPortal>{topSearchBar}</SearchBarPortal>}
+                    {children}
+                  </KibanaPageTemplate.Section>
+                </KibanaErrorBoundary>
+              </KibanaErrorBoundaryProvider>
               {bottomBar && (
                 <KibanaPageTemplate.BottomBar {...bottomBarProps}>
                   {bottomBar}

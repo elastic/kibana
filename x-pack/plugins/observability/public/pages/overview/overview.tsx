@@ -73,8 +73,10 @@ export function OverviewPage() {
 
   const [esQuery, setEsQuery] = useState<{ bool: BoolQuery }>(
     buildEsQuery({
-      from: relativeStart,
-      to: relativeEnd,
+      timeRange: {
+        from: relativeStart,
+        to: relativeEnd,
+      },
     })
   );
 
@@ -102,15 +104,16 @@ export function OverviewPage() {
   );
 
   const chartProps = {
-    theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
   };
 
   useEffect(() => {
     setEsQuery(
       buildEsQuery({
-        from: relativeStart,
-        to: relativeEnd,
+        timeRange: {
+          from: relativeStart,
+          to: relativeEnd,
+        },
       })
     );
   }, [relativeEnd, relativeStart]);
@@ -118,8 +121,10 @@ export function OverviewPage() {
   const handleTimeRangeRefresh = useCallback(() => {
     setEsQuery(
       buildEsQuery({
-        from: relativeStart,
-        to: relativeEnd,
+        timeRange: {
+          from: relativeStart,
+          to: relativeEnd,
+        },
       })
     );
   }, [relativeEnd, relativeStart]);
@@ -188,13 +193,11 @@ export function OverviewPage() {
             <AlertsStateTable
               alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
               configurationId={AlertConsumers.OBSERVABILITY}
-              flyoutSize="s"
               featureIds={observabilityAlertFeatureIds}
               hideLazyLoader
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
               query={esQuery}
-              showExpandToDetails={false}
               showAlertStatusWithFlapping
             />
           </SectionContainer>

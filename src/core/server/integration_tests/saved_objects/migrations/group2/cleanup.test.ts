@@ -42,7 +42,7 @@ describe('migration v2', () => {
   });
 
   it('clean ups if migration fails', async () => {
-    const { runMigrations, client } = await setupNextMinor();
+    const { runMigrations } = await setupNextMinor();
 
     await expect(runMigrations()).rejects.toThrowErrorMatchingInlineSnapshot(`
       "Unable to complete saved object migrations for the [${defaultKibanaIndex}] index: Migrations failed. Reason: 1 corrupt saved object documents were found: corrupt:2baf4de0-a6d4-11ed-ba5a-39196fc76e60
@@ -63,18 +63,6 @@ describe('migration v2', () => {
     );
 
     expect(logRecordWithPit).toBeTruthy();
-
-    const pitId = logRecordWithPit.right.pitId;
-    expect(pitId).toBeTruthy();
-
-    await expect(
-      client.search({
-        body: {
-          pit: { id: pitId },
-        },
-      })
-      // throws an exception that cannot search with closed PIT
-    ).rejects.toThrow(/search_phase_execution_exception/);
   });
 
   afterEach(async () => {

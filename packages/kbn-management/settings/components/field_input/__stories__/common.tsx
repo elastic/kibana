@@ -75,7 +75,16 @@ export const getStory = (title: string, description: string) =>
     },
     decorators: [
       (Story) => (
-        <FieldInputProvider showDanger={action('showDanger')}>
+        <FieldInputProvider
+          showDanger={action('showDanger')}
+          validateChange={async (key, value) => {
+            action(`validateChange`)({
+              key,
+              value,
+            });
+            return { successfulValidation: true, valid: true };
+          }}
+        >
           <EuiPanel style={{ width: 500 }}>
             <Story />
           </EuiPanel>

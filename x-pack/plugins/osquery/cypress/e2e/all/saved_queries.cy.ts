@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import {
+  ADD_QUERY_BUTTON,
+  customActionEditSavedQuerySelector,
+  customActionRunSavedQuerySelector,
+  EDIT_PACK_HEADER_BUTTON,
+  SAVED_QUERY_DROPDOWN_SELECT,
+} from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
   checkResults,
   deleteAndConfirm,
-  findAndClickButton,
-  findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -19,10 +25,17 @@ import {
 } from '../../tasks/live_query';
 import { navigateTo } from '../../tasks/navigation';
 import { getSavedQueriesComplexTest } from '../../tasks/saved_queries';
-import { loadCase, cleanupCase, loadPack, cleanupPack } from '../../tasks/api_fixtures';
+import {
+  loadCase,
+  cleanupCase,
+  loadPack,
+  cleanupPack,
+  loadSavedQuery,
+  cleanupSavedQuery,
+} from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
 
-describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
   let caseId: string;
 
   before(() => {
@@ -46,7 +59,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
 
-    findFormFieldByRowsLabelAndType('ID', 'users_elastic');
+    cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
+
     cy.contains('ID must be unique').should('not.exist');
     inputQuery('test');
     cy.contains('Save query').click();
@@ -65,6 +79,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
   describe('prebuilt', () => {
     let packName: string;
     let packId: string;
+    let savedQueryId: string;
 
     before(() => {
       loadPack({
@@ -79,6 +94,9 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
         packId = data.saved_object_id;
         packName = data.name;
       });
+      loadSavedQuery().then((data) => {
+        savedQueryId = data.saved_object_id;
+      });
     });
 
     beforeEach(() => {
@@ -90,21 +108,18 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
 
     after(() => {
       cleanupPack(packId);
+      cleanupSavedQuery(savedQueryId);
     });
 
     it('checks result type on prebuilt saved query', () => {
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { id: 'users_elastic' } },
-      }).click();
+      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
       });
     });
 
     it('user can run prebuilt saved query and add to case', () => {
-      cy.react('PlayButtonComponent', {
-        props: { savedQuery: { id: 'users_elastic' } },
-      }).click();
+      cy.get(customActionRunSavedQuerySelector('users_elastic')).click();
 
       selectAllAgents();
       submitQuery();
@@ -113,42 +128,31 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
       viewRecentCaseAndCheckResults();
     });
 
-    it('user cant delete prebuilt saved query', () => {
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { id: 'users_elastic' } },
-      }).click();
+    it('user can not delete prebuilt saved query but can delete normal saved query', () => {
+      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.contains('Delete query').should('not.exist');
-      navigateTo('/app/osquery/saved_queries');
+      navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 
-      cy.contains('Add saved query').click();
-      inputQuery('test');
-      findFormFieldByRowsLabelAndType('ID', 'query-to-delete');
-      cy.contains('Save query').click();
-      cy.react('CustomItemAction', {
-        props: { index: 1, item: { id: 'query-to-delete' } },
-      }).click();
       deleteAndConfirm('query');
     });
 
     it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
-      findAndClickButton('Edit');
+      cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);
-      findAndClickButton('Add query');
-      cy.contains('Attach next query');
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
-      cy.react('EuiComboBox', {
-        props: { placeholder: 'Search for a query to run, or write a new query below' },
-      })
-        .click()
-        .type('users_elastic{downArrow} {enter}');
+      cy.contains('Attach next query');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('users_elastic{downArrow} {enter}');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
       cy.contains('Unique identifier of the us').should('exist');
       cy.contains('User ID').should('exist');
 
-      cy.react('EuiFlyoutBody').within(() => {
+      cy.get(`[aria-labelledby="flyoutTitle"]`).within(() => {
         cy.getBySel('ECSMappingEditorForm')
           .first()
           .within(() => {
@@ -157,16 +161,15 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless', '@brokenInServer
       });
       cy.contains('Unique identifier of the us').should('not.exist');
       cy.contains('User ID').should('not.exist');
-      cy.react('EuiFlyoutFooter').react('EuiButton').contains('Save').click();
+      cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Save').click();
 
-      cy.react('CustomItemAction', {
-        props: { index: 0, item: { id: 'users_elastic' } },
-      }).click();
+      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
+
       cy.contains('SELECT * FROM users;where name=1');
       cy.contains('Unique identifier of the us.').should('not.exist');
       cy.contains('User ID').should('not.exist');
       cy.contains('Differential (Ignore removals)').should('exist');
-      cy.react('EuiFlyoutFooter').react('EuiButtonEmpty').contains('Cancel').click();
+      cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Cancel').click();
     });
   });
 });

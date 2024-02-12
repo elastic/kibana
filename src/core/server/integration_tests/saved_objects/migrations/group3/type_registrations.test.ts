@@ -29,6 +29,7 @@ const previouslyRegisteredTypes = [
   'canvas-element',
   'canvas-workpad',
   'canvas-workpad-template',
+  'cloud-security-posture-settings',
   'cases',
   'cases-comments',
   'cases-configure',

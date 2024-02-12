@@ -38,7 +38,7 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-ibmmq.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/ibmmq.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/ibmmq.svg'),
     artifacts: {
       dashboards: [
         {
@@ -54,7 +54,7 @@ export function ibmmqLogsSpecProvider(context: TutorialContext): TutorialSchema 
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/ibmmq_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/ibmmq_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

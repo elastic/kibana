@@ -17,16 +17,19 @@ import { DocViewsRegistry } from '../..';
 describe('<DocViewer />', () => {
   test('Render <DocViewer/> with 3 different tabs', () => {
     const registry = new DocViewsRegistry();
-    registry.addDocView({ order: 10, title: 'Render function', render: jest.fn() });
-    registry.addDocView({ order: 20, title: 'React component', component: () => <div>test</div> });
+    registry.add({ id: 'function', order: 10, title: 'Render function', render: jest.fn() });
+    registry.add({
+      id: 'component',
+      order: 20,
+      title: 'React component',
+      component: () => <div>test</div>,
+    });
     // @ts-expect-error This should be invalid and will throw an error when rendering
-    registry.addDocView({ order: 30, title: 'Invalid doc view' });
+    registry.add({ id: 'invalid', order: 30, title: 'Invalid doc view' });
 
     const renderProps = { hit: {} } as DocViewRenderProps;
 
-    const wrapper = shallow(
-      <DocViewer docViews={registry.getDocViewsSorted(renderProps.hit)} {...renderProps} />
-    );
+    const wrapper = shallow(<DocViewer docViews={registry.getAll()} {...renderProps} />);
 
     expect(wrapper).toMatchSnapshot();
   });
@@ -38,7 +41,8 @@ describe('<DocViewer />', () => {
     }
 
     const registry = new DocViewsRegistry();
-    registry.addDocView({
+    registry.add({
+      id: 'component',
       order: 10,
       title: 'React component',
       component: SomeComponent,
@@ -49,9 +53,7 @@ describe('<DocViewer />', () => {
     } as DocViewRenderProps;
     const errorMsg = 'Catch me if you can!';
 
-    const wrapper = mount(
-      <DocViewer docViews={registry.getDocViewsSorted(renderProps.hit)} {...renderProps} />
-    );
+    const wrapper = mount(<DocViewer docViews={registry.getAll()} {...renderProps} />);
     const error = new Error(errorMsg);
     wrapper.find(SomeComponent).simulateError(error);
     const errorMsgComponent = findTestSubject(wrapper, 'docViewerError');

@@ -70,4 +70,49 @@ describe('Cards Navigation', () => {
       expect(dataPipelinesApp).toBeNull();
     });
   });
+
+  describe('extending card navigation definition', () => {
+    test('does not render a card for a definition that specifies an invalid app id', () => {
+      const invalidAppId = 'some-invalid-app-id';
+
+      renderCardsNavigationComponent({
+        sections: sectionsMock,
+        appBasePath: APP_BASE_PATH,
+        extendedCardNavigationDefinitions: {
+          [invalidAppId]: {
+            icon: 'launch',
+            description: 'Invalid app not part of any registered management section',
+            category: 'other',
+          },
+        },
+      });
+
+      const invalidAppCard = screen.queryByTestId(`app-card-${invalidAppId}`);
+
+      expect(invalidAppCard).toBeNull();
+    });
+
+    test("renders a card for a definition that specifies any key, given the skipValidation property has a value of 'true'", () => {
+      const notManagementAppId = 'some-external-app';
+
+      renderCardsNavigationComponent({
+        sections: sectionsMock,
+        appBasePath: APP_BASE_PATH,
+        extendedCardNavigationDefinitions: {
+          [notManagementAppId]: {
+            icon: 'launch',
+            description: 'Invalid app not part of any registered management section',
+            category: 'other',
+            skipValidation: true,
+            title: 'Some external app',
+            href: '/path-to-said-external-app',
+          },
+        },
+      });
+
+      const externalAppCard = screen.queryByTestId(`app-card-${notManagementAppId}`);
+
+      expect(externalAppCard).not.toBeNull();
+    });
+  });
 });

@@ -13,13 +13,27 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { SLOEmbeddable, SLO_EMBEDDABLE } from './slo_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import type { SloEmbeddableInput } from './types';
 
+export const COMMON_SLO_GROUPING = [
+  {
+    id: 'slos',
+    getDisplayName: () => 'SLOs',
+    getIconType: () => {
+      return 'visGauge';
+    },
+  },
+];
 export type SloOverviewEmbeddableFactory = EmbeddableFactory;
-export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+export class SloOverviewEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition, IProvidesPanelPlacementSettings<SloEmbeddableInput>
+{
   public readonly type = SLO_EMBEDDABLE;
+
+  public readonly grouping = COMMON_SLO_GROUPING;
 
   constructor(
     private getStartServices: CoreSetup<
@@ -42,14 +56,20 @@ export class SloOverviewEmbeddableFactoryDefinition implements EmbeddableFactory
     }
   }
 
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+    SloEmbeddableInput,
+    unknown
+  >['getPanelPlacementSettings'] = (input) => {
+    if (input.showAllGroupByInstances) {
+      return { width: 24, height: 8 };
+    }
+    return { width: 12, height: 8 };
+  };
+
   public async create(initialInput: SloEmbeddableInput, parent?: IContainer) {
     try {
-      const [{ uiSettings, application, http, i18n: i18nService }] = await this.getStartServices();
-      return new SLOEmbeddable(
-        { uiSettings, application, http, i18n: i18nService },
-        initialInput,
-        parent
-      );
+      const [coreStart, pluginStart] = await this.getStartServices();
+      return new SLOEmbeddable({ ...coreStart, ...pluginStart }, initialInput, parent);
     } catch (e) {
       return new ErrorEmbeddable(e, initialInput, parent);
     }

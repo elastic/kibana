@@ -23,7 +23,6 @@ import { visit } from '../../../../tasks/navigation';
 
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import { createRule } from '../../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../../tasks/common';
 import {
   getExistingRule,
   getNewOverrideRule,
@@ -37,10 +36,8 @@ import {
 } from '../../../../tasks/table_pagination';
 import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Rules table: sorting', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Rules table: sorting', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     createRule(getNewRule({ rule_id: '1', enabled: false }));
     createRule(getExistingRule({ rule_id: '2', enabled: false }));

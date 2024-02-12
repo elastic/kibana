@@ -76,7 +76,6 @@ it(`#setup returns exposed services`, () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
-    buildNumber: 42,
     features: mockFeaturesSetup,
     getSpacesService: mockGetSpacesService,
     getCurrentUser: jest.fn(),
@@ -116,7 +115,9 @@ it(`#setup returns exposed services`, () => {
   expect(authorizationModeFactory).toHaveBeenCalledWith(mockLicense);
 
   expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
-  expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function));
+  expect(mockCoreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function), {
+    capabilityPath: '*',
+  });
 });
 
 describe('#start', () => {
@@ -136,7 +137,6 @@ describe('#start', () => {
       loggers: loggingSystemMock.create(),
       kibanaIndexName,
       packageVersion: 'some-version',
-      buildNumber: 42,
       features: featuresPluginMock.createSetup(),
       getSpacesService: jest
         .fn()
@@ -209,7 +209,6 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     loggers: loggingSystemMock.create(),
     kibanaIndexName,
     packageVersion: 'some-version',
-    buildNumber: 42,
     features: featuresPluginMock.createSetup(),
     getSpacesService: jest
       .fn()

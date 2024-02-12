@@ -2865,6 +2865,12 @@
                 "description": "Total number of services utilizing the opentelemetry/swift agent within the last day"
               }
             },
+            "opentelemetry/android": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of services utilizing the opentelemetry/android agent within the last day"
+              }
+            },
             "opentelemetry/webjs": {
               "type": "long",
               "_meta": {
@@ -4230,10 +4236,16 @@
             }
           }
         },
+        "has_any_services_per_official_agent": {
+          "type": "boolean",
+          "_meta": {
+            "description": "Indicates whether any service is being monitored. This is determined by checking all officially supported agents within the last day"
+          }
+        },
         "has_any_services": {
           "type": "boolean",
           "_meta": {
-            "description": "Indicates whether any service is being monitored. This is determined by checking all agents within the last day"
+            "description": "Indicates whether any service is being monitored within the last day."
           }
         },
         "version": {
@@ -6988,6 +7000,86 @@
                       "type": "long"
                     }
                   }
+                },
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
+                }
+              }
+            },
+            "main": {
+              "properties": {
+                "customFields": {
+                  "properties": {
+                    "totalsByType": {
+                      "properties": {
+                        "DYNAMIC_KEY": {
+                          "type": "long"
+                        }
+                      }
+                    },
+                    "totals": {
+                      "type": "long"
+                    },
+                    "required": {
+                      "type": "long"
+                    }
+                  }
                 }
               }
             }
@@ -7019,6 +7111,12 @@
           "type": "keyword",
           "_meta": {
             "description": "The Serverless Project ID"
+          }
+        },
+        "projectType": {
+          "type": "keyword",
+          "_meta": {
+            "description": "The Serverless Project type"
           }
         }
       }
@@ -7680,6 +7778,25 @@
                   }
                 }
               },
+              "posture_management_stats_enabled_rules": {
+                "properties": {
+                  "posture_score": {
+                    "type": "long"
+                  },
+                  "benchmark_name": {
+                    "type": "keyword"
+                  },
+                  "benchmark_version": {
+                    "type": "keyword"
+                  },
+                  "passed_findings_count": {
+                    "type": "long"
+                  },
+                  "failed_findings_count": {
+                    "type": "long"
+                  }
+                }
+              },
               "kspm_stats": {
                 "properties": {
                   "kubernetes_version": {
@@ -7695,7 +7812,80 @@
                     "type": "short"
                   }
                 }
+              },
+              "has_muted_rules": {
+                "type": "boolean"
               }
+            }
+          }
+        },
+        "muted_rules_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword"
+              },
+              "name": {
+                "type": "keyword"
+              },
+              "section": {
+                "type": "keyword"
+              },
+              "benchmark_id": {
+                "type": "keyword"
+              },
+              "benchmark_name": {
+                "type": "keyword"
+              },
+              "benchmark_version": {
+                "type": "keyword"
+              },
+              "rule_number": {
+                "type": "keyword"
+              },
+              "posture_type": {
+                "type": "keyword"
+              },
+              "version": {
+                "type": "keyword"
+              }
+            }
+          }
+        }
+      }
+    },
+    "connectors": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        }
+      }
+    },
+    "connectors_serverless": {
+      "properties": {
+        "native": {
+          "properties": {
+            "total": {
+              "type": "long"
+            }
+          }
+        },
+        "clients": {
+          "properties": {
+            "total": {
+              "type": "long"
             }
           }
         }
@@ -8164,6 +8354,34 @@
                   "type": "long",
                   "_meta": {
                     "description": "total number of es machine learning anomaly layers in cluster"
+                  }
+                }
+              }
+            },
+            "esql": {
+              "properties": {
+                "min": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "min number of ES|QL layers per map"
+                  }
+                },
+                "max": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "max number of ES|QL layers per map"
+                  }
+                },
+                "avg": {
+                  "type": "float",
+                  "_meta": {
+                    "description": "avg number of ES|QL layers per map"
+                  }
+                },
+                "total": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "total number of ES|QL layers in cluster"
                   }
                 }
               }
@@ -12382,6 +12600,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12433,6 +12657,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12486,6 +12716,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12537,6 +12773,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12590,6 +12832,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12641,6 +12889,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }
@@ -12694,6 +12948,12 @@
                           "_meta": {
                             "description": "Number of notifications enabled"
                           }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
+                          }
                         }
                       }
                     },
@@ -12745,6 +13005,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of notifications enabled"
+                          }
+                        },
+                        "legacy_investigation_fields": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of rules using the legacy investigation fields type introduced only in 8.10 ESS"
                           }
                         }
                       }

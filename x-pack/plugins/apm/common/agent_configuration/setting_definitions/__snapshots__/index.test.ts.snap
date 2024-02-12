@@ -73,6 +73,11 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "context_propagation_only",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "dedot_custom_metrics",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",

@@ -345,3 +345,45 @@ describe('#stop', () => {
     await batchSetPromise;
   });
 });
+
+describe('#validate', () => {
+  it('sends a validation request', async () => {
+    fetchMock.mock('*', {
+      body: { errorMessage: 'Test validation error message.' },
+    });
+
+    const { uiSettingsApi } = setup();
+    await uiSettingsApi.validate('foo', 'bar');
+    expect(fetchMock.calls()).toMatchSnapshot('validation request');
+  });
+
+  it('rejects on 404 response', async () => {
+    fetchMock.mock('*', {
+      status: 404,
+      body: 'not found',
+    });
+
+    const { uiSettingsApi } = setup();
+    await expect(uiSettingsApi.validate('foo', 'bar')).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('rejects on 301', async () => {
+    fetchMock.mock('*', {
+      status: 301,
+      body: 'redirect',
+    });
+
+    const { uiSettingsApi } = setup();
+    await expect(uiSettingsApi.validate('foo', 'bar')).rejects.toThrowErrorMatchingSnapshot();
+  });
+
+  it('rejects on 500', async () => {
+    fetchMock.mock('*', {
+      status: 500,
+      body: 'redirect',
+    });
+
+    const { uiSettingsApi } = setup();
+    await expect(uiSettingsApi.validate('foo', 'bar')).rejects.toThrowErrorMatchingSnapshot();
+  });
+});

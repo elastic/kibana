@@ -16,6 +16,7 @@ import {
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchCrawlerByIndexName } from '../crawler/fetch_crawlers';
+import { generateApiKey } from '../indices/generate_api_key';
 import { textAnalysisSettings } from '../indices/text_analysis';
 
 import { addConnector } from './add_connector';
@@ -26,6 +27,7 @@ jest.mock('@kbn/search-connectors', () => ({
   fetchConnectorByIndexName: jest.fn(),
 }));
 jest.mock('../crawler/fetch_crawlers', () => ({ fetchCrawlerByIndexName: jest.fn() }));
+jest.mock('../indices/generate_api_key', () => ({ generateApiKey: jest.fn() }));
 
 describe('addConnector lib function', () => {
   const mockClient = {
@@ -52,7 +54,7 @@ describe('addConnector lib function', () => {
             default_extract_binary_content: true,
             default_name: 'ent-search-generic-ingestion',
             default_reduce_whitespace: true,
-            default_run_ml_inference: false,
+            default_run_ml_inference: true,
           },
           version: '1',
         },
@@ -70,6 +72,7 @@ describe('addConnector lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
+    (generateApiKey as jest.Mock).mockImplementation(() => undefined);
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -87,7 +90,7 @@ describe('addConnector lib function', () => {
         extract_binary_content: true,
         name: 'ent-search-generic-ingestion',
         reduce_whitespace: true,
-        run_ml_inference: false,
+        run_ml_inference: true,
       },
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
@@ -95,6 +98,53 @@ describe('addConnector lib function', () => {
       mappings: {},
       settings: { ...textAnalysisSettings('fr'), auto_expand_replicas: '0-3', number_of_shards: 2 },
     });
+
+    // non-native connector should not generate API key or update secrets storage
+    expect(generateApiKey).toBeCalledTimes(0);
+  });
+
+  it('should add a native connector', async () => {
+    mockClient.asCurrentUser.index.mockImplementation(() => ({ _id: 'fakeId' }));
+    (createConnector as jest.Mock).mockImplementation(() => ({
+      id: 'fakeId',
+      index_name: 'index_name',
+    }));
+    mockClient.asCurrentUser.indices.exists.mockImplementation(() => false);
+    (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => undefined);
+    (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
+    mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
+    (generateApiKey as jest.Mock).mockImplementation(() => ({
+      id: 'api-key-id',
+      encoded: 'encoded-api-key',
+    }));
+
+    await expect(
+      addConnector(mockClient as unknown as IScopedClusterClient, {
+        indexName: 'index_name',
+        isNative: true,
+        language: 'ja',
+      })
+    ).resolves.toEqual(expect.objectContaining({ id: 'fakeId', index_name: 'index_name' }));
+    expect(createConnector).toHaveBeenCalledWith(mockClient.asCurrentUser, {
+      indexName: 'index_name',
+      isNative: true,
+      language: 'ja',
+      name: 'index_name',
+      pipeline: {
+        extract_binary_content: true,
+        name: 'ent-search-generic-ingestion',
+        reduce_whitespace: true,
+        run_ml_inference: true,
+      },
+    });
+    expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({
+      index: 'index_name',
+      mappings: {},
+      settings: { ...textAnalysisSettings('ja'), auto_expand_replicas: '0-3', number_of_shards: 2 },
+    });
+
+    // native connector should generate API key and update secrets storage
+    expect(generateApiKey).toHaveBeenCalledWith(mockClient, 'index_name', true, null);
   });
 
   it('should reject if index already exists', async () => {
@@ -185,6 +235,10 @@ describe('addConnector lib function', () => {
     (fetchConnectorByIndexName as jest.Mock).mockImplementation(() => ({ id: 'connectorId' }));
     (fetchCrawlerByIndexName as jest.Mock).mockImplementation(() => undefined);
     mockClient.asCurrentUser.indices.getMapping.mockImplementation(() => connectorsIndicesMapping);
+    (generateApiKey as jest.Mock).mockImplementation(() => ({
+      id: 'api-key-id',
+      encoded: 'encoded-api-key',
+    }));
 
     await expect(
       addConnector(mockClient as unknown as IScopedClusterClient, {
@@ -205,7 +259,7 @@ describe('addConnector lib function', () => {
         extract_binary_content: true,
         name: 'ent-search-generic-ingestion',
         reduce_whitespace: true,
-        run_ml_inference: false,
+        run_ml_inference: true,
       },
     });
     expect(mockClient.asCurrentUser.indices.create).toHaveBeenCalledWith({

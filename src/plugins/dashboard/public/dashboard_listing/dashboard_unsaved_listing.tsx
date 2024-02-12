@@ -156,7 +156,10 @@ export const DashboardUnsavedListing = ({
       const newItems = results.reduce((map, result) => {
         if (result.status === 'error') {
           hasError = true;
-          dashboardBackup.clearState(result.id);
+          if (result.error.statusCode === 404) {
+            // Save object not found error
+            dashboardBackup.clearState(result.id);
+          }
           return map;
         }
         return {
@@ -170,6 +173,7 @@ export const DashboardUnsavedListing = ({
       }
       setItems(newItems);
     });
+
     return () => {
       canceled = true;
     };
@@ -179,6 +183,7 @@ export const DashboardUnsavedListing = ({
     <>
       <EuiCallOut
         heading="h3"
+        data-test-subj="unsavedDashboardsCallout"
         title={dashboardUnsavedListingStrings.getUnsavedChangesTitle(
           unsavedDashboardIds.length > 1
         )}

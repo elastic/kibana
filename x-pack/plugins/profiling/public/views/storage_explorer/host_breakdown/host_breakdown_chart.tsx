@@ -15,6 +15,7 @@ import {
 } from '@elastic/charts';
 import { asDynamicBytes } from '@kbn/observability-plugin/common';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
 import type { StorageExplorerHostDetailsTimeseries } from '../../../../common/storage_explorer';
 import { useKibanaTimeZoneSetting } from '../../../hooks/use_kibana_timezone_setting';
 import { useProfilingChartsTheme } from '../../../hooks/use_profiling_charts_theme';
@@ -53,6 +54,7 @@ export function HostBreakdownChart({ data = [] }: Props) {
         legendPosition={Position.Right}
         baseTheme={chartsBaseTheme}
         theme={chartsTheme}
+        locale={i18n.getLocale()}
       />
       <Axis
         id="x-axis"

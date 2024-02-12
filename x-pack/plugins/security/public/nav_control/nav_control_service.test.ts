@@ -77,43 +77,40 @@ describe('SecurityNavControlService', () => {
       <div>
         <div
           css="You have tried to stringify object returned from \`css\` function. It isn't supposed to be used directly (e.g. as value of the \`className\` prop), but rather handed to emotion so it can handle it (e.g. as value of \`css\` prop)."
+          data-test-subj="kbnRedirectAppLink"
         >
           <div
-            class="euiPopover emotion-euiPopover"
+            class="euiPopover emotion-euiPopover-inline-block"
             id="headerUserMenu"
           >
-            <div
-              class="euiPopover__anchor css-16vtueo-render"
+            <button
+              aria-controls="headerUserMenu"
+              aria-expanded="false"
+              aria-haspopup="true"
+              aria-label="Account menu"
+              class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
+              data-test-subj="userMenuButton"
+              style="line-height: normal;"
+              type="button"
             >
-              <button
-                aria-controls="headerUserMenu"
-                aria-expanded="false"
-                aria-haspopup="true"
-                aria-label="Account menu"
-                class="euiButtonEmpty euiHeaderSectionItemButton emotion-euiButtonDisplay-euiButtonEmpty-m-empty-text-euiHeaderSectionItemButton"
-                data-test-subj="userMenuButton"
-                style="line-height: normal;"
-                type="button"
+              <span
+                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
               >
                 <span
-                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                  class="eui-textTruncate euiButtonEmpty__text"
                 >
                   <span
-                    class="eui-textTruncate euiButtonEmpty__text"
+                    class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
                   >
                     <span
-                      class="euiHeaderSectionItemButton__content emotion-euiHeaderSectionItemButton__content"
-                    >
-                      <span
-                        aria-label="Loading"
-                        class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
-                        role="progressbar"
-                      />
-                    </span>
+                      aria-label="Loading"
+                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                      role="progressbar"
+                    />
                   </span>
                 </span>
-              </button>
-            </div>
+              </span>
+            </button>
           </div>
         </div>
       </div>

@@ -8,10 +8,10 @@
 import { i18n } from '@kbn/i18n';
 import { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import type { InfraLocators } from '@kbn/infra-plugin/common/locators';
-import type { LocatorPublic } from '@kbn/share-plugin/public';
 import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
-import { getNodeLogsHref } from '../../../../shared/links/observability_logs_link';
+import type { LocatorPublic } from '@kbn/share-plugin/public';
+import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
 import { getInfraHref } from '../../../../shared/links/infra_link';
 import {
@@ -41,15 +41,15 @@ export function getMenuSections({
   basePath,
   onFilterByInstanceClick,
   metricsHref,
-  infraLocators,
   allDatasetsLocator,
+  nodeLogsLocator,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
   onFilterByInstanceClick: () => void;
   metricsHref: string;
-  infraLocators?: InfraLocators;
   allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
+  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
   const containerId = instanceDetails.container?.id;
@@ -57,22 +57,18 @@ export function getMenuSections({
     ? new Date(instanceDetails['@timestamp']).valueOf()
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
-  const infraNodeLocator = infraLocators?.nodeLogsLocator;
 
-  const podLogsHref = getNodeLogsHref(
-    'pod',
-    podId!,
+  const podLogsHref = nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('pod').id,
+    nodeId: podId!,
     time,
-    allDatasetsLocator,
-    infraNodeLocator
-  );
-  const containerLogsHref = getNodeLogsHref(
-    'container',
-    containerId!,
+  });
+
+  const containerLogsHref = nodeLogsLocator.getRedirectUrl({
+    nodeField: findInventoryFields('container').id,
+    nodeId: containerId!,
     time,
-    allDatasetsLocator,
-    infraNodeLocator
-  );
+  });
 
   const podActions: Action[] = [
     {
@@ -96,7 +92,7 @@ export function getMenuSections({
         path: `/link-to/pod-detail/${podId}`,
         query: infraMetricsQuery,
       }),
-      condition: !!podId && !!infraLocators,
+      condition: !!podId,
     },
   ];
 
@@ -122,7 +118,7 @@ export function getMenuSections({
         path: `/link-to/container-detail/${containerId}`,
         query: infraMetricsQuery,
       }),
-      condition: !!containerId && !!infraLocators,
+      condition: !!containerId,
     },
   ];
 

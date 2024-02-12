@@ -38,7 +38,7 @@ export const ClearQueryLink = ({ fieldCount, displayCount, onClearQuery }: Clear
   return (
     <EuiText css={linkCSS} size="s">
       <FormattedMessage
-        id="management.settings.form.searchResultText"
+        id="management.settings.fieldCategory.searchResultText"
         defaultMessage="Search terms are hiding {settingsCount} settings {clearSearch}"
         values={{
           settingsCount: fieldCount - displayCount,
@@ -46,7 +46,7 @@ export const ClearQueryLink = ({ fieldCount, displayCount, onClearQuery }: Clear
             <EuiLink onClick={onClearQuery}>
               <EuiText css={linkCSS} size="s">
                 <FormattedMessage
-                  id="management.settings.form.clearSearchResultText"
+                  id="management.settings.fieldCategory.clearSearchResultText"
                   defaultMessage="(clear search)"
                 />
               </EuiText>

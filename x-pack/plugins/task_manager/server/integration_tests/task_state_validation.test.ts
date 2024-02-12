@@ -6,14 +6,11 @@
  */
 
 import { v4 as uuidV4 } from 'uuid';
-import {
-  type TestElasticsearchUtils,
-  type TestKibanaUtils,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
 import { schema } from '@kbn/config-schema';
 import { TaskStatus } from '../task';
-import { type TaskPollingLifecycleOpts } from '../polling_lifecycle';
-import { type TaskClaimingOpts } from '../queries/task_claiming';
+import type { TaskPollingLifecycleOpts } from '../polling_lifecycle';
+import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { TaskManagerPlugin, type TaskManagerStartContract } from '../plugin';
 import { injectTask, setupTestServers, retry } from './lib';
 
@@ -307,7 +304,8 @@ describe('task state validation', () => {
     });
 
     it('should fail the task run when setting allow_reading_invalid_state:false and reading an invalid state', async () => {
-      const errorLogSpy = jest.spyOn(pollingLifecycleOpts.logger, 'error');
+      const logSpy = jest.spyOn(pollingLifecycleOpts.logger, 'warn');
+      const updateSpy = jest.spyOn(pollingLifecycleOpts.taskStore, 'bulkUpdate');
 
       const id = uuidV4();
       await injectTask(kibanaServer.coreStart.elasticsearch.client.asInternalUser, {
@@ -328,12 +326,14 @@ describe('task state validation', () => {
       taskIdsToRemove.push(id);
 
       await retry(async () => {
-        expect(errorLogSpy).toHaveBeenCalledWith(
-          `Failed to poll for work: Error: [foo]: expected value of type [string] but got [boolean]`
+        expect(logSpy.mock.calls[0][0]).toBe(
+          `Task (fooType/${id}) has a validation error: [foo]: expected value of type [string] but got [boolean]`
+        );
+        expect(updateSpy).toHaveBeenCalledWith(
+          expect.arrayContaining([expect.objectContaining({ id, taskType: 'fooType' })]),
+          { validate: false }
         );
       });
-
-      expect(mockCreateTaskRunner).not.toHaveBeenCalled();
     });
   });
 });

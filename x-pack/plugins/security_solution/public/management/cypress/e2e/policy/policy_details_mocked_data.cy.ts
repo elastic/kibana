@@ -17,7 +17,10 @@ import type { CyIndexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
 import { login } from '../../tasks/login';
 
-describe('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
+// Skipped due to flakiness:
+// https://buildkite.com/elastic/kibana-on-merge/builds/37074
+// https://buildkite.com/elastic/kibana-on-merge/builds/37077
+describe.skip('Policy Details', { tags: ['@ess', '@serverless'] }, () => {
   const packagePolicyBackupHelper = new PackagePolicyBackupHelper();
   let indexedHostsData: CyIndexEndpointHosts;
 

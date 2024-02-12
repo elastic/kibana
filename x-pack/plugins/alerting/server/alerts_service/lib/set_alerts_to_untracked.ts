@@ -9,13 +9,16 @@ import { isEmpty } from 'lodash';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { Logger } from '@kbn/logging';
 import {
+  ALERT_END,
   ALERT_RULE_CONSUMER,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_UNTRACKED,
+  ALERT_TIME_RANGE,
   ALERT_UUID,
+  AlertStatus,
 } from '@kbn/rule-data-utils';
 
 export interface SetAlertsToUntrackedOpts {
@@ -37,20 +40,15 @@ interface ConsumersAndRuleTypesAggregation {
   };
 }
 
-export async function setAlertsToUntracked({
-  logger,
-  esClient,
-  indices,
+const getQuery = ({
   ruleIds = [],
-  alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
-  ensureAuthorized,
+  alertUuids = [],
+  alertStatus,
 }: {
-  logger: Logger;
-  esClient: ElasticsearchClient;
-} & SetAlertsToUntrackedOpts): Promise<UntrackedAlertsResult> {
-  if (isEmpty(ruleIds) && isEmpty(alertUuids))
-    throw new Error('Must provide either ruleIds or alertUuids');
-
+  ruleIds?: string[];
+  alertUuids?: string[];
+  alertStatus: AlertStatus;
+}) => {
   const shouldMatchRules: Array<{ term: Record<string, { value: string }> }> = ruleIds.map(
     (ruleId) => ({
       term: {
@@ -69,12 +67,12 @@ export async function setAlertsToUntracked({
   const statusTerms: Array<{ term: Record<string, { value: string }> }> = [
     {
       term: {
-        [ALERT_STATUS]: { value: ALERT_STATUS_ACTIVE },
+        [ALERT_STATUS]: { value: alertStatus },
       },
     },
   ];
 
-  const must = [
+  return [
     ...statusTerms,
     {
       bool: {
@@ -88,6 +86,21 @@ export async function setAlertsToUntracked({
       },
     },
   ];
+};
+
+export async function setAlertsToUntracked({
+  logger,
+  esClient,
+  indices,
+  ruleIds = [],
+  alertUuids = [], // OPTIONAL - If no alertUuids are passed, untrack ALL ids by default,
+  ensureAuthorized,
+}: {
+  logger: Logger;
+  esClient: ElasticsearchClient;
+} & SetAlertsToUntrackedOpts): Promise<UntrackedAlertsResult> {
+  if (isEmpty(ruleIds) && isEmpty(alertUuids))
+    throw new Error('Must provide either ruleIds or alertUuids');
 
   if (ensureAuthorized) {
     // Fetch all rule type IDs and rule consumers, then run the provided ensureAuthorized check for each of them
@@ -98,7 +111,11 @@ export async function setAlertsToUntracked({
         size: 0,
         query: {
           bool: {
-            must,
+            must: getQuery({
+              ruleIds,
+              alertUuids,
+              alertStatus: ALERT_STATUS_ACTIVE,
+            }),
           },
         },
         aggs: {
@@ -134,15 +151,20 @@ export async function setAlertsToUntracked({
         body: {
           conflicts: 'proceed',
           script: {
-            source: UNTRACK_UPDATE_PAINLESS_SCRIPT,
+            source: getUntrackUpdatePainlessScript(new Date()),
             lang: 'painless',
           },
           query: {
             bool: {
-              must,
+              must: getQuery({
+                ruleIds,
+                alertUuids,
+                alertStatus: ALERT_STATUS_ACTIVE,
+              }),
             },
           },
         },
+        refresh: true,
       });
       if (total === 0 && response.total === 0)
         throw new Error('No active alerts matched the query');
@@ -166,7 +188,11 @@ export async function setAlertsToUntracked({
         size: total,
         query: {
           bool: {
-            must,
+            must: getQuery({
+              ruleIds,
+              alertUuids,
+              alertStatus: ALERT_STATUS_UNTRACKED,
+            }),
           },
         },
       },
@@ -183,9 +209,13 @@ export async function setAlertsToUntracked({
 }
 
 // Certain rule types don't flatten their AAD values, apply the ALERT_STATUS key to them directly
-const UNTRACK_UPDATE_PAINLESS_SCRIPT = `
+const getUntrackUpdatePainlessScript = (now: Date) => `
 if (!ctx._source.containsKey('${ALERT_STATUS}') || ctx._source['${ALERT_STATUS}'].empty) {
   ctx._source.${ALERT_STATUS} = '${ALERT_STATUS_UNTRACKED}';
+  ctx._source.${ALERT_END} = '${now.toISOString()}';
+  ctx._source.${ALERT_TIME_RANGE}.lte = '${now.toISOString()}';
 } else {
-  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}'
+  ctx._source['${ALERT_STATUS}'] = '${ALERT_STATUS_UNTRACKED}';
+  ctx._source['${ALERT_END}'] = '${now.toISOString()}';
+  ctx._source['${ALERT_TIME_RANGE}'].lte = '${now.toISOString()}';
 }`;

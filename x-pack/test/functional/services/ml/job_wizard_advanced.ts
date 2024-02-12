@@ -30,7 +30,7 @@ export function MachineLearningJobWizardAdvancedProvider(
     },
 
     async assertDatafeedQueryEditorExists() {
-      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > codeEditorHint');
+      await testSubjects.existOrFail('mlAdvancedDatafeedQueryEditor > ~codeEditorHint');
     },
 
     async assertDatafeedQueryEditorValue(expectedValue: string) {

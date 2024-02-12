@@ -6,22 +6,29 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
+import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 
-import { APP_NAME } from '../common';
+import { APP_ICON, APP_NAME, CONTENT_ID, LATEST_VERSION } from '../common';
+import { LinksCrudTypes } from '../common/content_management';
+import { LinksStrings } from './components/links_strings';
+import { getLinksClient } from './content_management/links_content_management_client';
 import { LinksFactoryDefinition } from './embeddable';
-import { CONTENT_ID, LATEST_VERSION } from '../common';
+import { LinksByReferenceInput } from './embeddable/types';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
   embeddable: EmbeddableSetup;
+  visualizations: VisualizationsSetup;
   contentManagement: ContentManagementPublicSetup;
 }
 
@@ -30,6 +37,7 @@ export interface LinksStartDependencies {
   dashboard: DashboardStart;
   presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export class LinksPlugin
@@ -39,7 +47,9 @@ export class LinksPlugin
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
     core.getStartServices().then(([_, deps]) => {
-      plugins.embeddable.registerEmbeddableFactory(CONTENT_ID, new LinksFactoryDefinition());
+      const linksFactory = new LinksFactoryDefinition();
+
+      plugins.embeddable.registerEmbeddableFactory(CONTENT_ID, linksFactory);
 
       plugins.contentManagement.registry.register({
         id: CONTENT_ID,
@@ -47,6 +57,53 @@ export class LinksPlugin
           latest: LATEST_VERSION,
         },
         name: APP_NAME,
+      });
+
+      const getExplicitInput = async ({
+        savedObjectId,
+        parent,
+      }: {
+        savedObjectId?: string;
+        parent?: DashboardContainer;
+      }) => {
+        try {
+          await linksFactory.getExplicitInput({ savedObjectId } as LinksByReferenceInput, parent);
+        } catch {
+          // swallow any errors - this just means that the user cancelled editing
+        }
+        return;
+      };
+
+      plugins.visualizations.registerAlias({
+        disableCreate: true, // do not allow creation through visualization listing page
+        name: CONTENT_ID,
+        title: APP_NAME,
+        icon: APP_ICON,
+        description: LinksStrings.getDescription(),
+        stage: 'experimental',
+        appExtensions: {
+          visualizations: {
+            docTypes: [CONTENT_ID],
+            searchFields: ['title^3'],
+            client: getLinksClient,
+            toListItem(linkItem: LinksCrudTypes['Item']) {
+              const { id, type, updatedAt, attributes } = linkItem;
+              const { title, description } = attributes;
+
+              return {
+                id,
+                title,
+                editor: { onEdit: (savedObjectId: string) => getExplicitInput({ savedObjectId }) },
+                description,
+                updatedAt,
+                icon: APP_ICON,
+                typeTitle: APP_NAME,
+                stage: 'experimental',
+                savedObjectType: type,
+              };
+            },
+          },
+        },
       });
     });
   }

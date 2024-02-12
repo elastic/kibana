@@ -6,7 +6,6 @@
  */
 
 import { EuiPopover, EuiIcon, type IconType, type IconColor, type IconSize } from '@elastic/eui';
-import { css } from '@emotion/react';
 import React from 'react';
 import { useBoolean } from '../../../../hooks/use_boolean';
 
@@ -28,22 +27,26 @@ export const Popover = ({
     <EuiPopover
       panelPaddingSize="s"
       button={
-        <EuiIcon
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            togglePopover();
+          }}
           data-test-subj={props['data-test-subj']}
-          type={icon}
-          color={iconColor ?? 'text'}
-          size={iconSize ?? 'original'}
-          onClick={togglePopover}
-          css={css`
-            cursor: pointer;
-          `}
-        />
+        >
+          <EuiIcon
+            type="questionInCircle"
+            color={iconColor ?? 'text'}
+            size={iconSize ?? 'original'}
+          />
+        </button>
       }
       isOpen={isPopoverOpen}
       offset={10}
       closePopover={closePopover}
       repositionOnScroll
       anchorPosition="upCenter"
+      panelStyle={{ maxWidth: 350 }}
     >
       {children}
     </EuiPopover>

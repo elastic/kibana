@@ -8,6 +8,7 @@
 
 import { PluginInitializer } from '@kbn/core/server';
 
-import { EmbeddableExamplesPlugin } from './plugin';
-
-export const plugin: PluginInitializer<void, void> = () => new EmbeddableExamplesPlugin();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { EmbeddableExamplesPlugin } = await import('./plugin');
+  return new EmbeddableExamplesPlugin();
+};

@@ -7,8 +7,7 @@
 
 import type { HttpServiceSetup, Logger } from '@kbn/core/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-
-import type { AuthorizationServiceSetup } from './authorization_service';
+import type { AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 
 class ProtectedApplications {
   private applications: Set<string> | null = null;

@@ -148,13 +148,10 @@ export async function getAllTranslations(): Promise<{ [key: string]: Translation
   const locales = getRegisteredLocales();
   const translations = await Promise.all(locales.map(getTranslationsByLocale));
 
-  return locales.reduce(
-    (acc, locale, index) => ({
-      ...acc,
-      [locale]: translations[index],
-    }),
-    {}
-  );
+  return locales.reduce((acc, locale, index) => {
+    acc[locale] = translations[index];
+    return acc;
+  }, {} as { [key: string]: Translation });
 }
 
 /**

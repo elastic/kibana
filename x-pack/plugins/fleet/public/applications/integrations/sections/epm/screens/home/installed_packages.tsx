@@ -21,12 +21,16 @@ import {
   useGetPackageVerificationKeyId,
 } from '../../../../hooks';
 import { PackageListGrid } from '../../components/package_list_grid';
-
+import { installationStatuses } from '../../../../../../../common/constants';
 import type { PackageListItem } from '../../../../types';
 
 import type { IntegrationsURLParameters } from './hooks/use_available_packages';
 
-import type { CategoryFacet, ExtendedIntegrationCategory } from './category_facets';
+import {
+  type CategoryFacet,
+  type ExtendedIntegrationCategory,
+  UPDATE_FAILED,
+} from './category_facets';
 import { CategoryFacets } from './category_facets';
 
 import type { CategoryParams } from '.';
@@ -34,7 +38,10 @@ import { getParams, categoryExists, mapToCard } from '.';
 import {
   ALL_INSTALLED_CATEGORY,
   UPDATES_AVAILABLE,
+  INSTALL_FAILED,
   UPDATES_AVAILABLE_CATEGORY,
+  UPDATE_FAILED_CATEGORY,
+  INSTALL_FAILED_CATEGORY,
 } from './category_facets';
 
 const AnnouncementLink = () => {
@@ -176,6 +183,26 @@ export const InstalledPackages: React.FC<{
     [installedPackages]
   );
 
+  // Todo move to another place
+  const installationFailedPackages = useMemo(
+    () =>
+      installedPackages.filter(
+        (item) => item?.installationInfo?.install_status === installationStatuses.InstallFailed
+      ),
+    [installedPackages]
+  );
+
+  const updateFailedPackages = useMemo(
+    () =>
+      installedPackages.filter((item) =>
+        item?.installationInfo?.latest_install_failed_attempts?.some(
+          (attempt) =>
+            item.installationInfo && semverLt(item.installationInfo.version, attempt.target_version)
+        )
+      ),
+    [installedPackages]
+  );
+
   const categories: CategoryFacet[] = useMemo(
     () => [
       {
@@ -186,39 +213,60 @@ export const InstalledPackages: React.FC<{
         ...UPDATES_AVAILABLE_CATEGORY,
         count: updatablePackages.length,
       },
+      {
+        ...UPDATE_FAILED_CATEGORY,
+        count: updateFailedPackages.length,
+      },
+      {
+        ...INSTALL_FAILED_CATEGORY,
+        count: installationFailedPackages.length,
+      },
     ],
-    [installedPackages.length, updatablePackages.length]
+    [
+      installedPackages.length,
+      updatablePackages.length,
+      installationFailedPackages.length,
+      updateFailedPackages.length,
+    ]
   );
+
+  const cards = useMemo(() => {
+    let packages: PackageListItem[];
+    if (selectedCategory === UPDATES_AVAILABLE) {
+      packages = updatablePackages;
+    } else if (selectedCategory === INSTALL_FAILED) {
+      packages = installationFailedPackages;
+    } else if (selectedCategory === UPDATE_FAILED) {
+      packages = updateFailedPackages;
+    } else {
+      packages = installedPackages;
+    }
+    return packages.map((item) =>
+      mapToCard({
+        getAbsolutePath,
+        getHref,
+        addBasePath,
+        item,
+        selectedCategory: selectedCategory || 'installed',
+        packageVerificationKeyId,
+      })
+    );
+  }, [
+    selectedCategory,
+    updatablePackages,
+    installedPackages,
+    updateFailedPackages,
+    installationFailedPackages,
+    packageVerificationKeyId,
+    addBasePath,
+    getHref,
+    getAbsolutePath,
+  ]);
 
   if (!categoryExists(selectedCategory, categories)) {
     setUrlandReplaceHistory({ searchString: searchTerm, categoryId: '' });
     return null;
   }
-
-  const controls = (
-    <CategoryFacets
-      categories={categories}
-      selectedCategory={selectedCategory}
-      onCategoryChange={({ id }: CategoryFacet) => {
-        setCategory(id as ExtendedIntegrationCategory);
-        setSearchTerm('');
-        setUrlandPushHistory({ searchString: '', categoryId: id });
-      }}
-    />
-  );
-
-  const cards = (
-    selectedCategory === UPDATES_AVAILABLE ? updatablePackages : installedPackages
-  ).map((item) =>
-    mapToCard({
-      getAbsolutePath,
-      getHref,
-      addBasePath,
-      item,
-      selectedCategory: selectedCategory || 'installed',
-      packageVerificationKeyId,
-    })
-  );
 
   let CalloutComponent = <InstalledIntegrationsInfoCallout />;
 
@@ -229,11 +277,22 @@ export const InstalledPackages: React.FC<{
   } else if (updateAvailableCount) {
     CalloutComponent = <UpdatesAvailableCallout count={updateAvailableCount} />;
   }
-  const callout = selectedCategory === UPDATES_AVAILABLE || isLoading ? null : CalloutComponent;
+  const callout = selectedCategory !== '' || isLoading ? null : CalloutComponent;
 
   return (
     <PackageListGrid
-      {...{ isLoading, controls, callout, categories }}
+      {...{ isLoading, callout, categories }}
+      controls={
+        <CategoryFacets
+          categories={categories}
+          selectedCategory={selectedCategory}
+          onCategoryChange={({ id }: CategoryFacet) => {
+            setCategory(id as ExtendedIntegrationCategory);
+            setSearchTerm('');
+            setUrlandPushHistory({ searchString: '', categoryId: id });
+          }}
+        />
+      }
       selectedCategory={selectedCategory}
       setCategory={setCategory}
       setUrlandPushHistory={setUrlandPushHistory}

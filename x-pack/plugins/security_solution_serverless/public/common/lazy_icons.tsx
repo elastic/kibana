@@ -19,18 +19,11 @@ const withSuspenseIcon = <T extends object = {}>(Component: React.ComponentType<
 
 export const IconLensLazy = withSuspenseIcon(React.lazy(() => import('./icons/lens')));
 export const IconEndpointLazy = withSuspenseIcon(React.lazy(() => import('./icons/endpoint')));
-export const IconIndexManagementLazy = withSuspenseIcon(
-  React.lazy(() => import('./icons/index_management'))
-);
 export const IconFleetLazy = withSuspenseIcon(React.lazy(() => import('./icons/fleet')));
 export const IconEcctlLazy = withSuspenseIcon(React.lazy(() => import('./icons/ecctl')));
-export const IconMapServicesLazy = withSuspenseIcon(
-  React.lazy(() => import('./icons/map_services'))
-);
+
 export const IconTimelineLazy = withSuspenseIcon(React.lazy(() => import('./icons/timeline')));
 export const IconOsqueryLazy = withSuspenseIcon(React.lazy(() => import('./icons/osquery')));
-export const IconUsersRolesLazy = withSuspenseIcon(React.lazy(() => import('./icons/users_roles')));
-export const IconReportingLazy = withSuspenseIcon(React.lazy(() => import('./icons/reporting')));
 export const IconVisualizationLazy = withSuspenseIcon(
   React.lazy(() => import('./icons/visualization'))
 );

@@ -101,7 +101,7 @@ export interface ScatterplotMatrixProps {
   legendType?: LegendType;
   searchQuery?: estypes.QueryDslQueryContainer;
   runtimeMappings?: RuntimeMappings;
-  indexPattern?: DataView;
+  dataView?: DataView;
   query?: Query;
 }
 
@@ -113,7 +113,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
   legendType,
   searchQuery,
   runtimeMappings,
-  indexPattern,
+  dataView,
   query,
 }) => {
   const { esSearch } = useMlApiContext();
@@ -210,9 +210,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
     vegaSpec.data = {
       url: {
         '%context%': true,
-        ...(indexPattern?.timeFieldName
-          ? { ['%timefield%']: `${indexPattern?.timeFieldName}` }
-          : {}),
+        ...(dataView?.timeFieldName ? { ['%timefield%']: `${dataView?.timeFieldName}` } : {}),
         index,
         body: {
           fields: fieldsToFetch,
@@ -300,7 +298,7 @@ export const ScatterplotMatrix: FC<ScatterplotMatrixProps> = ({
         }
 
         const combinedRuntimeMappings =
-          indexPattern && getCombinedRuntimeMappings(indexPattern, runtimeMappings);
+          dataView && getCombinedRuntimeMappings(dataView, runtimeMappings);
 
         const body = {
           fields: queryFields,

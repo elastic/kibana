@@ -12,6 +12,7 @@ import { serverMock } from '../__mocks__/server';
 import { requestMock } from '../__mocks__/request';
 import { requestContextMock } from '../__mocks__/request_context';
 import { getIndexMappingsRoute } from './get_index_mappings';
+import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 jest.mock('../lib', () => ({
   fetchMappings: jest.fn(),
@@ -20,6 +21,8 @@ jest.mock('../lib', () => ({
 describe('getIndexMappingsRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { context } = requestContextMock.createTools();
+  let logger: MockedLogger;
+
   const req = requestMock.create({
     method: 'get',
     path: GET_INDEX_MAPPINGS,
@@ -32,9 +35,11 @@ describe('getIndexMappingsRoute route', () => {
     jest.clearAllMocks();
 
     server = serverMock.create();
+    logger = loggerMock.create();
+
     ({ context } = requestContextMock.createTools());
 
-    getIndexMappingsRoute(server.router);
+    getIndexMappingsRoute(server.router, logger);
   });
 
   test('Returns index stats', async () => {
@@ -58,11 +63,11 @@ describe('getIndexMappingsRoute route', () => {
 
 describe('request validation', () => {
   let server: ReturnType<typeof serverMock.create>;
-
+  let logger: MockedLogger;
   beforeEach(() => {
     server = serverMock.create();
-
-    getIndexMappingsRoute(server.router);
+    logger = loggerMock.create();
+    getIndexMappingsRoute(server.router, logger);
   });
 
   test('disallows invalid pattern', () => {

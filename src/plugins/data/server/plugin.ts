@@ -74,9 +74,11 @@ export class DataServerPlugin
   private readonly kqlTelemetryService: KqlTelemetryService;
   private readonly queryService = new QueryService();
   private readonly logger: Logger;
+  private readonly config: ConfigSchema;
 
   constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
     this.logger = initializerContext.logger.get('data');
+    this.config = initializerContext.config.get();
     this.searchService = new SearchService(initializerContext, this.logger);
     this.scriptsService = new ScriptsService();
     this.kqlTelemetryService = new KqlTelemetryService(initializerContext);
@@ -90,7 +92,7 @@ export class DataServerPlugin
     const querySetup = this.queryService.setup(core);
     this.kqlTelemetryService.setup(core, { usageCollection });
 
-    core.uiSettings.register(getUiSettings(core.docLinks));
+    core.uiSettings.register(getUiSettings(core.docLinks, this.config.enableUiSettingsValidations));
 
     const searchSetup = this.searchService.setup(core, {
       bfetch,

@@ -9,9 +9,9 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_INDEX } from '@kbn/fleet-plugin/common';
+import type { AgentsRequestOptions } from '../../../../../../common/search_strategy/osquery/agents';
 import { getQueryFilter } from '../../../../../utils/build_query';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
-import type { AgentsRequestOptions } from '../../../../../../common/search_strategy';
 
 export const buildActionsQuery = ({
   kuery = '',
@@ -23,7 +23,7 @@ export const buildActionsQuery = ({
     bool: { filter },
   } = getQueryFilter({ filter: kuery });
 
-  const dslQuery = {
+  return {
     allow_no_indices: true,
     index: componentTemplateExists ? `${ACTIONS_INDEX}*` : AGENT_ACTIONS_INDEX,
     ignore_unavailable: true,
@@ -62,6 +62,4 @@ export const buildActionsQuery = ({
       ],
     },
   };
-
-  return dslQuery;
 };

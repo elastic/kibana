@@ -19,7 +19,11 @@ import {
   TASK_MANAGER_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
 import { Stats } from '../stats';
-import { cleanSavedObjectIndices, deleteSavedObjectIndices } from './kibana_index';
+import {
+  cleanSavedObjectIndices,
+  deleteSavedObjectIndices,
+  isSavedObjectIndex,
+} from './kibana_index';
 import { deleteIndex } from './delete_index';
 import { deleteDataStream } from './delete_data_stream';
 import { ES_CLIENT_HEADERS } from '../../client_headers';
@@ -37,12 +41,14 @@ export function createCreateIndexStream({
   stats,
   skipExisting = false,
   docsOnly = false,
+  isArchiveInExceptionList = false,
   log,
 }: {
   client: Client;
   stats: Stats;
   skipExisting?: boolean;
   docsOnly?: boolean;
+  isArchiveInExceptionList?: boolean;
   log: ToolingLog;
 }) {
   const skipDocsFromIndices = new Set();
@@ -127,6 +133,16 @@ export function createCreateIndexStream({
 
     if (docsOnly) {
       return;
+    }
+
+    if (isSavedObjectIndex(index) && !isArchiveInExceptionList) {
+      throw new Error(
+        `'esArchiver' no longer supports defining saved object indices, your archive is modifying '${index}'.
+      The recommendation is to use 'kbnArchiver' to import saved objects in your tests.
+      If you absolutely need to load some non-importable SOs, please stick to the official saved object indices created by Kibana at startup.
+      You can achieve that by simply removing your saved object index definitions from 'mappings.json' (likely removing the file altogether).
+      Find more information here: https://github.com/elastic/kibana/issues/161882`
+      );
     }
 
     async function attemptToCreate(attemptNumber = 1) {

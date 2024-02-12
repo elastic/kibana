@@ -9,7 +9,12 @@
 const nextTick = () => new Promise((res) => process.nextTick(res));
 
 import lodash from 'lodash';
-jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => fn);
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
+  fn.cancel = jest.fn();
+  return fn;
+});
 import {
   EuiInMemoryTable,
   EuiLink,
@@ -203,18 +208,13 @@ describe('SavedObjectsFinder', () => {
       await nextTick();
       const searchBar = wrapper.find(EuiInMemoryTable).prop('search') as EuiSearchBarProps;
       const toolsLeft = searchBar!.toolsLeft;
-      expect(toolsLeft).toMatchInlineSnapshot(
-        `
+      expect(toolsLeft).toMatchInlineSnapshot(`
         <React.Fragment>
-          <EuiButton
-            color="primary"
-            size="m"
-          >
+          <EuiButton>
             Hello
           </EuiButton>
         </React.Fragment>
-      `
-      );
+      `);
     });
   });
 
@@ -966,5 +966,37 @@ describe('SavedObjectsFinder', () => {
       expect(findTestSubject(wrapper, 'tableHeaderCell_title_1')).toHaveLength(1);
       expect(findTestSubject(wrapper, 'tableHeaderCell_references_2')).toHaveLength(0);
     });
+  });
+
+  it('should add a tooltip when text is provided', async () => {
+    (contentClient.mSearch as any as jest.SpyInstance).mockResolvedValue({
+      hits: [doc, doc2, doc3],
+    });
+
+    const tooltipText = 'This is a tooltip';
+
+    render(
+      <SavedObjectFinder
+        services={{ uiSettings, contentClient, savedObjectsTagging }}
+        savedObjectMetaData={metaDataConfig}
+        getTooltipText={(item) => (item.id === doc3.id ? tooltipText : undefined)}
+      />
+    );
+
+    const assertTooltip = async (linkTitle: string, show: boolean) => {
+      const elem = await screen.findByText(linkTitle);
+      userEvent.hover(elem);
+
+      const tooltip = screen.queryByText(tooltipText);
+      if (show) {
+        expect(tooltip).toBeInTheDocument();
+      } else {
+        expect(tooltip).toBeNull();
+      }
+    };
+
+    assertTooltip(doc.attributes.title, false);
+    assertTooltip(doc2.attributes.title, false);
+    assertTooltip(doc3.attributes.title, true);
   });
 });

@@ -7,62 +7,69 @@
 
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButton,
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiIcon,
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiPanel,
-  EuiPopover,
-  EuiSpacer,
-  EuiSwitch,
-  EuiText,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenu, EuiPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
+import { useKibana } from '../../hooks/use_kibana';
+import { useObservabilityAIAssistantRouter } from '../../hooks/use_observability_ai_assistant_router';
+import { getSettingsHref } from '../../utils/get_settings_href';
+import { getSettingsKnowledgeBaseHref } from '../../utils/get_settings_kb_href';
 import { ConnectorSelectorBase } from '../connector_selector/connector_selector_base';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
-import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 
 export function ChatActionsMenu({
   connectors,
-  connectorsManagementHref,
   conversationId,
   disabled,
-  knowledgeBase,
-  modelsManagementHref,
-  startedFrom,
+  showLinkToConversationsApp,
   onCopyConversationClick,
 }: {
   connectors: UseGenAIConnectorsResult;
-  connectorsManagementHref: string;
   conversationId?: string;
   disabled: boolean;
-  knowledgeBase: UseKnowledgeBaseResult;
-  modelsManagementHref: string;
-  startedFrom?: StartedFrom;
+  showLinkToConversationsApp: boolean;
   onCopyConversationClick: () => void;
 }) {
+  const {
+    application: { navigateToUrl },
+    http,
+  } = useKibana().services;
   const [isOpen, setIsOpen] = useState(false);
+
+  const router = useObservabilityAIAssistantRouter();
 
   const toggleActionsMenu = () => {
     setIsOpen(!isOpen);
+  };
+
+  const handleNavigateToSettings = () => {
+    navigateToUrl(getSettingsHref(http));
+  };
+
+  const handleNavigateToSettingsKnowledgeBase = () => {
+    navigateToUrl(getSettingsKnowledgeBaseHref(http));
   };
 
   return (
     <EuiPopover
       isOpen={isOpen}
       button={
-        <EuiButtonIcon
-          data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
-          disabled={disabled}
-          iconType="boxesVertical"
-          onClick={toggleActionsMenu}
-          aria-label="Menu"
-        />
+        <EuiToolTip
+          content={i18n.translate(
+            'xpack.observabilityAiAssistant.chatActionsMenu.euiToolTip.moreActionsLabel',
+            { defaultMessage: 'More actions' }
+          )}
+          display="block"
+        >
+          <EuiButtonIcon
+            data-test-subj="observabilityAiAssistantChatActionsMenuButtonIcon"
+            disabled={disabled}
+            iconType="boxesVertical"
+            onClick={toggleActionsMenu}
+            aria-label={i18n.translate(
+              'xpack.observabilityAiAssistant.chatActionsMenu.euiButtonIcon.menuLabel',
+              { defaultMessage: 'Menu' }
+            )}
+          />
+        </EuiToolTip>
       }
       panelPaddingSize="none"
       closePopover={toggleActionsMenu}
@@ -76,6 +83,51 @@ export function ChatActionsMenu({
               defaultMessage: 'Actions',
             }),
             items: [
+              ...(showLinkToConversationsApp
+                ? [
+                    {
+                      name: conversationId
+                        ? i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.actions.openInConversationsApp',
+                            {
+                              defaultMessage: 'Open in Conversations app',
+                            }
+                          )
+                        : i18n.translate(
+                            'xpack.observabilityAiAssistant.chatHeader.actions.goToConversationsApp',
+                            {
+                              defaultMessage: 'Go to Conversations app',
+                            }
+                          ),
+                      href: conversationId
+                        ? router.link('/conversations/{conversationId}', {
+                            path: { conversationId },
+                          })
+                        : router.link('/conversations/new'),
+                    },
+                  ]
+                : []),
+              {
+                name: i18n.translate(
+                  'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase',
+                  {
+                    defaultMessage: 'Manage knowledge base',
+                  }
+                ),
+                onClick: () => {
+                  toggleActionsMenu();
+                  handleNavigateToSettingsKnowledgeBase();
+                },
+              },
+              {
+                name: i18n.translate('xpack.observabilityAiAssistant.chatHeader.actions.settings', {
+                  defaultMessage: 'AI Assistant Settings',
+                }),
+                onClick: () => {
+                  toggleActionsMenu();
+                  handleNavigateToSettings();
+                },
+              },
               {
                 name: (
                   <div className="eui-textTruncate">
@@ -91,30 +143,6 @@ export function ChatActionsMenu({
                   </div>
                 ),
                 panel: 1,
-              },
-              {
-                name: (
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                    <EuiFlexItem grow>
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase',
-                        {
-                          defaultMessage: 'Knowledge base',
-                        }
-                      )}
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false} style={{ paddingRight: 4 }}>
-                      {knowledgeBase.status.loading || knowledgeBase.isInstalling ? (
-                        <EuiLoadingSpinner size="s" />
-                      ) : knowledgeBase.status.value?.ready ? (
-                        <EuiIcon type="checkInCircleFilled" />
-                      ) : (
-                        <EuiIcon type="dotInCircle" />
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ),
-                panel: 2,
               },
               {
                 name: i18n.translate(
@@ -140,109 +168,6 @@ export function ChatActionsMenu({
             content: (
               <EuiPanel>
                 <ConnectorSelectorBase {...connectors} />
-                <EuiSpacer size="m" />
-                <EuiButton
-                  data-test-subj="observabilityAiAssistantChatActionsMenuManageConnectorsButton"
-                  href={connectorsManagementHref}
-                  iconSide="right"
-                  iconType="arrowRight"
-                  size="s"
-                >
-                  {i18n.translate(
-                    'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement.button',
-                    {
-                      defaultMessage: 'Manage connectors',
-                    }
-                  )}
-                </EuiButton>
-              </EuiPanel>
-            ),
-          },
-          {
-            id: 2,
-            width: 256,
-            title: i18n.translate(
-              'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.title',
-              {
-                defaultMessage: 'Knowledge base',
-              }
-            ),
-            content: (
-              <EuiPanel>
-                <EuiText size="s">
-                  <p>
-                    {i18n.translate(
-                      'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.description.paragraph',
-                      {
-                        defaultMessage:
-                          'Using a knowledge base is optional but improves the experience of using the Assistant significantly.',
-                      }
-                    )}{' '}
-                    <EuiLink
-                      data-test-subj="observabilityAiAssistantChatActionsMenuLearnMoreLink"
-                      external
-                      target="_blank"
-                      href="https://www.elastic.co/guide/en/machine-learning/current/ml-nlp-elser.html"
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.elser.learnMore',
-                        {
-                          defaultMessage: 'Learn more',
-                        }
-                      )}
-                    </EuiLink>
-                  </p>
-                </EuiText>
-
-                <EuiSpacer size="l" />
-                {knowledgeBase.isInstalling || knowledgeBase.status.loading ? (
-                  <EuiLoadingSpinner size="m" />
-                ) : (
-                  <>
-                    <EuiSwitch
-                      label={
-                        knowledgeBase.isInstalling
-                          ? i18n.translate(
-                              'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.switchLabel.installing',
-                              {
-                                defaultMessage: 'Setting up knowledge base',
-                              }
-                            )
-                          : i18n.translate(
-                              'xpack.observabilityAiAssistant.chatHeader.actions.knowledgeBase.switchLabel.enable',
-                              {
-                                defaultMessage: 'Knowledge base installed',
-                              }
-                            )
-                      }
-                      checked={Boolean(knowledgeBase.status.value?.ready)}
-                      disabled={
-                        Boolean(knowledgeBase.status.value?.ready) || knowledgeBase.isInstalling
-                      }
-                      onChange={(e) => {
-                        if (e.target.checked) {
-                          knowledgeBase.install();
-                        }
-                      }}
-                    />
-
-                    <EuiSpacer size="m" />
-
-                    <EuiButton
-                      data-test-subj="observabilityAiAssistantChatActionsMenuGoToMachineLearningButton"
-                      fullWidth
-                      href={modelsManagementHref}
-                      size="s"
-                    >
-                      {i18n.translate(
-                        'xpack.observabilityAiAssistant.chatHeader.actions.connectorManagement',
-                        {
-                          defaultMessage: 'Go to Machine Learning',
-                        }
-                      )}
-                    </EuiButton>
-                  </>
-                )}
               </EuiPanel>
             ),
           },

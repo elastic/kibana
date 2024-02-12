@@ -7,7 +7,8 @@
 import { useCallback, useContext, useEffect, useMemo } from 'react';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ValidFeatureId } from '@kbn/rule-data-utils';
+import { AlertsTableContext } from '../contexts/alerts_table_context';
 import {
   Alerts,
   AlertsTableConfigurationRegistry,
@@ -17,7 +18,6 @@ import {
   BulkActionsVerbs,
   UseBulkActionsRegistry,
 } from '../../../../types';
-import { BulkActionsContext } from '../bulk_actions/context';
 import {
   getLeadingControlColumn as getBulkActionsLeadingControlColumn,
   GetLeadingControlColumn,
@@ -39,6 +39,7 @@ interface BulkActionsProps {
   casesConfig?: AlertsTableConfigurationRegistry['cases'];
   useBulkActionsConfig?: UseBulkActionsRegistry;
   refresh: () => void;
+  featureIds?: ValidFeatureId[];
 }
 
 export interface UseBulkActions {
@@ -236,13 +237,16 @@ export function useBulkActions({
   query,
   refresh,
   useBulkActionsConfig = () => [],
+  featureIds,
 }: BulkActionsProps): UseBulkActions {
-  const [bulkActionsState, updateBulkActionsState] = useContext(BulkActionsContext);
+  const {
+    bulkActions: [bulkActionsState, updateBulkActionsState],
+  } = useContext(AlertsTableContext);
   const configBulkActionPanels = useBulkActionsConfig(query);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
-  };
+  }, [updateBulkActionsState]);
   const setIsBulkActionsLoading = (isLoading: boolean = true) => {
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };
@@ -253,7 +257,11 @@ export function useBulkActions({
     clearSelection,
   });
 
-  const initialItems = [...caseBulkActions, ...untrackBulkActions];
+  const initialItems = [
+    ...caseBulkActions,
+    // SECURITY SOLUTION WORKAROUND: Disable untrack action for SIEM
+    ...(featureIds?.includes('siem') ? [] : untrackBulkActions),
+  ];
 
   const bulkActions = initialItems.length
     ? addItemsToInitialPanel({

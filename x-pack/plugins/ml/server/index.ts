@@ -8,7 +8,6 @@
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 import { type ConfigSchema } from '../common/constants/app';
 import { configSchema } from './config_schema';
-import { MlServerPlugin } from './plugin';
 export type { MlPluginSetup, MlPluginStart } from './plugin';
 export type {
   DatafeedStats as MlDatafeedStats,
@@ -38,4 +37,7 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   },
 };
 
-export const plugin = (ctx: PluginInitializerContext<ConfigSchema>) => new MlServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext<ConfigSchema>) => {
+  const { MlServerPlugin } = await import('./plugin');
+  return new MlServerPlugin(ctx);
+};

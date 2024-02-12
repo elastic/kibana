@@ -7,9 +7,9 @@ Connectors provide a central place to store connection information for services 
 [cols="2"]
 |===
 
-a| <<bedrock-action-type,AWS Bedrock>>
+a| <<bedrock-action-type,{bedrock}>>
 
-| Send a request to AWS Bedrock.
+| Send a request to {bedrock}.
 
 a| <<d3security-action-type,D3 Security>>
 
@@ -46,6 +46,10 @@ a| <<opsgenie-action-type,{opsgenie}>>
 a| <<pagerduty-action-type,PagerDuty>>
 
 | Send an event in PagerDuty.
+
+a| <<sentinelone-action-type,SentinelOne>>
+
+| Send a request to SentinelOne.
 
 a| <<server-log-action-type,ServerLog>>
 

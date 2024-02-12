@@ -24,6 +24,7 @@ function createManifest(
     requiredPlugins: required,
     optionalPlugins: optional,
     requiredBundles: [],
+    runtimePluginDependencies: [],
     owner: {
       name: 'foo',
     },

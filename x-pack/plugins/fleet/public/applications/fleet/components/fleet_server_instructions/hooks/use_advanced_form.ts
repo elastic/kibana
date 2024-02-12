@@ -9,9 +9,10 @@ import { useState } from 'react';
 
 import type { DeploymentMode } from '../steps';
 
+import { useServiceToken } from '../../../hooks/use_service_token';
+
 import { useFleetServerHost } from './use_fleet_server_host';
 import { useSelectFleetServerPolicy } from './use_select_fleet_server_policy';
-import { useServiceToken } from './use_service_token';
 import { useWaitForFleetServer } from './use_wait_for_fleet_server';
 
 /**

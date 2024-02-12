@@ -23,8 +23,8 @@ interface Props {
   onStatusChanged: (status: CaseStatuses) => void;
 }
 
-const caseStatuses = [CaseStatuses.open, CaseStatuses['in-progress'], CaseStatuses.closed];
-const statuses = {
+export const caseStatuses = [CaseStatuses.open, CaseStatuses['in-progress'], CaseStatuses.closed];
+export const statuses = {
   [CaseStatuses.open]: {
     color: 'primary',
     label: i18n.STATUS_OPEN,

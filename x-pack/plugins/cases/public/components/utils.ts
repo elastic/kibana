@@ -177,8 +177,9 @@ export const removeItemFromSessionStorage = (key: string) => {
   window.sessionStorage.removeItem(key);
 };
 
-export const stringifyToURL = (parsedParams: Record<string, string>) =>
+export const stringifyToURL = (parsedParams: Record<string, string> | URLSearchParams) =>
   new URLSearchParams(parsedParams).toString();
+
 export const parseURL = (queryString: string) =>
   Object.fromEntries(new URLSearchParams(queryString));
 
@@ -228,13 +229,9 @@ export const parseCaseUsers = ({
 };
 
 export const convertCustomFieldValue = (value: string | boolean) => {
-  let fieldValue = null;
-
-  if (!isEmpty(value) && typeof value === 'string') {
-    fieldValue = [value];
-  } else if (typeof value === 'boolean') {
-    fieldValue = value;
+  if (typeof value === 'string' && isEmpty(value)) {
+    return null;
   }
 
-  return fieldValue;
+  return value;
 };

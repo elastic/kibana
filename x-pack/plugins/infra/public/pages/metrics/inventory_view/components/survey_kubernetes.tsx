@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
-import React from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiGlobalToastList } from '@elastic/eui';
+import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { KibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
 const KUBERNETES_TOAST_STORAGE_KEY = 'kubernetesToastKey';
 const KUBERNETES_FEEDBACK_LINK = 'https://ela.st/k8s-feedback';
@@ -17,20 +19,26 @@ export const SurveyKubernetes = () => {
   const [isToastSeen, setIsToastSeen] = useLocalStorage(KUBERNETES_TOAST_STORAGE_KEY, false);
   const markToastAsSeen = () => setIsToastSeen(true);
 
+  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useContext(KibanaEnvironmentContext);
+
   return (
     <>
-      <EuiButton
-        href={KUBERNETES_FEEDBACK_LINK}
-        target="_blank"
-        color="warning"
-        iconType="editorComment"
+      <FeatureFeedbackButton
+        formUrl={KUBERNETES_FEEDBACK_LINK}
         data-test-subj="infra-kubernetes-feedback-link"
-      >
-        <FormattedMessage
-          id="xpack.infra.homePage.tellUsWhatYouThinkK8sLink"
-          defaultMessage="Tell us what you think! (K8s)"
-        />
-      </EuiButton>
+        kibanaVersion={kibanaVersion}
+        isCloudEnv={isCloudEnv}
+        isServerlessEnv={isServerlessEnv}
+        surveyButtonText={
+          <FormattedMessage
+            id="xpack.infra.homePage.tellUsWhatYouThinkK8sLink"
+            defaultMessage="Tell us what you think! (K8s)"
+          />
+        }
+        formConfig={{
+          kibanaVersionQueryParam: 'entry.184582718',
+        }}
+      />
       {!isToastSeen && (
         <EuiGlobalToastList
           toastLifeTimeMs={Infinity}
@@ -56,18 +64,21 @@ export const SurveyKubernetes = () => {
                   </p>
                   <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                     <EuiFlexItem grow={false}>
-                      <EuiButton
+                      <FeatureFeedbackButton
+                        formUrl={KUBERNETES_FEEDBACK_LINK}
                         data-test-subj="infra-toast-kubernetes-survey-start"
-                        href={KUBERNETES_FEEDBACK_LINK}
-                        target="_blank"
                         onClickCapture={markToastAsSeen}
-                        size="s"
-                      >
-                        <FormattedMessage
-                          id="xpack.infra.homePage.kubernetesToastButton"
-                          defaultMessage="Start survey"
-                        />
-                      </EuiButton>
+                        defaultButton={true}
+                        kibanaVersion={kibanaVersion}
+                        isCloudEnv={isCloudEnv}
+                        isServerlessEnv={isServerlessEnv}
+                        surveyButtonText={
+                          <FormattedMessage
+                            id="xpack.infra.homePage.kubernetesToastButton"
+                            defaultMessage="Start survey"
+                          />
+                        }
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </>

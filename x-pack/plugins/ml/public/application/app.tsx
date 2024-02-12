@@ -32,10 +32,11 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
+import type { StartServices } from './contexts/kibana';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
-  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions'
 > &
   MlStartDependencies;
 
@@ -78,31 +79,32 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
-  const services = useMemo(() => {
+  const services: StartServices = useMemo(() => {
     return {
-      kibanaVersion: deps.kibanaVersion,
-      share: deps.share,
+      cases: deps.cases,
+      charts: deps.charts,
+      contentManagement: deps.contentManagement,
+      dashboard: deps.dashboard,
       data: deps.data,
       dataViewEditor: deps.dataViewEditor,
-      security: deps.security,
-      licenseManagement: deps.licenseManagement,
-      storage: localStorage,
-      embeddable: deps.embeddable,
-      maps: deps.maps,
-      triggersActionsUi: deps.triggersActionsUi,
+      dataViews: deps.data.dataViews,
       dataVisualizer: deps.dataVisualizer,
-      usageCollection: deps.usageCollection,
+      embeddable: deps.embeddable,
       fieldFormats: deps.fieldFormats,
-      dashboard: deps.dashboard,
-      charts: deps.charts,
-      cases: deps.cases,
-      unifiedSearch: deps.unifiedSearch,
-      licensing: deps.licensing,
+      kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
+      licenseManagement: deps.licenseManagement,
+      maps: deps.maps,
+      presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
       savedSearch: deps.savedSearch,
-      contentManagement: deps.contentManagement,
-      presentationUtil: deps.presentationUtil,
+      security: deps.security,
+      share: deps.share,
+      storage: localStorage,
+      triggersActionsUi: deps.triggersActionsUi,
+      uiActions: deps.uiActions,
+      unifiedSearch: deps.unifiedSearch,
+      usageCollection: deps.usageCollection,
       ...coreStart,
       mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
     };

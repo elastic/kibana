@@ -30,6 +30,7 @@ export function fetchTextBased(
   data: DataPublicPluginStart,
   expressions: ExpressionsStart,
   inspectorAdapters: Adapters,
+  abortSignal?: AbortSignal,
   filters?: Filter[],
   inputQuery?: Query
 ): Promise<RecordsFetchResponse> {
@@ -43,9 +44,11 @@ export function fetchTextBased(
   })
     .then((ast) => {
       if (ast) {
-        const execution = expressions.run(ast, null, {
+        const contract = expressions.execute(ast, null, {
           inspectorAdapters,
         });
+        abortSignal?.addEventListener('abort', contract.cancel);
+        const execution = contract.getData();
         let finalData: DataTableRecord[] = [];
         let textBasedQueryColumns: Datatable['columns'] | undefined;
         let error: string | undefined;
@@ -59,14 +62,13 @@ export function fetchTextBased(
             const rows = table?.rows ?? [];
             textBasedQueryColumns = table?.columns ?? undefined;
             textBasedHeaderWarning = table.warning ?? undefined;
-            finalData = rows.map(
-              (row: Record<string, string>, idx: number) =>
-                ({
-                  id: String(idx),
-                  raw: row,
-                  flattened: row,
-                } as unknown as DataTableRecord)
-            );
+            finalData = rows.map((row: Record<string, string>, idx: number) => {
+              return {
+                id: String(idx),
+                raw: row,
+                flattened: row,
+              } as unknown as DataTableRecord;
+            });
           }
         });
         return lastValueFrom(execution).then(() => {

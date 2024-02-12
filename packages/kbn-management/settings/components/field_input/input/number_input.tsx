@@ -6,13 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
+import { debounce } from 'lodash';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
+import { useServices } from '../services';
 
 /**
  * Props for a {@link NumberInput} component.
@@ -28,18 +30,45 @@ export const NumberInput = ({
   isSavingEnabled,
   onInputChange,
 }: NumberInputProps) => {
-  const onChange: EuiFieldNumberProps['onChange'] = (event) => {
-    const inputValue = Number(event.target.value);
-    onUpdate({ type: field.type, unsavedValue: inputValue });
+  const [inputValue] = getFieldInputValue(field, unsavedChange) || undefined;
+  const [value, setValue] = useState(inputValue);
+  const { validateChange } = useServices();
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const updateValue = useCallback(
+    async (newValue: number, onUpdateFn) => {
+      const validationResponse = await validateChange(field.id, newValue);
+      if (validationResponse.successfulValidation && !validationResponse.valid) {
+        onUpdateFn({
+          type: field.type,
+          unsavedValue: newValue,
+          isInvalid: !validationResponse.valid,
+          error: validationResponse.errorMessage,
+        });
+      } else {
+        onUpdateFn({ type: field.type, unsavedValue: newValue });
+      }
+    },
+    [validateChange, field.id, field.type]
+  );
+
+  const debouncedUpdateValue = useMemo(() => {
+    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 500);
+  }, [updateValue]);
+
+  const onChange: EuiFieldNumberProps['onChange'] = async (event) => {
+    const newValue = Number(event.target.value);
+    setValue(newValue);
+    await debouncedUpdateValue(newValue, onUpdate);
   };
 
-  const onUpdate = useUpdate({ onInputChange, field });
+  useEffect(() => {
+    setValue(inputValue);
+  }, [inputValue]);
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;
-  const [rawValue] = getFieldInputValue(field, unsavedChange);
-
-  const value = rawValue === null ? undefined : rawValue;
 
   return (
     <EuiFieldNumber

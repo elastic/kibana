@@ -13,6 +13,20 @@ export interface Actions {
   connectors: Connectors[];
 }
 
+export interface AlertsFilter {
+  query: {
+    kql: string;
+  };
+  timeframe: {
+    days: number[];
+    timezone: string;
+    hours: {
+      start: string;
+      end: string;
+    };
+  };
+}
+
 export interface SecurityEvent {
   [field: string]: unknown;
   '@timestamp': number;

@@ -8,6 +8,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
   EuiFlexGroup,
@@ -28,6 +29,8 @@ import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { isTextBasedQuery } from '../../application/main/utils/is_text_based_query';
 import { useFlyoutActions } from './use_flyout_actions';
+import { useDiscoverCustomization } from '../../customizations';
+import { DiscoverGridFlyoutActions } from './discover_grid_flyout_actions';
 
 export interface DiscoverGridFlyoutProps {
   savedSearchId?: string;
@@ -69,6 +72,8 @@ export function DiscoverGridFlyout({
   setExpandedDoc,
 }: DiscoverGridFlyoutProps) {
   const services = useDiscoverServices();
+  const flyoutCustomization = useDiscoverCustomization('flyout');
+
   const isPlainRecord = isTextBasedQuery(query);
   // Get actual hit with updated highlighted searches
   const actualHit = useMemo(() => hits?.find(({ id }) => id === hit?.id) || hit, [hit, hits]);
@@ -103,6 +108,7 @@ export function DiscoverGridFlyout({
   );
 
   const { flyoutActions } = useFlyoutActions({
+    actions: flyoutCustomization?.actions,
     dataView,
     rowIndex: hit.raw._index,
     rowId: hit.raw._id,
@@ -111,36 +117,117 @@ export function DiscoverGridFlyout({
     savedSearchId,
   });
 
+  const addColumn = useCallback(
+    (columnName: string) => {
+      onAddColumn(columnName);
+      services.toastNotifications.addSuccess(
+        i18n.translate('discover.grid.flyout.toastColumnAdded', {
+          defaultMessage: `Column '{columnName}' was added`,
+          values: { columnName },
+        })
+      );
+    },
+    [onAddColumn, services.toastNotifications]
+  );
+
+  const removeColumn = useCallback(
+    (columnName: string) => {
+      onRemoveColumn(columnName);
+      services.toastNotifications.addSuccess(
+        i18n.translate('discover.grid.flyout.toastColumnRemoved', {
+          defaultMessage: `Column '{columnName}' was removed`,
+          values: { columnName },
+        })
+      );
+    },
+    [onRemoveColumn, services.toastNotifications]
+  );
+
+  const renderDefaultContent = useCallback(
+    () => (
+      <UnifiedDocViewer
+        columns={columns}
+        columnTypes={columnTypes}
+        dataView={dataView}
+        filter={onFilter}
+        hit={actualHit}
+        onAddColumn={addColumn}
+        onRemoveColumn={removeColumn}
+        textBasedHits={isPlainRecord ? hits : undefined}
+        docViewsRegistry={flyoutCustomization?.docViewsRegistry}
+      />
+    ),
+    [
+      actualHit,
+      addColumn,
+      columns,
+      columnTypes,
+      dataView,
+      hits,
+      isPlainRecord,
+      onFilter,
+      removeColumn,
+      flyoutCustomization?.docViewsRegistry,
+    ]
+  );
+
+  const contentActions = useMemo(
+    () => ({
+      filter: onFilter,
+      onAddColumn: addColumn,
+      onRemoveColumn: removeColumn,
+    }),
+    [onFilter, addColumn, removeColumn]
+  );
+
+  const bodyContent = flyoutCustomization?.Content ? (
+    <flyoutCustomization.Content
+      actions={contentActions}
+      doc={actualHit}
+      renderDefaultContent={renderDefaultContent}
+    />
+  ) : (
+    renderDefaultContent()
+  );
+
+  const defaultFlyoutTitle = isPlainRecord
+    ? i18n.translate('discover.grid.tableRow.docViewerTextBasedDetailHeading', {
+        defaultMessage: 'Row',
+      })
+    : i18n.translate('discover.grid.tableRow.docViewerDetailHeading', {
+        defaultMessage: 'Document',
+      });
+  const flyoutTitle = flyoutCustomization?.title ?? defaultFlyoutTitle;
+  const flyoutSize = flyoutCustomization?.size ?? 'm';
+
   return (
     <EuiPortal>
       <EuiFlyout
         onClose={onClose}
-        size="m"
+        size={flyoutSize}
         data-test-subj="docTableDetailsFlyout"
         onKeyDown={onKeyDown}
         ownFocus={false}
       >
         <EuiFlyoutHeader hasBorder>
-          <EuiTitle
-            size="s"
-            className="unifiedDataTable__flyoutHeader"
-            data-test-subj="docTableRowDetailsTitle"
+          <EuiFlexGroup
+            direction="row"
+            alignItems="center"
+            gutterSize="m"
+            responsive={false}
+            wrap={true}
           >
-            <h2>
-              {isPlainRecord
-                ? i18n.translate('discover.grid.tableRow.textBasedDetailHeading', {
-                    defaultMessage: 'Expanded row',
-                  })
-                : i18n.translate('discover.grid.tableRow.detailHeading', {
-                    defaultMessage: 'Expanded document',
-                  })}
-            </h2>
-          </EuiTitle>
-
-          <EuiSpacer size="s" />
-          <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-            {!isPlainRecord &&
-              flyoutActions.map((action) => action.enabled && <action.Content key={action.id} />)}
+            <EuiFlexItem grow={false}>
+              <EuiTitle
+                size="s"
+                data-test-subj="docTableRowDetailsTitle"
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
+                <h2>{flyoutTitle}</h2>
+              </EuiTitle>
+            </EuiFlexItem>
             {activePage !== -1 && (
               <EuiFlexItem data-test-subj={`dscDocNavigationPage-${activePage}`}>
                 <EuiPagination
@@ -150,42 +237,20 @@ export function DiscoverGridFlyout({
                   pageCount={pageCount}
                   activePage={activePage}
                   onPageClick={setPage}
-                  className="unifiedDataTable__flyoutDocumentNavigation"
                   compressed
                   data-test-subj="dscDocNavigation"
                 />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
+          {isPlainRecord || !flyoutActions.length ? null : (
+            <>
+              <EuiSpacer size="s" />
+              <DiscoverGridFlyoutActions flyoutActions={flyoutActions} />
+            </>
+          )}
         </EuiFlyoutHeader>
-        <EuiFlyoutBody>
-          <UnifiedDocViewer
-            hit={actualHit}
-            columns={columns}
-            columnTypes={columnTypes}
-            dataView={dataView}
-            filter={onFilter}
-            onRemoveColumn={(columnName: string) => {
-              onRemoveColumn(columnName);
-              services.toastNotifications.addSuccess(
-                i18n.translate('discover.grid.flyout.toastColumnRemoved', {
-                  defaultMessage: `Column '{columnName}' was removed`,
-                  values: { columnName },
-                })
-              );
-            }}
-            onAddColumn={(columnName: string) => {
-              onAddColumn(columnName);
-              services.toastNotifications.addSuccess(
-                i18n.translate('discover.grid.flyout.toastColumnAdded', {
-                  defaultMessage: `Column '{columnName}' was added`,
-                  values: { columnName },
-                })
-              );
-            }}
-            textBasedHits={isPlainRecord ? hits : undefined}
-          />
-        </EuiFlyoutBody>
+        <EuiFlyoutBody>{bodyContent}</EuiFlyoutBody>
       </EuiFlyout>
     </EuiPortal>
   );

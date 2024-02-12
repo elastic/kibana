@@ -19,6 +19,7 @@ import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
+  IStaticAssets,
   KibanaRequest,
   Logger,
   LoggerFactory,
@@ -36,6 +37,7 @@ import {
 } from '@kbn/core/server/mocks';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-server-mocks';
 import type { UnauthorizedError } from '@kbn/es-errors';
+import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { AuthenticationResult } from './authentication_result';
@@ -43,7 +45,6 @@ import { AuthenticationService } from './authentication_service';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { mockAuthenticatedUser } from '../../common/model/authenticated_user.mock';
-import type { AuditServiceSetup } from '../audit';
 import { auditServiceMock } from '../audit/mocks';
 import type { ConfigType } from '../config';
 import { ConfigSchema, createConfig } from '../config';
@@ -63,7 +64,7 @@ describe('AuthenticationService', () => {
     elasticsearch: jest.Mocked<ElasticsearchServiceSetup>;
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
-    buildNumber: number;
+    staticAssets: IStaticAssets;
     customBranding: jest.Mocked<CustomBrandingSetup>;
   };
   let mockStartAuthenticationParams: {
@@ -96,7 +97,7 @@ describe('AuthenticationService', () => {
         isTLSEnabled: false,
       }),
       license: licenseMock.create(),
-      buildNumber: 100500,
+      staticAssets: coreSetupMock.http.staticAssets,
       customBranding: customBrandingServiceMock.createSetupContract(),
     };
     mockCanRedirectRequest.mockReturnValue(false);
@@ -983,7 +984,7 @@ describe('AuthenticationService', () => {
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/app/some',
         });
       });
@@ -1015,7 +1016,7 @@ describe('AuthenticationService', () => {
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/app/some',
         });
       });
@@ -1050,7 +1051,7 @@ describe('AuthenticationService', () => {
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/',
         });
       });

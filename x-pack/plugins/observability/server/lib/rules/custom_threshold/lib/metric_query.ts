@@ -6,11 +6,14 @@
  */
 
 import moment from 'moment';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import { Filter } from '@kbn/es-query';
 import {
   Aggregators,
-  MetricExpressionParams,
+  CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import { isCustom, isNotCountOrCustom } from './metric_expression_params';
+import { getSearchConfigurationBoolQuery } from '../../../../utils/get_parsed_filtered_query';
+import { SearchConfigurationType } from '../types';
 import { createCustomMetricsAggregations } from './create_custom_metrics_aggregations';
 import {
   CONTAINER_ID,
@@ -20,103 +23,76 @@ import {
   validGroupByForContext,
 } from '../utils';
 import { createBucketSelector } from './create_bucket_selector';
-import { createPercentileAggregation } from './create_percentile_aggregation';
-import { createRateAggsBuckets, createRateAggsBucketScript } from './create_rate_aggregation';
 import { wrapInCurrentPeriod } from './wrap_in_period';
-import { getParsedFilterQuery } from '../../../../utils/get_parsed_filtered_query';
 
-export const calculateCurrentTimeframe = (
-  metricParams: MetricExpressionParams,
+export const calculateCurrentTimeFrame = (
+  metricParams: CustomMetricExpressionParams,
   timeframe: { start: number; end: number }
-) => ({
-  ...timeframe,
-  start: moment(timeframe.end)
-    .subtract(
-      metricParams.aggType === Aggregators.RATE ? metricParams.timeSize * 2 : metricParams.timeSize,
-      metricParams.timeUnit
-    )
-    .valueOf(),
-});
+) => {
+  const isRateAgg = metricParams.metrics.some((metric) => metric.aggType === Aggregators.RATE);
+  return {
+    ...timeframe,
+    start: moment(timeframe.end)
+      .subtract(
+        isRateAgg ? metricParams.timeSize * 2 : metricParams.timeSize,
+        metricParams.timeUnit
+      )
+      .valueOf(),
+  };
+};
 
-export const createBaseFilters = (
-  metricParams: MetricExpressionParams,
+const QueryDslQueryContainerToFilter = (queries: QueryDslQueryContainer[]): Filter[] => {
+  return queries.map((query) => ({
+    meta: {},
+    query,
+  }));
+};
+
+export const createBoolQuery = (
   timeframe: { start: number; end: number },
   timeFieldName: string,
-  filterQuery?: string
+  searchConfiguration: SearchConfigurationType,
+  additionalQueries: QueryDslQueryContainer[] = []
 ) => {
-  const rangeFilters = [
-    {
-      range: {
-        [timeFieldName]: {
-          gte: moment(timeframe.start).toISOString(),
-          lte: moment(timeframe.end).toISOString(),
-        },
+  const rangeQuery: QueryDslQueryContainer = {
+    range: {
+      [timeFieldName]: {
+        gte: moment(timeframe.start).toISOString(),
+        lte: moment(timeframe.end).toISOString(),
       },
     },
-  ];
+  };
+  const filters = QueryDslQueryContainerToFilter([rangeQuery, ...additionalQueries]);
 
-  const metricFieldFilters =
-    isNotCountOrCustom(metricParams) && metricParams.metric
-      ? [
-          {
-            exists: {
-              field: metricParams.metric,
-            },
-          },
-        ]
-      : [];
-
-  const parsedFilterQuery = getParsedFilterQuery(filterQuery);
-
-  return [...rangeFilters, ...metricFieldFilters, ...parsedFilterQuery];
+  return getSearchConfigurationBoolQuery(searchConfiguration, filters);
 };
 
 export const getElasticsearchMetricQuery = (
-  metricParams: MetricExpressionParams,
+  metricParams: CustomMetricExpressionParams,
   timeframe: { start: number; end: number },
   timeFieldName: string,
   compositeSize: number,
   alertOnGroupDisappear: boolean,
+  searchConfiguration: SearchConfigurationType,
   lastPeriodEnd?: number,
   groupBy?: string | string[],
-  filterQuery?: string,
   afterKey?: Record<string, string>,
   fieldsExisted?: Record<string, boolean> | null
 ) => {
-  const { aggType } = metricParams;
-  if (isNotCountOrCustom(metricParams) && !metricParams.metric) {
-    throw new Error(
-      'Can only aggregate without a metric if using the document count or custom aggregator'
-    );
-  }
-
   // We need to make a timeframe that represents the current timeframe as opposed
   // to the total timeframe (which includes the last period).
-  const currentTimeframe = {
-    ...calculateCurrentTimeframe(metricParams, timeframe),
+  const currentTimeFrame = {
+    ...calculateCurrentTimeFrame(metricParams, timeframe),
     timeFieldName,
   };
 
-  const metricAggregations =
-    aggType === Aggregators.COUNT
-      ? {}
-      : aggType === Aggregators.RATE
-      ? createRateAggsBuckets(currentTimeframe, 'aggregatedValue', metricParams.metric)
-      : aggType === Aggregators.P95 || aggType === Aggregators.P99
-      ? createPercentileAggregation(aggType, metricParams.metric)
-      : isCustom(metricParams)
-      ? createCustomMetricsAggregations(
-          'aggregatedValue',
-          metricParams.metrics,
-          metricParams.equation
-        )
-      : {
-          aggregatedValue: {
-            [aggType]: {
-              field: metricParams.metric,
-            },
-          },
-        };
+  const metricAggregations = createCustomMetricsAggregations(
+    'aggregatedValue',
+    metricParams.metrics,
+    currentTimeFrame,
+    timeFieldName,
+    metricParams.equation
+  );
 
   const bucketSelectorAggregations = createBucketSelector(
     metricParams,
@@ -126,12 +102,7 @@ export const getElasticsearchMetricQuery = (
     lastPeriodEnd
   );
 
-  const rateAggBucketScript =
-    metricParams.aggType === Aggregators.RATE
-      ? createRateAggsBucketScript(currentTimeframe, 'aggregatedValue')
-      : {};
-
-  const currentPeriod = wrapInCurrentPeriod(currentTimeframe, metricAggregations);
+  const currentPeriod = wrapInCurrentPeriod(currentTimeFrame, metricAggregations);
 
   const containerIncludesList = ['container.*'];
   const containerExcludesList = [
@@ -207,7 +178,6 @@ export const getElasticsearchMetricQuery = (
           },
           aggs: {
             ...currentPeriod,
-            ...rateAggBucketScript,
             ...bucketSelectorAggregations,
             ...additionalContextAgg,
             ...containerContextAgg,
@@ -225,7 +195,6 @@ export const getElasticsearchMetricQuery = (
           },
           aggs: {
             ...currentPeriod,
-            ...rateAggBucketScript,
             ...bucketSelectorAggregations,
           },
         },
@@ -235,15 +204,11 @@ export const getElasticsearchMetricQuery = (
     aggs.groupings.composite.after = afterKey;
   }
 
-  const baseFilters = createBaseFilters(metricParams, timeframe, timeFieldName, filterQuery);
+  const query = createBoolQuery(timeframe, timeFieldName, searchConfiguration);
 
   return {
     track_total_hits: true,
-    query: {
-      bool: {
-        filter: baseFilters,
-      },
-    },
+    query,
     size: 0,
     aggs,
   };

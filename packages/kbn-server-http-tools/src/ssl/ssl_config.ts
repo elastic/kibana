@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { isEqual } from 'lodash';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { readPkcs12Keystore, readPkcs12Truststore } from '@kbn/crypto';
 import { constants as cryptoConstants } from 'crypto';
@@ -160,6 +161,13 @@ export class SslConfig {
         ? secureOptions
         : secureOptions | secureOption; // eslint-disable-line no-bitwise
     }, 0);
+  }
+
+  public isEqualTo(otherConfig: SslConfig) {
+    if (this === otherConfig) {
+      return true;
+    }
+    return isEqual(this, otherConfig);
   }
 }
 

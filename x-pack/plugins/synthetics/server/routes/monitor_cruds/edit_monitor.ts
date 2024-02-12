@@ -8,6 +8,7 @@ import { schema } from '@kbn/config-schema';
 import { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { ELASTIC_MANAGED_LOCATIONS_DISABLED } from './add_monitor_project';
 import { getDecryptedMonitor } from '../../saved_objects/synthetics_monitor';
 import { getPrivateLocations } from '../../synthetics_service/get_private_locations';
 import { mergeSourceMonitor } from './helper';
@@ -41,7 +42,6 @@ export const editSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () => (
     }),
     body: schema.any(),
   },
-  writeAccess: true,
   handler: async (routeContext): Promise<any> => {
     const { request, response, savedObjectsClient, server } = routeContext;
     const { logger } = server;
@@ -250,10 +250,13 @@ export const validatePermissions = async (
 
   const elasticManagedLocationsEnabled =
     Boolean(
-      (await server.coreStart?.capabilities.resolveCapabilities(request)).uptime
-        .elasticManagedLocationsEnabled
+      (
+        await server.coreStart?.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'uptime.*',
+        })
+      ).uptime.elasticManagedLocationsEnabled
     ) ?? true;
   if (!elasticManagedLocationsEnabled) {
-    return "You don't have permission to use public locations";
+    return ELASTIC_MANAGED_LOCATIONS_DISABLED;
   }
 };

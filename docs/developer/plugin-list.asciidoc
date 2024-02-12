@@ -23,9 +23,17 @@ NOTE:
 
 
 |{kib-repo}blob/{branch}/src/plugins/advanced_settings/README.md[advancedSettings]
-|This plugin contains the advanced settings management section
+|This plugin registers the management settings application
 allowing users to configure their advanced settings, also known
 as uiSettings within the code.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/observability/README.md[aiAssistantManagementObservability]
+|The aiAssistantManagementObservability plugin manages the Ai Assistant for Observability management section.
+
+
+|{kib-repo}blob/{branch}/src/plugins/ai_assistant_management/selection/README.md[aiAssistantManagementSelection]
+|The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
 |{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
@@ -266,6 +274,10 @@ Content is fetched from the remote (https://feeds.elastic.co) once a day, with p
 |Helps to globally configure the no data page components
 
 
+|{kib-repo}blob/{branch}/src/plugins/presentation_panel/README.md[presentationPanel]
+|The Presentation Panel is the point of contact between any React component and any registered UI actions. Components provided to the Presentation Panel should use an imperative handle to expose methods and state.
+
+
 |{kib-repo}blob/{branch}/src/plugins/presentation_util/README.mdx[presentationUtil]
 |The Presentation Utility Plugin is a set of common, shared components and toolkits for solutions within the Presentation space, (e.g. Dashboards, Canvas).
 
@@ -494,10 +506,6 @@ The plugin exposes the static DefaultEditorController class to consume.
 |Integrates with FullStory in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_gain_sight/README.md[cloudGainsight]
-|Integrates with Gainsight in order to provide better product analytics, so we can understand how our users make use of Kibana. This plugin should only run on Elastic Cloud.
-
-
 |{kib-repo}blob/{branch}/x-pack/plugins/cloud_integrations/cloud_links/README.md[cloudLinks]
 |Adds all the links to the Elastic Cloud console.
 
@@ -517,6 +525,10 @@ Plugin server-side only. Plugin has three main functions:
 
 |<<dashboard-enhanced-plugin>>
 |Adds drilldown capabilities to dashboard.  Owned by the Kibana App team.
+
+
+|{kib-repo}blob/{branch}/x-pack/plugins/dataset_quality/README.md[datasetQuality]
+|In order to make ongoing maintenance of log collection easy we want to introduce the concept of dataset quality, where users can easily get an overview on the datasets they have with information such as integration, size, last activity, among others.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/data_visualizer/README.md[dataVisualizer]
@@ -598,7 +610,7 @@ Index Management by running this series of requests in Console:
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/index_management/README.md[indexManagement]
-|Create an index with special characters and verify it renders correctly:
+|This service is exposed from the Index Management setup contract and can be used to add content to the indices list and the index details page.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/infra/README.md[infra]
@@ -635,8 +647,8 @@ the infrastructure monitoring use-case within Kibana.
 using the CURL scripts in the scripts folder.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/log_explorer/README.md[logExplorer]
-|This plugin is home to the <LogExplorer /> component and related types. It implements several of the underlying concepts that the Observability Log Explorer app builds upon.
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/logs_explorer/README.md[logsExplorer]
+|This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/logs_shared/README.md[logsShared]
@@ -668,7 +680,7 @@ Elastic.
 |This plugin allows for other plugins to add data to Kibana stack monitoring documents.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.md[notifications]
+|{kib-repo}blob/{branch}/x-pack/plugins/notifications/README.mdx[notifications]
 |The Notifications plugin provides a set of services to help Solutions and plugins send notifications to users.
 
 
@@ -680,8 +692,8 @@ Elastic.
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/observability_log_explorer/README.md[observabilityLogExplorer]
-|This plugin provides an app based on the LogExplorer component from the log_explorer plugin, but adds observability-specific affordances.
+|{kib-repo}blob/{branch}/x-pack/plugins/observability_solution/observability_logs_explorer/README.md[observabilityLogsExplorer]
+|This plugin provides an app based on the LogsExplorer component from the logs_explorer plugin, but adds observability-specific affordances.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/observability_onboarding/README.md[observabilityOnboarding]
@@ -771,7 +783,7 @@ It leverages universal configuration and other APIs in the serverless plugin to 
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/serverless_search/README.mdx[serverlessSearch]
-|This plugin contains configuration and code used to create a Serverless Search project.  It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
+|This plugin contains configuration and code used to create a Serverless Search project. It leverages universal configuration and other APIs in the serverless plugin to configure Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/plugins/session_view/README.md[sessionView]

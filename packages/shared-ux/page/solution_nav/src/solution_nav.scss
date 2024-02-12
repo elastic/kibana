@@ -1,5 +1,6 @@
 $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
 @import '@elastic/eui/src/components/side_nav/mixins';
+@import 'variables';
 
 // Put the page background color in the flyout version too
 .kbnSolutionNav__flyout {
@@ -14,12 +15,18 @@ $euiSideNavEmphasizedBackgroundColor: transparentize($euiColorLightShade, .7);
   flex-direction: column;
 
   @include euiBreakpoint('m', 'l', 'xl') {
-    width: 248px;
+    width: $solutionNavWidth;
     padding: $euiSizeL;
   }
 
-  .kbnSolutionNav__avatar {
-    margin-right: $euiSize;
+  &__title {
+    display: inline-flex;
+    align-items: center;
+  }
+
+  &__titleAvatar {
+    margin-right: $euiSizeM;
+    align-self: flex-start;
   }
 }
 

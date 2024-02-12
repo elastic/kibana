@@ -28,6 +28,7 @@ jest.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => ({
 jest.mock('axios', () => ({
   create: jest.fn(),
   AxiosHeaders: jest.requireActual('axios').AxiosHeaders,
+  AxiosError: jest.requireActual('axios').AxiosError,
 }));
 const createAxiosInstanceMock = axios.create as jest.Mock;
 const axiosInstanceMock = {

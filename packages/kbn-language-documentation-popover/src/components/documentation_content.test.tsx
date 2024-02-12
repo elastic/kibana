@@ -9,6 +9,7 @@
 import React from 'react';
 import { mountWithIntl, findTestSubject } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
+import { Markdown } from '@kbn/shared-ux-markdown';
 import { LanguageDocumentationPopoverContent } from './documentation_content';
 
 describe('###Documentation popover content', () => {
@@ -24,11 +25,15 @@ describe('###Documentation popover content', () => {
         items: [
           {
             label: 'Section two item 1',
-            description: <span>Section 2 item 1 description</span>,
+            description: (
+              <Markdown readOnly markdownContent={`## Section two item 1 description `} />
+            ),
           },
           {
             label: 'Section two item 2',
-            description: <span>Section 2 item 2 description</span>,
+            description: (
+              <Markdown readOnly markdownContent={`## Section two item 2 description `} />
+            ),
           },
         ],
       },
@@ -52,7 +57,7 @@ describe('###Documentation popover content', () => {
     });
   });
 
-  test('Documentation component should list all sections that match the search input', () => {
+  test('Documentation component should list all sections that match the search input when title matches', () => {
     const component = mountWithIntl(
       <LanguageDocumentationPopoverContent language="test" sections={sections} />
     );
@@ -68,5 +73,26 @@ describe('###Documentation popover content', () => {
     const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
     expect(sectionsLabels.length).toBe(1);
     expect(sectionsLabels.text()).toEqual('Section one');
+  });
+
+  test('Documentation component should list all sections that match the search input when description matches', () => {
+    const component = mountWithIntl(
+      <LanguageDocumentationPopoverContent
+        language="test"
+        sections={sections}
+        searchInDescription
+      />
+    );
+    const searchBox = component.find('[data-test-subj="language-documentation-navigation-search"]');
+    act(() => {
+      searchBox.at(0).prop('onChange')!({
+        target: { value: 'item 2 description' },
+      } as React.ChangeEvent<HTMLInputElement>);
+    });
+
+    component.update();
+
+    const sectionsLabels = findTestSubject(component, 'language-documentation-navigation-title');
+    expect(sectionsLabels.length).toBe(1);
   });
 });

@@ -1,0 +1,38 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+    ]
+  },
+  "include": [
+    "**/*.ts",
+    "**/*.tsx",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/i18n",
+    "@kbn/screenshotting-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/kibana-utils-plugin",
+    "@kbn/logging",
+    "@kbn/core",
+    "@kbn/reporting-common",
+    "@kbn/core-http-server",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-plugins-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-ui-settings-server",
+    "@kbn/licensing-plugin",
+    "@kbn/spaces-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-http-router-server-internal",
+    "@kbn/core-http-request-handler-context-server",
+    "@kbn/config-schema",
+  ]
+}

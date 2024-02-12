@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // Defined in CSP plugin
@@ -29,6 +32,7 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
       const response = await supertest
         .get('/internal/cloud_security_posture/status?check=init')
         .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200);
       expect(response.body).to.eql({ isPluginInitialized: true });
       log.debug('CSP plugin is initialized');
@@ -110,7 +114,11 @@ export function CspDashboardPageProvider({ getService, getPageObjects }: FtrProv
     },
 
     getKubernetesComplianceScore: async () => {
-      await dashboard.getKubernetesSummarySection();
+      await retry.waitFor(
+        'Cloud posture dashboard summary section to be displayed',
+        async () => !!(await dashboard.getKubernetesSummarySection())
+      );
+
       return await testSubjects.find('dashboard-summary-section-compliance-score');
     },
   };

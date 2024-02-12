@@ -33,7 +33,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
-import { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -60,7 +59,6 @@ export interface ExploratoryViewPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
 
-  guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;

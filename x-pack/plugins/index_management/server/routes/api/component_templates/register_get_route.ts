@@ -33,9 +33,9 @@ export function registerGetAllRoute({ router, lib: { handleEsError } }: RouteDep
         const { index_templates: indexTemplates } =
           await client.asCurrentUser.indices.getIndexTemplate();
 
-        const body = componentTemplates.map((componentTemplate: ComponentTemplateFromEs) => {
+        const body = componentTemplates.map((componentTemplate) => {
           const deserializedComponentTemplateListItem = deserializeComponentTemplateList(
-            componentTemplate,
+            componentTemplate as ComponentTemplateFromEs,
             // @ts-expect-error TemplateSerialized.index_patterns not compatible with IndicesIndexTemplate.index_patterns
             indexTemplates
           );

@@ -6,85 +6,44 @@
  */
 
 import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react';
+import { isEqual } from 'lodash';
+import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiFlyoutBody,
-  EuiFlyoutFooter,
   EuiTitle,
-  EuiLink,
-  EuiIcon,
-  EuiToolTip,
-  EuiSpacer,
+  EuiAccordion,
+  useEuiTheme,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiTheme,
-  EuiCallOut,
+  euiScrollBarStyles,
 } from '@elastic/eui';
-import { isEqual } from 'lodash';
-import type { Observable } from 'rxjs';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import type { CoreStart } from '@kbn/core/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type { LensPluginStartDependencies } from '../../../plugin';
+import {
+  getAggregateQueryMode,
+  isOfAggregateQueryType,
+  getLanguageDisplayName,
+} from '@kbn/es-query';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
+import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
   useLensSelector,
   selectFramePublicAPI,
+  onActiveDataChange,
   useLensDispatch,
-  updateIndexPatterns,
 } from '../../../state_management';
-import { replaceIndexpattern } from '../../../state_management/lens_slice';
-import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
-
-import type { DatasourceMap, VisualizationMap } from '../../../types';
 import type { TypedLensByValueInput } from '../../../embeddable/embeddable_component';
-import type { LensEmbeddableOutput } from '../../../embeddable';
-import type { LensInspector } from '../../../lens_inspector_service';
-import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
-import { extractReferencesFromState } from '../../../utils';
-import type { Document } from '../../../persistence';
-import { createIndexPatternService } from '../../../data_views_service/service';
-
-export interface EditConfigPanelProps {
-  coreStart: CoreStart;
-  startDependencies: LensPluginStartDependencies;
-  visualizationMap: VisualizationMap;
-  datasourceMap: DatasourceMap;
-  /** The attributes of the Lens embeddable */
-  attributes: TypedLensByValueInput['attributes'];
-  /** Callback for updating the visualization and datasources state */
-  updatePanelState: (datasourceState: unknown, visualizationState: unknown) => void;
-  /** Lens visualizations can be either created from ESQL (textBased) or from dataviews (formBased) */
-  datasourceId: 'formBased' | 'textBased';
-  /** Embeddable output observable, useful for dashboard flyout  */
-  output$?: Observable<LensEmbeddableOutput>;
-  /** Contains the active data, necessary for some panel configuration such as coloring */
-  lensAdapters?: LensInspector['adapters'];
-  /** Optional callback called when updating the by reference embeddable */
-  updateByRefInput?: (soId: string) => void;
-  /** Callback for closing the edit flyout */
-  closeFlyout?: () => void;
-  /** Boolean used for adding a flyout wrapper */
-  wrapInFlyout?: boolean;
-  /** Optional parameter for panel identification
-   * If not given, Lens generates a new one
-   */
-  panelId?: string;
-  /** Optional parameter for saved object id
-   * Should be given if the lens embeddable is a by reference one
-   * (saved in the library)
-   */
-  savedObjectId?: string;
-  /** Callback for saving the embeddable as a SO */
-  saveByRef?: (attrs: Document) => void;
-  /** Optional callback for navigation from the header of the flyout */
-  navigateToLensEditor?: () => void;
-  /** If set to true it displays a header on the flyout */
-  displayFlyoutHeader?: boolean;
-}
+import { EXPRESSION_BUILD_ERROR_ID, extractReferencesFromState } from '../../../utils';
+import { LayerConfiguration } from './layer_configuration_section';
+import type { EditConfigPanelProps } from './types';
+import { FlyoutWrapper } from './flyout_wrapper';
+import { getSuggestions } from './helpers';
+import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
+import { useApplicationUserMessages } from '../../get_application_user_messages';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -94,6 +53,8 @@ export function LensEditConfigurationFlyout({
   datasourceMap,
   datasourceId,
   updatePanelState,
+  updateSuggestion,
+  setCurrentAttributes,
   closeFlyout,
   saveByRef,
   savedObjectId,
@@ -102,31 +63,60 @@ export function LensEditConfigurationFlyout({
   lensAdapters,
   navigateToLensEditor,
   displayFlyoutHeader,
+  canEditTextBasedQuery,
+  isNewPanel,
+  deletePanel,
+  hidesSuggestions,
+  onApplyCb,
+  onCancelCb,
 }: EditConfigPanelProps) {
+  const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensByValueInput['attributes']>(attributes);
+  const previousAdapters = useRef<Partial<DefaultInspectorAdapters> | undefined>(lensAdapters);
+  const prevQuery = useRef<AggregateQuery | Query>(attributes.state.query);
+  const [query, setQuery] = useState<AggregateQuery | Query>(attributes.state.query);
+  const [errors, setErrors] = useState<Error[] | undefined>();
+  const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
+  const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
+  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
-  const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
-  const [isInlineFooterVisible, setIsInlineFlyoutFooterVisible] = useState(true);
-  const { euiTheme } = useEuiTheme();
-  const { datasourceStates, visualization, isLoading } = useLensSelector((state) => state.lens);
+
+  const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
+    useLensSelector((state) => state.lens);
+  // use the latest activeId, but fallback to attributes
+  const activeVisualization =
+    visualizationMap[visualization.activeId ?? attributes.visualizationType];
+
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
+
+  const layers = useMemo(
+    () => activeDatasource.getLayers(datasourceState),
+    [activeDatasource, datasourceState]
+  );
+
   const dispatch = useLensDispatch();
-  const activeData: Record<string, Datatable> = useMemo(() => {
-    return {};
-  }, []);
   useEffect(() => {
     const s = output$?.subscribe(() => {
-      const layers = activeDatasource.getLayers(datasourceState);
-      const adaptersTables = lensAdapters?.tables?.tables as Record<string, Datatable>;
+      const activeData: Record<string, Datatable> = {};
+      const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
-      layers.forEach((layer) => {
-        if (table) {
+      if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first
+        // MAX_NUM_OF_COLUMNS
+        const columns = Object.keys(table.rows?.[0]) ?? [];
+        setSuggestsLimitedColumns(columns.length >= MAX_NUM_OF_COLUMNS);
+        layers.forEach((layer) => {
           activeData[layer] = table;
-        }
-      });
+        });
+
+        dispatch(onActiveDataChange({ activeData }));
+      }
     });
     return () => s?.unsubscribe();
-  }, [activeDatasource, lensAdapters, datasourceState, output$, activeData]);
+  }, [dispatch, output$, layers]);
 
   const attributesChanged: boolean = useMemo(() => {
     const previousAttrs = previousAttributes.current;
@@ -142,257 +132,415 @@ export function LensEditConfigurationFlyout({
         : false;
 
     const visualizationState = visualization.state;
-    return (
-      !isEqual(visualizationState, previousAttrs.state.visualization) || !datasourceStatesAreSame
-    );
-  }, [attributes.references, datasourceId, datasourceMap, datasourceStates, visualization.state]);
+    const customIsEqual = visualizationMap[previousAttrs.visualizationType]?.isEqual;
+    const visualizationStateIsEqual = customIsEqual
+      ? (() => {
+          try {
+            return customIsEqual(
+              previousAttrs.state.visualization,
+              previousAttrs.references,
+              visualizationState,
+              attributes.references,
+              annotationGroups
+            );
+          } catch (err) {
+            return false;
+          }
+        })()
+      : isEqual(visualizationState, previousAttrs.state.visualization);
+
+    return !visualizationStateIsEqual || !datasourceStatesAreSame;
+  }, [
+    attributes.references,
+    datasourceId,
+    datasourceMap,
+    datasourceStates,
+    visualizationMap,
+    annotationGroups,
+    visualization.state,
+  ]);
 
   const onCancel = useCallback(() => {
     const previousAttrs = previousAttributes.current;
-
     if (attributesChanged) {
-      const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
-        ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
-            previousAttrs.state.datasourceStates[datasourceId],
-            previousAttrs.references
-          )
-        : previousAttrs.state.datasourceStates[datasourceId];
-      updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
+      if (previousAttrs.visualizationType === visualization.activeId) {
+        const currentDatasourceState = datasourceMap[datasourceId].injectReferencesToLayers
+          ? datasourceMap[datasourceId]?.injectReferencesToLayers?.(
+              previousAttrs.state.datasourceStates[datasourceId],
+              previousAttrs.references
+            )
+          : previousAttrs.state.datasourceStates[datasourceId];
+        updatePanelState?.(currentDatasourceState, previousAttrs.state.visualization);
+      } else {
+        updateSuggestion?.(previousAttrs);
+      }
       if (savedObjectId) {
         updateByRefInput?.(savedObjectId);
       }
     }
+    // for a newly created chart, I want cancelling to also remove the panel
+    if (isNewPanel && deletePanel) {
+      deletePanel();
+    }
+    onCancelCb?.();
     closeFlyout?.();
   }, [
     attributesChanged,
-    savedObjectId,
+    isNewPanel,
+    deletePanel,
     closeFlyout,
+    visualization.activeId,
+    savedObjectId,
     datasourceMap,
     datasourceId,
     updatePanelState,
+    updateSuggestion,
     updateByRefInput,
+    onCancelCb,
   ]);
 
   const onApply = useCallback(() => {
+    const dsStates = Object.fromEntries(
+      Object.entries(datasourceStates).map(([id, ds]) => {
+        const dsState = ds.state;
+        return [id, dsState];
+      })
+    );
+    const references = extractReferencesFromState({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, id) => ({
+          ...acc,
+          [id]: datasourceMap[id],
+        }),
+        {}
+      ),
+      datasourceStates,
+      visualizationState: visualization.state,
+      activeVisualization,
+    });
+    const attrs = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: visualization.state,
+        datasourceStates: dsStates,
+      },
+      references,
+      visualizationType: visualization.activeId,
+      title: visualization.activeId ?? '',
+    };
     if (savedObjectId) {
-      const dsStates = Object.fromEntries(
-        Object.entries(datasourceStates).map(([id, ds]) => {
-          const dsState = ds.state;
-          return [id, dsState];
-        })
-      );
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, id) => ({
-            ...acc,
-            [id]: datasourceMap[id],
-          }),
-          {}
-        ),
-        datasourceStates,
-        visualizationState: visualization.state,
-        activeVisualization,
-      });
-      const attrs = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualization.state,
-          datasourceStates: dsStates,
-        },
-        references,
-      };
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
+
+    // check if visualization type changed, if it did, don't pass the previous visualization state
+    const prevVisState =
+      previousAttributes.current.visualizationType === visualization.activeId
+        ? previousAttributes.current.state.visualization
+        : undefined;
+    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
+      visualization.state,
+      prevVisState
+    );
+    if (telemetryEvents && telemetryEvents.length) {
+      trackUiCounterEvents(telemetryEvents);
+    }
+
+    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
+    visualization.activeId,
     savedObjectId,
     closeFlyout,
+    onApplyCb,
     datasourceStates,
     visualization.state,
     activeVisualization,
     attributes,
+    datasourceMap,
     saveByRef,
     updateByRefInput,
-    datasourceMap,
   ]);
 
-  const indexPatternService = useMemo(
-    () =>
-      createIndexPatternService({
-        dataViews: startDependencies.dataViews,
-        uiActions: startDependencies.uiActions,
-        core: coreStart,
-        updateIndexPatterns: (newIndexPatternsState, options) => {
-          dispatch(updateIndexPatterns(newIndexPatternsState));
-        },
-        replaceIndexPattern: (newIndexPattern, oldId, options) => {
-          dispatch(replaceIndexpattern({ newIndexPattern, oldId }));
-        },
-      }),
-    [coreStart, dispatch, startDependencies.dataViews, startDependencies.uiActions]
+  const { getUserMessages } = useApplicationUserMessages({
+    coreStart,
+    framePublicAPI,
+    activeDatasourceId: datasourceId,
+    datasourceState: datasourceStates[datasourceId],
+    datasource: datasourceMap[datasourceId],
+    dispatch,
+    visualization: activeVisualization,
+    visualizationType: visualization.activeId,
+    visualizationState: visualization,
+  });
+
+  // needed for text based languages mode which works ONLY with adHoc dataviews
+  const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
+
+  const runQuery = useCallback(
+    async (q, abortController) => {
+      const attrs = await getSuggestions(
+        q,
+        startDependencies,
+        datasourceMap,
+        visualizationMap,
+        adHocDataViews,
+        setErrors,
+        abortController
+      );
+      if (attrs) {
+        setCurrentAttributes?.(attrs);
+        setErrors([]);
+        updateSuggestion?.(attrs);
+      }
+    },
+    [
+      startDependencies,
+      datasourceMap,
+      visualizationMap,
+      adHocDataViews,
+      setCurrentAttributes,
+      updateSuggestion,
+    ]
   );
 
-  const framePublicAPI = useLensSelector((state) => {
-    const newState = {
-      ...state,
-      lens: {
-        ...state.lens,
-        activeData,
-      },
-    };
-    return selectFramePublicAPI(newState, datasourceMap);
-  });
-  if (isLoading) return null;
-
-  const layerPanelsProps = {
-    framePublicAPI,
+  const isSaveable = useMemo(() => {
+    if (!attributesChanged) {
+      return false;
+    }
+    if (!visualization.state || !visualization.activeId) {
+      return false;
+    }
+    const visualizationErrors = getUserMessages(['visualization'], {
+      severity: 'error',
+    });
+    // shouldn't build expression if there is any type of error other than an expression build error
+    // (in which case we try again every time because the config might have changed)
+    if (visualizationErrors.every((error) => error.uniqueId === EXPRESSION_BUILD_ERROR_ID)) {
+      return Boolean(
+        buildExpression({
+          visualization: activeVisualization,
+          visualizationState: visualization.state,
+          datasourceMap,
+          datasourceStates,
+          datasourceLayers: framePublicAPI.datasourceLayers,
+          indexPatterns: framePublicAPI.dataViews.indexPatterns,
+          dateRange: framePublicAPI.dateRange,
+          nowInstant: startDependencies.data.nowProvider.get(),
+          searchSessionId,
+        })
+      );
+    }
+  }, [
+    attributesChanged,
+    activeVisualization,
     datasourceMap,
-    visualizationMap,
-    core: coreStart,
-    dataViews: startDependencies.dataViews,
-    uiActions: startDependencies.uiActions,
-    hideLayerHeader: datasourceId === 'textBased',
-    indexPatternService,
-    setIsInlineFlyoutFooterVisible,
-  };
+    datasourceStates,
+    framePublicAPI.dataViews.indexPatterns,
+    framePublicAPI.dateRange,
+    framePublicAPI.datasourceLayers,
+    searchSessionId,
+    startDependencies.data.nowProvider,
+    visualization.activeId,
+    visualization.state,
+    getUserMessages,
+  ]);
+
+  const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
+
+  if (isLoading) return null;
+  // Example is the Discover editing where we dont want to render the text based editor on the panel, neither the suggestions (for now)
+  if (!canEditTextBasedQuery && hidesSuggestions) {
+    return (
+      <FlyoutWrapper
+        isInlineFlyoutVisible={isInlineFlyoutVisible}
+        displayFlyoutHeader={displayFlyoutHeader}
+        onCancel={onCancel}
+        navigateToLensEditor={navigateToLensEditor}
+        onApply={onApply}
+        isScrollable={true}
+        isNewPanel={isNewPanel}
+        isSaveable={isSaveable}
+      >
+        <LayerConfiguration
+          getUserMessages={getUserMessages}
+          attributes={attributes}
+          coreStart={coreStart}
+          startDependencies={startDependencies}
+          visualizationMap={visualizationMap}
+          datasourceMap={datasourceMap}
+          datasourceId={datasourceId}
+          hasPadding={true}
+          framePublicAPI={framePublicAPI}
+          setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
+        />
+      </FlyoutWrapper>
+    );
+  }
+
   return (
     <>
-      <EuiFlyoutBody
-        className="lnsEditFlyoutBody"
-        css={css`
-          // styles needed to display extra drop targets that are outside of the config panel main area
-          overflow-y: auto;
-          padding-left: ${euiThemeVars.euiFormMaxWidth};
-          margin-left: -${euiThemeVars.euiFormMaxWidth};
-          pointer-events: none;
-          .euiFlyoutBody__overflow {
-            padding-left: inherit;
-            margin-left: inherit;
-            > * {
-              pointer-events: auto;
-            }
-          }
-          .euiFlyoutBody__overflowContent {
-            padding: 0;
-          }
-        `}
+      <FlyoutWrapper
+        isInlineFlyoutVisible={isInlineFlyoutVisible}
+        displayFlyoutHeader={displayFlyoutHeader}
+        onCancel={onCancel}
+        navigateToLensEditor={navigateToLensEditor}
+        onApply={onApply}
+        language={textBasedMode ? getLanguageDisplayName(textBasedMode) : ''}
+        isSaveable={isSaveable}
+        isScrollable={false}
+        isNewPanel={isNewPanel}
       >
-        <EuiFlexGroup gutterSize="s" direction="column">
-          {displayFlyoutHeader && (
-            <EuiFlexItem
-              data-test-subj="editFlyoutHeader"
-              css={css`
-                padding: ${euiThemeVars.euiSizeL};
-                border-block-end: 1px solid ${euiThemeVars.euiBorderColor};
-              `}
-            >
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-                <EuiFlexItem grow={false}>
-                  <EuiFlexGroup alignItems="center" gutterSize="xs">
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h2 id="Edit visualization">
-                          {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                            defaultMessage: 'Edit visualization',
-                          })}
-                        </h2>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiToolTip
-                        content={i18n.translate('xpack.lens.config.experimentalLabel', {
-                          defaultMessage: 'Technical preview',
-                        })}
-                      >
-                        <EuiIcon type="beaker" size="m" />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-                {navigateToLensEditor && (
-                  <EuiFlexItem grow={false}>
-                    <EuiLink
-                      onClick={navigateToLensEditor}
-                      data-test-subj="navigateToLensEditorLink"
-                    >
-                      {i18n.translate('xpack.lens.config.editLinkLabel', {
-                        defaultMessage: 'Edit in Lens',
-                      })}
-                    </EuiLink>
-                  </EuiFlexItem>
-                )}
-              </EuiFlexGroup>
+        <EuiFlexGroup
+          css={css`
+            block-size: 100%;
+            .euiFlexItem,
+            .euiAccordion,
+            .euiAccordion__triggerWrapper,
+            .euiAccordion__childWrapper {
+              min-block-size: 0;
+            }
+            .euiAccordion {
+              display: flex;
+              flex: 1;
+              flex-direction: column;
+            }
+            .euiAccordion__childWrapper {
+              overflow-y: auto !important;
+              ${euiScrollBarStyles(euiTheme)}
+              padding-left: ${euiThemeVars.euiFormMaxWidth};
+              margin-left: -${euiThemeVars.euiFormMaxWidth};
+              .euiAccordion-isOpen & {
+                block-size: auto !important;
+                flex: 1;
+              }
+            }
+          `}
+          direction="column"
+          gutterSize="none"
+        >
+          {isOfAggregateQueryType(query) && canEditTextBasedQuery && (
+            <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
+              <TextBasedLangEditor
+                query={query}
+                onTextLangQueryChange={(q) => {
+                  setQuery(q);
+                  prevQuery.current = q;
+                }}
+                expandCodeEditor={(status: boolean) => {}}
+                isCodeEditorExpanded
+                detectTimestamp={Boolean(adHocDataViews?.[0]?.timeFieldName)}
+                errors={errors}
+                warning={
+                  suggestsLimitedColumns
+                    ? i18n.translate('xpack.lens.config.configFlyoutCallout', {
+                        defaultMessage:
+                          'Displaying a limited portion of the available fields. Add more from the configuration panel.',
+                      })
+                    : undefined
+                }
+                hideMinimizeButton
+                editorIsInline
+                hideRunQueryText
+                onTextLangQuerySubmit={async (q, a) => {
+                  if (q) {
+                    await runQuery(q, a);
+                  }
+                }}
+                isDisabled={false}
+                allowQueryCancellation={true}
+              />
             </EuiFlexItem>
           )}
           <EuiFlexItem
+            grow={isLayerAccordionOpen ? 1 : false}
             css={css`
-              padding: ${euiTheme.size.s};
+                padding-left: ${euiThemeVars.euiSize};
+                padding-right: ${euiThemeVars.euiSize};
+                .euiAccordion__childWrapper {
+                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
+                }
+              }
             `}
           >
-            {datasourceId === 'textBased' && (
-              <EuiCallOut
-                size="s"
-                title={i18n.translate('xpack.lens.config.configFlyoutCallout', {
-                  defaultMessage: 'ES|QL currently offers limited configuration options',
-                })}
-                iconType="iInCircle"
+            <EuiAccordion
+              id="layer-configuration"
+              buttonContent={
+                <EuiTitle
+                  size="xxs"
+                  css={css`
+                padding: 2px;
+              }
+            `}
+                >
+                  <h5>
+                    {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
+                      defaultMessage: 'Layer configuration',
+                    })}
+                  </h5>
+                </EuiTitle>
+              }
+              buttonProps={{
+                paddingSize: 'm',
+              }}
+              initialIsOpen={isLayerAccordionOpen}
+              forceState={isLayerAccordionOpen ? 'open' : 'closed'}
+              onToggle={(status) => {
+                if (status && isSuggestionsAccordionOpen) {
+                  setIsSuggestionsAccordionOpen(!status);
+                }
+                setIsLayerAccordionOpen(!isLayerAccordionOpen);
+              }}
+            >
+              <LayerConfiguration
+                attributes={attributes}
+                getUserMessages={getUserMessages}
+                coreStart={coreStart}
+                startDependencies={startDependencies}
+                visualizationMap={visualizationMap}
+                datasourceMap={datasourceMap}
+                datasourceId={datasourceId}
+                framePublicAPI={framePublicAPI}
+                setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
               />
-            )}
-            <EuiSpacer size="m" />
-            <VisualizationToolbar
-              activeVisualization={activeVisualization}
-              framePublicAPI={framePublicAPI}
-            />
-            <EuiSpacer size="m" />
-            <ConfigPanelWrapper
-              {...layerPanelsProps}
-              css={css`
-                padding: ${euiTheme.size.s};
-              `}
+            </EuiAccordion>
+          </EuiFlexItem>
+
+          <EuiFlexItem
+            grow={isSuggestionsAccordionOpen ? 1 : false}
+            data-test-subj="InlineEditingSuggestions"
+            css={css`
+                border-top: ${euiThemeVars.euiBorderThin};
+                border-bottom: ${euiThemeVars.euiBorderThin};
+                padding-left: ${euiThemeVars.euiSize};
+                padding-right: ${euiThemeVars.euiSize};
+                .euiAccordion__childWrapper {
+                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
+                }
+              }
+            `}
+          >
+            <SuggestionPanel
+              ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
+              datasourceMap={datasourceMap}
+              visualizationMap={visualizationMap}
+              frame={framePublicAPI}
+              core={coreStart}
+              nowProvider={startDependencies.data.nowProvider}
+              showOnlyIcons
+              wrapSuggestions
+              isAccordionOpen={isSuggestionsAccordionOpen}
+              toggleAccordionCb={(status) => {
+                if (!status && isLayerAccordionOpen) {
+                  setIsLayerAccordionOpen(status);
+                }
+                setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlyoutBody>
-      {isInlineFooterVisible && (
-        <EuiFlyoutFooter>
-          <EuiFlexGroup justifyContent="spaceBetween">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                onClick={onCancel}
-                flush="left"
-                aria-label={i18n.translate('xpack.lens.config.cancelFlyoutAriaLabel', {
-                  defaultMessage: 'Cancel applied changes',
-                })}
-                data-test-subj="cancelFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.lens.config.cancelFlyoutLabel"
-                  defaultMessage="Cancel"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onApply}
-                fill
-                aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
-                  defaultMessage: 'Apply changes',
-                })}
-                iconType="check"
-                isDisabled={!attributesChanged}
-                data-test-subj="applyFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.lens.config.applyFlyoutLabel"
-                  defaultMessage="Apply and close"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlyoutFooter>
-      )}
+      </FlyoutWrapper>
     </>
   );
 }

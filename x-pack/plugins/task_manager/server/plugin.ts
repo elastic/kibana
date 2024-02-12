@@ -179,7 +179,7 @@ export class TaskManagerPlugin
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
-          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          serviceStatus.level >= derivedStatus.level ? serviceStatus : derivedStatus
         )
       )
     );
@@ -241,6 +241,7 @@ export class TaskManagerPlugin
       adHocTaskCounter: this.adHocTaskCounter,
       allowReadingInvalidState: this.config.allow_reading_invalid_state,
       logger: this.logger,
+      requestTimeouts: this.config.request_timeouts,
     });
 
     const managedConfiguration = createManagedConfiguration({

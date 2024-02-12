@@ -16,8 +16,8 @@ import {
   httpServiceMock,
   loggingSystemMock,
 } from '@kbn/core/server/mocks';
+import type { AuditEvent } from '@kbn/security-plugin-types-server';
 
-import type { AuditEvent } from './audit_events';
 import {
   AuditService,
   createLoggingConfig,
@@ -52,6 +52,7 @@ const recordAuditLoggingUsage = jest.fn();
 beforeEach(() => {
   logger.info.mockClear();
   logging.configure.mockClear();
+  logger.isLevelEnabled.mockClear().mockReturnValue(true);
   recordAuditLoggingUsage.mockClear();
   http.registerOnPostAuth.mockClear();
 });
@@ -319,6 +320,41 @@ describe('#asScoped', () => {
 
     await auditSetup.asScoped(request).log(undefined);
     expect(logger.info).not.toHaveBeenCalled();
+    audit.stop();
+  });
+
+  it('does not log to audit logger if info logging level is disabled', async () => {
+    logger.isLevelEnabled.mockReturnValue(false);
+
+    const audit = new AuditService(logger);
+    const auditSetup = audit.setup({
+      license,
+      config,
+      logging,
+      http,
+      getCurrentUser,
+      getSpaceId,
+      getSID,
+      recordAuditLoggingUsage,
+    });
+    const request = httpServerMock.createKibanaRequest({
+      socket: { remoteAddress: '3.3.3.3' } as Socket,
+      headers: {
+        'x-forwarded-for': '1.1.1.1, 2.2.2.2',
+      },
+      kibanaRequestState: { requestId: 'REQUEST_ID', requestUuid: 'REQUEST_UUID' },
+    });
+
+    await auditSetup.asScoped(request).log({
+      message: 'MESSAGE',
+      event: { action: 'ACTION' },
+      http: { request: { method: 'GET' } },
+    });
+
+    expect(logger.info).not.toHaveBeenCalled();
+    expect(logger.isLevelEnabled).toHaveBeenCalledTimes(1);
+    expect(logger.isLevelEnabled).toHaveBeenCalledWith('info');
+
     audit.stop();
   });
 });

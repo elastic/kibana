@@ -337,7 +337,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       await testSubjects.click('superDatePickerAbsoluteTab');
       const datePickerInput = await testSubjects.find('superDatePickerAbsoluteDateInput');
       await datePickerInput.clearValueWithKeyboard();
-      await datePickerInput.type([date]);
+      await datePickerInput.type([date, browser.keys.RETURN]);
     },
     async setAnomaliesThreshold(threshold: string) {
       const thresholdInput = await find.byCssSelector(
@@ -345,6 +345,10 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
       );
       await thresholdInput.clearValueWithKeyboard({ charByChar: true });
       await thresholdInput.type([threshold]);
+    },
+
+    async ensureAlertsAndRulesDropdownIsMissing() {
+      await testSubjects.missingOrFail('infrastructure-alerts-and-rules');
     },
 
     async clickAlertsAndRules() {
@@ -369,7 +373,7 @@ export function InfraHomePageProvider({ getService, getPageObjects }: FtrProvide
 
     async dismissDatePickerTooltip() {
       const isTooltipOpen = await testSubjects.exists(`waffleDatePickerIntervalTooltip`, {
-        timeout: 1000,
+        timeout: 3000,
       });
 
       if (isTooltipOpen) {

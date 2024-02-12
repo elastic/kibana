@@ -6,9 +6,11 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { RemoteClustersServerPlugin } from './plugin';
 
 export { config } from './config';
 export type { RemoteClustersPluginSetup } from './plugin';
 
-export const plugin = (ctx: PluginInitializerContext) => new RemoteClustersServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { RemoteClustersServerPlugin } = await import('./plugin');
+  return new RemoteClustersServerPlugin(ctx);
+};

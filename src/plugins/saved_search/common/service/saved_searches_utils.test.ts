@@ -25,6 +25,9 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: false,
         usesAdHocDataView: false,
+        rowsPerPage: 250,
+        sampleSize: 1000,
+        breakdownField: 'extension.keyword',
       };
 
       expect(
@@ -34,11 +37,12 @@ describe('saved_searches_utils', () => {
           ['tags-1', 'tags-2'],
           [],
           createSearchSourceMock(),
-          {}
+          {},
+          false
         )
       ).toMatchInlineSnapshot(`
         Object {
-          "breakdownField": undefined,
+          "breakdownField": "extension.keyword",
           "columns": Array [
             "a",
             "b",
@@ -49,10 +53,12 @@ describe('saved_searches_utils', () => {
           "hideChart": true,
           "id": "id",
           "isTextBasedQuery": false,
+          "managed": false,
           "references": Array [],
           "refreshInterval": undefined,
           "rowHeight": undefined,
-          "rowsPerPage": undefined,
+          "rowsPerPage": 250,
+          "sampleSize": 1000,
           "searchSource": SearchSource {
             "dependencies": Object {
               "aggs": Object {
@@ -102,6 +108,7 @@ describe('saved_searches_utils', () => {
         hideChart: true,
         isTextBasedQuery: true,
         usesAdHocDataView: false,
+        managed: false,
       };
 
       expect(toSavedSearchAttributes(savedSearch, '{}')).toMatchInlineSnapshot(`
@@ -122,6 +129,7 @@ describe('saved_searches_utils', () => {
           "refreshInterval": undefined,
           "rowHeight": undefined,
           "rowsPerPage": undefined,
+          "sampleSize": undefined,
           "sort": Array [
             Array [
               "a",

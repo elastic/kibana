@@ -47,6 +47,7 @@ describe(`cases`, () => {
         ['read', 'observability'],
         ['update', 'observability'],
         ['delete', 'securitySolution'],
+        ['settings', 'observability'],
       ])('grants %s privileges under feature with id %s', (operation, featureID) => {
         const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
@@ -55,7 +56,6 @@ describe(`cases`, () => {
           cases: {
             [operation]: [featureID],
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -88,8 +88,8 @@ describe(`cases`, () => {
             update: ['obs'],
             delete: ['security'],
             read: ['obs'],
+            settings: ['security'],
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -113,7 +113,6 @@ describe(`cases`, () => {
             "cases:security/pushCase",
             "cases:security/createCase",
             "cases:security/createComment",
-            "cases:security/createConfiguration",
             "cases:security/getCase",
             "cases:security/getComment",
             "cases:security/getTags",
@@ -122,9 +121,10 @@ describe(`cases`, () => {
             "cases:security/findConfigurations",
             "cases:security/updateCase",
             "cases:security/updateComment",
-            "cases:security/updateConfiguration",
             "cases:security/deleteCase",
             "cases:security/deleteComment",
+            "cases:security/createConfiguration",
+            "cases:security/updateConfiguration",
             "cases:obs/getCase",
             "cases:obs/getComment",
             "cases:obs/getTags",
@@ -133,7 +133,6 @@ describe(`cases`, () => {
             "cases:obs/findConfigurations",
             "cases:obs/updateCase",
             "cases:obs/updateComment",
-            "cases:obs/updateConfiguration",
           ]
         `);
       });
@@ -147,7 +146,6 @@ describe(`cases`, () => {
             all: ['security', 'other-security'],
             read: ['obs', 'other-obs'],
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -171,7 +169,6 @@ describe(`cases`, () => {
             "cases:security/pushCase",
             "cases:security/createCase",
             "cases:security/createComment",
-            "cases:security/createConfiguration",
             "cases:security/getCase",
             "cases:security/getComment",
             "cases:security/getTags",
@@ -180,13 +177,13 @@ describe(`cases`, () => {
             "cases:security/findConfigurations",
             "cases:security/updateCase",
             "cases:security/updateComment",
-            "cases:security/updateConfiguration",
             "cases:security/deleteCase",
             "cases:security/deleteComment",
+            "cases:security/createConfiguration",
+            "cases:security/updateConfiguration",
             "cases:other-security/pushCase",
             "cases:other-security/createCase",
             "cases:other-security/createComment",
-            "cases:other-security/createConfiguration",
             "cases:other-security/getCase",
             "cases:other-security/getComment",
             "cases:other-security/getTags",
@@ -195,9 +192,10 @@ describe(`cases`, () => {
             "cases:other-security/findConfigurations",
             "cases:other-security/updateCase",
             "cases:other-security/updateComment",
-            "cases:other-security/updateConfiguration",
             "cases:other-security/deleteCase",
             "cases:other-security/deleteComment",
+            "cases:other-security/createConfiguration",
+            "cases:other-security/updateConfiguration",
             "cases:obs/getCase",
             "cases:obs/getComment",
             "cases:obs/getTags",

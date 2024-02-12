@@ -18,5 +18,9 @@ export { getFieldIconType } from './src/utils/get_field_icon_type';
 export { getFieldType } from './src/utils/get_field_type';
 export { getFieldTypeDescription } from './src/utils/get_field_type_description';
 export { getFieldTypeName, UNKNOWN_FIELD_TYPE_MESSAGE } from './src/utils/get_field_type_name';
+export {
+  fieldNameWildcardMatcher,
+  getFieldSearchMatchingHighlight,
+} from './src/utils/field_name_wildcard_matcher';
 
 export { FieldIcon, type FieldIconProps, getFieldIconProps } from './src/components/field_icon';

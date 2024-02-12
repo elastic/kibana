@@ -27,6 +27,15 @@ export function AlertFlyout({ onClose }: Props) {
       onClose,
       canChangeTrigger: false,
       ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
+      metadata: {
+        currentOptions: {
+          /*
+          Setting the groupBy is currently required in custom threshold
+          rule for it to populate the rule with additional host context.
+          */
+          groupBy: 'host.name',
+        },
+      },
     });
   }, [onClose, triggersActionsUI]);
 

@@ -8,6 +8,7 @@
 import { ChromeBreadcrumb } from '@kbn/core/public';
 import { render } from '../utils/testing';
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import { Route } from 'react-router-dom';
 import { OVERVIEW_ROUTE } from '../../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -22,13 +23,27 @@ describe('useBreadcrumbs', () => {
     const [getBreadcrumbs, core] = mockCore();
 
     const expectedCrumbs: ChromeBreadcrumb[] = [
-      { text: 'Crumb: ', href: 'http://href.example.net' },
-      { text: 'Crumb II: Son of Crumb', href: 'http://href2.example.net' },
+      {
+        text: 'Crumb: ',
+        'data-test-subj': 'http://href.example.net',
+        href: 'http://href.example.net',
+      },
+      {
+        text: 'Crumb II: Son of Crumb',
+        'data-test-subj': 'http://href2.example.net',
+        href: 'http://href2.example.net',
+      },
     ];
 
     const Component = () => {
       useBreadcrumbs(expectedCrumbs);
-      return <>Hello</>;
+      return (
+        <>
+          {i18n.translate('app_not_found_in_i18nrc.component.helloLabel', {
+            defaultMessage: 'Hello',
+          })}
+        </>
+      );
     };
 
     render(

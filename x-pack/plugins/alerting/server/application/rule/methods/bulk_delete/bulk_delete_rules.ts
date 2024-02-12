@@ -9,6 +9,7 @@ import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { SavedObjectsBulkUpdateObject } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
+import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
 import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
@@ -29,7 +30,7 @@ import type {
   BulkDeleteRulesResult,
   BulkDeleteRulesRequestBody,
 } from './types';
-import { validateCommonBulkOptions } from './validation';
+import { validateBulkDeleteRulesBody } from './validation';
 import type { RuleAttributes } from '../../../../data/rule/types';
 import { bulkDeleteRulesSo } from '../../../../data/rule';
 import { transformRuleAttributesToRuleDomain, transformRuleDomainToRule } from '../../transforms';
@@ -43,7 +44,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   options: BulkDeleteRulesRequestBody
 ): Promise<BulkDeleteRulesResult<Params>> => {
   try {
-    validateCommonBulkOptions(options);
+    validateBulkDeleteRulesBody(options);
   } catch (error) {
     throw Boom.badRequest(`Error validating bulk delete data - ${error.message}`);
   }
@@ -93,7 +94,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
   const deletedRules = rules.map(({ id, attributes, references }) => {
     // TODO (http-versioning): alertTypeId should never be null, but we need to
     // fix the type cast from SavedObjectsBulkUpdateObject to SavedObjectsBulkUpdateObject
-    // when we are doing the bulk create and this should fix itself
+    // when we are doing the bulk delete and this should fix itself
     const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
     const ruleDomain = transformRuleAttributesToRuleDomain<Params>(attributes as RuleAttributes, {
       id,
@@ -106,7 +107,7 @@ export const bulkDeleteRules = async <Params extends RuleParams>(
     try {
       ruleDomainSchema.validate(ruleDomain);
     } catch (e) {
-      context.logger.warn(`Error validating bulk edited rule domain object for id: ${id}, ${e}`);
+      context.logger.warn(`Error validating bulk deleted rule domain object for id: ${id}, ${e}`);
     }
     return ruleDomain;
   });
@@ -136,7 +137,7 @@ const bulkDeleteWithOCC = async (
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RuleAttributes>(
         {
           filter,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           perPage: 100,
           ...(context.namespace ? { namespaces: [context.namespace] } : undefined),
         }
@@ -168,7 +169,7 @@ const bulkDeleteWithOCC = async (
             ruleAuditEvent({
               action: RuleAuditAction.DELETE,
               outcome: 'unknown',
-              savedObject: { type: 'alert', id: rule.id },
+              savedObject: { type: RULE_SAVED_OBJECT_TYPE, id: rule.id },
             })
           );
         }
@@ -218,7 +219,7 @@ const bulkDeleteWithOCC = async (
   const rules = rulesToDelete.filter((rule) => deletedRuleIds.includes(rule.id));
 
   // migrate legacy actions only for SIEM rules
-  // TODO (http-versioning) Remove RawRuleAction and RawRule casts
+  // TODO (http-versioning) Remove RawRule casts
   await pMap(
     rules,
     async (rule) => {

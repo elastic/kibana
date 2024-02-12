@@ -17,7 +17,6 @@ import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks
 import { createTGridMocks } from '@kbn/timelines-plugin/public/mock';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import { MockSubscriptionTrackingProvider } from '@kbn/subscription-tracking/mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { MemoryRouter } from 'react-router-dom';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
@@ -72,18 +71,17 @@ const dataServiceMock = {
     ...data.query,
     savedQueries: {
       ...data.query.savedQueries,
-      getAllSavedQueries: jest.fn(() =>
-        Promise.resolve({
-          id: '123',
-          attributes: {
-            total: 123,
-          },
-        })
-      ),
       findSavedQueries: jest.fn(() =>
         Promise.resolve({
           total: 123,
-          queries: [],
+          queries: [
+            {
+              id: '123',
+              attributes: {
+                total: 123,
+              },
+            },
+          ],
         })
       ),
     },
@@ -142,13 +140,11 @@ export const TestProvidersComponent: FC = ({ children }) => (
           <EuiThemeProvider>
             <SecuritySolutionContext.Provider value={mockSecurityContext}>
               <KibanaContext.Provider value={{ services: mockedServices } as any}>
-                <MockSubscriptionTrackingProvider>
-                  <I18nProvider>
-                    <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
-                      {children}
-                    </IndicatorsFiltersContext.Provider>
-                  </I18nProvider>
-                </MockSubscriptionTrackingProvider>
+                <I18nProvider>
+                  <IndicatorsFiltersContext.Provider value={mockIndicatorsFiltersContext}>
+                    {children}
+                  </IndicatorsFiltersContext.Provider>
+                </I18nProvider>
               </KibanaContext.Provider>
             </SecuritySolutionContext.Provider>
           </EuiThemeProvider>

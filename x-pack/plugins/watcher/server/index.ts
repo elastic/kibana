@@ -8,9 +8,10 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 
-import { WatcherServerPlugin } from './plugin';
-
-export const plugin = (ctx: PluginInitializerContext) => new WatcherServerPlugin(ctx);
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { WatcherServerPlugin } = await import('./plugin');
+  return new WatcherServerPlugin(ctx);
+};
 
 export const config = {
   schema: schema.object({

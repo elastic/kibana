@@ -22,6 +22,7 @@ interface ProcessAlertsOpts<
   hasReachedAlertLimit: boolean;
   alertLimit: number;
   autoRecoverAlerts: boolean;
+  startedAt?: string | null;
   flappingSettings: RulesSettingsFlappingProperties;
   maintenanceWindowIds: string[];
 }
@@ -52,6 +53,7 @@ export function processAlerts<
   autoRecoverAlerts,
   flappingSettings,
   maintenanceWindowIds,
+  startedAt,
 }: ProcessAlertsOpts<State, Context>): ProcessAlertsResult<
   State,
   Context,
@@ -65,7 +67,8 @@ export function processAlerts<
         previouslyRecoveredAlerts,
         alertLimit,
         flappingSettings,
-        maintenanceWindowIds
+        maintenanceWindowIds,
+        startedAt
       )
     : processAlertsHelper(
         alerts,
@@ -73,7 +76,8 @@ export function processAlerts<
         previouslyRecoveredAlerts,
         autoRecoverAlerts,
         flappingSettings,
-        maintenanceWindowIds
+        maintenanceWindowIds,
+        startedAt
       );
 }
 
@@ -88,12 +92,13 @@ function processAlertsHelper<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   autoRecoverAlerts: boolean,
   flappingSettings: RulesSettingsFlappingProperties,
-  maintenanceWindowIds: string[]
+  maintenanceWindowIds: string[],
+  startedAt?: string | null
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
 
-  const currentTime = new Date().toISOString();
+  const currentTime = startedAt ?? new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const activeAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
   const currentRecoveredAlerts: Record<string, Alert<State, Context, RecoveryActionGroupId>> = {};
@@ -183,7 +188,8 @@ function processAlertsLimitReached<
   previouslyRecoveredAlerts: Record<string, Alert<State, Context>>,
   alertLimit: number,
   flappingSettings: RulesSettingsFlappingProperties,
-  maintenanceWindowIds: string[]
+  maintenanceWindowIds: string[],
+  startedAt?: string | null
 ): ProcessAlertsResult<State, Context, ActionGroupIds, RecoveryActionGroupId> {
   const existingAlertIds = new Set(Object.keys(existingAlerts));
   const previouslyRecoveredAlertsIds = new Set(Object.keys(previouslyRecoveredAlerts));
@@ -193,7 +199,7 @@ function processAlertsLimitReached<
   // - pass through all existing alerts as active
   // - add any new alerts, up to the max allowed
 
-  const currentTime = new Date().toISOString();
+  const currentTime = startedAt ?? new Date().toISOString();
   const newAlerts: Record<string, Alert<State, Context, ActionGroupIds>> = {};
 
   // all existing alerts stay active

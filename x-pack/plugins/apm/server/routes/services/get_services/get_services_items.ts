@@ -24,7 +24,7 @@ export const MAX_NUMBER_OF_SERVICES = 1_000;
 
 export interface ServicesItemsResponse {
   items: MergedServiceStat[];
-  maxServiceCountExceeded: boolean;
+  maxCountExceeded: boolean;
   serviceOverflowCount: number;
 }
 
@@ -41,6 +41,8 @@ export async function getServicesItems({
   randomSampler,
   documentType,
   rollupInterval,
+  useDurationSummary,
+  searchQuery,
 }: {
   environment: string;
   kuery: string;
@@ -54,6 +56,8 @@ export async function getServicesItems({
   randomSampler: RandomSampler;
   documentType: ApmServiceTransactionDocumentType;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
+  searchQuery?: string;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
@@ -66,11 +70,13 @@ export async function getServicesItems({
       randomSampler,
       documentType,
       rollupInterval,
+      useDurationSummary,
+      searchQuery,
     };
 
     const [
       { serviceStats, serviceOverflowCount },
-      { services: servicesWithoutTransactions, maxServiceCountExceeded },
+      { services: servicesWithoutTransactions, maxCountExceeded },
       healthStatuses,
       alertCounts,
     ] = await Promise.all([
@@ -100,7 +106,7 @@ export async function getServicesItems({
           healthStatuses,
           alertCounts,
         }) ?? [],
-      maxServiceCountExceeded,
+      maxCountExceeded,
       serviceOverflowCount,
     };
   });

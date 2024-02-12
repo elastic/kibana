@@ -1,0 +1,21 @@
+title: Timeslice Metric Doc Count Metric
+required:
+  - name
+  - aggregation
+type: object
+properties:
+  name:
+    description: The name of the metric. Only valid options are A-Z
+    type: string
+    example: A
+    pattern: "^[A-Z]$"
+  aggregation:
+    description: The aggregation type of the metric. Only valid option is "doc_count"
+    type: string
+    example: doc_count
+    enum: [doc_count]
+  filter:
+    description: The filter to apply to the metric.
+    type: string
+    example: 'processor.outcome: "success"'
+

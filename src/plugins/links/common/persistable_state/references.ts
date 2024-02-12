@@ -7,6 +7,7 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
+import { omit } from 'lodash';
 import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../content_management';
 
 export function extractReferences({
@@ -22,23 +23,24 @@ export function extractReferences({
 
   const { links } = attributes;
   const extractedReferences: Reference[] = [];
-  links.forEach((link) => {
+
+  const newLinks = links.map((link) => {
     if (link.type === DASHBOARD_LINK_TYPE && link.destination) {
       const refName = `link_${link.id}_dashboard`;
-      link.destinationRefName = refName;
       extractedReferences.push({
         name: refName,
         type: 'dashboard',
         id: link.destination,
       });
-      delete link.destination;
+      return { ...omit(link, 'destination'), destinationRefName: refName };
     }
+    return link;
   });
 
   return {
     attributes: {
       ...attributes,
-      links,
+      links: newLinks,
     },
     references: references.concat(extractedReferences),
   };

@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 
 import { useStartServices } from '../../hooks';
 
-import { agentPolicyRouteService } from '../../../common';
+import { agentPolicyRouteService, API_VERSIONS } from '../../../common';
 
 import { sendGetK8sManifest } from '../../hooks/use_request/k8s';
 
@@ -33,6 +33,7 @@ interface Props {
 
 export const getManifestDownloadLink = (fleetServerHost?: string, enrollmentAPIKey?: string) => {
   const searchParams = new URLSearchParams({
+    apiVersion: API_VERSIONS.public.v1,
     ...(fleetServerHost && { fleetServer: fleetServerHost }),
     ...(enrollmentAPIKey && { enrolToken: enrollmentAPIKey }),
   });

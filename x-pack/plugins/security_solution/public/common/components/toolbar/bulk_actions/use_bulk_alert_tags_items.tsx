@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
 import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
 import React, { useCallback, useMemo } from 'react';
+import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { BulkAlertTagsPanel } from './alert_bulk_tags';
 import * as i18n from './translations';
 import { useSetAlertTags } from './use_set_alert_tags';
@@ -24,6 +25,7 @@ export interface UseBulkAlertTagsPanel {
 }
 
 export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) => {
+  const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertTags = useSetAlertTags();
   const handleOnAlertTagsSubmit = useCallback(
     async (tags, ids, onSuccess, setIsLoading) => {
@@ -34,16 +36,22 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
     [setAlertTags]
   );
 
-  const alertTagsItems = [
-    {
-      key: 'manage-alert-tags',
-      'data-test-subj': 'alert-tags-context-menu-item',
-      name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-      panel: 1,
-      label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
-      disableOnQuery: true,
-    },
-  ];
+  const alertTagsItems = useMemo(
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              key: 'manage-alert-tags',
+              'data-test-subj': 'alert-tags-context-menu-item',
+              name: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+              panel: 1,
+              label: i18n.ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE,
+              disableOnQuery: true,
+            },
+          ]
+        : [],
+    [hasIndexWrite]
+  );
 
   const TitleContent = useMemo(
     () => (
@@ -79,15 +87,18 @@ export const useBulkAlertTagsItems = ({ refetch }: UseBulkAlertTagsItemsProps) =
   );
 
   const alertTagsPanels: UseBulkAlertTagsPanel[] = useMemo(
-    () => [
-      {
-        id: 1,
-        title: TitleContent,
-        'data-test-subj': 'alert-tags-context-menu-panel',
-        renderContent,
-      },
-    ],
-    [TitleContent, renderContent]
+    () =>
+      hasIndexWrite
+        ? [
+            {
+              id: 1,
+              title: TitleContent,
+              'data-test-subj': 'alert-tags-context-menu-panel',
+              renderContent,
+            },
+          ]
+        : [],
+    [TitleContent, hasIndexWrite, renderContent]
   );
 
   return {

@@ -23,7 +23,7 @@ import {
 import { Layer } from './layer';
 import type { LayerResult } from '../../../../application/jobs/new_job/job_from_lens';
 import { VisualizationExtractor } from '../../../../application/jobs/new_job/job_from_lens';
-import { useMlFromLensKibanaContext } from '../context';
+import { useMlFromLensKibanaContext } from '../../common/context';
 
 interface Props {
   embeddable: Embeddable;

@@ -2,6 +2,10 @@
 
 set -euo pipefail
 
+echo '--- Log out of gcloud'
+./.buildkite/scripts/common/activate_service_account.sh --unset-impersonation || echo "Failed to unset impersonation"
+./.buildkite/scripts/common/activate_service_account.sh --logout-gcloud || echo "Failed to log out of gcloud"
+
 echo '--- Agent Debug Info'
 ts-node .buildkite/scripts/lifecycle/print_agent_links.ts || true
 
@@ -14,6 +18,9 @@ if [[ "$IS_TEST_EXECUTION_STEP" == "true" ]]; then
   buildkite-agent artifact upload 'target/kibana-coverage/functional/**/*'
   buildkite-agent artifact upload 'target/kibana-*'
   buildkite-agent artifact upload 'target/kibana-security-solution/**/*.png'
+  buildkite-agent artifact upload 'target/kibana-security-solution/**/management/**/*.mp4'
+  buildkite-agent artifact upload 'target/kibana-osquery/**/*.png'
+  buildkite-agent artifact upload 'target/kibana-osquery/**/*.mp4'
   buildkite-agent artifact upload 'target/kibana-fleet/**/*.png'
   buildkite-agent artifact upload 'target/test-metrics/*'
   buildkite-agent artifact upload 'target/test-suites-ci-plan.json'

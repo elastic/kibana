@@ -8,15 +8,21 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiHealth, EuiText } from '@elastic/eui';
+import { EuiHealth, EuiText, EuiTextProps } from '@elastic/eui';
 import { HEALTH_HEX_CODES } from './gradient';
 
 interface Props {
   count?: number;
   status: string;
+  textProps?: EuiTextProps;
 }
 
-export function ClusterHealth({ count, status }: Props) {
+const defaultTextProps: EuiTextProps = {
+  size: 'xs',
+  color: 'subdued',
+};
+
+export function ClusterHealth({ count, status, textProps = defaultTextProps }: Props) {
   if (typeof count === 'number' && count === 0) {
     return null;
   }
@@ -48,9 +54,7 @@ export function ClusterHealth({ count, status }: Props) {
   const label = typeof count === 'number' ? `${count} ${statusLabel}` : statusLabel;
   return (
     <EuiHealth color={color}>
-      <EuiText size="xs" color="subdued">
-        {label}
-      </EuiText>
+      <EuiText {...textProps}>{label}</EuiText>
     </EuiHealth>
   );
 }

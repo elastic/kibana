@@ -11,8 +11,6 @@ import {
   ConnectorConfiguration,
   ConnectorDocument,
   ConnectorStatus,
-  FilteringPolicy,
-  FilteringRuleRule,
   FilteringValidationState,
   IngestPipelineParams,
 } from '../types/connectors';
@@ -40,6 +38,7 @@ export function createConnectorDocument({
 
   return {
     api_key_id: null,
+    api_key_secret_id: null,
     configuration: configuration || {},
     custom_scheduling: {},
     description: null,
@@ -59,8 +58,8 @@ export function createConnectorDocument({
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: currentTimestamp,
               value: '.*',
             },
@@ -83,8 +82,8 @@ export function createConnectorDocument({
               field: '_',
               id: 'DEFAULT',
               order: 0,
-              policy: FilteringPolicy.INCLUDE,
-              rule: FilteringRuleRule.REGEX,
+              policy: 'include',
+              rule: 'regex',
               updated_at: currentTimestamp,
               value: '.*',
             },
@@ -116,7 +115,7 @@ export function createConnectorDocument({
       incremental: { enabled: false, interval: '0 0 0 * * ?' },
     },
     service_type: serviceType || null,
-    status: ConnectorStatus.CREATED,
+    status: isNative ? ConnectorStatus.NEEDS_CONFIGURATION : ConnectorStatus.CREATED,
     sync_now: false,
   };
 }

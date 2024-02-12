@@ -19,13 +19,14 @@ import type {
 } from '@elastic/charts';
 import React, { useCallback, useMemo } from 'react';
 
+import type { IToasts } from '@kbn/core-notifications-browser';
 import { Body } from './data_quality_panel/body';
 import { DataQualityProvider } from './data_quality_panel/data_quality_context';
 import { EMPTY_STAT } from './helpers';
 import { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';
 
 interface Props {
-  addSuccessToast: (toast: { title: string }) => void;
+  toasts: IToasts;
   baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
   defaultNumberFormat: string;
@@ -66,7 +67,7 @@ interface Props {
 
 /** Renders the `Data Quality` dashboard content */
 const DataQualityPanelComponent: React.FC<Props> = ({
-  addSuccessToast,
+  toasts,
   baseTheme,
   canUserCreateAndReadCases,
   defaultBytesFormat,
@@ -103,11 +104,19 @@ const DataQualityPanelComponent: React.FC<Props> = ({
     [reportDataQualityCheckAllCompleted, reportDataQualityIndexChecked]
   );
 
+  const addSuccessToast = useCallback(
+    (toast: { title: string }) => {
+      toasts.addSuccess(toast);
+    },
+    [toasts]
+  );
+
   return (
     <DataQualityProvider
       httpFetch={httpFetch}
       telemetryEvents={telemetryEvents}
       isILMAvailable={isILMAvailable}
+      toasts={toasts}
     >
       <Body
         addSuccessToast={addSuccessToast}

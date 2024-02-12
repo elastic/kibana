@@ -56,6 +56,7 @@ export interface Module {
   jobs: ModuleJob[];
   datafeeds: ModuleDatafeed[];
   kibana: KibanaObjects;
+  tags?: string[];
 }
 
 export interface RecognizeResult {

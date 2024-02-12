@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/deeplinks-observability",
-  "owner": "@elastic/apm-ui"
+  "owner": "@elastic/obs-ux-logs-team"
 }

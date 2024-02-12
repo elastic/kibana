@@ -8,8 +8,8 @@
 
 export { PluginsService } from './plugins_service';
 export type {
-  PluginsServiceSetup,
-  PluginsServiceStart,
+  InternalPluginsServiceSetup,
+  InternalPluginsServiceStart,
   PluginsServiceSetupDeps,
   PluginsServiceStartDeps,
 } from './plugins_service';

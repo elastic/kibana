@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { NewOutput } from '../types';
+import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
@@ -13,6 +13,7 @@ export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',
   Kafka: 'kafka',
+  RemoteElasticsearch: 'remote_elasticsearch',
 } as const;
 
 export const DEFAULT_OUTPUT_ID = 'fleet-default-output';
@@ -24,6 +25,8 @@ export const DEFAULT_OUTPUT: NewOutput = {
   type: outputType.Elasticsearch,
   hosts: [''],
 };
+
+export const SERVERLESS_DEFAULT_OUTPUT_ID = 'es-default-output';
 
 export const LICENCE_FOR_PER_POLICY_OUTPUT = 'platinum';
 
@@ -118,3 +121,20 @@ export const kafkaSupportedVersions = [
   '2.5.1',
   '2.6.0',
 ];
+
+export const RESERVED_CONFIG_YML_KEYS = [
+  'bulk_max_size',
+  'compression_level',
+  'connection_idle_timeout',
+  'queue.mem.events',
+  'queue.mem.flush.min_events',
+  'queue.mem.flush.timeout',
+  'workers',
+];
+
+export const OUTPUT_TYPES_WITH_PRESET_SUPPORT: Array<ValueOf<OutputType>> = [
+  outputType.Elasticsearch,
+  outputType.RemoteElasticsearch,
+];
+
+export const OUTPUT_HEALTH_DATA_STREAM = 'logs-fleet_server.output_health-default';

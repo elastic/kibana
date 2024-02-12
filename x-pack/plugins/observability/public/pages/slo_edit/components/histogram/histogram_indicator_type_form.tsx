@@ -17,7 +17,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
-import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
+import { useCreateDataView } from '../../../../hooks/use_create_data_view';
+import { GroupByField } from '../common/group_by_field';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
 import { IndexFieldSelector } from '../common/index_field_selector';
@@ -29,11 +30,12 @@ export function HistogramIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
 
-  const { isLoading: isIndexFieldsLoading, data: indexFields = [] } =
-    useFetchIndexPatternFields(index);
-  const histogramFields = indexFields.filter((field) => field.type === 'histogram');
-  const timestampFields = indexFields.filter((field) => field.type === 'date');
-  const partitionByFields = indexFields.filter((field) => field.aggregatable);
+  const { dataView, loading: isIndexFieldsLoading } = useCreateDataView({
+    indexPatternString: index,
+  });
+
+  const histogramFields = dataView?.fields.filter((field) => field.type === 'histogram');
+  const timestampFields = dataView?.fields.filter((field) => field.type === 'date');
 
   return (
     <>
@@ -53,7 +55,7 @@ export function HistogramIndicatorTypeForm() {
           </EuiFlexItem>
           <EuiFlexItem>
             <IndexFieldSelector
-              indexFields={timestampFields}
+              indexFields={timestampFields ?? []}
               name="indicator.params.timestampField"
               label={i18n.translate('xpack.observability.slo.sloEdit.timestampField.label', {
                 defaultMessage: 'Timestamp field',
@@ -110,7 +112,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <HistogramIndicator
             type="good"
-            histogramFields={histogramFields}
+            histogramFields={histogramFields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -129,7 +131,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <HistogramIndicator
             type="total"
-            histogramFields={histogramFields}
+            histogramFields={histogramFields ?? []}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -137,28 +139,7 @@ export function HistogramIndicatorTypeForm() {
           <EuiHorizontalRule margin="none" />
         </EuiFlexItem>
 
-        <IndexFieldSelector
-          indexFields={partitionByFields}
-          name="groupBy"
-          label={
-            <span>
-              {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {
-                defaultMessage: 'Partition by',
-              })}{' '}
-              <EuiIconTip
-                content={i18n.translate('xpack.observability.slo.sloEdit.groupBy.tooltip', {
-                  defaultMessage: 'Create individual SLOs for each value of the selected field.',
-                })}
-                position="top"
-              />
-            </span>
-          }
-          placeholder={i18n.translate('xpack.observability.slo.sloEdit.groupBy.placeholder', {
-            defaultMessage: 'Select an optional field to partition by',
-          })}
-          isLoading={!!index && isIndexFieldsLoading}
-          isDisabled={!index}
-        />
+        <GroupByField dataView={dataView} isLoading={isIndexFieldsLoading} />
 
         <DataPreviewChart />
       </EuiFlexGroup>

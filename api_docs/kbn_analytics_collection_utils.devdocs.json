@@ -1,0 +1,47 @@
+{
+  "id": "@kbn/analytics-collection-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/analytics-collection-utils",
+        "id": "def-common.isSyntheticsMonitor",
+        "type": "Function",
+        "tags": [],
+        "label": "isSyntheticsMonitor",
+        "description": [
+          "\nReturns whether the current navigation is performed by a Synthetics monitor\n(and hence, telemetry should not be collected)."
+        ],
+        "signature": [
+          "() => boolean"
+        ],
+        "path": "packages/analytics/utils/analytics_collection_utils/src/is_synthetics_monitor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

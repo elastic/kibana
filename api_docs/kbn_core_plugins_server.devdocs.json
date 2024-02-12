@@ -191,7 +191,15 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -356,7 +364,15 @@
             "label": "stop",
             "description": [],
             "signature": [
-              "(() => void) | undefined"
+              "(() => ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.MaybePromise",
+                "text": "MaybePromise"
+              },
+              "<void>) | undefined"
             ],
             "path": "packages/core/plugins/core-plugins-server/src/types.ts",
             "deprecated": false,
@@ -834,6 +850,22 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-server",
+            "id": "def-common.PluginManifest.runtimePluginDependencies",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimePluginDependencies",
+            "description": [
+              "\nAn optional list of plugin dependencies that can be resolved dynamically at runtime\nusing the dynamic contract resolving capabilities from the plugin service."
+            ],
+            "signature": [
+              "readonly string[]"
+            ],
+            "path": "packages/core/plugins/core-plugins-server/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-plugins-server",
             "id": "def-common.PluginManifest.ui",
             "type": "boolean",
             "tags": [],
@@ -1190,7 +1222,7 @@
             "section": "def-common.PluginInitializerContext",
             "text": "PluginInitializerContext"
           },
-          "<unknown>) => ",
+          "<unknown>) => Promise<",
           {
             "pluginId": "@kbn/core-plugins-server",
             "scope": "common",
@@ -1214,7 +1246,7 @@
             "section": "def-common.AsyncPlugin",
             "text": "AsyncPlugin"
           },
-          "<TSetup, TStart, TPluginsSetup, TPluginsStart>"
+          "<TSetup, TStart, TPluginsSetup, TPluginsStart>>"
         ],
         "path": "packages/core/plugins/core-plugins-server/src/types.ts",
         "deprecated": false,

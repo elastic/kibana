@@ -1,0 +1,101 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`createAggregations(options) should return add offset to histogram 1`] = `
+Object {
+  "histogram": Object {
+    "aggregations": Object {
+      "metric_0": Object {
+        "avg": Object {
+          "field": "system.cpu.user.pct",
+        },
+      },
+    },
+    "date_histogram": Object {
+      "extended_bounds": Object {
+        "max": 1577838720000,
+        "min": 1577835120000,
+      },
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+      "offset": "-60000ms",
+    },
+  },
+  "metricsets": Object {
+    "terms": Object {
+      "field": "metricset.name",
+    },
+  },
+}
+`;
+
+exports[`createAggregations(options) should return groupings aggregation with groupBy 1`] = `
+Object {
+  "groupings": Object {
+    "aggs": Object {
+      "histogram": Object {
+        "aggregations": Object {
+          "metric_0": Object {
+            "avg": Object {
+              "field": "system.cpu.user.pct",
+            },
+          },
+        },
+        "date_histogram": Object {
+          "extended_bounds": Object {
+            "max": 1577840400000,
+            "min": 1577836800000,
+          },
+          "field": "@timestamp",
+          "fixed_interval": "1m",
+          "offset": "0s",
+        },
+      },
+      "metricsets": Object {
+        "terms": Object {
+          "field": "metricset.name",
+        },
+      },
+    },
+    "composite": Object {
+      "size": 20,
+      "sources": Array [
+        Object {
+          "groupBy0": Object {
+            "terms": Object {
+              "field": "host.name",
+            },
+          },
+        },
+      ],
+    },
+  },
+}
+`;
+
+exports[`createAggregations(options) should return just histogram aggregation without groupBy 1`] = `
+Object {
+  "histogram": Object {
+    "aggregations": Object {
+      "metric_0": Object {
+        "avg": Object {
+          "field": "system.cpu.user.pct",
+        },
+      },
+    },
+    "date_histogram": Object {
+      "extended_bounds": Object {
+        "max": 1577840400000,
+        "min": 1577836800000,
+      },
+      "field": "@timestamp",
+      "fixed_interval": "1m",
+      "offset": "0s",
+    },
+  },
+  "metricsets": Object {
+    "terms": Object {
+      "field": "metricset.name",
+    },
+  },
+}
+`;

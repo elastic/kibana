@@ -1,7 +1,6 @@
 title: Connector response properties for a server log connector
 type: object
 required:
-  - config
   - connector_type_id
   - id
   - is_deprecated
@@ -9,8 +8,9 @@ required:
   - name
 properties:
   config:
-    type: object
-    nullable: true
+    type:
+      - "object"
+      - "null"
   connector_type_id:
     type: string
     description: The type of connector.
@@ -30,3 +30,5 @@ properties:
   name:
     type: string
     description: The display name for the connector.
+  referenced_by_count:
+    $ref: 'referenced_by_count.yaml'

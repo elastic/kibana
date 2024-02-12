@@ -10,6 +10,7 @@ import React, { useCallback, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { Query } from '@kbn/es-query';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { AlertsStatusFilter } from './components';
 import { observabilityAlertFeatureIds } from '../../../common/constants';
 import { ALERT_STATUS_QUERY, DEFAULT_QUERIES, DEFAULT_QUERY_STRING } from './constants';
@@ -37,7 +38,7 @@ export function ObservabilityAlertSearchBar({
   kuery,
   rangeFrom,
   rangeTo,
-  services: { AlertsSearchBar, timeFilterService, useToasts },
+  services: { AlertsSearchBar, timeFilterService, useToasts, uiSettings },
   status,
 }: ObservabilityAlertSearchBarProps) {
   const toasts = useToasts();
@@ -46,14 +47,15 @@ export function ObservabilityAlertSearchBar({
     (alertStatus: AlertStatus) => {
       try {
         onEsQueryChange(
-          buildEsQuery(
-            {
+          buildEsQuery({
+            timeRange: {
               to: rangeTo,
               from: rangeFrom,
             },
             kuery,
-            [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries]
-          )
+            queries: [...getAlertStatusQuery(alertStatus), ...defaultSearchQueries],
+            config: getEsQueryConfig(uiSettings),
+          })
         );
       } catch (error) {
         toasts.addError(error, {
@@ -62,7 +64,16 @@ export function ObservabilityAlertSearchBar({
         onKueryChange(DEFAULT_QUERY_STRING);
       }
     },
-    [onEsQueryChange, rangeTo, rangeFrom, kuery, defaultSearchQueries, toasts, onKueryChange]
+    [
+      onEsQueryChange,
+      rangeTo,
+      rangeFrom,
+      kuery,
+      defaultSearchQueries,
+      uiSettings,
+      toasts,
+      onKueryChange,
+    ]
   );
 
   useEffect(() => {
@@ -78,14 +89,15 @@ export function ObservabilityAlertSearchBar({
     ({ dateRange, query }) => {
       try {
         // First try to create es query to make sure query is valid, then save it in state
-        const esQuery = buildEsQuery(
-          {
+        const esQuery = buildEsQuery({
+          timeRange: {
             to: dateRange.to,
             from: dateRange.from,
           },
-          query,
-          [...getAlertStatusQuery(status), ...defaultSearchQueries]
-        );
+          kuery: query,
+          queries: [...getAlertStatusQuery(status), ...defaultSearchQueries],
+          config: getEsQueryConfig(uiSettings),
+        });
         if (query) onKueryChange(query);
         timeFilterService.setTime(dateRange);
         onRangeFromChange(dateRange.from);
@@ -99,13 +111,14 @@ export function ObservabilityAlertSearchBar({
       }
     },
     [
+      status,
       defaultSearchQueries,
+      uiSettings,
+      onKueryChange,
       timeFilterService,
       onRangeFromChange,
       onRangeToChange,
-      onKueryChange,
       onEsQueryChange,
-      status,
       toasts,
     ]
   );

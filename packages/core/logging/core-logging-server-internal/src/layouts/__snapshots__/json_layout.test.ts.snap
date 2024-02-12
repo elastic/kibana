@@ -15,6 +15,7 @@ Object {
   "message": "message-1",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
 }
 `;
@@ -29,6 +30,7 @@ Object {
   "message": "message-2",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
 }
 `;
@@ -43,6 +45,7 @@ Object {
   "message": "message-3",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
 }
 `;
@@ -57,6 +60,7 @@ Object {
   "message": "message-4",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
 }
 `;
@@ -71,6 +75,7 @@ Object {
   "message": "message-5",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
 }
 `;
@@ -85,6 +90,7 @@ Object {
   "message": "message-6",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
 }
 `;
@@ -99,6 +105,7 @@ Object {
   "message": "message-6",
   "process": Object {
     "pid": 5355,
+    "uptime": 10,
   },
   "span": Object {
     "id": "spanId-1",

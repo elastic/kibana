@@ -8,6 +8,7 @@
 
 import Os from 'os';
 import { resolve } from 'path';
+import { REPO_ROOT } from '@kbn/repo-info';
 
 function maybeUseBat(bin: string) {
   return Os.platform().startsWith('win') ? `${bin}.bat` : bin;
@@ -36,7 +37,10 @@ export const SERVERLESS_SERVICE_TOKENS_PATH = resolve(
 export const SERVERLESS_USERS_PATH = resolve(__dirname, './serverless_resources/users');
 export const SERVERLESS_USERS_ROLES_PATH = resolve(__dirname, './serverless_resources/users_roles');
 
-export const SERVERLESS_ROLES_PATH = resolve(__dirname, './serverless_resources/roles.yml');
+export const SERVERLESS_ROLES_ROOT_PATH = resolve(
+  __dirname,
+  './serverless_resources/project_roles'
+);
 export const SERVERLESS_ROLE_MAPPING_PATH = resolve(
   __dirname,
   './serverless_resources/role_mapping.yml'
@@ -51,10 +55,11 @@ export const SERVERLESS_SECRETS_SSL_PATH = resolve(
 
 export const SERVERLESS_JWKS_PATH = resolve(__dirname, './serverless_resources/jwks.json');
 
+export const SERVERLESS_IDP_METADATA_PATH = resolve(REPO_ROOT, '.es', 'idp_metadata.xml');
+
 export const SERVERLESS_RESOURCES_PATHS = [
   SERVERLESS_OPERATOR_USERS_PATH,
   SERVERLESS_ROLE_MAPPING_PATH,
-  SERVERLESS_ROLES_PATH,
   SERVERLESS_SERVICE_TOKENS_PATH,
   SERVERLESS_USERS_PATH,
   SERVERLESS_USERS_ROLES_PATH,

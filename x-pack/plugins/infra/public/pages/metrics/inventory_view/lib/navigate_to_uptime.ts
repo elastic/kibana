@@ -7,8 +7,8 @@
 
 import { uptimeOverviewLocatorID } from '@kbn/observability-plugin/public';
 import { LocatorClient } from '@kbn/share-plugin/common/url_service/locators';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { InfraWaffleMapNode } from '../../../../lib/lib';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
 
 export const navigateToUptime = (
   locators: LocatorClient,

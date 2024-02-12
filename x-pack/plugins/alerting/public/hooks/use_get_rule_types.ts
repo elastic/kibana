@@ -32,6 +32,7 @@ export const useGetRuleTypes = () => {
     queryKey: ['useGetRuleTypes'],
     queryFn,
     onError,
+    refetchOnWindowFocus: false,
   });
 
   return {

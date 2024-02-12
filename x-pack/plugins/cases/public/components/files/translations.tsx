@@ -31,6 +31,16 @@ export const DOWNLOAD_FILE = i18n.translate('xpack.cases.caseView.files.download
   defaultMessage: 'Download file',
 });
 
+export const COPY_FILE_HASH = i18n.translate('xpack.cases.caseView.files.copyFileHash', {
+  defaultMessage: 'Copy file hash',
+});
+
+export const COPY_FILE_HASH_SUCCESS = (hashName: string) =>
+  i18n.translate('xpack.cases.caseView.files.copyFileHashSuccess', {
+    values: { hashName },
+    defaultMessage: `Copied {hashName} file hash successfully`,
+  });
+
 export const FILES_TABLE = i18n.translate('xpack.cases.caseView.files.filesTable', {
   defaultMessage: 'Files table',
 });
