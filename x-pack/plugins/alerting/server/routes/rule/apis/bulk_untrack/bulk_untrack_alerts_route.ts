@@ -9,12 +9,12 @@ import {
   BulkUntrackRequestBodyV1,
   bulkUntrackBodySchemaV1,
 } from '../../../../../common/routes/rule/apis/bulk_untrack';
-import { transformRequestBodyToApplicationV1 } from './transforms';
+import { transformBulkUntrackAlertsBodyV1 } from './transforms';
 import { ILicenseState, RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 
-export const bulkUntrackAlertRoute = (
+export const bulkUntrackAlertsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -30,7 +30,10 @@ export const bulkUntrackAlertRoute = (
         const rulesClient = (await context.alerting).getRulesClient();
         const body: BulkUntrackRequestBodyV1 = req.body;
         try {
-          await rulesClient.bulkUntrackAlerts(transformRequestBodyToApplicationV1(body));
+          await rulesClient.bulkUntrackAlerts({
+            ...transformBulkUntrackAlertsBodyV1(body),
+            isUsingQuery: false,
+          });
           return res.noContent();
         } catch (e) {
           if (e instanceof RuleTypeDisabledError) {
