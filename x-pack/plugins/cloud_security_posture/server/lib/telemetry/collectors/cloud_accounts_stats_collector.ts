@@ -359,7 +359,7 @@ const getAccountStatsBasedOnEnablesRule = async (
   logger: Logger
 ): Promise<CloudSecurityAccountsStats[]> => {
   const mutedRulesObject = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
-  const benchmarkWithMutedRules = [
+  const benchmarksWithMutedRules = [
     ...new Set(
       Object.values(mutedRulesObject).map((item) => {
         if (item.muted === true) return item.benchmark_id;
@@ -367,7 +367,7 @@ const getAccountStatsBasedOnEnablesRule = async (
     ),
   ].filter(Boolean);
 
-  if (benchmarkWithMutedRules.length) {
+  if (benchmarksWithMutedRules.length) {
     const mutedRulesFilterQuery = await getMutedRulesFilterQuery(encryptedSoClient);
 
     const enabledRulesQuery = {
@@ -377,7 +377,7 @@ const getAccountStatsBasedOnEnablesRule = async (
           must_not: mutedRulesFilterQuery,
           must: {
             terms: {
-              'rule.benchmark.id': benchmarkWithMutedRules,
+              'rule.benchmark.id': benchmarksWithMutedRules,
             },
           },
         },
