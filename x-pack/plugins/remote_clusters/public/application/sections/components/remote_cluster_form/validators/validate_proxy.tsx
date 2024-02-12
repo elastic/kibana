@@ -10,14 +10,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAddressValid, isPortValid } from './validate_address';
 
-export function validateProxy(isCloudEnabled: boolean, proxy?: string): null | JSX.Element {
+export function validateProxy(proxy?: string): null | JSX.Element {
   if (!proxy) {
-    return isCloudEnabled ? (
-      <FormattedMessage
-        id="xpack.remoteClusters.remoteClusterForm.proxyError.missingRemoteAddressMessage"
-        defaultMessage="A remote address is required."
-      />
-    ) : (
+    return (
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.proxyError.missingProxyMessage"
         defaultMessage="A proxy address is required."
@@ -37,7 +32,7 @@ export function validateProxy(isCloudEnabled: boolean, proxy?: string): null | J
     );
   }
 
-  if (!isCloudEnabled && !isPortValid(proxy)) {
+  if (!isPortValid(proxy)) {
     return (
       <FormattedMessage
         id="xpack.remoteClusters.remoteClusterForm.addressError.invalidPortMessage"

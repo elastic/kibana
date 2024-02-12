@@ -296,6 +296,19 @@ describe('Create Remote cluster', () => {
         actions.saveButton.click();
         expect(actions.getErrorMessages()).toContain('A remote address is required.');
       });
+
+      test('should only allow alpha-numeric characters and "-" (dash) in the remote address "host" part', async () => {
+        await actions.saveButton.click(); // display form errors
+
+        const expectInvalidChar = (char: string) => {
+          actions.cloudRemoteAddressInput.setValue(`192.16${char}:3000`);
+          expect(actions.getErrorMessages()).toContain('Remote address is invalid.');
+        };
+
+        [...NON_ALPHA_NUMERIC_CHARS, ...ACCENTED_CHARS]
+          .filter(notInArray(['-', '_', ':']))
+          .forEach(expectInvalidChar);
+      });
     });
   });
 });

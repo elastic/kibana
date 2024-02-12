@@ -11,4 +11,4 @@ export { validateSeeds } from './validate_seeds';
 export { validateSeed } from './validate_seed';
 export type { ClusterErrors } from './validate_cluster';
 export { validateCluster } from './validate_cluster';
-export { convertCloudRemoteAddressToProxy } from './validate_cloud_address';
+export { convertCloudRemoteAddressToProxyConnection } from './validate_cloud_url';

@@ -40,7 +40,12 @@ import { skippingDisconnectedClustersUrl } from '../../../services/documentation
 
 import { RequestFlyout } from './request_flyout';
 import { ConnectionMode } from './components';
-import { ClusterErrors, validateCluster, convertCloudRemoteAddressToProxy } from './validators';
+import {
+  ClusterErrors,
+  validateCluster,
+  convertCloudRemoteAddressToProxyConnection,
+} from './validators';
+import { isCloudAdvancedOptionsEnabled } from './validators/validate_cloud_url';
 
 const defaultClusterValues: ClusterPayload = {
   name: '',
@@ -97,10 +102,7 @@ export class RemoteClusterForm extends Component<Props, State> {
         ...defaultClusterValues,
         mode: defaultMode,
         cloudRemoteAddress: cluster?.proxyAddress || '',
-        cloudAdvancedOptionsEnabled:
-          cluster?.serverName != null ||
-          (cluster?.proxySocketConnections != null &&
-            cluster?.proxySocketConnections !== defaultClusterValues.proxySocketConnections),
+        cloudAdvancedOptionsEnabled: isCloudAdvancedOptionsEnabled(cluster),
       },
       cluster
     );
@@ -123,18 +125,33 @@ export class RemoteClusterForm extends Component<Props, State> {
   onFieldsChange = (changedFields: Partial<FormFields>) => {
     const { isCloudEnabled } = this.context;
 
-    // when cloudUrl changes, fill proxy address and server name
-    const { cloudAdvancedOptionsEnabled, serverName, cloudRemoteAddress } = changedFields;
-    if (cloudAdvancedOptionsEnabled) {
-      changedFields = {
-        ...changedFields,
-        serverName: cloudAdvancedOptionsEnabled ? serverName : '',
-      };
-    }
+    // when cloud remote address changes, fill proxy address and server name
+    const { cloudRemoteAddress, cloudAdvancedOptionsEnabled } = changedFields;
     if (cloudRemoteAddress) {
+      const { proxyAddress, serverName } =
+        convertCloudRemoteAddressToProxyConnection(cloudRemoteAddress);
+      // Only change the server name if the advanced options are not currently open
+      if (this.state.fields.cloudAdvancedOptionsEnabled) {
+        changedFields = {
+          ...changedFields,
+          proxyAddress,
+        };
+      } else {
+        changedFields = {
+          ...changedFields,
+          proxyAddress,
+          serverName,
+        };
+      }
+    }
+
+    // If we switch off the advanced options, revert the server name to
+    // the host name from the proxy address
+    if (cloudAdvancedOptionsEnabled === false) {
       changedFields = {
         ...changedFields,
-        proxyAddress: convertCloudRemoteAddressToProxy(cloudRemoteAddress),
+        serverName: this.state.fields.proxyAddress?.split(':')[0],
+        proxySocketConnections: defaultClusterValues.proxySocketConnections,
       };
     }
 

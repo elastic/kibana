@@ -77,7 +77,7 @@ describe('Edit Remote cluster', () => {
   describe('on cloud', () => {
     const cloudUrl = 'cloud-url';
     const defaultCloudPort = '9400';
-    test('existing cluster that has a TLS server name', async () => {
+    test('existing cluster that has the same TLS server name as the host in the remote address', async () => {
       const cluster: Cluster = {
         name: REMOTE_CLUSTER_EDIT_NAME,
         mode: 'proxy',
@@ -94,7 +94,7 @@ describe('Edit Remote cluster', () => {
 
       expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
       expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:${defaultCloudPort}`);
-      expect(actions.tlsServerNameInput.exists()).toBe(true);
+      expect(actions.tlsServerNameInput.exists()).toBe(false);
     });
 
     test("existing cluster that doesn't have a TLS server name", async () => {
@@ -113,7 +113,7 @@ describe('Edit Remote cluster', () => {
 
       expect(actions.cloudRemoteAddressInput.exists()).toBe(true);
       expect(actions.cloudRemoteAddressInput.getValue()).toBe(`${cloudUrl}:9500`);
-      expect(actions.tlsServerNameInput.exists()).toBe(false);
+      expect(actions.tlsServerNameInput.exists()).toBe(true);
     });
 
     test('existing cluster that has remote address different from TLS server name)', async () => {

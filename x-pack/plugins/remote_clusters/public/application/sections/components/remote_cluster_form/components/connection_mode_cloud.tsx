@@ -37,7 +37,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
   const { fields, fieldsErrors, areErrorsVisible, onFieldsChange } = props;
   const { cloudRemoteAddress, serverName, proxySocketConnections, cloudAdvancedOptionsEnabled } =
     fields;
-  const { proxyAddress: proxyAddressError } = fieldsErrors;
+  const { cloudRemoteAddress: cloudRemoteAddressError } = fieldsErrors;
 
   return (
     <EuiDescribedFormGroup
@@ -67,9 +67,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
               }
               checked={cloudAdvancedOptionsEnabled}
               data-test-subj="remoteClusterFormCloudAdvancedOptionsToggle"
-              onChange={(e) =>
-                onFieldsChange({ cloudAdvancedOptionsEnabled: e.target.checked, serverName: '' })
-              }
+              onChange={(e) => onFieldsChange({ cloudAdvancedOptionsEnabled: e.target.checked })}
             />
           </EuiFormRow>
           <EuiSpacer size="s" />
@@ -94,8 +92,8 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
             }}
           />
         }
-        isInvalid={Boolean(areErrorsVisible && proxyAddressError)}
-        error={proxyAddressError}
+        isInvalid={Boolean(areErrorsVisible && cloudRemoteAddressError)}
+        error={cloudRemoteAddressError}
         fullWidth
       >
         <EuiFieldText
@@ -107,7 +105,7 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
             }
           )}
           onChange={(e) => onFieldsChange({ cloudRemoteAddress: e.target.value })}
-          isInvalid={Boolean(areErrorsVisible && proxyAddressError)}
+          isInvalid={Boolean(areErrorsVisible && cloudRemoteAddressError)}
           data-test-subj="remoteClusterFormRemoteAddressInput"
           fullWidth
         />

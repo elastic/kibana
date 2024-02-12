@@ -36,6 +36,7 @@ export interface RemoteClustersActions {
   cloudRemoteAddressInput: {
     exists: () => boolean;
     getValue: () => string;
+    setValue: (remoteAddress: string) => void;
   };
   seedsInput: {
     setValue: (seed: string) => void;
@@ -252,6 +253,8 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
       cloudRemoteAddressInput: {
         exists: () => exists(cloudUrlInputSelector),
         getValue: () => find(cloudUrlInputSelector).props().value,
+        setValue: (remoteAddress: string) =>
+          form.setInputValue(cloudUrlInputSelector, remoteAddress),
       },
     };
   };
