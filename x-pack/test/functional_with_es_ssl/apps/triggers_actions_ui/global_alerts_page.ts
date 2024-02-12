@@ -61,8 +61,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.clickAlertsPageShowQueryMenuButton();
         const quickFilters = await pageObjects.triggersActionsUI.getAlertsPageQuickFilters();
         const solutionFilters = getSolutionNamesFromFilters(quickFilters);
-        expect(solutionFilters).to.have.length(1);
+        expect(solutionFilters).to.have.length(2);
         expect(solutionFilters[0]).to.equal('Stack management');
+        // Observability is included because of multi-consumer rules
+        expect(solutionFilters[1]).to.equal('Observability');
       });
     });
 
