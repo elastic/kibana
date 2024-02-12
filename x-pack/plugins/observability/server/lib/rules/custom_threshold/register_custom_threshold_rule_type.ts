@@ -18,7 +18,7 @@ import { createLifecycleExecutor, IRuleDataClient } from '@kbn/rule-registry-plu
 import { LicenseType } from '@kbn/licensing-plugin/server';
 import { EsQueryRuleParamsExtractedParams } from '@kbn/stack-alerts-plugin/server/rule_types/es_query/rule_type_params';
 import { observabilityFeatureId, observabilityPaths } from '../../../../common';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 import { THRESHOLD_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
 import {
@@ -58,6 +58,14 @@ export const searchConfigurationSchema = schema.object({
     }),
     query: schema.string(),
   }),
+  filter: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        meta: schema.recordOf(schema.string(), schema.any()),
+      })
+    )
+  ),
 });
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
@@ -76,6 +84,8 @@ export function thresholdRuleType(
     timeUnit: schema.string(),
     timeSize: schema.number(),
   };
+  const allowedAggregators = Object.values(Aggregators);
+  allowedAggregators.splice(Object.values(Aggregators).indexOf(Aggregators.COUNT), 1);
 
   const customCriterion = schema.object({
     ...baseCriterion,
@@ -85,7 +95,7 @@ export function thresholdRuleType(
       schema.oneOf([
         schema.object({
           name: schema.string(),
-          aggType: oneOfLiterals(['avg', 'sum', 'max', 'min', 'cardinality']),
+          aggType: oneOfLiterals(allowedAggregators),
           field: schema.string(),
           filter: schema.never(),
         }),

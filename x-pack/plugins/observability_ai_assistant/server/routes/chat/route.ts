@@ -5,13 +5,13 @@
  * 2.0.
  */
 import { notImplemented } from '@hapi/boom';
-import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
-import type OpenAI from 'openai';
+import * as t from 'io-ts';
 import { Readable } from 'stream';
+import { flushBuffer } from '../../service/util/flush_buffer';
+import { observableIntoStream } from '../../service/util/observable_into_stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
-import { observableIntoStream } from '../../service/util/observable_into_stream';
 
 const chatRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/chat',
@@ -40,7 +40,10 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
   handler: async (resources): Promise<Readable> => {
     const { request, params, service } = resources;
 
-    const client = await service.getClient({ request });
+    const [client, cloudStart] = await Promise.all([
+      service.getClient({ request }),
+      resources.plugins.cloud?.start(),
+    ]);
 
     if (!client) {
       throw notImplemented();
@@ -68,7 +71,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
         : {}),
     });
 
-    return observableIntoStream(response$);
+    return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
   },
 });
 
@@ -90,10 +93,13 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       }),
     ]),
   }),
-  handler: async (resources): Promise<Readable | OpenAI.Chat.ChatCompletion> => {
+  handler: async (resources): Promise<Readable> => {
     const { request, params, service } = resources;
 
-    const client = await service.getClient({ request });
+    const [client, cloudStart] = await Promise.all([
+      service.getClient({ request }),
+      resources.plugins.cloud?.start() || Promise.resolve(undefined),
+    ]);
 
     if (!client) {
       throw notImplemented();
@@ -125,7 +131,7 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
       functionClient,
     });
 
-    return observableIntoStream(response$);
+    return observableIntoStream(response$.pipe(flushBuffer(!!cloudStart?.isCloudEnabled)));
   },
 });
 

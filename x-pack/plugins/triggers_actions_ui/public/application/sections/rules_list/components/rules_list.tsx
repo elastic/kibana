@@ -555,8 +555,8 @@ export const RulesList = ({
   };
 
   const onDisableRule = useCallback(
-    (rule: RuleTableItem) => {
-      return bulkDisableRules({ http, ids: [rule.id] });
+    (rule: RuleTableItem, untrack: boolean) => {
+      return bulkDisableRules({ http, ids: [rule.id], untrack });
     },
     [bulkDisableRules]
   );
@@ -701,12 +701,12 @@ export const RulesList = ({
     onClearSelection();
   };
 
-  const onDisable = async () => {
+  const onDisable = async (untrack: boolean) => {
     setIsDisablingRules(true);
 
     const { errors, total } = isAllSelected
-      ? await bulkDisableRules({ http, filter: getFilter() })
-      : await bulkDisableRules({ http, ids: selectedIds });
+      ? await bulkDisableRules({ http, filter: getFilter(), untrack })
+      : await bulkDisableRules({ http, ids: selectedIds, untrack });
 
     setIsDisablingRules(false);
     showToast({ action: 'DISABLE', errors, total });
