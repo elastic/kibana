@@ -11,7 +11,7 @@ import {
   PositiveIntegerGreaterThanZero,
   enumeration,
 } from '@kbn/securitysolution-io-ts-types';
-import { AlertSuppressionMissingFieldsStrategyEnum } from '../rule_schema/specific_attributes/query_attributes.gen';
+import { AlertSuppressionMissingFieldsStrategyEnum } from '../rule_schema/common_attributes.gen';
 
 export type AlertSuppressionMissingFields = t.TypeOf<typeof AlertSuppressionMissingFields>;
 export const AlertSuppressionMissingFields = enumeration(
