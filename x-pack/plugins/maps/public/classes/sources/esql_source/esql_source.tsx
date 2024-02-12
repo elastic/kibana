@@ -45,7 +45,10 @@ export const sourceTitle = i18n.translate('xpack.maps.source.esqlSearchTitle', {
   defaultMessage: 'ES|QL',
 });
 
-export class ESQLSource extends AbstractVectorSource implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'> {
+export class ESQLSource
+  extends AbstractVectorSource
+  implements IVectorSource, Pick<IESSource, 'getIndexPatternId' | 'getGeoFieldName'>
+{
   readonly _descriptor: ESQLSourceDescriptor;
 
   static createDescriptor(descriptor: Partial<ESQLSourceDescriptor>): ESQLSourceDescriptor {
