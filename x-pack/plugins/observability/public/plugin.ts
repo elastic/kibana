@@ -314,7 +314,7 @@ export class Plugin
       ],
       visibleIn: Boolean(pluginsSetup.serverless)
         ? ['home', 'kibanaOverview']
-        : ['globalSearch', 'home', 'kibanaOverview'],
+        : ['globalSearch', 'home', 'kibanaOverview', 'sideNav'],
     };
 
     coreSetup.application.register(app);

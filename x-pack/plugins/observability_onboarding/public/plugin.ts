@@ -105,6 +105,7 @@ export class ObservabilityOnboardingPlugin
             config,
           });
         },
+        visibleIn: [],
       });
     }
 

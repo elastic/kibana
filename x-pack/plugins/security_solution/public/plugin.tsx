@@ -221,6 +221,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       updater$: this.appUpdater$,
+      visibleIn: ['globalSearch'],
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases
@@ -256,7 +257,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       id: 'siem',
       appRoute: 'app/siem',
       title: 'SIEM',
-      // navLinkStatus: 3,
+      visibleIn: [],
       mount: async (params: AppMountParameters) => {
         const [coreStart] = await core.getStartServices();
 
