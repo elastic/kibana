@@ -11,6 +11,7 @@ import {
   bootstrapRendererMock,
   getSettingValueMock,
   getStylesheetPathsMock,
+  getBrowserLoggingConfigMock,
 } from './rendering_service.test.mocks';
 
 import { load } from 'cheerio';
@@ -32,6 +33,7 @@ const INJECTED_METADATA = {
   version: expect.any(String),
   branch: expect.any(String),
   buildNumber: expect.any(Number),
+  logging: expect.any(Object),
   env: {
     mode: {
       name: expect.any(String),
@@ -198,6 +200,22 @@ function renderTestCases(
       const dom = load(content);
       const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
       expect(data).toMatchSnapshot(INJECTED_METADATA);
+    });
+
+    it('renders "core" with logging config injected', async () => {
+      const loggingConfig = {
+        root: {
+          level: 'info',
+        },
+      };
+      getBrowserLoggingConfigMock.mockReturnValue(loggingConfig);
+      const [render] = await getRender();
+      const content = await render(createKibanaRequest(), uiSettings, {
+        isAnonymousPage: false,
+      });
+      const dom = load(content);
+      const data = JSON.parse(dom('kbn-injected-metadata').attr('data') ?? '""');
+      expect(data.logging).toEqual(loggingConfig);
     });
   });
 }
@@ -418,8 +436,9 @@ describe('RenderingService', () => {
     jest.clearAllMocks();
     service = new RenderingService(mockRenderingServiceParams);
 
-    getSettingValueMock.mockImplementation((settingName: string) => settingName);
-    getStylesheetPathsMock.mockReturnValue(['/style-1.css', '/style-2.css']);
+    getSettingValueMock.mockReset().mockImplementation((settingName: string) => settingName);
+    getStylesheetPathsMock.mockReset().mockReturnValue(['/style-1.css', '/style-2.css']);
+    getBrowserLoggingConfigMock.mockReset().mockReturnValue({});
   });
 
   describe('preboot()', () => {
