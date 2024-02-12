@@ -568,7 +568,6 @@ export class Plugin implements ISecuritySolutionPlugin {
         );
 
         turnOffAgentPolicyFeatures(
-          core.elasticsearch.client.asInternalUser,
           endpointFleetServicesFactory.asInternalUser(),
           appFeaturesService,
           logger
