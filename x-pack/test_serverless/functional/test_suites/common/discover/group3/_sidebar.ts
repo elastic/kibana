@@ -26,7 +26,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
-  const INITIAL_FIELD_LIST_SUMMARY = '53 available fields. 3 meta fields.';
+  const INITIAL_FIELD_LIST_SUMMARY = '48 available fields. 5 empty fields. 3 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
@@ -266,7 +266,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
           'available'
         );
-        expect(availableFields.length).to.be(50);
+        expect(availableFields.length).to.be(48);
         expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
 
         // Available fields after scrolling down
@@ -308,7 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
           'available'
         );
-        expect(availableFields.length).to.be(50);
+        expect(availableFields.length).to.be(48);
         expect(
           availableFields
             .join(', ')
@@ -336,7 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('relatedContent');
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '53 available fields. 1 unmapped field. 3 meta fields.'
+          '48 available fields. 5 empty fields. 1 unmapped field. 3 meta fields.'
         );
       });
 
@@ -357,7 +357,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.includes('@message')).to.be(true);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '2 selected fields. 2 popular fields. 53 available fields. 3 meta fields.'
+          '2 selected fields. 2 popular fields. 48 available fields. 5 empty fields. 3 meta fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('@message');
@@ -377,7 +377,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('@message, _id, extension');
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '3 selected fields. 3 popular fields. 53 available fields. 3 meta fields.'
+          '3 selected fields. 3 popular fields. 48 available fields. 5 empty fields. 3 meta fields.'
         );
       });
 
@@ -564,7 +564,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 3 meta fields.'
+          '49 available fields. 5 empty fields. 3 meta fields.'
         );
 
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
@@ -583,7 +583,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 3 meta fields.'
+          '49 available fields. 5 empty fields. 3 meta fields.'
         );
 
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
@@ -620,7 +620,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // check that the sidebar is rendered
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 3 meta fields.'
+          '49 available fields. 5 empty fields. 3 meta fields.'
         );
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);

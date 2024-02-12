@@ -319,7 +319,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         let availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
           'available'
         );
-        expect(availableFields.length).to.be(50);
+        expect(availableFields.length).to.be(48);
         expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
 
         // Available fields after scrolling down
@@ -670,7 +670,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 3 meta fields.'
+          '49 available fields. 5 empty fields. 3 meta fields.'
         );
 
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
@@ -689,7 +689,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 3 meta fields.'
+          '49 available fields. 5 empty fields. 3 meta fields.'
         );
 
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
@@ -726,7 +726,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // check that the sidebar is rendered
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 3 meta fields.'
+          '49 available fields. 5 empty fields. 3 meta fields.'
         );
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
