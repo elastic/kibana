@@ -185,5 +185,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
     "@kbn/esql-utils",
+    "@kbn/core-test-helpers-kbn-server"
   ]
 }
