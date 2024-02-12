@@ -113,6 +113,13 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   version: string;
   inference_config?: Record<string, any>;
   indices?: Array<Record<IndexName, IndicesIndexState | null>>;
+  /**
+   * Whether the model has inference services
+   */
+  hasInferenceServices: boolean;
+  /**
+   * Inference services associated with the model
+   */
   inference_apis?: InferenceAPIConfigResponse[];
 };
 
