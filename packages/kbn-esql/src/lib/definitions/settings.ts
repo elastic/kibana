@@ -11,26 +11,26 @@ import { CommandModeDefinition } from './types';
 
 export const enrichModes: CommandModeDefinition = {
   name: 'ccq.mode',
-  description: i18n.translate('esql.definitions.ccqModeDoc', {
+  description: i18n.translate('kbn-esql.definitions.ccqModeDoc', {
     defaultMessage: 'Cross-clusters query mode',
   }),
   prefix: '_',
   values: [
     {
       name: 'any',
-      description: i18n.translate('esql.definitions.ccqAnyDoc', {
+      description: i18n.translate('kbn-esql.definitions.ccqAnyDoc', {
         defaultMessage: 'Enrich takes place on any cluster',
       }),
     },
     {
       name: 'coordinator',
-      description: i18n.translate('esql.definitions.ccqCoordinatorDoc', {
+      description: i18n.translate('kbn-esql.definitions.ccqCoordinatorDoc', {
         defaultMessage: 'Enrich takes place on the coordinating cluster receiving an ES|QL',
       }),
     },
     {
       name: 'remote',
-      description: i18n.translate('esql.definitions.ccqRemoteDoc', {
+      description: i18n.translate('kbn-esql.definitions.ccqRemoteDoc', {
         defaultMessage: 'Enrich takes place on the cluster hosting the target index.',
       }),
     },

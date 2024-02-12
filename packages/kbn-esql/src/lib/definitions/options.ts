@@ -13,7 +13,7 @@ import { CommandOptionsDefinition } from './types';
 
 export const byOption: CommandOptionsDefinition = {
   name: 'by',
-  description: i18n.translate('esql.definitions.byDoc', {
+  description: i18n.translate('kbn-esql.definitions.byDoc', {
     defaultMessage: 'By',
   }),
   signature: {
@@ -25,7 +25,7 @@ export const byOption: CommandOptionsDefinition = {
 
 export const metadataOption: CommandOptionsDefinition = {
   name: 'metadata',
-  description: i18n.translate('esql.definitions.metadataDoc', {
+  description: i18n.translate('kbn-esql.definitions.metadataDoc', {
     defaultMessage: 'Metadata',
   }),
   signature: {
@@ -40,7 +40,7 @@ export const metadataOption: CommandOptionsDefinition = {
     if (/\[metadata/i.test(command.text)) {
       messages.push({
         location: option.location,
-        text: i18n.translate('esql.validation.metadataBracketsDeprecation', {
+        text: i18n.translate('kbn-esql.validation.metadataBracketsDeprecation', {
           defaultMessage: "Square brackets '[]' need to be removed from FROM METADATA declaration",
         }),
         type: 'warning',
@@ -54,7 +54,7 @@ export const metadataOption: CommandOptionsDefinition = {
         if (!metadataFieldsAvailable.has(field.name)) {
           messages.push({
             location: field.location,
-            text: i18n.translate('esql.validation.wrongMetadataArgumentType', {
+            text: i18n.translate('kbn-esql.validation.wrongMetadataArgumentType', {
               defaultMessage:
                 'Metadata field [{value}] is not available. Available metadata fields are: [{availableFields}]',
               values: {
@@ -74,7 +74,7 @@ export const metadataOption: CommandOptionsDefinition = {
 
 export const asOption: CommandOptionsDefinition = {
   name: 'as',
-  description: i18n.translate('esql.definitions.asDoc', { defaultMessage: 'As' }),
+  description: i18n.translate('kbn-esql.definitions.asDoc', { defaultMessage: 'As' }),
   signature: {
     multipleParams: false,
     params: [
@@ -87,7 +87,7 @@ export const asOption: CommandOptionsDefinition = {
 
 export const onOption: CommandOptionsDefinition = {
   name: 'on',
-  description: i18n.translate('esql.definitions.onDoc', { defaultMessage: 'On' }),
+  description: i18n.translate('kbn-esql.definitions.onDoc', { defaultMessage: 'On' }),
   signature: {
     multipleParams: false,
     params: [{ name: 'matchingColumn', type: 'column' }],
@@ -97,7 +97,7 @@ export const onOption: CommandOptionsDefinition = {
 
 export const withOption: CommandOptionsDefinition = {
   name: 'with',
-  description: i18n.translate('esql.definitions.withDoc', { defaultMessage: 'With' }),
+  description: i18n.translate('kbn-esql.definitions.withDoc', { defaultMessage: 'With' }),
   signature: {
     multipleParams: true,
     params: [{ name: 'assignment', type: 'any' }],
@@ -107,7 +107,7 @@ export const withOption: CommandOptionsDefinition = {
 
 export const appendSeparatorOption: CommandOptionsDefinition = {
   name: 'append_separator',
-  description: i18n.translate('esql.definitions.appendSeparatorDoc', {
+  description: i18n.translate('kbn-esql.definitions.appendSeparatorDoc', {
     defaultMessage:
       'The character(s) that separate the appended fields. Default to empty string ("").',
   }),
@@ -127,7 +127,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
       const value = 'value' in firstArg ? firstArg.value : firstArg.name;
       messages.push({
         location: firstArg.location,
-        text: i18n.translate('esql.validation.wrongDissectOptionArgumentType', {
+        text: i18n.translate('kbn-esql.validation.wrongDissectOptionArgumentType', {
           defaultMessage:
             'Invalid value for DISSECT append_separator: expected a string, but was [{value}]',
           values: {
