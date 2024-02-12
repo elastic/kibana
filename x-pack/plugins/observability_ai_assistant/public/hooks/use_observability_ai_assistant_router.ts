@@ -7,7 +7,6 @@
 
 import { PathsOf, TypeAsArgs, TypeOf } from '@kbn/typed-react-router-config';
 import { useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { ObservabilityAIAssistantRouter, ObservabilityAIAssistantRoutes } from '../routes/config';
 import { observabilityAIAssistantRouter } from '../routes/config';
 import { useKibana } from './use_kibana';
@@ -24,10 +23,11 @@ interface StatefulObservabilityAIAssistantRouter extends ObservabilityAIAssistan
 }
 
 export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssistantRouter {
-  const history = useHistory();
-
   const {
-    services: { http },
+    services: {
+      http,
+      application: { navigateToApp },
+    },
   } = useKibana();
 
   const link = (...args: any[]) => {
@@ -40,17 +40,16 @@ export function useObservabilityAIAssistantRouter(): StatefulObservabilityAIAssi
       ...observabilityAIAssistantRouter,
       push: (...args) => {
         const next = link(...args);
-
-        history.push(next);
+        navigateToApp('observabilityAIAssistant', { path: next, replace: false });
       },
       replace: (path, ...args) => {
         const next = link(path, ...args);
-        history.replace(next);
+        navigateToApp('observabilityAIAssistant', { path: next, replace: true });
       },
       link: (path, ...args) => {
         return http.basePath.prepend('/app/observabilityAIAssistant' + link(path, ...args));
       },
     }),
-    [http, history]
+    [navigateToApp, http.basePath]
   );
 }

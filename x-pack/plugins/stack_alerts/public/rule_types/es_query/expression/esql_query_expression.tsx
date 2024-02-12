@@ -116,6 +116,7 @@ export const EsqlQueryExpression: React.FC<
         from: new Date(now - timeWindow).toISOString(),
         to: new Date(now).toISOString(),
       },
+      undefined,
       // create a data view with the timefield to pass into the query
       new DataView({
         spec: { timeFieldName: timeField },
@@ -219,7 +220,7 @@ export const EsqlQueryExpression: React.FC<
           }, 1000)}
           expandCodeEditor={() => true}
           isCodeEditorExpanded={true}
-          onTextLangQuerySubmit={() => {}}
+          onTextLangQuerySubmit={async () => {}}
           detectTimestamp={detectTimestamp}
           hideMinimizeButton={true}
           hideRunQueryText={true}
