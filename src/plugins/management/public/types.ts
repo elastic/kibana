@@ -58,7 +58,6 @@ export interface SectionsServiceStart {
 export enum ManagementSectionId {
   Ingest = 'ingest',
   Data = 'data',
-  Access = 'access',
   InsightsAndAlerting = 'insightsAndAlerting',
   Security = 'security',
   Kibana = 'kibana',
