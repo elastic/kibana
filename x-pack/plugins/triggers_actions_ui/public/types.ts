@@ -221,6 +221,14 @@ export type BulkOperationAttributes = BulkOperationAttributesWithoutHttp & {
   http: HttpSetup;
 };
 
+export type BulkDisableParamsWithoutHttp = BulkOperationAttributesWithoutHttp & {
+  untrack: boolean;
+};
+
+export type BulkDisableParams = BulkDisableParamsWithoutHttp & {
+  http: HttpSetup;
+};
+
 export interface ActionParamsProps<TParams> {
   actionParams: Partial<TParams>;
   index: number;
