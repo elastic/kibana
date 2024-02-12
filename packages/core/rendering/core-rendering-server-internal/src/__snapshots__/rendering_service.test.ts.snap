@@ -57,6 +57,7 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -122,6 +123,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -191,6 +193,7 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -256,6 +259,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -321,6 +325,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -390,6 +395,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -455,6 +461,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -520,6 +527,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -594,6 +602,7 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -659,6 +668,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -733,6 +743,7 @@ Object {
       },
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -803,6 +814,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -868,6 +880,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -942,6 +955,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -1012,6 +1026,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
@@ -1082,6 +1097,7 @@ Object {
       "user": Object {},
     },
   },
+  "logging": Any<Object>,
   "publicBaseUrl": "http://myhost.com/mock-server-basepath",
   "serverBasePath": "/mock-server-basepath",
   "theme": Object {
