@@ -74,7 +74,11 @@ export class Root {
   public async start() {
     this.log.debug('starting root');
     try {
-      return await this.server.start();
+      const startResult = await this.server.start();
+      setTimeout(() => {
+        throw new Error('Crash!');
+      }, 30 * 1_000);
+      return startResult;
     } catch (e) {
       await this.shutdown(e);
       throw e;
