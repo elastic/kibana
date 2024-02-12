@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { TestProviders } from '../../../common/mock';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { AssetCriticalitySelector } from './asset_criticality_selector';
@@ -13,7 +14,11 @@ import type { State } from './use_asset_criticality';
 const criticality = {
   status: 'create',
   query: {},
-  privileges: {},
+  privileges: {
+    data: {
+      has_write_permissions: true,
+    },
+  },
   mutation: {},
 } as State;
 
@@ -23,7 +28,10 @@ describe('AssetCriticalitySelector', () => {
       <AssetCriticalitySelector
         criticality={criticality}
         entity={{ type: 'host' as const, name: 'My test Host' }}
-      />
+      />,
+      {
+        wrapper: TestProviders,
+      }
     );
 
     expect(getByTestId('asset-criticality-selector')).toBeInTheDocument();
@@ -35,7 +43,10 @@ describe('AssetCriticalitySelector', () => {
         criticality={criticality}
         entity={{ type: 'host' as const, name: 'My test Host' }}
         compressed
-      />
+      />,
+      {
+        wrapper: TestProviders,
+      }
     );
 
     expect(getByTestId('asset-criticality-change-btn')).toHaveAttribute(
