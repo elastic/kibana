@@ -9,13 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import {
-  EuiRangeTick,
-  EuiDualRange,
-  EuiDualRangeProps,
-  EuiTourStep,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
@@ -24,7 +18,6 @@ import { ControlError } from '../../control_group/component/control_error_compon
 import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
-import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
@@ -35,15 +28,12 @@ export const RangeSliderControl: FC = () => {
   const id = rangeSlider.select((state) => state.explicitInput.id);
   const value = rangeSlider.select((state) => state.explicitInput.value);
 
-  // Embeddable cmponent state
+  // Embeddable component state
   const min = rangeSlider.select((state) => state.componentState.min);
   const max = rangeSlider.select((state) => state.componentState.max);
   const error = rangeSlider.select((state) => state.componentState.error);
   const fieldSpec = rangeSlider.select((state) => state.componentState.field);
   const isInvalid = rangeSlider.select((state) => state.componentState.isInvalid);
-  const showInvalidSelectionWarning = rangeSlider.select(
-    (state) => state.componentState.showInvalidRangeWarning
-  );
 
   // Embeddable output
   const isLoading = rangeSlider.select((state) => state.output.loading);
@@ -74,13 +64,6 @@ export const RangeSliderControl: FC = () => {
     ];
     return [Math.min(selectedMin, min), Math.max(selectedMax, max ?? Infinity)];
   }, [min, max, value]);
-
-  // show warning if there are invalid selections and the warning is not supressed
-  useEffect(() => {
-    if (isInvalid && rangeSlider.canShowInvalidSelectionsWarning()) {
-      rangeSlider.dispatch.setInvalidRangeWarningOpen(true);
-    }
-  }, [isInvalid, rangeSlider]);
 
   /**
    * The following `useEffect` ensures that the changes to the value that come from the embeddable (for example,
@@ -141,79 +124,46 @@ export const RangeSliderControl: FC = () => {
   return error ? (
     <ControlError error={error} />
   ) : (
-    <>
-      <EuiTourStep
-        anchorPosition="downCenter"
-        isStepOpen={showInvalidSelectionWarning}
-        title={RangeSliderStrings.control.getInvalidRangeWarningTitle()}
-        content={RangeSliderStrings.control.getInvalidRangeWarningContent()}
-        stepsTotal={1}
-        repositionOnScroll
-        step={1}
-        maxWidth={300}
-        panelPaddingSize="m"
-        display="block"
-        footerAction={
-          <EuiButtonEmpty
-            size="xs"
-            flush="right"
-            color="text"
-            data-test-subj="invalidSelectionsPopoverDismissButton"
-            onClick={() => {
-              rangeSlider.supressInvalidSelectionsWarning();
-              rangeSlider.dispatch.setInvalidRangeWarningOpen(false);
-            }}
-          >
-            {RangeSliderStrings.control.getInvalidRangeWarningDismissButton()}
-          </EuiButtonEmpty>
-        }
-        closePopover={() => {
-          rangeSlider.dispatch.setInvalidRangeWarningOpen(false);
+    <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
+      <EuiDualRange
+        ref={rangeSliderRef}
+        id={id}
+        fullWidth
+        showTicks
+        ticks={ticks}
+        levels={levels}
+        min={displayedMin}
+        max={displayedMax}
+        isLoading={isLoading}
+        inputPopoverProps={{
+          panelMinWidth: MIN_POPOVER_WIDTH,
         }}
-        onFinish={() => {}}
-      >
-        <span className="rangeSliderAnchor__button" data-test-subj={`range-slider-control-${id}`}>
-          <EuiDualRange
-            ref={rangeSliderRef}
-            id={id}
-            fullWidth
-            showTicks
-            ticks={ticks}
-            levels={levels}
-            min={displayedMin}
-            max={displayedMax}
-            isLoading={isLoading}
-            inputPopoverProps={{
-              panelMinWidth: MIN_POPOVER_WIDTH,
-            }}
-            onMouseUp={() => {
-              // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
-              // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
-              // the `useEffect` above.
-              debouncedOnChange.cancel();
-              rangeSlider.dispatch.setSelectedRange(displayedValue);
-            }}
-            readOnly={disablePopover}
-            showInput={'inputWithPopover'}
-            data-test-subj="rangeSlider__slider"
-            minInputProps={getCommonInputProps({
-              inputValue: displayedValue[0],
-              testSubj: 'lowerBoundFieldNumber',
-              placeholder: String(min ?? -Infinity),
-            })}
-            maxInputProps={getCommonInputProps({
-              inputValue: displayedValue[1],
-              testSubj: 'upperBoundFieldNumber',
-              placeholder: String(max ?? Infinity),
-            })}
-            value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
-            onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
-              setDisplayedValue([String(minSelection), String(maxSelection)]);
-              debouncedOnChange([String(minSelection), String(maxSelection)]);
-            }}
-          />
-        </span>
-      </EuiTourStep>
-    </>
+        onMouseUp={() => {
+          // when the pin is dropped (on mouse up), cancel any pending debounced changes and force the change
+          // in value to happen instantly (which, in turn, will re-calculate the min/max for the slider due to
+          // the `useEffect` above.
+          debouncedOnChange.cancel();
+          rangeSlider.dispatch.setSelectedRange(displayedValue);
+        }}
+        readOnly={disablePopover}
+        showInput={'inputWithPopover'}
+        data-test-subj="rangeSlider__slider"
+        minInputProps={getCommonInputProps({
+          inputValue: displayedValue[0],
+          testSubj: 'lowerBoundFieldNumber',
+          placeholder: String(min ?? -Infinity),
+        })}
+        maxInputProps={getCommonInputProps({
+          inputValue: displayedValue[1],
+          testSubj: 'upperBoundFieldNumber',
+          placeholder: String(max ?? Infinity),
+        })}
+        value={[displayedValue[0] || displayedMin, displayedValue[1] || displayedMax]}
+        onChange={([minSelection, maxSelection]: [number | string, number | string]) => {
+          setDisplayedValue([String(minSelection), String(maxSelection)]);
+          debouncedOnChange([String(minSelection), String(maxSelection)]);
+        }}
+      />
+    </span>
   );
 };

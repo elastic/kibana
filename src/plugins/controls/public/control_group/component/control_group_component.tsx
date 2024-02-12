@@ -9,33 +9,33 @@
 import '../control_group.scss';
 
 import {
-  arrayMove,
-  SortableContext,
-  rectSortingStrategy,
-  sortableKeyboardCoordinates,
-} from '@dnd-kit/sortable';
-import {
   closestCenter,
   DndContext,
   DragEndEvent,
   DragOverlay,
   KeyboardSensor,
+  LayoutMeasuringStrategy,
   PointerSensor,
   useSensor,
   useSensors,
-  LayoutMeasuringStrategy,
 } from '@dnd-kit/core';
-import classNames from 'classnames';
-import React, { useMemo, useState } from 'react';
-import { TypedUseSelectorHook, useSelector } from 'react-redux';
+import {
+  arrayMove,
+  rectSortingStrategy,
+  SortableContext,
+  sortableKeyboardCoordinates,
+} from '@dnd-kit/sortable';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
+import classNames from 'classnames';
+import React, { useEffect, useMemo, useState } from 'react';
+import { TypedUseSelectorHook, useSelector } from 'react-redux';
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 
-import { ControlGroupReduxState } from '../types';
 import { ControlGroupStrings } from '../control_group_strings';
-import { ControlClone, SortableControl } from './control_group_sortable_item';
 import { useControlGroupContainer } from '../embeddable/control_group_container';
+import { ControlGroupReduxState } from '../types';
+import { ControlClone, SortableControl } from './control_group_sortable_item';
 
 const contextSelect = useSelector as TypedUseSelectorHook<ControlGroupReduxState>;
 
@@ -47,6 +47,15 @@ export const ControlGroup = () => {
   const viewMode = contextSelect((state) => state.explicitInput.viewMode);
   const controlStyle = contextSelect((state) => state.explicitInput.controlStyle);
   const showAddButton = contextSelect((state) => state.componentState.showAddButton);
+  const controlsHaveInvalidSelections = contextSelect(
+    (state) => state.componentState.controlsHaveInvalidSelections
+  );
+
+  useEffect(() => {
+    if (controlsHaveInvalidSelections) {
+      controlGroup.showInvalidSelectionsToast();
+    }
+  }, [controlGroup, controlsHaveInvalidSelections]);
 
   const isEditable = viewMode === ViewMode.EDIT;
 

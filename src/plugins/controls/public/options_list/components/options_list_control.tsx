@@ -11,13 +11,7 @@ import classNames from 'classnames';
 import { debounce, isEmpty } from 'lodash';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiFilterButton,
-  EuiFilterGroup,
-  EuiInputPopover,
-  EuiTourStep,
-} from '@elastic/eui';
+import { EuiFilterButton, EuiFilterGroup, EuiInputPopover } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
 import { OptionsListStrings } from './options_list_strings';
@@ -42,9 +36,6 @@ export const OptionsListControl = ({
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
   const fieldSpec = optionsList.select((state) => state.componentState.field);
-  const showInvalidSelectionWarning = optionsList.select(
-    (state) => state.componentState.showInvalidSelectionWarning
-  );
 
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
@@ -64,18 +55,6 @@ export const OptionsListControl = ({
       optionsList.dispatch.setPopoverOpen(false); // on unmount, close the popover
     };
   }, [optionsList]);
-
-  const hasInvalidSelections = useMemo(
-    () => invalidSelections && invalidSelections?.length > 0,
-    [invalidSelections]
-  );
-
-  // show warning if there are invalid selections and the warning is not supressed
-  useEffect(() => {
-    if (hasInvalidSelections && optionsList.canShowInvalidSelectionsWarning()) {
-      optionsList.dispatch.setInvalidSelectionWarningOpen(true);
-    }
-  }, [hasInvalidSelections, optionsList]);
 
   // debounce loading state so loading doesn't flash when user types
   const [debouncedLoading, setDebouncedLoading] = useState(true);
@@ -196,57 +175,26 @@ export const OptionsListControl = ({
         'optionsList--filterGroupSingle': controlStyle !== 'twoLine',
       })}
     >
-      <EuiTourStep
-        anchorPosition="downCenter"
-        isStepOpen={showInvalidSelectionWarning}
-        title={OptionsListStrings.control.getInvalidSelectionWarningTitle()}
-        content={OptionsListStrings.control.getInvalidSelectionWarningContent()}
-        stepsTotal={1}
+      <EuiInputPopover
+        ownFocus
+        input={button}
+        hasArrow={false}
         repositionOnScroll
-        step={1}
-        maxWidth={300}
-        panelPaddingSize="m"
-        display="block"
-        footerAction={
-          <EuiButtonEmpty
-            size="xs"
-            flush="right"
-            color="text"
-            data-test-subj="invalidSelectionsPopoverDismissButton"
-            onClick={() => {
-              optionsList.supressInvalidSelectionsWarning();
-              optionsList.dispatch.setInvalidSelectionWarningOpen(false);
-            }}
-          >
-            {OptionsListStrings.control.getInvalidSelectionWarningDismissButton()}
-          </EuiButtonEmpty>
-        }
-        closePopover={() => {
-          optionsList.dispatch.setInvalidSelectionWarningOpen(false);
-        }}
-        onFinish={() => {}}
+        isOpen={isPopoverOpen}
+        panelPaddingSize="none"
+        panelMinWidth={MIN_POPOVER_WIDTH}
+        className="optionsList__inputButtonOverride"
+        initialFocus={'[data-test-subj=optionsList-control-search-input]'}
+        closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
+        panelClassName="optionsList__popoverOverride"
+        panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
       >
-        <EuiInputPopover
-          ownFocus
-          input={button}
-          hasArrow={false}
-          repositionOnScroll
-          isOpen={isPopoverOpen}
-          panelPaddingSize="none"
-          panelMinWidth={MIN_POPOVER_WIDTH}
-          className="optionsList__inputButtonOverride"
-          initialFocus={'[data-test-subj=optionsList-control-search-input]'}
-          closePopover={() => optionsList.dispatch.setPopoverOpen(false)}
-          panelClassName="optionsList__popoverOverride"
-          panelProps={{ 'aria-label': OptionsListStrings.popover.getAriaLabel(fieldName) }}
-        >
-          <OptionsListPopover
-            isLoading={debouncedLoading}
-            updateSearchString={updateSearchString}
-            loadMoreSuggestions={loadMoreSuggestions}
-          />
-        </EuiInputPopover>
-      </EuiTourStep>
+        <OptionsListPopover
+          isLoading={debouncedLoading}
+          updateSearchString={updateSearchString}
+          loadMoreSuggestions={loadMoreSuggestions}
+        />
+      </EuiInputPopover>
     </EuiFilterGroup>
   );
 };

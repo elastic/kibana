@@ -28,6 +28,7 @@ import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
+  ControlGroupContainer,
   ControlInput,
   ControlOutput,
   RangeSliderEmbeddableInput,
@@ -40,7 +41,6 @@ import { IClearableControl } from '../../types';
 import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
 import { RangeSliderReduxState } from '../types';
-import { ControlsStorageService } from '../../services/storage/types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -82,6 +82,7 @@ export class RangeSliderEmbeddable
 {
   public readonly type = RANGE_SLIDER_CONTROL;
   public deferEmbeddableLoad = true;
+  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -89,7 +90,6 @@ export class RangeSliderEmbeddable
   // Controls services
   private dataService: ControlsDataService;
   private dataViewsService: ControlsDataViewsService;
-  private storageService: ControlsStorageService;
 
   // Internal data fetching state for this input control.
   private dataView?: DataView;
@@ -110,13 +110,10 @@ export class RangeSliderEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent); // get filters for initial output...
+    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
-    ({
-      data: this.dataService,
-      dataViews: this.dataViewsService,
-      storage: this.storageService,
-    } = pluginServices.getServices());
+    ({ data: this.dataService, dataViews: this.dataViewsService } = pluginServices.getServices());
 
     const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
       RangeSliderReduxState,
@@ -131,6 +128,7 @@ export class RangeSliderEmbeddable
     this.dispatch = reduxEmbeddableTools.dispatch;
     this.onStateChange = reduxEmbeddableTools.onStateChange;
     this.cleanupStateTools = reduxEmbeddableTools.cleanup;
+
     this.initialize();
   }
 
@@ -392,14 +390,21 @@ export class RangeSliderEmbeddable
 
       const docCount = typeof total === 'number' ? total : total?.value;
       this.dispatch.setIsInvalid(!docCount);
+
+      const {
+        explicitInput: { value },
+      } = this.getState();
+      this.reportInvalidSelections(
+        !value || (value[0] === '' && value[1] === '') ? false : !docCount // don't set the range slider invalid if it has no selections
+      );
     }
   };
 
-  public canShowInvalidSelectionsWarning = () =>
-    this.storageService.getShowInvalidSelectionWarning() ?? true;
-
-  public supressInvalidSelectionsWarning = () => {
-    this.storageService.setShowInvalidSelectionWarning(false);
+  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.parent?.reportInvalidSelections({
+      id: this.id,
+      hasInvalidSelections,
+    });
   };
 
   public clearSelections() {

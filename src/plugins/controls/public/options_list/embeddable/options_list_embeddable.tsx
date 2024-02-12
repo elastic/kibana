@@ -6,42 +6,42 @@
  * Side Public License, v 1.
  */
 
-import ReactDOM from 'react-dom';
-import { batch } from 'react-redux';
 import deepEqual from 'fast-deep-equal';
 import { isEmpty, isEqual } from 'lodash';
-import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
 import React, { createContext, useContext } from 'react';
-import { debounceTime, map, distinctUntilChanged, skip } from 'rxjs/operators';
+import ReactDOM from 'react-dom';
+import { batch } from 'react-redux';
+import { merge, Subject, Subscription, switchMap, tap } from 'rxjs';
+import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs/operators';
 
-import {
-  Filter,
-  compareFilters,
-  buildPhraseFilter,
-  buildPhrasesFilter,
-  COMPARE_ALL_OPTIONS,
-  buildExistsFilter,
-} from '@kbn/es-query';
-import { i18n } from '@kbn/i18n';
 import { DataView, FieldSpec } from '@kbn/data-views-plugin/public';
 import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
+import {
+  buildExistsFilter,
+  buildPhraseFilter,
+  buildPhrasesFilter,
+  compareFilters,
+  COMPARE_ALL_OPTIONS,
+  Filter,
+} from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
+  ControlGroupContainer,
   ControlInput,
   ControlOutput,
-  OPTIONS_LIST_CONTROL,
   OptionsListEmbeddableInput,
+  OPTIONS_LIST_CONTROL,
 } from '../..';
 import { pluginServices } from '../../services';
-import { IClearableControl } from '../../types';
-import { OptionsListControl } from '../components/options_list_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
 import { ControlsOptionsListService } from '../../services/options_list/types';
-import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
+import { IClearableControl } from '../../types';
+import { OptionsListControl } from '../components/options_list_control';
 import { getDefaultComponentState, optionsListReducers } from '../options_list_reducers';
-import { ControlsStorageService } from '../../services/storage/types';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE, OptionsListReduxState } from '../types';
 
 const diffDataFetchProps = (
   last?: OptionsListDataFetchProps,
@@ -84,6 +84,7 @@ export class OptionsListEmbeddable
 {
   public readonly type = OPTIONS_LIST_CONTROL;
   public deferEmbeddableLoad = true;
+  public parent: ControlGroupContainer;
 
   private subscriptions: Subscription = new Subscription();
   private node?: HTMLElement;
@@ -91,7 +92,6 @@ export class OptionsListEmbeddable
   // Controls services
   private dataViewsService: ControlsDataViewsService;
   private optionsListService: ControlsOptionsListService;
-  private storageService: ControlsStorageService;
 
   // Internal data fetching state for this input control.
   private typeaheadSubject: Subject<string> = new Subject<string>();
@@ -115,13 +115,11 @@ export class OptionsListEmbeddable
     parent?: IContainer
   ) {
     super(input, output, parent);
+    this.parent = parent as ControlGroupContainer;
 
     // Destructure controls services
-    ({
-      dataViews: this.dataViewsService,
-      optionsList: this.optionsListService,
-      storage: this.storageService,
-    } = pluginServices.getServices());
+    ({ dataViews: this.dataViewsService, optionsList: this.optionsListService } =
+      pluginServices.getServices());
 
     this.typeaheadSubject = new Subject<string>();
     this.loadMoreSubject = new Subject<number>();
@@ -135,7 +133,6 @@ export class OptionsListEmbeddable
       reducers: optionsListReducers,
       initialComponentState: getDefaultComponentState(),
     });
-
     this.select = reduxEmbeddableTools.select;
     this.getState = reduxEmbeddableTools.getState;
     this.dispatch = reduxEmbeddableTools.dispatch;
@@ -353,6 +350,7 @@ export class OptionsListEmbeddable
           validSelections: selectedOptions,
           totalCardinality,
         });
+        this.reportInvalidSelections(false);
       } else {
         const valid: string[] = [];
         const invalid: string[] = [];
@@ -366,6 +364,7 @@ export class OptionsListEmbeddable
           validSelections: valid,
           totalCardinality,
         });
+        this.reportInvalidSelections(true);
       }
 
       batch(() => {
@@ -381,6 +380,13 @@ export class OptionsListEmbeddable
         this.dispatch.setLoading(false);
       });
     }
+  };
+
+  private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.parent?.reportInvalidSelections({
+      id: this.id,
+      hasInvalidSelections,
+    });
   };
 
   private buildFilter = async () => {
@@ -411,15 +417,9 @@ export class OptionsListEmbeddable
     return [newFilter];
   };
 
-  public canShowInvalidSelectionsWarning = () =>
-    this.storageService.getShowInvalidSelectionWarning() ?? true;
-
-  public supressInvalidSelectionsWarning = () => {
-    this.storageService.setShowInvalidSelectionWarning(false);
-  };
-
   public clearSelections() {
     this.dispatch.clearSelections({});
+    this.reportInvalidSelections(false);
   }
 
   reload = () => {

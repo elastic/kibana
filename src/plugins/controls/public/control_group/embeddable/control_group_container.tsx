@@ -5,7 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { compareFilters, COMPARE_ALL_OPTIONS, Filter, uniqFilters } from '@kbn/es-query';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { isEqual, pick } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
@@ -13,7 +16,7 @@ import { Provider, TypedUseSelectorHook, useSelector } from 'react-redux';
 import { BehaviorSubject, merge, Subject, Subscription } from 'rxjs';
 import { debounceTime, distinctUntilChanged, skip } from 'rxjs/operators';
 
-import { OverlayRef } from '@kbn/core/public';
+import { OverlayRef, Toast } from '@kbn/core/public';
 import { Container, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
@@ -55,6 +58,8 @@ import {
   controlOrdersAreEqual,
 } from './control_group_chaining_system';
 import { getNextPanelOrder } from './control_group_helpers';
+import { ControlGroupStrings } from '../control_group_strings';
+import { ControlsStorageService } from '../../services/storage/types';
 
 let flyoutRef: OverlayRef | undefined;
 export const setFlyoutRef = (newRef: OverlayRef | undefined) => {
@@ -86,11 +91,16 @@ export class ControlGroupContainer extends Container<
 
   private initialized$ = new BehaviorSubject(false);
 
+  private storageService: ControlsStorageService;
+
   private subscriptions: Subscription = new Subscription();
   private domNode?: HTMLElement;
   private recalculateFilters$: Subject<null>;
   private relevantDataViewId?: string;
   private lastUsedDataViewId?: string;
+  private invalidSelectionsState: { [childId: string]: boolean };
+  private invalidSelectionsToast?: Toast;
+
   public diffingSubscription: Subscription = new Subscription();
 
   // state management
@@ -126,6 +136,8 @@ export class ControlGroupContainer extends Container<
       ControlGroupChainingSystems[initialInput.chainingSystem]?.getContainerSettings(initialInput)
     );
 
+    ({ storage: this.storageService } = pluginServices.getServices());
+
     this.recalculateFilters$ = new Subject();
     this.onFiltersPublished$ = new Subject<Filter[]>();
     this.onControlRemoved$ = new Subject<string>();
@@ -153,6 +165,10 @@ export class ControlGroupContainer extends Container<
 
     this.store = reduxEmbeddableTools.store;
 
+    this.invalidSelectionsState = this.getChildIds().reduce((prev, id) => {
+      return { ...prev, [id]: false };
+    }, {});
+
     // when all children are ready setup subscriptions
     this.untilAllChildrenReady().then(() => {
       this.recalculateDataViews();
@@ -163,6 +179,69 @@ export class ControlGroupContainer extends Container<
 
     this.fieldFilterPredicate = fieldFilterPredicate;
   }
+
+  public canShowInvalidSelectionsWarning = () =>
+    this.storageService.getShowInvalidSelectionWarning() ?? true;
+
+  public supressInvalidSelectionsWarning = () => {
+    this.storageService.setShowInvalidSelectionWarning(false);
+  };
+
+  public showInvalidSelectionsToast = () => {
+    if (!this.canShowInvalidSelectionsWarning()) return;
+    const {
+      core: { notifications, theme, i18n },
+    } = pluginServices.getServices();
+
+    // remove any existing toasts to avoid a toast storm
+    if (this.invalidSelectionsToast) {
+      notifications.toasts.remove(this.invalidSelectionsToast);
+    }
+
+    this.invalidSelectionsToast = notifications.toasts.add({
+      title: ControlGroupStrings.invalidControlWarning.title,
+      text: toMountPoint(
+        <>
+          <p>{ControlGroupStrings.invalidControlWarning.text}</p>
+          <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                color="text"
+                onClick={() => {
+                  this.supressInvalidSelectionsWarning();
+                  if (this.invalidSelectionsToast) {
+                    notifications.toasts.remove(this.invalidSelectionsToast);
+                  }
+                }}
+              >
+                {ControlGroupStrings.invalidControlWarning.dismissButtonLabel}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </>,
+        { theme, i18n }
+      ),
+    });
+  };
+
+  public reportInvalidSelections = ({
+    id,
+    hasInvalidSelections,
+  }: {
+    id: string;
+    hasInvalidSelections: boolean;
+  }) => {
+    this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
+
+    const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
+      this.getInput().panels
+    ).idsInOrder.filter((childId) => {
+      return this.invalidSelectionsState[childId];
+    });
+
+    this.dispatch.setControlsHaveInvalidSelections(childrenWithInvalidSelections.length > 0);
+  };
 
   private setupSubscriptions = () => {
     /**
@@ -201,7 +280,9 @@ export class ControlGroupContainer extends Container<
      * debounce output recalculation
      */
     this.subscriptions.add(
-      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => this.recalculateFilters())
+      this.recalculateFilters$.pipe(debounceTime(10)).subscribe(() => {
+        this.recalculateFilters();
+      })
     );
   };
 
@@ -211,7 +292,14 @@ export class ControlGroupContainer extends Container<
     } = this.getState();
     if (!persistableControlGroupInputIsEqual(this.getPersistableInput(), lastSavedInput)) {
       this.updateInput(lastSavedInput);
+      this.reload(); // this forces the children to update their inputs + perform validation as necessary
     }
+  }
+
+  public reload() {
+    // reset invalid selections state on reload
+    this.dispatch.setControlsHaveInvalidSelections(undefined);
+    super.reload();
   }
 
   public getPersistableInput: () => PersistableControlGroupInput & { id: string } = () => {
@@ -284,13 +372,14 @@ export class ControlGroupContainer extends Container<
   private recalculateFilters = () => {
     const allFilters: Filter[] = [];
     let timeslice;
-    Object.values(this.children).map((child) => {
+    Object.values(this.children).map((child: ControlEmbeddable) => {
       const childOutput = child.getOutput() as ControlOutput;
       allFilters.push(...(childOutput?.filters ?? []));
       if (childOutput.timeslice) {
         timeslice = childOutput.timeslice;
       }
     });
+
     // if filters are different, publish them
     if (
       !compareFilters(this.output.filters ?? [], allFilters ?? [], COMPARE_ALL_OPTIONS) ||
