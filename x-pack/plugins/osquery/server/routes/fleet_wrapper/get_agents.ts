@@ -48,35 +48,6 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           pitId?: string;
           getStatusSummary?: boolean;
         };
-        try {
-          esAgents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
-            page: query.page,
-            perPage: query.perPage,
-            sortField: query.sortField,
-            sortOrder: query.sortOrder,
-            showUpgradeable: query.showUpgradeable,
-            getStatusSummary: query.getStatusSummary,
-            pitId: query.pitId,
-            searchAfter: query.searchAfter,
-            kuery: query.kuery,
-            showInactive: query.showInactive,
-            aggregations: {
-              platforms: {
-                terms: {
-                  field: 'local_metadata.os.platform',
-                },
-              },
-              policies: {
-                terms: {
-                  field: 'policy_id',
-                  size: 2000,
-                },
-              },
-            },
-          });
-        } catch (error) {
-          return response.badRequest({ body: error });
-        }
 
         const internalSavedObjectsClient = await getInternalSavedObjectsClient(
           osqueryContext.getStartServices
@@ -102,7 +73,53 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
           agentPolicyIds
         );
 
+        // FIND agents by policy_name
+        const policyNamePattern = /policy_name:([^ ]+)/;
+        const policyNameMatches = query.kuery.match(policyNamePattern);
+        const policyIds = policyNameMatches?.map((match: string) => match.split(':')[1]);
+        const kueryWithPolicy = agentPolicies?.filter((policy) =>
+          policy.name.toLowerCase().includes(policyIds?.[0]?.toLowerCase())
+        );
+        let kuery = query.kuery;
+        if (kueryWithPolicy?.length) {
+          kuery =
+            kuery.slice(0, -1) +
+            ' or ' +
+            kueryWithPolicy.map((p) => `policy_id:${p.id}`).join(' or ') +
+            ')';
+        }
+
         const agentPolicyById = mapKeys(agentPolicies, 'id');
+
+        try {
+          esAgents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
+            page: query.page,
+            perPage: query.perPage,
+            sortField: query.sortField,
+            sortOrder: query.sortOrder,
+            showUpgradeable: query.showUpgradeable,
+            getStatusSummary: query.getStatusSummary,
+            pitId: query.pitId,
+            searchAfter: query.searchAfter,
+            kuery,
+            showInactive: query.showInactive,
+            aggregations: {
+              platforms: {
+                terms: {
+                  field: 'local_metadata.os.platform',
+                },
+              },
+              policies: {
+                terms: {
+                  field: 'policy_id',
+                  size: 2000,
+                },
+              },
+            },
+          });
+        } catch (error) {
+          return response.badRequest({ body: error });
+        }
 
         const { platforms, overlap, policies } = processAggregations(esAgents?.aggregations);
 
