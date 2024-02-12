@@ -83,9 +83,7 @@ export async function fetchSearchSourceQuery({
     services.share.url.locators.get<DiscoverAppLocatorParams>('DISCOVER_APP_LOCATOR')!,
     services.dataViews,
     index,
-    shouldExcludeHitsFromPreviousRun(params, latestTimestamp, dateStart)
-      ? latestTimestamp
-      : dateStart,
+    dateStart,
     dateEnd,
     spacePrefix
   );
@@ -130,15 +128,17 @@ export function updateSearchSource(
     ),
   ];
 
-  if (shouldExcludeHitsFromPreviousRun(params, latestTimestamp, dateStart)) {
-    // add additional filter for documents with a timestamp greater than
-    // the timestamp of the previous run, so that those documents are not counted twice
-    const addTimeRangeField = buildRangeFilter(
-      field!,
-      { gt: latestTimestamp, format: 'strict_date_optional_time' },
-      index
-    );
-    filters.push(addTimeRangeField);
+  if (params.excludeHitsFromPreviousRun) {
+    if (latestTimestamp && latestTimestamp > dateStart) {
+      // add additional filter for documents with a timestamp greater then
+      // the timestamp of the previous run, so that those documents are not counted twice
+      const addTimeRangeField = buildRangeFilter(
+        field!,
+        { gt: latestTimestamp, format: 'strict_date_optional_time' },
+        index
+      );
+      filters.push(addTimeRangeField);
+    }
   }
 
   const searchSourceChild = searchSource.createChild();
@@ -178,8 +178,8 @@ async function generateLink(
   discoverLocator: LocatorPublic<DiscoverAppLocatorParams>,
   dataViews: DataViewsContract,
   dataViewToUpdate: DataView,
-  timeRangeFrom: string,
-  timeRangeTo: string,
+  dateStart: string,
+  dateEnd: string,
   spacePrefix: string
 ) {
   const prevFilters = searchSource.getField('filter') as Filter[];
@@ -196,7 +196,7 @@ async function generateLink(
     dataViewSpec: getSmallerDataViewSpec(newDataView),
     filters: updatedFilters,
     query: searchSource.getField('query'),
-    timeRange: { from: timeRangeFrom, to: timeRangeTo },
+    timeRange: { from: dateStart, to: dateEnd },
     isAlertResults: true,
   };
 
@@ -206,16 +206,6 @@ async function generateLink(
   const [start, end] = redirectUrl.split('/app');
 
   return start + spacePrefix + '/app' + end;
-}
-
-function shouldExcludeHitsFromPreviousRun(
-  params: OnlySearchSourceRuleParams,
-  latestTimestamp: string | undefined,
-  dateStart: string
-): latestTimestamp is string {
-  return Boolean(
-    params.excludeHitsFromPreviousRun && latestTimestamp && latestTimestamp > dateStart
-  );
 }
 
 function updateFilterReferences(filters: Filter[], fromDataView: string, toDataView: string) {
