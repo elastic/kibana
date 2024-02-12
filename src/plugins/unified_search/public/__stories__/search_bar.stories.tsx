@@ -8,7 +8,7 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import type { DataViewBase, Query } from '@kbn/es-query';
+import { buildEmptyFilter, DataViewBase, Query } from '@kbn/es-query';
 import { storiesOf } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -710,5 +710,35 @@ storiesOf('SearchBar', module)
       },
       submitButtonStyle: 'full',
       renderQueryInputAppend: () => <EuiButton onClick={() => {}}>Append</EuiButton>,
+    })
+  )
+  .add('with quick filters', () =>
+    wrapSearchBarInContext({
+      showFilterBar: true,
+      quickFilters: [
+        {
+          name: 'Observability rule types',
+          filter: buildEmptyFilter(false),
+          icon: 'logoObservability',
+        },
+        {
+          name: 'Security rule types',
+          filter: buildEmptyFilter(false),
+          icon: 'logoSecurity',
+        },
+        {
+          groupName: 'Status',
+          items: [
+            {
+              name: 'Active',
+              filter: buildEmptyFilter(false),
+            },
+            {
+              name: 'Inactive',
+              filter: buildEmptyFilter(false),
+            },
+          ],
+        },
+      ],
     })
   );
