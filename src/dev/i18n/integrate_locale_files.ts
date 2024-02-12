@@ -36,6 +36,8 @@ export interface IntegrateOptions {
   ignoreMissing: boolean;
   config: I18nConfig;
   log: ToolingLog;
+  filterPerI18nId?: string[];
+  returnErrorsInsteadOfThrow?: boolean;
 }
 
 type MessageMap = Map<string, { message: string }>;
@@ -113,6 +115,10 @@ export function verifyMessages(
   }
 
   if (errorMessage) {
+    if (options.returnErrorsInsteadOfThrow) {
+      return errorMessage;
+    }
+
     throw createFailError(errorMessage);
   }
 }
@@ -192,10 +198,15 @@ export async function integrateLocaleFiles(
     throw createFailError(`Locale file should contain formats object.`);
   }
 
-  const localizedMessagesMap: LocalizedMessageMap = new Map(
-    Object.entries(localizedMessages.messages)
-  );
-  verifyMessages(localizedMessagesMap, defaultMessagesMap, options);
+  const messages = options.filterPerI18nId
+    ? Object.entries(localizedMessages.messages as Record<string, string>).filter(([key]) =>
+        options.filterPerI18nId?.find((p) => key.startsWith(`${p}.`))
+      )
+    : Object.entries(localizedMessages.messages as Record<string, string>);
+
+  const localizedMessagesMap: LocalizedMessageMap = new Map(messages);
+
+  const response = verifyMessages(localizedMessagesMap, defaultMessagesMap, options);
 
   const knownNamespaces = Object.keys(options.config.paths);
   const groupedLocalizedMessagesMap = groupMessagesByNamespace(
@@ -206,4 +217,6 @@ export async function integrateLocaleFiles(
   if (!options.dryRun) {
     await writeMessages(groupedLocalizedMessagesMap, localizedMessages.formats, options);
   }
+
+  return response;
 }

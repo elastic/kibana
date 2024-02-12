@@ -8,6 +8,7 @@
 
 export const RUNNING_IN_EDITOR =
   !process.env.IS_KIBANA_PRECOMIT_HOOK &&
+  !process.env.IS_KIBANA_PREPUSH_HOOK &&
   // vscode sets this in the env for all workers
   (!!process.env.VSCODE_CWD ||
     // MacOS sets this for intellij processes, not sure if it works in webstorm but we could expand this check later
