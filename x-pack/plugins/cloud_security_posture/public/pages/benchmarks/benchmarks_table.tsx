@@ -171,7 +171,7 @@ const getBenchmarkTableColumns = (
       if (benchmarkEvaluation === 0) {
         return (
           <EuiButtonEmpty href={integrationLink} iconType="plusInCircle" flush="left">
-            {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
+            {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
               defaultMessage: 'Add {resourcePlurals}',
               values: { resourcePlurals },
             })}
@@ -191,7 +191,7 @@ const getBenchmarkTableColumns = (
             navToFindings({ 'rule.benchmark.id': benchmark.id }, [groupByField]);
           }}
         >
-          {i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
+          {i18n.translate('xpack.csp.benchmarks.benchmarksTable.accountsCountTitle', {
             defaultMessage: '{benchmarkEvaluation} {resourcePlurals}',
             values: { benchmarkEvaluation, resourcePlurals },
           })}
