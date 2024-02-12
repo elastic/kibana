@@ -106,9 +106,9 @@ export const OptionsListControl = ({
       hasSelections: !isEmpty(selectedOptions),
       selectedOptionsCount: selectedOptions?.length,
       selectionDisplayNode: (
-        <EuiFlexGroup alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <div>
+        <EuiFlexGroup alignItems="center" responsive={false} gutterSize="xs">
+          <EuiFlexItem className="optionsList__selections">
+            <div className="eui-textTruncate">
               {exclude && (
                 <>
                   <span className="optionsList__negateLabel">
@@ -145,9 +145,11 @@ export const OptionsListControl = ({
               )}
             </div>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
-          </EuiFlexItem>
+          {(invalidSelections ?? []).length > 0 && (
+            <EuiFlexItem grow={false}>
+              <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       ),
     };

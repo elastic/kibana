@@ -7,12 +7,17 @@
     max-inline-size: none; // overwrite the default `max-inline-size` that's coming from EUI
   }
 
+
   .optionsList--filterBtn {
     height: $euiButtonHeight;
 
     &.optionsList--filterBtnPlaceholder {
       color: $euiTextSubduedColor;
       font-weight: $euiFontWeightRegular;
+    }
+
+    .optionsList__selections {
+      overflow: hidden !important;
     }
 
     .optionsList__filter {
