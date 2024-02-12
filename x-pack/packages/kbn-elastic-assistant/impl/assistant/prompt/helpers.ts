@@ -75,8 +75,7 @@ export function getCombinedMessage({
   return {
     content: `${
       isNewChat ? `${selectedSystemPrompt?.content ?? ''}\n\n` : ''
-    }${promptContextsContent}
-  ${promptText}`,
+    }${promptContextsContent}\n\n${promptText}`,
     role: 'user', // we are combining the system and user messages into one message
     timestamp: new Date().toLocaleString(),
   };
