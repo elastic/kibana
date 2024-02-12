@@ -6,7 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import { App, AppDeepLink, ApplicationStart, AppUpdater, AppStatus } from '@kbn/core/public';
+import { App, AppDeepLink, ApplicationStart, AppUpdater } from '@kbn/core/public';
 import { casesFeatureId, sloFeatureId } from '../../common';
 import { updateGlobalNavigation } from './update_global_navigation';
 
@@ -29,7 +29,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        status: AppStatus.inaccessible,
+        visibleIn: [],
       });
     });
   });
@@ -49,7 +49,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks,
-        status: AppStatus.accessible,
+        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
       });
     });
 
@@ -84,7 +84,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'], // visibility set
             },
           ],
-          status: AppStatus.accessible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
@@ -115,7 +115,7 @@ describe('updateGlobalNavigation', () => {
 
         expect(callback).toHaveBeenCalledWith({
           deepLinks: [], // Deeplink has been filtered out
-          status: AppStatus.accessible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
@@ -153,7 +153,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          status: AppStatus.accessible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
@@ -182,7 +182,7 @@ describe('updateGlobalNavigation', () => {
 
       expect(callback).toHaveBeenCalledWith({
         deepLinks: [], // Deeplink has been filtered out
-        status: AppStatus.accessible,
+        visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
       });
     });
 
@@ -218,7 +218,7 @@ describe('updateGlobalNavigation', () => {
               visibleIn: ['sideNav', 'globalSearch'],
             },
           ],
-          status: AppStatus.accessible,
+          visibleIn: ['sideNav', 'globalSearch', 'home', 'kibanaOverview'],
         });
       });
     });
