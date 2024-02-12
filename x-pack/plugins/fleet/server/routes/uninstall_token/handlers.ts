@@ -54,8 +54,14 @@ export const getUninstallTokensMetadataHandler: FleetRequestHandler<
 
     const managedPolicyIds = managedPolicies.map((policy) => policy.id);
 
-    const policyIdSearchTerm = search?.trim() ?? policyId?.trim();
-    const policyNameSearchTerm = search?.trim();
+    let policyIdSearchTerm: string | undefined;
+    let policyNameSearchTerm: string | undefined;
+    if (search) {
+      policyIdSearchTerm = search.trim();
+      policyNameSearchTerm = search.trim();
+    } else if (policyId) {
+      policyIdSearchTerm = policyId.trim();
+    }
 
     const body = await uninstallTokenService.getTokenMetadata(
       policyIdSearchTerm,
