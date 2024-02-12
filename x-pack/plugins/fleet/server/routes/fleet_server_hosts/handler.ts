@@ -42,7 +42,7 @@ async function checkFleetServerHostsWriteAPIsAllowed(
   );
   if (!isEqual(hostUrls, serverlessDefaultFleetServerHost.host_urls)) {
     throw new FleetServerHostUnauthorizedError(
-      `Fleet server host must have default URL in serverless${serverlessDefaultFleetServerHost.host_urls}`
+      `Fleet server host must have default URL in serverless: ${serverlessDefaultFleetServerHost.host_urls}`
     );
   }
 }
