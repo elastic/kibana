@@ -6,6 +6,7 @@
  */
 
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import type { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server/service/client';
 
 import { getConnectorType as getCasesWebhookConnectorType } from './cases_webhook';
 import { getConnectorType as getJiraConnectorType } from './jira';
@@ -28,6 +29,7 @@ import { getConnectorType as getWebhookConnectorType } from './webhook';
 import { getConnectorType as getXmattersConnectorType } from './xmatters';
 import { getConnectorType as getTeamsConnectorType } from './teams';
 import { getConnectorType as getD3SecurityConnectorType } from './d3security';
+import { getConnectorType as getObsAIAssistantConnectorType } from './observability_ai_assistant';
 import { getOpsgenieConnectorType } from './opsgenie';
 import type { ActionParamsType as ServiceNowITSMActionParams } from './servicenow_itsm';
 import type { ActionParamsType as ServiceNowSIRActionParams } from './servicenow_sir';
@@ -80,10 +82,12 @@ export function registerConnectorTypes({
   actions,
   publicBaseUrl,
   experimentalFeatures,
+  getObsAIClient,
 }: {
   actions: ActionsPluginSetupContract;
   publicBaseUrl?: string;
   experimentalFeatures: ExperimentalFeatures;
+  getObsAIClient: () => Promise<ObservabilityAIAssistantClient | undefined>;
 }) {
   actions.registerType(getEmailConnectorType({ publicBaseUrl }));
   actions.registerType(getIndexConnectorType());
@@ -102,6 +106,7 @@ export function registerConnectorTypes({
   actions.registerType(getResilientConnectorType());
   actions.registerType(getTeamsConnectorType());
   actions.registerType(getTorqConnectorType());
+  actions.registerType(getObsAIAssistantConnectorType({ getObsAIClient }));
 
   actions.registerSubActionConnectorType(getOpsgenieConnectorType());
   actions.registerSubActionConnectorType(getTinesConnectorType());

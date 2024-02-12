@@ -7,6 +7,9 @@
 
 import { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/core/server';
 import { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/server/types';
+import type { FakeRawRequest } from '@kbn/core-http-server';
+import { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import { registerConnectorTypes } from './connector_types';
 import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
 import {
@@ -14,6 +17,7 @@ import {
   parseExperimentalConfigValue,
 } from '../common/experimental_features';
 import { StackConnectorsConfigType } from '../common/types';
+
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;
 }
@@ -44,6 +48,29 @@ export class StackConnectorsPlugin implements Plugin<void, void> {
       actions,
       publicBaseUrl: core.http.basePath.publicBaseUrl,
       experimentalFeatures: this.experimentalFeatures,
+      getObsAIClient: () => {
+        return core.plugins
+          .onStart<{ observabilityAIAssistant: ObservabilityAIAssistantPluginStart }>(
+            'observabilityAIAssistant'
+          )
+          .then(async ({ observabilityAIAssistant }) => {
+            if (observabilityAIAssistant.found) {
+              const fakeRawRequest: FakeRawRequest = {
+                headers: {
+                  authorization:
+                    'ApiKey R2Q4dm5ZMEJnbzRmclpmV0l0LWo6R215QkJhV1RSVzYzM1ZxWG9QS2h4dw==',
+                },
+                path: '/',
+              };
+
+              const fakeRequest = CoreKibanaRequest.from(fakeRawRequest);
+
+              return observabilityAIAssistant.contract.service.getClient({
+                request: fakeRequest,
+              });
+            }
+          });
+      },
     });
   }
 

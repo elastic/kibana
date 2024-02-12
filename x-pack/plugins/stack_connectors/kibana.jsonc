@@ -16,6 +16,9 @@
       "kibanaReact",
       "triggersActionsUi"
     ],
+    "runtimePluginDependencies": [
+      "observabilityAIAssistant"
+    ],
     "extraPublicDirs": [
       "public/common"
     ]
