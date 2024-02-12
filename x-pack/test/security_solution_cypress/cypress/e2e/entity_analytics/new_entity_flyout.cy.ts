@@ -112,7 +112,7 @@ describe(
             'Asset Criticality'
           );
 
-          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Create');
+          cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Assign');
         });
 
         it('should display asset criticality modal', () => {
@@ -193,7 +193,7 @@ describe(
           'Asset Criticality'
         );
 
-        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Create');
+        cy.get(ENTITY_DETAILS_FLYOUT_ASSET_CRITICALITY_BUTTON).should('have.text', 'Assign');
       });
 
       it('should display asset criticality modal', () => {

@@ -577,6 +577,58 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.ConsolePluginStart.isEmbeddedConsoleAvailable",
+            "type": "Function",
+            "tags": [],
+            "label": "isEmbeddedConsoleAvailable",
+            "description": [
+              "\nisEmbeddedConsoleAvailable is available if the embedded console can be rendered. Returns true when\ncalled if the Embedded Console is currently rendered."
+            ],
+            "signature": [
+              "(() => boolean) | undefined"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "console",
+            "id": "def-public.ConsolePluginStart.openEmbeddedConsole",
+            "type": "Function",
+            "tags": [],
+            "label": "openEmbeddedConsole",
+            "description": [
+              "\nopenEmbeddedConsole is available if the embedded console can be rendered. Calling\nthis function will open the embedded console on the page if it is currently rendered."
+            ],
+            "signature": [
+              "((content?: string | undefined) => void) | undefined"
+            ],
+            "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "console",
+                "id": "def-public.ConsolePluginStart.openEmbeddedConsole.$1",
+                "type": "string",
+                "tags": [],
+                "label": "content",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/plugins/console/public/types/plugin_dependencies.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
