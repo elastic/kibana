@@ -21,15 +21,20 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../common/hooks/use_kibana';
+import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
 import { getRemediationList } from '../configurations/findings_flyout/overview_tab';
 import * as TEST_SUBJECTS from './test_subjects';
 import { useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
-import { TakeAction } from '../../components/take_action';
+import {
+  showChangeBenchmarkRuleStatesSuccessToast,
+  TakeAction,
+} from '../../components/take_action';
+import { useFetchDetectionRulesByTags } from '../../common/api/use_fetch_detection_rules_by_tags';
 
 export const RULES_FLYOUT_SWITCH_BUTTON = 'rule-flyout-switch-button';
 
@@ -61,8 +66,11 @@ type RuleTab = typeof tabs[number]['id'];
 export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStates = useChangeCspRuleState();
+  const { data: rulesData } = useFetchDetectionRulesByTags(
+    getFindingsDetectionRuleSearchTags(rule.metadata)
+  );
   const isRuleMuted = rule?.state === 'muted';
-
+  const { notifications } = useKibana().services;
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {
@@ -74,6 +82,10 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
       const nextRuleStates = isRuleMuted ? 'unmute' : 'mute';
       await postRequestChangeRulesStates(nextRuleStates, [rulesObjectRequest]);
       await refetchRulesStates();
+      await showChangeBenchmarkRuleStatesSuccessToast(notifications, isRuleMuted, {
+        numberOfRules: 1,
+        numberOfDetectionRules: rulesData?.total || 0,
+      });
     }
   };
 
