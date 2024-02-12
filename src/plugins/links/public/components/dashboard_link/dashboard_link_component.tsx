@@ -116,7 +116,12 @@ export const DashboardLinkComponent = ({
 
     const params: DashboardLocatorParams = {
       dashboardId: link.destination,
-      ...getDashboardLocatorParamsFromEmbeddable(linksEmbeddable as Partial<PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>>, linkOptions),
+      ...getDashboardLocatorParamsFromEmbeddable(
+        linksEmbeddable as Partial<
+          PublishesLocalUnifiedSearch & HasParentApi<Partial<PublishesLocalUnifiedSearch>>
+        >,
+        linkOptions
+      ),
     };
 
     const locator = dashboardContainer.locator;
