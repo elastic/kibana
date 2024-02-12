@@ -56,8 +56,6 @@ export const TopValues: FC<Props> = ({ stats, fieldFormat, barColor, compressed,
   if (stats === undefined || !stats.topValues) return null;
   const { topValues, fieldName, sampleCount } = stats;
 
-  // @TODO: remove
-  console.log(`--@@topValues`, topValues);
   if (topValues?.length === 0) return null;
   const totalDocuments = stats.totalDocuments ?? sampleCount ?? 0;
   const topValuesOtherCountPercent =

@@ -69,8 +69,6 @@ export const getESQLBooleanFieldStats = async ({
           let falseCount = 0;
           let trueCount = 0;
           const terms = results.map((row) => {
-            // @TODO: remove
-            console.log(`--@@row`, row);
             if (row[1] === false) {
               falseCount = row[0];
             }
