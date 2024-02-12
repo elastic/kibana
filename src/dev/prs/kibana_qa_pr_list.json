@@ -3,6 +3,7 @@
 "v8.13.0"
 ],
 "exclude": [
+"v8.12.1",
 "v8.12.0",
 "v8.3.3",
 "v8.3.2",
@@ -20,7 +21,6 @@
 "Feature:Endpoint",
 "Feature:Observability Landing - Milestone 1",
 "Feature:Osquery",
-"Feature:Transforms",
 "Feature:Unified Integrations",
 "Synthetics",
 "Team: AWL: Platform",
