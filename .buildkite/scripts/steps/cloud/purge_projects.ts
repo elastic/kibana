@@ -10,7 +10,7 @@ import { execSync } from 'child_process';
 import axios from 'axios';
 
 async function getPrProjects() {
-  const match = /^kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
+  const match = /^(keep.?)?kibana-pr-([0-9]+)-(elasticsearch|security|observability)$/;
   try {
     return (
       await Promise.all([

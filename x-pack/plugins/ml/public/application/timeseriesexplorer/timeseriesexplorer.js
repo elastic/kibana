@@ -568,7 +568,8 @@ export class TimeSeriesExplorer extends React.Component {
             detectorIndex,
             entityControls,
             searchBounds.min.valueOf(),
-            searchBounds.max.valueOf()
+            searchBounds.max.valueOf(),
+            this.props.functionDescription
           )
           .then((resp) => {
             stateUpdate.chartDetails = resp.results;
