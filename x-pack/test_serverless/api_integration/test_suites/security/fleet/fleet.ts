@@ -12,8 +12,7 @@ export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/176399
-  describe.skip('fleet', function () {
+  describe('fleet', function () {
     it('rejects request to create a new fleet server hosts if host url is different from default', async () => {
       const { body, status } = await supertest
         .post('/api/fleet/fleet_server_hosts')
