@@ -74,3 +74,20 @@ export const SMART_FALLBACK_FIELDS = {
 // UI preferences
 export const DEFAULT_COLUMNS = [RESOURCE_FIELD_CONFIGURATION, CONTENT_FIELD_CONFIGURATION];
 export const DEFAULT_ROWS_PER_PAGE = 100;
+
+// Content column filter options
+export const FILTER_FOR_CONTENT = [
+  '_', // Filter fields like '_id', '_score'
+  '@timestamp',
+  'agent.',
+  'elastic_agent.',
+  'data_stream.',
+  'data_stream.',
+  'host.',
+  'container.',
+  'cloud.',
+  'kubernetes.',
+  'orchestrator.',
+  'log.',
+  'service.',
+];
