@@ -145,7 +145,7 @@
                 "section": "def-common.AggregateQuery",
                 "text": "AggregateQuery"
               },
-              " | undefined) => void"
+              " | undefined, abortController?: AbortController | undefined) => Promise<void>"
             ],
             "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
             "deprecated": false,
@@ -167,6 +167,21 @@
                     "text": "AggregateQuery"
                   },
                   " | undefined"
+                ],
+                "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              },
+              {
+                "parentPluginId": "textBasedLanguages",
+                "id": "def-public.TextBasedLanguagesEditorProps.onTextLangQuerySubmit.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "abortController",
+                "description": [],
+                "signature": [
+                  "AbortController | undefined"
                 ],
                 "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
                 "deprecated": false,
@@ -389,6 +404,22 @@
             "label": "disableSubmitAction",
             "description": [
               "Disables the submit query action"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-text-based-editor/src/text_based_languages_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "textBasedLanguages",
+            "id": "def-public.TextBasedLanguagesEditorProps.allowQueryCancellation",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "allowQueryCancellation",
+            "description": [
+              "when set to true enables query cancellation"
             ],
             "signature": [
               "boolean | undefined"

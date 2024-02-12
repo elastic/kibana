@@ -62,6 +62,8 @@ import type {
   RuleAddProps,
   RuleEditProps,
   RuleTypeModel,
+  RuleTypeParams,
+  RuleTypeMetaData,
   AlertsTableProps,
   RuleStatusDropdownProps,
   RuleTagFilterProps,
@@ -115,12 +117,18 @@ export interface TriggersAndActionsUIPublicPluginStart {
   getEditConnectorFlyout: (
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
-  getAddRuleFlyout: (
-    props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleAddProps>;
-  getEditRuleFlyout: (
-    props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-  ) => ReactElement<RuleEditProps>;
+  getAddRuleFlyout: <
+    Params extends RuleTypeParams = RuleTypeParams,
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  >(
+    props: Omit<RuleAddProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleAddProps<Params, MetaData>>;
+  getEditRuleFlyout: <
+    Params extends RuleTypeParams = RuleTypeParams,
+    MetaData extends RuleTypeMetaData = RuleTypeMetaData
+  >(
+    props: Omit<RuleEditProps<Params, MetaData>, 'actionTypeRegistry' | 'ruleTypeRegistry'>
+  ) => ReactElement<RuleEditProps<Params, MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
   getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
     props: P
@@ -403,7 +411,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getAddRuleFlyout: (props: Omit<RuleAddProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>) => {
+      getAddRuleFlyout: (props) => {
         return getAddRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,
@@ -411,9 +419,7 @@ export class Plugin
           connectorServices: this.connectorServices!,
         });
       },
-      getEditRuleFlyout: (
-        props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
-      ) => {
+      getEditRuleFlyout: (props) => {
         return getEditRuleFlyoutLazy({
           ...props,
           actionTypeRegistry: this.actionTypeRegistry,

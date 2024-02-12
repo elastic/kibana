@@ -54,6 +54,39 @@ export default ({ getService }: FtrProviderContext): void => {
         await deleteListsIndex(supertest, log);
       });
 
+      it('should not import a list item if the imported file is not .txt or .csv', async () => {
+        const { body } = await supertest
+          .post(`${LIST_ITEM_URL}/_import?type=ip`)
+          .set('kbn-xsrf', 'true')
+          .attach('file', getImportListItemAsBuffer(['127.0.0.1', '127.0.0.2']), 'list_items.pdf')
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(415);
+
+        expect(body).to.eql({
+          status_code: 415,
+          message: 'Unsupported media type. File must be one of the following types: [.csv, .txt]',
+        });
+      });
+
+      it('should not import a list item if the imported file exceed the file size limit', async () => {
+        const { body } = await supertest
+          .post(`${LIST_ITEM_URL}/_import?type=ip`)
+          .set('kbn-xsrf', 'true')
+          .attach(
+            'file',
+            getImportListItemAsBuffer(Array(1000000).fill('127.0.0.1')),
+            'list_items.txt'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(413);
+
+        expect(body).to.eql({
+          statusCode: 413,
+          error: 'Request Entity Too Large',
+          message: 'Payload content length greater than maximum allowed: 9000000',
+        });
+      });
+
       it('should set the response content types to be expected when importing two items', async () => {
         await supertest
           .post(`${LIST_ITEM_URL}/_import?type=ip`)

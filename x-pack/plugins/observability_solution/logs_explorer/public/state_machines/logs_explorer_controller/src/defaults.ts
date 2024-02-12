@@ -40,4 +40,5 @@ export const DEFAULT_CONTEXT: DefaultLogsExplorerControllerState = {
     from: 'now-15m/m',
     to: 'now',
   },
+  rows: [],
 };
