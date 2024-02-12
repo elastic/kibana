@@ -38,7 +38,7 @@ type BenchmarkDynamicNames =
     };
 
 export type BenchmarkDynamicValues = BenchmarkDynamicNames & {
-  resourcePlurals: string;
+  resourceCountLabel: string;
   integrationLink: string;
   learnMoreLink: string;
 };
@@ -67,7 +67,7 @@ export const useBenchmarkDynamicValues = () => {
    * //   integrationType: 'CSPM',
    * //   integrationName: 'AWS',
    * //   resourceName: 'Accounts',
-   * //   resourcePlurals: '3 accounts',
+   * //   resourceCountLabel: '3 accounts',
    * //   integrationLink: 'cspm-integration-link',
    * //   learnMoreLink: 'https://ela.st/cspm-get-started'
    * // }
@@ -82,7 +82,7 @@ export const useBenchmarkDynamicValues = () => {
           integrationType: 'CSPM',
           integrationName: 'AWS',
           resourceName: 'Accounts',
-          resourcePlurals: i18n.translate('xpack.csp.benchmarkDynamicValues.AwsAccountPlural', {
+          resourceCountLabel: i18n.translate('xpack.csp.benchmarkDynamicValues.AwsAccountPlural', {
             defaultMessage: '{resourceCount, plural, one {account} other {accounts}}',
             values: { resourceCount: resourceCount || 0 },
           }),
@@ -94,7 +94,7 @@ export const useBenchmarkDynamicValues = () => {
           integrationType: 'CSPM',
           integrationName: 'GCP',
           resourceName: 'Projects',
-          resourcePlurals: i18n.translate('xpack.csp.benchmarkDynamicValues.GcpAccountPlural', {
+          resourceCountLabel: i18n.translate('xpack.csp.benchmarkDynamicValues.GcpAccountPlural', {
             defaultMessage: '{resourceCount, plural, one {project} other {projects}}',
             values: { resourceCount: resourceCount || 0 },
           }),
@@ -106,10 +106,13 @@ export const useBenchmarkDynamicValues = () => {
           integrationType: 'CSPM',
           integrationName: 'Azure',
           resourceName: 'Subscriptions',
-          resourcePlurals: i18n.translate('xpack.csp.benchmarkDynamicValues.AzureAccountPlural', {
-            defaultMessage: '{resourceCount, plural, one {subscription} other {subscriptions}}',
-            values: { resourceCount: resourceCount || 0 },
-          }),
+          resourceCountLabel: i18n.translate(
+            'xpack.csp.benchmarkDynamicValues.AzureAccountPlural',
+            {
+              defaultMessage: '{resourceCount, plural, one {subscription} other {subscriptions}}',
+              values: { resourceCount: resourceCount || 0 },
+            }
+          ),
           integrationLink: cspmIntegrationLink,
           learnMoreLink: 'https://ela.st/cspm-get-started',
         };
@@ -118,7 +121,7 @@ export const useBenchmarkDynamicValues = () => {
           integrationType: 'KSPM',
           integrationName: 'Kubernetes',
           resourceName: 'Clusters',
-          resourcePlurals: i18n.translate('xpack.csp.benchmarkDynamicValues.K8sAccountPlural', {
+          resourceCountLabel: i18n.translate('xpack.csp.benchmarkDynamicValues.K8sAccountPlural', {
             defaultMessage: '{resourceCount, plural, one {cluster} other {clusters}}',
             values: { resourceCount: resourceCount || 0 },
           }),
@@ -130,7 +133,7 @@ export const useBenchmarkDynamicValues = () => {
           integrationType: 'KSPM',
           integrationName: 'EKS',
           resourceName: 'Clusters',
-          resourcePlurals: i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
+          resourceCountLabel: i18n.translate('xpack.csp.benchmarkDynamicValues.EksAccountPlural', {
             defaultMessage: '{resourceCount, plural, one {cluster} other {clusters}}',
             values: { resourceCount: resourceCount || 0 },
           }),

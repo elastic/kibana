@@ -163,7 +163,7 @@ const getBenchmarkTableColumns = (
     width: '17.5%',
     'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
     render: (benchmarkEvaluation: Benchmark['evaluation'], benchmark: Benchmark) => {
-      const { resourcePlurals, integrationLink } = getBenchmarkDynamicValues(
+      const { resourceCountLabel, integrationLink } = getBenchmarkDynamicValues(
         benchmark.id,
         benchmarkEvaluation
       );
@@ -172,8 +172,8 @@ const getBenchmarkTableColumns = (
         return (
           <EuiButtonEmpty href={integrationLink} iconType="plusInCircle" flush="left">
             {i18n.translate('xpack.csp.benchmarks.benchmarksTable.addIntegrationTitle', {
-              defaultMessage: 'Add {resourcePlurals}',
-              values: { resourcePlurals },
+              defaultMessage: 'Add {resourceCountLabel}',
+              values: { resourceCountLabel },
             })}
           </EuiButtonEmpty>
         );
@@ -192,8 +192,8 @@ const getBenchmarkTableColumns = (
           }}
         >
           {i18n.translate('xpack.csp.benchmarks.benchmarksTable.accountsCountTitle', {
-            defaultMessage: '{benchmarkEvaluation} {resourcePlurals}',
-            values: { benchmarkEvaluation, resourcePlurals },
+            defaultMessage: '{benchmarkEvaluation} {resourceCountLabel}',
+            values: { benchmarkEvaluation, resourceCountLabel },
           })}
         </EuiButtonEmpty>
       );

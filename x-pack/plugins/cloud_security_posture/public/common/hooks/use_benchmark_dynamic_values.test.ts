@@ -27,7 +27,7 @@ describe('useBenchmarkDynamicValues', () => {
       integrationType: 'CSPM',
       integrationName: 'AWS',
       resourceName: 'Accounts',
-      resourcePlurals: 'accounts',
+      resourceCountLabel: 'accounts',
       integrationLink: 'cspm-integration-link',
       learnMoreLink: 'https://ela.st/cspm-get-started',
     });
@@ -37,7 +37,7 @@ describe('useBenchmarkDynamicValues', () => {
       integrationType: 'CSPM',
       integrationName: 'GCP',
       resourceName: 'Projects',
-      resourcePlurals: 'projects',
+      resourceCountLabel: 'projects',
       integrationLink: 'cspm-integration-link',
       learnMoreLink: 'https://ela.st/cspm-get-started',
     });
@@ -47,7 +47,7 @@ describe('useBenchmarkDynamicValues', () => {
       integrationType: 'CSPM',
       integrationName: 'Azure',
       resourceName: 'Subscriptions',
-      resourcePlurals: 'subscription',
+      resourceCountLabel: 'subscription',
       integrationLink: 'cspm-integration-link',
       learnMoreLink: 'https://ela.st/cspm-get-started',
     });
@@ -57,7 +57,7 @@ describe('useBenchmarkDynamicValues', () => {
       integrationType: 'KSPM',
       integrationName: 'Kubernetes',
       resourceName: 'Clusters',
-      resourcePlurals: 'clusters',
+      resourceCountLabel: 'clusters',
       integrationLink: 'kspm-integration-link',
       learnMoreLink: 'https://ela.st/kspm-get-started',
     });
@@ -67,7 +67,7 @@ describe('useBenchmarkDynamicValues', () => {
       integrationType: 'KSPM',
       integrationName: 'EKS',
       resourceName: 'Clusters',
-      resourcePlurals: 'clusters',
+      resourceCountLabel: 'clusters',
       integrationLink: 'kspm-integration-link',
       learnMoreLink: 'https://ela.st/kspm-get-started',
     });
@@ -80,18 +80,18 @@ describe('useBenchmarkDynamicValues', () => {
     const { result } = renderHook(() => useBenchmarkDynamicValues());
 
     const benchmarkValuesCisAws = result.current.getBenchmarkDynamicValues('cis_aws', 3);
-    expect(benchmarkValuesCisAws.resourcePlurals).toBe('accounts');
+    expect(benchmarkValuesCisAws.resourceCountLabel).toBe('accounts');
 
     const benchmarkValuesCisGcp = result.current.getBenchmarkDynamicValues('cis_gcp', 0);
-    expect(benchmarkValuesCisGcp.resourcePlurals).toBe('projects');
+    expect(benchmarkValuesCisGcp.resourceCountLabel).toBe('projects');
 
     const benchmarkValuesCisAzure = result.current.getBenchmarkDynamicValues('cis_azure', 1);
-    expect(benchmarkValuesCisAzure.resourcePlurals).toBe('subscription');
+    expect(benchmarkValuesCisAzure.resourceCountLabel).toBe('subscription');
 
     const benchmarkValuesCisK8s = result.current.getBenchmarkDynamicValues('cis_k8s', 0);
-    expect(benchmarkValuesCisK8s.resourcePlurals).toBe('clusters');
+    expect(benchmarkValuesCisK8s.resourceCountLabel).toBe('clusters');
 
     const benchmarkValuesCisEks = result.current.getBenchmarkDynamicValues('cis_eks');
-    expect(benchmarkValuesCisEks.resourcePlurals).toBe('clusters');
+    expect(benchmarkValuesCisEks.resourceCountLabel).toBe('clusters');
   });
 });
