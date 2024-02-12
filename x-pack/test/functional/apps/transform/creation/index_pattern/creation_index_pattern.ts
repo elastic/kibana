@@ -528,6 +528,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
 
         // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176697
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176698
         it.skip('navigates through the wizard and sets all needed fields', async () => {
           await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
