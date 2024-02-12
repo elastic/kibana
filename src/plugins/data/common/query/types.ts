@@ -28,4 +28,6 @@ export interface SavedQueryAttributes {
   query: Query;
   filters?: Filter[];
   timefilter?: SavedQueryTimeFilter;
+  appName?: string;
+  tags?: string[];
 }

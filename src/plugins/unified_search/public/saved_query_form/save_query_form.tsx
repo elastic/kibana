@@ -7,7 +7,15 @@
  */
 
 import React, { useState, useCallback } from 'react';
-import { EuiButton, EuiForm, EuiFormRow, EuiFieldText, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiForm,
+  EuiFormRow,
+  EuiFieldText,
+  EuiSwitch,
+  EuiText,
+  EuiComboBox,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { SavedQuery, SavedQueryService } from '@kbn/data-plugin/public';
@@ -24,6 +32,7 @@ interface Props {
 export interface SavedQueryMeta {
   id?: string;
   title: string;
+  tags?: string[];
   description: string;
   shouldIncludeFilters: boolean;
   shouldIncludeTimefilter: boolean;
@@ -38,6 +47,7 @@ export function SaveQueryForm({
   showTimeFilterOption = true,
 }: Props) {
   const [title, setTitle] = useState(savedQuery?.attributes.title ?? '');
+  const [tags, setTags] = useState<string[]>(savedQuery?.attributes.tags ?? []);
   const [shouldIncludeFilters, setShouldIncludeFilters] = useState(
     Boolean(savedQuery ? savedQuery.attributes.filters : true)
   );
@@ -98,6 +108,7 @@ export function SaveQueryForm({
         onSave({
           id: savedQuery?.id,
           title,
+          tags,
           description: '',
           shouldIncludeFilters,
           shouldIncludeTimefilter,
@@ -110,11 +121,12 @@ export function SaveQueryForm({
   }, [
     validate,
     onSave,
-    onClose,
     savedQuery?.id,
     title,
+    tags,
     shouldIncludeFilters,
     shouldIncludeTimefilter,
+    onClose,
   ]);
 
   const onInputChange = useCallback((event) => {
@@ -149,6 +161,33 @@ export function SaveQueryForm({
           isInvalid={hasErrors}
           onBlur={autoTrim}
           compressed
+        />
+      </EuiFormRow>
+
+      <EuiFormRow
+        display="rowCompressed"
+        label={i18n.translate('unifiedSearch.search.searchBar.savedQueryTagsLabelText', {
+          defaultMessage: 'Tags',
+        })}
+        labelAppend={
+          <EuiText size="xs" color="subdued">
+            {i18n.translate('unifiedSearch.search.searchBar.optional', {
+              defaultMessage: 'Optional',
+            })}
+          </EuiText>
+        }
+      >
+        <EuiComboBox
+          compressed
+          options={tags.map((tag) => ({ label: tag }))}
+          selectedOptions={tags.map((tag) => ({ label: tag }))}
+          onChange={(values) => {
+            setTags(values.map((value) => value.label));
+          }}
+          onCreateOption={(searchValue) => {
+            setTags([...tags, searchValue]);
+          }}
+          data-test-subj="saveQueryFormTagsOption"
         />
       </EuiFormRow>
 

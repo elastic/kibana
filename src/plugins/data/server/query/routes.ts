@@ -24,6 +24,8 @@ const SAVED_QUERY_ATTRS_CONFIG = schema.object({
   }),
   filters: schema.maybe(schema.arrayOf(schema.any())),
   timefilter: schema.maybe(schema.any()),
+  appName: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 const savedQueryResponseSchema = schema.object({

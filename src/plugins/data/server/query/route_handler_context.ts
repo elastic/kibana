@@ -70,6 +70,8 @@ function extractReferences({
   query,
   filters,
   timefilter,
+  appName,
+  tags,
 }: SavedQueryAttributes) {
   const { state: extractedFilters, references } = filters
     ? extract(filters)
@@ -98,6 +100,8 @@ function extractReferences({
     // since the saved objects client ignores undefined values
     filters: extractedFilters ?? null,
     timefilter: timefilter ?? null,
+    ...(appName && { appName }),
+    ...(tags && { tags }),
   };
 
   return { attributes, references };

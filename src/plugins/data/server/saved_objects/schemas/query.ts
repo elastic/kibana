@@ -39,6 +39,8 @@ export const SCHEMA_QUERY_MODEL_VERSION_1 = SCHEMA_QUERY_BASE;
 
 export const SCHEMA_QUERY_MODEL_VERSION_2 = SCHEMA_QUERY_BASE.extends({
   titleKeyword: schema.string(),
+  appName: schema.maybe(schema.string()),
+  tags: schema.maybe(schema.arrayOf(schema.string())),
   filters: schema.maybe(schema.nullable(FILTERS_SCHEMA)),
   timefilter: schema.maybe(schema.nullable(TIME_FILTER_SCHEMA)),
 });
