@@ -70,9 +70,6 @@ export function updateGlobalNavigation({
 
   updater$.next(() => ({
     deepLinks: updatedDeepLinks,
-    status:
-      someVisible || !!capabilities[sloFeatureId]?.read
-        ? AppStatus.accessible
-        : AppStatus.inaccessible,
+    visibleIn: someVisible || !!capabilities[sloFeatureId]?.read ? ['sideNav', 'globalSearch'] : [],
   }));
 }
