@@ -58,7 +58,7 @@ export const useBenchmarkDynamicValues = () => {
    * @param {BenchmarksCisId} benchmarkId - The benchmark ID.
    * @param {number} [resourceCount] - The count of resources (optional).
    * @returns {BenchmarkDynamicValues} The dynamic benchmark values including integration details,
-   * resource name, resource plurals, integration link, and learn more link.
+   * resource name, resource count label in plurals/singular, integration link, and learn more link.
    *
    * @example
    * const benchmarkValues = getBenchmarkDynamicValues('cis_aws', 3);
