@@ -146,10 +146,10 @@ function getFieldMapping(
     useNestedFunction: false,
     useLiterals: true,
   }
-) {
+): FunctionDefinition['signatures'][number]['params'] {
   const literalValues = {
     string: `"a"`,
-    number: 5,
+    number: '5',
   };
   return params.map(({ name: _name, type, literalOnly, ...rest }) => {
     const typeString: string = type;
@@ -193,7 +193,7 @@ function generateWrongMappingForArgs(
 ) {
   const literalValues = {
     string: `"a"`,
-    number: 5,
+    number: '5',
   };
   const wrongFieldMapping = currentParams.map(({ name: _name, literalOnly, type, ...rest }, i) => {
     // this thing is complex enough, let's not make it harder for constants
