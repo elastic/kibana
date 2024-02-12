@@ -235,13 +235,24 @@ export const useHostsTable = () => {
               field: 'alertsCount',
               sortable: true,
               'data-test-subj': 'hostsView-tableRow-alertsCount',
-              render: (alertsCount: HostNodeRow['alertsCount']) => {
+              render: (alertsCount: HostNodeRow['alertsCount'], row: HostNodeRow) => {
                 if (!alertsCount) {
                   return null;
                 }
                 return (
                   <EuiToolTip position="top" content={TABLE_COLUMN_LABEL.alertsCount}>
-                    <EuiBadge iconType="warning" color="danger">
+                    <EuiBadge
+                      iconType="warning"
+                      color="danger"
+                      onClick={() => {
+                        setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
+                      }}
+                      onClickAriaLabel={TABLE_COLUMN_LABEL.alertsCount}
+                      iconOnClick={() => {
+                        setProperties({ detailsItemId: row.id === detailsItemId ? null : row.id });
+                      }}
+                      iconOnClickAriaLabel={TABLE_COLUMN_LABEL.alertsCount}
+                    >
                       {alertsCount}
                     </EuiBadge>
                   </EuiToolTip>
