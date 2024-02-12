@@ -25,8 +25,9 @@ const props: Props = {
   ],
   conversation: undefined,
   isSettingsModalVisible: false,
-  selectedPrompt: undefined,
+  selectedPrompt: { id: 'default-system-prompt', content: '', name: '', promptType: 'system' },
   setIsSettingsModalVisible: jest.fn(),
+  isFlyoutMode: false,
 };
 
 const mockUseAssistantContext = {

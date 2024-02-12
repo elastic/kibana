@@ -25,7 +25,7 @@ const TitleFieldComponent = ({ conversationIds, euiFieldProps }: TitleFieldProps
     rules: {
       required: {
         message: i18n.translate(
-          'xpack.elasticAssistant.conversation.newConversationModal.form.requiredTitleError',
+          'xpack.elasticAssistant.conversationSidepanel.titleField.titleIsRequired',
           {
             defaultMessage: 'Title is required',
           }
@@ -35,7 +35,7 @@ const TitleFieldComponent = ({ conversationIds, euiFieldProps }: TitleFieldProps
       validate: (text: string) => {
         if (conversationIds?.includes(value)) {
           return i18n.translate(
-            'xpack.elasticAssistant.conversation.newConversationModal.form.uniqueTitleError',
+            'xpack.elasticAssistant.conversationSidepanel.titleField.uniqueTitle',
             {
               defaultMessage: 'Title must be unique',
             }
@@ -49,12 +49,9 @@ const TitleFieldComponent = ({ conversationIds, euiFieldProps }: TitleFieldProps
 
   return (
     <EuiFormRow
-      label={i18n.translate(
-        'xpack.elasticAssistant.conversation.newConversationModal.form.titleFieldLabel',
-        {
-          defaultMessage: 'Title',
-        }
-      )}
+      label={i18n.translate('xpack.elasticAssistant.conversationSidepanel.titleFieldLabel', {
+        defaultMessage: 'Title',
+      })}
       error={error?.message}
       isInvalid={hasError}
       fullWidth
