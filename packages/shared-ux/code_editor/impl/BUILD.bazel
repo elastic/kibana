@@ -25,7 +25,6 @@ BUNDLER_DEPS = [
   "@npm//react",
   "@npm//tslib",
   "@npm//react-monaco-editor",
-  "@npm//react-resize-detector",
 ]
 
 js_library(
