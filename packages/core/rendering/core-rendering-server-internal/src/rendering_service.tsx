@@ -29,7 +29,7 @@ import {
   RenderingMetadata,
 } from './types';
 import { registerBootstrapRoute, bootstrapRendererFactory } from './bootstrap';
-import { getSettingValue, getStylesheetPaths } from './render_utils';
+import { getSettingValue, getStylesheetPaths, getBrowserLoggingConfig } from './render_utils';
 import { filterUiPlugins } from './filter_ui_plugins';
 import type { InternalRenderingRequestHandlerContext } from './internal_types';
 
@@ -185,6 +185,8 @@ export class RenderingService {
       buildNum,
     });
 
+    const loggingConfig = await getBrowserLoggingConfig(this.coreContext.configService);
+
     const filteredPlugins = filterUiPlugins({ uiPlugins, isAnonymousPage });
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
@@ -210,6 +212,7 @@ export class RenderingService {
         serverBasePath,
         publicBaseUrl,
         assetsHrefBase: staticAssetsHrefBase,
+        logging: loggingConfig,
         env,
         clusterInfo,
         anonymousStatusPage: status?.isStatusPageAnonymous() ?? false,
