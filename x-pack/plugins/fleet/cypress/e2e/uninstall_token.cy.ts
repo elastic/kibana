@@ -75,7 +75,7 @@ describe('Uninstall token page', () => {
           cy.getBySel(UNINSTALL_TOKENS.UNINSTALL_COMMAND_FLYOUT).should('exist');
 
           cy.contains(`sudo elastic-agent uninstall --uninstall-token ${fetchedToken.token}`);
-          cy.contains(`Valid for the following agent policy: ${fetchedToken.policy_id}`);
+          cy.contains(`Valid for the following agent policy: (${fetchedToken.policy_id})`);
         });
       });
 
