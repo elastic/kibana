@@ -1383,7 +1383,7 @@ describe('validation logic', () => {
       testErrorsAndWarnings(
         `from a_index | eval ${divideByZeroExpr}`,
         [],
-        ['Module by zero can return null value: 1/0']
+        ['Module by zero can return null value: 1%0']
       );
     }
     for (const op of ['like', 'rlike']) {
