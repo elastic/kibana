@@ -150,7 +150,6 @@ export class EnterpriseSearchPlugin implements Plugin {
       category: DEFAULT_APP_CATEGORIES.enterpriseSearch,
       euiIconType: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.LOGO,
       id: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.ID,
-      visibleIn: ['home', 'globalSearch', 'sideNav'],
       mount: async (params: AppMountParameters) => {
         const kibanaDeps = await this.getKibanaDeps(core, params, cloud);
         const { chrome, http } = kibanaDeps.core;
@@ -167,6 +166,7 @@ export class EnterpriseSearchPlugin implements Plugin {
         return renderApp(EnterpriseSearchOverview, kibanaDeps, pluginData);
       },
       title: ENTERPRISE_SEARCH_OVERVIEW_PLUGIN.NAV_TITLE,
+      visibleIn: ['home', 'kibanaOverview', 'globalSearch', 'sideNav'],
     });
 
     core.application.register({

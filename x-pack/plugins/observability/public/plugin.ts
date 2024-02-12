@@ -312,7 +312,9 @@ export class Plugin
         'user',
         'experience',
       ],
-      visibleIn: Boolean(pluginsSetup.serverless) ? ['home'] : ['globalSearch', 'home'],
+      visibleIn: Boolean(pluginsSetup.serverless)
+        ? ['home', 'kibanaOverview']
+        : ['globalSearch', 'home', 'kibanaOverview'],
     };
 
     coreSetup.application.register(app);
