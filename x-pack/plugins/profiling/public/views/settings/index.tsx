@@ -29,7 +29,6 @@ import {
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React from 'react';
-import { ValueValidation } from '@kbn/core-ui-settings-browser/src/types';
 import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -53,7 +52,7 @@ export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
   const {
     start: {
-      core: { docLinks, notifications },
+      core: { docLinks, notifications, settings },
     },
   } = useProfilingDependencies();
 
@@ -81,11 +80,7 @@ export function Settings() {
     }
   }
 
-  // We don't validate the user input on these settings
-  const settingsValidationResponse: ValueValidation = {
-    successfulValidation: true,
-    valid: true,
-  };
+  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   return (
     <ProfilingAppPageTemplate hideSearchBar>
@@ -215,7 +210,8 @@ export function Settings() {
                       {...{
                         links: docLinks.links.management,
                         showDanger: (message: string) => notifications.toasts.addDanger(message),
-                        validateChange: async () => settingsValidationResponse,
+                        validateChange: (key: string, value: any) =>
+                          settings.client.validateValue(key, value),
                       }}
                     >
                       <FieldRow
@@ -242,6 +238,7 @@ export function Settings() {
               defaultMessage: 'Save changes',
             })}
             unsavedChangesCount={Object.keys(unsavedChanges).length}
+            areChangesInvalid={hasInvalidChanges}
           />
         )}
       </>

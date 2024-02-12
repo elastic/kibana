@@ -29,7 +29,7 @@ export interface FunctionDefinition {
     returnType: string;
     examples?: string[];
   }>;
-  warning?: (fnDef: ESQLFunction) => ESQLMessage[];
+  validate?: (fnDef: ESQLFunction) => ESQLMessage[];
 }
 
 export interface CommandBaseDefinition {
@@ -57,12 +57,18 @@ export interface CommandOptionsDefinition extends CommandBaseDefinition {
   wrapped?: string[];
   optional: boolean;
   skipCommonValidation?: boolean;
-  validate?: (option: ESQLCommandOption, command: ESQLCommand) => ESQLMessage[];
+  validate?: (
+    option: ESQLCommandOption,
+    command: ESQLCommand,
+    references?: unknown
+  ) => ESQLMessage[];
 }
 
-export interface CommandModeDefinition extends CommandBaseDefinition {
+export interface CommandModeDefinition {
   name: string;
   description: string;
+  values: Array<{ name: string; description: string }>;
+  prefix?: string;
 }
 
 export interface CommandDefinition extends CommandBaseDefinition {

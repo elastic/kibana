@@ -7,7 +7,31 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { isLiteralItem } from '../shared/helpers';
+import { ESQLFunction } from '../types';
 import { FunctionDefinition } from './types';
+
+const validateLogFunctions = (fnDef: ESQLFunction) => {
+  const messages = [];
+  // do not really care here about the base and field
+  // just need to check both values are not negative
+  for (const arg of fnDef.args) {
+    if (isLiteralItem(arg) && arg.value < 0) {
+      messages.push({
+        type: 'warning' as const,
+        code: 'logOfNegativeValue',
+        text: i18n.translate('monaco.esql.divide.warning.logOfNegativeValue', {
+          defaultMessage: 'Log of a negative number results in null: {value}',
+          values: {
+            value: arg.value,
+          },
+        }),
+        location: arg.location,
+      });
+    }
+  }
+  return messages;
+};
 
 export const evalFunctionsDefinitions: FunctionDefinition[] = [
   {
@@ -68,6 +92,29 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
         examples: [`from index | eval log10_value = log10(field)`],
       },
     ],
+    validate: validateLogFunctions,
+  },
+
+  {
+    name: 'log',
+    description: i18n.translate('monaco.esql.definitions.logDoc', {
+      defaultMessage:
+        'A scalar function log(based, value) returns the logarithm of a value for a particular base, as specified in the argument',
+    }),
+    signatures: [
+      {
+        params: [
+          { name: 'baseOrField', type: 'number' },
+          { name: 'field', type: 'number', optional: true },
+        ],
+        returnType: 'number',
+        examples: [
+          `from index | eval log2_value = log(2, field)`,
+          `from index | eval loge_value = log(field)`,
+        ],
+      },
+    ],
+    validate: validateLogFunctions,
   },
   {
     name: 'pow',
@@ -221,7 +268,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
           { name: 'words', type: 'string' },
           { name: 'separator', type: 'string' },
         ],
-        returnType: 'string[]',
+        returnType: 'string',
         examples: [`ROW words="foo;bar;baz;qux;quux;corge" | EVAL word = SPLIT(words, ";")`],
       },
     ],
@@ -873,7 +920,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_avg(a)'],
       },
@@ -888,7 +935,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     signatures: [
       {
         params: [
-          { name: 'multivalue', type: 'string[]' },
+          { name: 'multivalue', type: 'string' },
           { name: 'delimeter', type: 'string' },
         ],
         returnType: 'string',
@@ -904,7 +951,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'any[]' }],
+        params: [{ name: 'multivalue', type: 'any' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_count(a)'],
       },
@@ -917,8 +964,8 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'any[]' }],
-        returnType: 'any[]',
+        params: [{ name: 'multivalue', type: 'any' }],
+        returnType: 'any',
         examples: ['row a = [2, 2, 3] | eval mv_dedupe(a)'],
       },
     ],
@@ -959,7 +1006,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_max(a)'],
       },
@@ -973,7 +1020,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_min(a)'],
       },
@@ -987,7 +1034,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_median(a)'],
       },
@@ -1001,7 +1048,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
     }),
     signatures: [
       {
-        params: [{ name: 'multivalue', type: 'number[]' }],
+        params: [{ name: 'multivalue', type: 'number' }],
         returnType: 'number',
         examples: ['row a = [1, 2, 3] | eval mv_sum(a)'],
       },
@@ -1050,7 +1097,7 @@ export const evalFunctionsDefinitions: FunctionDefinition[] = [
   .sort(({ name: a }, { name: b }) => a.localeCompare(b))
   .map((def) => ({
     ...def,
-    supportedCommands: ['eval', 'where', 'row'],
+    supportedCommands: ['stats', 'eval', 'where', 'row'],
     supportedOptions: ['by'],
     type: 'eval',
   }));

@@ -33,7 +33,7 @@ import {
 } from '@elastic/eui';
 import { usePageUrlState, useUrlState } from '@kbn/ml-url-state';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
-import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/es-query';
+import { getIndexPatternFromSQLQuery, getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -675,7 +675,7 @@ export const IndexDataVisualizerESQL: FC<IndexDataVisualizerESQLProps> = (dataVi
   // Query that has been typed, but has not submitted with cmd + enter
   const [localQuery, setLocalQuery] = useState<AggregateQuery>({ esql: '' });
 
-  const onQueryUpdate = (q?: AggregateQuery) => {
+  const onQueryUpdate = async (q?: AggregateQuery) => {
     // When user submits a new query
     // resets all current requests and other data
     if (cancelOverallStatsRequest) {

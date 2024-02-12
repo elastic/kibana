@@ -22,10 +22,8 @@ import {
   withOption,
   appendSeparatorOption,
 } from '../definitions/options';
-import { ccqMode } from '../definitions/settings';
 import {
   CommandDefinition,
-  CommandModeDefinition,
   CommandOptionsDefinition,
   FunctionDefinition,
   SignatureArgType,
@@ -92,13 +90,24 @@ export function isIncompleteItem(arg: ESQLAstItem): boolean {
   return !arg || (!Array.isArray(arg) && arg.incomplete);
 }
 
-export function isMathFunction(char: string) {
+export function isMathFunction(query: string, offset: number) {
+  const queryTrimmed = query.substring(0, offset).trimEnd();
+  // try to get the full operation token (e.g. "+", "in", "like", etc...) but it requires the token
+  // to be spaced out from a field/function (e.g. "field + ") so it is subject to issues
+  const [opString] = queryTrimmed.split(' ').reverse();
   // compare last char for all math functions
   // limit only to 2 chars operators
-  return builtinFunctions
-    .filter(({ name }) => name.length < 3)
-    .map(({ name }) => name[name.length - 1])
-    .some((op) => char === op);
+  const fns = builtinFunctions.filter(({ name }) => name.length < 3).map(({ name }) => name);
+  const tokenMatch = fns.some((op) => opString === op);
+  // there's a match, that's good
+  if (tokenMatch) {
+    return true;
+  }
+  // either there's no match or it is the case where field/function and op are not spaced out
+  // e.g "field+" or "fn()+"
+  // so try to extract the last char and compare it with the single char math functions
+  const singleCharFns = fns.filter((name) => name.length === 1);
+  return singleCharFns.some((c) => c === opString[opString.length - 1]);
 }
 
 export function isComma(char: string) {
@@ -208,10 +217,6 @@ export function getCommandOption(optionName: CommandOptionsDefinition['name']) {
   );
 }
 
-export function getCommandMode(settingName: CommandModeDefinition['name']) {
-  return [ccqMode].find(({ name }) => name === settingName);
-}
-
 function compareLiteralType(argTypes: string, item: ESQLLiteral) {
   if (item.literalType !== 'string') {
     return argTypes === item.literalType;
@@ -293,10 +298,7 @@ export function getAllArrayValues(arg: ESQLAstItem) {
       if (subArg.type === 'literal') {
         values.push(String(subArg.value));
       }
-      if (subArg.type === 'column') {
-        values.push(subArg.name);
-      }
-      if (subArg.type === 'timeInterval') {
+      if (isColumnItem(subArg) || isTimeIntervalItem(subArg)) {
         values.push(subArg.name);
       }
       if (subArg.type === 'function') {
@@ -359,11 +361,6 @@ export function isEqualType(
   if (item.type === 'literal') {
     return compareLiteralType(argType, item);
   }
-  if (item.type === 'list') {
-    const listType = `${item.values[0].literalType}[]`;
-    // argType = 'list' means any list value is ok
-    return argType === item.type || argType === listType;
-  }
   if (item.type === 'function') {
     if (isSupportedFunction(item.name, parentCommand).supported) {
       const fnDef = buildFunctionLookup().get(item.name)!;
@@ -385,32 +382,6 @@ export function isEqualType(
     const wrappedTypes = Array.isArray(hit.type) ? hit.type : [hit.type];
     return wrappedTypes.some((ct) => argType === ct);
   }
-  if (item.type === 'source') {
-    return item.sourceType === argType;
-  }
-}
-
-export function endsWithOpenBracket(text: string) {
-  return /\($/.test(text);
-}
-
-export function isDateFunction(fnName: string) {
-  // TODO: improve this and rely in signature in the future
-  return ['to_datetime', 'date_trunc', 'date_parse'].includes(fnName.toLowerCase());
-}
-
-export function getDateMathOperation() {
-  return builtinFunctions.filter(({ name }) => ['+', '-'].includes(name));
-}
-
-export function getDurationItemsWithQuantifier(quantifier: number = 1) {
-  return timeLiterals
-    .filter(({ name }) => !/s$/.test(name))
-    .map(({ name, ...rest }) => ({
-      label: `${quantifier} ${name}`,
-      insertText: `${quantifier} ${name}`,
-      ...rest,
-    }));
 }
 
 function fuzzySearch(fuzzyName: string, resources: IterableIterator<string>) {

@@ -8,14 +8,15 @@
 import { Observable } from 'rxjs';
 import { PassThrough } from 'stream';
 import {
+  BufferFlushEvent,
   ChatCompletionErrorEvent,
   isChatCompletionError,
-  StreamingChatResponseEvent,
   StreamingChatResponseEventType,
+  StreamingChatResponseEventWithoutError,
 } from '../../../common/conversation_complete';
 
 export function observableIntoStream(
-  source: Observable<Exclude<StreamingChatResponseEvent, ChatCompletionErrorEvent>>
+  source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent>
 ) {
   const stream = new PassThrough();
 
@@ -29,6 +30,7 @@ export function observableIntoStream(
           message: error.message,
           stack: error.stack,
           code: isChatCompletionError(error) ? error.code : undefined,
+          meta: error.meta,
         },
         type: StreamingChatResponseEventType.ChatCompletionError,
       };

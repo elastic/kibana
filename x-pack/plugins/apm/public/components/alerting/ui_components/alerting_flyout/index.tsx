@@ -8,6 +8,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
 import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../../plugin';
@@ -35,7 +36,7 @@ export function AlertingFlyout(props: Props) {
   const { start, end } = useTimeRange({ rangeFrom, rangeTo, optional: true });
 
   const environment =
-    'environment' in query ? query.environment : ENVIRONMENT_ALL.value;
+    'environment' in query ? query.environment! : ENVIRONMENT_ALL.value;
   const transactionType =
     'transactionType' in query ? query.transactionType : undefined;
   const transactionName =
@@ -53,7 +54,10 @@ export function AlertingFlyout(props: Props) {
   const addAlertFlyout = useMemo(
     () =>
       ruleType &&
-      services.triggersActionsUi.getAddRuleFlyout({
+      services.triggersActionsUi.getAddRuleFlyout<
+        RuleTypeParams,
+        AlertMetadata
+      >({
         consumer: APM_SERVER_FEATURE_ID,
         onClose: onCloseAddFlyout,
         ruleTypeId: ruleType,
@@ -67,7 +71,7 @@ export function AlertingFlyout(props: Props) {
           errorGroupingKey,
           start,
           end,
-        } as AlertMetadata,
+        },
         useRuleProducer: true,
       }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */

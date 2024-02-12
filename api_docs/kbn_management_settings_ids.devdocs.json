@@ -1314,6 +1314,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID",
+        "type": "string",
+        "tags": [],
+        "label": "OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_CUSTOM_DASHBOARDS_ID",
+        "description": [],
+        "signature": [
+          "\"observability:enableInfrastructureHostsCustomDashboards\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.OBSERVABILITY_ENABLE_INFRASTRUCTURE_HOSTS_VIEW_ID",
         "type": "string",
         "tags": [],
