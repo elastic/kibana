@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { omit } from 'lodash';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
@@ -227,7 +226,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
@@ -235,7 +233,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `99th percentile of system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`

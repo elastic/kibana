@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import moment from 'moment';
 import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
 import {
   Aggregators,
@@ -247,7 +246,6 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('should set correct action variables', async () => {
-        const rangeFrom = moment(startedAt).subtract('5', 'minute').toISOString();
         const resp = await waitForDocumentInIndex<ActionDocument>({
           esClient,
           indexName: ALERT_ACTION_INDEX,
@@ -255,7 +253,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source?.ruleType).eql('observability.rules.custom_threshold');
         expect(resp.hits.hits[0]._source?.alertDetailsUrl).eql(
-          `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
+          `https://localhost:5601/app/observability/alerts/${alertId}`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
           `Rate of system.network.in.bytes is 0.3 B/s, above or equal the threshold of 0.2 B/s. (duration: 1 min, data view: kbn-data-forge-fake_hosts.fake_hosts-*, group: host-0,container-0)`
