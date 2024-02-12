@@ -178,6 +178,12 @@ export const allowedExperimentalValues = Object.freeze({
    * Enables experimental "Updates" tab in the prebuilt rule upgrade flyout.
    * This tab shows the JSON diff between the installed prebuilt rule
    * version and the latest available version.
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/169160
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Dec 06, 2023 in https://github.com/elastic/kibana/pull/172535
+   * Turned: on Dec 20, 2023 in https://github.com/elastic/kibana/pull/173368
+   * Expires: on Feb 20, 2024
    */
   jsonPrebuiltRulesDiffingEnabled: true,
   /*
@@ -185,6 +191,15 @@ export const allowedExperimentalValues = Object.freeze({
    *
    */
   timelineEsqlTabDisabled: false,
+
+  /**
+   * Enables per-field rule diffs tab in the prebuilt rule upgrade flyout
+   *
+   * Ticket: https://github.com/elastic/kibana/issues/166489
+   * Owners: https://github.com/orgs/elastic/teams/security-detection-rule-management
+   * Added: on Feb 12, 2023 in https://github.com/elastic/kibana/pull/174564
+   */
+  perFieldPrebuiltRulesDiffingEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

@@ -31,6 +31,13 @@ export interface GradientColor {
 }
 
 /**
+ * An index specified categorical color, coming from paletteId
+ */
+export interface LoopColor {
+  type: 'loop';
+}
+
+/**
  * A special rule that match automatically, in order, all the categories that are not matching a specified rule
  */
 export interface RuleAuto {
@@ -134,14 +141,13 @@ export interface GradientColorMode {
 export interface Config {
   paletteId: string;
   colorMode: CategoricalColorMode | GradientColorMode;
-  assignmentMode: 'auto' | 'manual';
   assignments: Array<
     Assignment<
       RuleAuto | RuleMatchExactly | RuleMatchExactlyCI | RuleRange | RuleRegExp,
       CategoricalColor | ColorCode | GradientColor
     >
   >;
-  specialAssignments: Array<Assignment<RuleOthers, CategoricalColor | ColorCode>>;
+  specialAssignments: Array<Assignment<RuleOthers, CategoricalColor | ColorCode | LoopColor>>;
 }
 
 export interface CategoricalPalette {
@@ -149,5 +155,5 @@ export interface CategoricalPalette {
   name: string;
   type: 'categorical';
   colorCount: number;
-  getColor: (valueInRange: number, isDarkMode: boolean) => string;
+  getColor: (valueInRange: number, isDarkMode: boolean, loop: boolean) => string;
 }
