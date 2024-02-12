@@ -206,41 +206,21 @@ export class AuthenticationService {
         canRedirectRequest(request) &&
         (request.route.options.tags.includes(ROUTE_TAG_AUTH_FLOW) || preResponse.statusCode === 401)
       ) {
-        console.log({ isLoginFormAvailable, isLoginSelectorEnabled, isLoginPageAvailable });
-        const needsToLogout = (await this.session?.getSID(request)) !== undefined;
-        if (needsToLogout) {
-          this.logger.warn(
-            'Could not authenticate user with the existing session. Forcing logout.'
-          );
-        }
-        if (isLoginPageAvailable) {
+        if (!isLoginPageAvailable) {
+          const customBrandingValue = await customBranding.getBrandingFor(request, {
+            unauthenticated: true,
+          });
+
           return toolkit.render({
-            body: '<div/>',
-            headers: {
-              'Content-Security-Policy': http.csp.header,
-              Refresh: `0;url=${http.basePath.prepend(
-                `${
-                  needsToLogout ? '/logout' : '/login'
-                }?msg=UNAUTHENTICATED&${NEXT_URL_QUERY_STRING_PARAMETER}=${encodeURIComponent(
-                  originalURL
-                )}`
-              )}`,
-            },
+            body: renderUnauthenticatedPage({
+              staticAssets: http.staticAssets,
+              basePath: http.basePath,
+              originalURL,
+              customBranding: customBrandingValue,
+            }),
+            headers: { 'Content-Security-Policy': http.csp.header },
           });
         }
-        const customBrandingValue = await customBranding.getBrandingFor(request, {
-          unauthenticated: true,
-        });
-
-        return toolkit.render({
-          body: renderUnauthenticatedPage({
-            staticAssets: http.staticAssets,
-            basePath: http.basePath,
-            originalURL,
-            customBranding: customBrandingValue,
-          }),
-          headers: { 'Content-Security-Policy': http.csp.header },
-        });
       }
 
       if (preResponse.statusCode !== 401 || !canRedirectRequest(request)) {
