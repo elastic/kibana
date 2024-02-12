@@ -49,7 +49,7 @@ export class KibanaOverviewPlugin
         const hasKibanaApp = Boolean(
           navLinks.find(
             ({ id, category, visibleIn }) =>
-              visibleIn.includes('kibanaOverview') && category?.id === 'kibana' && id !== PLUGIN_ID
+              visibleIn.length > 0 && category?.id === 'kibana' && id !== PLUGIN_ID
           )
         );
 
