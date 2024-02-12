@@ -7,35 +7,35 @@
 
 import React from 'react';
 import { EuiText, EuiLink } from '@elastic/eui';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
+import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
-export const ServicesTooltipContent = React.memo(() => {
+export const ServicesTooltipContent = () => {
+  const { services } = useKibanaContextForPlugin();
   const linkProps = useLinkProps({
     app: 'home',
     hash: '/tutorial/apm',
   });
-  const onClick = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
-    e.stopPropagation();
-  };
   return (
-    <EuiText size="xs" onClick={onClick}>
-      <p>
-        <FormattedMessage
-          id="xpack.infra.assetDetails.services.tooltip.servicesLabel"
-          defaultMessage="Showing {apmTutorialLink} services detected on this host."
-          values={{
-            apmTutorialLink: (
+    <EuiText size="xs">
+      <FormattedMessage
+        id="xpack.infra.assetDetails.services.tooltip.servicesLabel"
+        defaultMessage="Showing {apmTutorialLink} services detected on this host."
+        values={{
+          apmTutorialLink: (
+            <RedirectAppLinks coreStart={services} style={{ display: 'inline-block' }}>
               <EuiLink data-test-subj="assetDetailsTooltipApmTutorialLink" href={linkProps.href}>
                 <FormattedMessage
                   id="xpack.infra.assetDetails.table.services.tooltip.tutorialLink"
                   defaultMessage="APM-instrumented"
                 />
               </EuiLink>
-            ),
-          }}
-        />
-      </p>
+            </RedirectAppLinks>
+          ),
+        }}
+      />
     </EuiText>
   );
-});
+};
