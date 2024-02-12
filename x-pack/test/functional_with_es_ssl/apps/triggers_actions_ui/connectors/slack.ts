@@ -148,7 +148,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ruleName = await setupRule();
 
         await selectSlackConnectorInRuleAction({
-          connectorId: webConnectorId,
+          connectorId: webhookConnectorId,
         });
         await testSubjects.click('saveRuleButton');
         await pageObjects.triggersActionsUI.searchAlerts(ruleName);

@@ -22,6 +22,10 @@ export async function deleteAllConnectors(
   const connectors = await getAllConnectors(supertest, { spaceId });
 
   for (const connector of connectors) {
+    if (connector.isPreconfigured) {
+      continue;
+    }
+
     await deleteConnector(supertest, connector.id, { spaceId }).expect(204, '');
   }
 }

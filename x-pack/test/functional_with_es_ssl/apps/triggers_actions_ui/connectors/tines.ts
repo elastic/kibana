@@ -82,8 +82,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('should edit the connector', async () => {
         const connectorName = generateUniqueKey();
         const updatedConnectorName = `${connectorName}updated`;
-        const createdAction = await createTinesConnector(connectorName);
-        objectRemover.add(createdAction.id, 'action', 'actions');
+        const createdConnectorId = await createTinesConnector(connectorName);
+        objectRemover.add(createdConnectorId, 'action', 'actions');
         browser.refresh();
 
         await pageObjects.triggersActionsUI.searchConnectors(connectorName);
