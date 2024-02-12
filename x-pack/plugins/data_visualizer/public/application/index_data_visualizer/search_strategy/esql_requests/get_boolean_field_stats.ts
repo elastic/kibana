@@ -69,6 +69,8 @@ export const getESQLBooleanFieldStats = async ({
           let falseCount = 0;
           let trueCount = 0;
           const terms = results.map((row) => {
+            // @TODO: remove
+            console.log(`--@@row`, row);
             if (row[1] === false) {
               falseCount = row[0];
             }
@@ -76,7 +78,7 @@ export const getESQLBooleanFieldStats = async ({
               trueCount = row[0];
             }
             return {
-              key_as_string: row[1]?.toString(),
+              key_as_string: row[1] === false ? 'false' : 'true',
               doc_count: row[0],
               percent: row[0] / topValuesSampleSize,
             };
