@@ -27,6 +27,22 @@ export type ListFilterControl = {
 
 export const LOGS_EXPLORER_LOCATOR_ID = 'LOGS_EXPLORER_LOCATOR';
 
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type DocumentFieldGridColumnOptions = {
+  type: 'document-field';
+  field: string;
+  width?: number;
+};
+
+// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
+export type SmartFieldGridColumnOptions = {
+  type: 'smart-field';
+  smartField: 'content' | 'resource';
+  width?: number;
+};
+
+export type GridColumnDisplayOptions = DocumentFieldGridColumnOptions | SmartFieldGridColumnOptions;
+
 export interface LogsExplorerNavigationParams extends SerializableRecord {
   /**
    * Optionally set the time range in the time picker.
@@ -43,7 +59,7 @@ export interface LogsExplorerNavigationParams extends SerializableRecord {
   /**
    * Columns displayed in the table
    */
-  columns?: string[];
+  columns?: GridColumnDisplayOptions[];
   /**
    * Optionally apply free-form filters.
    */
