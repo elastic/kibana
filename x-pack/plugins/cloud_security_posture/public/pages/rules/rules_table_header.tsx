@@ -20,11 +20,11 @@ import {
   EuiFilterButton,
 } from '@elastic/eui';
 import useDebounce from 'react-use/lib/useDebounce';
-import { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTagsFromArrayOfRules } from '../../../common/utils/detection_rules';
 import { RuleStateAttributesWithoutStates, useChangeCspRuleState } from './change_csp_rule_state';
 import { CspBenchmarkRulesWithStates } from './rules_container';
@@ -58,7 +58,6 @@ interface RulesTableToolbarProps {
   enabledDisabledItemsFilterState: string;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-  notifications: NotificationsStart;
 }
 
 interface RuleTableCount {
@@ -68,7 +67,6 @@ interface RuleTableCount {
   refetchRulesStates: () => void;
   setSelectAllRules: () => void;
   setSelectedRules: (rules: CspBenchmarkRulesWithStates[]) => void;
-  notifications: NotificationsStart;
 }
 
 export const RulesTableHeader = ({
@@ -87,7 +85,6 @@ export const RulesTableHeader = ({
   enabledDisabledItemsFilterState,
   setSelectAllRules,
   setSelectedRules,
-  notifications,
 }: RulesTableToolbarProps) => {
   const [selectedSection, setSelectedSection] = useState<string[]>([]);
   const [selectedRuleNumber, setSelectedRuleNumber] = useState<string[]>([]);
@@ -123,7 +120,6 @@ export const RulesTableHeader = ({
           refetchRulesStates={refetchRulesStates}
           setSelectAllRules={setSelectAllRules}
           setSelectedRules={setSelectedRules}
-          notifications={notifications}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
@@ -221,7 +217,6 @@ const SearchField = ({
   refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
-  notifications,
 }: Pick<
   RulesTableToolbarProps,
   | 'isSearching'
@@ -233,7 +228,6 @@ const SearchField = ({
   | 'refetchRulesStates'
   | 'setSelectAllRules'
   | 'setSelectedRules'
-  | 'notifications'
 >) => {
   const [localValue, setLocalValue] = useState(searchValue);
 
@@ -260,7 +254,6 @@ const SearchField = ({
         refetchRulesStates={refetchRulesStates}
         setSelectAllRules={setSelectAllRules}
         setSelectedRules={setSelectedRules}
-        notifications={notifications}
       />
     </div>
   );
@@ -273,7 +266,6 @@ const CurrentPageOfTotal = ({
   refetchRulesStates,
   setSelectAllRules,
   setSelectedRules,
-  notifications,
 }: RuleTableCount) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const onPopoverClick = () => {
@@ -284,6 +276,8 @@ const CurrentPageOfTotal = ({
     getFindingsDetectionRuleSearchTagsFromArrayOfRules(selectedRules.map((rule) => rule.metadata)),
     { match: 'any' }
   );
+
+  const { notifications } = useKibana().services;
 
   const postRequestChangeRulesState = useChangeCspRuleState();
   const changeRulesState = async (state: 'mute' | 'unmute') => {

@@ -22,7 +22,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { NotificationsStart } from '@kbn/core/public';
+import { useKibana } from '../../common/hooks/use_kibana';
 import { getFindingsDetectionRuleSearchTags } from '../../../common/utils/detection_rules';
 import { CspBenchmarkRuleMetadata } from '../../../common/types/latest';
 import { getRuleList } from '../configurations/findings_flyout/rule_tab';
@@ -42,7 +42,6 @@ interface RuleFlyoutProps {
   onClose(): void;
   rule: CspBenchmarkRulesWithStates;
   refetchRulesStates: () => void;
-  notifications: NotificationsStart;
 }
 
 const tabs = [
@@ -64,18 +63,14 @@ const tabs = [
 
 type RuleTab = typeof tabs[number]['id'];
 
-export const RuleFlyout = ({
-  onClose,
-  rule,
-  refetchRulesStates,
-  notifications,
-}: RuleFlyoutProps) => {
+export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProps) => {
   const [tab, setTab] = useState<RuleTab>('overview');
   const postRequestChangeRulesStates = useChangeCspRuleState();
   const { data: rulesData } = useFetchDetectionRulesByTags(
     getFindingsDetectionRuleSearchTags(rule.metadata)
   );
   const isRuleMuted = rule?.state === 'muted';
+  const { notifications } = useKibana().services;
   const switchRuleStates = async () => {
     if (rule.metadata.benchmark.rule_number) {
       const rulesObjectRequest = {

@@ -39,7 +39,7 @@ export const useFetchDetectionRulesByTags = (
   option: { match: 'all' | 'any' } = { match: 'all' }
 ) => {
   const { http } = useKibana<CoreStart>().services;
-  return useQuery([DETECTION_ENGINE_RULES_KEY, tags], () =>
+  return useQuery([DETECTION_ENGINE_RULES_KEY, tags, option], () =>
     fetchDetectionRulesByTags(tags, option, http)
   );
 };
