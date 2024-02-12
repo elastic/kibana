@@ -6,6 +6,7 @@
  */
 import { EuiEmptyPrompt, EuiFlexItem, EuiLoadingSpinner, EuiTablePagination } from '@elastic/eui';
 import React from 'react';
+import { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { useFetchSloGroups } from '../../../../hooks/slo/use_fetch_slo_groups';
 import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import type { SortDirection } from '../slo_list_search_bar';
@@ -70,6 +71,7 @@ export function GroupView({ kqlQuery, sloView, sort, direction, groupBy }: Props
             sort={sort}
             direction={direction}
             summary={result.summary}
+            savedQuery={result.savedQuery as SavedQueryAttributes}
             filters={filters}
           />
         ))}

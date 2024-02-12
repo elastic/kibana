@@ -21,10 +21,11 @@ import {
 } from '@elastic/eui';
 import { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import React, { memo, useState } from 'react';
+import React, { memo, useMemo, useState } from 'react';
 import { GroupSummary } from '@kbn/slo-schema';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
+import { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/slo/use_fetch_slo_list';
 import { SLI_OPTIONS } from '../../../slo_edit/constants';
@@ -42,6 +43,7 @@ interface Props {
   groupBy: string;
   summary: GroupSummary;
   filters: Filter[];
+  savedQuery?: SavedQueryAttributes;
 }
 
 export function GroupListView({
@@ -53,8 +55,8 @@ export function GroupListView({
   groupBy,
   summary,
   filters,
+  savedQuery,
 }: Props) {
-  const query = kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
   let groupName = group.toLowerCase();
   if (groupBy === 'slo.indicator.type') {
     groupName = SLI_OPTIONS.find((option) => option.value === group)?.text ?? group;
@@ -72,6 +74,13 @@ export function GroupListView({
     http: { basePath },
   } = useKibana<CoreStart>().services;
 
+  const allFilters = useMemo(() => {
+    if (savedQuery?.filters && savedQuery?.filters.length > 0) {
+      return [...filters, ...savedQuery.filters];
+    }
+    return filters;
+  }, [filters, savedQuery]);
+
   const [itemsPerPage, setItemsPerPage] = useState(10);
   const {
     isLoading,
@@ -79,12 +88,17 @@ export function GroupListView({
     isError,
     data: sloList,
   } = useFetchSloList({
-    kqlQuery: query,
+    kqlQuery: mixKql({
+      groupBy,
+      group,
+      kqlQuery,
+      savedQuery,
+    }),
     sortBy: sort,
     sortDirection: direction,
     perPage: itemsPerPage,
     page: page + 1,
-    filters,
+    filters: allFilters,
     disabled: !isAccordionOpen,
   });
   const { results = [], total = 0 } = sloList ?? {};
@@ -220,5 +234,28 @@ export function GroupListView({
     </>
   );
 }
+
+const mixKql = ({
+  kqlQuery,
+  group,
+  groupBy,
+  savedQuery,
+}: {
+  kqlQuery: string;
+  group: string;
+  groupBy: string;
+  savedQuery?: SavedQueryAttributes;
+}) => {
+  if (groupBy === 'savedQueries') {
+    if (!String(savedQuery?.query.query)) {
+      return kqlQuery;
+    }
+    return kqlQuery
+      ? `${String(savedQuery?.query.query)} and ${kqlQuery}`
+      : `${String(savedQuery?.query.query)}`;
+  }
+
+  return kqlQuery ? `"${groupBy}": (${group}) and ${kqlQuery}` : `"${groupBy}": ${group}`;
+};
 
 const MemoEuiAccordion = memo(EuiAccordion);

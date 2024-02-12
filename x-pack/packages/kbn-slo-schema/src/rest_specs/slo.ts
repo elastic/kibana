@@ -107,6 +107,7 @@ const groupBySchema = t.union([
   t.literal('slo.tags'),
   t.literal('status'),
   t.literal('slo.indicator.type'),
+  t.literal('savedQueries'),
 ]);
 
 const findSLOGroupsParamsSchema = t.partial({
@@ -147,11 +148,16 @@ const sloWithSummaryResponseSchema = t.intersection([
   t.type({ summary: summarySchema }),
 ]);
 
-const sloGroupWithSummaryResponseSchema = t.type({
-  group: t.string,
-  groupBy: t.string,
-  summary: groupSummarySchema,
-});
+const sloGroupWithSummaryResponseSchema = t.intersection([
+  t.type({
+    group: t.string,
+    groupBy: t.string,
+    summary: groupSummarySchema,
+  }),
+  t.partial({
+    savedQuery: t.unknown,
+  }),
+]);
 
 const getSLOQuerySchema = t.partial({
   query: t.partial({

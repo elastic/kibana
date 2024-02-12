@@ -53,6 +53,7 @@ import {
   calcAutoIntervalLessThan,
 } from '../common';
 import { configDeprecationProvider } from './config_deprecations';
+export type { SavedQueryRouteHandlerContext } from './query/route_handler_context';
 
 export type {
   ParsedInterval,

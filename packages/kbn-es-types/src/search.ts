@@ -597,7 +597,7 @@ export type AggregateOfMap<TAggregationMap extends AggregationMap | undefined, T
     : never; // using never means we effectively ignore optional keys, using {} creates a union type of { ... } | {}
 };
 
-type SubAggregateOf<TAggregationRequest, TDocument = unknown> = TAggregationRequest extends {
+export type SubAggregateOf<TAggregationRequest, TDocument = unknown> = TAggregationRequest extends {
   aggs?: AggregationMap;
 }
   ? AggregateOfMap<TAggregationRequest['aggs'], TDocument>
