@@ -79,10 +79,10 @@ export class ToastsService extends FtrService {
 
   public async getTitleAndDismiss(): Promise<string> {
     const toast = await this.find.byCssSelector('.euiToast', 6 * this.defaultFindTimeout);
-    const element = await toast.findByTestSubject('euiToastHeader__title');
-    const title = await element.getVisibleText();
     await toast.moveMouseTo();
-    await this.dismiss();
+    const title = await (await this.testSubjects.find('euiToastHeader__title')).getVisibleText();
+
+    await this.testSubjects.click('toastCloseButton');
     return title;
   }
 
