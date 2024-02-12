@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   TECHNICAL_PREVIEW,
   TECHNICAL_PREVIEW_DESCRIPTION,
@@ -24,7 +25,9 @@ import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_a
 export const PanelHeader: FC = () => {
   const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
   const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
-
+  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
+    'responseActionsSentinelOneV1Enabled'
+  );
   const title = (
     <EuiFlexGroup responsive gutterSize="s">
       <EuiFlexItem grow={false}>
@@ -40,7 +43,7 @@ export const PanelHeader: FC = () => {
           />
         )}
       </EuiFlexItem>
-      {isSentinelOneAlert && (
+      {isSentinelOneV1Enabled && isSentinelOneAlert && (
         <EuiFlexItem grow={false}>
           <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_DESCRIPTION} />
         </EuiFlexItem>
