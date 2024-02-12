@@ -37,12 +37,12 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
 
       // Login into accounts so that they got activated and visible in user profiles list
-      loadPageAs(ROLES.t1_analyst);
-      loadPageAs(ROLES.t2_analyst);
-      loadPageAs(ROLES.t3_analyst);
-      loadPageAs(ROLES.soc_manager);
-      loadPageAs(ROLES.detections_admin);
-      loadPageAs(ROLES.platform_engineer);
+      loadPageAs(ALERTS_URL, ROLES.t1_analyst);
+      loadPageAs(ALERTS_URL, ROLES.t2_analyst);
+      loadPageAs(ALERTS_URL, ROLES.t3_analyst);
+      loadPageAs(ALERTS_URL, ROLES.soc_manager);
+      loadPageAs(ALERTS_URL, ROLES.detections_admin);
+      loadPageAs(ALERTS_URL, ROLES.platform_engineer);
     });
 
     after(() => {
