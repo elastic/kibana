@@ -36,6 +36,7 @@ export async function getVersionInfo({ isRelease, versionQualifier, pkg }: Optio
 
   return {
     buildSha,
+    buildShaShort: buildSha.slice(0, 12),
     buildVersion,
     buildNumber: await getBuildNumber(),
     buildDate: new Date().toISOString(),

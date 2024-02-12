@@ -199,10 +199,6 @@ export function ConversationView() {
               showLinkToConversationsApp={false}
               startedFrom="conversationView"
               onConversationUpdate={handleConversationUpdate}
-              chatFlyoutSecondSlotHandler={{
-                container: secondSlotContainer,
-                setVisibility: setIsSecondSlotVisible,
-              }}
             />
 
             <div className={sidebarContainerClass}>
