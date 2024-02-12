@@ -137,13 +137,13 @@ export const RuleFlyout = ({ onClose, rule, refetchRulesStates }: RuleFlyoutProp
               <TakeAction
                 enableBenchmarkRuleFn={switchRuleStates}
                 createRuleFn={createMisconfigurationRuleFn}
-                isRuleMuted={true}
+                isCreateDetectionRuleDisabled={true}
               />
             ) : (
               <TakeAction
                 disableBenchmarkRuleFn={switchRuleStates}
                 createRuleFn={createMisconfigurationRuleFn}
-                isRuleMuted={false}
+                isCreateDetectionRuleDisabled={false}
               />
             )}
           </EuiFlexItem>
