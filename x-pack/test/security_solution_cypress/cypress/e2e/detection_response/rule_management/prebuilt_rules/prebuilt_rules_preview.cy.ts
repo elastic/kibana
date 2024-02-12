@@ -49,12 +49,14 @@ import {
   assertMachineLearningPropertiesShown,
   assertNewTermsFieldsPropertyShown,
   assertSavedQueryPropertiesShown,
+  assertSelectedPreviewTab,
   assertThreatMatchQueryPropertiesShown,
   assertThresholdPropertyShown,
   assertWindowSizePropertyShown,
   closeRulePreview,
   openRuleInstallPreview,
   openRuleUpdatePreview,
+  selectPreviewTab,
 } from '../../../../tasks/prebuilt_rules_preview';
 import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 import {
@@ -842,6 +844,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'].name);
+          assertSelectedPreviewTab('JSON view');
+          selectPreviewTab('Overview');
 
           const { index } = UPDATED_CUSTOM_QUERY_INDEX_PATTERN_RULE['security-rule'] as {
             index: string[];
@@ -868,6 +872,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           closeRulePreview();
 
           openRuleUpdatePreview(UPDATED_SAVED_QUERY_DATA_VIEW_RULE['security-rule'].name);
+          assertSelectedPreviewTab('JSON view');
+          selectPreviewTab('Overview');
 
           const { data_view_id: dataViewId } = UPDATED_SAVED_QUERY_DATA_VIEW_RULE[
             'security-rule'
@@ -889,6 +895,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_MACHINE_LEARNING_RULE['security-rule'].name);
+          selectPreviewTab('Overview');
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -910,6 +917,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'].name);
+          selectPreviewTab('Overview');
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -940,6 +948,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_EQL_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab('Overview');
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -956,6 +965,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_THREAT_MATCH_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab('Overview');
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -999,6 +1009,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
           clickRuleUpdatesTab();
 
           openRuleUpdatePreview(UPDATED_NEW_TERMS_INDEX_PATTERN_RULE['security-rule'].name);
+          selectPreviewTab('Overview');
 
           assertCommonPropertiesShown(commonProperties);
 
@@ -1040,6 +1051,7 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
             clickRuleUpdatesTab();
 
             openRuleUpdatePreview(UPDATED_ESQL_RULE['security-rule'].name);
+            selectPreviewTab('Overview');
 
             assertCommonPropertiesShown(commonProperties);
 
