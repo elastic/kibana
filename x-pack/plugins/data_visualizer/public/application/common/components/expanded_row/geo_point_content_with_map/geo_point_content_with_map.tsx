@@ -22,8 +22,7 @@ export const GeoPointContentWithMap: FC<{
   dataView: DataView | undefined;
   combinedQuery?: CombinedQuery;
   esql?: string;
-  timeFieldName?: string;
-}> = ({ config, dataView, combinedQuery, esql, timeFieldName }) => {
+}> = ({ config, dataView, combinedQuery, esql }) => {
   const { stats } = config;
   const [layerList, setLayerList] = useState<LayerDescriptor[]>([]);
   const {
@@ -98,7 +97,7 @@ export const GeoPointContentWithMap: FC<{
     }
     updateIndexPatternSearchLayer();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataView, combinedQuery, esql, config, mapsPlugin, data.query, timeFieldName]);
+  }, [dataView, combinedQuery, esql, config, mapsPlugin, data.query]);
 
   if (stats?.examples === undefined) return null;
   return (

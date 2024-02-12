@@ -33,7 +33,6 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   esql,
   totalDocuments,
   typeAccessor = 'type',
-  timeFieldName,
 }: {
   item: FieldVisConfig;
   dataView: DataView | undefined;
@@ -41,7 +40,6 @@ export const IndexBasedDataVisualizerExpandedRow = ({
   esql?: string;
   totalDocuments?: number;
   typeAccessor?: 'type' | 'secondaryType';
-  timeFieldName?: string;
   /**
    * Callback to add a filter to filter bar
    */
@@ -79,7 +77,6 @@ export const IndexBasedDataVisualizerExpandedRow = ({
             dataView={dataView}
             combinedQuery={combinedQuery}
             esql={esql}
-            timeFieldName={timeFieldName}
           />
         );
 
