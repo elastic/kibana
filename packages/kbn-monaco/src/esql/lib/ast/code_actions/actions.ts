@@ -7,21 +7,21 @@
  */
 import { i18n } from '@kbn/i18n';
 import levenshtein from 'js-levenshtein';
-import type { monaco } from '../../../../monaco_imports';
 import {
+  buildQueryForFieldsFromSource,
   getFieldsByTypeHelper,
   getPolicyHelper,
   getSourcesHelper,
-} from '../shared/resources_helpers';
-import {
   getAllFunctions,
   getCommandDefinition,
   isSourceItem,
   shouldBeQuotedText,
-} from '../shared/helpers';
-import { ESQLCallbacks } from '../shared/types';
-import { AstProviderFn, ESQLAst, ESQLCommand } from '../types';
-import { buildQueryForFieldsFromSource } from '../validation/helpers';
+  type ESQLCallbacks,
+  type AstProviderFn,
+  type ESQLAst,
+  type ESQLCommand,
+} from '@kbn/esql';
+import type { monaco } from '../../../../monaco_imports';
 
 type GetSourceFn = () => Promise<string[]>;
 type GetFieldsByTypeFn = (type: string | string[], ignored?: string[]) => Promise<string[]>;

@@ -112,7 +112,7 @@ export function isComma(char: string) {
   return char === ',';
 }
 
-export function isSourceCommand({ label }: AutocompleteCommandDefinition) {
+export function isSourceCommand({ label }: { label: string }) {
   return ['from', 'row', 'show'].includes(String(label));
 }
 

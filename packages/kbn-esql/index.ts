@@ -56,7 +56,10 @@ export {
   isComma,
   isMathFunction,
   isSourceCommand,
+  shouldBeQuotedText,
+  getAllFunctions,
 } from './src/lib/shared/helpers';
+export { buildQueryForFieldsFromSource } from './src/lib/validation/helpers';
 export { excludeVariablesFromCurrentCommand, collectVariables } from './src/lib/shared/variables';
 export { getAstContext, removeMarkerArgFromArgsList } from './src/lib/shared/context';
 export { getFunctionSignatures, getCommandSignature } from './src/lib/definitions/helpers';
@@ -70,6 +73,7 @@ export type {
   FunctionDefinition,
   CommandDefinition,
   CommandOptionsDefinition,
+  CommandModeDefinition,
 } from './src/lib/definitions/types';
 export type {
   ESQLPolicy,

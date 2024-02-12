@@ -10,12 +10,14 @@ import { i18n } from '@kbn/i18n';
 import {
   chronoLiterals,
   CommandDefinition,
+  CommandModeDefinition,
   CommandOptionsDefinition,
   evalFunctionsDefinitions,
   FunctionDefinition,
   getCommandDefinition,
   getCommandSignature,
   getFunctionSignatures,
+  shouldBeQuotedText,
   statsAggregationFunctionDefinitions,
   timeLiterals,
 } from '@kbn/esql';

@@ -13,6 +13,7 @@ import type { ESQLWorker } from '../../worker/esql_worker';
 import { suggest } from '../ast/autocomplete/autocomplete';
 import { getHoverItem } from '../ast/hover/hover';
 import { getSignatureHelp } from '../ast/signature';
+import { getActions } from '../ast/code_actions/actions';
 
 // from linear offset to Monaco position
 export function offsetToRowColumn(expression: string, offset: number): monaco.Position {
