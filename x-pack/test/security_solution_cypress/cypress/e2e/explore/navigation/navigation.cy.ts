@@ -89,6 +89,7 @@ import {
 } from '../../../screens/kibana_navigation';
 
 // Failing: See https://github.com/elastic/kibana/issues/176757
+// Failing: See https://github.com/elastic/kibana/issues/176759
 describe.skip('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
