@@ -147,26 +147,6 @@ export const getDocumentationSections = async (language: string) => {
     description?: string;
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
-  if (language === 'sql') {
-    const {
-      comparisonOperators,
-      logicalOperators,
-      mathOperators,
-      initialSection,
-      aggregateFunctions,
-    } = await import('./sql_documentation_sections');
-    groups.push({
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.howItWorks', {
-        defaultMessage: 'How it works',
-      }),
-      items: [],
-    });
-    groups.push(comparisonOperators, logicalOperators, mathOperators, aggregateFunctions);
-    return {
-      groups,
-      initialSection,
-    };
-  }
   if (language === 'esql') {
     const {
       sourceCommands,
