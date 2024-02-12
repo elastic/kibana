@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-import expect from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const svlCommonApi = getService('svlCommonApi');
   const supertest = getService('supertest');
 
-  describe('security/authorization', function () {
+  describe('security', function () {
     describe('route access', () => {
-      describe('disabled', () => {
+      describe('roles/privileges/permissions', () => {
         it('get all privileges', async () => {
           const { body, status } = await supertest
             .get('/api/security/privileges')
@@ -33,28 +32,28 @@ export default function ({ getService }: FtrProviderContext) {
           const { body, status } = await supertest
             .put('/api/security/role/test')
             .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          svlCommonApi.assertResponseStatusCode(400, status, body);
         });
 
         it('get role', async () => {
           const { body, status } = await supertest
             .get('/api/security/role/superuser')
             .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          svlCommonApi.assertResponseStatusCode(200, status, body);
         });
 
         it('get all roles', async () => {
           const { body, status } = await supertest
             .get('/api/security/role')
             .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          svlCommonApi.assertResponseStatusCode(200, status, body);
         });
 
         it('delete role', async () => {
           const { body, status } = await supertest
             .delete('/api/security/role/superuser')
             .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          svlCommonApi.assertResponseStatusCode(410, status, body);
         });
 
         it('get shared saved object permissions', async () => {
@@ -62,15 +61,6 @@ export default function ({ getService }: FtrProviderContext) {
             .get('/internal/security/_share_saved_object_permissions')
             .set(svlCommonApi.getInternalRequestHeader());
           svlCommonApi.assertApiNotFound(body, status);
-        });
-      });
-
-      describe('public', () => {
-        it('reset session page', async () => {
-          const { status } = await supertest
-            .get('/internal/security/reset_session_page.js')
-            .set(svlCommonApi.getCommonRequestHeader());
-          expect(status).toBe(200);
         });
       });
     });
