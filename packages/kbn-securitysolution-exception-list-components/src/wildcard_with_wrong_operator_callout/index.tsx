@@ -7,23 +7,17 @@
  */
 
 import React from 'react';
-import type { FC } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { EuiCallOut } from '@elastic/eui';
 
-interface WildCardWithWrongOperatorWarningProps {
-  index?: string;
-}
-export const WildCardWithWrongOperatorCallout: FC<WildCardWithWrongOperatorWarningProps> = ({
-  index,
-}) => {
+export const WildCardWithWrongOperatorCallout = () => {
   return (
     <EuiCallOut
       title={i18n.translate(
         'xpack.lists.exceptions.wildcardWithWrongOperatorWarning.callout.title',
-        { defaultMessage: 'Ineffective entry' }
+        { defaultMessage: 'Please review your entries' }
       )}
       iconType="warning"
       color="warning"
@@ -32,10 +26,9 @@ export const WildCardWithWrongOperatorCallout: FC<WildCardWithWrongOperatorWarni
       <p>
         <FormattedMessage
           id="xpack.lists.exceptions.wildcardWithWrongOperatorWarning.callout.body"
-          defaultMessage="{entry_index} Using a '*' or a '?' at the end of the value and using the 'IS' operator can make the entry ineffective. Change the {operator} to '{matches}' to ensure wildcards run properly."
+          defaultMessage="Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. {operator} to '{matches}' to ensure wildcards run properly."
           values={{
-            entry_index: index ? `[${index}] ` : '',
-            operator: <strong>operator</strong>,
+            operator: <strong>Change the operator</strong>,
             matches: <strong>matches</strong>,
           }}
         />

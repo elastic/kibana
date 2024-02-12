@@ -156,7 +156,7 @@ export const INPUT_ERRORS = {
     ),
   wildcardWithWrongOperatorWarning: (index: number) =>
     i18n.translate('xpack.securitySolution.trustedapps.create.conditionWrongOperatorMsg', {
-      defaultMessage: `[{row}] Using a '*' or a '?' at the end of the value and using the 'IS' operator can make the entry ineffective. Change the operator to 'matches' to ensure wildcards run properly.`,
+      defaultMessage: `[{row}] Using a '*' or a '?' in the value with the 'IS' operator can make the entry ineffective. Change the operator to 'matches' to ensure wildcards run properly.`,
       values: { row: index + 1 },
     }),
 };
