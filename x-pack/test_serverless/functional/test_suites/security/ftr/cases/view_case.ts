@@ -530,14 +530,6 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('update toast exist', async () => {
-          return await testSubjects.exists('toastCloseButton');
-        });
-
-        await testSubjects.click('toastCloseButton');
-
-        await header.waitUntilLoadingHasFinished();
-
         await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
