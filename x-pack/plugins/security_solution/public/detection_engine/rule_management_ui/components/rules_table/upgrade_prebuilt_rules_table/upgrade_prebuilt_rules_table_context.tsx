@@ -296,15 +296,19 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             },
           ]
         : []),
-      {
-        id: 'jsonViewUpdates',
-        name: ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL,
-        content: (
-          <TabContentPadding>
-            <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
-          </TabContentPadding>
-        ),
-      },
+      ...(isJsonPrebuiltRulesDiffingEnabled
+        ? [
+            {
+              id: 'jsonViewUpdates',
+              name: ruleDetailsI18n.JSON_VIEW_UPDATES_TAB_LABEL,
+              content: (
+                <TabContentPadding>
+                  <RuleDiffTab oldRule={activeRule.current_rule} newRule={activeRule.target_rule} />
+                </TabContentPadding>
+              ),
+            },
+          ]
+        : []),
     ];
   }, [
     previewedRule,
