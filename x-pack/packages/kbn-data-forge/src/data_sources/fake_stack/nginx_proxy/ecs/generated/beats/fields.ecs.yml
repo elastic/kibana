@@ -72,6 +72,26 @@
         It can contain what `hostname` returns on Unix systems, the fully qualified
         domain name, or a name specified by the user. The sender decides which value
         to use.'
+  - name: http
+    title: HTTP
+    group: 2
+    description: Fields related to HTTP activity. Use the `url` field set to store
+      the url of the request.
+    type: group
+    default_field: true
+    fields:
+    - name: response.bytes
+      level: extended
+      type: long
+      format: bytes
+      description: Total size in bytes of the response (body and headers).
+      example: 1437
+    - name: response.status_code
+      level: extended
+      type: long
+      format: string
+      description: HTTP response status code.
+      example: 404
   - name: log
     title: Log
     group: 2

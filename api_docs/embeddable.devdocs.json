@@ -722,6 +722,52 @@
           },
           {
             "parentPluginId": "embeddable",
+            "id": "def-public.Container.addNewPanel",
+            "type": "Function",
+            "tags": [],
+            "label": "addNewPanel",
+            "description": [],
+            "signature": [
+              "<ApiType extends unknown = unknown>(panelPackage: ",
+              {
+                "pluginId": "@kbn/presentation-containers",
+                "scope": "common",
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.PanelPackage",
+                "text": "PanelPackage"
+              },
+              ") => Promise<ApiType | undefined>"
+            ],
+            "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "embeddable",
+                "id": "def-public.Container.addNewPanel.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "panelPackage",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/presentation-containers",
+                    "scope": "common",
+                    "docId": "kibKbnPresentationContainersPluginApi",
+                    "section": "def-common.PanelPackage",
+                    "text": "PanelPackage"
+                  }
+                ],
+                "path": "src/plugins/embeddable/public/lib/containers/container.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "embeddable",
             "id": "def-public.Container.replacePanel",
             "type": "Function",
             "tags": [],
@@ -2557,7 +2603,15 @@
                 "section": "def-common.PublishesLastSavedState",
                 "text": "PublishesLastSavedState"
               },
-              " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+              " & { addNewPanel: <ApiType extends unknown = unknown>(panel: ",
+              {
+                "pluginId": "@kbn/presentation-containers",
+                "scope": "common",
+                "docId": "kibKbnPresentationContainersPluginApi",
+                "section": "def-common.PanelPackage",
+                "text": "PanelPackage"
+              },
+              ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>; registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
               {
                 "pluginId": "@kbn/presentation-containers",
                 "scope": "common",
@@ -8972,6 +9026,54 @@
       },
       {
         "parentPluginId": "embeddable",
+        "id": "def-public.registerSavedObjectToPanelMethod",
+        "type": "Function",
+        "tags": [],
+        "label": "registerSavedObjectToPanelMethod",
+        "description": [],
+        "signature": [
+          "<TSavedObjectAttributes, TByValueAttributes>(savedObjectType: string, method: SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>) => void"
+        ],
+        "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.registerSavedObjectToPanelMethod.$1",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectType",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "embeddable",
+            "id": "def-public.registerSavedObjectToPanelMethod.$2",
+            "type": "Function",
+            "tags": [],
+            "label": "method",
+            "description": [],
+            "signature": [
+              "SavedObjectToPanelMethod<TSavedObjectAttributes, TByValueAttributes>"
+            ],
+            "path": "src/plugins/embeddable/public/registry/saved_object_to_panel_methods.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "embeddable",
         "id": "def-public.runEmbeddableFactoryMigrations",
         "type": "Function",
         "tags": [],
@@ -13404,7 +13506,15 @@
             "section": "def-common.PublishesLastSavedState",
             "text": "PublishesLastSavedState"
           },
-          " & { registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
+          " & { addNewPanel: <ApiType extends unknown = unknown>(panel: ",
+          {
+            "pluginId": "@kbn/presentation-containers",
+            "scope": "common",
+            "docId": "kibKbnPresentationContainersPluginApi",
+            "section": "def-common.PanelPackage",
+            "text": "PanelPackage"
+          },
+          ", displaySuccessMessage?: boolean | undefined) => Promise<ApiType | undefined>; registerPanelApi: <ApiType extends unknown = unknown>(panelId: string, panelApi: ApiType) => void; removePanel: (panelId: string) => void; canRemovePanels?: (() => boolean) | undefined; replacePanel: (idToRemove: string, newPanel: ",
           {
             "pluginId": "@kbn/presentation-containers",
             "scope": "common",

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { Logger } from '@kbn/core/server';
+import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import { getPackagePolicyIdRuntimeMapping } from '../../../../common/runtime_mappings/get_package_policy_id_mapping';
 import { getIdentifierRuntimeMapping } from '../../../../common/runtime_mappings/get_identifier_runtime_mapping';
@@ -23,6 +23,10 @@ import {
   LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   VULN_MGMT_POLICY_TEMPLATE,
 } from '../../../../common/constants';
+import {
+  getCspBenchmarkRulesStatesHandler,
+  getMutedRulesFilterQuery,
+} from '../../../routes/benchmark_rules/get_states/v1';
 
 export const getPostureAccountsStatsQuery = (index: string): SearchRequest => ({
   index,
@@ -348,23 +352,90 @@ export const getCloudAccountsStats = (
   return cloudAccountsStats;
 };
 
+const getAccountStatsBasedOnEnablesRule = async (
+  esClient: ElasticsearchClient,
+  encryptedSoClient: ISavedObjectsRepository,
+  accountQuery: SearchRequest,
+  logger: Logger
+): Promise<CloudSecurityAccountsStats[]> => {
+  const mutedRulesObject = await getCspBenchmarkRulesStatesHandler(encryptedSoClient);
+  const benchmarksWithMutedRules = [
+    ...new Set(
+      Object.values(mutedRulesObject).map((item) => {
+        if (item.muted === true) return item.benchmark_id;
+      })
+    ),
+  ].filter(Boolean);
+
+  if (benchmarksWithMutedRules.length) {
+    const mutedRulesFilterQuery = await getMutedRulesFilterQuery(encryptedSoClient);
+
+    const enabledRulesQuery = {
+      ...accountQuery,
+      query: {
+        bool: {
+          must_not: mutedRulesFilterQuery,
+          must: {
+            terms: {
+              'rule.benchmark.id': benchmarksWithMutedRules,
+            },
+          },
+        },
+      },
+    };
+
+    const enabledRulesAccountsStatsResponse = await esClient.search<unknown, AccountsStats>(
+      enabledRulesQuery
+    );
+    const cloudAccountsStatsForEnabledRules = enabledRulesAccountsStatsResponse.aggregations
+      ? getCloudAccountsStats(enabledRulesAccountsStatsResponse.aggregations, logger)
+      : [];
+    return cloudAccountsStatsForEnabledRules;
+  }
+  return [];
+};
+
 export const getIndexAccountStats = async (
   esClient: ElasticsearchClient,
+  encryptedSoClient: ISavedObjectsRepository,
   logger: Logger,
   index: string,
   getAccountQuery: (index: string) => SearchRequest
-) => {
-  const accountsStatsResponse = await esClient.search<unknown, AccountsStats>(
-    getAccountQuery(index)
-  );
+): Promise<CloudSecurityAccountsStats[]> => {
+  const accountQuery = getAccountQuery(index);
 
-  return accountsStatsResponse.aggregations
+  const accountsStatsResponse = await esClient.search<unknown, AccountsStats>(accountQuery);
+
+  const cloudAccountsStats = accountsStatsResponse.aggregations
     ? getCloudAccountsStats(accountsStatsResponse.aggregations, logger)
     : [];
+
+  if (index === LATEST_FINDINGS_INDEX_DEFAULT_NS) {
+    const cloudAccountsStatsForEnabledRules = await getAccountStatsBasedOnEnablesRule(
+      esClient,
+      encryptedSoClient,
+      accountQuery,
+      logger
+    );
+
+    cloudAccountsStatsForEnabledRules.forEach((statsEnabledRule) => {
+      const foundStatsIndex = cloudAccountsStats.findIndex(
+        (stats) => stats.account_id === statsEnabledRule.account_id
+      );
+      if (foundStatsIndex !== -1) {
+        // Update the object in cloudAccountsStats based on the object in cloudAccountsStatsForEnabledRules
+        cloudAccountsStats[foundStatsIndex].posture_management_stats_enabled_rules =
+          statsEnabledRule.posture_management_stats;
+        cloudAccountsStats[foundStatsIndex].has_muted_rules = true;
+      }
+    });
+  }
+  return cloudAccountsStats;
 };
 
 export const getAllCloudAccountsStats = async (
   esClient: ElasticsearchClient,
+  encryptedSoClient: ISavedObjectsRepository,
   logger: Logger
 ): Promise<CloudSecurityAccountsStats[]> => {
   try {
@@ -385,6 +456,7 @@ export const getAllCloudAccountsStats = async (
     if (findingIndex.exists) {
       postureIndexAccountStats = await getIndexAccountStats(
         esClient,
+        encryptedSoClient,
         logger,
         findingIndex.name,
         getPostureAccountsStatsQuery
@@ -394,6 +466,7 @@ export const getAllCloudAccountsStats = async (
     if (vulnerabilitiesIndex.exists) {
       vulnerabilityIndexAccountStats = await getIndexAccountStats(
         esClient,
+        encryptedSoClient,
         logger,
         vulnerabilitiesIndex.name,
         getVulnMgmtAccountsStatsQuery

@@ -4179,6 +4179,16 @@
         "tags": [],
         "label": "RuleDefinitionProps",
         "description": [],
+        "signature": [
+          {
+            "pluginId": "triggersActionsUi",
+            "scope": "public",
+            "docId": "kibTriggersActionsUiPluginApi",
+            "section": "def-public.RuleDefinitionProps",
+            "text": "RuleDefinitionProps"
+          },
+          "<Params>"
+        ],
         "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -4199,15 +4209,7 @@
                 "section": "def-common.SanitizedRule",
                 "text": "SanitizedRule"
               },
-              "<",
-              {
-                "pluginId": "alerting",
-                "scope": "common",
-                "docId": "kibAlertingPluginApi",
-                "section": "def-common.RuleTypeParams",
-                "text": "RuleTypeParams"
-              },
-              ">, \"alertTypeId\"> & { ruleTypeId: string; }"
+              "<Params>, \"alertTypeId\"> & { ruleTypeId: string; }"
             ],
             "path": "x-pack/plugins/triggers_actions_ui/public/types.ts",
             "deprecated": false,
@@ -7820,11 +7822,43 @@
           "label": "getAddRuleFlyout",
           "description": [],
           "signature": [
-            "(props: Omit<",
+            "<Params extends ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            " = ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            ", MetaData extends ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeMetaData",
+              "text": "RuleTypeMetaData"
+            },
+            " = ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeMetaData",
+              "text": "RuleTypeMetaData"
+            },
+            ">(props: Omit<",
             "RuleAddProps",
-            "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
             "RuleAddProps",
-            "<Record<string, any>>, string | React.JSXElementConstructor<any>>"
+            "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -7840,7 +7874,7 @@
               "signature": [
                 "Omit<",
                 "RuleAddProps",
-                "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -7858,11 +7892,43 @@
           "label": "getEditRuleFlyout",
           "description": [],
           "signature": [
-            "(props: Omit<",
+            "<Params extends ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            " = ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            ", MetaData extends ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeMetaData",
+              "text": "RuleTypeMetaData"
+            },
+            " = ",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeMetaData",
+              "text": "RuleTypeMetaData"
+            },
+            ">(props: Omit<",
             "RuleEditProps",
-            "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
+            "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">) => React.ReactElement<",
             "RuleEditProps",
-            "<Record<string, any>>, string | React.JSXElementConstructor<any>>"
+            "<Params, MetaData>, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -7878,7 +7944,7 @@
               "signature": [
                 "Omit<",
                 "RuleEditProps",
-                "<Record<string, any>>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
+                "<Params, MetaData>, \"actionTypeRegistry\" | \"ruleTypeRegistry\">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
@@ -8416,7 +8482,15 @@
               "section": "def-public.RuleDefinitionProps",
               "text": "RuleDefinitionProps"
             },
-            ") => React.ReactElement<",
+            "<",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            ">) => React.ReactElement<",
             {
               "pluginId": "triggersActionsUi",
               "scope": "public",
@@ -8424,7 +8498,15 @@
               "section": "def-public.RuleDefinitionProps",
               "text": "RuleDefinitionProps"
             },
-            ", string | React.JSXElementConstructor<any>>"
+            "<",
+            {
+              "pluginId": "alerting",
+              "scope": "common",
+              "docId": "kibAlertingPluginApi",
+              "section": "def-common.RuleTypeParams",
+              "text": "RuleTypeParams"
+            },
+            ">, string | React.JSXElementConstructor<any>>"
           ],
           "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
           "deprecated": false,
@@ -8444,7 +8526,16 @@
                   "docId": "kibTriggersActionsUiPluginApi",
                   "section": "def-public.RuleDefinitionProps",
                   "text": "RuleDefinitionProps"
-                }
+                },
+                "<",
+                {
+                  "pluginId": "alerting",
+                  "scope": "common",
+                  "docId": "kibAlertingPluginApi",
+                  "section": "def-common.RuleTypeParams",
+                  "text": "RuleTypeParams"
+                },
+                ">"
               ],
               "path": "x-pack/plugins/triggers_actions_ui/public/plugin.ts",
               "deprecated": false,
