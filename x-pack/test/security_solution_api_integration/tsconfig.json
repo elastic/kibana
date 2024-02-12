@@ -4,16 +4,7 @@
     "outDir": "target/types",
     "types": ["node", "jest", "@kbn/ambient-ftr-types"]
   },
-  "include": [
-    "**/*",
-    "../../../typings/**/*",
-    "../../../packages/kbn-test/types/ftr_globals/**/*",
-    "../common/utils/connectors/create_connector.ts",
-    "../common/utils/connectors/delete_connector.ts",
-    "../common/utils/connectors/get_connector.ts",
-    "../common/utils/connectors/index.ts",
-    "../common/utils/get_space_prefix.ts"
-  ],
+  "include": ["**/*", "../../../typings/**/*", "../../../packages/kbn-test/types/ftr_globals/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     { "path": "../../test_serverless/tsconfig.json" },
