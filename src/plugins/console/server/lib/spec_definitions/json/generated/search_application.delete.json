@@ -12,7 +12,7 @@
     "patterns": [
       "_application/search_application/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/put-search-application.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/delete-search-application.html",
     "availability": {
       "stack": true,
       "serverless": true
