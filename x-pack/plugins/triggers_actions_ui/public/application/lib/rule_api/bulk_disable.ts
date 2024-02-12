@@ -5,16 +5,18 @@
  * 2.0.
  */
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import { BulkOperationResponse, BulkOperationAttributes } from '../../../types';
+import { BulkOperationResponse, BulkDisableParams } from '../../../types';
 
 export const bulkDisableRules = async ({
   filter,
   ids,
   http,
-}: BulkOperationAttributes): Promise<BulkOperationResponse> => {
+  untrack,
+}: BulkDisableParams): Promise<BulkOperationResponse> => {
   try {
     const body = JSON.stringify({
       ids: ids?.length ? ids : undefined,
+      untrack,
       ...(filter ? { filter: JSON.stringify(filter) } : {}),
     });
 

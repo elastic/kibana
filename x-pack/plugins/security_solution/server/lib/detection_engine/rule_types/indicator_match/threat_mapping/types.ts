@@ -17,6 +17,7 @@ import type {
   LanguageOrUndefined,
   Type,
 } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -34,7 +35,9 @@ import type {
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
+  WrapSuppressedHits,
   OverrideBodyQuery,
+  RunOpts,
 } from '../../types';
 import type { CompleteRule, ThreatRuleParams } from '../../../rule_schema';
 import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
@@ -67,12 +70,15 @@ export interface CreateThreatSignalsOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
+  licensing: LicensingPluginSetup;
 }
 
 export interface CreateThreatSignalOptions {
@@ -96,6 +102,7 @@ export interface CreateThreatSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   primaryTimestamp: string;
   secondaryTimestamp?: string;
@@ -112,6 +119,9 @@ export interface CreateThreatSignalOptions {
   allowedFieldsForTermsQuery: AllowedFieldsForTermsQuery;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
+  sortOrder?: SortOrderOrUndefined;
+  isAlertSuppressionActive: boolean;
 }
 
 export interface CreateEventSignalOptions {
@@ -134,6 +144,7 @@ export interface CreateEventSignalOptions {
   tuple: RuleRangeTuple;
   type: Type;
   wrapHits: WrapHits;
+  wrapSuppressedHits: WrapSuppressedHits;
   threatFilters: unknown[];
   threatIndex: ThreatIndex;
   threatIndicatorPath: ThreatIndicatorPath;
@@ -152,6 +163,9 @@ export interface CreateEventSignalOptions {
   threatMatchedFields: ThreatMatchedFields;
   inputIndexFields: DataViewFieldBase[];
   threatIndexFields: DataViewFieldBase[];
+  runOpts: RunOpts<ThreatRuleParams>;
+  sortOrder?: SortOrderOrUndefined;
+  isAlertSuppressionActive: boolean;
 }
 
 type EntryKey = 'field' | 'value';
@@ -300,6 +314,7 @@ export interface EventsOptions {
   exceptionFilter: Filter | undefined;
   eventListConfig?: OverrideBodyQuery;
   indexFields: DataViewFieldBase[];
+  sortOrder?: SortOrderOrUndefined;
 }
 
 export interface EventDoc {
