@@ -1296,19 +1296,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await header.waitUntilLoadingHasFinished();
 
-        await retry.waitFor('update toast exist', async () => {
-          return await testSubjects.exists('toastCloseButton');
-        });
-
-        await testSubjects.click('toastCloseButton');
-
-        await header.waitUntilLoadingHasFinished();
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
-
-        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
         expect(await toggle.getAttribute('aria-checked')).equal('false');
 

@@ -35,11 +35,13 @@ export const getSupportedSchemas = (
   experimentalFeatures: ExperimentalFeatures | undefined
 ): SupportedSchema[] => {
   const sentinelOneDataInAnalyzerEnabled = experimentalFeatures?.sentinelOneDataInAnalyzerEnabled;
+  const crowdstrikeDataInAnalyzerEnabled = experimentalFeatures?.crowdstrikeDataInAnalyzerEnabled;
 
   const supportedFileBeatDataSets = [
     ...(sentinelOneDataInAnalyzerEnabled
       ? ['sentinel_one_cloud_funnel.event', 'sentinel_one.alert']
       : []),
+    ...(crowdstrikeDataInAnalyzerEnabled ? ['crowdstrike.falcon', 'crowdstrike.fdr'] : []),
   ];
 
   return [
