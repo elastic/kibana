@@ -64,7 +64,6 @@ export const ExecuteConnectorRequestBody = z.object({
   isEnabledRAGAlerts: z.boolean().optional(),
   replacements: z.object({}).catchall(z.unknown()).optional(),
   size: z.number().optional(),
-  llmType: z.string(),
 });
 export type ExecuteConnectorRequestBodyInput = z.input<typeof ExecuteConnectorRequestBody>;
 
