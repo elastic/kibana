@@ -69,7 +69,8 @@ function isTimeSeriesCompatible(type: string, timeSeriesMetric?: string) {
 }
 
 function timeScaleToUnit(t?: string) {
-  if (!t || t === 's') return 'second';
+  if (!t) return undefined;
+  if (t === 's') return 'second';
   else if (t === 'h') return 'hour';
   else if (t === 'm') return 'minute';
   return 'day';
@@ -242,11 +243,10 @@ function buildMetricOperation<T extends MetricColumn<string>>({
       const counterField =
         _indexPattern.getFieldByName(column.sourceField)?.timeSeriesMetric === 'counter';
 
-      const doTimeScale =
-        counterRateColumn &&
-        (layer.columns[counterRateColumn].timeScale || column.timeScale) !== undefined;
-
-      if (counterRateColumn && counterField && doTimeScale) {
+      if (counterRateColumn && counterField) {
+        const unit = timeScaleToUnit(
+          layer.columns[counterRateColumn].timeScale || column.timeScale
+        );
         return buildExpressionFunction<AggFunctionsMapping['aggBucketSum']>('aggBucketSum', {
           id: columnId,
           enabled: true,
@@ -266,7 +266,7 @@ function buildMetricOperation<T extends MetricColumn<string>>({
               field: column.sourceField,
               // time shift is added to wrapping aggFilteredMetric if filter is set
               timeShift: column.filter ? undefined : column.timeShift,
-              unit: timeScaleToUnit(layer.columns[counterRateColumn].timeScale || column.timeScale),
+              ...(unit ? { unit } : {}),
             }),
           ]),
         }).toAst();

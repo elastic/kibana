@@ -18,7 +18,7 @@ const rateTitle = i18n.translate('data.search.aggs.metrics.rateTitle', {
 });
 
 export interface AggParamsRate extends BaseAggParams {
-  unit: string;
+  unit?: string;
   field?: string;
 }
 

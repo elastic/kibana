@@ -56,7 +56,7 @@ export const aggRate = (): FunctionDefinition => ({
     },
     unit: {
       types: ['string'],
-      required: true,
+      required: false,
       options: ['second', 'minute', 'hour', 'day', 'week', 'month', 'quarter', 'year'],
       help: i18n.translate('data.search.aggs.metrics.rate.unit.help', {
         defaultMessage: 'Unit to use for this aggregation',
