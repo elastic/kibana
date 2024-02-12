@@ -22,9 +22,9 @@ class IndexStatsService {
 
       const indexStats = await esClient.indices.stats({ index });
       return {
-        doc_count: indexStats._all.primaries?.docs ? indexStats._all.primaries?.docs?.count : 0,
-        size_in_bytes: indexStats._all.primaries?.store
-          ? indexStats._all.primaries?.store.size_in_bytes
+        doc_count: indexStats._all.total?.docs ? indexStats._all.total?.docs?.count : 0,
+        size_in_bytes: indexStats._all.total?.store
+          ? indexStats._all.total?.store.size_in_bytes
           : 0,
       };
     } catch (e) {
