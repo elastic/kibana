@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { act } from '@testing-library/react-hooks';
 
 import { useStartServices } from '../../../../hooks';
 
 import { ExperimentalFeaturesService } from '../../../../services';
+import { createFleetTestRendererMock } from '../../../../../../mock';
 
 import { useFetchAgentsData } from './use_fetch_agents_data';
 
@@ -78,7 +79,6 @@ jest.mock('../../../../hooks', () => ({
     pageSizeOptions: [5, 20, 50],
     setPagination: jest.fn(),
   }),
-  useUrlParams: jest.fn().mockReturnValue({ urlParams: { kuery: '' } }),
 }));
 
 describe('useFetchAgentsData', () => {
@@ -97,10 +97,9 @@ describe('useFetchAgentsData', () => {
   });
 
   it('should fetch agents and agent policies data', async () => {
-    let result: any | undefined;
-    let waitForNextUpdate: any | undefined;
+    const renderer = createFleetTestRendererMock();
+    const { result, waitForNextUpdate } = renderer.renderHook(() => useFetchAgentsData());
     await act(async () => {
-      ({ result, waitForNextUpdate } = renderHook(() => useFetchAgentsData()));
       await waitForNextUpdate();
     });
 
@@ -138,5 +137,31 @@ describe('useFetchAgentsData', () => {
     expect(result?.current.currentRequestRef).toEqual({ current: 1 });
     expect(result?.current.pagination).toEqual({ currentPage: 1, pageSize: 5 });
     expect(result?.current.pageSizeOptions).toEqual([5, 20, 50]);
+  });
+
+  it('sync querystring kuery with current search', async () => {
+    const renderer = createFleetTestRendererMock();
+    const { result, waitForNextUpdate } = renderer.renderHook(() => useFetchAgentsData());
+    await act(async () => {
+      await waitForNextUpdate();
+    });
+
+    expect(renderer.history.location.search).toEqual('');
+
+    // Set search
+    await act(async () => {
+      result.current.setSearch('active:true');
+      await waitForNextUpdate();
+    });
+
+    expect(renderer.history.location.search).toEqual('?kuery=active%3Atrue');
+
+    // Clear search
+    await act(async () => {
+      result.current.setSearch('');
+      await waitForNextUpdate();
+    });
+
+    expect(renderer.history.location.search).toEqual('');
   });
 });

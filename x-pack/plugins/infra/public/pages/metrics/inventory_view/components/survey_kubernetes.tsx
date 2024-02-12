@@ -35,6 +35,9 @@ export const SurveyKubernetes = () => {
             defaultMessage="Tell us what you think! (K8s)"
           />
         }
+        formConfig={{
+          kibanaVersionQueryParam: 'entry.184582718',
+        }}
       />
       {!isToastSeen && (
         <EuiGlobalToastList
