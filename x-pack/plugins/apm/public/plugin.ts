@@ -387,7 +387,9 @@ export class ApmPlugin implements Plugin<ApmPluginSetup, ApmPluginStart> {
           id: 'storage-explorer',
           title: apmStorageExplorerTitle,
           path: '/storage-explorer',
-          searchable: featureFlags.storageExplorerAvailable,
+          visibleIn: featureFlags.storageExplorerAvailable
+            ? ['globalSearch']
+            : [],
         },
         { id: 'tutorial', title: apmTutorialTitle, path: '/tutorial' },
       ],
