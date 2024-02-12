@@ -127,7 +127,7 @@ export interface RulesListTableProps {
   onPercentileOptionsChange?: (options: EuiSelectableOption[]) => void;
   onRuleChanged: () => Promise<void>;
   onEnableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
-  onDisableRule: (rule: RuleTableItem) => Promise<BulkOperationResponse>;
+  onDisableRule: (rule: RuleTableItem, untrack: boolean) => Promise<BulkOperationResponse>;
   onSnoozeRule: (rule: RuleTableItem, snoozeSchedule: SnoozeSchedule) => Promise<void>;
   onUnsnoozeRule: (rule: RuleTableItem, scheduleIds?: string[]) => Promise<void>;
   onSelectAll: () => void;
@@ -281,12 +281,19 @@ export const RulesListTable = (props: RulesListTableProps) => {
     [ruleTypeRegistry]
   );
 
+  const onDisableRuleInternal = useCallback(
+    (rule: RuleTableItem) => (untrack: boolean) => {
+      return onDisableRule(rule, untrack);
+    },
+    [onDisableRule]
+  );
+
   const renderRuleStatusDropdown = useCallback(
     (rule: RuleTableItem) => {
       return (
         <RuleStatusDropdown
           hideSnoozeOption
-          disableRule={async () => await onDisableRule(rule)}
+          disableRule={onDisableRuleInternal(rule)}
           enableRule={async () => await onEnableRule(rule)}
           snoozeRule={async () => {}}
           unsnoozeRule={async () => {}}
@@ -296,7 +303,7 @@ export const RulesListTable = (props: RulesListTableProps) => {
         />
       );
     },
-    [isRuleTypeEditableInContext, onDisableRule, onEnableRule, onRuleChanged]
+    [isRuleTypeEditableInContext, onDisableRuleInternal, onEnableRule, onRuleChanged]
   );
 
   const selectionColumn = useMemo(() => {
