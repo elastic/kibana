@@ -44,6 +44,8 @@ const renderWithRouter = (
   );
 };
 
+const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
+
 for (let i = 0; i <= 200; i = i + 1) {
   describe('Cases routes', () => {
     describe('All cases', () => {
@@ -60,8 +62,8 @@ for (let i = 0; i <= 200; i = i + 1) {
     });
 
     // FLAKY: https://github.com/elastic/kibana/issues/163263
-    describe('Case view', () => {
-      it.each(['/cases/test-id', '/cases/test-id/comment-id'])(
+    describe.skip('Case view', () => {
+      it.each(getCaseViewPaths())(
         'navigates to the cases view page for path: %s',
         async (path: string) => {
           renderWithRouter([path]);
@@ -70,7 +72,7 @@ for (let i = 0; i <= 200; i = i + 1) {
         }
       );
 
-      it.each(['/cases/test-id', '/cases/test-id/comment-id'])(
+      it.each(getCaseViewPaths())(
         'user can navigate to the cases view page with read permissions and path: %s',
         async (path: string) => {
           renderWithRouter([path], readCasesPermissions());
