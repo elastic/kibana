@@ -84,7 +84,7 @@ describe('getHelp()', () => {
   });
 });
 
-describe.skip('getCommandLevelHelp()', () => {
+describe('getCommandLevelHelp()', () => {
   it('returns the expected output', () => {
     expect(
       getCommandLevelHelp({
@@ -130,7 +130,7 @@ describe.skip('getCommandLevelHelp()', () => {
   });
 });
 
-describe.skip('getHelpForAllCommands()', () => {
+describe('getHelpForAllCommands()', () => {
   it('returns the expected output', () => {
     expect(
       getHelpForAllCommands({
