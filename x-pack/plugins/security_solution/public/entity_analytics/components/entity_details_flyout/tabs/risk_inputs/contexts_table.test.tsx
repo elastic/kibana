@@ -74,6 +74,6 @@ describe('ContextsTable', () => {
 
     expect(screen.getByText('Asset Criticality Level')).toBeInTheDocument();
     expect(screen.getByTestId('risk-inputs-asset-criticality-badge')).toBeInTheDocument();
-    expect(screen.getByText('No criticality assigned')).toBeInTheDocument();
+    expect(screen.getByText('Criticality Unassigned')).toBeInTheDocument();
   });
 });
