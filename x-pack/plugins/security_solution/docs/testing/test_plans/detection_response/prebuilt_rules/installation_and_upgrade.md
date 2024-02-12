@@ -995,7 +995,7 @@ When user opens the upgrade preview
 The <field> diff accordion panel should display its grouped rule properties
 And each property should have its name displayed inside the panel above its value
 
-CASES:
+Examples:
 | field              |
 | data_source        |
 | kql_query          |
