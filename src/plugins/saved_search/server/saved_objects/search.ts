@@ -12,8 +12,8 @@ import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { getAllMigrations } from './search_migrations';
 import {
   SCHEMA_SEARCH_V8_8_0,
-  SCHEMA_SEARCH_V8_12_0,
   SCHEMA_SEARCH_MODEL_VERSION_1,
+  SCHEMA_SEARCH_MODEL_VERSION_2,
 } from './schema';
 
 export function getSavedSearchObjectType(
@@ -47,6 +47,13 @@ export function getSavedSearchObjectType(
           create: SCHEMA_SEARCH_MODEL_VERSION_1,
         },
       },
+      2: {
+        changes: [],
+        schemas: {
+          forwardCompatibility: SCHEMA_SEARCH_MODEL_VERSION_2.extends({}, { unknowns: 'ignore' }),
+          create: SCHEMA_SEARCH_MODEL_VERSION_2,
+        },
+      },
     },
     mappings: {
       dynamic: false,
@@ -57,7 +64,6 @@ export function getSavedSearchObjectType(
     },
     schemas: {
       '8.8.0': SCHEMA_SEARCH_V8_8_0,
-      '8.12.0': SCHEMA_SEARCH_V8_12_0,
     },
     migrations: () => getAllMigrations(getSearchSourceMigrations()),
   };
