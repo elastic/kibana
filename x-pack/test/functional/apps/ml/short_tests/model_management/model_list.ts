@@ -181,8 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.trainedModelsTable.assertPipelinesTabContent(false);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/165084
-      describe.skip('DFA model deployment', () => {
+      describe('DFA model deployment', () => {
         after(async () => {
           await ml.api.deleteIngestPipeline(modelWithoutPipelineDataExpectedValues.name, false);
           await ml.api.deleteIngestPipeline(
@@ -191,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
           );
         });
 
-        it.skip('deploys the trained model with default values', async () => {
+        it('deploys the trained model with default values', async () => {
           await ml.testExecution.logTestStep('should display the trained model in the table');
           await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
           await ml.testExecution.logTestStep(
@@ -248,7 +247,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         });
 
-        it.skip('deploys the trained model with custom values', async () => {
+        it('deploys the trained model with custom values', async () => {
           await ml.testExecution.logTestStep('should display the trained model in the table');
           await ml.trainedModelsTable.filterWithSearchString(modelWithoutPipelineData.modelId, 1);
           await ml.testExecution.logTestStep(
