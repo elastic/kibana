@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { TypeOf } from '@kbn/config-schema';
+import { bulkUntrackByQueryBodySchemaV1 } from '..';
 
-export { transformBulkUntrackAlertsBody } from './transform_bulk_untrack_alerts_body/latest';
-export { transformBulkUntrackAlertsBody as transformBulkUntrackAlertsBodyV1 } from './transform_bulk_untrack_alerts_body/v1';
+export type BulkUntrackByQueryRequestBody = TypeOf<typeof bulkUntrackByQueryBodySchemaV1>;

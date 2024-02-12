@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export { transformBulkUntrackAlertsBody } from './transform_bulk_untrack_alerts_body/latest';
-export { transformBulkUntrackAlertsBody as transformBulkUntrackAlertsBodyV1 } from './transform_bulk_untrack_alerts_body/v1';
+import { schema } from '@kbn/config-schema';
+
+export const bulkUntrackByQueryBodySchema = schema.object({
+  query: schema.arrayOf(schema.any()),
+  feature_ids: schema.arrayOf(schema.string()),
+});
