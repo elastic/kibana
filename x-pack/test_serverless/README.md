@@ -103,6 +103,29 @@ tests that should run in a serverless environment have to be added to the
 Tests in this area should be clearly designed for the serverless environment,
 particularly when it comes to timing for API requests and UI interaction.
 
+### Roles-based testing
+
+Each serverless project has its own set of SAML roles with [specfic permissions defined in roles.yml](https://github.com/elastic/kibana/blob/main/packages/kbn-es/src/serverless_resources/project_roles)
+and in oder to properly test Kibana functionality, UI tests design requires to login with
+a project-supported SAML role.
+
+Some recommendations:
+- in each test file top level `describe` suite should start with `loginWithRole` in `before` hook
+- use the minimal required role to access tested functionality
+- when feature logic depends on both project type & role, make sure to add separate tests
+- avoid using basic authentication, unless it is the actual test case
+- no need to log out, you can change role by calling `loginWithRole` again.
+
+```
+describe("my test suite", async function() {
+  before(async () => {
+    await PageObjects.svlCommonPage.loginWithRole('viewer');
+    await esArchiver.load(...);
+    await PageObjects.dashboard.navigateToApp();
+  });
+});
+```
+
 ### Testing with feature flags
 
 **tl;dr:** Tests specific to functionality behind a feature flag need special

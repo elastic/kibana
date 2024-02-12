@@ -15,6 +15,7 @@ import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common
 import {
   Rule,
   RuleTypeParams,
+  RuleTypeMetaData,
   RuleUpdates,
   RuleFlyoutCloseReason,
   IErrorObject,
@@ -49,7 +50,12 @@ const defaultCreateRuleErrorMessage = i18n.translate(
   }
 );
 
-const RuleAdd = ({
+export type RuleAddComponent = typeof RuleAdd;
+
+const RuleAdd = <
+  Params extends RuleTypeParams = RuleTypeParams,
+  MetaData extends RuleTypeMetaData = RuleTypeMetaData
+>({
   consumer,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -67,7 +73,7 @@ const RuleAdd = ({
   useRuleProducer,
   initialSelectedConsumer,
   ...props
-}: RuleAddProps) => {
+}: RuleAddProps<Params, MetaData>) => {
   const onSaveHandler = onSave ?? reloadRules;
   const [metadata, setMetadata] = useState(initialMetadata);
   const onChangeMetaData = useCallback((newMetadata) => setMetadata(newMetadata), []);

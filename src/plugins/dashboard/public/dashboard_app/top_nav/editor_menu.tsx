@@ -255,6 +255,7 @@ export const EditorMenu = ({
   const getEditorMenuPanels = (closePopover: () => void) => {
     const initialPanelItems = [
       ...visTypeAliases.map(getVisTypeAliasMenuItem),
+      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
       ...toolVisTypes.map(getVisTypeMenuItem),
       ...ungroupedFactories.map((factory) => {
         return getEmbeddableFactoryMenuItem(factory, closePopover);
@@ -265,9 +266,7 @@ export const EditorMenu = ({
         panel: panelId,
         'data-test-subj': `dashboardEditorMenu-${id}Group`,
       })),
-
       ...promotedVisTypes.map(getVisTypeMenuItem),
-      ...getAddPanelActionMenuItems(api, addPanelActions, closePopover),
     ];
     if (aggsBasedVisTypes.length > 0) {
       initialPanelItems.push({
