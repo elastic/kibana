@@ -139,8 +139,6 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
       allow_hidden: allowHidden,
       include_empty_fields: includeEmptyFields,
     } = request.query;
-    console.log(request.query);
-    console.log(includeEmptyFields);
 
     // not available to get request
     const indexFilter = request.body?.index_filter;

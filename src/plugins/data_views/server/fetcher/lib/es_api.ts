@@ -73,7 +73,6 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
     },
     fields = ['*'],
     expandWildcards,
-    // @ts-expect-error
     includeEmptyFields,
   } = params;
   try {
@@ -84,8 +83,8 @@ export async function callFieldCapsApi(params: FieldCapsApiParams) {
         ignore_unavailable: true,
         index_filter: indexFilter,
         expand_wildcards: expandWildcards,
-        // todo reenable once ES functionality is in place
-        // include_empty_fields: includeEmptyFields ?? true,
+        // @ts-expect-error
+        include_empty_fields: includeEmptyFields ?? true,
         ...fieldCapsOptions,
       },
       { meta: true }
