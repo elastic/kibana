@@ -11,11 +11,11 @@ import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import { getShouldShowFieldHandler } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { dynamic } from '@kbn/shared-ux-utility';
 import { useDocDetail, getMessageWithFallbacks } from '../../hooks/use_doc_detail';
 import { LogDocument } from '../../../common/document';
 import { LogLevel } from '../common/log_level';
 import * as constants from '../../../common/constants';
-import { dynamic } from '../../utils/dynamic';
 import './virtual_column.scss';
 
 const SourceDocument = dynamic(
@@ -31,9 +31,9 @@ const LogMessage = ({ field, value }: { field?: string; value: string }) => {
   return (
     <EuiText size="xs" style={{ display: 'inline', marginLeft: '5px' }}>
       {renderFieldPrefix && (
-        <strong data-test-subj="logExplorerDataTableMessageKey">{field}</strong>
+        <strong data-test-subj="logsExplorerDataTableMessageKey">{field}</strong>
       )}
-      <span data-test-subj="logExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
+      <span data-test-subj="logsExplorerDataTableMessageValue" style={{ marginLeft: '5px' }}>
         {value}
       </span>
     </EuiText>
@@ -108,7 +108,7 @@ export const Content = ({
           fieldFormats={fieldFormats}
           shouldShowFieldHandler={shouldShowFieldHandler}
           maxEntries={50}
-          dataTestSubj="logExplorerCellDescriptionList"
+          dataTestSubj="logsExplorerCellDescriptionList"
           className="logsExplorerVirtualColumn__sourceDocument"
         />
       )}

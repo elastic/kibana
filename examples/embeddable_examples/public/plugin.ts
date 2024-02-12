@@ -31,6 +31,8 @@ import {
   FilterDebuggerEmbeddableFactory,
   FilterDebuggerEmbeddableFactoryDefinition,
 } from './filter_debugger';
+import { registerMarkdownEditorEmbeddable } from './react_embeddables/eui_markdown/eui_markdown_react_embeddable';
+import { registerCreateEuiMarkdownAction } from './react_embeddables/eui_markdown/create_eui_markdown_action';
 
 export interface EmbeddableExamplesSetupDependencies {
   embeddable: EmbeddableSetup;
@@ -68,6 +70,9 @@ export class EmbeddableExamplesPlugin
     core: CoreSetup<EmbeddableExamplesStartDependencies>,
     deps: EmbeddableExamplesSetupDependencies
   ) {
+    registerMarkdownEditorEmbeddable();
+    registerCreateEuiMarkdownAction(deps.uiActions);
+
     this.exampleEmbeddableFactories.getHelloWorldEmbeddableFactory =
       deps.embeddable.registerEmbeddableFactory(
         HELLO_WORLD_EMBEDDABLE,

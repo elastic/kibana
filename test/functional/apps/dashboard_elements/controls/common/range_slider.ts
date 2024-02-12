@@ -19,6 +19,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
+  const browser = getService('browser');
   const { dashboardControls, common, dashboard, header } = getPageObjects([
     'dashboardControls',
     'dashboard',
@@ -74,6 +75,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'logstash-*',
           fieldName: 'bytes',
           width: 'small',
+          additionalSettings: { step: 10 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(1);
         await dashboard.clearUnsavedChanges();
@@ -94,6 +96,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           dataViewTitle: 'kibana_sample_data_flights',
           fieldName: 'AvgTicketPrice',
           width: 'medium',
+          additionalSettings: { step: 100 },
         });
         expect(await dashboardControls.getControlsCount()).to.be(2);
         const secondId = (await dashboardControls.getAllControlIds())[1];
@@ -174,6 +177,38 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const secondId = (await dashboardControls.getAllControlIds())[1];
         await dashboardControls.rangeSliderWaitForLoading(secondId);
         await dashboardControls.validateRange('placeholder', secondId, '100', '1000');
+        await dashboard.clearUnsavedChanges();
+      });
+
+      it('can select a range on a defined step interval using arrow keys', async () => {
+        const secondId = (await dashboardControls.getAllControlIds())[1];
+
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__lowerBoundFieldNumber`
+        );
+
+        // use arrow key to set lower bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '300', '');
+
+        // use arrow key to set lower bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        await dashboardControls.validateRange('value', secondId, '200', '');
+
+        await dashboardControls.rangeSliderSetUpperBound(secondId, '800');
+
+        await testSubjects.click(
+          `range-slider-control-${secondId} > rangeSlider__upperBoundFieldNumber`
+        );
+
+        // use arrow key to set upper bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_UP);
+        await dashboardControls.validateRange('value', secondId, '200', '900');
+
+        // use arrow key to set upper bound to the next step up
+        await browser.pressKeys(browser.keys.ARROW_DOWN);
+        await dashboardControls.validateRange('value', secondId, '200', '800');
+
         await dashboard.clearUnsavedChanges();
       });
 

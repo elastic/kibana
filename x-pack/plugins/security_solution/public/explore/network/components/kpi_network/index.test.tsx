@@ -9,19 +9,11 @@ import { shallow } from 'enzyme';
 import React from 'react';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 
-import {
-  mockGlobalState,
-  SUB_PLUGINS_REDUCER,
-  kibanaObservable,
-  createSecuritySolutionStorageMock,
-} from '../../../../common/mock';
+import { createMockStore } from '../../../../common/mock';
 import '../../../../common/mock/match_media';
-import type { State } from '../../../../common/store';
-import { createStore } from '../../../../common/store';
 import { NetworkKpiComponent } from '.';
 
 describe('NetworkKpiComponent', () => {
-  const state: State = mockGlobalState;
   const props = {
     filterQuery: '',
     from: '2019-06-15T06:00:00.000Z',
@@ -32,17 +24,10 @@ describe('NetworkKpiComponent', () => {
     to: '2019-06-18T06:00:00.000Z',
   };
 
-  const { storage } = createSecuritySolutionStorageMock();
-  let store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-
-  beforeEach(() => {
-    store = createStore(state, SUB_PLUGINS_REDUCER, kibanaObservable, storage);
-  });
-
   describe('rendering', () => {
     test('it renders the default widget', () => {
       const wrapper = shallow(
-        <ReduxStoreProvider store={store}>
+        <ReduxStoreProvider store={createMockStore()}>
           <NetworkKpiComponent {...props} />
         </ReduxStoreProvider>
       );

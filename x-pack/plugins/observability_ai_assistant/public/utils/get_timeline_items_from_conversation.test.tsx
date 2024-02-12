@@ -25,6 +25,7 @@ describe('getTimelineItemsFromConversation', () => {
       hasConnector: true,
       messages: [],
       chatState: ChatState.Ready,
+      onActionClick: jest.fn(),
     });
 
     expect(items.length).toBe(1);
@@ -57,6 +58,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
     it('excludes the system message', () => {
@@ -115,7 +117,7 @@ describe('getTimelineItemsFromConversation', () => {
               role: MessageRole.Assistant,
               function_call: {
                 name: 'recall',
-                arguments: JSON.stringify({ queries: [], contexts: [] }),
+                arguments: JSON.stringify({ queries: [], categories: [] }),
                 trigger: MessageRole.Assistant,
               },
             },
@@ -129,6 +131,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -227,6 +230,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -261,7 +265,8 @@ describe('getTimelineItemsFromConversation', () => {
       expect(mockChatService.renderFunction).toHaveBeenCalledWith(
         'my_render_function',
         JSON.stringify({ foo: 'bar' }),
-        { content: '[]', name: 'my_render_function', role: 'user' }
+        { content: '[]', name: 'my_render_function', role: 'user' },
+        expect.any(Function)
       );
 
       expect(container.textContent).toEqual('Rendered');
@@ -313,6 +318,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -384,6 +390,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -425,6 +432,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -454,7 +462,7 @@ describe('getTimelineItemsFromConversation', () => {
               role: MessageRole.Assistant,
               function_call: {
                 name: 'recall',
-                arguments: JSON.stringify({ queries: [], contexts: [] }),
+                arguments: JSON.stringify({ queries: [], categories: [] }),
                 trigger: MessageRole.User,
               },
             },
@@ -475,6 +483,7 @@ describe('getTimelineItemsFromConversation', () => {
             },
           },
         ],
+        onActionClick: jest.fn(),
       });
     });
 
@@ -532,6 +541,7 @@ describe('getTimelineItemsFromConversation', () => {
           },
           ...extraMessages,
         ],
+        onActionClick: jest.fn(),
       });
     };
 

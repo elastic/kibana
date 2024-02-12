@@ -66,6 +66,7 @@ import { ResizableButton } from './resizable_button';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import { useAbortableAsync } from './hooks/use_abortable_async';
 import { AssistantAvatar } from './assistant_avatar';
+// import { ErrorsWarningsCompactViewPopover } from './errors_warnings_popover';
 
 import './overwrite.scss';
 
@@ -75,7 +76,10 @@ export interface TextBasedLanguagesEditorProps {
   /** Callback running everytime the query changes */
   onTextLangQueryChange: (query: AggregateQuery) => void;
   /** Callback running when the user submits the query */
-  onTextLangQuerySubmit: (query?: AggregateQuery) => void;
+  onTextLangQuerySubmit: (
+    query?: AggregateQuery,
+    abortController?: AbortController
+  ) => Promise<void>;
   /** Can be used to expand/minimize the editor */
   expandCodeEditor: (status: boolean) => void;
   /** If it is true, the editor initializes with height EDITOR_INITIAL_HEIGHT_EXPANDED */
@@ -111,6 +115,9 @@ export interface TextBasedLanguagesEditorProps {
   disableSubmitAction?: boolean;
   isAiChatVisible?: boolean;
   setIsAiChatVisible?: (status: boolean) => void;
+
+  /** when set to true enables query cancellation **/
+  allowQueryCancellation?: boolean;
 }
 
 interface TextBasedEditorDeps {
@@ -167,6 +174,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   dataTestSubj,
   isAiChatVisible,
   setIsAiChatVisible,
+  allowQueryCancellation,
 }: TextBasedLanguagesEditorProps) {
   const { euiTheme } = useEuiTheme();
   const language = getAggregateQueryMode(query);
@@ -178,6 +186,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
     indexManagementApiService,
     application,
     observabilityAIAssistant,
+    docLinks,
   } = kibana.services;
   const chatService = useAbortableAsync(
     ({ signal }) => {
@@ -200,6 +209,8 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const [isChatVisible, setIsChatVisible] = useState(isAiChatVisible);
 
+  const [isQueryLoading, setIsQueryLoading] = useState(true);
+  const [abortController, setAbortController] = useState(new AbortController());
   const [editorMessages, setEditorMessages] = useState<{
     errors: MonacoMessage[];
     warnings: MonacoMessage[];
@@ -209,12 +220,25 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   });
 
   const onQuerySubmit = useCallback(() => {
-    const currentValue = editor1.current?.getValue();
-    if (currentValue != null) {
-      setCodeStateOnSubmission(currentValue);
+    if (isQueryLoading && allowQueryCancellation) {
+      abortController?.abort();
+      setIsQueryLoading(false);
+    } else {
+      setIsQueryLoading(true);
+      const abc = new AbortController();
+      setAbortController(abc);
+
+      const currentValue = editor1.current?.getValue();
+      if (currentValue != null) {
+        setCodeStateOnSubmission(currentValue);
+      }
+      onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery, abc);
     }
-    onTextLangQuerySubmit({ [language]: currentValue } as AggregateQuery);
-  }, [language, onTextLangQuerySubmit]);
+  }, [language, onTextLangQuerySubmit, abortController, isQueryLoading, allowQueryCancellation]);
+
+  useEffect(() => {
+    if (!isLoading) setIsQueryLoading(false);
+  }, [isLoading]);
 
   const [documentationSections, setDocumentationSections] =
     useState<LanguageDocumentationSections>();
@@ -334,12 +358,13 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const { cache: esqlFieldsCache, memoizedFieldsFromESQL } = useMemo(() => {
     // need to store the timing of the first request so we can atomically clear the cache per query
     const fn = memoize(
-      (...args: [{ esql: string }, ExpressionsStart]) => ({
+      (...args: [{ esql: string }, ExpressionsStart, undefined, AbortController?]) => ({
         timestamp: Date.now(),
         result: fetchFieldsFromESQL(...args),
       }),
       ({ esql }) => esql
     );
+
     return { cache: fn.cache, memoizedFieldsFromESQL: fn };
   }, []);
 
@@ -357,7 +382,12 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           // Check if there's a stale entry and clear it
           clearCacheWhenOld(esqlFieldsCache, esqlQuery.esql);
           try {
-            const table = await memoizedFieldsFromESQL(esqlQuery, expressions).result;
+            const table = await memoizedFieldsFromESQL(
+              esqlQuery,
+              expressions,
+              undefined,
+              abortController
+            ).result;
             return table?.columns.map((c) => ({ name: c.name, type: c.meta.type })) || [];
           } catch (e) {
             // no action yet
@@ -365,6 +395,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         }
         return [];
       },
+      getMetaFields: async () => ['_version', '_id', '_index', '_source'],
       getPolicies: async () => {
         const { data: policies, error } =
           (await indexManagementApiService?.getAllEnrichPolicies()) || {};
@@ -374,7 +405,14 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
         return policies.map(({ type, query: policyQuery, ...rest }) => rest);
       },
     }),
-    [dataViews, expressions, indexManagementApiService, esqlFieldsCache, memoizedFieldsFromESQL]
+    [
+      dataViews,
+      expressions,
+      indexManagementApiService,
+      esqlFieldsCache,
+      memoizedFieldsFromESQL,
+      abortController,
+    ]
   );
 
   const queryValidation = useCallback(
@@ -438,6 +476,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
 
   const hoverProvider = useMemo(
     () => (language === 'esql' ? ESQLLang.getHoverProvider?.(esqlCallbacks) : undefined),
+    [language, esqlCallbacks]
+  );
+
+  const codeActionProvider = useMemo(
+    () => (language === 'esql' ? ESQLLang.getCodeActionProvider?.(esqlCallbacks) : undefined),
     [language, esqlCallbacks]
   );
 
@@ -582,6 +625,11 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
       vertical: 'auto',
     },
     overviewRulerBorder: false,
+    // this becomes confusing with multiple markers, so quick fixes
+    // will be proposed only within the tooltip
+    lightbulb: {
+      enabled: false,
+    },
     readOnly:
       isLoading ||
       isDisabled ||
@@ -722,6 +770,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       language={getLanguageDisplayName(String(language))}
                       sections={documentationSections}
                       searchInDescription
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
+                      }
                       buttonProps={{
                         color: 'text',
                         size: 's',
@@ -837,6 +888,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                           options={codeEditorOptions}
                           width="100%"
                           suggestionProvider={suggestionProvider}
+                          codeActions={codeActionProvider}
                           hoverProvider={{
                             provideHover: (model, position, token) => {
                               if (isCompactFocused || !hoverProvider?.provideHover) {
@@ -960,6 +1012,9 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                     <LanguageDocumentationPopover
                       language={
                         String(language) === 'esql' ? 'ES|QL' : String(language).toUpperCase()
+                      }
+                      linkToDocumentation={
+                        language === 'esql' ? docLinks?.links?.query?.queryESQL : ''
                       }
                       searchInDescription
                       sections={documentationSections}

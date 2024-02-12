@@ -15,12 +15,16 @@ import {
   AvailableControlPanels,
   availableControlsPanels,
   DatasetSelectionPlain,
+  SMART_FALLBACK_FIELDS,
 } from '@kbn/logs-explorer-plugin/common';
-import { OBSERVABILITY_LOG_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
-import { OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY, urlSchemaV1 } from '../../url_schema';
+import { OBSERVABILITY_LOGS_EXPLORER_APP_ID } from '@kbn/deeplinks-observability';
+import {
+  OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
+  logsExplorerUrlSchemaV1,
+} from '../../url_schema';
 import { deepCompactObject } from '../../utils/deep_compact_object';
 
-type ControlsPageState = NonNullable<urlSchemaV1.UrlSchema['controls']>;
+type ControlsPageState = NonNullable<logsExplorerUrlSchemaV1.UrlSchema['controls']>;
 
 interface LocatorPathConstructionParams {
   datasetSelection: DatasetSelectionPlain;
@@ -35,7 +39,7 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
     useHash,
   } = params;
 
-  const pageState = urlSchemaV1.urlSchemaRT.encode(
+  const pageState = logsExplorerUrlSchemaV1.urlSchemaRT.encode(
     deepCompactObject({
       v: 1,
       datasetSelection,
@@ -43,20 +47,22 @@ export const constructLocatorPath = async (params: LocatorPathConstructionParams
       query,
       refreshInterval,
       time: timeRange,
-      columns: columns?.map((field) => ({ field })),
+      columns: columns?.map((column) => {
+        return column.type === 'smart-field' ? SMART_FALLBACK_FIELDS[column.smartField] : column;
+      }),
       controls: getControlsPageStateFromFilterControlsParams(filterControls ?? {}),
     })
   );
 
   const path = setStateToKbnUrl(
-    OBSERVABILITY_LOG_EXPLORER_URL_STATE_KEY,
+    OBSERVABILITY_LOGS_EXPLORER_URL_STATE_KEY,
     pageState,
     { useHash, storeInHashQuery: false },
     '/'
   );
 
   return {
-    app: OBSERVABILITY_LOG_EXPLORER_APP_ID,
+    app: OBSERVABILITY_LOGS_EXPLORER_APP_ID,
     path,
     state: {
       ...(origin ? { origin } : {}),

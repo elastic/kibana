@@ -16,6 +16,7 @@ export function toSavedObjectWithMeta(so: SavedObject): SavedObjectWithMetadata 
     namespaces: so.namespaces,
     references: so.references,
     updated_at: so.updated_at,
+    managed: so.managed,
     attributes: so.attributes,
     created_at: so.created_at,
     error: so.error,

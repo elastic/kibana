@@ -6,11 +6,12 @@
  */
 
 import type { AnalyticsServiceStart } from '@kbn/core/public';
+import type { FeaturesPluginStart, FeaturesPluginSetup } from '@kbn/features-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
 } from '@kbn/data-views-plugin/public';
-import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/public';
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { ILicense, LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
@@ -39,6 +40,7 @@ import type {
   Message,
   PendingMessage,
 } from '../common/types';
+import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { PendingMessage } from '../common/types';
 import type { StreamingChatResponseEvent } from '../common/conversation_complete';
@@ -51,15 +53,19 @@ import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
 
 export type { CreateChatCompletionResponseChunk } from '../common/types';
 export type { PendingMessage };
+export type { ChatFlyoutSecondSlotHandler };
 
 export interface ObservabilityAIAssistantChatService {
   analytics: AnalyticsServiceStart;
-  chat: (options: {
-    messages: Message[];
-    connectorId: string;
-    function?: 'none' | 'auto';
-    signal: AbortSignal;
-  }) => Observable<StreamingChatResponseEventWithoutError>;
+  chat: (
+    name: string,
+    options: {
+      messages: Message[];
+      connectorId: string;
+      function?: 'none' | 'auto';
+      signal: AbortSignal;
+    }
+  ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
     messages: Message[];
     connectorId: string;
@@ -74,7 +80,8 @@ export interface ObservabilityAIAssistantChatService {
   renderFunction: (
     name: string,
     args: string | undefined,
-    response: { data?: string; content?: string }
+    response: { data?: string; content?: string },
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
 }
 
@@ -91,6 +98,7 @@ export interface ObservabilityAIAssistantService {
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
+  onActionClick: ChatActionClickHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<
@@ -123,6 +131,7 @@ export interface ObservabilityAIAssistantPluginStartDependencies {
   security: SecurityPluginStart;
   share: SharePluginStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
+  uiActions: UiActionsStart;
   ml: MlPluginStart;
 }
 
