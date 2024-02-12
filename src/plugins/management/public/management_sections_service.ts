@@ -11,6 +11,7 @@ import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import {
   IngestSection,
   DataSection,
+  AccessSection,
   InsightsAndAlertingSection,
   SecuritySection,
   KibanaSection,
@@ -39,6 +40,7 @@ export class ManagementSectionsService {
     this.definedSections = {
       ingest: this.registerSection(IngestSection),
       data: this.registerSection(DataSection),
+      access: this.registerSection(AccessSection),
       insightsAndAlerting: this.registerSection(InsightsAndAlertingSection),
       security: this.registerSection(SecuritySection),
       kibana: this.registerSection(KibanaSection),

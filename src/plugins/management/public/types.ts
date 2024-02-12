@@ -23,6 +23,7 @@ export interface ManagementSetup {
 export interface DefinedSections {
   ingest: ManagementSection;
   data: ManagementSection;
+  access: ManagementSection;
   insightsAndAlerting: ManagementSection;
   security: ManagementSection;
   kibana: ManagementSection;
@@ -58,6 +59,7 @@ export interface SectionsServiceStart {
 export enum ManagementSectionId {
   Ingest = 'ingest',
   Data = 'data',
+  Access = 'access',
   InsightsAndAlerting = 'insightsAndAlerting',
   Security = 'security',
   Kibana = 'kibana',

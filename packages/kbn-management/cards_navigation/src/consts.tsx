@@ -7,11 +7,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { AppIds, AppId, AppDefinition, appCategories } from './types';
+import { AppIds, AppId, CardNavExtensionDefinition, appCategories } from './types';
 
 export { AppIds, appCategories } from './types';
 
-export const appDefinitions: Record<AppId, AppDefinition> = {
+export const appDefinitions: Record<AppId, CardNavExtensionDefinition> = {
   [AppIds.INDEX_MANAGEMENT]: {
     category: appCategories.DATA,
     description: i18n.translate(
@@ -119,19 +119,42 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     icon: 'tag',
   },
 
-  [AppIds.API_KEYS]: {
-    category: appCategories.OTHER,
-    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
-      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
-    }),
-    icon: 'lockOpen',
-  },
-
   [AppIds.SERVERLESS_SETTINGS]: {
     category: appCategories.OTHER,
     description: i18n.translate('management.landing.withCardNavigation.settingsDescription', {
       defaultMessage: 'Control project behavior, such as date display and default sorting.',
     }),
     icon: 'gear',
+  },
+
+  // ToDo: description based on build flavor? serverless vs stateful
+  [AppIds.ROLES]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.rolesDescription', {
+      defaultMessage:
+        'Create roles unique to this project and combine the exact set of privileges that your users need.', // 'Allow custom roles to be created for users.',
+    }),
+    icon: 'usersRolesApp',
+  },
+  // ToDo: how to limit access to this card when the user does not have permissions to assign roles in cloud?
+  // uiConfig.userManagementEnabled
+  [AppIds.MEMBERS]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.membersDescription', {
+      defaultMessage: 'Invite team members and assign them roles to access this project.',
+    }),
+    icon: 'users',
+    skipValidation: true,
+    href: 'https://cloud.elastic.co/account/members', // ToDo: replace hard-coded URL with resource/const
+    title: i18n.translate('management.landing.withCardNavigation.membersTitle', {
+      defaultMessage: 'Manage organization members',
+    }),
+  },
+  [AppIds.API_KEYS]: {
+    category: appCategories.ACCESS,
+    description: i18n.translate('management.landing.withCardNavigation.apiKeysDescription', {
+      defaultMessage: 'Allow programmatic access to your project data and capabilities.',
+    }),
+    icon: 'lockOpen',
   },
 };

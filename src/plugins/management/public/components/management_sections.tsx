@@ -57,6 +57,14 @@ const stackTip = i18n.translate('management.sections.stackTip', {
   defaultMessage: 'Manage your license and upgrade the Stack',
 });
 
+const accessTitle = i18n.translate('management.sections.accessTitle', {
+  defaultMessage: 'Access',
+});
+
+const accessTip = i18n.translate('management.sections.accessTip', {
+  defaultMessage: 'Access', // ToDo:
+});
+
 export const IngestSection = {
   id: ManagementSectionId.Ingest,
   title: ingestTitle,
@@ -99,6 +107,13 @@ export const StackSection = {
   order: 4,
 };
 
+export const AccessSection = {
+  id: ManagementSectionId.Access,
+  title: accessTitle,
+  tip: accessTip,
+  order: 1,
+};
+
 export const managementSections = [
   IngestSection,
   DataSection,
@@ -106,4 +121,5 @@ export const managementSections = [
   SecuritySection,
   KibanaSection,
   StackSection,
+  AccessSection,
 ];
