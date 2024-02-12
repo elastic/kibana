@@ -967,7 +967,7 @@ When a user upgrades the rule
 Then the rule bound data should be preserved
 ```
 
-CASEs: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
 
 #### **Scenario: Rule bound data is preserved after upgrading a rule to a newer version with a different rule type**
 
@@ -981,7 +981,7 @@ When a user upgrades the rule
 Then the rule bound data should be preserved
 ```
 
-CASEs: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
+Examples: generated alerts, exception lists (rule exception list, shared exception list, endpoint exception list), timeline reference, actions, enabled state, execution results and execution events.
 
 ### Rule upgrade workflow: misc cases
 
