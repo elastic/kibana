@@ -127,7 +127,7 @@ export type InferenceServiceSettings =
       service_settings: {
         num_allocations: number;
         num_threads: number;
-        model_version: string;
+        model_id: string;
       };
     }
   | {

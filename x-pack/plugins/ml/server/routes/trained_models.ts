@@ -108,7 +108,7 @@ export function trainedModelsRoutes(
 
           try {
             // Check if model is used by an inference service
-            const { models } = await client.asCurrentUser.transport.request<{
+            const { models } = await client.asInternalUser.transport.request<{
               models: InferenceAPIConfigResponse[];
             }>({
               method: 'GET',
@@ -117,7 +117,7 @@ export function trainedModelsRoutes(
 
             const inferenceAPIMap = groupBy(
               models,
-              (model) => model.service === 'elser' && model.service_settings.model_version
+              (model) => model.service === 'elser' && model.service_settings.model_id
             );
 
             for (const model of result) {
