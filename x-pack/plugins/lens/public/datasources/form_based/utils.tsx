@@ -235,7 +235,7 @@ const accuracyModeEnabledWarning = (
           <strong>
             <FormattedMessage
               id="xpack.lens.indexPattern.precisionErrorWarning.topValues"
-              defaultMessage="Top Values"
+              defaultMessage="Top Fun Values"
             />
           </strong>
         ),
