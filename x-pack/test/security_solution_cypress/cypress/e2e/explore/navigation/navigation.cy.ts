@@ -88,7 +88,8 @@ import {
   THREAT_INTELLIGENCE_PAGE,
 } from '../../../screens/kibana_navigation';
 
-describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/176757
+describe.skip('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(TIMELINES_URL);
