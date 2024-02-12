@@ -105,7 +105,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   }
 
   public async getDataStreamsEstimatedDataInBytes(
-    params: GetDataStreamsEstimatedDataInBytesParams = { query: { type: DEFAULT_DATASET_TYPE } }
+    params: GetDataStreamsEstimatedDataInBytesParams
   ) {
     const response = await this.http
       .get<GetDataStreamsEstimatedDataInBytesResponse>(

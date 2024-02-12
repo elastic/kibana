@@ -71,7 +71,7 @@ const degradedDocsRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/degraded_docs',
   params: t.type({
     query: t.intersection([
-      rangeRt,
+      t.partial(rangeRt.props),
       typeRt,
       t.partial({
         datasetQuery: t.string,
@@ -138,8 +138,8 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
 
 const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
   endpoint: 'GET /internal/dataset_quality/data_streams/estimated_data',
-  params: t.partial({
-    query: t.intersection([rangeRt, typeRt]),
+  params: t.type({
+    query: t.intersection([typeRt, rangeRt]),
   }),
   options: {
     tags: [],
@@ -154,7 +154,7 @@ const estimatedDataInBytesRoute = createDatasetQualityServerRoute({
 
     const estimatedDataInBytes = await getEstimatedDataInBytes({
       esClient,
-      ...params,
+      ...params.query,
     });
 
     return {

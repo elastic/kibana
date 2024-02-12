@@ -13,8 +13,8 @@ import { indexStatsService } from '../../../services';
 export async function getEstimatedDataInBytes(args: {
   esClient: ElasticsearchClient;
   type?: DataStreamType;
-  start?: number;
-  end?: number;
+  start: number;
+  end: number;
 }) {
   const { esClient, type = DEFAULT_DATASET_TYPE, start, end } = args;
 

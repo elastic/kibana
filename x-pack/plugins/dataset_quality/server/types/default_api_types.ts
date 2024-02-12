@@ -13,7 +13,7 @@ export const typeRt = t.partial({
   type: dataStreamTypesRt,
 });
 
-export const rangeRt = t.partial({
+export const rangeRt = t.type({
   start: isoToEpochRt,
   end: isoToEpochRt,
 });

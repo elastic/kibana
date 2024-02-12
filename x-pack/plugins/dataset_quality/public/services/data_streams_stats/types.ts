@@ -34,6 +34,6 @@ export interface IDataStreamsStatsClient {
   ): Promise<DataStreamDegradedDocsStatServiceResponse>;
   getDataStreamDetails(params: GetDataStreamDetailsParams): Promise<DataStreamDetails>;
   getDataStreamsEstimatedDataInBytes(
-    params?: GetDataStreamsEstimatedDataInBytesParams
+    params: GetDataStreamsEstimatedDataInBytesParams
   ): Promise<GetDataStreamsEstimatedDataInBytesResponse>;
 }

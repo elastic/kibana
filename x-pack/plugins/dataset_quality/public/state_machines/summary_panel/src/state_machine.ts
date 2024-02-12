@@ -7,6 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
+import { getDefaultTimeRange } from '../../../utils';
 import { filterInactiveDatasets } from '../../../utils/filter_inactive_datasets';
 import { IDataStreamsStatsClient } from '../../../services/data_streams_stats';
 import { defaultContext, MAX_RETRIES, RETRY_DELAY_IN_MS } from './defaults';
@@ -218,8 +219,16 @@ export const createDatasetsSummaryPanelStateMachine = ({
           active: activeDataStreams.length,
         };
       },
-      loadEstimatedData: async (_context) =>
-        dataStreamStatsClient.getDataStreamsEstimatedDataInBytes(),
+      loadEstimatedData: async (_context) => {
+        const { from: start, to: end } = getDefaultTimeRange();
+        return dataStreamStatsClient.getDataStreamsEstimatedDataInBytes({
+          query: {
+            type: 'logs',
+            start,
+            end,
+          },
+        });
+      },
     },
   });
 

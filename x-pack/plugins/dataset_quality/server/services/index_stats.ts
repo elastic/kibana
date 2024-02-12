@@ -38,21 +38,13 @@ class IndexStatsService {
   public async getIndexDocCount(
     esClient: ElasticsearchClient,
     type: DataStreamType,
-    start?: number,
-    end?: number
+    start: number,
+    end: number
   ): Promise<number> {
     try {
-      const defaultQuery = {
-        range: {
-          '@timestamp': {
-            gte: 'now-1d/d',
-            lte: 'now/d',
-          },
-        },
-      };
-      const index = `${type}-*`;
+      const index = `${type}-*-*`;
 
-      const query = start && end ? rangeQuery(start, end)[0] : defaultQuery;
+      const query = rangeQuery(start, end)[0];
       const docCount = await esClient.count({
         index,
         query,
