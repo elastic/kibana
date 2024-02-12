@@ -241,6 +241,7 @@ export abstract class ResponseActionsClientImpl implements ResponseActionsClient
       hosts: undefined,
       ruleId: undefined,
       ruleName: undefined,
+      error: undefined,
       ...options,
     };
   }

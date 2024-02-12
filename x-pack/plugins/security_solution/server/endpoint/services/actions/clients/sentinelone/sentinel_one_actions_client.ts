@@ -194,20 +194,22 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'isolate',
     };
 
-    let error = (await this.validateRequest(reqIndexOptions)).error;
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
 
-    if (!error) {
-      try {
-        await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
-      } catch (err) {
-        error = err;
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.ISOLATE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
       }
-    }
 
-    reqIndexOptions.error = error?.message;
+      reqIndexOptions.error = error?.message;
 
-    if (!this.options.isAutomated && error) {
-      throw error;
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
     }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);
@@ -249,20 +251,22 @@ export class SentinelOneActionsClient extends ResponseActionsClientImpl {
       command: 'unisolate',
     };
 
-    let error = (await this.validateRequest(reqIndexOptions)).error;
+    if (!reqIndexOptions.error) {
+      let error = (await this.validateRequest(reqIndexOptions)).error;
 
-    if (!error) {
-      try {
-        await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
-      } catch (err) {
-        error = err;
+      if (!error) {
+        try {
+          await this.sendAction(SUB_ACTION.RELEASE_HOST, { uuid: actionRequest.endpoint_ids[0] });
+        } catch (err) {
+          error = err;
+        }
       }
-    }
 
-    reqIndexOptions.error = error?.message;
+      reqIndexOptions.error = error?.message;
 
-    if (!this.options.isAutomated && error) {
-      throw error;
+      if (!this.options.isAutomated && error) {
+        throw error;
+      }
     }
 
     const actionRequestDoc = await this.writeActionRequestToEndpointIndex(reqIndexOptions);

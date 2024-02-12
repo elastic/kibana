@@ -42,6 +42,11 @@ export interface CommonResponseActionMethodOptions
   ruleId?: string;
   /** Used when invoked from rules */
   ruleName?: string;
+  /**
+   * If defined, then action request will be created with an Error. Note that teh action will
+   * not be dispatched to Fleet or an external EDR system if this value is defined
+   */
+  error?: string;
 }
 
 /**

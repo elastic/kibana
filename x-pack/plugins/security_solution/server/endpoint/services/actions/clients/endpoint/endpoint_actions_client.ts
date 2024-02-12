@@ -81,27 +81,29 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
   ): Promise<TResponse> {
     const agentIds = await this.checkAgentIds(actionReq.endpoint_ids);
     const actionId = uuidv4();
-    const { hosts, ruleName, ruleId } = this.getMethodOptions<TMethodOptions>(options);
-    let actionError: string | undefined;
+    const { hosts, ruleName, ruleId, error } = this.getMethodOptions<TMethodOptions>(options);
+    let actionError: string | undefined = error;
 
     // Dispatch action to Endpoint using Fleet
-    try {
-      await this.dispatchActionViaFleet({
-        actionId,
-        agents: agentIds.valid,
-        data: {
-          command,
-          parameters: actionReq.parameters as EndpointActionDataParameterTypes,
-        },
-      });
-    } catch (e) {
-      // If not in Automated mode, then just throw, else save the error and write
-      // it to the Endpoint Action request doc
-      if (!this.options.isAutomated) {
-        throw e;
-      }
+    if (!actionError) {
+      try {
+        await this.dispatchActionViaFleet({
+          actionId,
+          agents: agentIds.valid,
+          data: {
+            command,
+            parameters: actionReq.parameters as EndpointActionDataParameterTypes,
+          },
+        });
+      } catch (e) {
+        // If not in Automated mode, then just throw, else save the error and write
+        // it to the Endpoint Action request doc
+        if (!this.options.isAutomated) {
+          throw e;
+        }
 
-      actionError = e.message;
+        actionError = e.message;
+      }
     }
 
     // Write action to endpoint index
