@@ -25,8 +25,8 @@ import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_a
 export const PanelHeader: FC = () => {
   const { isolateAction, dataFormattedForFieldBrowser: data } = useIsolateHostPanelContext();
   const isSentinelOneAlert = isAlertFromSentinelOneEvent({ data });
-  const isSentinelOneV1Enabled = useIsExperimentalFeatureEnabled(
-    'responseActionsSentinelOneV1Enabled'
+  const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
+    'sentinelOneManualHostActionsEnabled'
   );
   const title = (
     <EuiFlexGroup responsive gutterSize="s">
@@ -43,7 +43,7 @@ export const PanelHeader: FC = () => {
           />
         )}
       </EuiFlexItem>
-      {isSentinelOneV1Enabled && isSentinelOneAlert && (
+      {sentinelOneManualHostActionsEnabled && isSentinelOneAlert && (
         <EuiFlexItem grow={false}>
           <EuiBetaBadge label={TECHNICAL_PREVIEW} tooltipContent={TECHNICAL_PREVIEW_DESCRIPTION} />
         </EuiFlexItem>
