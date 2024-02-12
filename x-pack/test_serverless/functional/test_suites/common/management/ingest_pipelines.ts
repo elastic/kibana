@@ -29,13 +29,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   describe('Ingest Pipelines', function () {
     this.tags('smoke');
     before(async () => {
-      await pageObjects.svlCommonPage.login();
+      await pageObjects.svlCommonPage.loginAsAdmin();
     });
     beforeEach(async () => {
       await pageObjects.common.navigateToApp('ingestPipelines');
-    });
-    after(async () => {
-      await pageObjects.svlCommonPage.forceLogout();
     });
 
     it('Loads the app', async () => {

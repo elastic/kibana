@@ -204,6 +204,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.overviewAlertsTitleExists();
           });
 
+          it('should show / hide alerts section with no alerts and show / hide closed section content', async () => {
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            // Collapsed by default
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsExist();
+            // Expand
+            await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+            await pageObjects.assetDetails.alertsSectionClosedContentNoAlertsMissing();
+          });
+
           it('shows the CPU Profiling prompt if UI setting for Profiling integration is enabled', async () => {
             await setInfrastructureProfilingIntegrationUiSetting(true);
             await pageObjects.assetDetails.cpuProfilingPromptExists();
@@ -212,6 +221,42 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('hides the CPU Profiling prompt if UI setting for Profiling integration is disabled', async () => {
             await setInfrastructureProfilingIntegrationUiSetting(false);
             await pageObjects.assetDetails.cpuProfilingPromptMissing();
+          });
+
+          describe('Alerts Section with alerts', () => {
+            before(async () => {
+              await navigateToNodeDetails('demo-stack-apache-01', 'demo-stack-apache-01');
+              await pageObjects.header.waitUntilLoadingHasFinished();
+
+              await pageObjects.timePicker.setAbsoluteRange(
+                START_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT),
+                END_HOST_ALERTS_DATE.format(DATE_PICKER_FORMAT)
+              );
+
+              await pageObjects.assetDetails.clickOverviewTab();
+            });
+
+            after(async () => {
+              await navigateToNodeDetails('Jennys-MBP.fritz.box', 'Jennys-MBP.fritz.box');
+              await pageObjects.header.waitUntilLoadingHasFinished();
+
+              await pageObjects.timePicker.setAbsoluteRange(
+                START_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT),
+                END_HOST_PROCESSES_DATE.format(DATE_PICKER_FORMAT)
+              );
+            });
+
+            it('should show / hide alerts section with active alerts and show / hide closed section content', async () => {
+              await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+              // Expanded by default
+              await pageObjects.assetDetails.alertsSectionClosedContentMissing();
+              // Collapse
+              await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+              await pageObjects.assetDetails.alertsSectionClosedContentExist();
+              // Expand
+              await pageObjects.assetDetails.alertsSectionCollapsibleClick();
+              await pageObjects.assetDetails.alertsSectionClosedContentMissing();
+            });
           });
         });
 

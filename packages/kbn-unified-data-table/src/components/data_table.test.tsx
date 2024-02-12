@@ -24,7 +24,10 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { servicesMock } from '../../__mocks__/services';
 import { buildDataTableRecord, getDocId } from '@kbn/discover-utils';
 import type { DataTableRecord, EsHitRecord } from '@kbn/discover-utils/types';
-import { testLeadingControlColumn } from '../../__mocks__/external_control_columns';
+import {
+  testLeadingControlColumn,
+  testTrailingControlColumns,
+} from '../../__mocks__/external_control_columns';
 
 const mockUseDataGridColumnsCellActions = jest.fn((prop: unknown) => []);
 jest.mock('@kbn/cell-actions', () => ({
@@ -415,6 +418,69 @@ describe('UnifiedDataTable', () => {
           "showSortSelector": true,
         }
       `);
+    });
+  });
+
+  describe('customControlColumnsConfiguration', () => {
+    const customControlColumnsConfiguration = jest.fn();
+    it('should be able to customise the leading control column', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
+          () => {
+            return {
+              leadingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
+              trailingControlColumns: [],
+            };
+          }
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+      ).toBeTruthy();
+    });
+
+    it('should be able to customise the trailing control column', async () => {
+      const component = await getComponent({
+        ...getProps(),
+        expandedDoc: {
+          id: 'test',
+          raw: {
+            _index: 'test_i',
+            _id: 'test',
+          },
+          flattened: { test: jest.fn() },
+        },
+        setExpandedDoc: jest.fn(),
+        renderDocumentView: jest.fn(),
+        externalControlColumns: [testLeadingControlColumn],
+        customControlColumnsConfiguration: customControlColumnsConfiguration.mockImplementation(
+          () => {
+            return {
+              leadingControlColumns: [],
+              trailingControlColumns: [testLeadingControlColumn, testTrailingControlColumns[0]],
+            };
+          }
+        ),
+      });
+
+      expect(findTestSubject(component, 'test-body-control-column-cell').exists()).toBeTruthy();
+      expect(
+        findTestSubject(component, 'test-trailing-column-popover-button').exists()
+      ).toBeTruthy();
     });
   });
 
