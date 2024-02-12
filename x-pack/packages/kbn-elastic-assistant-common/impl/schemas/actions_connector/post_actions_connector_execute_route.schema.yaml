@@ -51,6 +51,11 @@ paths:
                   additionalProperties: true
                 size:
                   type: number
+                llmType:
+                  type: string
+                  enum:
+                    - bedrock
+                    - openai
       responses:
         '200':
           description: Successful response
@@ -59,11 +64,11 @@ paths:
               schema:
                 type: object
                 properties:
-                  data: 
+                  data:
                     type: string
                   connector_id:
                     type: string
-                  replacements: 
+                  replacements:
                     type: object
                     additionalProperties: true
                   status:
@@ -105,7 +110,7 @@ components:
         - subActionParams
         - subAction
       properties:
-        subActionParams: 
+        subActionParams:
           type: object
           required:
             - messages
@@ -122,7 +127,7 @@ components:
                     type: string
                     description: Message role.
                     enum:
-                      - system 
+                      - system
                       - user
                       - assistant
                   content:
