@@ -92,6 +92,24 @@ describe('Uninstall token page', () => {
 
         cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
       });
+
+      if (!removePolicies) {
+        it('should filter for policy name by partial match', () => {
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('Agent 200');
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 1);
+        });
+      } else {
+        it('should not be able to filter for policy name by partial match', () => {
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length.at.least', 3);
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_SEARCH_FIELD).type('Agent 200');
+
+          cy.getBySel(UNINSTALL_TOKENS.POLICY_ID_TABLE_FIELD).should('have.length', 0);
+        });
+      }
     });
   });
 
