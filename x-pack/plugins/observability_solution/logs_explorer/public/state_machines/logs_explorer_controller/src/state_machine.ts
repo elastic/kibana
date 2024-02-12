@@ -31,6 +31,7 @@ import {
   redirectToDiscoverAction,
   subscribeToDiscoverState,
   updateContextFromDiscoverAppState,
+  updateContextFromDiscoverDataState,
   updateDiscoverAppStateFromContext,
 } from './services/discover_service';
 import { initializeSelection } from './services/selection_service';
@@ -142,6 +143,7 @@ export const createPureLogsExplorerControllerStateMachine = (
               id: 'timefilterService',
             },
           ],
+          entry: ['resetRows'],
           states: {
             datasetSelection: {
               initial: 'idle',
@@ -237,6 +239,12 @@ export const createPureLogsExplorerControllerStateMachine = (
             RECEIVE_DISCOVER_APP_STATE: {
               actions: ['updateContextFromDiscoverAppState'],
             },
+            RECEIVE_DISCOVER_DATA_STATE: {
+              actions: ['updateContextFromDiscoverDataState'],
+            },
+            RECEIVE_QUERY_STATE: {
+              actions: ['updateQueryStateFromQueryServiceState'],
+            },
             RECEIVE_TIMEFILTER_TIME: {
               actions: ['updateContextFromTimefilter'],
             },
@@ -280,8 +288,12 @@ export const createPureLogsExplorerControllerStateMachine = (
               }
             : {}
         ),
+        resetRows: actions.assign((_context, event) => ({
+          rows: [],
+        })),
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
         updateContextFromDiscoverAppState,
+        updateContextFromDiscoverDataState,
         updateDiscoverAppStateFromContext,
         updateContextFromTimefilter,
       },
