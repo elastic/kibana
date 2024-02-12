@@ -7,8 +7,13 @@
 
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
 import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
-import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
+import type {
+  DiscoverAppState,
+  DiscoverStateContainer,
+  DataDocumentsMsg,
+} from '@kbn/discover-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
+import type { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { ControlPanels, DisplayOptions } from '../../../../common';
 import type { DatasetEncodingError, DatasetSelection } from '../../../../common/dataset_selection';
 
@@ -32,9 +37,14 @@ export interface WithDiscoverStateContainer {
   discoverStateContainer: DiscoverStateContainer;
 }
 
+export interface WithDataTableRecord {
+  rows: DataTableRecord[];
+}
+
 export type DefaultLogsExplorerControllerState = WithDatasetSelection &
   WithQueryState &
-  WithDisplayOptions;
+  WithDisplayOptions &
+  WithDataTableRecord;
 
 export type LogsExplorerControllerTypeState =
   | {
@@ -59,6 +69,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -67,6 +78,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -75,6 +87,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -83,6 +96,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -91,6 +105,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -99,6 +114,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -108,6 +124,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     }
   | {
@@ -117,6 +134,7 @@ export type LogsExplorerControllerTypeState =
         WithControlPanels &
         WithQueryState &
         WithDisplayOptions &
+        WithDataTableRecord &
         WithDiscoverStateContainer;
     };
 
@@ -150,6 +168,10 @@ export type LogsExplorerControllerEvent =
   | {
       type: 'RECEIVE_DISCOVER_APP_STATE';
       appState: DiscoverAppState;
+    }
+  | {
+      type: 'RECEIVE_DISCOVER_DATA_STATE';
+      dataState: DataDocumentsMsg['result'];
     }
   | {
       type: 'RECEIVE_TIMEFILTER_TIME';
