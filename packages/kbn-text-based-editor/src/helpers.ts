@@ -53,8 +53,10 @@ export const parseWarning = (warning: string): MonacoMessage[] => {
         // if there's line number encoded in the message use it as new positioning
         // and replace the actual message without it
         if (/Line (\d+):(\d+):/.test(warningMessage)) {
-          const [encodedLine, encodedColumn, innerMessage] = warningMessage.split(':');
-          warningMessage = innerMessage;
+          const [encodedLine, encodedColumn, innerMessage, additionalInfoMessage] =
+            warningMessage.split(':');
+          // sometimes the warning comes to the format java.lang.IllegalArgumentException: warning message
+          warningMessage = additionalInfoMessage ?? innerMessage;
           if (!Number.isNaN(Number(encodedColumn))) {
             startColumn = Number(encodedColumn);
             startLineNumber = Number(encodedLine.replace('Line ', ''));
@@ -147,26 +149,6 @@ export const getDocumentationSections = async (language: string) => {
     description?: string;
     items: Array<{ label: string; description?: JSX.Element }>;
   }> = [];
-  if (language === 'sql') {
-    const {
-      comparisonOperators,
-      logicalOperators,
-      mathOperators,
-      initialSection,
-      aggregateFunctions,
-    } = await import('./sql_documentation_sections');
-    groups.push({
-      label: i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.howItWorks', {
-        defaultMessage: 'How it works',
-      }),
-      items: [],
-    });
-    groups.push(comparisonOperators, logicalOperators, mathOperators, aggregateFunctions);
-    return {
-      groups,
-      initialSection,
-    };
-  }
   if (language === 'esql') {
     const {
       sourceCommands,

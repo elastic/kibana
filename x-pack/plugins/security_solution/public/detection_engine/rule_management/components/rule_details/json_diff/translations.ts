@@ -31,10 +31,24 @@ export const BASE_VERSION_DESCRIPTION = i18n.translate(
   }
 );
 
-export const UPDATED_VERSION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.rules.upgradeRules.updatedVersionLabel',
+export const CURRENT_RULE_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionLabel',
   {
-    defaultMessage: 'Update',
+    defaultMessage: 'Current rule',
+  }
+);
+
+export const CURRENT_VERSION_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.currentVersionDescriptionLabel',
+  {
+    defaultMessage: 'Shows currently installed rule',
+  }
+);
+
+export const ELASTIC_UPDATE_VERSION = i18n.translate(
+  'xpack.securitySolution.detectionEngine.rules.upgradeRules.elasticUpdateVersionLabel',
+  {
+    defaultMessage: 'Elastic update',
   }
 );
 
