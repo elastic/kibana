@@ -27,21 +27,26 @@ const fieldTypes = ['number', 'date', 'boolean', 'ip', 'string', 'cartesian_poin
 
 function getCallbackMocks() {
   return {
-    getFieldsFor: jest.fn(async ({ query }) =>
-      /enrich/.test(query)
-        ? [
-            { name: 'otherField', type: 'string' },
-            { name: 'yetAnotherField', type: 'number' },
-          ]
-        : /unsupported_index/.test(query)
-        ? [{ name: 'unsupported_field', type: 'unsupported' }]
-        : [
-            ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
-            { name: 'any#Char$Field', type: 'number' },
-            { name: 'kubernetes.something.something', type: 'number' },
-            { name: '@timestamp', type: 'date' },
-          ]
-    ),
+    getFieldsFor: jest.fn(async ({ query }) => {
+      if (/enrich/.test(query)) {
+        return [
+          { name: 'otherField', type: 'string' },
+          { name: 'yetAnotherField', type: 'number' },
+        ];
+      }
+      if (/unsupported_index/.test(query)) {
+        return [{ name: 'unsupported_field', type: 'unsupported' }];
+      }
+      if (/dissect|grok/.test(query)) {
+        return [{ name: 'firstWord', type: 'string' }];
+      }
+      return [
+        ...fieldTypes.map((type) => ({ name: `${camelCase(type)}Field`, type })),
+        { name: 'any#Char$Field', type: 'number' },
+        { name: 'kubernetes.something.something', type: 'number' },
+        { name: '@timestamp', type: 'date' },
+      ];
+    }),
     getSources: jest.fn(async () =>
       ['a', 'index', 'otherIndex', '.secretIndex', 'my-index', 'unsupported_index'].map((name) => ({
         name,
@@ -250,7 +255,7 @@ describe('validation logic', () => {
       "SyntaxError: missing {QUOTED_IDENTIFIER, FROM_UNQUOTED_IDENTIFIER} at '<EOF>'",
     ]);
     testErrorsAndWarnings(`from assignment = 1`, [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "="',
+      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET, METADATA} but found "="',
       'Unknown index [assignment]',
     ]);
     testErrorsAndWarnings(`from index`, []);
@@ -262,21 +267,53 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from index, missingIndex`, ['Unknown index [missingIndex]']);
     testErrorsAndWarnings(`from fn()`, ['Unknown index [fn()]']);
     testErrorsAndWarnings(`from average()`, ['Unknown index [average()]']);
-    testErrorsAndWarnings(`from index [METADATA _id]`, []);
-    testErrorsAndWarnings(`from index [metadata _id]`, []);
+    for (const isWrapped of [true, false]) {
+      function setWrapping(option: string) {
+        return isWrapped ? `[${option}]` : option;
+      }
+      function addBracketsWarning() {
+        return isWrapped
+          ? ["Square brackets '[]' need to be removed from FROM METADATA declaration"]
+          : [];
+      }
+      testErrorsAndWarnings(`from index ${setWrapping('METADATA _id')}`, [], addBracketsWarning());
+      testErrorsAndWarnings(`from index ${setWrapping('metadata _id')}`, [], addBracketsWarning());
 
-    testErrorsAndWarnings(`from index [METADATA _id, _source]`, []);
-    testErrorsAndWarnings(`from index [METADATA _id, _source2]`, [
-      'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
-    ]);
-    testErrorsAndWarnings(`from index [metadata _id, _source] [METADATA _id2]`, [
-      'SyntaxError: expected {<EOF>, PIPE} but found "["',
-    ]);
-    testErrorsAndWarnings(`from index metadata _id`, [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "metadata"',
-    ]);
+      testErrorsAndWarnings(
+        `from index ${setWrapping('METADATA _id, _source')}`,
+        [],
+        addBracketsWarning()
+      );
+      testErrorsAndWarnings(
+        `from index ${setWrapping('METADATA _id, _source2')}`,
+        [
+          'Metadata field [_source2] is not available. Available metadata fields are: [_id, _source]',
+        ],
+        addBracketsWarning()
+      );
+      testErrorsAndWarnings(
+        `from index ${setWrapping('metadata _id, _source')} ${setWrapping('METADATA _id2')}`,
+        [
+          isWrapped
+            ? 'SyntaxError: expected {COMMA, CLOSING_BRACKET} but found "["'
+            : 'SyntaxError: expected {<EOF>, PIPE, COMMA} but found "METADATA"',
+        ],
+        addBracketsWarning()
+      );
+
+      testErrorsAndWarnings(
+        `from remote-ccs:indexes ${setWrapping('METADATA _id')}`,
+        [],
+        addBracketsWarning()
+      );
+      testErrorsAndWarnings(
+        `from *:indexes ${setWrapping('METADATA _id')}`,
+        [],
+        addBracketsWarning()
+      );
+    }
     testErrorsAndWarnings(`from index (metadata _id)`, [
-      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "(metadata"',
+      'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET, METADATA} but found "(metadata"',
     ]);
     testErrorsAndWarnings(`from ind*, other*`, []);
     testErrorsAndWarnings(`from index*`, []);
@@ -289,8 +326,6 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from remote-*:indexes`, []);
     testErrorsAndWarnings(`from remote-ccs:indexes`, []);
     testErrorsAndWarnings(`from a, remote-ccs:indexes`, []);
-    testErrorsAndWarnings(`from remote-ccs:indexes [METADATA _id]`, []);
-    testErrorsAndWarnings(`from *:indexes [METADATA _id]`, []);
     testErrorsAndWarnings('from .secretIndex', []);
     testErrorsAndWarnings('from my-index', []);
     testErrorsAndWarnings('from numberField', ['Unknown index [numberField]']);
@@ -374,7 +409,7 @@ describe('validation logic', () => {
         );
 
         testErrorsAndWarnings(`row var = ${signatureStringCorrect}`, []);
-        testErrorsAndWarnings(`row ${signatureStringCorrect}`);
+        testErrorsAndWarnings(`row ${signatureStringCorrect}`, []);
 
         if (alias) {
           for (const otherName of alias) {
@@ -412,7 +447,7 @@ describe('validation logic', () => {
             )[0].declaration
           );
 
-          testErrorsAndWarnings(`row var = ${signatureString}`);
+          testErrorsAndWarnings(`row var = ${signatureString}`, []);
 
           const wrongFieldMapping = params.map(({ name: _name, type, ...rest }) => {
             const typeString = type;
@@ -580,26 +615,18 @@ describe('validation logic', () => {
       'Unknown column [missingField]',
     ]);
     testErrorsAndWarnings('from index | keep `any#Char$Field`', []);
-    testErrorsAndWarnings(
-      'from index | project ',
-      [`SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'`],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
-    testErrorsAndWarnings(
-      'from index | project stringField, numberField, dateField',
-      [],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
-    testErrorsAndWarnings(
-      'from index | PROJECT stringField, numberField, dateField',
-      [],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
-    testErrorsAndWarnings(
-      'from index | project missingField, numberField, dateField',
-      ['Unknown column [missingField]'],
-      ['PROJECT command is no longer supported, please use KEEP instead']
-    );
+    testErrorsAndWarnings('from index | project ', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"project\"`,
+    ]);
+    testErrorsAndWarnings('from index | project stringField, numberField, dateField', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"project\"`,
+    ]);
+    testErrorsAndWarnings('from index | PROJECT stringField, numberField, dateField', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"PROJECT\"`,
+    ]);
+    testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
+      `SyntaxError: expected {DISSECT, DROP, ENRICH, EVAL, GROK, INLINESTATS, KEEP, LIMIT, MV_EXPAND, RENAME, SORT, STATS, WHERE} but found \"project\"`,
+    ]);
     testErrorsAndWarnings('from index | keep s*', []);
     testErrorsAndWarnings('from index | keep *Field', []);
     testErrorsAndWarnings('from index | keep s*Field', []);
@@ -736,27 +763,28 @@ describe('validation logic', () => {
       "SyntaxError: missing STRING at '%'",
     ]);
     // Do not try to validate the dissect pattern string
-    testErrorsAndWarnings('from a | dissect stringField "%{a}"', []);
-    testErrorsAndWarnings('from a | dissect numberField "%{a}"', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}"', []);
+    testErrorsAndWarnings('from a | dissect numberField "%{firstWord}"', [
       'DISSECT only supports string type values, found [numberField] of type number',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" option ', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option ', [
       'SyntaxError: expected {ASSIGN} but found "<EOF>"',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" option = ', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option = ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET} but found "<EOF>"',
       'Invalid option for DISSECT: [option]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" option = 1', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" option = 1', [
       'Invalid option for DISSECT: [option]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = "-"', []);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" ignore_missing = true', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" append_separator = "-"', []);
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" ignore_missing = true', [
       'Invalid option for DISSECT: [ignore_missing]',
     ]);
-    testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = true', [
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" append_separator = true', [
       'Invalid value for DISSECT append_separator: expected a string, but was [true]',
     ]);
+    testErrorsAndWarnings('from a | dissect stringField "%{firstWord}" | keep firstWord', []);
     // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
     //   'Using wildcards (*) in dissect is not allowed [s*]',
     // ]);
@@ -776,10 +804,11 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a | grok stringField %a', ["SyntaxError: missing STRING at '%'"]);
     // Do not try to validate the grok pattern string
-    testErrorsAndWarnings('from a | grok stringField "%{a}"', []);
-    testErrorsAndWarnings('from a | grok numberField "%{a}"', [
+    testErrorsAndWarnings('from a | grok stringField "%{firstWord}"', []);
+    testErrorsAndWarnings('from a | grok numberField "%{firstWord}"', [
       'GROK only supports string type values, found [numberField] of type number',
     ]);
+    testErrorsAndWarnings('from a | grok stringField "%{firstWord}" | keep firstWord', []);
     // testErrorsAndWarnings('from a | grok s* "%{a}"', [
     //   'Using wildcards (*) in grok is not allowed [s*]',
     // ]);
@@ -1047,7 +1076,7 @@ describe('validation logic', () => {
     }
 
     for (const { name, alias, signatures, ...defRest } of evalFunctionsDefinitions) {
-      for (const { params, returnType } of signatures) {
+      for (const { params, returnType, infiniteParams, minParams } of signatures) {
         const fieldMapping = getFieldMapping(params);
         testErrorsAndWarnings(
           `from a | eval var = ${
@@ -1128,6 +1157,40 @@ describe('validation logic', () => {
             }`,
             expectedErrors
           );
+
+          if (!infiniteParams && !minParams) {
+            // test that additional args are spotted
+            const fieldMappingWithOneExtraArg = getFieldMapping(params).concat({
+              name: 'extraArg',
+              type: 'number',
+            });
+            // get the expected args from the first signature in case of errors
+            const expectedArgs = signatures[0].params.filter(({ optional }) => !optional).length;
+            const shouldBeExactly = signatures[0].params.length;
+            testErrorsAndWarnings(
+              `from a | eval ${
+                getFunctionSignatures(
+                  {
+                    name,
+                    ...defRest,
+                    signatures: [{ params: fieldMappingWithOneExtraArg, returnType }],
+                  },
+                  { withTypes: false }
+                )[0].declaration
+              }`,
+              [
+                `Error building [${name}]: expects ${
+                  shouldBeExactly - expectedArgs === 0 ? 'exactly ' : ''
+                }${
+                  expectedArgs === 1
+                    ? 'one argument'
+                    : expectedArgs === 0
+                    ? '0 arguments'
+                    : `${expectedArgs} arguments`
+                }, passed ${fieldMappingWithOneExtraArg.length} instead.`,
+              ]
+            );
+          }
         }
 
         // test that wildcard won't work as arg
@@ -1151,6 +1214,37 @@ describe('validation logic', () => {
         }
       }
     }
+    testErrorsAndWarnings(
+      'from a | eval log10(-1)',
+      [],
+      ['Log of a negative number results in null: -1']
+    );
+    testErrorsAndWarnings(
+      'from a | eval log(-1)',
+      [],
+      ['Log of a negative number results in null: -1']
+    );
+    testErrorsAndWarnings(
+      'from a | eval log(-1, 20)',
+      [],
+      ['Log of a negative number results in null: -1']
+    );
+    testErrorsAndWarnings(
+      'from a | eval log(-1, -20)',
+      [],
+      [
+        'Log of a negative number results in null: -1',
+        'Log of a negative number results in null: -20',
+      ]
+    );
+    testErrorsAndWarnings(
+      'from a | eval var0 = log(-1, -20)',
+      [],
+      [
+        'Log of a negative number results in null: -1',
+        'Log of a negative number results in null: -20',
+      ]
+    );
     for (const op of ['>', '>=', '<', '<=', '==']) {
       testErrorsAndWarnings(`from a | eval numberField ${op} 0`, []);
       testErrorsAndWarnings(`from a | eval NOT numberField ${op} 0`, []);
@@ -1304,9 +1398,11 @@ describe('validation logic', () => {
     ]);
     testErrorsAndWarnings('from a | stats numberField=', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [=] of type [void]",
     ]);
     testErrorsAndWarnings('from a | stats numberField=5 by ', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "<EOF>"',
+      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [=] of type [void]",
     ]);
     testErrorsAndWarnings('from a | stats avg(numberField) by wrongField', [
       'Unknown column [wrongField]',
@@ -1347,6 +1443,12 @@ describe('validation logic', () => {
       'from a | stats avg(numberField), percentile(numberField, 50) BY ipField',
       []
     );
+    for (const op of ['+', '-', '*', '/', '%']) {
+      testErrorsAndWarnings(
+        `from a | stats avg(numberField) ${op} percentile(numberField, 50) BY ipField`,
+        []
+      );
+    }
     testErrorsAndWarnings('from a | stats count(* + 1) BY ipField', [
       'SyntaxError: expected {STRING, INTEGER_LITERAL, DECIMAL_LITERAL, FALSE, LP, NOT, NULL, PARAM, TRUE, PLUS, MINUS, OPENING_BRACKET, UNQUOTED_IDENTIFIER, QUOTED_IDENTIFIER} but found "+"',
     ]);
@@ -1359,15 +1461,33 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | stats count(count(*)) BY ipField', [
       `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [number]`,
     ]);
-    testErrorsAndWarnings('from a | stats numberField + 1', ['STATS does not support function +']);
+    testErrorsAndWarnings('from a | stats numberField + 1', [
+      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
+    ]);
+
+    for (const nesting of [1, 2, 3, 4]) {
+      const moreBuiltinWrapping = Array(nesting).fill('+ 1').join('');
+      testErrorsAndWarnings(`from a | stats 5 + avg(numberField) ${moreBuiltinWrapping}`, []);
+      testErrorsAndWarnings(`from a | stats 5 ${moreBuiltinWrapping} + avg(numberField)`, []);
+      testErrorsAndWarnings(`from a | stats 5 ${moreBuiltinWrapping} + numberField`, [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+      ]);
+      testErrorsAndWarnings(`from a | stats 5 + numberField ${moreBuiltinWrapping}`, [
+        "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+      ]);
+    }
+
+    testErrorsAndWarnings('from a | stats 5 + numberField + 1', [
+      "Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]",
+    ]);
 
     testErrorsAndWarnings('from a | stats numberField + 1 by ipField', [
-      'STATS does not support function +',
+      `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [+] of type [number]`,
     ]);
 
     testErrorsAndWarnings(
       'from a | stats avg(numberField), percentile(numberField, 50) + 1 by ipField',
-      ['STATS does not support function +']
+      []
     );
 
     testErrorsAndWarnings('from a | stats count(*)', []);
@@ -1393,6 +1513,52 @@ describe('validation logic', () => {
         );
         testErrorsAndWarnings(
           `from a | stats ${
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a | stats var = round(${
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          })`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a | stats round(${
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          })`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a | stats var = round(${
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          }) + ${
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          }`,
+          []
+        );
+        testErrorsAndWarnings(
+          `from a | stats round(${
+            getFunctionSignatures(
+              { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
+              { withTypes: false }
+            )[0].declaration
+          }) + ${
             getFunctionSignatures(
               { name, ...defRest, signatures: [{ params: fieldMapping, returnType }] },
               { withTypes: false }
@@ -1623,55 +1789,50 @@ describe('validation logic', () => {
 
   describe('enrich', () => {
     testErrorsAndWarnings(`from a | enrich`, [
-      'SyntaxError: expected {OPENING_BRACKET, ENRICH_POLICY_NAME} but found "<EOF>"',
+      "SyntaxError: missing ENRICH_POLICY_NAME at '<EOF>'",
     ]);
-    testErrorsAndWarnings(`from a | enrich [`, [
-      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich _`, ['Unknown policy [_]']);
+    testErrorsAndWarnings(`from a | enrich _:`, [
+      "SyntaxError: token recognition error at: ':'",
+      'Unknown policy [_]',
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode`, [
-      'SyntaxError: expected {COLON} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich _:policy`, [
+      'Unrecognized value [_] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:`, [
-      'SyntaxError: expected {SETTING} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich :policy`, [
+      "SyntaxError: token recognition error at: ':'",
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "<EOF>"',
+    testErrorsAndWarnings(`from a | enrich any:`, [
+      "SyntaxError: token recognition error at: ':'",
+      'Unknown policy [any]',
     ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] `, [
-      "SyntaxError: extraneous input '<EOF>' expecting {OPENING_BRACKET, ENRICH_POLICY_NAME}",
+    testErrorsAndWarnings(`from a | enrich _any:`, [
+      "SyntaxError: token recognition error at: ':'",
+      'Unknown policy [_any]',
+    ]);
+    testErrorsAndWarnings(`from a | enrich any:policy`, [
+      'Unrecognized value [any] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
     testErrorsAndWarnings(`from a | enrich policy `, []);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:value] policy `, [
-      'Unrecognized value [value], ENRICH [ccq.mode] needs to be one of [ANY, COORDINATOR, REMOTE]',
-    ]);
     for (const value of ['any', 'coordinator', 'remote']) {
-      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value}] policy `, []);
-      testErrorsAndWarnings(`from a | enrich [ccq.mode:${value.toUpperCase()}] policy `, []);
+      testErrorsAndWarnings(`from a | enrich _${value}:policy `, []);
+      testErrorsAndWarnings(`from a | enrich _${value} :  policy `, [
+        "SyntaxError: token recognition error at: ':'",
+        "SyntaxError: extraneous input 'policy' expecting <EOF>",
+        `Unknown policy [_${value}]`,
+      ]);
+      testErrorsAndWarnings(`from a | enrich _${value}:  policy `, [
+        "SyntaxError: token recognition error at: ':'",
+        "SyntaxError: extraneous input 'policy' expecting <EOF>",
+        `Unknown policy [_${value}]`,
+      ]);
+      testErrorsAndWarnings(`from a | enrich _${camelCase(value)}:policy `, []);
+      testErrorsAndWarnings(`from a | enrich _${value.toUpperCase()}:policy `, []);
     }
 
-    testErrorsAndWarnings(`from a | enrich [setting:value policy`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-      'Unsupported setting [setting], expected [ccq.mode]',
+    testErrorsAndWarnings(`from a | enrich _unknown:policy`, [
+      'Unrecognized value [_unknown] for ENRICH, mode needs to be one of [_ANY, _COORDINATOR, _REMOTE]',
     ]);
-
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-    ]);
-
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any policy`, [
-      'SyntaxError: expected {CLOSING_BRACKET} but found "policy"',
-    ]);
-
-    testErrorsAndWarnings(`from a | enrich [setting:value] policy`, [
-      'Unsupported setting [setting], expected [ccq.mode]',
-    ]);
-    testErrorsAndWarnings(`from a | enrich [ccq.mode:any] policy[]`, []);
-
-    testErrorsAndWarnings(
-      `from a | enrich [ccq.mode:any][ccq.mode:coordinator] policy[]`,
-      [],
-      ['Multiple definition of setting [ccq.mode]. Only last one will be applied.']
-    );
     testErrorsAndWarnings(`from a | enrich missing-policy `, ['Unknown policy [missing-policy]']);
     testErrorsAndWarnings(`from a | enrich policy on `, [
       "SyntaxError: missing {QUOTED_IDENTIFIER, UNQUOTED_ID_PATTERN} at '<EOF>'",
@@ -1749,7 +1910,7 @@ describe('validation logic', () => {
       expect(callbackMocks.getSources).not.toHaveBeenCalled();
     });
 
-    it(`should fetch policies if no enrich command is found`, async () => {
+    it(`should not fetch policies if no enrich command is found`, async () => {
       const callbackMocks = getCallbackMocks();
       await validateAst(`row a = 1 | eval a`, getAstAndErrors, callbackMocks);
       expect(callbackMocks.getPolicies).not.toHaveBeenCalled();
@@ -1793,6 +1954,34 @@ describe('validation logic', () => {
       expect(callbackMocks.getFieldsFor).toHaveBeenLastCalledWith({
         query: `from enrichIndex1 | keep otherField, yetAnotherField`,
       });
+    });
+
+    it(`should not crash if no callbacks are available`, async () => {
+      try {
+        await validateAst(
+          `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
+          getAstAndErrors,
+          {
+            getFieldsFor: undefined,
+            getSources: undefined,
+            getPolicies: undefined,
+            getMetaFields: undefined,
+          }
+        );
+      } catch {
+        fail('Should not throw');
+      }
+    });
+
+    it(`should not crash if no callbacks are passed`, async () => {
+      try {
+        await validateAst(
+          `from a | eval b  = a | enrich policy | dissect stringField "%{firstWord}"`,
+          getAstAndErrors
+        );
+      } catch {
+        fail('Should not throw');
+      }
     });
   });
 });

@@ -22,10 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const PageObjects = getPageObjects([
     'common',
-    'unifiedSearch',
+    'svlCommonPage',
     'discover',
     'timePicker',
-    'settings',
     'header',
     'context',
     'dashboard',
@@ -45,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover.json');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
-
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await PageObjects.common.navigateToApp('discover');
     });
