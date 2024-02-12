@@ -53,6 +53,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
   const RECOVERED_PATH = 'kibana.alert.rule.execution.metrics.alert_counts.recovered';
   const ACTION_PATH = 'kibana.alert.rule.execution.metrics.number_of_triggered_actions';
   const UUID_PATH = 'kibana.alert.rule.execution.uuid';
+  const DELAYED_PATH = 'kibana.alert.rule.execution.metrics.number_of_delayed_alerts';
 
   const es = getService('es');
   const retry = getService('retry');
@@ -152,6 +153,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
       const alertDocsRun1 = await queryForAlertDocs<PatternFiringAlert>();
@@ -178,6 +180,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
       const alertDocsRun2 = await queryForAlertDocs<PatternFiringAlert>();
@@ -205,6 +208,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(1);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(1);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun3 = await queryForAlertDocs<PatternFiringAlert>();
@@ -260,6 +264,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun4 = await queryForAlertDocs<PatternFiringAlert>();
@@ -311,6 +316,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(1);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun5 = await queryForAlertDocs<PatternFiringAlert>();
@@ -366,6 +372,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(1);
 
       // Query for alerts
       const alertDocsRun6 = await queryForAlertDocs<PatternFiringAlert>();
@@ -439,6 +446,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(2);
 
       // Query for alerts
       const alertDocsRun1 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -465,6 +473,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(2);
 
       // Query for alerts
       const alertDocsRun2 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -493,6 +502,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(2);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(2);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun3 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);
@@ -555,6 +565,7 @@ export default function createAlertsAsDataAlertDelayInstallResourcesTest({
       expect(get(executeEvent, NEW_PATH)).to.be(0);
       expect(get(executeEvent, RECOVERED_PATH)).to.be(0);
       expect(get(executeEvent, ACTION_PATH)).to.be(0);
+      expect(get(executeEvent, DELAYED_PATH)).to.be(0);
 
       // Query for alerts
       const alertDocsRun4 = await queryForAlertDocs<Alert>(alwaysFiringAlertsAsDataIndex);

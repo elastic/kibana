@@ -22,6 +22,7 @@ import {
 } from '../../../../../../common/search_strategy';
 import { RiskScoreEntity } from '../../../../../../common/entity_analytics/risk_engine';
 import { ContextsTable } from './contexts_table';
+import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 export interface RiskInputsTabProps extends Record<string, unknown> {
   entityType: RiskScoreEntity;
   entityName: string;
@@ -79,7 +80,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     []
   );
 
-  const columns: Array<EuiBasicTableColumn<AlertRawData>> = useMemo(
+  const alertsColumns: Array<EuiBasicTableColumn<AlertRawData>> = useMemo(
     () => [
       {
         name: (
@@ -143,6 +144,10 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     [currentPage.index, currentPage.size, alertsData?.length]
   );
 
+  const isAssetCriticalityEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsAssetCriticalityEnabled'
+  );
+
   if (riskScoreError || riskAlertsError) {
     return (
       <EuiCallOut
@@ -165,7 +170,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
     );
   }
 
-  return (
+  const riskInputsContextSection = (
     <>
       <EuiTitle size="xs" data-test-subj="risk-input-contexts-title">
         <h3>
@@ -178,6 +183,11 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
       <EuiSpacer size="xs" />
       <ContextsTable riskScore={riskScore} loading={loadingRiskScore} />
       <EuiSpacer size="m" />
+    </>
+  );
+
+  const riskInputsAlertSection = (
+    <>
       <EuiTitle size="xs" data-test-subj="risk-input-alert-title">
         <h3>
           <FormattedMessage
@@ -193,7 +203,7 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         compressed={true}
         loading={loadingRiskScore || loadingAlerts}
         items={alertsData ?? []}
-        columns={columns}
+        columns={alertsColumns}
         pagination
         sorting
         selection={euiTableSelectionProps}
@@ -201,6 +211,13 @@ export const RiskInputsTab = ({ entityType, entityName }: RiskInputsTabProps) =>
         isSelectable
         itemId="_id"
       />
+    </>
+  );
+
+  return (
+    <>
+      {isAssetCriticalityEnabled && riskInputsContextSection}
+      {riskInputsAlertSection}
     </>
   );
 };

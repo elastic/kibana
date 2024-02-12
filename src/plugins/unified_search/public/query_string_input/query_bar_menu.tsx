@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, RefObject } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -15,15 +15,22 @@ import {
   useGeneratedHtmlId,
   EuiButtonIconProps,
   EuiToolTip,
-  useEuiTheme,
 } from '@elastic/eui';
+import {
+  EuiContextMenuClass,
+  EuiContextMenuPanelId,
+} from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { SavedQueryService, SavedQuery } from '@kbn/data-plugin/public';
-import { QueryBarMenuPanels, QueryBarMenuPanelsProps } from './query_bar_menu_panels';
+import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
+import { euiThemeVars } from '@kbn/ui-theme';
+import {
+  QueryBarMenuPanel,
+  useQueryBarMenuPanels,
+  QueryBarMenuPanelsProps,
+} from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import { popoverDragAndDropCss } from './add_filter_popover.styles';
 import {
   withCloseFilterEditorConfirmModal,
   WithCloseFilterEditorConfirmModalProps,
@@ -51,6 +58,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   disableQueryLanguageSwitcher?: boolean;
   dateRangeFrom?: string;
   dateRangeTo?: string;
+  timeFilter?: SavedQueryTimeFilter;
   savedQueryService: SavedQueryService;
   saveAsNewQueryFormComponent?: JSX.Element;
   saveFormComponent?: JSX.Element;
@@ -71,6 +79,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   isDisabled?: boolean;
   suggestionsAbstraction?: SuggestionsAbstraction;
   renderQueryInputAppend?: () => React.ReactNode;
+  queryBarMenuRef: RefObject<EuiContextMenuClass>;
 }
 
 function QueryBarMenuComponent({
@@ -79,6 +88,7 @@ function QueryBarMenuComponent({
   disableQueryLanguageSwitcher,
   dateRangeFrom,
   dateRangeTo,
+  timeFilter,
   onQueryChange,
   onQueryBarSubmit,
   savedQueryService,
@@ -105,13 +115,16 @@ function QueryBarMenuComponent({
   onLocalFilterCreate,
   onLocalFilterUpdate,
   suggestionsAbstraction,
+  queryBarMenuRef,
 }: QueryBarMenuProps) {
   const [renderedComponent, setRenderedComponent] = useState('menu');
-
-  const euiTheme = useEuiTheme();
+  const [currentPanelId, setCurrentPanelId] = useState<EuiContextMenuPanelId>(
+    QueryBarMenuPanel.main
+  );
 
   useEffect(() => {
     if (openQueryBarMenu) {
+      setCurrentPanelId(QueryBarMenuPanel.main);
       setRenderedComponent('menu');
     }
   }, [openQueryBarMenu]);
@@ -141,7 +154,7 @@ function QueryBarMenuComponent({
         onClick={onButtonClick}
         isDisabled={isDisabled}
         {...buttonProps}
-        style={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
+        css={{ borderTopRightRadius: 0, borderBottomRightRadius: 0 }}
         iconType="filter"
         aria-label={strings.getFilterSetButtonLabel()}
         data-test-subj="showQueryBarMenu"
@@ -149,22 +162,25 @@ function QueryBarMenuComponent({
     </EuiToolTip>
   );
 
-  const panels = QueryBarMenuPanels({
+  const panels = useQueryBarMenuPanels({
     filters,
     savedQuery,
     language,
     dateRangeFrom,
     dateRangeTo,
+    timeFilter,
     query,
     showSaveQuery,
     showFilterBar,
     showQueryInput,
     savedQueryService,
+    saveFormComponent,
     saveAsNewQueryFormComponent,
     manageFilterSetComponent,
     hiddenPanelOptions,
     nonKqlMode,
     disableQueryLanguageSwitcher,
+    queryBarMenuRef,
     closePopover: plainClosePopover,
     onQueryBarSubmit,
     onFiltersUpdated,
@@ -176,21 +192,41 @@ function QueryBarMenuComponent({
   const renderComponent = () => {
     switch (renderedComponent) {
       case 'menu':
-      default:
         return (
-          <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="queryBarMenuPanel" />
-        );
-      case 'saveForm':
-        return (
-          <EuiContextMenuPanel
-            title={strings.getSavedQueryPopoverSaveChangesButtonText()}
-            items={[<div style={{ padding: 16 }}>{saveFormComponent}</div>]}
-          />
-        );
-      case 'saveAsNewForm':
-        return (
-          <EuiContextMenuPanel
-            items={[<div style={{ padding: 16 }}>{saveAsNewQueryFormComponent}</div>]}
+          <EuiContextMenu
+            // @ts-expect-error EuiContextMenu ref is mistyped
+            ref={queryBarMenuRef}
+            initialPanelId={QueryBarMenuPanel.main}
+            panels={panels}
+            onPanelChange={({ panelId }) => setCurrentPanelId(panelId)}
+            data-test-subj="queryBarMenuPanel"
+            css={[
+              {
+                // Add width to transition properties to smooth
+                // the animation when the panel width changes
+                transitionProperty: 'width, height !important',
+                // Add a white background to panels since panels
+                // of different widths can overlap each other
+                // when transitioning, but the background colour
+                // ensures the incoming panel always overlays
+                // the outgoing panel which improves the effect
+                '.euiContextMenuPanel': {
+                  backgroundColor: euiThemeVars.euiColorEmptyShade,
+                },
+              },
+              // Fix the update button underline on hover, and
+              // the button focus outline being cut off
+              currentPanelId === QueryBarMenuPanel.main && {
+                '.euiContextMenuPanel__title': {
+                  ':hover': {
+                    textDecoration: 'none !important',
+                  },
+                  '.euiContextMenuItem__text': {
+                    overflow: 'visible',
+                  },
+                },
+              },
+            ]}
           />
         );
       case 'addFilter':
@@ -217,23 +253,19 @@ function QueryBarMenuComponent({
   };
 
   return (
-    <>
-      <EuiPopover
-        id={normalContextMenuPopoverId}
-        button={button}
-        isOpen={openQueryBarMenu}
-        closePopover={renderedComponent === 'addFilter' ? closePopover : plainClosePopover}
-        panelPaddingSize="none"
-        anchorPosition="downLeft"
-        repositionOnScroll
-        data-test-subj="queryBarMenuPopover"
-        panelProps={{
-          css: popoverDragAndDropCss(euiTheme),
-        }}
-      >
-        {renderComponent()}
-      </EuiPopover>
-    </>
+    <EuiPopover
+      id={normalContextMenuPopoverId}
+      button={button}
+      isOpen={openQueryBarMenu}
+      closePopover={renderedComponent === 'addFilter' ? closePopover : plainClosePopover}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+      repositionOnScroll
+      data-test-subj="queryBarMenuPopover"
+      hasDragDrop
+    >
+      {renderComponent()}
+    </EuiPopover>
   );
 }
 
