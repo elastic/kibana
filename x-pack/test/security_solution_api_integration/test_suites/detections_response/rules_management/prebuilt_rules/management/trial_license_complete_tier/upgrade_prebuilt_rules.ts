@@ -8,7 +8,6 @@ import expect from 'expect';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../../config/shared';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
-  deleteAllRules,
   deleteAllTimelines,
   deleteAllPrebuiltRuleAssets,
   createRuleAssetSavedObject,
@@ -21,6 +20,7 @@ import {
   fetchRule,
   patchRule,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../../common/utils/security_solution';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
