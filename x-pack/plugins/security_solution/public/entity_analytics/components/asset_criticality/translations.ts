@@ -19,25 +19,25 @@ export const CRITICALITY_LEVEL_TITLE: Record<CriticalityLevel, string> = {
   normal: i18n.translate(
     'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.normal',
     {
-      defaultMessage: 'Normal',
+      defaultMessage: 'Medium impact',
     }
   ),
   not_important: i18n.translate(
     'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.notImportant',
     {
-      defaultMessage: 'Not important',
+      defaultMessage: 'Low impact',
     }
   ),
   important: i18n.translate(
     'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.important',
     {
-      defaultMessage: 'Important',
+      defaultMessage: 'High impact',
     }
   ),
   very_important: i18n.translate(
     'xpack.securitySolution.entityAnalytics.assetCriticality.levelTitle.veryImportant',
     {
-      defaultMessage: 'Very important',
+      defaultMessage: 'Extreme impact',
     }
   ),
 };
