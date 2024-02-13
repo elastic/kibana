@@ -11,12 +11,12 @@ import { RISK_SCORE_PREVIEW_URL } from '@kbn/security-solution-plugin/common/con
 import type { RiskScore } from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { v4 as uuidv4 } from 'uuid';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { dataGeneratorFactory } from '../../../detections_response/utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
   deleteAllRules,
-  dataGeneratorFactory,
-} from '../../../detections_response/utils';
+} from '../../../../../common/utils/security_solution';
 import {
   assetCriticalityRouteHelpersFactory,
   buildDocument,

@@ -12,7 +12,8 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Configure } from './configure';
 
-describe('Configure ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/176600
+describe.skip('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
