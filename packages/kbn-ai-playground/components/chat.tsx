@@ -127,9 +127,7 @@ export const Chat = () => {
             name={ChatFormFields.openAIKey}
             control={control}
             defaultValue=""
-            render={({ field }) => (
-              <OpenAIKey apiKey={field.value} onSave={field.onChange} />
-            )}
+            render={({ field }) => <OpenAIKeyField apiKey={field.value} onSave={field.onChange} />}
           />
 
           <Controller
