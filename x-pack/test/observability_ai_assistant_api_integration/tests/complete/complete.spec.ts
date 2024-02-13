@@ -93,7 +93,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           messages,
           connectorId,
           persist: false,
-          appContexts: [],
+          screenContexts: [],
         })
         .pipe(passThrough);
 
@@ -211,7 +211,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               messages,
               connectorId,
               persist: true,
-              appContexts: [],
+              screenContexts: [],
             })
             .end((err, response) => {
               if (err) {

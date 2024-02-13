@@ -119,8 +119,8 @@ export function ApmMainTemplate({
   });
 
   useEffect(() => {
-    return aiAssistant.setApplicationContext({
-      description: [
+    return aiAssistant.setScreenContext({
+      screenDescription: [
         hasApmData
           ? 'The user has APM data.'
           : 'The user does not have APM data.',

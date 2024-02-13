@@ -58,7 +58,7 @@ export function AlertDetails() {
     http,
     triggersActionsUi: { ruleTypeRegistry },
     observabilityAIAssistant: {
-      service: { setApplicationContext },
+      service: { setScreenContext },
     },
     uiSettings,
   } = useKibana().services;
@@ -80,7 +80,7 @@ export function AlertDetails() {
       return;
     }
 
-    const description = dedent(`The user is looking at an ${
+    const screenDescription = dedent(`The user is looking at an ${
       alertDetail.formatted.active ? 'active' : 'recovered'
     } alert.
     It started at ${new Date(
@@ -96,8 +96,8 @@ export function AlertDetails() {
     }
     `);
 
-    return setApplicationContext({
-      description,
+    return setScreenContext({
+      screenDescription,
       data: [
         {
           name: 'alert_fields',
@@ -106,7 +106,7 @@ export function AlertDetails() {
         },
       ],
     });
-  }, [setApplicationContext, alertDetail]);
+  }, [setScreenContext, alertDetail]);
 
   useEffect(() => {
     if (alertDetail) {

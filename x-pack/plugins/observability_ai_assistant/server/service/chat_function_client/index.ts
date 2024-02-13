@@ -15,7 +15,7 @@ import {
   FunctionResponse,
   FunctionVisibility,
   Message,
-  ObservabilityAIAssistantAppContext,
+  ObservabilityAIAssistantScreenContext,
   RegisterContextDefinition,
 } from '../../../common/types';
 import { filterFunctionDefinitions } from '../../../common/utils/filter_function_definitions';
@@ -36,8 +36,8 @@ export class ChatFunctionClient {
   private readonly functionRegistry: FunctionHandlerRegistry = new Map();
   private readonly validators: Map<string, ValidateFunction> = new Map();
 
-  constructor(private readonly appContexts: ObservabilityAIAssistantAppContext[]) {
-    const allData = compact(appContexts.flatMap((context) => context.data));
+  constructor(private readonly screenContexts: ObservabilityAIAssistantScreenContext[]) {
+    const allData = compact(screenContexts.flatMap((context) => context.data));
 
     if (allData.length) {
       this.registerFunction(
@@ -146,7 +146,7 @@ export class ChatFunctionClient {
     this.validate(name, parsedArguments);
 
     return await fn.respond(
-      { arguments: parsedArguments, messages, connectorId, appContexts: this.appContexts },
+      { arguments: parsedArguments, messages, connectorId, screenContexts: this.screenContexts },
       signal
     );
   }

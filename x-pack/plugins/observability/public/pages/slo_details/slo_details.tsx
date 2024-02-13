@@ -36,7 +36,7 @@ export function SloDetailsPage() {
     application: { navigateToUrl },
     http: { basePath },
     observabilityAIAssistant: {
-      service: { setApplicationContext },
+      service: { setScreenContext },
     },
   } = useKibana().services;
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -62,8 +62,8 @@ export function SloDetailsPage() {
       return;
     }
 
-    return setApplicationContext({
-      description: dedent(`
+    return setScreenContext({
+      screenDescription: dedent(`
         The user is looking at the detail page for the following SLO
         
         Name: ${slo.name}.
@@ -80,7 +80,7 @@ export function SloDetailsPage() {
         },
       ],
     });
-  }, [setApplicationContext, slo]);
+  }, [setScreenContext, slo]);
 
   const isSloNotFound = !isLoading && slo === undefined;
   if (isSloNotFound) {

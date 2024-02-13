@@ -63,7 +63,7 @@ export function registerContextFunction({
         required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: args, messages, connectorId, appContexts }, signal) => {
+    async ({ arguments: args, messages, connectorId, screenContexts }, signal) => {
       const { queries, categories } = args;
 
       async function getContext() {
@@ -71,10 +71,14 @@ export function registerContextFunction({
           (message) => message.message.role === MessageRole.System
         );
 
-        const screenDescription = appContexts.map((context) => context.description).join('\n\n');
+        const screenDescription = compact(
+          screenContexts.map((context) => context.screenDescription)
+        ).join('\n\n');
         // any data that falls within the token limit, send it automatically
 
-        const dataWithinTokenLimit = compact(appContexts.flatMap((context) => context.data)).filter(
+        const dataWithinTokenLimit = compact(
+          screenContexts.flatMap((context) => context.data)
+        ).filter(
           (data) => encode(JSON.stringify(data.value)).length <= MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN
         );
 

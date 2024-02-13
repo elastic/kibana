@@ -40,7 +40,7 @@ export function SloList() {
 
   const {
     observabilityAIAssistant: {
-      service: { setApplicationContext },
+      service: { setScreenContext },
     },
   } = useKibana().services;
   const { results = [], total = 0 } = sloList ?? {};
@@ -64,8 +64,8 @@ export function SloList() {
       (groupResults) => groupResults.map((result) => `- ${result.name}`).join('\n')
     ) as Record<typeof results[number]['summary']['status'], string>;
 
-    return setApplicationContext({
-      description: dedent(`The user is looking at a list of SLOs.
+    return setScreenContext({
+      screenDescription: dedent(`The user is looking at a list of SLOs.
 
       ${
         sloList.total >= 1
@@ -88,7 +88,7 @@ export function SloList() {
       }
       `),
     });
-  }, [sloList, setApplicationContext]);
+  }, [sloList, setScreenContext]);
 
   return (
     <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloList">

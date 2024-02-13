@@ -99,7 +99,7 @@ describe('chatFunctionClient', () => {
     it('exposes a function that returns the requested data', async () => {
       const client = new ChatFunctionClient([
         {
-          description: 'My description',
+          screenDescription: 'My description',
           data: [
             {
               name: 'my_dummy_data',

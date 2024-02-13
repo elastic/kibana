@@ -38,7 +38,7 @@ import type {
   FunctionDefinition,
   FunctionResponse,
   Message,
-  ObservabilityAIAssistantAppContext,
+  ObservabilityAIAssistantScreenContext,
   PendingMessage,
 } from '../common/types';
 import type { ChatActionClickHandler } from './components/chat/types';
@@ -63,7 +63,7 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    appContexts: ObservabilityAIAssistantAppContext[];
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
@@ -90,8 +90,8 @@ export interface ObservabilityAIAssistantService {
   getLicenseManagementLocator: () => SharePluginStart;
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
-  setApplicationContext: (appContext: ObservabilityAIAssistantAppContext) => () => void;
-  getApplicationContexts: () => ObservabilityAIAssistantAppContext[];
+  setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
+  getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {

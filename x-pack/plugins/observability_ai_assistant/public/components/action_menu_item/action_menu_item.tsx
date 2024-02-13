@@ -45,8 +45,8 @@ export function ObservabilityAIAssistantActionMenuItem() {
   }, []);
 
   useEffect(() => {
-    const unregister = service.setApplicationContext({
-      description: 'The user is looking at ' + window.location.href,
+    const unregister = service.setScreenContext({
+      screenDescription: 'The user is looking at ' + window.location.href,
     });
 
     return () => {

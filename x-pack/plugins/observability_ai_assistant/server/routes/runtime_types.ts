@@ -13,7 +13,7 @@ import {
   type ConversationUpdateRequest,
   type Message,
   MessageRole,
-  type ObservabilityAIAssistantAppContext,
+  type ObservabilityAIAssistantScreenContext,
 } from '../../common/types';
 
 const serializeableRt = t.any;
@@ -94,7 +94,7 @@ export const conversationRt: t.Type<Conversation> = t.intersection([
   }),
 ]);
 
-export const appContextRt: t.Type<ObservabilityAIAssistantAppContext> = t.partial({
+export const screenContextRt: t.Type<ObservabilityAIAssistantScreenContext> = t.partial({
   description: t.string,
   data: t.array(
     t.type({

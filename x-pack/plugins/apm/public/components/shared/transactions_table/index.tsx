@@ -164,12 +164,11 @@ export function TransactionsTable({
       };
     }, [mainStatistics.maxCountExceeded, setSearchQueryDebounced]);
 
-  const setApplicationContext =
-    useApmPluginContext().observabilityAIAssistant.service
-      .setApplicationContext;
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
-    return setApplicationContext({
+    return setScreenContext({
       data: [
         {
           name: 'top_transactions',
@@ -183,7 +182,7 @@ export function TransactionsTable({
         },
       ],
     });
-  }, [setApplicationContext, mainStatistics]);
+  }, [setScreenContext, mainStatistics]);
 
   return (
     <EuiFlexGroup

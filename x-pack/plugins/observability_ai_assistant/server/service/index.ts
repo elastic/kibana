@@ -13,7 +13,7 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
-import { KnowledgeBaseEntryRole, ObservabilityAIAssistantAppContext } from '../../common/types';
+import { KnowledgeBaseEntryRole, ObservabilityAIAssistantScreenContext } from '../../common/types';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ChatFunctionClient } from './chat_function_client';
 import { ObservabilityAIAssistantClient } from './client';
@@ -286,17 +286,17 @@ export class ObservabilityAIAssistantService {
   }
 
   async getFunctionClient({
-    appContexts,
+    screenContexts,
     signal,
     resources,
     client,
   }: {
-    appContexts: ObservabilityAIAssistantAppContext[];
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     signal: AbortSignal;
     resources: RespondFunctionResources;
     client: ObservabilityAIAssistantClient;
   }): Promise<ChatFunctionClient> {
-    const fnClient = new ChatFunctionClient(appContexts);
+    const fnClient = new ChatFunctionClient(screenContexts);
 
     const params = {
       signal,

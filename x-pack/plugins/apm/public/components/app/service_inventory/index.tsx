@@ -266,24 +266,23 @@ export function ServiceInventory() {
     [tiebreakerField]
   );
 
-  const setApplicationContext =
-    useApmPluginContext().observabilityAIAssistant.service
-      .setApplicationContext;
+  const { setScreenContext } =
+    useApmPluginContext().observabilityAIAssistant.service;
 
   useEffect(() => {
     if (isFailure(mainStatisticsStatus)) {
-      return setApplicationContext({
-        description: 'The services have failed to load',
+      return setScreenContext({
+        screenDescription: 'The services have failed to load',
       });
     }
 
     if (isPending(mainStatisticsStatus)) {
-      return setApplicationContext({
-        description: 'The services are still loading',
+      return setScreenContext({
+        screenDescription: 'The services are still loading',
       });
     }
 
-    return setApplicationContext({
+    return setScreenContext({
       data: [
         {
           name: 'services',
@@ -292,7 +291,7 @@ export function ServiceInventory() {
         },
       ],
     });
-  }, [mainStatisticsStatus, mainStatisticsData.items, setApplicationContext]);
+  }, [mainStatisticsStatus, mainStatisticsData.items, setScreenContext]);
 
   return (
     <>

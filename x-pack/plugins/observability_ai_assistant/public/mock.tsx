@@ -65,8 +65,8 @@ export const mockService: ObservabilityAIAssistantService = {
       navigate: () => {},
     } as unknown as SharePluginStart),
   register: () => {},
-  setApplicationContext: () => noop,
-  getApplicationContexts: () => [],
+  setScreenContext: () => noop,
+  getScreenContexts: () => [],
 };
 
 function createSetupContract(): ObservabilityAIAssistantPluginSetup {

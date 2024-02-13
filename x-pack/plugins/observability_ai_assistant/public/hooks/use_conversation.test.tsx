@@ -43,8 +43,8 @@ const mockService: MockedService = {
   isEnabled: jest.fn(),
   start: jest.fn(),
   register: jest.fn(),
-  setApplicationContext: jest.fn(),
-  getApplicationContexts: jest.fn(),
+  setScreenContext: jest.fn(),
+  getScreenContexts: jest.fn(),
 };
 
 const mockChatService = createMockChatService();

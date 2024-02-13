@@ -127,8 +127,8 @@ export type RegisterContextDefinition = (options: ContextDefinition) => void;
 export type ContextRegistry = Map<string, ContextDefinition>;
 export type FunctionRegistry = Map<string, FunctionDefinition>;
 
-export interface ObservabilityAIAssistantAppContext {
-  description?: string;
+export interface ObservabilityAIAssistantScreenContext {
+  screenDescription?: string;
   data?: Array<{
     name: string;
     description: string;
