@@ -73,6 +73,8 @@ export const EmbeddableSingleMetricViewerContainer: FC<
     onRenderComplete
   );
   const selectedJobId = data?.jobIds[0];
+  // Need to make sure we fall back to `undefined` if `functionDescription` is an empty string,
+  // otherwise anomaly table data will not be loaded.
   const functionDescription =
     (data?.functionDescription ?? '') === '' ? undefined : data.functionDescription;
   const previousRefresh = usePrevious(lastRefresh ?? 0);
