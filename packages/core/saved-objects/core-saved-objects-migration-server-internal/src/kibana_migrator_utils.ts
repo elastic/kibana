@@ -67,7 +67,7 @@ export async function getCurrentIndexTypesMap({
         client.indices.getMapping({
           index: mainIndex,
         }),
-      logger,
+      undefined, // .kibana will NOT exist on a fresh start, and this should not result in a WARN in the logs
       retryDelay
     );
 

@@ -60,7 +60,7 @@ export const retryCallCluster = <T extends Promise<unknown>>(apiCaller: () => T)
  */
 export const migrationRetryCallCluster = <T extends Promise<unknown>>(
   apiCaller: () => T,
-  log: Logger,
+  log?: Logger, // users might not want to log errors at this level, so we make the logger optional
   delay: number = 2500
 ): T => {
   const previousErrors: string[] = [];
@@ -70,7 +70,7 @@ export const migrationRetryCallCluster = <T extends Promise<unknown>>(
         errors.pipe(
           concatMap((error) => {
             if (!previousErrors.includes(error.message)) {
-              log.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
+              log?.warn(`Unable to connect to Elasticsearch. Error: ${error.message}`);
               previousErrors.push(error.message);
             }
             return iif(
