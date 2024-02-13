@@ -9,7 +9,7 @@
 import { debounce } from 'lodash';
 import React, { FC, useState, useMemo, useEffect, useCallback, useRef } from 'react';
 
-import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken } from '@elastic/eui';
+import { EuiRangeTick, EuiDualRange, EuiDualRangeProps, EuiToken, EuiToolTip } from '@elastic/eui';
 
 import { RangeValue } from '../../../common/range_slider/types';
 import { useRangeSlider } from '../embeddable/range_slider_embeddable';
@@ -18,6 +18,7 @@ import { ControlError } from '../../control_group/component/control_error_compon
 import './range_slider.scss';
 import { MIN_POPOVER_WIDTH } from '../../constants';
 import { useFieldFormatter } from '../../hooks/use_field_formatter';
+import { RangeSliderStrings } from './range_slider_strings';
 
 export const RangeSliderControl: FC = () => {
   /** Controls Services Context */
@@ -167,7 +168,20 @@ export const RangeSliderControl: FC = () => {
         append={
           isInvalid ? (
             <div className="rangeSlider__invalidToken">
-              <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
+              <EuiToolTip
+                position="top"
+                content={RangeSliderStrings.control.getInvalidSelectionWarningContent()}
+                delay="long"
+              >
+                <EuiToken
+                  iconType="alert"
+                  size="s"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
+                  title={RangeSliderStrings.control.getInvalidSelectionWarningTitle()}
+                />
+              </EuiToolTip>
             </div>
           ) : undefined
         }

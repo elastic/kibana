@@ -18,6 +18,7 @@ import {
   EuiFlexItem,
   EuiInputPopover,
   EuiToken,
+  EuiToolTip,
 } from '@elastic/eui';
 
 import { MAX_OPTIONS_LIST_REQUEST_SIZE } from '../types';
@@ -145,9 +146,27 @@ export const OptionsListControl = ({
               )}
             </div>
           </EuiFlexItem>
-          {(invalidSelections ?? []).length > 0 && (
+          {invalidSelections && invalidSelections.length > 0 && (
             <EuiFlexItem grow={false}>
-              <EuiToken iconType="alert" size="s" color="euiColorVis5" shape="square" fill="dark" />
+              <EuiToolTip
+                position="top"
+                content={OptionsListStrings.control.getInvalidSelectionWarningContent(
+                  invalidSelections.length
+                )}
+                delay="long"
+              >
+                <EuiToken
+                  iconType="alert"
+                  size="s"
+                  color="euiColorVis5"
+                  shape="square"
+                  fill="dark"
+                  title={OptionsListStrings.control.getInvalidSelectionWarningTitle(
+                    invalidSelections.length
+                  )}
+                  css={{ verticalAlign: 'text-bottom' }} // Align with the notification badge
+                />
+              </EuiToolTip>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

@@ -9,6 +9,17 @@
 import { i18n } from '@kbn/i18n';
 
 export const RangeSliderStrings = {
+  control: {
+    getInvalidSelectionWarningTitle: () =>
+      i18n.translate('controls.rangeSlider.control.invalidSelectionWarningTitle', {
+        defaultMessage: 'Selected range returns no results',
+      }),
+    getInvalidSelectionWarningContent: () =>
+      i18n.translate('controls.optionsList.control.invalidSelectionWarningMessage', {
+        defaultMessage:
+          'Selected range returns no results. Select a different range or adjust the time range and filters.',
+      }),
+  },
   editor: {
     getStepTitle: () =>
       i18n.translate('controls.rangeSlider.editor.stepSizeTitle', {

@@ -33,18 +33,21 @@ export const OptionsListStrings = {
       i18n.translate('controls.optionsList.control.excludeExists', {
         defaultMessage: 'DOES NOT',
       }),
-    getInvalidSelectionWarningTitle: () =>
+    getInvalidSelectionWarningTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.control.invalidSelectionWarningTitle', {
-        defaultMessage: 'You have invalid selections',
+        defaultMessage:
+          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection} other {selections}} return no results',
+        values: {
+          invalidSelectionCount,
+        },
       }),
-    getInvalidSelectionWarningContent: () =>
+    getInvalidSelectionWarningContent: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.control.invalidSelectionWarningMessage', {
         defaultMessage:
-          'To increase Dashboard performance, invalid selections in Controls are no longer ignored. Please remove invalid selections to see complete results.',
-      }),
-    getInvalidSelectionWarningDismissButton: () =>
-      i18n.translate('controls.optionsList.control.invalidSelectionWarningConfirmButton', {
-        defaultMessage: 'Do not show again',
+          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection} other {selections}} return no results. Remove them for complete results',
+        values: {
+          invalidSelectionCount,
+        },
       }),
   },
   editor: {
