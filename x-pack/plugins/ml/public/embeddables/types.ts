@@ -30,6 +30,7 @@ import { MlResultsService } from '../application/services/results_service';
 import type { MlApiServices } from '../application/services/ml_api_service';
 import type { MlFieldFormatService } from '../application/services/field_format_service';
 import type { MlTimeSeriesSeachService } from '../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service';
+import type { MlCapabilitiesService } from '../application/capabilities/check_capabilities';
 
 export interface AnomalySwimlaneEmbeddableCustomInput {
   jobIds: JobId[];
@@ -131,6 +132,7 @@ export interface SingleMetricViewerServices {
   anomalyExplorerService: AnomalyExplorerChartsService;
   anomalyDetectorService: AnomalyDetectorService;
   mlApiServices: MlApiServices;
+  mlCapabilities: MlCapabilitiesService;
   mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
   mlTimeSeriesSearchService?: MlTimeSeriesSeachService;

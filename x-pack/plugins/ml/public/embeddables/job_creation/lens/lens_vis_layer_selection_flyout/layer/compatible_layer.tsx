@@ -42,6 +42,7 @@ export const CompatibleLayer: FC<Props> = ({ layer, layerIndex, embeddable }) =>
     () =>
       new QuickLensJobCreator(
         lens,
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,

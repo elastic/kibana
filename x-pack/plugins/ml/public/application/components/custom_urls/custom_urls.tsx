@@ -105,7 +105,7 @@ class CustomUrlsUI extends Component<CustomUrlsProps, CustomUrlsState> {
         );
       });
 
-    loadDataViewListItems()
+    loadDataViewListItems(this.props.kibana.services.data.dataViews)
       .then((dataViewListItems) => {
         this.setState({ dataViewListItems });
       })

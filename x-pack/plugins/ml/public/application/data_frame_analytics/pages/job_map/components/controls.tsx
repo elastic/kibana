@@ -111,6 +111,7 @@ export const Controls: FC<Props> = React.memo(
 
     const {
       services: {
+        data,
         share,
         application: { navigateToUrl, capabilities },
       },
@@ -138,7 +139,7 @@ export const Controls: FC<Props> = React.memo(
     const nodeType = selectedNode?.data('type');
 
     const onCreateJobClick = useCallback(async () => {
-      const dataViewId = await getDataViewIdFromName(nodeLabel);
+      const dataViewId = await getDataViewIdFromName(data.dataViews, nodeLabel);
 
       if (dataViewId !== null) {
         const path = await mlLocator.getUrl({

@@ -79,6 +79,7 @@ export class SingleMetricViewerEmbeddableFactory
       { indexServiceFactory },
       { mlApiServicesProvider },
       { mlResultsServiceProvider },
+      { MlCapabilitiesService },
       { timeSeriesSearchServiceFactory },
     ] = await Promise.all([
       await this.getStartServices(),
@@ -87,6 +88,7 @@ export class SingleMetricViewerEmbeddableFactory
       await import('../../application/util/index_service'),
       await import('../../application/services/ml_api_service'),
       await import('../../application/services/results_service'),
+      await import('../../application/capabilities/check_capabilities'),
       await import(
         '../../application/timeseriesexplorer/timeseriesexplorer_utils/time_series_search_service'
       ),
@@ -102,6 +104,7 @@ export class SingleMetricViewerEmbeddableFactory
       mlApiServices
     );
     const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
+    const mlCapabilities = new MlCapabilitiesService(mlApiServices);
 
     const anomalyExplorerService = new AnomalyExplorerChartsService(
       pluginsStart.data.query.timefilter.timefilter,
@@ -119,6 +122,7 @@ export class SingleMetricViewerEmbeddableFactory
         mlApiServices,
         mlTimeSeriesSearchService,
         mlFieldFormatService,
+        mlCapabilities,
       },
     ];
   }

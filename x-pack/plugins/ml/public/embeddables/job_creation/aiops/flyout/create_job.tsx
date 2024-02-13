@@ -85,6 +85,7 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
   const quickJobCreator = useMemo(
     () =>
       new QuickCategorizationJobCreator(
+        data.dataViews,
         uiSettings,
         data.query.timefilter.timefilter,
         dashboardService,

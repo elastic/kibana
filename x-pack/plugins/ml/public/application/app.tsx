@@ -184,7 +184,6 @@ export const renderApp = (
     dashboard: deps.dashboard,
     maps: deps.maps,
     dataVisualizer: deps.dataVisualizer,
-    dataViews: deps.data.dataViews,
     share: deps.share,
     lens: deps.lens,
   });

@@ -97,7 +97,7 @@ export const useResultsViewConfig = (jobId: string) => {
 
           try {
             const destIndex = getDestinationIndex(jobConfigUpdate);
-            const destDataViewId = (await getDataViewIdFromName(destIndex)) ?? destIndex;
+            const destDataViewId = (await getDataViewIdFromName(dataViews, destIndex)) ?? destIndex;
             let fetchedDataView: DataView | undefined;
 
             try {
@@ -115,7 +115,8 @@ export const useResultsViewConfig = (jobId: string) => {
             if (fetchedDataView === undefined) {
               setNeedsDestDataView(true);
               const sourceIndex = jobConfigUpdate.source.index[0];
-              const sourceDataViewId = (await getDataViewIdFromName(sourceIndex)) ?? sourceIndex;
+              const sourceDataViewId =
+                (await getDataViewIdFromName(dataViews, sourceIndex)) ?? sourceIndex;
               try {
                 fetchedDataView = await dataViews.get(sourceDataViewId);
               } catch (e) {

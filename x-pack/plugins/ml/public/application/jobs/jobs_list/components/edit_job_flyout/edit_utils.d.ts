@@ -6,5 +6,8 @@
  */
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 
-export function loadDataViewListItems(): Promise<DataViewListItem[]>;
+export function loadDataViewListItems(
+  dataViewsService: DataViewsContract
+): Promise<DataViewListItem[]>;

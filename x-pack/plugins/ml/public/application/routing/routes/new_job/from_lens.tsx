@@ -30,6 +30,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
   const {
     services: {
       data: {
+        dataViews,
         query: {
           timefilter: { timefilter: timeFilter },
         },
@@ -44,7 +45,7 @@ const PageWrapper: FC<PageProps> = ({ location }) => {
   const { context } = useRouteResolver('full', ['canCreateJob'], {
     redirect: () =>
       resolver(
-        { lens, mlApiServices, timeFilter, kibanaConfig, dashboardService },
+        { dataViews, lens, mlApiServices, timeFilter, kibanaConfig, dashboardService },
         vis,
         from,
         to,

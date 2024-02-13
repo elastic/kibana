@@ -10,13 +10,9 @@ import type { SavedSearch, SavedSearchPublicPluginStart } from '@kbn/saved-searc
 import type { Query, Filter } from '@kbn/es-query';
 import type { DataView, DataViewField, DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Job } from '../../../common/types/anomaly_detection_jobs';
-import { getToastNotifications, getDataViews } from './dependency_cache';
+import { getToastNotifications } from './dependency_cache';
 
-export async function getDataViewNames() {
-  const dataViewsService = getDataViews();
-  if (dataViewsService === null) {
-    throw new Error('Data views are not initialized!');
-  }
+export async function getDataViewNames(dataViewsService: DataViewsContract) {
   return (await dataViewsService.getIdsWithTitle()).map(({ title }) => title);
 }
 
@@ -27,11 +23,11 @@ export async function getDataViewNames() {
  * @param job - Optional job object.
  * @returns The data view ID or null if it doesn't exist.
  */
-export async function getDataViewIdFromName(name: string, job?: Job): Promise<string | null> {
-  const dataViewsService = getDataViews();
-  if (dataViewsService === null) {
-    throw new Error('Data views are not initialized!');
-  }
+export async function getDataViewIdFromName(
+  dataViewsService: DataViewsContract,
+  name: string,
+  job?: Job
+): Promise<string | null> {
   const dataViews = await dataViewsService.find(name);
   const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
   if (!dataView) {
@@ -49,12 +45,10 @@ export async function getDataViewIdFromName(name: string, job?: Job): Promise<st
   return dataView.id ?? dataView.getIndexPattern();
 }
 
-export function getDataViewById(id: string): Promise<DataView> {
-  const dataViewsService = getDataViews();
-  if (dataViewsService === null) {
-    throw new Error('Data views are not initialized!');
-  }
-
+export function getDataViewById(
+  dataViewsService: DataViewsContract,
+  id: string
+): Promise<DataView> {
   if (id) {
     return dataViewsService.get(id);
   } else {

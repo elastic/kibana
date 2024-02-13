@@ -19,9 +19,6 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
      * @returns The data view ID or null if it doesn't exist.
      */
     async getDataViewIdFromName(name: string, job?: Job): Promise<string | null> {
-      if (dataViewsService === null) {
-        throw new Error('Data views are not initialized!');
-      }
       const dataViews = await dataViewsService.find(name);
       const dataView = dataViews.find((dv) => dv.getIndexPattern() === name);
       if (!dataView) {
@@ -39,10 +36,6 @@ export function indexServiceFactory(dataViewsService: DataViewsContract) {
       return dataView.id ?? dataView.getIndexPattern();
     },
     getDataViewById(id: string): Promise<DataView> {
-      if (dataViewsService === null) {
-        throw new Error('Data views are not initialized!');
-      }
-
       if (id) {
         return dataViewsService.get(id);
       } else {
