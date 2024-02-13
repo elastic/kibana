@@ -116,7 +116,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
   /**
    * Whether the model has inference services
    */
-  hasInferenceServices: boolean;
+  hasInferenceServices?: boolean;
   /**
    * Inference services associated with the model
    */
