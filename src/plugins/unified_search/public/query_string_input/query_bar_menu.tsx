@@ -29,7 +29,7 @@ import {
   useQueryBarMenuPanels,
   QueryBarMenuPanelsProps,
   QueryBarMenuPanel,
-  AdditionalQueryBarMenuItem,
+  AdditionalQueryBarMenuItems,
 } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import {
@@ -67,7 +67,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   hiddenPanelOptions?: QueryBarMenuPanelsProps['hiddenPanelOptions'];
   onFiltersUpdated?: (filters: Filter[]) => void;
   filters?: Filter[];
-  additionalQueryBarMenuItems: AdditionalQueryBarMenuItem[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItems;
   query?: Query;
   savedQuery?: SavedQuery;
   onClearSavedQuery?: () => void;

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, RefObject, useMemo } from 'react';
+import React, { useState, useRef, useEffect, RefObject } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiContextMenuPanelDescriptor,
@@ -155,27 +155,14 @@ export enum QueryBarMenuPanel {
   selectLanguage = 'selectLanguage',
 }
 
-type AdditionalQueryBarMenuPanelDescriptor = Omit<EuiContextMenuPanelDescriptor, 'id' | 'items'> & {
-  items: AdditionalQueryBarMenuItem[];
-  icon?: EuiContextMenuPanelItemDescriptor['icon'];
-};
-
-export type AdditionalQueryBarMenuItemDescriptor = Exclude<
-  EuiContextMenuPanelItemDescriptor,
-  EuiContextMenuPanelDescriptor
->;
-
-export type AdditionalQueryBarMenuItem =
-  | AdditionalQueryBarMenuItemDescriptor
-  | AdditionalQueryBarMenuPanelDescriptor;
-
-const isAdditionalQueryBarMenuPanel = (
-  item: EuiContextMenuPanelItemDescriptor | AdditionalQueryBarMenuPanelDescriptor
-): item is AdditionalQueryBarMenuPanelDescriptor => 'title' in item;
+export interface AdditionalQueryBarMenuItems {
+  items?: EuiContextMenuPanelItemDescriptor[];
+  panels?: EuiContextMenuPanelDescriptor[];
+}
 
 export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
-  additionalQueryBarMenuItems: AdditionalQueryBarMenuItem[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItems;
   savedQuery?: SavedQuery;
   language: string;
   dateRangeFrom?: string;
@@ -236,51 +223,6 @@ export function useQueryBarMenuPanels({
   const [hasSavedQueries, setHasSavedQueries] = useState(false);
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
   const [savedQueryHasChanged, setSavedQueryHasChanged] = useState(false);
-
-  const additionalQueryBarMenuItemsData = useMemo(() => {
-    if (showFilterBar && additionalQueryBarMenuItems.length > 0) {
-      // EuiContextMenu expects a flattened panels structure so here we collect all
-      // the nested panels in a linear list
-      const panels = [] as EuiContextMenuPanelDescriptor[];
-      const additionalQueryBarMenuItemToContextMenuItem = (
-        menuItem: AdditionalQueryBarMenuItem
-      ) => {
-        if (isAdditionalQueryBarMenuPanel(menuItem)) {
-          const panelId = `additional-query-bar-menu-panel-${panels.length}`;
-          panels.push({
-            id: panelId,
-            title: menuItem.title,
-            items: menuItem.items.map(
-              additionalQueryBarMenuItemToContextMenuItem
-            ) as EuiContextMenuPanelItemDescriptor[],
-            'data-test-subj': panelId,
-          } as EuiContextMenuPanelDescriptor);
-          return {
-            name: menuItem.title,
-            icon: menuItem.icon,
-            panel: panelId,
-            'data-test-subj': `additional-query-bar-menu-item-${menuItem.title}`,
-          };
-        } else {
-          return {
-            ...menuItem,
-            'data-test-subj': `additional-query-bar-menu-item-${menuItem.name}`,
-          };
-        }
-      };
-      return {
-        items: additionalQueryBarMenuItems.map(
-          additionalQueryBarMenuItemToContextMenuItem
-        ) as EuiContextMenuPanelItemDescriptor[],
-        panels,
-      };
-    } else {
-      return {
-        items: [],
-        panels: [],
-      };
-    }
-  }, [additionalQueryBarMenuItems, showFilterBar]);
 
   useEffect(() => {
     if (savedQuery) {
@@ -482,8 +424,8 @@ export function useQueryBarMenuPanels({
     );
   }
 
-  if (showFilterBar && additionalQueryBarMenuItems.length > 0) {
-    items.push(...[...additionalQueryBarMenuItemsData.items, { isSeparator: true } as const]);
+  if (showFilterBar && additionalQueryBarMenuItems.items?.length) {
+    items.push(...[...additionalQueryBarMenuItems.items, { isSeparator: true } as const]);
   }
 
   // saved queries actions are only shown when the showQueryInput and showFilterBar is true
@@ -635,7 +577,7 @@ export function useQueryBarMenuPanels({
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },
-    ...additionalQueryBarMenuItemsData.panels,
+    ...(additionalQueryBarMenuItems.panels ?? []),
   ] as EuiContextMenuPanelDescriptor[];
 
   if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {

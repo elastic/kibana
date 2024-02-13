@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import { AdditionalQueryBarMenuItem } from '@kbn/unified-search-plugin/public/query_string_input/query_bar_menu_panels';
+import { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
@@ -96,33 +96,55 @@ export function AlertsSearchBar({
     });
   };
 
-  const quickFiltersItemToAdditionalQueryBarMenuItem = useCallback(
-    (qfi: QuickFiltersMenuItem): AdditionalQueryBarMenuItem => {
-      if (isQuickFiltersGroup(qfi)) {
-        return {
-          ...qfi,
-          items: qfi.items.map(quickFiltersItemToAdditionalQueryBarMenuItem),
-        } as AdditionalQueryBarMenuItem;
-      }
-      const { filter, ...menuItem } = qfi;
+  const additionalQueryBarMenuItems = useMemo(() => {
+    if (showFilterBar && quickFilters.length > 0) {
+      // EuiContextMenu expects a flattened panels structure so here we collect all
+      // the nested panels in a linear list
+      const panels = [] as EuiContextMenuPanelDescriptor[];
+      const quickFiltersItemToContextMenuItem = (qf: QuickFiltersMenuItem) => {
+        if (isQuickFiltersGroup(qf)) {
+          const panelId = `quick-filters-panel-${panels.length}`;
+          panels.push({
+            id: panelId,
+            title: qf.title,
+            items: qf.items.map(
+              quickFiltersItemToContextMenuItem
+            ) as EuiContextMenuPanelItemDescriptor[],
+            'data-test-subj': panelId,
+          } as EuiContextMenuPanelDescriptor);
+          return {
+            name: qf.title,
+            icon: qf.icon ?? 'filterInCircle',
+            panel: panelId,
+            'data-test-subj': `quick-filters-item-${qf.title}`,
+          };
+        } else {
+          const { filter, ...menuItem } = qf;
+          return {
+            ...menuItem,
+            icon: qf.icon ?? 'filterInCircle',
+            onClick: () => {
+              if (!filters?.some((f) => compareFilters(f, filter))) {
+                onFiltersUpdated?.([...(filters ?? []), filter]);
+              }
+            },
+            'data-test-subj': `quick-filters-item-${qf.name}`,
+          };
+        }
+      };
       return {
-        ...menuItem,
-        onClick: () => {
-          if (!filters?.some((f) => compareFilters(f, filter))) {
-            onFiltersUpdated?.([...(filters ?? []), filter]);
-          }
-        },
-      } as AdditionalQueryBarMenuItem;
-    },
-    [filters, onFiltersUpdated]
-  );
-
-  const additionalQueryBarMenuItems = useMemo<AdditionalQueryBarMenuItem[]>(() => {
-    if (!quickFilters?.length) {
-      return [];
+        items: quickFilters.map(
+          quickFiltersItemToContextMenuItem
+        ) as EuiContextMenuPanelItemDescriptor[],
+        panels,
+      };
+    } else {
+      return {
+        items: [],
+        panels: [],
+      };
     }
-    return quickFilters.map(quickFiltersItemToAdditionalQueryBarMenuItem);
-  }, [quickFilters, quickFiltersItemToAdditionalQueryBarMenuItem]);
+  }, [filters, onFiltersUpdated, quickFilters, showFilterBar]);
 
   return (
     <SearchBar

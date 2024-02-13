@@ -27,7 +27,7 @@ import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import { AdditionalQueryBarMenuItem } from '../query_string_input/query_bar_menu_panels';
+import { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
@@ -65,7 +65,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
-  additionalQueryBarMenuItems?: AdditionalQueryBarMenuItem[];
+  additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
   filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   prependFilterBar?: React.ReactNode;
@@ -533,7 +533,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
-        additionalQueryBarMenuItems={this.props.additionalQueryBarMenuItems ?? []}
+        additionalQueryBarMenuItems={this.props.additionalQueryBarMenuItems ?? {}}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         query={this.state.query as Query}
         savedQuery={this.props.savedQuery}

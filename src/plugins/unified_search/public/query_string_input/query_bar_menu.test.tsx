@@ -119,7 +119,7 @@ describe('Querybar Menu component', () => {
           ],
         }),
       },
-      additionalQueryBarMenuItems: [],
+      additionalQueryBarMenuItems: {},
       queryBarMenuRef: React.createRef(),
     };
   });
@@ -351,11 +351,13 @@ describe('Querybar Menu component', () => {
       ...props,
       openQueryBarMenu: true,
       showFilterBar: true,
-      additionalQueryBarMenuItems: [
-        {
-          name: 'Test additional query bar menu item',
-        },
-      ],
+      additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Test additional query bar menu item',
+          },
+        ],
+      },
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
@@ -364,21 +366,24 @@ describe('Querybar Menu component', () => {
     ).toBeTruthy();
   });
 
-  it('should render nested additional menu items', async () => {
+  it('should render additional menu panels', async () => {
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
       showFilterBar: true,
-      additionalQueryBarMenuItems: [
-        {
-          title: 'Grouped additional query bar menu items',
-          items: [
-            {
-              name: 'Test additional query bar menu item',
-            },
-          ],
-        },
-      ],
+      additionalQueryBarMenuItems: {
+        panels: [
+          {
+            id: 'panel-1',
+            title: 'Grouped additional query bar menu items',
+            items: [
+              {
+                name: 'Test additional query bar menu item',
+              },
+            ],
+          },
+        ],
+      },
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
