@@ -7,7 +7,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
 
 import type {
   ActionDetails,
@@ -19,8 +18,7 @@ import type { EndpointAppContext } from '../../../types';
 import { getActionDetailsById } from '..';
 import type { ActionCreateService, CreateActionMetadata, CreateActionPayload } from './types';
 import { writeActionToIndices } from './write_action_to_indices';
-
-const returnActionIdCommands: ResponseActionsApiCommandNames[] = ['isolate', 'unisolate'];
+import { responseActionsWithLegacyActionProperty } from '../constants';
 
 export const actionCreateService = (
   esClient: ElasticsearchClient,
@@ -53,7 +51,9 @@ export const actionCreateService = (
       payload,
     });
 
-    const actionId = returnActionIdCommands.includes(payload.command) ? { action: actionID } : {};
+    const actionId = responseActionsWithLegacyActionProperty.includes(payload.command)
+      ? { action: actionID }
+      : {};
     const data = await getActionDetailsById(
       esClient,
       endpointContext.service.getEndpointMetadataService(),
