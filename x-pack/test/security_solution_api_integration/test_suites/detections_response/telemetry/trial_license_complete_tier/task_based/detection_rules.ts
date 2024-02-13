@@ -103,7 +103,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -215,7 +215,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -271,7 +271,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -327,7 +327,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(stats.detection_rules).to.eql([
             [
               {
-                name: 'Security Solution Detection Rule Lists Telemetry',
+                name: 'security:telemetry-detection-rules',
                 passed: true,
               },
             ],
@@ -473,7 +473,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -550,7 +550,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -627,7 +627,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -704,7 +704,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -781,7 +781,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[0].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
@@ -900,7 +900,7 @@ export default ({ getService }: FtrProviderContext) => {
               rule_version: detectionRules[1].rule_version,
             },
             {
-              name: 'Security Solution Detection Rule Lists Telemetry',
+              name: 'security:telemetry-detection-rules',
               passed: true,
             },
           ]);
