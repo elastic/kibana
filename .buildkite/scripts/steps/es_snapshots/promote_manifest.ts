@@ -42,12 +42,14 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
       `
       set -euo pipefail
       .buildkite/scripts/common/activate_service_account.sh ${bucket}
+      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_DAILY}
+      .buildkite/scripts/common/activate_service_account.sh ${BASE_BUCKET_PERMANENT}
       cp manifest.json manifest-latest-verified.json
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
       rm manifest.json
       cp manifest-permanent.json manifest.json
       gsutil -m cp -r gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_DAILY}/${version}/
     `,
       { shell: '/bin/bash' }
     );
