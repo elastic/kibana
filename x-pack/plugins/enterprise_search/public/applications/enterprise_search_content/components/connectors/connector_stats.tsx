@@ -123,15 +123,29 @@ export const ConnectorStats: React.FC<ConnectorStatsProps> = ({ isCrawler }) => 
           </EuiSplitPanel.Inner>
 
           <EuiSplitPanel.Inner grow={false} color="subdued">
-            {i18n.translate('xpack.enterpriseSearch.connectorStats.idleSyncsOrphanedSyncsLabel', {
-              defaultMessage:
-                '{idleCount} Idle syncs  / {orphanedCount} Orphaned syncs / {errorCount} Sync errors',
-              values: {
-                errorCount: data?.errors || 0,
-                idleCount: data?.idle,
-                orphanedCount: data?.orphaned_jobs,
-              },
-            })}
+            {isCrawler
+              ? i18n.translate(
+                  'xpack.enterpriseSearch.connectorStats.crawlerSyncsOrphanedSyncsLabel',
+                  {
+                    defaultMessage: '{orphanedCount} Orphaned syncs / {errorCount} Sync errors',
+                    values: {
+                      errorCount: data?.errors || 0,
+                      orphanedCount: data?.orphaned_jobs,
+                    },
+                  }
+                )
+              : i18n.translate(
+                  'xpack.enterpriseSearch.connectorStats.connectorSyncsOrphanedSyncsLabel',
+                  {
+                    defaultMessage:
+                      '{idleCount} Idle syncs  / {orphanedCount} Orphaned syncs / {errorCount} Sync errors',
+                    values: {
+                      errorCount: data?.errors || 0,
+                      idleCount: data?.idle,
+                      orphanedCount: data?.orphaned_jobs,
+                    },
+                  }
+                )}
           </EuiSplitPanel.Inner>
         </EuiSplitPanel.Outer>
       </EuiFlexItem>

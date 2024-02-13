@@ -17,17 +17,19 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
+  deleteAllEventLogExecutionEvents,
+  indexEventLogExecutionEvents,
+  waitForEventLogExecuteComplete,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
-  deleteAllEventLogExecutionEvents,
   deleteAllAlerts,
   getRuleForAlertTesting,
-  indexEventLogExecutionEvents,
-  waitForEventLogExecuteComplete,
   waitForRulePartialFailure,
   waitForRuleSuccess,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import {
   failedGapExecution,
   failedRanAfterDisabled,
