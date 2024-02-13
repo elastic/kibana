@@ -1661,8 +1661,8 @@ export default ({ getService }: FtrProviderContext) => {
           return expect(fullAlert).to.be.ok();
         }
 
-        expect(fullAlert?.['host.asset.criticality']).to.eql('low');
-        expect(fullAlert?.['user.asset.criticality']).to.eql('very_important');
+        expect(fullAlert?.['host.asset.criticality']).to.eql('low_impact');
+        expect(fullAlert?.['user.asset.criticality']).to.eql('extreme_impact');
       });
     });
   });
