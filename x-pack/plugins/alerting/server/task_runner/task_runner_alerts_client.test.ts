@@ -462,7 +462,7 @@ describe('Task Runner', () => {
         );
         expect(logger.debug).nthCalledWith(
           debugCall++,
-          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+          'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":0,"numberOfGeneratedActions":0,"numberOfActiveAlerts":0,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":0,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
         );
         expect(
           taskRunnerFactoryInitializerParams.internalSavedObjectsRepository.update
@@ -808,6 +808,7 @@ describe('Task Runner', () => {
           statusChangeThreshold: 4,
         },
         maintenanceWindowIds: [],
+        ruleRunMetricsStore,
       });
 
       expect(alertsClientToUse.logAlerts).toHaveBeenCalledWith({

@@ -21,7 +21,6 @@ import {
   getImportExceptionsListItemNewerVersionSchemaMock,
 } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import {
-  deleteAllRules,
   getSimpleRule,
   getSimpleRuleAsNdjson,
   getSimpleRuleOutput,
@@ -31,6 +30,7 @@ import {
   removeServerGeneratedProperties,
   ruleToNdjson,
 } from '../../../utils';
+import { deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -1291,12 +1291,12 @@ export default ({ getService }: FtrProviderContext): void => {
           await deleteAllExceptions(supertest, log);
         });
 
-        /* 
-          Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+        /*
+          Following the release of version 8.7, this test can be considered as an evaluation of exporting
           an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
           within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
-          and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
-          thereby enabling simulation of migration scenarios. 
+          and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule,
+          thereby enabling simulation of migration scenarios.
         */
         it('should be able to import a rule and an old version exception list, then delete it successfully', async () => {
           const simpleRule = getSimpleRule('rule-1');

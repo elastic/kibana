@@ -9,19 +9,22 @@ import expect from 'expect';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
   binaryToString,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
   removeServerGeneratedProperties,
-  waitForRulePartialFailure,
   updateUsername,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRulePartialFailure,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -381,7 +384,7 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should export rule without the action connector if it is Preconfigured Connector', async () => {
         const action = {
           group: 'default',
-          id: 'my-test-email',
+          id: PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID,
           action_type_id: '.email',
           params: {},
         };

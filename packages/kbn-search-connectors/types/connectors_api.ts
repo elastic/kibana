@@ -8,8 +8,12 @@
 
 // TODO: delete this once ES client can be used for Connectors API
 
-import { ConnectorSyncJob } from './connectors';
+import { ConnectorSyncJob, Connector } from './connectors';
 
+export interface ConnectorAPIListConnectorsResponse {
+  count: number;
+  results: Connector[];
+}
 export interface ConnectorsAPISyncJobResponse {
   count: number;
   results: ConnectorSyncJob[];
