@@ -41,13 +41,13 @@ export const UPDATE_BUTTON_LABEL = i18n.translate(
 export const UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.perFieldTooltip',
   {
-    defaultMessage: 'View updates on a per field basis.',
+    defaultMessage: 'View changes field by field.',
   }
 );
 
 export const UPDATE_FLYOUT_JSON_VIEW_TOOLTIP_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewTooltip',
   {
-    defaultMessage: 'View the rule updates in JSON format.',
+    defaultMessage: 'View the latest rule changes in JSON format.',
   }
 );

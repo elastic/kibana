@@ -38,7 +38,6 @@ export const UPDATE_TOUR_TITLE = i18n.translate(
 export const UPDATE_TOUR_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription',
   {
-    defaultMessage:
-      'You can now view the diff of updates in the flyout by clicking on the rule name.',
+    defaultMessage: "Click on a rule's name to view the latest changes.",
   }
 );
