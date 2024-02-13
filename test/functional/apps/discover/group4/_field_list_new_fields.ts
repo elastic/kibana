@@ -35,6 +35,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         path: '/my-index-000001',
         method: 'DELETE',
       });
+      await es.transport.request({
+        path: '/my-index-000002',
+        method: 'DELETE',
+      });
     });
 
     it('Check that new ingested fields are added to the available fields section', async function () {
@@ -84,9 +88,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it("Mapped fields without values aren't shown", async function () {
-      const initialPattern = 'my-index-';
+      const initialPattern = 'my-index-000002';
       await es.transport.request({
-        path: '/my-index-000001/_doc',
+        path: '/my-index-000002/_doc',
         method: 'POST',
         body: {
           '@timestamp': new Date().toISOString(),
@@ -108,7 +112,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       ]);
 
       await es.transport.request({
-        path: '/my-index-000001/_mapping',
+        path: '/my-index-000002/_mapping',
         method: 'PUT',
         body: {
           properties: {
@@ -121,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // add new doc and check for it to make sure we're looking at fresh results
       await es.transport.request({
-        path: '/my-index-000001/_doc',
+        path: '/my-index-000002/_doc',
         method: 'POST',
         body: {
           '@timestamp': new Date().toISOString(),
