@@ -27,6 +27,14 @@ _Pending_:
 
 ## Table of Contents
 
+The following TOC was created using the [Pandoc](https://pandoc.org/installing.html) tool.
+
+You can create it by navigating to the directory of the markdown file and running the command below and pasting the generated table from the output document into the current one:
+
+```
+pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -o output.md
+```
+
 -   [Necessary rule schema changes](#necessary-rule-schema-changes)
     -   [`prebuilt` and `immutable` fields](#prebuilt-and-immutable-fields)
         -   [`isCustomized` subfield](#iscustomized-subfield)
@@ -87,55 +95,71 @@ _Pending_:
 -   [Marking rules (and their fields) as customized](#marking-rules-and-their-fields-as-customized)
 -   [Other open questions](#other-open-questions)
 
+## Note about scope of RFC
+
+This RFC was initially planned to have a scope strictly limited to the Customization of Prebuilt Rules epic. However, another epic is, in parallel, in the discussion phase: the [Detections-as-Code (DaC) epic](https://docs.google.com/document/d/1MfPFa3Io82S91rRfdQde8Xi_9AGEbE44Z2MkIYWD10U/edit).
+
+Both epics have many areas of contact, and features/decisions in one need to take account features in the others.
+
+This RFC includes some decision that will be taken in order to future-proof our archtecture for the upcoming DaC epic, but the vast majority will refer specifically to the Prebuilt Rules Customization epic. Elastic prebuilt rules will become a specific case of externally sourced rules: in the future, rules can be installed as Elastic prebuilt rules from our `detection-rules` repo, but also from any other repository handled by the user.
+
+During this RFC, we will explicitly refer to case of Elastic prebuilt rules, but take into account that this will be only a specific case of all the possible external sources for rules.
+
 ## Necessary rule schema changes
 
-In order to support the customization of Elastic Prebuilt Rules, we need to modify our rule schema. This involves introducing a new nested `prebuilt` field and deprecating the `immutable` field.
-
-### `prebuilt` and `immutable` fields
-
-The `prebuilt` field will be a top-level object field in our rule schema that will contain subfields with information relating to Elastic Prebuilt rules.
-
-It will be an optional field, which will only be present for Elastic prebuilt rules.
-
-Its existence within a rule object will determine if a rule is a prebuilt rule (and its absence will determine that it is a custom rule).
-
-This means that its presence in a rule object will determine whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intented to replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
-
-That means that, in the current state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRADE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
-
-When successfully implemented, the `prebuilt` field should replace the `immutable` field as a flag to mark Elastic prebuilt rules, but with one difference: the `prebuilt` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user, i.e. independently of the existence (or absence) of `prebuilt`.
-
-Because of this difference in the behaviour of the `prebuilt` and `immutable` fields, we feel that a field called `immutable` will lose its meaning over time and become confusing, especially for consumers of the API who interact directly with the field name. That's why we want to eventually deprecate it and fully replace it with `prebuilt`.
-
-To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `prebuilt` field: this means that for all rules that have a `immutable` value of `true`, the `prebuilt` rule will always exist. Viceversa, rule with `immutable: false` will not have a `prebuilt` field.
-
-This means, however, that there will be a change in behaviour of the `immutable` field: with the release of the feature, rules with the `immutable: true` value will now be customizable by the user, which is not the current behaviour.
-
-In this first phase, the `prebuilt` will contain two subfields: `isCustomized` and `elasticUpdateDate`.
+In order to support the customization of Elastic Prebuilt Rules, we need to modify our rule schema. This involves introducing a new nested `external_source` field and deprecating the `immutable` field.
 
 ```ts
 // PSEUDOCODE - see complete schema in detail below
 {
-  prebuilt?: {
-    isCustomized: boolean;
-    elasticUpdateDate?: Date;
+  external_source?: {
+    repo_name: string;
+    is_customized: boolean;
+    source_updated_at?: Date;
   }
 }
 ```
 
-#### `isCustomized` subfield
+### `external_source` and `immutable` fields
 
-The `isCustomized` field will be a boolean field that determines whether a Prebuilt Rule has been customized by the user, i.e. if any of its fields have been modified and diverged from the base version of the rule, which is the version that is installed from the Prebuilt Rules `security_detection_engine` Fleet package.
+The `external_source` field will be a top-level object field in our rule schema that will contain subfields with information relating to Elastic Prebuilt rules.
 
-This means that the `isCustomized` subfield only makes sense and will be used for prebuilt rules, or rules whose `prebuilt` field exists. It is therefor a subfield of the `prebuilt` field.
+It will be an optional field, which will only be present for Elastic prebuilt rules (i.e. rules that are externally soruced).
 
-For prebuilt rules, the `prebuilt.isCustomized` value will be initially set to `false` when a brand new rule is installed, but will be rewritten to `true` if a rule's field is edited and diverges from the value from the base version of the rule.
+Its existence within a rule object will determine if a rule is a prebuilt rule, and its absence will determine that it is a custom rule.
+
+This means that its presence in a rule object will determine whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. This field is intented to replace the currently existing `immutable` field, which is used today for the same purpose, but -as its name indicates- also currently determines if a rule's fields can be modified/customized.
+
+That means that, in the current state, rules with `immutable: false` are rules which are not Elastic Prebuilt Rules, i.e. custom rules, and can be modified. Meanwhile, `immutable: true` rules are Elastic Prebuilt Rules, created by the TRaDE team, distributed via the `security_detection_engine` Fleet package, and cannot be modified once installed.
+
+When successfully implemented, the `external_source` field should replace the `immutable` field as a flag to mark Elastic prebuilt rules, but with one difference: the `external_source` field will determine if the rule is an Elastic Prebuilt Rule or not, but now all rules will be customizable by the user, i.e. independently of the existence (or absence) of `external_source`.
+
+Because of this difference in the behaviour of the `external_source` and `immutable` fields, we feel that a field called `immutable` will lose its meaning over time and become confusing, especially for consumers of the API who interact directly with the field name. That's why we want to eventually deprecate it and fully replace it with `external_source`.
+
+To ensure backward compatibility and avoid breaking changes, we will deprecate the `immutable` field but keep it within the rule schema, asking our users to stop relying on this field in Detection API responses. During the migration period, we want to keep the value of the `immutable` field in sync with the `external_source` field: this means that for all rules that have a `immutable` value of `true`, the `external_source` rule will always exist. Viceversa, rule with `immutable: false` will not have a `external_source` field.
+
+This means, however, that there will be a change in behaviour of the `immutable` field: with the release of the feature, rules with the `immutable: true` value will now be customizable by the user, which is not the current behaviour.
+
+In this first phase, the `external_source` will contain three subfields: `repo_name`, `is_customized` and `source_updated_at`.
+
+#### `repo_name` subfield
+
+The `repo_name` will be a required string field that specifies the origin repo of the rule. For Elastic prebuilt rules, its value will be `elastic_prebuilt`. The field is required since it will be the leaf node used when searching/filtering for externally sourced rules when using KQL. More details about that below.
+
+
+#### `is_customized` subfield
+
+The `is_customized` field will be a boolean field that determines whether a Prebuilt Rule has been customized by the user, i.e. if any of its fields have been modified and diverged from the base version of the rule, which is the version that is installed from the Prebuilt Rules `security_detection_engine` Fleet package.
+
+This means that the `is_customized` subfield only makes sense and will be used for prebuilt rules, or rules whose `external_source` field exists. It is therefore a subfield of the `external_source` field.
+
+For prebuilt rules, the `external_source.is_customized` value will be initially set to `false` when a brand new rule is installed, but will be rewritten to `true` if a rule's field is edited and diverges from the value from the base version of the rule.
 
 See section [Calculating the `isCustomized` flag]()
 
-#### `elasticUpdateDate` subfield
+#### `source_updated_at` subfield
 
-The `elasticUpdateDate` will be a field containing a date in ISO 8601 format which describes the last time that an Elastic Prebuilt Detection rule was created and subsequently updated by the TRaDe team, the team responsible for creating detection rules. Its usage is detailed in this ticket.
+The `source_updated_at` will be a field containing a date in ISO 8601 format which describes the last time that an Elastic Prebuilt Detection rule was created and subsequently updated by the TRaDe team, the team responsible for creating detection rules. Its usage is detailed in this [ticket](https://github.com/elastic/detection-rules/issues/2826).
 
 This field will be optional in both the API schema and the internal rule schema, since this value will not exist for prebuilt rules until a new version of each rule which includes this field in the prebuilt rule asset is published by the TRaDE team, and the user installs it or updates to it.
 
@@ -147,7 +171,7 @@ This means that we need to differentiate between changes to the internal rule sc
 
 #### API schema
 
-**In the API schema** the `prebuilt` field will be optional, as it will exist for Elastic prebuilt rules, but won't for custom rules. The OpenAPI schema will need to be modified so:
+**In the API schema** the `external_source` field will be optional, as it will exist for Elastic prebuilt rules, but won't for custom rules. The OpenAPI schema will need to be modified so:
 
 _Source: [x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.schema.yaml)_
 
@@ -159,25 +183,32 @@ IsRuleImmutable:
   type: boolean
   description: '[DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).'
 
-# Add the top-level `prebuilt` object and its subfields `isCustomized` and `elasticUpdateDate`
-IsPrebuiltRuleCustomized:
-  type: boolean
-  description: Determines whether the prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverge from the base value).
+# Add the top-level `external_source` object and its subfields `repo_name`, `is_customized` and `source_updated_at`
+ExternalSourceRepoName:
+  type: string
+  description: Name of the external origin repo where rule originated from. For rules created by Elastic and originating from the `detection-rules` repo, the value should be `elastic_prebuilt`.
 
-ElasticUpdateDate:
+IsExternalRuleCustomized:
+  type: boolean
+  description: Determines whether an external/prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverged from the base value).
+
+SourceUpdatedAt:
   type: string
   format: date-time
-  description: The date and time that the prebuilt rule was last updated by Elastic.
+  description: The date and time that the external/prebuilt rule was last updated in its source repository.
 
-Prebuilt:
+ExternalSourceAttributes:
   type: object
-  description: Property whose existence  determines whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. Contains  information relating to prebuilt rules.
+  description: Property whose existence determines whether the rule is an externally sourced rule. Contains information relating to externally sourced rules. Elastic Prebuilt rules are a specific case of externally sourced rules.
   properties:
-    isCustomized:
-      $ref: '#/components/schemas/IsPrebuiltRuleCustomized'
-    elasticUpdateDate:
-      $ref: '#/components/schemas/ElasticUpdateDate'
+    repo_name:
+      $ref: 
+    is_customized:
+      $ref: '#/components/schemas/IsExternalRuleCustomized'
+    source_updated_at:
+      $ref: '#/components/schemas/SourceUpdatedAt'
   required:
+    - repo_name
     - isCustomized
 #  [... file continues below ...]
 ```
@@ -196,11 +227,11 @@ ResponseFields:
       $ref: './common_attributes.schema.yaml#/components/schemas/RuleSignatureId'
     immutable:
       $ref: './common_attributes.schema.yaml#/components/schemas/IsRuleImmutable'
-    prebuilt:
-      $ref: './common_attributes.schema.yaml#/components/schemas/Prebuilt'
+    external_source:
+      $ref: './common_attributes.schema.yaml#/components/schemas/ExternalSourceAttributes'
     #  [...  more response fields ...]
   required:
-    # notice `prebuilt` is not required
+    # notice `external_source` is not required
     - id
     - rule_id
     - immutable
@@ -215,63 +246,9 @@ ResponseFields:
 #  [... file continues below...]
 ```
 
-When the OpenAPI code generator is run, this will result in the files:
-
-_Source: [x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/common_attributes.gen.ts)_
-
-```ts
-//  [... file continues above...]
-
-/**
- * [DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).
- */
-export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
-export const IsRuleImmutable = z.boolean();
-
-/**
- * Determines whether the prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverge from the base value).
- */
-export type IsPrebuiltRuleCustomized = z.infer<typeof IsPrebuiltRuleCustomized>;
-export const IsPrebuiltRuleCustomized = z.boolean();
-
-/**
- * The date and time that the prebuilt rule was last updated by Elastic.
- */
-export type ElasticUpdateDate = z.infer<typeof ElasticUpdateDate>;
-export const ElasticUpdateDate = z.string().datetime();
-
-/**
- * Property whose existence  determines whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. Contains information relating to prebuilt rules.
- */
-export type Prebuilt = z.infer<typeof Prebuilt>;
-export const Prebuilt = z.object({
-  isCustomized: IsPrebuiltRuleCustomized,
-  elasticUpdateDate: ElasticUpdateDate.optional(),
-});
-
-//  [... file continues below ...]
-```
-
-_Source: [x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/rule_schemas.gen.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/model/rule_schema/rule_schemas.gen.ts)_
-
-```ts
-//  [... file continues above ...]
-
-export type ResponseFields = z.infer<typeof ResponseFields>;
-export const ResponseFields = z.object({
-  id: RuleObjectId,
-  rule_id: RuleSignatureId,
-  immutable: IsRuleImmutable,
-  prebuilt: Prebuilt.optional(),
-  // [...]
-});
-
-//  [... file continues below ...]
-```
-
 We also need to modify the `RuleToImport` schema, since now we will be allowing the importing of both custom rules and prebuilt rules.
 
-Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules. We need to update this schema so that it accepts the `immutable` param with both boolean values, and also optionally accepts the new `prebuilt` field:
+Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules. We need to update this schema so that it accepts the `immutable` param with both boolean values, and also optionally accepts the new `external_source` field:
 
 _Source: [x-pack/plugins/security_solution/common/api/detection_engine/rule_management/import_rules/rule_to_import.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/api/detection_engine/rule_management/import_rules/rule_to_import.ts)_
 
@@ -281,7 +258,7 @@ import {
   // [...]
   RuleSignatureId,
   IsRuleImmutable,
-  Prebuilt,
+  ExternalSourceAttributes,
 } from '../../model/rule_schema';
 
 export type RuleToImport = z.infer<typeof RuleToImport>;
@@ -290,14 +267,14 @@ export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
     immutable: IsRuleImmutable.optional(),
-    prebuilt: Prebuilt.optional(),
+    external_source: ExternalSourceAttributes.optional(),
   })
 );
 ```
 
 #### Internal rule schema
 
-**The internal rule schema** needs to represent that the new `prebuilt` field may not always exist, i.e. for rules yet to be migrated, so `prebuilt` must also be optional.
+**The internal rule schema** needs to represent that the new `external_source` field may not always exist, so `external_source` must also be optional.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_schema/model/rule_schemas.ts)_
 
@@ -306,7 +283,7 @@ _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_sche
 
 import {
   // [...]
-  Prebuilt,
+  ExternalSourceAttributes,
   // [...]
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 
@@ -315,18 +292,20 @@ export const BaseRuleParams = z.object({
   // [...]
 
   immutable: IsRuleImmutable,
-  prebuilt: Prebuilt.optional(),
+  external_soruce: ExternalSourceAttributes.transform(camelize).optional(),
 
   // [...]
 });
 ```
 
-In the internal rule schema, there are two additional important reasons why we need to make sure that this values is optional:
+> Notice that in the internal schema we cannot simply reuse the `ExternalSourceAttributes` attribute defined for the API schema, since it should have CamelCase and the API schema uses snake_case. We need to apply a transformation to our Zod type. See this [issue](https://github.com/colinhacks/zod/issues/486#issuecomment-1567296747).
+
+In the internal rule schema, there are two additional important reasons why we need to make sure that this value is optional:
 
 - When rules are executed, a call to the method `validateRuleTypeParams` is done, which is a method that validates the passed rule's parameters using the validators defined in `x-pack/plugins/security_solution/server/lib/detection_engine/rule_types`, within each of the rule query types files (for [EQL rules](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_types/eql/create_eql_alert_type.ts#L27), for example). The validation is done based on the internal rule schema `BaseRulesParams` displayed above. Having `prebuilt` as a required fields would cause custom rules to fail on runtime.
 - The Rule Client `update` method also calls the `validateRuleTypeParams` to validate the rule's params. Since the Rule Client's `update` method is used in our endpoint handlers, such as and `/rules/patch` and `/_bulk_actions`, these would fail when executed against a payload of custom rule.
 
-Additionally, the `PrebuiltRuleAsset` type needs to be updated to include the new `elasticUpdateDate` date that will be progressively shipped with new versions of rules in the Elastic Prebuilt Rules package:
+Additionally, the `PrebuiltRuleAsset` type needs to be updated to include the new `source_updated_at` date that will be progressively shipped with new versions of rules in the Elastic Prebuilt Rules package:
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/model/rule_assets/prebuilt_rule_asset.ts)_
 
@@ -338,7 +317,7 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
     related_integrations: RelatedIntegrationArray.optional(),
     required_fields: RequiredFieldArray.optional(),
     setup: SetupGuide.optional(),
-    source_updated_at: ElasticUpdateDate.optional(), // new optional field
+    source_updated_at: SourceUpdatedAt.optional(), // new optional field
   })
 );
 ```
@@ -359,11 +338,8 @@ Both the docs and the custom response header should communicate that the `immuta
 - is maintained for backwards compatibility reasons only
 - will be removed after a specific date/release
 
-The endpoints should be updated to include a custom response header like so:
+The endpoints should be updated to include a custom response header, using the [format we already use for our bulk CRUD endpoints.](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/api/deprecation.ts#L34-L43)
 
-```http
-Deprecation-Info: immutable field is deprecated and will be removed in version 8.XX (or date). Use prebuilt field instead.
-```
 
 ## Mapping changes
 
