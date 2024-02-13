@@ -39,6 +39,10 @@ jest.mock('../case_view/case_view_page', () => ({
   CaseViewPage: () => <div>{'Case View Page'}</div>,
 }));
 
+const useGetCaseMock = useGetCase as jest.Mock;
+
+const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
+
 const renderWithRouter = (
   initialEntries: MemoryRouterProps['initialEntries'] = ['/cases'],
   permissions?: CasesPermissions
@@ -52,71 +56,66 @@ const renderWithRouter = (
   );
 };
 
-const getCaseViewPaths = () => ['/cases/test-id', '/cases/test-id/comment-id'];
-const useGetCaseMock = useGetCase as jest.Mock;
-
-for (let i = 0; i <= 200; i = i + 1) {
-  describe('Cases routes', () => {
-    describe('All cases', () => {
-      it('navigates to the all cases page', async () => {
-        renderWithRouter();
-        expect(await screen.findByText('All cases')).toBeInTheDocument();
-      });
-
-      // User has read only privileges
-      it('user can navigate to the all cases page with only read permissions', async () => {
-        renderWithRouter(['/cases'], readCasesPermissions());
-        expect(await screen.findByText('All cases')).toBeInTheDocument();
-      });
+describe('Cases routes', () => {
+  describe('All cases', () => {
+    it('navigates to the all cases page', async () => {
+      renderWithRouter();
+      expect(await screen.findByText('All cases')).toBeInTheDocument();
     });
 
-    describe('Case view', () => {
-      beforeEach(() => {
-        useGetCaseMock.mockReturnValue({
-          ...defaultGetCase,
-        });
-      });
-
-      it.each(getCaseViewPaths())(
-        'navigates to the cases view page for path: %s',
-        async (path: string) => {
-          renderWithRouter([path]);
-          expect(await screen.findByText('Case View Page')).toBeInTheDocument();
-          // User has read only privileges
-        }
-      );
-
-      it.each(getCaseViewPaths())(
-        'user can navigate to the cases view page with read permissions and path: %s',
-        async (path: string) => {
-          renderWithRouter([path], readCasesPermissions());
-          expect(await screen.findByText('Case View Page')).toBeInTheDocument();
-        }
-      );
-    });
-
-    describe('Create case', () => {
-      it('navigates to the create case page', async () => {
-        renderWithRouter(['/cases/create']);
-        expect(await screen.findByText('Create case')).toBeInTheDocument();
-      });
-
-      it('shows the no privileges page if the user does not have create privileges', async () => {
-        renderWithRouter(['/cases/create'], noCreateCasesPermissions());
-        expect(await screen.findByText('Privileges required')).toBeInTheDocument();
-      });
-    });
-
-    describe('Cases settings', () => {
-      it('navigates to the cases settings page', async () => {
-        renderWithRouter(['/cases/configure']);
-        expect(await screen.findByText('Settings')).toBeInTheDocument();
-      });
-
-      it('shows the no privileges page if the user does not have settings privileges', async () => {
-        renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
-        expect(await screen.findByText('Privileges required')).toBeInTheDocument();
-      });
+    // User has read only privileges
+    it('user can navigate to the all cases page with only read permissions', async () => {
+      renderWithRouter(['/cases'], readCasesPermissions());
+      expect(await screen.findByText('All cases')).toBeInTheDocument();
     });
   });
-}
+
+  describe('Case view', () => {
+    beforeEach(() => {
+      useGetCaseMock.mockReturnValue({
+        ...defaultGetCase,
+      });
+    });
+
+    it.each(getCaseViewPaths())(
+      'navigates to the cases view page for path: %s',
+      async (path: string) => {
+        renderWithRouter([path]);
+        expect(await screen.findByText('Case View Page')).toBeInTheDocument();
+        // User has read only privileges
+      }
+    );
+
+    it.each(getCaseViewPaths())(
+      'user can navigate to the cases view page with read permissions and path: %s',
+      async (path: string) => {
+        renderWithRouter([path], readCasesPermissions());
+        expect(await screen.findByText('Case View Page')).toBeInTheDocument();
+      }
+    );
+  });
+
+  describe('Create case', () => {
+    it('navigates to the create case page', async () => {
+      renderWithRouter(['/cases/create']);
+      expect(await screen.findByText('Create case')).toBeInTheDocument();
+    });
+
+    it('shows the no privileges page if the user does not have create privileges', async () => {
+      renderWithRouter(['/cases/create'], noCreateCasesPermissions());
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+    });
+  });
+
+  describe('Cases settings', () => {
+    it('navigates to the cases settings page', async () => {
+      renderWithRouter(['/cases/configure']);
+      expect(await screen.findByText('Settings')).toBeInTheDocument();
+    });
+
+    it('shows the no privileges page if the user does not have settings privileges', async () => {
+      renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
+      expect(await screen.findByText('Privileges required')).toBeInTheDocument();
+    });
+  });
+});
