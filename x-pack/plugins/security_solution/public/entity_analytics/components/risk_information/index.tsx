@@ -173,7 +173,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreFieldText"
-              defaultMessage="The {riskScoreField} field represents the normalized risk of the Entity as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
+              defaultMessage="The {riskScoreField} field represents the normalized risk of the Entity as a single numeric value. You can use this value as a relative indicator of risk in triaging and response playbooks."
               values={{
                 riskScoreField: (
                   <b>
@@ -214,7 +214,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.howOftenText"
-              defaultMessage="Once enabled, the risk engine runs hourly."
+              defaultMessage="Once enabled, entity risk scoring runs hourly."
             />
           </p>
           <EuiTitle size="s">
@@ -229,7 +229,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep1"
-                defaultMessage="Only scores entities (users and hosts) associated with a detection alert, based on any alerts that have not been closed."
+                defaultMessage="Only scores users and hosts (entities) associated with detection alerts that have not been closed."
               />
             </li>
             <li>
@@ -241,13 +241,13 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep3"
-                defaultMessage="Verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Context' category."
+                defaultMessage="If the 'Asset Criticality' feature is enabled in your space, entity risk scoring verifies the asset criticality classification tier of the entity and generates a score modifier under the 'Asset Criticality' category."
               />
             </li>
             <li>
               <FormattedMessage
                 id="xpack.securitySolution.riskInformation.riskCalculationStep4"
-                defaultMessage="Produces a single normalized numeric value as the entity risk score."
+                defaultMessage="Produces entity risk as a normalized numeric score."
               />
             </li>
             <li>
