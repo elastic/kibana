@@ -11,6 +11,7 @@ import { from } from 'rxjs';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { getInitialGroupsMap } from '../../application/components/job_selector/job_selector';
 import { getMlGlobalServices } from '../../application/app';
 import type { JobId } from '../../../common/types/anomaly_detection_jobs';
@@ -26,6 +27,7 @@ import { JobSelectorFlyout } from './components/job_selector_flyout';
  */
 export async function resolveJobSelection(
   coreStart: CoreStart,
+  dataViews: DataViewsContract,
   selectedJobIds?: JobId[],
   singleSelection: boolean = false
 ): Promise<{ jobIds: string[]; groups: Array<{ groupId: string; jobIds: string[] }> }> {
@@ -70,7 +72,9 @@ export async function resolveJobSelection(
 
       const flyoutSession = coreStart.overlays.openFlyout(
         toMountPoint(
-          <KibanaContextProvider services={{ ...coreStart, mlServices: getMlGlobalServices(http) }}>
+          <KibanaContextProvider
+            services={{ ...coreStart, mlServices: getMlGlobalServices(http, dataViews) }}
+          >
             <JobSelectorFlyout
               selectedIds={selectedJobIds}
               withTimeRangeSelector={false}

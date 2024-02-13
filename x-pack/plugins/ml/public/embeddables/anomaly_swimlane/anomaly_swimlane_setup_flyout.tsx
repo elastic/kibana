@@ -8,6 +8,7 @@
 import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { extractInfluencers } from '../../../common/util/job_utils';
 import { VIEW_BY_JOB_LABEL } from '../../application/explorer/explorer_constants';
 import { AnomalySwimlaneInitializer } from './anomaly_swimlane_initializer';
@@ -19,6 +20,7 @@ import { mlApiServicesProvider } from '../../application/services/ml_api_service
 
 export async function resolveAnomalySwimlaneUserInput(
   coreStart: CoreStart,
+  dataViews: DataViewsContract,
   input?: AnomalySwimlaneEmbeddableInput
 ): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
   const { http, overlays, theme, i18n } = coreStart;
@@ -27,7 +29,7 @@ export async function resolveAnomalySwimlaneUserInput(
 
   return new Promise(async (resolve, reject) => {
     try {
-      const { jobIds } = await resolveJobSelection(coreStart, input?.jobIds);
+      const { jobIds } = await resolveJobSelection(coreStart, dataViews, input?.jobIds);
       const title = input?.title ?? getDefaultSwimlanePanelTitle(jobIds);
       const { jobs } = await getJobs({ jobId: jobIds.join(',') });
       const influencers = extractInfluencers(jobs);

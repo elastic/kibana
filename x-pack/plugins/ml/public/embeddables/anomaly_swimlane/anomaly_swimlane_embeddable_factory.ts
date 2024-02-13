@@ -55,11 +55,11 @@ export class AnomalySwimlaneEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalySwimlaneEmbeddableInput>> {
-    const [coreStart] = await this.getServices();
+    const [coreStart, deps] = await this.getServices();
 
     try {
       const { resolveAnomalySwimlaneUserInput } = await import('./anomaly_swimlane_setup_flyout');
-      return await resolveAnomalySwimlaneUserInput(coreStart);
+      return await resolveAnomalySwimlaneUserInput(coreStart, deps.data.dataViews);
     } catch (e) {
       return Promise.reject();
     }

@@ -55,13 +55,13 @@ export class AnomalyChartsEmbeddableFactory
   }
 
   public async getExplicitInput(): Promise<Partial<AnomalyChartsEmbeddableInput>> {
-    const [coreStart] = await this.getServices();
+    const [coreStart, deps] = await this.getServices();
 
     try {
       const { resolveEmbeddableAnomalyChartsUserInput } = await import(
         './anomaly_charts_setup_flyout'
       );
-      return await resolveEmbeddableAnomalyChartsUserInput(coreStart);
+      return await resolveEmbeddableAnomalyChartsUserInput(coreStart, deps.data.dataViews);
     } catch (e) {
       return Promise.reject();
     }

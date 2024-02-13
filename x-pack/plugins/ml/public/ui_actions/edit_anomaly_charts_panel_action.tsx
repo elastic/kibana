@@ -34,7 +34,7 @@ export function createEditAnomalyChartsPanelAction(
         throw new Error('Not possible to execute an action without the embeddable context');
       }
 
-      const [coreStart] = await getStartServices();
+      const [coreStart, deps] = await getStartServices();
 
       try {
         const { resolveEmbeddableAnomalyChartsUserInput } = await import(
@@ -43,6 +43,7 @@ export function createEditAnomalyChartsPanelAction(
 
         const result = await resolveEmbeddableAnomalyChartsUserInput(
           coreStart,
+          deps.data.dataViews,
           embeddable.getInput()
         );
         embeddable.updateInput(result);
