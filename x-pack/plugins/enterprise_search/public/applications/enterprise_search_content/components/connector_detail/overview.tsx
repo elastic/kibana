@@ -15,6 +15,8 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../../common/constants';
+
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
 import { isConnectorIndex } from '../../utils/indices';
@@ -100,10 +102,13 @@ export const ConnectorDetailOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {isConnectorIndex(indexData) && connector && (
-        <ConnectorStats connector={connector} indexData={indexData} />
+      {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
+        <ConnectorStats
+          connector={connector}
+          indexData={isConnectorIndex(indexData) ? indexData : undefined}
+        />
       )}
-      {isConnectorIndex(indexData) && (
+      {connector && connector.service_type !== ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE && (
         <>
           <EuiSpacer />
           <SyncJobs />

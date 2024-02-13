@@ -24,7 +24,7 @@ interface Params {
  * @param
  * @returns
  */
-export const getESQLTextFieldStats = async ({
+export const getESQLExampleFieldValues = async ({
   runRequest,
   columns: textFields,
   esqlBaseQuery,

@@ -39,8 +39,8 @@ export const assetCriticalityFieldMap: FieldMap = {
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
  */
 export const CriticalityModifiers: Record<AssetCriticalityRecord['criticality_level'], number> = {
-  very_important: 2,
-  important: 1.5,
-  normal: 1,
-  not_important: 0.5,
+  extreme_impact: 2,
+  high_impact: 1.5,
+  medium_impact: 1,
+  low_impact: 0.5,
 };
