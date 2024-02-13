@@ -16,7 +16,7 @@ import {
   getAlertsById,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
