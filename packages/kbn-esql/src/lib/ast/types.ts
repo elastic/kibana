@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EditorError } from '../../../types';
+import { EditorError } from '../types';
 
 export type ESQLAst = ESQLCommand[];
 
