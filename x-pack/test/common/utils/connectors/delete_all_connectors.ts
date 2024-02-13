@@ -22,7 +22,7 @@ export async function deleteAllConnectors(
   const connectors = await getAllConnectors(supertest, { spaceId });
 
   for (const connector of connectors) {
-    if (connector.isPreconfigured) {
+    if (connector.is_preconfigured) {
       continue;
     }
 
