@@ -35,10 +35,12 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
 
     fs.writeFileSync('manifest-permanent.json', manifestPermanentJson);
 
+    const currentPath = execSync('pwd', { encoding: 'utf-8' }).trim();
+    console.log('Current working directory:', currentPath);
+
     execSync(
       `
       set -euo pipefail
-      echo $(pwd)
       .buildkite/scripts/common/activate_service_account.sh ${bucket}
       cp manifest.json manifest-latest-verified.json
       gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest-latest-verified.json gs://${BASE_BUCKET_DAILY}/${version}/
