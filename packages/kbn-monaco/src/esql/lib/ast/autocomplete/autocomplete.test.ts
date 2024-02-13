@@ -20,7 +20,7 @@ import {
   ESQLErrorListener,
   getParser,
   ROOT_STATEMENT,
-} from '@kbn/esql';
+} from '@kbn/esql-ast';
 import { TRIGGER_SUGGESTION_COMMAND } from './factories';
 import { camelCase } from 'lodash';
 

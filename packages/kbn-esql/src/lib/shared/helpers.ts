@@ -112,7 +112,7 @@ export function isComma(char: string) {
   return char === ',';
 }
 
-export function isSourceCommand({ label }: { label: string }) {
+export function isSourceCommand({ label }: { label: string | { label: string } }) {
   return ['from', 'row', 'show'].includes(String(label));
 }
 

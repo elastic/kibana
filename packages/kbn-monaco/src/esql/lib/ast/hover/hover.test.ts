@@ -8,13 +8,16 @@
 
 import { monaco } from '../../../../monaco_imports';
 import { CharStreams } from 'antlr4ts';
-import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
-import { ESQLErrorListener } from '../../monaco/esql_error_listener';
-import { AstListener } from '../ast_factory';
 import { getHoverItem } from './hover';
-import { getFunctionDefinition } from '../shared/helpers';
-import { getFunctionSignatures } from '../definitions/helpers';
-import { enrichModes } from '../definitions/settings';
+import {
+  ESQLErrorListener,
+  AstListener,
+  getParser,
+  ROOT_STATEMENT,
+  getFunctionDefinition,
+  getFunctionSignatures,
+} from '@kbn/esql-ast';
+import { enrichModes } from '@kbn/esql-ast/src/lib/definitions/settings';
 
 const fields: Array<{ name: string; type: string; suggestedAs?: string }> = [
   ...['string', 'number', 'date', 'boolean', 'ip'].map((type) => ({

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
+import type { AstProviderFn } from '@kbn/esql-ast';
 import type { monaco } from '../../../../monaco_imports';
-import type { AstProviderFn } from '../types';
 
 export function getSignatureHelp(
   model: monaco.editor.ITextModel,

@@ -9,14 +9,17 @@
 import { EditorError } from '../../../../types';
 import { CharStreams } from 'antlr4ts';
 import { getActions } from './actions';
-import { getParser, ROOT_STATEMENT } from '../../antlr_facade';
-import { ESQLErrorListener } from '../../monaco/esql_error_listener';
-import { AstListener } from '../ast_factory';
-import { wrapAsMonacoMessage } from '../shared/monaco_utils';
-import { ESQLAst } from '../types';
-import { validateAst } from '../validation/validation';
 import { monaco } from '../../../../monaco_imports';
-import { getAllFunctions } from '../shared/helpers';
+import {
+  type ESQLAst,
+  ESQLErrorListener,
+  AstListener,
+  getParser,
+  ROOT_STATEMENT,
+  validateAst,
+  getAllFunctions,
+} from '@kbn/esql-ast';
+import { wrapAsMonacoMessage } from '../shared/monaco_utils';
 
 function getCallbackMocks() {
   return {
