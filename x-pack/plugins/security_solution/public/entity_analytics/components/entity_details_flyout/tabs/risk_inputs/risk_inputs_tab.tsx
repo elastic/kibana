@@ -250,7 +250,7 @@ const RiskInputsAssetCriticalitySection: React.FC<{
       <EuiSpacer size="s" />
       <AssetCriticalityBadgeAllowMissing
         criticalityLevel={criticalityLevel}
-        dataTestSubj="risk-input-asset-criticality-badge"
+        dataTestSubj="risk-inputs-asset-criticality-badge"
       />
 
       <EuiSpacer size="m" />
