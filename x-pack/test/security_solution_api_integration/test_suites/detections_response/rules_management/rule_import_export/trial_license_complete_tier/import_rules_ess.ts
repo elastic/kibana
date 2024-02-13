@@ -15,17 +15,16 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { toNdJsonString } from '@kbn/lists-plugin/common/schemas/request/import_exceptions_schema.mock';
 import {
-  deleteAllRules,
   getSimpleRule,
   ruleToNdjson,
   createLegacyRuleAction,
   getLegacyActionSO,
-  createRule,
   fetchRule,
   getWebHookAction,
   getSimpleRuleAsNdjson,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import { deleteAllRules, createRule } from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,

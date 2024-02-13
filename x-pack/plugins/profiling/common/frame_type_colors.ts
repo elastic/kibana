@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { FrameType } from '@kbn/profiling-utils';
+import { FrameType, normalizeFrameType } from '@kbn/profiling-utils';
 
 /*
  * Helper to calculate the color of a given block to be drawn. The desirable outcomes of this are:
  * Each of the following frame types should get a different set of color hues:
  *
- *   0 = Unsymbolized frame
- *   1 = Python
- *   2 = PHP
- *   3 = Native
- *   4 = Kernel
- *   5 = JVM/Hotspot
- *   6 = Ruby
- *   7 = Perl
- *   8 = JavaScript
- *   9 = PHP JIT
+ *   0x00 = Unsymbolized frame
+ *   0x01 = Python
+ *   0x02 = PHP
+ *   0x03 = Native
+ *   0x04 = Kernel
+ *   0x05 = JVM/Hotspot
+ *   0x06 = Ruby
+ *   0x07 = Perl
+ *   0x08 = JavaScript
+ *   0x09 = PHP JIT
+ *   0xFF = Error frame
  *
  * This is most easily achieved by mapping frame types to different color variations, using
  * the x-position we can use different colors for adjacent blocks while keeping a similar hue
@@ -38,10 +39,12 @@ export const FRAME_TYPE_COLOR_MAP = {
   [FrameType.Perl]: [0xf98bb9, 0xfaa2c7, 0xfbb9d5, 0xfdd1e3],
   [FrameType.JavaScript]: [0xcbc3e3, 0xd5cfe8, 0xdfdbee, 0xeae7f3],
   [FrameType.PHPJIT]: [0xccfc82, 0xd1fc8e, 0xd6fc9b, 0xdbfca7],
+  [FrameType.ErrorFlag]: [0x0, 0x0, 0x0, 0x0], // This is a special case, it's not a real frame type
+  [FrameType.Error]: [0xfd8484, 0xfd9d9d, 0xfeb5b5, 0xfecece],
 };
 
 export function frameTypeToRGB(frameType: FrameType, x: number): number {
-  return FRAME_TYPE_COLOR_MAP[frameType][x % 4];
+  return FRAME_TYPE_COLOR_MAP[normalizeFrameType(frameType)][x % 4];
 }
 
 export function rgbToRGBA(rgb: number): number[] {
