@@ -8,7 +8,11 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import {
-  fetchSyncJobsByConnectorId,
+  deleteConnectorById,
+  deleteConnectorSecret,
+  fetchConnectorById,
+  fetchConnectors,
+  fetchSyncJobs,
   putUpdateNative,
   updateConnectorConfiguration,
   updateConnectorNameAndDescription,
@@ -21,10 +25,14 @@ import {
 
 import { ConnectorStatus, FilteringRule, SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
+import { isResourceNotFoundException } from '@kbn/search-connectors/utils/identify_exceptions';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { addConnector } from '../../lib/connectors/add_connector';
 import { startSync } from '../../lib/connectors/start_sync';
+import { deleteAccessControlIndex } from '../../lib/indices/delete_access_control_index';
+import { fetchIndexCounts } from '../../lib/indices/fetch_index_counts';
+import { deleteIndexPipelines } from '../../lib/pipelines/delete_pipelines';
 import { getDefaultPipeline } from '../../lib/pipelines/get_default_pipeline';
 import { updateDefaultPipeline } from '../../lib/pipelines/update_default_pipeline';
 import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
@@ -32,7 +40,11 @@ import { updateConnectorPipeline } from '../../lib/pipelines/update_pipeline';
 import { RouteDependencies } from '../../plugin';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
-import { isAccessControlDisabledException } from '../../utils/identify_exceptions';
+import {
+  isAccessControlDisabledException,
+  isExpensiveQueriesNotAllowedException,
+  isIndexNotFoundException,
+} from '../../utils/identify_exceptions';
 
 export function registerConnectorRoutes({ router, log }: RouteDependencies) {
   router.post(
@@ -237,7 +249,7 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
     },
     elasticsearchErrorHandler(log, async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const result = await fetchSyncJobsByConnectorId(
+      const result = await fetchSyncJobs(
         client.asCurrentUser,
         request.params.connectorId,
         request.query.from,
@@ -465,6 +477,167 @@ export function registerConnectorRoutes({ router, log }: RouteDependencies) {
       const { is_native } = request.body;
       const result = await putUpdateNative(client.asCurrentUser, connectorId, is_native);
       return result ? response.ok({ body: result }) : response.conflict();
+    })
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors',
+      validate: {
+        query: schema.object({
+          fetchCrawlersOnly: schema.maybe(schema.boolean()),
+          from: schema.number({ defaultValue: 0, min: 0 }),
+          searchQuery: schema.string({ defaultValue: '' }),
+          size: schema.number({ defaultValue: 10, min: 0 }),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { fetchCrawlersOnly, from, size, searchQuery } = request.query;
+
+      let connectorResult;
+      let connectorCountResult;
+      try {
+        connectorResult = await fetchConnectors(
+          client.asCurrentUser,
+          undefined,
+          fetchCrawlersOnly,
+          searchQuery
+        );
+
+        const indicesSlice = connectorResult
+          .reduce((acc: string[], connector) => {
+            if (connector.index_name) {
+              acc.push(connector.index_name);
+            }
+            return acc;
+          }, [])
+          .slice(from, from + size);
+        connectorCountResult = await fetchIndexCounts(client, indicesSlice);
+      } catch (error) {
+        if (isExpensiveQueriesNotAllowedException(error)) {
+          return createError({
+            errorCode: ErrorCode.EXPENSIVE_QUERY_NOT_ALLOWED_ERROR,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.expensive_query_not_allowed_error',
+              {
+                defaultMessage:
+                  'Expensive search queries not allowed. "search.allow_expensive_queries" is set to false ',
+              }
+            ),
+            response,
+            statusCode: 400,
+          });
+        }
+        throw error;
+      }
+      return response.ok({
+        body: {
+          connectors: connectorResult.slice(from, from + size),
+          counts: connectorCountResult,
+          meta: {
+            page: {
+              from,
+              size,
+              total: connectorResult.length,
+            },
+          },
+        },
+      });
+    })
+  );
+  router.get(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
+
+      let connectorResult;
+      try {
+        connectorResult = await fetchConnectorById(client.asCurrentUser, connectorId);
+      } catch (error) {
+        throw error;
+      }
+      return response.ok({
+        body: {
+          connector: connectorResult?.value,
+        },
+      });
+    })
+  );
+  router.delete(
+    {
+      path: '/internal/enterprise_search/connectors/{connectorId}',
+      validate: {
+        params: schema.object({
+          connectorId: schema.string(),
+        }),
+        query: schema.object({
+          shouldDeleteIndex: schema.maybe(schema.boolean()),
+        }),
+      },
+    },
+    elasticsearchErrorHandler(log, async (context, request, response) => {
+      const { client } = (await context.core).elasticsearch;
+      const { connectorId } = request.params;
+      const { shouldDeleteIndex } = request.query;
+
+      let connectorResponse;
+      try {
+        const connector = await fetchConnectorById(client.asCurrentUser, connectorId);
+        const indexNameToDelete = shouldDeleteIndex ? connector?.value.index_name : null;
+        const apiKeyId = connector?.value.api_key_id;
+        const secretId = connector?.value.api_key_secret_id;
+
+        connectorResponse = await deleteConnectorById(client.asCurrentUser, connectorId);
+
+        if (indexNameToDelete) {
+          await deleteIndexPipelines(client, indexNameToDelete);
+          await deleteAccessControlIndex(client, indexNameToDelete);
+          await client.asCurrentUser.indices.delete({ index: indexNameToDelete });
+        }
+        if (apiKeyId) {
+          await client.asCurrentUser.security.invalidateApiKey({ ids: [apiKeyId] });
+        }
+        if (secretId) {
+          await deleteConnectorSecret(client.asCurrentUser, secretId);
+        }
+      } catch (error) {
+        if (isResourceNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.RESOURCE_NOT_FOUND,
+            message: i18n.translate(
+              'xpack.enterpriseSearch.server.routes.connectors.resource_not_found_error',
+              {
+                defaultMessage: 'Connector with id {connectorId} is not found.',
+                values: { connectorId },
+              }
+            ),
+            response,
+            statusCode: 404,
+          });
+        }
+
+        if (isIndexNotFoundException(error)) {
+          return createError({
+            errorCode: ErrorCode.INDEX_NOT_FOUND,
+            message: 'Could not find index',
+            response,
+            statusCode: 404,
+          });
+        }
+
+        throw error;
+      }
+
+      return response.ok({ body: connectorResponse });
     })
   );
 }

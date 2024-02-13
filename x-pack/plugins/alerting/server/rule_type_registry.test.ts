@@ -40,6 +40,7 @@ beforeEach(() => {
     licensing: licensingMock.createSetup(),
     minimumScheduleInterval: { value: '1m', enforce: false },
     inMemoryMetrics,
+    latestRuleVersion: 1,
   };
 });
 
@@ -910,6 +911,16 @@ describe('Create Lifecycle', () => {
       expect(() =>
         ruleTypeRegistry.ensureRuleTypeEnabled('test')
       ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
+    });
+  });
+
+  describe('getLatestRuleVersion', () => {
+    test('should return the latest rule version', async () => {
+      const ruleTypeRegistry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        latestRuleVersion: 5,
+      });
+      expect(ruleTypeRegistry.getLatestRuleVersion()).toBe(5);
     });
   });
 });

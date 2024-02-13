@@ -7,27 +7,31 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
-import type { EsAssetReference, InstallablePackage } from '../../../../types';
+import type { EsAssetReference } from '../../../../types';
 
 import { ElasticsearchAssetType } from '../../../../types';
-import { getAsset, getPathParts } from '../../archive';
-import { updateEsAssetReferences } from '../../packages/install';
+import { getAssetFromAssetsMap, getPathParts } from '../../archive';
+import { updateEsAssetReferences } from '../../packages/es_assets_reference';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
+import { PackageInvalidArchiveError } from '../../../../errors';
+import type { PackageInstallContext } from '../../../../../common/types';
 
 export async function installILMPolicy(
-  packageInfo: InstallablePackage,
-  paths: string[],
+  packageInstallContext: PackageInstallContext,
   esClient: ElasticsearchClient,
   savedObjectsClient: SavedObjectsClientContract,
   logger: Logger,
   esReferences: EsAssetReference[]
 ): Promise<EsAssetReference[]> {
-  const ilmPaths = paths.filter((path) => isILMPolicy(path));
+  const { packageInfo } = packageInstallContext;
+  const ilmPaths = packageInstallContext.paths.filter((path) => isILMPolicy(path));
   if (!ilmPaths.length) return esReferences;
 
   const ilmPolicies = ilmPaths.map((path) => {
-    const body = JSON.parse(getAsset(path).toString('utf-8'));
+    const body = JSON.parse(
+      getAssetFromAssetsMap(packageInstallContext.assetsMap, path).toString('utf-8')
+    );
 
     body.policy._meta = getESAssetMetadata({ packageName: packageInfo.name });
 
@@ -57,7 +61,7 @@ export async function installILMPolicy(
           { logger }
         );
       } catch (err) {
-        throw new Error(err.message);
+        throw new PackageInvalidArchiveError(`Couldn't install ilm policies: ${err.message}`);
       }
     })
   );

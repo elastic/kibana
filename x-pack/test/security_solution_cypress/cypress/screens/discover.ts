@@ -32,7 +32,8 @@ export const DISCOVER_ESQL_INPUT = `${DISCOVER_CONTAINER} ${getDataTestSubjectSe
 
 export const DISCOVER_ESQL_INPUT_TEXT_CONTAINER = `${DISCOVER_ESQL_INPUT} .view-lines`;
 
-export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea:first`;
+export const DISCOVER_ESQL_INPUT_EXPAND = getDataTestSubjectSelector('TextBasedLangEditor-expand');
+export const DISCOVER_ESQL_EDITABLE_INPUT = `${DISCOVER_ESQL_INPUT} textarea`;
 
 export const DISCOVER_ADD_FILTER = `${DISCOVER_CONTAINER} ${getDataTestSubjectSelector(
   'addFilter'
@@ -42,7 +43,7 @@ export const DISCOVER_FILTER_BADGES = `${DISCOVER_CONTAINER} ${getDataTestSubjec
   'filter-badge-'
 )}`;
 
-export const DISCOVER_RESULT_HITS = getDataTestSubjectSelector('unifiedHistogramQueryHits');
+export const DISCOVER_RESULT_HITS = getDataTestSubjectSelector('discoverQueryHits');
 
 export const DISCOVER_FIELDS_LOADING = getDataTestSubjectSelector(
   'fieldListGroupedAvailableFields-countLoading'

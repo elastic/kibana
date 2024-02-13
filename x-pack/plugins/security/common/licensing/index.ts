@@ -5,7 +5,4 @@
  * 2.0.
  */
 
-export type { SecurityLicense } from './license_service';
 export { SecurityLicenseService } from './license_service';
-
-export type { LoginLayout, SecurityLicenseFeatures } from './license_features';

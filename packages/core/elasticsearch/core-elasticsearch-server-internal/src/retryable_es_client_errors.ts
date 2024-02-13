@@ -9,12 +9,13 @@
 import { errors as EsErrors } from '@elastic/elasticsearch';
 
 const retryResponseStatuses = [
-  503, // ServiceUnavailable
   401, // AuthorizationException
   403, // AuthenticationException
   408, // RequestTimeout
   410, // Gone
   429, // TooManyRequests -> ES circuit breaker
+  503, // ServiceUnavailable
+  504, // GatewayTimeout
 ];
 
 /**

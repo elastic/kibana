@@ -25,7 +25,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
 
       const instances = [...Array(numServices).keys()].map((index) =>
         apm
-          .service({ name: `synth-go-${index}`, environment: ENVIRONMENT, agentName: 'go' })
+          .service({ name: `synth-node-${index}`, environment: ENVIRONMENT, agentName: 'nodejs' })
           .instance('instance')
       );
       const instanceSpans = (instance: Instance) => {
@@ -62,7 +62,10 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
             .failure()
             .errors(
               instance
-                .error({ message: '[ResponseError] index_not_found_exception' })
+                .error({
+                  message: '[ResponseError] index_not_found_exception',
+                  type: 'ResponseError',
+                })
                 .timestamp(timestamp + 50)
             )
         );

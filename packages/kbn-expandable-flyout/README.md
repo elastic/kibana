@@ -27,7 +27,11 @@ The expandable-flyout is making some strict UI design decisions:
 
 The ExpandableFlyout [React component](https://github.com/elastic/kibana/tree/main/packages/kbn-expandable-flyout/src/index.tsx) renders the UI, leveraging an [EuiFlyout](https://eui.elastic.co/#/layout/flyout).
 
-The ExpandableFlyout [React context](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx) manages the internal state of the expandable flyout, and exposes the following api:
+To retrieve the flyout's layout (left, right and preview panels), you can utilize [useExpandableFlyoutState](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_state.ts).
+
+To control (or mutate) flyout's layout, you can utilize [useExpandableFlyoutApi](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/hooks/use_expandable_flyout_api.ts).
+
+**Expandable Flyout API** exposes the following methods:
 - **openFlyout**: open the flyout with a set of panels
 - **openRightPanel**: open a right panel
 - **openLeftPanel**: open a left panel
@@ -37,8 +41,6 @@ The ExpandableFlyout [React context](https://github.com/elastic/kibana/blob/main
 - **closePreviewPanel**: close the preview panels
 - **previousPreviewPanel**: navigate to the previous preview panel
 - **closeFlyout**: close the flyout
-
-To retrieve the flyout's layout (left, right and preview panels), you can use the **panels** from the same [React context](https://github.com/elastic/kibana/blob/main/packages/kbn-expandable-flyout/src/context.tsx).
 
 ## Usage
 
@@ -57,6 +59,12 @@ Then use the [React UI component](https://github.com/elastic/kibana/tree/main/pa
 <ExpandableFlyout registeredPanels={myPanels} />
 ```
 _where `myPanels` is a list of all the panels that can be rendered in the flyout_
+
+## State persistence 
+
+The expandable flyout offers 2 ways of managing its state:
+- the default behavior saves the state of the flyout in the url. This allows the flyout to be automatically reopened when users refresh the browser page, or when users share a url 
+- the second way (done by setting the `storage` prop to `memory`) stores the state of the flyout in memory. This means that the flyout will not be reopened when users refresh the browser page, or when users share a url
 
 
 ## Terminology

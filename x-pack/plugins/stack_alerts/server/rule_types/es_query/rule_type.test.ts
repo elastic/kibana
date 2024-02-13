@@ -703,6 +703,7 @@ describe('ruleType', () => {
           payload: expect.objectContaining({
             'kibana.alert.evaluation.conditions':
               'Number of matching documents is greater than or equal to 3',
+            'kibana.alert.evaluation.threshold': 3,
             'kibana.alert.evaluation.value': '3',
             'kibana.alert.reason': expect.any(String),
             'kibana.alert.title': "rule 'rule-name' matched query",
@@ -797,6 +798,7 @@ describe('ruleType', () => {
           id: 'query matched',
           payload: expect.objectContaining({
             'kibana.alert.evaluation.conditions': 'Query matched documents',
+            'kibana.alert.evaluation.threshold': 0,
             'kibana.alert.evaluation.value': '3',
             'kibana.alert.reason': expect.any(String),
             'kibana.alert.title': "rule 'rule-name' matched query",

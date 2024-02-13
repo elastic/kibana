@@ -8,6 +8,7 @@
 import { chunk, cloneDeep, flatten } from 'lodash';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { lastValueFrom } from 'rxjs';
+import { getEsQueryConfig } from '@kbn/data-plugin/common';
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type {
@@ -29,8 +30,8 @@ import { isDefined } from '@kbn/ml-is-defined';
 import { computeChi2PValue, type Histogram } from '@kbn/ml-chi2test';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 
-import type { AggregationsRangeBucketKeys } from '@elastic/elasticsearch/lib/api/types';
-import { createMergedEsQuery } from '../index_data_visualizer/utils/saved_search_utils';
+import type { AggregationsMultiTermsBucketKeys } from '@elastic/elasticsearch/lib/api/types';
+import { buildEsQuery } from '@kbn/es-query';
 import { useDataVisualizerKibana } from '../kibana_context';
 
 import { useDataDriftStateManagerContext } from './use_state_manager';
@@ -54,6 +55,7 @@ import {
   TimeRange,
   ComparisonHistogram,
 } from './types';
+import { isFulfilled, isRejected } from '../common/util/promise_all_settled_utils';
 
 export const getDataComparisonType = (kibanaType: string): DataDriftField['type'] => {
   switch (kibanaType) {
@@ -459,12 +461,19 @@ const fetchComparisonDriftedData = async ({
   );
 
   const fieldsWithNoOverlap = new Set<string>();
+  const rangesAggs = rangesResp?.aggregations?.sample
+    ? rangesResp.aggregations.sample
+    : rangesResp?.aggregations;
   for (const { field } of fields) {
-    if (rangesResp.aggregations[`${field}_ranges`]) {
-      const buckets = rangesResp.aggregations[`${field}_ranges`]
-        .buckets as AggregationsRangeBucketKeys[];
+    if (
+      isPopulatedObject<
+        string,
+        estypes.AggregationsMultiBucketAggregateBase<AggregationsMultiTermsBucketKeys>
+      >(rangesAggs, [`${field}_ranges`])
+    ) {
+      const buckets = rangesAggs[`${field}_ranges`].buckets;
 
-      if (buckets) {
+      if (Array.isArray(buckets)) {
         const totalSumOfAllBuckets = buckets.reduce((acc, bucket) => acc + bucket.doc_count, 0);
 
         const fractions = buckets.map((bucket) => ({
@@ -475,7 +484,7 @@ const fetchComparisonDriftedData = async ({
         if (totalSumOfAllBuckets > 0) {
           driftedRequestAggs[`${field}_ks_test`] = {
             bucket_count_ks_test: {
-              buckets_path: `${field}_ranges>_count`,
+              buckets_path: `${field}_ranges > _count`,
               alternative: ['two_sided'],
               ...(totalSumOfAllBuckets > 0
                 ? { fractions: fractions.map((bucket) => Number(bucket.fraction.toFixed(3))) }
@@ -580,12 +589,6 @@ const fetchHistogramData = async ({
     return dataSearch(histogramRequest, signal);
   }
 };
-
-const isFulfilled = <T>(
-  input: PromiseSettledResult<Awaited<T>>
-): input is PromiseFulfilledResult<Awaited<T>> => input.status === 'fulfilled';
-const isRejected = <T>(input: PromiseSettledResult<Awaited<T>>): input is PromiseRejectedResult =>
-  input.status === 'rejected';
 
 type EsRequestParams = NonNullable<
   IKibanaSearchRequest<NonNullable<estypes.SearchRequest>>['params']
@@ -756,18 +759,18 @@ export const useFetchDataComparisonResult = (
 
         const kqlQuery =
           searchString !== undefined && searchQueryLanguage !== undefined
-            ? { query: searchString, language: searchQueryLanguage }
+            ? ({ query: searchString, language: searchQueryLanguage } as Query)
             : undefined;
 
         const refDataQuery = getDataComparisonQuery({
-          searchQuery: createMergedEsQuery(
-            kqlQuery,
+          searchQuery: buildEsQuery(
+            currentDataView,
+            kqlQuery ?? [],
             mapAndFlattenFilters([
               ...queryManager.filterManager.getFilters(),
               ...(referenceStateManager.filters ?? []),
             ]),
-            currentDataView,
-            uiSettings
+            uiSettings ? getEsQueryConfig(uiSettings) : undefined
           ),
           datetimeField: currentDataView?.timeFieldName,
           runtimeFields,
@@ -825,14 +828,14 @@ export const useFetchDataComparisonResult = (
           setLoaded(0.25);
 
           const prodDataQuery = getDataComparisonQuery({
-            searchQuery: createMergedEsQuery(
-              kqlQuery,
+            searchQuery: buildEsQuery(
+              currentDataView,
+              kqlQuery ?? [],
               mapAndFlattenFilters([
                 ...queryManager.filterManager.getFilters(),
                 ...(comparisonStateManager.filters ?? []),
               ]),
-              currentDataView,
-              uiSettings
+              uiSettings ? getEsQueryConfig(uiSettings) : undefined
             ),
             datetimeField: currentDataView?.timeFieldName,
             runtimeFields,
@@ -870,6 +873,7 @@ export const useFetchDataComparisonResult = (
                 signal,
               }),
           });
+
           if (isReturnedError(driftedRespAggs)) {
             setResult({
               data: undefined,

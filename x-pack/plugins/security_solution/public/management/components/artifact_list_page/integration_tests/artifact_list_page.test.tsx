@@ -13,6 +13,12 @@ import userEvent from '@testing-library/user-event';
 import type { ArtifactListPageRenderingSetup } from '../mocks';
 import { getArtifactListPageRenderingSetup } from '../mocks';
 import { getDeferred } from '../../../mocks/utils';
+import { useGetEndpointSpecificPolicies } from '../../../services/policies/hooks';
+
+jest.mock('../../../services/policies/hooks', () => ({
+  useGetEndpointSpecificPolicies: jest.fn(),
+}));
+const mockUseGetEndpointSpecificPolicies = useGetEndpointSpecificPolicies as jest.Mock;
 
 jest.mock('../../../../common/components/user_privileges');
 
@@ -29,6 +35,10 @@ describe('When using the ArtifactListPage component', () => {
     const renderSetup = getArtifactListPageRenderingSetup();
 
     ({ history, mockedApi, getFirstCard } = renderSetup);
+
+    mockUseGetEndpointSpecificPolicies.mockReturnValue({
+      data: mockedApi.responseProvider.endpointPackagePolicyList(),
+    });
 
     render = (props = {}) => (renderResult = renderSetup.renderArtifactListPage(props));
   });
@@ -132,6 +142,14 @@ describe('When using the ArtifactListPage component', () => {
       await waitFor(() => {
         expect(history.location.search).toMatch(/pageSize=20/);
       });
+    });
+
+    it('should call useGetEndpointSpecificPolicies hook with specific perPage value', () => {
+      expect(mockUseGetEndpointSpecificPolicies).toHaveBeenCalledWith(
+        expect.objectContaining({
+          perPage: 1000,
+        })
+      );
     });
 
     describe('and interacting with card actions', () => {

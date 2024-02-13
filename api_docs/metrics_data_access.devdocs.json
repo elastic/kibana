@@ -517,7 +517,7 @@
         "label": "findInventoryFields",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
+          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => { id: string; name: string; os?: string | undefined; ip?: string | undefined; cloudProvider?: string | undefined; }"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -531,7 +531,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -550,8 +550,7 @@
         "label": "findInventoryModel",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => ",
-          "InventoryModel"
+          "<T extends \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\">(type: T) => InventoryModels<T>"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -560,12 +559,12 @@
           {
             "parentPluginId": "metricsDataAccess",
             "id": "def-common.findInventoryModel.$1",
-            "type": "CompoundType",
+            "type": "Uncategorized",
             "tags": [],
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "T"
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -584,7 +583,7 @@
         "label": "getFieldByType",
         "description": [],
         "signature": [
-          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
+          "(type: \"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\") => \"container.id\" | \"host.name\" | \"kubernetes.pod.uid\" | undefined"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -598,7 +597,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+              "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
             ],
             "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
             "deprecated": false,
@@ -671,7 +670,7 @@
         "label": "awsEC2SnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"rx\" | \"cpu\" | \"tx\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
+          "(\"rx\" | \"tx\" | \"cpu\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/aws_ec2/metrics/index.ts",
         "deprecated": false,
@@ -686,7 +685,7 @@
         "label": "awsRDSSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"cpu\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\")[]"
+          "(\"cpu\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/aws_rds/metrics/index.ts",
         "deprecated": false,
@@ -701,7 +700,7 @@
         "label": "awsS3SnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\")[]"
+          "(\"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/aws_s3/metrics/index.ts",
         "deprecated": false,
@@ -716,7 +715,7 @@
         "label": "awsSQSSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\")[]"
+          "(\"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/aws_sqs/metrics/index.ts",
         "deprecated": false,
@@ -731,7 +730,7 @@
         "label": "containerSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"cpu\" | \"tx\")[]"
+          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/container/metrics/index.ts",
         "deprecated": false,
@@ -746,7 +745,7 @@
         "label": "hostSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryFree\" | \"memoryTotal\" | \"normalizedLoad1m\" | \"tx\" | \"logRate\")[]"
+          "(\"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\")[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/host/metrics/index.ts",
         "deprecated": false,
@@ -761,7 +760,7 @@
         "label": "InventoryFormatterType",
         "description": [],
         "signature": [
-          "\"number\" | \"percent\" | \"bytes\" | \"abbreviatedNumber\" | \"bits\" | \"highPrecision\""
+          "\"number\" | \"percent\" | \"bytes\" | \"bits\" | \"abbreviatedNumber\" | \"highPrecision\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -776,7 +775,7 @@
         "label": "InventoryItemType",
         "description": [],
         "signature": [
-          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsSQS\" | \"awsRDS\""
+          "\"host\" | \"container\" | \"pod\" | \"awsEC2\" | \"awsS3\" | \"awsRDS\" | \"awsSQS\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -806,8 +805,85 @@
         "label": "inventoryModels",
         "description": [],
         "signature": [
+          "(",
           "InventoryModel",
-          "[]"
+          "<",
+          "InventoryMetricsWithDashboards",
+          "<{ cpuUsage: ",
+          "LensBaseLayer",
+          "; cpuUsageIowait: ",
+          "LensBaseLayer",
+          "; cpuUsageIrq: ",
+          "LensBaseLayer",
+          "; cpuUsageNice: ",
+          "LensBaseLayer",
+          "; cpuUsageSoftirq: ",
+          "LensBaseLayer",
+          "; cpuUsageSteal: ",
+          "LensBaseLayer",
+          "; cpuUsageUser: ",
+          "LensBaseLayer",
+          "; cpuUsageSystem: ",
+          "LensBaseLayer",
+          "; diskIORead: ",
+          "LensBaseLayer",
+          "; diskIOWrite: ",
+          "LensBaseLayer",
+          "; diskReadThroughput: ",
+          "LensBaseLayer",
+          "; diskWriteThroughput: ",
+          "LensBaseLayer",
+          "; diskSpaceAvailability: ",
+          "LensBaseLayer",
+          "; diskSpaceAvailable: ",
+          "LensBaseLayer",
+          "; diskUsage: ",
+          "LensBaseLayer",
+          "; hostCount: ",
+          "LensBaseLayer",
+          "; logRate: ",
+          "LensBaseLayer",
+          "; normalizedLoad1m: ",
+          "LensBaseLayer",
+          "; load1m: ",
+          "LensBaseLayer",
+          "; load5m: ",
+          "LensBaseLayer",
+          "; load15m: ",
+          "LensBaseLayer",
+          "; memoryUsage: ",
+          "LensBaseLayer",
+          "; memoryFree: ",
+          "LensBaseLayer",
+          "; memoryUsed: ",
+          "LensBaseLayer",
+          "; memoryFreeExcludingCache: ",
+          "LensBaseLayer",
+          "; memoryCache: ",
+          "LensBaseLayer",
+          "; rx: ",
+          "LensBaseLayer",
+          "; tx: ",
+          "LensBaseLayer",
+          "; }, { assetDetails: { get: ({ metricsDataViewId, logsDataViewId, }: { metricsDataViewId?: string | undefined; logsDataViewId?: string | undefined; }) => ",
+          "DashboardModel",
+          "; }; assetDetailsFlyout: { get: ({ metricsDataViewId, logsDataViewId, }: { metricsDataViewId?: string | undefined; logsDataViewId?: string | undefined; }) => ",
+          "DashboardModel",
+          "; }; hostsView: { get: ({ metricsDataViewId }: { metricsDataViewId?: string | undefined; }) => ",
+          "DashboardModel",
+          "; }; kpi: { get: ({ metricsDataViewId, options, }: { metricsDataViewId?: string | undefined; options?: Pick<{ title: string; dataset?: ",
+          "LensDataset",
+          " | undefined; label?: string | undefined; filter?: string | undefined; format?: \"string\" | \"number\" | \"duration\" | \"percent\" | \"currency\" | \"bytes\" | \"bits\" | undefined; decimals?: number | undefined; normalizeByUnit?: \"m\" | \"d\" | \"h\" | \"s\" | undefined; compactValues?: boolean | undefined; randomSampling?: number | undefined; useGlobalFilter?: boolean | undefined; seriesColor?: string | undefined; value: string; chartType: \"metric\"; querySecondaryMetric?: string | undefined; queryMaxValue?: string | undefined; breakdown?: ",
+          "LensBreakdownConfig",
+          " | undefined; trendLine?: boolean | undefined; subtitle?: string | undefined; }, \"subtitle\" | \"seriesColor\"> | undefined; }) => ",
+          "DashboardModel",
+          "; }; assetDetailsKubernetesNode: { get: ({ metricsDataViewId }: { metricsDataViewId?: string | undefined; }) => ",
+          "DashboardModel",
+          "; }; }>> | ",
+          "InventoryModel",
+          "<",
+          "InventoryMetrics",
+          ">)[]"
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/index.ts",
         "deprecated": false,
@@ -822,7 +898,7 @@
         "label": "InventoryVisType",
         "description": [],
         "signature": [
-          "\"bar\" | \"line\" | \"area\""
+          "\"area\" | \"line\" | \"bar\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -854,9 +930,9 @@
         "label": "podSnapshotMetricTypes",
         "description": [],
         "signature": [
-          "(\"memory\" | \"rx\" | \"cpu\" | \"tx\")[]"
+          "(\"memory\" | \"rx\" | \"tx\" | \"cpu\")[]"
         ],
-        "path": "x-pack/plugins/metrics_data_access/common/inventory_models/pod/metrics/index.ts",
+        "path": "x-pack/plugins/metrics_data_access/common/inventory_models/kubernetes/pod/metrics/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -869,7 +945,7 @@
         "label": "SnapshotMetricType",
         "description": [],
         "signature": [
-          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"cpu\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryFree\" | \"memoryTotal\" | \"normalizedLoad1m\" | \"tx\" | \"logRate\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"s3TotalRequests\" | \"s3NumberOfObjects\" | \"s3BucketSize\" | \"s3DownloadBytes\" | \"s3UploadBytes\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"rdsLatency\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesSent\" | \"sqsMessagesEmpty\" | \"sqsOldestMessage\""
+          "\"count\" | \"custom\" | \"memory\" | \"rx\" | \"logRate\" | \"normalizedLoad1m\" | \"memoryFree\" | \"tx\" | \"cpu\" | \"s3BucketSize\" | \"s3NumberOfObjects\" | \"s3TotalRequests\" | \"s3UploadBytes\" | \"s3DownloadBytes\" | \"diskLatency\" | \"diskSpaceUsage\" | \"load\" | \"memoryTotal\" | \"diskIOReadBytes\" | \"diskIOWriteBytes\" | \"rdsLatency\" | \"rdsConnections\" | \"rdsQueriesExecuted\" | \"rdsActiveTransactions\" | \"sqsMessagesVisible\" | \"sqsMessagesDelayed\" | \"sqsMessagesEmpty\" | \"sqsMessagesSent\" | \"sqsOldestMessage\""
         ],
         "path": "x-pack/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

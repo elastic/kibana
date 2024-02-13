@@ -6,20 +6,18 @@
  * Side Public License, v 1.
  */
 
-import { readFile, stat } from 'fs';
+import { readFile } from 'fs';
 import { resolve } from 'path';
 import { coerce } from 'semver';
-import { promisify } from 'util';
 import { snakeCase } from 'lodash';
 import { isConfigPath, PackageInfo } from '@kbn/config';
 import { PluginType } from '@kbn/core-base-common';
 import { PluginManifest } from '@kbn/core-plugins-server';
+import { promisify } from 'util';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 import { isCamelCase } from './is_camel_case';
 
 const fsReadFileAsync = promisify(readFile);
-const fsStatAsync = promisify(stat);
-
 /**
  * Name of the JSON manifest file that should be located in the plugin directory.
  */
@@ -220,21 +218,6 @@ export async function parseManifest(
     description: manifest.description,
     enabledOnAnonymousPages: manifest.enabledOnAnonymousPages,
   };
-}
-
-/**
- * Checks whether specified folder contains Kibana new platform plugin. It's only
- * intended to be used by the legacy systems when they need to check whether specific
- * plugin path is handled by the core plugin system or not.
- * @param pluginPath Path to the plugin.
- * @internal
- */
-export async function isNewPlatformPlugin(pluginPath: string) {
-  try {
-    return (await fsStatAsync(resolve(pluginPath, MANIFEST_FILE_NAME))).isFile();
-  } catch (err) {
-    return false;
-  }
 }
 
 /**

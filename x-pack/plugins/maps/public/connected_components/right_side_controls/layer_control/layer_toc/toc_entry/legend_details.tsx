@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { ILayer } from '../../../../../classes/layers/layer';
 
 interface Props {
+  inspectorAdapters: Adapters;
   layer: ILayer;
 }
 
-export function LegendDetails({ layer }: Props) {
-  const errors = layer.getErrors();
+export function LegendDetails({ inspectorAdapters, layer }: Props) {
+  const errors = layer.getErrors(inspectorAdapters);
   if (errors.length) {
     return (
       <>

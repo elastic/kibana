@@ -32,6 +32,8 @@ type ReportPayload = ReportSource['payload'];
  * It can be instantiated with ReportApiJSON: the response data format for the report job APIs
  */
 export class Job {
+  public readonly payload: Omit<ReportPayload, 'headers'>;
+
   public readonly id: JobId;
   public readonly index: string;
 
@@ -40,7 +42,8 @@ export class Job {
   public readonly isDeprecated: ReportPayload['isDeprecated'];
   public readonly spaceId: ReportPayload['spaceId'];
   public readonly browserTimezone?: ReportPayload['browserTimezone'];
-  public readonly layout: ReportPayload['layout'];
+  public readonly layout: ReportPayload['layout']; // png & pdf only
+  public readonly pagingStrategy: ReportPayload['pagingStrategy']; // csv only
   public readonly version: ReportPayload['version'];
 
   public readonly jobtype: ReportSource['jobtype'];
@@ -73,10 +76,13 @@ export class Job {
     this.id = report.id;
     this.index = report.index;
 
+    this.payload = report.payload;
+
     this.jobtype = report.jobtype;
     this.objectType = report.payload.objectType;
     this.title = report.payload.title;
     this.layout = report.payload.layout;
+    this.pagingStrategy = report.payload.pagingStrategy;
     this.version = report.payload.version;
     this.created_by = report.created_by;
     this.created_at = report.created_at;
@@ -103,6 +109,10 @@ export class Job {
     this.metrics = report.metrics;
     this.queue_time_ms = report.queue_time_ms;
     this.execution_time_ms = report.execution_time_ms;
+  }
+
+  public isSearch() {
+    return this.objectType === 'search';
   }
 
   getStatusMessage() {

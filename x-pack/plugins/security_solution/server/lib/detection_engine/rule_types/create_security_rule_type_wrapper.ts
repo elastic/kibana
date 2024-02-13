@@ -412,7 +412,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     wrapHits,
                     wrapSequences,
                     listClient,
-                    ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                    ruleDataClient,
                     mergeStrategy,
                     primaryTimestamp,
                     secondaryTimestamp,
@@ -422,6 +422,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     alertWithSuppression,
                     refreshOnIndexingAlerts: refresh,
                     publicBaseUrl,
+                    experimentalFeatures,
                   },
                 });
 

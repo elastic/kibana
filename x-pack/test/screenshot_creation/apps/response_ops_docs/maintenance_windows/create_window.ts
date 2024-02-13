@@ -26,7 +26,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'create-maintenance-window',
         screenshotDirectories,
         1400,
-        1024
+        1600
+      );
+      const filterAlerts = await find.byCssSelector(
+        '[data-test-subj="maintenanceWindowScopedQuerySwitch"] .euiSwitch__button'
+      );
+      await filterAlerts.click();
+      await commonScreenshots.takeScreenshot(
+        'create-maintenance-window-filter',
+        screenshotDirectories,
+        1400,
+        1600
       );
       const cancelButton = await testSubjects.find('cancelMaintenanceWindow');
       await cancelButton.click();

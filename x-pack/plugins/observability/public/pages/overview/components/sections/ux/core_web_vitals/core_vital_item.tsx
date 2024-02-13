@@ -41,6 +41,7 @@ interface Props {
   thresholds: Thresholds;
   isCls?: boolean;
   helpLabel: string;
+  dataTestSubj?: string;
 }
 
 export function getCoreVitalTooltipMessage(
@@ -82,6 +83,7 @@ export function CoreVitalItem({
   ranks = [100, 0, 0],
   isCls,
   helpLabel,
+  dataTestSubj,
 }: Props) {
   const palette = euiPaletteForStatus(3);
 
@@ -96,6 +98,7 @@ export function CoreVitalItem({
   return (
     <>
       <EuiStat
+        data-test-subj={dataTestSubj}
         aria-label={`${title} ${value}`} // aria-label is required when passing a component, instead of a string, as the description
         titleSize="s"
         title={value ?? ''}

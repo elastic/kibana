@@ -133,7 +133,8 @@ export default function ({ getService }: FtrProviderContext) {
               connectorId,
               outcome: 'failure',
               message: `action execution failure: test.system-action-kibana-privileges:${connectorId}: ${name}`,
-              errorMessage: 'Unauthorized to execute actions',
+              errorMessage:
+                'Unauthorized to execute a "test.system-action-kibana-privileges" action',
               startDate,
             });
             break;

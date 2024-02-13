@@ -29,15 +29,11 @@ export const addsFields = (fields: string[]) => {
 };
 
 export const addsHostGeoCityNameToTimeline = () => {
-  cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check({
-    force: true,
-  });
+  cy.get(FIELDS_BROWSER_HOST_GEO_CITY_NAME_CHECKBOX).check();
 };
 
 export const addsHostGeoContinentNameToTimeline = () => {
-  cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check({
-    force: true,
-  });
+  cy.get(FIELDS_BROWSER_HOST_GEO_CONTINENT_NAME_CHECKBOX).check();
 };
 
 export const clearFieldsBrowser = () => {
@@ -51,7 +47,7 @@ export const clearFieldsBrowser = () => {
 };
 
 export const closeFieldsBrowser = () => {
-  cy.get(FIELD_BROWSER_CLOSE_BTN).click({ force: true });
+  cy.get(FIELD_BROWSER_CLOSE_BTN).click();
   cy.get(FIELDS_BROWSER_FILTER_INPUT).should('not.exist');
 };
 
@@ -67,7 +63,7 @@ export const filterFieldsBrowser = (fieldName: string) => {
 };
 
 export const toggleCategoryFilter = () => {
-  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click({ force: true });
+  cy.get(FIELDS_BROWSER_CATEGORIES_FILTER_BUTTON).click();
 };
 
 export const toggleCategory = (category: string) => {
@@ -79,24 +75,22 @@ export const toggleCategory = (category: string) => {
 };
 
 export const removesMessageField = () => {
-  cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck({
-    force: true,
-  });
+  cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck();
 };
 
 export const removeField = (fieldName: string) => {
-  cy.get(GET_FIELD_CHECKBOX(fieldName)).uncheck({ force: true });
+  cy.get(GET_FIELD_CHECKBOX(fieldName)).uncheck();
 };
 
 export const resetFields = () => {
-  cy.get(FIELDS_BROWSER_RESET_FIELDS).click({ force: true });
+  cy.get(FIELDS_BROWSER_RESET_FIELDS).click();
 };
 
 export const activateViewSelected = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
-  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
+  cy.get(FIELDS_BROWSER_VIEW_SELECTED).click();
 };
 export const activateViewAll = () => {
-  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click({ force: true });
-  cy.get(FIELDS_BROWSER_VIEW_ALL).click({ force: true });
+  cy.get(FIELDS_BROWSER_VIEW_BUTTON).click();
+  cy.get(FIELDS_BROWSER_VIEW_ALL).click();
 };

@@ -70,18 +70,12 @@ export function FunctionRow({
     return <CPUStat cpu={functionRow.totalCPUPerc} diffCPU={functionRow.diff?.totalCPUPerc} />;
   }
 
-  if (
-    columnId === TopNFunctionSortField.AnnualizedCo2 &&
-    functionRow.impactEstimates?.selfCPU?.annualizedCo2
-  ) {
-    return <div>{asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)}</div>;
+  if (columnId === TopNFunctionSortField.AnnualizedCo2) {
+    return <div>{asWeight(functionRow.totalAnnualCO2kgs, 'kgs')}</div>;
   }
 
-  if (
-    columnId === TopNFunctionSortField.AnnualizedDollarCost &&
-    functionRow.impactEstimates?.selfCPU?.annualizedDollarCost
-  ) {
-    return <div>{asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)}</div>;
+  if (columnId === TopNFunctionSortField.AnnualizedDollarCost) {
+    return <div>{asCost(functionRow.totalAnnualCostUSD)}</div>;
   }
 
   return null;

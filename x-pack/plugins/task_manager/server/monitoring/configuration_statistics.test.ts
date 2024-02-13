@@ -53,6 +53,10 @@ describe('Configuration Statistics Aggregator', () => {
         max_attempts: 20,
       },
       metrics_reset_interval: 3000,
+      claim_strategy: 'default',
+      request_timeouts: {
+        update_by_query: 1000,
+      },
     };
 
     const managedConfig = {

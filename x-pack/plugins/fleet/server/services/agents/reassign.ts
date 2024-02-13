@@ -5,11 +5,14 @@
  * 2.0.
  */
 import type { SavedObjectsClientContract, ElasticsearchClient } from '@kbn/core/server';
-import Boom from '@hapi/boom';
 
 import type { Agent } from '../../types';
 import { agentPolicyService } from '../agent_policy';
-import { AgentReassignmentError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentReassignmentError,
+  HostedAgentPolicyRestrictionRelatedError,
+  AgentPolicyNotFoundError,
+} from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -33,7 +36,7 @@ export async function reassignAgent(
 ) {
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!newAgentPolicy) {
-    throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
+    throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
   }
 
   await reassignAgentIsAllowed(soClient, esClient, agentId, newAgentPolicyId);
@@ -87,7 +90,7 @@ export async function reassignAgents(
 ): Promise<{ actionId: string }> {
   const newAgentPolicy = await agentPolicyService.get(soClient, newAgentPolicyId);
   if (!newAgentPolicy) {
-    throw Boom.notFound(`Agent policy not found: ${newAgentPolicyId}`);
+    throw new AgentPolicyNotFoundError(`Agent policy not found: ${newAgentPolicyId}`);
   }
   if (newAgentPolicy.is_managed) {
     throw new HostedAgentPolicyRestrictionRelatedError(

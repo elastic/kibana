@@ -7,6 +7,7 @@
  */
 
 import { getDocLinks, getDocLinksMeta } from '@kbn/doc-links';
+import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
 
@@ -17,12 +18,15 @@ export interface DocLinksServiceStartDeps {
 
 /** @internal */
 export class DocLinksService {
+  constructor(private readonly coreContext: CoreContext) {}
+
   public setup() {}
 
   public start({ injectedMetadata }: DocLinksServiceStartDeps): DocLinksStart {
     const kibanaBranch = injectedMetadata.getKibanaBranch();
-    const docMeta = getDocLinksMeta({ kibanaBranch });
-    const docLinks = getDocLinks({ kibanaBranch });
+    const buildFlavor = this.coreContext.env.packageInfo.buildFlavor;
+    const docMeta = getDocLinksMeta({ kibanaBranch, buildFlavor });
+    const docLinks = getDocLinks({ kibanaBranch, buildFlavor });
 
     return {
       DOC_LINK_VERSION: docMeta.version,

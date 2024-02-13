@@ -120,6 +120,9 @@ export const defaultNavigation: ManagementNodeDefinition = {
               link: 'management:dataViews',
             },
             {
+              link: 'management:aiAssistantManagementSelection',
+            },
+            {
               // Saved objects
               link: 'management:objects',
             },

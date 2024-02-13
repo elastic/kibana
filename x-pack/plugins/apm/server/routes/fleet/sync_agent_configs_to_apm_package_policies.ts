@@ -39,7 +39,7 @@ export async function syncAgentConfigsToApmPackagePolicies({
   const [savedObjectsClient, agentConfigurations, packagePolicies] =
     await Promise.all([
       getInternalSavedObjectsClient(coreStart),
-      listConfigurations(internalESClient, apmIndices),
+      listConfigurations({ internalESClient, apmIndices }),
       getApmPackagePolicies({ coreStart, fleetPluginStart }),
     ]);
 

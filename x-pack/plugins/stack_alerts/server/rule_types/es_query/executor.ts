@@ -8,8 +8,14 @@ import { sha256 } from 'js-sha256';
 import { i18n } from '@kbn/i18n';
 import { CoreSetup } from '@kbn/core/server';
 import { isGroupAggregation, UngroupedGroupId } from '@kbn/triggers-actions-ui-plugin/common';
-import { ALERT_EVALUATION_VALUE, ALERT_REASON, ALERT_URL } from '@kbn/rule-data-utils';
+import {
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUE,
+  ALERT_REASON,
+  ALERT_URL,
+} from '@kbn/rule-data-utils';
 
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { ComparatorFns } from '../../../common';
 import {
   addMessages,
@@ -43,10 +49,13 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
     getTimeRange,
   } = options;
   const { alertsClient, scopedClusterClient, searchSourceClient, share, dataViews } = services;
+  if (!alertsClient) {
+    throw new AlertsClientError();
+  }
   const currentTimestamp = new Date().toISOString();
   const publicBaseUrl = core.http.basePath.publicBaseUrl ?? '';
   const spacePrefix = spaceId !== 'default' ? `/s/${spaceId}` : '';
-  const alertLimit = alertsClient?.getAlertLimitValue();
+  const alertLimit = alertsClient.getAlertLimitValue();
   const compareFn = ComparatorFns.get(params.thresholdComparator);
   if (compareFn == null) {
     throw new Error(getInvalidComparatorError(params.thresholdComparator));
@@ -127,6 +136,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       value,
       hits: result.hits,
       link,
+      sourceFields: result.sourceFields,
     };
     const baseActiveContext: EsQueryRuleActionContext = {
       ...baseContext,
@@ -150,7 +160,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
 
     const id = alertId === UngroupedGroupId && !isGroupAgg ? ConditionMetAlertInstanceId : alertId;
 
-    alertsClient!.report({
+    alertsClient.report({
       id,
       actionGroup: ActionGroupId,
       state: { latestTimestamp, dateStart, dateEnd },
@@ -161,6 +171,8 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: actionContext.title,
         [ALERT_EVALUATION_CONDITIONS]: actionContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${actionContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
+        ...actionContext.sourceFields,
       },
     });
     if (!isGroupAgg) {
@@ -173,9 +185,9 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       }
     }
   }
-  alertsClient!.setAlertLimitReached(parsedResults.truncated);
+  alertsClient.setAlertLimitReached(parsedResults.truncated);
 
-  const { getRecoveredAlerts } = alertsClient!;
+  const { getRecoveredAlerts } = alertsClient;
   for (const recoveredAlert of getRecoveredAlerts()) {
     const alertId = recoveredAlert.alert.getId();
     const baseRecoveryContext: EsQueryRuleActionContext = {
@@ -193,6 +205,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         aggField: params.aggField,
         ...(isGroupAgg ? { group: alertId } : {}),
       }),
+      sourceFields: [],
     } as EsQueryRuleActionContext;
     const recoveryContext = addMessages({
       ruleName: name,
@@ -202,7 +215,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
       ...(isGroupAgg ? { group: alertId } : {}),
       index,
     });
-    alertsClient?.setAlertData({
+    alertsClient.setAlertData({
       id: alertId,
       context: recoveryContext,
       payload: {
@@ -211,6 +224,7 @@ export async function executor(core: CoreSetup, options: ExecutorOptions<EsQuery
         [ALERT_TITLE]: recoveryContext.title,
         [ALERT_EVALUATION_CONDITIONS]: recoveryContext.conditions,
         [ALERT_EVALUATION_VALUE]: `${recoveryContext.value}`,
+        [ALERT_EVALUATION_THRESHOLD]: params.threshold?.length === 1 ? params.threshold[0] : null,
       },
     });
   }

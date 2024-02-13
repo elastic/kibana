@@ -13,7 +13,7 @@ import { isVersionMismatch } from '../../../common/is_version_mismatch';
 import { InitialAppData } from '../../../common/types';
 import { VersionMismatchPage } from '../shared/version_mismatch';
 
-import { ElasticsearchGuide } from './components/elasticsearch_guide';
+import { ElasticsearchGuide } from './components/elasticsearch_guide/elasticsearch_guide';
 
 import { ROOT_PATH } from './routes';
 

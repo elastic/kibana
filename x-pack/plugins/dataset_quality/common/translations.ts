@@ -11,10 +11,6 @@ export const datasetQualityAppTitle = i18n.translate('xpack.datasetQuality.appTi
   defaultMessage: 'Datasets',
 });
 
-export const onboardingLinkTitle = i18n.translate('xpack.datasetQuality.onboardingLinkTitle', {
-  defaultMessage: 'Add data',
-});
-
 export const noDatasetsDescription = i18n.translate('xpack.datasetQuality.noDatasetsDescription', {
   defaultMessage: 'Try adjusting your time or filter.',
 });
@@ -34,3 +30,79 @@ export const tableSummaryAllText = i18n.translate('xpack.datasetQuality.tableSum
 export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSummaryOfText', {
   defaultMessage: 'of',
 });
+
+export const flyoutCancelText = i18n.translate('xpack.datasetQuality.flyoutCancelText', {
+  defaultMessage: 'Cancel',
+});
+
+export const flyoutOpenInLogsExplorerText = i18n.translate(
+  'xpack.datasetQuality.flyoutOpenInLogsExplorerText',
+  {
+    defaultMessage: 'Open in Logs Explorer',
+  }
+);
+
+export const flyoutDatasetDetailsText = i18n.translate(
+  'xpack.datasetQuality.flyoutDatasetDetailsText',
+  {
+    defaultMessage: 'Dataset details',
+  }
+);
+
+export const flyoutDatasetLastActivityText = i18n.translate(
+  'xpack.datasetQuality.flyoutDatasetLastActivityText',
+  {
+    defaultMessage: 'Last Activity',
+  }
+);
+
+export const flyoutDatasetCreatedOnText = i18n.translate(
+  'xpack.datasetQuality.flyoutDatasetCreatedOnText',
+  {
+    defaultMessage: 'Created on',
+  }
+);
+
+export const flyoutIntegrationDetailsText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationDetailsText',
+  {
+    defaultMessage: 'Integration details',
+  }
+);
+
+export const flyoutIntegrationVersionText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationVersionText',
+  {
+    defaultMessage: 'Version',
+  }
+);
+
+export const flyoutIntegrationNameText = i18n.translate(
+  'xpack.datasetQuality.flyoutIntegrationNameText',
+  {
+    defaultMessage: 'Name',
+  }
+);
+
+export const inactiveDatasetsLabel = i18n.translate('xpack.datasetQuality.inactiveDatasetsLabel', {
+  defaultMessage: 'Show inactive datasets',
+});
+
+export const inactiveDatasetsDescription = i18n.translate(
+  'xpack.datasetQuality.inactiveDatasetsDescription',
+  {
+    defaultMessage:
+      'Turn on to show datasets with a Last activity outside of the selected timeframe.',
+  }
+);
+
+export const fullDatasetNameLabel = i18n.translate('xpack.datasetQuality.fullDatasetNameLabel', {
+  defaultMessage: 'Show full dataset names',
+});
+
+export const fullDatasetNameDescription = i18n.translate(
+  'xpack.datasetQuality.fullDatasetNameDescription',
+  {
+    defaultMessage: 'Turn on to show the actual dataset names used to store the documents.',
+  }
+);

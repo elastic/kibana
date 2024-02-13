@@ -135,8 +135,8 @@ describe('getHosts', () => {
           },
         },
         {
-          term: {
-            'host.hostname': mockHostName,
+          terms: {
+            'host.hostname': [mockHostName],
           },
         },
       ])

@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { niceTimeFormatter } from '@elastic/charts';
-import { Theme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
+import { Theme, LEGACY_LIGHT_THEME, LEGACY_DARK_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiLoadingChart, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -81,9 +81,9 @@ export const getDomain = (series: Series, stacked: boolean = false) => {
   return { yMin: min || 0, yMax: max || 0, xMin: minTimestamp, xMax: maxTimestamp };
 };
 
-// TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+// TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
 export const getChartTheme = (isDarkMode: boolean): Theme => {
-  return isDarkMode ? DARK_THEME : LIGHT_THEME;
+  return isDarkMode ? LEGACY_DARK_THEME : LEGACY_LIGHT_THEME;
 };
 
 export const EmptyContainer: React.FC = ({ children }) => (

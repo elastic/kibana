@@ -32,6 +32,8 @@ export const InvokeAIActionParamsSchema = schema.object({
     })
   ),
   model: schema.maybe(schema.string()),
+  temperature: schema.maybe(schema.number()),
+  stopSequences: schema.maybe(schema.arrayOf(schema.string())),
 });
 
 export const InvokeAIActionResponseSchema = schema.object({
@@ -52,3 +54,12 @@ export const RunActionResponseSchema = schema.object(
 );
 
 export const StreamingResponseSchema = schema.any();
+
+// Run action schema
+export const DashboardActionParamsSchema = schema.object({
+  dashboardId: schema.string(),
+});
+
+export const DashboardActionResponseSchema = schema.object({
+  available: schema.boolean(),
+});

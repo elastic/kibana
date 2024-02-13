@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { ActionGroup } from './rule_type';
-
-export type DefaultActionGroupId = 'default';
-
-export type RecoveredActionGroupId = typeof RecoveredActionGroup['id'];
-export const RecoveredActionGroup: Readonly<ActionGroup<'recovered'>> = Object.freeze({
-  id: 'recovered',
-  name: i18n.translate('xpack.alerting.builtinActionGroups.recovered', {
-    defaultMessage: 'Recovered',
-  }),
-});
+import type { RecoveredActionGroupId, ActionGroup } from '@kbn/alerting-types';
+import { RecoveredActionGroup } from '@kbn/alerting-types';
 
 export type ReservedActionGroups<RecoveryActionGroupId extends string> =
   | RecoveryActionGroupId
@@ -32,3 +22,7 @@ export function getBuiltinActionGroups<RecoveryActionGroupId extends string>(
 ): [ActionGroup<ReservedActionGroups<RecoveryActionGroupId>>] {
   return [customRecoveryGroup ?? RecoveredActionGroup];
 }
+
+export type { RecoveredActionGroupId, DefaultActionGroupId } from '@kbn/alerting-types';
+
+export { RecoveredActionGroup } from '@kbn/alerting-types';

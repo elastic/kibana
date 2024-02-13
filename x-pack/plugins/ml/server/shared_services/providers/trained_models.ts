@@ -8,7 +8,10 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { GetElserOptions, ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
+import type {
+  GetModelDownloadConfigOptions,
+  ModelDefinitionResponse,
+} from '@kbn/ml-trained-models-utils';
 import type {
   MlInferTrainedModelRequest,
   MlStopTrainedModelDeploymentRequest,
@@ -16,6 +19,7 @@ import type {
   UpdateTrainedModelDeploymentResponse,
 } from '../../lib/ml_client/types';
 import { modelsProvider } from '../../models/model_management';
+import type { GetCuratedModelConfigParams } from '../../models/model_management/models_provider';
 import type { GetGuards } from '../shared_services';
 
 export interface TrainedModelsProvider {
@@ -47,7 +51,9 @@ export interface TrainedModelsProvider {
     putTrainedModel(
       params: estypes.MlPutTrainedModelRequest
     ): Promise<estypes.MlPutTrainedModelResponse>;
-    getELSER(params?: GetElserOptions): Promise<ModelDefinitionResponse>;
+    getELSER(params?: GetModelDownloadConfigOptions): Promise<ModelDefinitionResponse>;
+    getCuratedModelConfig(...params: GetCuratedModelConfigParams): Promise<ModelDefinitionResponse>;
+    installElasticModel(modelId: string): Promise<estypes.MlTrainedModelConfig>;
   };
 }
 
@@ -123,12 +129,31 @@ export function getTrainedModelsProvider(
               return mlClient.putTrainedModel(params);
             });
         },
-        async getELSER(params?: GetElserOptions) {
+        async getELSER(params?: GetModelDownloadConfigOptions) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
             .ok(async ({ scopedClient, mlClient }) => {
               return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
+            });
+        },
+        async getCuratedModelConfig(...params: GetCuratedModelConfigParams) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getCuratedModelConfig(...params);
+            });
+        },
+        async installElasticModel(modelId: string) {
+          return await guards
+            .isFullLicense()
+            .hasMlCapabilities(['canGetTrainedModels'])
+            .ok(async ({ scopedClient, mlClient, mlSavedObjectService }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).installElasticModel(
+                modelId,
+                mlSavedObjectService
+              );
             });
         },
       };

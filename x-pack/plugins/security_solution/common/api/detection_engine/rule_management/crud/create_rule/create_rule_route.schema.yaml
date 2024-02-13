@@ -1,7 +1,7 @@
 openapi: 3.0.0
 info:
   title: Create Rule API endpoint
-  version: 2023-10-31
+  version: '2023-10-31'
 paths:
   /api/detection_engine/rules:
     post:

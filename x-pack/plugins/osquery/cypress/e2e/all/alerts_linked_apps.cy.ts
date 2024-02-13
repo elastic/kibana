@@ -54,7 +54,7 @@ describe(
 
       cy.getBySel(RESPONSE_ACTIONS_ITEM_0).within(() => {
         cy.contains("SELECT * FROM os_version where name='{{host.os.name}}';");
-        cy.contains('host.os.platform');
+        cy.get('input[value="host.os.platform"]').should('exist');
         cy.contains('platform');
       });
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
@@ -89,7 +89,7 @@ describe(
         cy.getBySel(RESULTS_TABLE_BUTTON).should('not.exist');
       });
       cy.contains('Cancel').click();
-      cy.getBySel('flyoutBottomBar').within(() => {
+      cy.getBySel('timeline-bottom-bar').within(() => {
         cy.contains(TIMELINE_NAME).click();
       });
       cy.getBySel('draggableWrapperKeyboardHandler').contains('action_id: "');

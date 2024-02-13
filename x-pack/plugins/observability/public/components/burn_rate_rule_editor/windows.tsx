@@ -17,7 +17,7 @@ import {
   EuiTitle,
   EuiSwitch,
 } from '@elastic/eui';
-import { SLOResponse } from '@kbn/slo-schema';
+import { CreateSLOInput, SLOResponse } from '@kbn/slo-schema';
 import { i18n } from '@kbn/i18n';
 import numeral from '@elastic/numeral';
 import { v4 } from 'uuid';
@@ -51,7 +51,10 @@ const ACTION_GROUP_OPTIONS = [
   { value: LOW_PRIORITY_ACTION.id, text: LOW_PRIORITY_ACTION.name },
 ];
 
-export const calculateMaxBurnRateThreshold = (longWindow: Duration, slo?: SLOResponse) => {
+export const calculateMaxBurnRateThreshold = (
+  longWindow: Duration,
+  slo?: SLOResponse | CreateSLOInput
+) => {
   return slo
     ? Math.floor(toMinutes(toDuration(slo.timeWindow.duration)) / toMinutes(longWindow))
     : Infinity;
@@ -69,7 +72,7 @@ function Window({
   onDelete,
   errors,
   disableDelete,
-  budgetMode = false,
+  budgetMode = true,
 }: WindowProps) {
   const onLongWindowDurationChange = (duration: Duration) => {
     const longWindowDurationInMinutes = toMinutes(duration);
@@ -244,7 +247,7 @@ const getErrorBudgetExhaustionText = (
       });
 
 export const createNewWindow = (
-  slo?: SLOResponse,
+  slo?: SLOResponse | CreateSLOInput,
   partialWindow: Partial<WindowSchema> = {}
 ): WindowSchema => {
   const longWindow = partialWindow.longWindow || { value: 1, unit: 'h' };
@@ -268,7 +271,7 @@ interface WindowsProps {
 }
 
 export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }: WindowsProps) {
-  const [budgetMode, setBudgetMode] = useState<boolean>(false);
+  const [budgetMode, setBudgetMode] = useState<boolean>(true);
   const handleWindowChange = (windowDef: WindowSchema) => {
     onChange(windows.map((def) => (windowDef.id === def.id ? windowDef : def)));
   };
@@ -336,9 +339,9 @@ export function Windows({ slo, windows, errors, onChange, totalNumberOfWindows }
           <EuiSwitch
             compressed
             onChange={handleModeChange}
-            checked={budgetMode}
-            label={i18n.translate('xpack.observability.slo.rules.useBudgetConsumedModeLabel', {
-              defaultMessage: 'Budget consumed mode',
+            checked={!budgetMode}
+            label={i18n.translate('xpack.observability.slo.rules.useBurnRateModeLabel', {
+              defaultMessage: 'Burn rate mode',
             })}
           />
         </EuiFlexItem>

@@ -16,7 +16,7 @@ import { createGettingStartedMonitor, UpsertMonitorResponse } from '../../state'
 import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults';
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import {
-  DataStream,
+  MonitorTypeEnum,
   EncryptedSyntheticsSavedMonitor,
   ServiceLocationErrors,
 } from '../../../../../common/runtime_types';
@@ -47,7 +47,7 @@ export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData
         'source.inline.script': `step('Go to ${urls}', async () => {
   await page.goto('${urls}');
 });`,
-        [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+        [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
         [ConfigKey.NAME]: urls,
         [ConfigKey.LOCATIONS]: locations,
         [ConfigKey.URLS]: urls,

@@ -14,11 +14,13 @@ import type {
   FeatureElasticsearchPrivileges,
   KibanaFeature,
 } from '@kbn/features-plugin/server';
+import type {
+  AuthorizationServiceSetup,
+  CheckPrivilegesResponse,
+} from '@kbn/security-plugin-types-server';
 import type { RecursiveReadonly, RecursiveReadonlyArray } from '@kbn/utility-types';
 
-import type { AuthorizationServiceSetup } from './authorization_service';
-import type { CheckPrivilegesResponse } from './types';
-import type { AuthenticatedUser } from '../../common/model';
+import type { AuthenticatedUser } from '../../common';
 
 export function disableUICapabilitiesFactory(
   request: KibanaRequest,

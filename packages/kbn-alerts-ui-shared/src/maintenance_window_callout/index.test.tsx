@@ -10,7 +10,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, waitFor, cleanup, screen } from '@testing-library/react';
-import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { MAINTENANCE_WINDOW_FEATURE_ID } from './constants';
 import { MaintenanceWindowCallout } from '.';
 import { fetchActiveMaintenanceWindows } from './api';
 import {

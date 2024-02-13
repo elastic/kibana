@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { updateLoadingStateAction } from '../../../../common/api/log_rate_analysis/actions';
+import {
+  updateLoadingStateAction,
+  setZeroDocsFallback,
+} from '../../../../common/api/log_rate_analysis/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
@@ -36,6 +39,7 @@ export const indexInfoHandlerFactory =
     const textFieldCandidates: string[] = [];
 
     let totalDocCount = 0;
+    let zeroDocsFallback = false;
 
     if (!requestBody.overrides?.remainingFieldCandidates) {
       logDebugMessage('Fetch index information.');
@@ -63,7 +67,8 @@ export const indexInfoHandlerFactory =
         fieldCandidates.push(...indexInfo.fieldCandidates);
         fieldCandidatesCount = fieldCandidates.length;
         textFieldCandidates.push(...indexInfo.textFieldCandidates);
-        totalDocCount = indexInfo.totalDocCount;
+        totalDocCount = indexInfo.deviationTotalDocCount;
+        zeroDocsFallback = indexInfo.zeroDocsFallback;
       } catch (e) {
         if (!isRequestAbortedError(e)) {
           logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
@@ -96,6 +101,8 @@ export const indexInfoHandlerFactory =
         })
       );
 
+      responseStream.push(setZeroDocsFallback(zeroDocsFallback));
+
       if (fieldCandidatesCount === 0) {
         responseStream.endWithUpdatedLoadingState();
       } else if (stateHandler.shouldStop()) {
@@ -105,5 +112,5 @@ export const indexInfoHandlerFactory =
       }
     }
 
-    return { fieldCandidates, textFieldCandidates };
+    return { fieldCandidates, textFieldCandidates, zeroDocsFallback };
   };

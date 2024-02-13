@@ -1,7 +1,7 @@
 {
   "extends": "../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types",
+    "outDir": "target/types"
   },
   "include": ["*.ts", "common/**/*", "public/**/*", "server/**/*", "../../../typings/**/*"],
   "kbn_references": [
@@ -87,16 +87,30 @@
     "@kbn/serverless",
     "@kbn/ebt-tools",
     "@kbn/chart-expressions-common",
+    "@kbn/search-errors",
     "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/text-based-languages",
     "@kbn/field-utils",
-    "@kbn/discover-utils",
+    "@kbn/panel-loader",
+    "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions",
-    "@kbn/shared-ux-button-toolbar"
+    "@kbn/presentation-containers",
+    "@kbn/discover-utils",
+    "@kbn/code-editor",
+    "@kbn/calculate-width-from-char-count",
+    "@kbn/discover-utils",
+    "@kbn/lens-formula-docs",
+    "@kbn/visualization-utils",
+    "@kbn/test-eui-helpers",
+    "@kbn/shared-ux-utility",
+    "@kbn/esql-utils",
+    "@kbn/text-based-editor",
+    "@kbn/managed-content-badge",
+    "@kbn/sort-predicates",
+    "@kbn/presentation-publishing",
+    "@kbn/saved-objects-finder-plugin"
   ],
-  "exclude": [
-    "target/**/*",
-  ]
+  "exclude": ["target/**/*"]
 }

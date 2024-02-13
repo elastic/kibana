@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { KibanaRequest } from '@kbn/core-http-server';
 import type { Message } from '@kbn/elastic-assistant';
 import { AIMessage, BaseMessage, HumanMessage, SystemMessage } from 'langchain/schema';
+
+import { RequestBody } from './types';
 
 export const getLangChainMessage = (
   assistantMessage: Pick<Message, 'content' | 'role'>
@@ -31,3 +34,23 @@ export const getMessageContentAndRole = (prompt: string): Pick<Message, 'content
   content: prompt,
   role: 'user',
 });
+
+export const requestHasRequiredAnonymizationParams = (
+  request: KibanaRequest<unknown, unknown, RequestBody>
+): boolean => {
+  const { allow, allowReplacement, replacements } = request?.body ?? {};
+
+  const allowIsValid =
+    Array.isArray(allow) &&
+    allow.length > 0 && // at least one field must be in the allow list
+    allow.every((item) => typeof item === 'string');
+
+  const allowReplacementIsValid =
+    Array.isArray(allowReplacement) && allowReplacement.every((item) => typeof item === 'string');
+
+  const replacementsIsValid =
+    typeof replacements === 'object' &&
+    Object.keys(replacements).every((key) => typeof replacements[key] === 'string');
+
+  return allowIsValid && allowReplacementIsValid && replacementsIsValid;
+};

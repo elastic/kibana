@@ -14,6 +14,7 @@ import { createLifecycleExecutor } from '@kbn/rule-registry-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { IBasePath } from '@kbn/core/server';
 import { LocatorPublic } from '@kbn/share-plugin/common';
+import { SLO_BURN_RATE_AAD_FIELDS } from '../../../../common/field_names/slo';
 import { AlertsLocatorParams, observabilityPaths, sloFeatureId } from '../../../../common';
 import { SLO_RULE_REGISTRATION_CONTEXT } from '../../../common/constants';
 
@@ -49,16 +50,24 @@ export function sloBurnRateRuleType(
   basePath: IBasePath,
   alertsLocator?: LocatorPublic<AlertsLocatorParams>
 ) {
+  const paramsSchema = schema.object({
+    sloId: schema.string(),
+    windows: schema.arrayOf(windowSchema),
+  });
   return {
     id: SLO_BURN_RATE_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.slo.rules.burnRate.name', {
       defaultMessage: 'SLO burn rate',
     }),
+    fieldsForAAD: SLO_BURN_RATE_AAD_FIELDS,
     validate: {
-      params: schema.object({
-        sloId: schema.string(),
-        windows: schema.arrayOf(windowSchema),
-      }),
+      params: paramsSchema,
+    },
+    schemas: {
+      params: {
+        type: 'config-schema' as const,
+        schema: paramsSchema,
+      },
     },
     defaultActionGroupId: ALERT_ACTION.id,
     actionGroups: [ALERT_ACTION, HIGH_PRIORITY_ACTION, MEDIUM_PRIORITY_ACTION, LOW_PRIORITY_ACTION],

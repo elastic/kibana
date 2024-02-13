@@ -10,6 +10,7 @@ import Boom from '@hapi/boom';
 import type { KibanaRequest, SavedObjectsClient } from '@kbn/core/server';
 import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type { ISavedObjectsSecurityExtension } from '@kbn/core-saved-objects-server';
+import type { AuditLogger, AuthorizationServiceSetup } from '@kbn/security-plugin-types-server';
 import type {
   GetAllSpacesOptions,
   GetAllSpacesPurpose,
@@ -18,9 +19,7 @@ import type {
   Space,
 } from '@kbn/spaces-plugin/server';
 
-import type { AuditLogger } from '../audit';
 import { SpaceAuditAction, spaceAuditEvent } from '../audit';
-import type { AuthorizationServiceSetup } from '../authorization';
 import type { SecurityPluginSetup } from '../plugin';
 
 const PURPOSE_PRIVILEGE_MAP: Record<

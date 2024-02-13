@@ -186,7 +186,11 @@ export const BulkInstallPackagesFromRegistryRequestSchema = {
     packages: schema.arrayOf(
       schema.oneOf([
         schema.string(),
-        schema.object({ name: schema.string(), version: schema.string() }),
+        schema.object({
+          name: schema.string(),
+          version: schema.string(),
+          prerelease: schema.maybe(schema.boolean()),
+        }),
       ]),
       { minSize: 1 }
     ),
@@ -257,5 +261,6 @@ export const GetInputsRequestSchema = {
     format: schema.oneOf([schema.literal('json'), schema.literal('yml'), schema.literal('yaml')], {
       defaultValue: 'json',
     }),
+    prerelease: schema.maybe(schema.boolean()),
   }),
 };

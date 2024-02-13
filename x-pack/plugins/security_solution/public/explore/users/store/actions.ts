@@ -9,6 +9,7 @@ import actionCreatorFactory from 'typescript-fsa';
 import type { usersModel } from '.';
 import type { RiskScoreSortField, RiskSeverity } from '../../../../common/search_strategy';
 import type { SortUsersField } from '../../../../common/search_strategy/security_solution/users/common';
+import type { UserAssetTableType } from './model';
 
 const actionCreator = actionCreatorFactory('x-pack/security_solution/local/users');
 
@@ -48,3 +49,13 @@ export const updateUsersAnomaliesInterval = actionCreator<{
   interval: string;
   usersType: usersModel.UsersType;
 }>('UPDATE_USERS_ANOMALIES_INTERVAL');
+
+export const addUserAssetTableField = actionCreator<{
+  fieldName: string;
+  tableId: UserAssetTableType;
+}>('ADD_USER_ASSET_TABLE_FIELD');
+
+export const removeUserAssetTableField = actionCreator<{
+  fieldName: string;
+  tableId: UserAssetTableType;
+}>('REMOVE_USER_ASSET_TABLE_FIELD');

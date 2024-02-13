@@ -82,7 +82,7 @@ export const INTERNAL_DELETE_FILE_ATTACHMENTS_URL =
 export const INTERNAL_GET_CASE_CATEGORIES_URL = `${CASES_INTERNAL_URL}/categories` as const;
 export const INTERNAL_CASE_METRICS_URL = `${CASES_INTERNAL_URL}/metrics` as const;
 export const INTERNAL_CASE_METRICS_DETAILS_URL = `${CASES_INTERNAL_URL}/metrics/{case_id}` as const;
-
+export const INTERNAL_PUT_CUSTOM_FIELDS_URL = `${CASES_INTERNAL_URL}/{case_id}/custom_fields/{custom_field_id}`;
 /**
  * Action routes
  */
@@ -162,6 +162,7 @@ export const READ_CASES_CAPABILITY = 'read_cases' as const;
 export const UPDATE_CASES_CAPABILITY = 'update_cases' as const;
 export const DELETE_CASES_CAPABILITY = 'delete_cases' as const;
 export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
+export const CASES_SETTINGS_CAPABILITY = 'cases_settings' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 
 /**
@@ -200,9 +201,9 @@ export const SEARCH_DEBOUNCE_MS = 500;
  * Local storage keys
  */
 export const LOCAL_STORAGE_KEYS = {
-  casesQueryParams: 'cases.list.queryParams',
-  casesFilterOptions: 'cases.list.filterOptions',
   casesTableColumns: 'cases.list.tableColumns',
+  casesTableFiltersConfig: 'cases.list.tableFiltersConfig',
+  casesTableState: 'cases.list.state',
 };
 
 /**

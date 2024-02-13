@@ -14,12 +14,7 @@ import type { EventFieldsData } from '../../../../common/components/event_detail
 import { FieldValueCell } from '../../../../common/components/event_details/table/field_value_cell';
 import type { BrowserField, BrowserFields } from '../../../../../common/search_strategy';
 import { FieldNameCell } from '../../../../common/components/event_details/table/field_name_cell';
-import {
-  CellActionsMode,
-  SecurityCellActions,
-  SecurityCellActionsTrigger,
-} from '../../../../common/components/cell_actions';
-import { getSourcererScopeId } from '../../../../helpers';
+import { CellActions } from '../components/cell_actions';
 import * as i18n from '../../../../common/components/event_details/translations';
 import { useRightPanelContext } from '../context';
 import type { ColumnsProvider } from '../../../../common/components/event_details/event_fields_browser';
@@ -47,6 +42,7 @@ export const getColumns: ColumnsProvider = ({
         <strong>{i18n.FIELD}</strong>
       </EuiText>
     ),
+    width: '30%',
     render: (field, data) => {
       return (
         <FieldNameCell data={data as EventFieldsData} field={field} fieldMapping={undefined} />
@@ -60,23 +56,14 @@ export const getColumns: ColumnsProvider = ({
         <strong>{i18n.VALUE}</strong>
       </EuiText>
     ),
+    width: '70%',
     render: (values, data) => {
       const fieldFromBrowserField = getFieldFromBrowserField(
         [data.category as string, 'fields', data.field],
         browserFields
       );
       return (
-        <SecurityCellActions
-          data={{
-            field: data.field,
-            value: values,
-          }}
-          triggerId={SecurityCellActionsTrigger.DETAILS_FLYOUT}
-          mode={CellActionsMode.HOVER_RIGHT}
-          visibleCellActions={6}
-          sourcererScopeId={getSourcererScopeId(scopeId)}
-          metadata={{ scopeId, isObjectArray: data.isObjectArray }}
-        >
+        <CellActions field={data.field} value={values} isObjectArray={data.isObjectArray}>
           <FieldValueCell
             contextId={contextId}
             data={data as EventFieldsData}
@@ -86,7 +73,7 @@ export const getColumns: ColumnsProvider = ({
             isDraggable={isDraggable}
             values={values}
           />
-        </SecurityCellActions>
+        </CellActions>
       );
     },
   },

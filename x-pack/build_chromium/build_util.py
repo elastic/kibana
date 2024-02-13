@@ -20,10 +20,10 @@ def mkdir(dir):
   if not os.path.exists(dir):
     return os.makedirs(dir)
 
-def md5_file(filename):
-  """Builds a hex md5 hash of the given file"""
-  md5 = hashlib.md5()
+def sha256_file(filename):
+  """Builds a hex sha1 hash of the given file"""
+  sha256 = hashlib.sha256()
   with open(filename, 'rb') as f:
-    for chunk in iter(lambda: f.read(128 * md5.block_size), b''):
-      md5.update(chunk)
-  return md5.hexdigest()
+    for chunk in iter(lambda: f.read(128 * sha256.block_size), b''):
+      sha256.update(chunk)
+  return sha256.hexdigest()

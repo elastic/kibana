@@ -15,7 +15,7 @@ import {
   SLO_DESTINATION_INDEX_NAME,
   SLO_INGEST_PIPELINE_NAME,
   getSLOTransformId,
-} from '../../../assets/constants';
+} from '../../../../common/slo/constants';
 import { MetricCustomIndicator, SLO } from '../../../domain/models';
 import { GetCustomMetricIndicatorAggregation } from '../aggregations';
 

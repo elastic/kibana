@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { HttpHandler, ToastInput } from '@kbn/core/public';
+import { HttpFetchOptions, HttpHandler, ToastInput } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useTrackedPromise, CanceledPromiseError } from '../utils/use_tracked_promise';
@@ -20,7 +20,8 @@ export function useHTTPRequest<Response>(
   decode: (response: any) => Response = (response) => response,
   fetch?: HttpHandler,
   toastDanger?: (input: ToastInput) => void,
-  abortable = false
+  abortable = false,
+  fetchOptions?: Omit<HttpFetchOptions, 'body' | 'method' | 'signal'>
 ) {
   const kibana = useKibana();
   const fetchService = fetch ? fetch : kibana.services.http?.fetch;
@@ -100,6 +101,7 @@ export function useHTTPRequest<Response>(
           signal: abortController.current.signal,
           method,
           body,
+          ...fetchOptions,
         });
       },
       onResolve: (resp) => {
@@ -114,7 +116,7 @@ export function useHTTPRequest<Response>(
         onError(e);
       },
     },
-    [pathname, body, method, fetch, toast, onError]
+    [pathname, body, method, fetch, toast, onError, fetchOptions]
   );
 
   const loading = request.state === 'uninitialized' || request.state === 'pending';

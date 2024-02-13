@@ -8,7 +8,7 @@
 import * as z from 'zod';
 import {
   BaseCreateProps,
-  ResponseRequiredFields,
+  ResponseFields,
   RuleSignatureId,
   TypeSpecificCreateProps,
 } from '../../model/rule_schema';
@@ -26,7 +26,7 @@ import {
 export type RuleToImport = z.infer<typeof RuleToImport>;
 export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
-  ResponseRequiredFields.partial().extend({
+  ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
     immutable: z.literal(false).default(false),
   })

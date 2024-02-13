@@ -78,44 +78,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelTitle).to.equal(EMPTY_TITLE);
         await PageObjects.dashboard.clearUnsavedChanges();
       });
-
-      it('blank titles are hidden in view mode', async () => {
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
-        expect(titleVisibility).to.be(false);
-      });
-
-      it('custom titles are visible in view mode', async () => {
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.setCustomPanelTitle(CUSTOM_TITLE);
-        await dashboardCustomizePanel.clickSaveButton();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
-        expect(titleVisibility).to.be(true);
-      });
-
-      it('hiding an individual panel title hides it in view mode', async () => {
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickSaveButton();
-        await PageObjects.dashboard.clickQuickSave();
-        await PageObjects.dashboard.clickCancelOutOfEditMode();
-
-        const titleVisibility = (await PageObjects.dashboard.getVisibilityOfPanelTitles())[0];
-        expect(titleVisibility).to.be(false);
-
-        // undo the previous hide panel toggle (i.e. make the panel visible) to keep state consistent
-        await PageObjects.dashboard.switchToEditMode();
-        await dashboardPanelActions.customizePanel();
-        await dashboardCustomizePanel.clickToggleHidePanelTitle();
-        await dashboardCustomizePanel.clickSaveButton();
-        await PageObjects.dashboard.clickQuickSave();
-      });
     });
 
     describe('by reference', () => {

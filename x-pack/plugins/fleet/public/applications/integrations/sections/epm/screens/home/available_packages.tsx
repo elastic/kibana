@@ -97,9 +97,9 @@ function OnPremLink() {
   );
 }
 
-export const AvailablePackages: React.FC<{
-  setPrereleaseEnabled: (isEnabled: boolean) => void;
-}> = ({ setPrereleaseEnabled }) => {
+export const AvailablePackages: React.FC<{ prereleaseIntegrationsEnabled: boolean }> = ({
+  prereleaseIntegrationsEnabled,
+}) => {
   useBreadcrumbs('integrations_all');
 
   const {
@@ -121,11 +121,10 @@ export const AvailablePackages: React.FC<{
     setUrlandPushHistory,
     setUrlandReplaceHistory,
     filteredCards,
-    setPrereleaseIntegrationsEnabled,
     availableSubCategories,
     selectedSubCategory,
     setSelectedSubCategory,
-  } = useAvailablePackages();
+  } = useAvailablePackages({ prereleaseIntegrationsEnabled });
 
   const onCategoryChange = useCallback(
     ({ id }: { id: string }) => {
@@ -135,14 +134,6 @@ export const AvailablePackages: React.FC<{
       setUrlandPushHistory({ searchString: '', categoryId: id, subCategoryId: '' });
     },
     [setCategory, setSearchTerm, setSelectedSubCategory, setUrlandPushHistory]
-  );
-
-  const onPrereleaseEnabledChange = useCallback(
-    (isEnabled: boolean) => {
-      setPrereleaseIntegrationsEnabled(isEnabled);
-      setPrereleaseEnabled(isEnabled);
-    },
-    [setPrereleaseIntegrationsEnabled, setPrereleaseEnabled]
   );
 
   if (!isLoading && !categoryExists(initialSelectedCategory, allCategories)) {
@@ -155,8 +146,8 @@ export const AvailablePackages: React.FC<{
       <EuiHorizontalRule margin="m" />
       <IntegrationPreference
         initialType={preference}
+        prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
         onChange={setPreference}
-        onPrereleaseEnabledChange={onPrereleaseEnabledChange}
       />
     </EuiFlexItem>,
   ];

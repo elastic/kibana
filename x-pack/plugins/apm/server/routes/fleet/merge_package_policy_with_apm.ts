@@ -28,7 +28,7 @@ export async function decoratePackagePolicyWithAgentConfigAndSourceMap({
   apmIndices: APMIndices;
 }) {
   const [agentConfigurations, { artifacts }] = await Promise.all([
-    listConfigurations(internalESClient, apmIndices),
+    listConfigurations({ internalESClient, apmIndices }),
     listSourceMapArtifacts({ fleetPluginStart }),
   ]);
 

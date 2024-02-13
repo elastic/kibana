@@ -42,6 +42,7 @@ else
     --docker-tag-qualifier="$GIT_COMMIT" \
     --docker-push \
     --skip-docker-ubi \
+    --skip-docker-fips \
     --skip-docker-ubuntu \
     --skip-docker-serverless \
     --skip-docker-contexts
@@ -62,7 +63,7 @@ fi
 
 echo "--- Create Deployment"
 CLOUD_DEPLOYMENT_ID=$(ecctl deployment list --output json | jq -r '.deployments[] | select(.name == "'$CLOUD_DEPLOYMENT_NAME'") | .id')
-if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
+if [ -z "${CLOUD_DEPLOYMENT_ID}" ] || [ "${CLOUD_DEPLOYMENT_ID}" = 'null' ]; then
   jq '
     .resources.kibana[0].plan.kibana.docker_image = "'$KIBANA_CLOUD_IMAGE'" |
     .resources.elasticsearch[0].plan.elasticsearch.docker_image = "'$ELASTICSEARCH_CLOUD_IMAGE'" |
@@ -86,7 +87,13 @@ if [ -z "${CLOUD_DEPLOYMENT_ID}" ]; then
   VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
   VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
   retry 5 30 vault login -no-print "$VAULT_TOKEN"
-  retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+
+  # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
+  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+    vault_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+  else
+    vault_kv_set "cloud-deploy/$CLOUD_DEPLOYMENT_NAME" username="$CLOUD_DEPLOYMENT_USERNAME" password="$CLOUD_DEPLOYMENT_PASSWORD"
+  fi
 
   echo "Enabling Stack Monitoring..."
   jq '
@@ -121,6 +128,13 @@ fi
 CLOUD_DEPLOYMENT_KIBANA_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.kibana[0].info.metadata.aliased_url')
 CLOUD_DEPLOYMENT_ELASTICSEARCH_URL=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" | jq -r '.resources.elasticsearch[0].info.metadata.aliased_url')
 
+# TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
+if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+  VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
+else
+  VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$CLOUD_DEPLOYMENT_NAME"
+fi
+
 cat << EOF | buildkite-agent annotate --style "info" --context cloud
   ### Cloud Deployment
 
@@ -128,7 +142,7 @@ cat << EOF | buildkite-agent annotate --style "info" --context cloud
 
   Elasticsearch: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL
 
-  Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$CLOUD_DEPLOYMENT_NAME\`
+  Credentials: \`$VAULT_READ_COMMAND\`
 
   Kibana image: \`$KIBANA_CLOUD_IMAGE\`
 

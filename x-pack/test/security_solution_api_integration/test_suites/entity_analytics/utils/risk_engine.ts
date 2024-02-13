@@ -13,7 +13,10 @@ import { v4 as uuidv4 } from 'uuid';
 import SuperTest from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { EcsRiskScore, RiskScore } from '@kbn/security-solution-plugin/common/risk_engine';
+import type {
+  EcsRiskScore,
+  RiskScore,
+} from '@kbn/security-solution-plugin/common/entity_analytics/risk_engine';
 import { riskEngineConfigurationTypeName } from '@kbn/security-solution-plugin/server/lib/entity_analytics/risk_engine/saved_object';
 import type { KbnClient } from '@kbn/test';
 import {
@@ -21,7 +24,9 @@ import {
   RISK_ENGINE_DISABLE_URL,
   RISK_ENGINE_ENABLE_URL,
   RISK_ENGINE_STATUS_URL,
+  RISK_ENGINE_PRIVILEGES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import {
   createRule,
   waitForAlertsToBePresent,
@@ -33,11 +38,15 @@ import {
 } from '../../detections_response/utils';
 
 const sanitizeScore = (score: Partial<RiskScore>): Partial<RiskScore> => {
-  delete score['@timestamp'];
-  delete score.inputs;
-  delete score.notes;
-  // delete score.category_1_score;
-  return score;
+  const {
+    '@timestamp': timestamp,
+    inputs,
+    notes,
+    category_2_count: cat2Count,
+    category_2_score: cat2Score,
+    ...rest
+  } = score;
+  return rest;
 };
 
 export const sanitizeScores = (scores: Array<Partial<RiskScore>>): Array<Partial<RiskScore>> =>
@@ -104,6 +113,17 @@ export const createAndSyncRuleAndAlertsFactory =
     await waitForRuleSuccess({ supertest, log, id, namespace });
     await waitForAlertsToBePresent(supertest, log, alerts, [id], namespace);
   };
+
+export const getLatestRiskScoreIndexMapping: (
+  es: Client
+) => Promise<MappingTypeMapping | undefined> = async (es: Client) => {
+  const riskScoreLatestIndex = 'risk-score.risk-score-latest-default';
+  return (
+    await es.indices.get({
+      index: riskScoreLatestIndex,
+    })
+  )[riskScoreLatestIndex]?.mappings;
+};
 
 export const deleteRiskScoreIndices = async ({
   log,
@@ -482,6 +502,7 @@ export const riskEngineRouteHelpersFactory = (
       .get(routeWithNamespace(RISK_ENGINE_STATUS_URL, namespace))
       .set('kbn-xsrf', 'true')
       .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
 
@@ -502,6 +523,52 @@ export const riskEngineRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
+});
+
+interface Credentials {
+  username: string;
+  password: string;
+}
+
+export const riskEngineRouteHelpersFactoryNoAuth = (
+  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
+  privilegesForUser: async ({ username, password }: Credentials) =>
+    await supertestWithoutAuth
+      .get(RISK_ENGINE_PRIVILEGES_URL)
+      .auth(username, password)
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(200),
+  init: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
+    await supertestWithoutAuth
+      .post(routeWithNamespace(RISK_ENGINE_INIT_URL, namespace))
+      .auth(username, password)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
+  enable: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
+    await supertestWithoutAuth
+      .post(routeWithNamespace(RISK_ENGINE_ENABLE_URL, namespace))
+      .auth(username, password)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
+  disable: async ({ username, password }: Credentials, expectStatusCode: number = 200) =>
+    await supertestWithoutAuth
+      .post(routeWithNamespace(RISK_ENGINE_DISABLE_URL, namespace))
+      .auth(username, password)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send()
+      .expect(expectStatusCode),
 });
 
 export const installLegacyRiskScore = async ({

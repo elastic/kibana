@@ -169,9 +169,10 @@ export interface AlertNodeStats {
 }
 
 export interface AlertCpuUsageNodeStats extends AlertNodeStats {
-  cpuUsage?: number;
-  limitsChanged?: boolean;
-  unexpectedLimits?: boolean;
+  cpuUsage: number;
+  containerUsage: number;
+  containerPeriods: number;
+  containerQuota: number;
 }
 
 export interface AlertThreadPoolRejectionsStats {

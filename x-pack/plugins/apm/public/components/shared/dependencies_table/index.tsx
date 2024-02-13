@@ -38,6 +38,7 @@ interface Props {
   status: FETCH_STATUS;
   compact?: boolean;
   showPerPageOptions?: boolean;
+  showSparkPlots?: boolean;
 }
 
 type FormattedSpanMetricGroup = SpanMetricGroup & {
@@ -56,10 +57,11 @@ export function DependenciesTable(props: Props) {
     compact = true,
     showPerPageOptions = true,
     initialPageSize,
+    showSparkPlots,
   } = props;
 
-  // SparkPlots should be hidden if we're in two-column view and size XL (1200px)
-  const breakpoints = useBreakpoints();
+  const { isLarge } = useBreakpoints();
+  const shouldShowSparkPlots = showSparkPlots ?? !isLarge;
 
   const items: FormattedSpanMetricGroup[] = dependencies.map((dependency) => ({
     name: dependency.name,
@@ -95,7 +97,7 @@ export function DependenciesTable(props: Props) {
       width: '30%',
     },
     ...getSpanMetricColumns({
-      breakpoints,
+      shouldShowSparkPlots,
       comparisonFetchStatus: status,
     }),
   ];

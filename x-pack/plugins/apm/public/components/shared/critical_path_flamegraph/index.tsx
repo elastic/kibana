@@ -12,7 +12,7 @@ import {
   euiPaletteColorBlind,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
 import React, { useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -73,7 +73,7 @@ export function CriticalPathFlamegraph(
     [timerange, traceIds, serviceName, transactionName]
   );
 
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
 
   const isLoading =
     isPending(traceIdsFetchStatus) || isPending(criticalPathFetchStatus);
@@ -143,8 +143,9 @@ export function CriticalPathFlamegraph(
                     chartMargins: themeOverrides.chartMargins,
                     chartPaddings: themeOverrides.chartPaddings,
                   },
-                  ...chartTheme,
+                  ...chartThemes.theme,
                 ]}
+                baseTheme={chartThemes.baseTheme}
                 onElementClick={(elements) => {}}
                 locale={i18n.getLocale()}
               />

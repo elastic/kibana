@@ -113,7 +113,7 @@ List of {kib} client-side headers to send to {es}. To send *no* client-side
 headers, set this value to [] (an empty list). Removing the `authorization`
 header from being whitelisted means that you cannot use
 <<basic-authentication, basic authentication>> in {kib}.
-*Default: `[ 'authorization' ]`*
+*Default: `[ 'authorization', 'es-client-authentication' ]`*
 
 [[elasticsearch-requestTimeout]] `elasticsearch.requestTimeout`::
 Time in milliseconds to wait for responses from the back end or {es}.
@@ -323,8 +323,7 @@ run {kib} in different modes. Valid options are `background_tasks` and `ui`,
 or `*` to select all roles. *Default: `*`*
 
 `notifications.connectors.default.email`::
-Specifies the name of the connector that is used to send email notifications.
-In {ecloud}, the default value is `elastic-cloud-email`.
+ Choose the default email connector for user notifications. As of `8.6.0`, {kib} is shipping with a new notification mechanism that will send email notifications for various user actions, e.g. assigning a _Case_ to a user. To enable notifications, an email connector must be <<pre-configured-connectors,preconfigured>> in the system via `kibana.yml`, and the notifications plugin must be configured to point to the ID of that connector.
 
 [[path-data]] `path.data`::
 The path where {kib} stores persistent data

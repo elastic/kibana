@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { LensBaseLayer, LensConfig } from '@kbn/lens-embeddable-utils/config_builder';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
@@ -384,11 +385,21 @@ export interface InventoryMetrics {
   defaultTimeRangeInSeconds: number;
 }
 
-export interface InventoryModel {
+export interface InventoryMetricsWithDashboards<
+  TFormula extends Record<string, LensBaseLayer>,
+  TDashboard extends Record<string, DashboardFn>
+> extends InventoryMetrics {
+  getFormulas: () => Promise<TFormula>;
+  getDashboards: () => Promise<TDashboard>;
+}
+
+type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
+
+export interface InventoryModel<TMetrics = InventoryMetrics> {
   id: string;
   displayName: string;
   singularDisplayName: string;
-  requiredModule: string;
+  requiredModule: Modules;
   fields: {
     id: string;
     name: string;
@@ -402,8 +413,18 @@ export interface InventoryModel {
     apm: boolean;
     uptime: boolean;
   };
-  metrics: InventoryMetrics;
+  metrics: TMetrics;
   requiredMetrics: InventoryMetric[];
   tooltipMetrics: SnapshotMetricType[];
   nodeFilter?: object[];
+}
+
+export type LensConfigWithId = LensConfig & { id: string };
+export interface DashboardFn {
+  get: (...args: any[]) => DashboardModel;
+}
+
+export interface DashboardModel {
+  charts: LensConfigWithId[];
+  dependsOn?: string[];
 }

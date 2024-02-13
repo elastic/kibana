@@ -27,7 +27,7 @@ const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleDa
         id: action.id,
         params: action.params,
         actionTypeId: action.actionTypeId,
-        useAlertDataForTemplate,
+        ...(typeof useAlertDataForTemplate !== 'undefined' ? { useAlertDataForTemplate } : {}),
         ...(action.uuid ? { uuid: action.uuid } : {}),
         ...(frequency
           ? {
@@ -58,5 +58,6 @@ export const transformCreateBody = <Params extends RuleParams = never>(
     schedule: createBody.schedule,
     actions: transformCreateBodyActions(createBody.actions),
     ...(createBody.notify_when ? { notifyWhen: createBody.notify_when } : {}),
+    ...(createBody.alert_delay ? { alertDelay: createBody.alert_delay } : {}),
   };
 };

@@ -115,17 +115,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // adding a11y tests for the new data grid
     it('a11y test on single document view', async () => {
       await testSubjects.click('docTableExpandToggleColumn');
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test on JSON view of the document', async () => {
-      await PageObjects.discover.clickDocViewerTab(1);
+      await PageObjects.discover.clickDocViewerTab('doc_view_source');
       await a11y.testAppSnapshot();
     });
 
     it('a11y test for actions on a field', async () => {
-      await PageObjects.discover.clickDocViewerTab(0);
+      await PageObjects.discover.clickDocViewerTab('doc_view_table');
       if (await testSubjects.exists('openFieldActionsButton-Cancelled')) {
         await testSubjects.click('openFieldActionsButton-Cancelled');
       } else {
@@ -159,24 +159,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for chart options panel', async () => {
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await a11y.testAppSnapshot();
-    });
-
     it('a11y test for data grid with hidden chart', async () => {
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.closeHistogramPanel();
       await a11y.testAppSnapshot();
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.openHistogramPanel();
     });
 
     it('a11y test for time interval panel', async () => {
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramTimeIntervalPanel');
+      await testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
       await a11y.testAppSnapshot();
-      await testSubjects.click('contextMenuPanelTitleButton');
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
     it('a11y test for data grid sort panel', async () => {
@@ -205,7 +196,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid with collapsed side bar', async () => {
       await PageObjects.discover.closeSidebar();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.toggleSidebarCollapse();
+      await PageObjects.discover.openSidebar();
     });
 
     it('a11y test for adding a field from side bar', async () => {

@@ -4,9 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export const getEntraUserIndex = (spaceId: string = 'default') =>
+  `logs-entityanalytics_entra_id.user-${spaceId}`;
 
-export const MANAGED_USER_INDEX = ['logs-entityanalytics_azure.users-*'];
-export const MANAGED_USER_PACKAGE_NAME = 'entityanalytics_azure';
-export const INSTALL_INTEGRATION_HREF = `/detail/${MANAGED_USER_PACKAGE_NAME}/overview`;
+export const ENTRA_ID_PACKAGE_NAME = 'entityanalytics_entra_id';
+
+export const INSTALL_EA_INTEGRATIONS_HREF = `browse/security?q=entityanalytics`;
+
 export const ONE_WEEK_IN_HOURS = 24 * 7;
 export const MANAGED_USER_QUERY_ID = 'managedUserDetailsQuery';
+
+export const getOktaUserIndex = (spaceId: string = 'default') =>
+  `logs-entityanalytics_okta.user-${spaceId}`;
+
+export const OKTA_PACKAGE_NAME = 'entityanalytics_okta';

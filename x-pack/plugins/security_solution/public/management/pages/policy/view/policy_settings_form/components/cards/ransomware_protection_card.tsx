@@ -23,7 +23,6 @@ import {
 import type { RansomwareProtectionOSes } from '../../../../types';
 import { useLicense } from '../../../../../../../common/hooks/use_license';
 import { SettingLockedCard } from '../setting_locked_card';
-import { RelatedDetectionRulesCallout } from '../related_detection_rules_callout';
 import { useGetProtectionsUnavailableComponent } from '../../hooks/use_get_protections_unavailable_component';
 
 const RANSOMEWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
@@ -107,8 +106,6 @@ export const RansomwareProtectionCard = React.memo<RansomwareProtectionCardProps
           data-test-subj={getTestId('notifyUser')}
         />
         <EuiSpacer size="m" />
-
-        <RelatedDetectionRulesCallout data-test-subj={getTestId('rulesCallout')} />
       </SettingCard>
     );
   }

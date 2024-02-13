@@ -5,29 +5,18 @@
  * 2.0.
  */
 
-import { Cluster, ComplianceDashboardData } from '../../../common/types';
+import { BenchmarkData, ComplianceDashboardDataV2 } from '../../../common/types_old';
 
-export const getClusterMockData = (): Cluster => ({
+export const getMockDashboardData = () => ({
+  ...mockDashboardData,
+});
+
+export const getBenchmarkMockData = (): BenchmarkData => ({
   meta: {
-    assetIdentifierId: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
-    lastUpdate: '2022-11-07T13:14:34.990Z',
-    cloud: {
-      provider: 'aws',
-      account: {
-        name: 'build-security-dev',
-        id: '704479110758',
-      },
-    },
-    benchmark: {
-      name: 'CIS Amazon Web Services Foundations',
-      rule_number: '1.4',
-      id: 'cis_aws',
-      posture_type: 'cspm',
-      version: 'v1.5.0',
-    },
-    cluster: {
-      name: '8f9c5b98-cc02-4827-8c82-316e2cc25870',
-    },
+    benchmarkId: 'cis_aws',
+    benchmarkVersion: '1.2.3',
+    benchmarkName: 'CIS AWS Foundations Benchmark',
+    assetCount: 153,
   },
   stats: {
     totalFailed: 17,
@@ -104,11 +93,7 @@ export const getClusterMockData = (): Cluster => ({
   ],
 });
 
-export const getMockDashboardData = () => ({
-  ...mockDashboardData,
-});
-
-export const mockDashboardData: ComplianceDashboardData = {
+export const mockDashboardData: ComplianceDashboardDataV2 = {
   stats: {
     totalFailed: 17,
     totalPassed: 155,
@@ -167,7 +152,7 @@ export const mockDashboardData: ComplianceDashboardData = {
       postureScore: 50.0,
     },
   ],
-  clusters: [getClusterMockData()],
+  benchmarks: [getBenchmarkMockData()],
   trend: [
     {
       timestamp: '2022-05-22T11:03:00.000Z',

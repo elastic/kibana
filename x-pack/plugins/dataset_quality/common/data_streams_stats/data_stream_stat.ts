@@ -5,35 +5,48 @@
  * 2.0.
  */
 
+import { DataStreamType } from '../types';
+import { indexNameToDataStreamParts } from '../utils';
 import { Integration } from './integration';
-import { DataStreamStatType, IntegrationType } from './types';
+import { DataStreamStatType } from './types';
 
 export class DataStreamStat {
+  rawName: string;
+  type: DataStreamType;
   name: DataStreamStatType['name'];
+  namespace: string;
   title: string;
   size?: DataStreamStatType['size'];
-  sizeBytes?: DataStreamStatType['size_bytes'];
-  lastActivity?: DataStreamStatType['last_activity'];
-  integration?: IntegrationType;
+  sizeBytes?: DataStreamStatType['sizeBytes'];
+  lastActivity?: DataStreamStatType['lastActivity'];
+  integration?: Integration;
+  degradedDocs?: number;
 
   private constructor(dataStreamStat: DataStreamStat) {
+    this.rawName = dataStreamStat.rawName;
+    this.type = dataStreamStat.type;
     this.name = dataStreamStat.name;
     this.title = dataStreamStat.title ?? dataStreamStat.name;
+    this.namespace = dataStreamStat.namespace;
     this.size = dataStreamStat.size;
     this.sizeBytes = dataStreamStat.sizeBytes;
     this.lastActivity = dataStreamStat.lastActivity;
     this.integration = dataStreamStat.integration;
+    this.degradedDocs = dataStreamStat.degradedDocs;
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
-    const [_type, dataset, namespace] = dataStreamStat.name.split('-');
+    const { type, dataset, namespace } = indexNameToDataStreamParts(dataStreamStat.name);
 
     const dataStreamStatProps = {
-      name: dataStreamStat.name,
-      title: `${dataset}-${namespace}`,
+      rawName: dataStreamStat.name,
+      type,
+      name: dataset,
+      title: dataStreamStat.integration?.datasets?.[dataset] ?? dataset,
+      namespace,
       size: dataStreamStat.size,
-      sizeBytes: dataStreamStat.size_bytes,
-      lastActivity: dataStreamStat.last_activity,
+      sizeBytes: dataStreamStat.sizeBytes,
+      lastActivity: dataStreamStat.lastActivity,
       integration: dataStreamStat.integration
         ? Integration.create(dataStreamStat.integration)
         : undefined,

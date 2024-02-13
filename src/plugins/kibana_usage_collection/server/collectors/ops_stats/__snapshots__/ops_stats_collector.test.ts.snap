@@ -32,6 +32,8 @@ Object {
       "utilization": 1,
     },
     "memory": Object {
+      "array_buffers_in_bytes": 1,
+      "external_in_bytes": 1,
       "heap": Object {
         "size_limit": 1,
         "total_in_bytes": 1,
@@ -51,6 +53,8 @@ Object {
         "utilization": 1,
       },
       "memory": Object {
+        "array_buffers_in_bytes": 1,
+        "external_in_bytes": 1,
         "heap": Object {
           "size_limit": 1,
           "total_in_bytes": 1,

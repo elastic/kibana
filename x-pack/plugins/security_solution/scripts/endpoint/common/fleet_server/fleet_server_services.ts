@@ -49,8 +49,8 @@ import {
   retryOnError,
 } from '../../../../common/endpoint/data_loaders/utils';
 import { isServerlessKibanaFlavor } from '../stack_services';
-import type { FormattedAxiosError } from '../format_axios_error';
-import { catchAxiosErrorFormatAndThrow } from '../format_axios_error';
+import type { FormattedAxiosError } from '../../../../common/endpoint/format_axios_error';
+import { catchAxiosErrorFormatAndThrow } from '../../../../common/endpoint/format_axios_error';
 import {
   ensureFleetSetup,
   fetchFleetOutputs,
@@ -247,113 +247,120 @@ const startFleetServerWithDocker = async ({
   let agentVersion = version || (await getAgentVersionMatchingCurrentStack(kbnClient));
   const localhostRealIp = getLocalhostRealIp();
   const fleetServerUrl = `https://${localhostRealIp}:${port}`;
+  const isServerless = await isServerlessKibanaFlavor(kbnClient);
+  const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
+  const containerName = `dev-fleet-server.${port}`;
 
   log.info(
     `Starting a new fleet server using Docker\n    Agent version: ${agentVersion}\n    Server URL: ${fleetServerUrl}`
   );
 
-  const response: StartedServer = await log.indent(4, async () => {
-    const isServerless = await isServerlessKibanaFlavor(kbnClient);
-    const esURL = new URL(await getFleetElasticsearchOutputHost(kbnClient));
-    const containerName = `dev-fleet-server.${port}`;
-    const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
-    let containerId = '';
-    let fleetServerVersionInfo = '';
+  let retryAttempt = isServerless ? 0 : 1;
+  const attemptServerlessFleetServerSetup = async (): Promise<StartedServer> => {
+    return log.indent(4, async () => {
+      const hostname = `dev-fleet-server.${port}.${Math.random().toString(32).substring(2, 6)}`;
+      let containerId = '';
+      let fleetServerVersionInfo = '';
 
-    if (isLocalhost(esURL.hostname)) {
-      esURL.hostname = localhostRealIp;
-    }
+      if (isLocalhost(esURL.hostname)) {
+        esURL.hostname = localhostRealIp;
+      }
 
-    if (isServerless) {
-      log.info(`Kibana running in serverless mode.
+      if (isServerless) {
+        log.info(`Kibana running in serverless mode.
   - will install/run standalone Fleet Server
   - version adjusted to [latest] from [${agentVersion}]`);
 
-      agentVersion = 'latest';
-    } else {
-      assert.ok(!!policyId, '`policyId` is required');
-      assert.ok(!!serviceToken, '`serviceToken` is required');
-    }
+        agentVersion = 'latest';
+      } else {
+        assert.ok(!!policyId, '`policyId` is required');
+        assert.ok(!!serviceToken, '`serviceToken` is required');
+      }
 
-    // Create the `elastic` network to use with all containers
-    await maybeCreateDockerNetwork(log);
+      // Create the `elastic` network to use with all containers
+      await maybeCreateDockerNetwork(log);
+      try {
+        const dockerArgs = isServerless
+          ? getFleetServerStandAloneDockerArgs({
+              containerName,
+              hostname,
+              port,
+              esUrl: esURL.toString(),
+              agentVersion,
+            })
+          : getFleetServerManagedDockerArgs({
+              containerName,
+              hostname,
+              port,
+              serviceToken,
+              policyId,
+              agentVersion,
+              esUrl: esURL.toString(),
+            });
 
-    try {
-      const dockerArgs = isServerless
-        ? getFleetServerStandAloneDockerArgs({
-            containerName,
-            hostname,
-            port,
-            esUrl: esURL.toString(),
-            agentVersion,
+        await execa('docker', ['kill', containerName])
+          .then(() => {
+            log.info(
+              `Killed an existing container with name [${containerName}]. New one will be started.`
+            );
           })
-        : getFleetServerManagedDockerArgs({
-            containerName,
-            hostname,
-            port,
-            serviceToken,
-            policyId,
-            agentVersion,
-            esUrl: esURL.toString(),
+          .catch((error) => {
+            if (!/no such container/i.test(error.message)) {
+              log.verbose(`Attempt to kill currently running fleet-server container with name [${containerName}] was unsuccessful:
+      ${error}`);
+            }
           });
 
-      await execa('docker', ['kill', containerName])
-        .then(() => {
-          log.info(
-            `Killed an existing container with name [${containerName}]. New one will be started.`
-          );
-        })
-        .catch((error) => {
-          if (!/no such container/i.test(error.message)) {
-            log.verbose(`Attempt to kill currently running fleet-server container with name [${containerName}] was unsuccessful:
-      ${error}`);
-          }
-        });
+        log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
 
-      log.verbose(`docker arguments:\n${dockerArgs.join(' ')}`);
+        containerId = (await execa('docker', dockerArgs)).stdout;
 
-      containerId = (await execa('docker', dockerArgs)).stdout;
+        log.info(`Fleet server started`);
 
-      log.info(`Fleet server started`);
+        if (!isServerless) {
+          await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
+        }
 
-      if (!isServerless) {
-        await addFleetServerHostToFleetSettings(kbnClient, log, fleetServerUrl);
+        await updateFleetElasticsearchOutputHostNames(kbnClient, log);
+
+        if (isServerless) {
+          log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
+          await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 180000);
+        } else {
+          await waitForHostToEnroll(kbnClient, log, hostname, 120000);
+        }
+
+        fleetServerVersionInfo = isServerless
+          ? // `/usr/bin/fleet-server` process does not seem to support a `--version` type of argument
+            'Running latest standalone fleet server'
+          : (
+              await execa('docker', [
+                'exec',
+                containerName,
+                '/bin/bash',
+                '-c',
+                '/usr/share/elastic-agent/elastic-agent version',
+              ]).catch((err) => {
+                log.verbose(
+                  `Failed to retrieve agent version information from running instance.`,
+                  err
+                );
+                return { stdout: 'Unable to retrieve version information' };
+              })
+            ).stdout;
+      } catch (error) {
+        if (retryAttempt < 1) {
+          retryAttempt++;
+          log.error(`Failed to start fleet server, retrying. Error: ${error.message}`);
+          log.verbose(dump(error));
+          return attemptServerlessFleetServerSetup();
+        }
+
+        log.error(dump(error));
+        throw error;
       }
 
-      await updateFleetElasticsearchOutputHostNames(kbnClient, log);
-
-      if (isServerless) {
-        log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
-
-        await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 120000);
-      } else {
-        await waitForHostToEnroll(kbnClient, log, hostname, 120000);
-      }
-
-      fleetServerVersionInfo = isServerless
-        ? // `/usr/bin/fleet-server` process does not seem to support a `--version` type of argument
-          'Running latest standalone fleet server'
-        : (
-            await execa('docker', [
-              'exec',
-              containerName,
-              '/bin/bash',
-              '-c',
-              '/usr/share/elastic-agent/elastic-agent version',
-            ]).catch((err) => {
-              log.verbose(
-                `Failed to retrieve agent version information from running instance.`,
-                err
-              );
-              return { stdout: 'Unable to retrieve version information' };
-            })
-          ).stdout;
-    } catch (error) {
-      log.error(dump(error));
-      throw error;
-    }
-
-    const info = `Container Name: ${containerName}
+      const info = `Container Name: ${containerName}
 Container Id:   ${containerId}
 Fleet-server version:
     ${fleetServerVersionInfo.replace(/\n/g, '\n    ')}
@@ -363,26 +370,29 @@ Shell access:         ${chalk.cyan(`docker exec -it ${containerName} /bin/bash`)
 Kill container:       ${chalk.cyan(`docker kill ${containerId}`)}
   `;
 
-    return {
-      type: 'docker',
-      name: containerName,
-      id: containerId,
-      url: fleetServerUrl,
-      info,
-      stop: async () => {
-        log.info(
-          `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
-        );
-        await execa('docker', ['kill', containerId]);
-      },
-      stopNow: () => {
-        log.info(
-          `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
-        );
-        execa.sync('docker', ['kill', containerId]);
-      },
-    };
-  });
+      return {
+        type: 'docker',
+        name: containerName,
+        id: containerId,
+        url: fleetServerUrl,
+        info,
+        stop: async () => {
+          log.info(
+            `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
+          );
+          await execa('docker', ['kill', containerId]);
+        },
+        stopNow: () => {
+          log.info(
+            `Stopping (kill) fleet server. Container name [${containerName}] id [${containerId}]`
+          );
+          execa.sync('docker', ['kill', containerId]);
+        },
+      };
+    });
+  };
+
+  const response: StartedServer = await attemptServerlessFleetServerSetup();
 
   log.info(`Done. Fleet server up and running`);
 
@@ -743,7 +753,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
 
   if (!found) {
     throw new Error(
-      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsarch`
+      `Timed out waiting for fleet server [${fleetServerHostname}] to register with Elasticsearch`
     );
   }
 };

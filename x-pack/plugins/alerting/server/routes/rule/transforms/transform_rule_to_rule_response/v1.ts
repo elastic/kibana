@@ -63,7 +63,9 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
       id,
       params,
       connector_type_id: actionTypeId,
-      use_alert_data_for_template: useAlertDataForTemplate ?? false,
+      ...(typeof useAlertDataForTemplate !== 'undefined'
+        ? { use_alert_data_for_template: useAlertDataForTemplate }
+        : {}),
       ...(frequency
         ? {
             frequency: {
@@ -117,4 +119,5 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   ...(rule.viewInAppRelativeUrl !== undefined
     ? { view_in_app_relative_url: rule.viewInAppRelativeUrl }
     : {}),
+  ...(rule.alertDelay !== undefined ? { alert_delay: rule.alertDelay } : {}),
 });

@@ -7,6 +7,8 @@ properties:
     type: boolean
   is_default_monitoring:
     type: boolean
+  is_internal:
+    type: boolean
   name:
     type: string
   type:
@@ -22,6 +24,9 @@ properties:
     type: string
   config:
     type: object
+  preset:
+    type: string
+    enum: ['balanced', 'custom', 'throughput', 'scale', 'latency']
   config_yaml:
     type: string
   ssl:

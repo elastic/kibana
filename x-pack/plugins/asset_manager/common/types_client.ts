@@ -20,8 +20,5 @@ export interface SharedAssetsOptionsPublic<F = AssetFilters> {
 export type GetHostsOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
 export type GetContainersOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
 export type GetPodsOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
-
-export interface GetServicesOptionsPublic
-  extends SharedAssetsOptionsPublic<SingleKindAssetFilters> {
-  parent?: string;
-}
+export type GetServicesOptionsPublic = SharedAssetsOptionsPublic<SingleKindAssetFilters>;
+export type GetAssetsOptionsPublic = SharedAssetsOptionsPublic<AssetFilters>;

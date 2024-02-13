@@ -6,14 +6,17 @@
  */
 
 import {
+  dataViewCreateQuerySchema,
+  type DataViewCreateQuerySchema,
+} from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
+
+import {
   transformIdParamSchema,
   type TransformIdParamSchema,
 } from '../../../../common/api_schemas/common';
 import {
   putTransformsRequestSchema,
-  putTransformsQuerySchema,
   type PutTransformsRequestSchema,
-  type PutTransformsQuerySchema,
 } from '../../../../common/api_schemas/transforms';
 import { addInternalBasePath } from '../../../../common/constants';
 
@@ -40,20 +43,20 @@ export function registerRoute(routeDependencies: RouteDependencies) {
       path: addInternalBasePath('transforms/{transformId}'),
       access: 'internal',
     })
-    .addVersion<TransformIdParamSchema, PutTransformsQuerySchema, PutTransformsRequestSchema>(
+    .addVersion<TransformIdParamSchema, DataViewCreateQuerySchema, PutTransformsRequestSchema>(
       {
         version: '1',
         validate: {
           request: {
             params: transformIdParamSchema,
-            query: putTransformsQuerySchema,
+            query: dataViewCreateQuerySchema,
             body: putTransformsRequestSchema,
           },
         },
       },
       license.guardApiRoute<
         TransformIdParamSchema,
-        PutTransformsQuerySchema,
+        DataViewCreateQuerySchema,
         PutTransformsRequestSchema
       >(routeHandlerFactory(routeDependencies))
     );

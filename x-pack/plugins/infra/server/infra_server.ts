@@ -32,6 +32,8 @@ import { initProcessListRoute } from './routes/process_list';
 import { initSnapshotRoute } from './routes/snapshot';
 import { initInfraMetricsRoute } from './routes/infra';
 import { initMetricsExplorerViewRoutes } from './routes/metrics_explorer_views';
+import { initProfilingRoutes } from './routes/profiling';
+import { initServicesRoute } from './routes/services';
 
 export const initInfraServer = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -59,4 +61,6 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initProcessListRoute(libs);
   initOverviewRoute(libs);
   initInfraMetricsRoute(libs);
+  initProfilingRoutes(libs);
+  initServicesRoute(libs);
 };

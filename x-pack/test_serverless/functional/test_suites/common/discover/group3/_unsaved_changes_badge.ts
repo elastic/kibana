@@ -9,19 +9,20 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const SAVED_SEARCH_NAME = 'test saved search';
+const SAVED_SEARCH_WITH_FILTERS_NAME = 'test saved search with filters';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const dataGrid = getService('dataGrid');
+  const filterBar = getService('filterBar');
   const PageObjects = getPageObjects([
-    'settings',
     'common',
+    'svlCommonPage',
     'discover',
     'header',
     'timePicker',
-    'dashboard',
     'unifiedFieldList',
   ]);
   const security = getService('security');
@@ -35,6 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.importExport.load('test/functional/fixtures/kbn_archiver/discover');
+      await PageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
@@ -161,6 +163,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       await testSubjects.missingOrFail('unsavedChangesBadge');
+    });
+
+    it('should not show the badge after pinning the first filter but after disabling a filter', async () => {
+      await filterBar.addFilter({ field: 'extension', operation: 'is', value: 'png' });
+      await filterBar.addFilter({ field: 'bytes', operation: 'exists' });
+      await PageObjects.discover.saveSearch(SAVED_SEARCH_WITH_FILTERS_NAME);
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await filterBar.toggleFilterPinned('extension');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await filterBar.isFilterPinned('extension')).to.be(true);
+
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      await filterBar.toggleFilterNegated('bytes');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await filterBar.isFilterNegated('bytes')).to.be(true);
+
+      await testSubjects.existOrFail('unsavedChangesBadge');
+
+      await PageObjects.discover.revertUnsavedChanges();
+      await testSubjects.missingOrFail('unsavedChangesBadge');
+
+      expect(await filterBar.getFilterCount()).to.be(2);
+      expect(await filterBar.isFilterPinned('extension')).to.be(false);
+      expect(await filterBar.isFilterNegated('bytes')).to.be(false);
+      expect(await PageObjects.discover.getHitCount()).to.be('1,373');
     });
   });
 }

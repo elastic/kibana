@@ -60,14 +60,17 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         observability: {
           pathname: '/app/observability',
         },
-        observabilityLogExplorer: {
-          pathname: '/app/observability-log-explorer',
+        observabilityLogsExplorer: {
+          pathname: '/app/observability-logs-explorer',
         },
         management: {
           pathname: '/app/management',
         },
         indexManagement: {
           pathname: '/app/management/data/index_management',
+        },
+        ingestPipelines: {
+          pathname: '/app/management/ingest/ingest_pipelines',
         },
         transform: {
           pathname: '/app/management/data/transform',
@@ -99,6 +102,13 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         context: {
           pathname: '/app/discover',
           hash: '/context',
+        },
+        searchProfiler: {
+          pathname: '/app/dev_tools',
+          hash: '/searchprofiler',
+        },
+        maintenanceWindows: {
+          pathname: '/app/management/insightsAndAlerting/maintenanceWindows',
         },
       },
       // choose where screenshots should be saved

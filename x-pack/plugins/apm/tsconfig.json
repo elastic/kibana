@@ -51,7 +51,6 @@
     "@kbn/charts-plugin",
     "@kbn/field-formats-plugin",
     "@kbn/typed-react-router-config",
-    "@kbn/advanced-settings-plugin",
     "@kbn/core-http-browser",
     "@kbn/server-route-repository",
     "@kbn/datemath",
@@ -101,11 +100,17 @@
     "@kbn/core-analytics-server",
     "@kbn/analytics-client",
     "@kbn/monaco",
-    "@kbn/shared-svg",
     "@kbn/deeplinks-observability",
     "@kbn/custom-icons",
     "@kbn/elastic-agent-utils",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/observability-get-padded-alert-time-range-util",
+    "@kbn/core-lifecycle-server",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
+    "@kbn/shared-svg",
+    "@kbn/shared-ux-utility",
+    "@kbn/management-settings-components-field-row",
   ],
   "exclude": ["target/**/*"]
 }

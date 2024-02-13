@@ -15,8 +15,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/169159
-  describe.skip('migrations', () => {
+  describe('migrations', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/actions');
     });
@@ -127,6 +126,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
       expect(response.body).to.eql({
         connector_id: '0f8f2810-0a59-11ec-9a7c-fd0c2b83ff7d',
         status: 'error',
+        errorSource: 'framework',
         message: `error validating action type connector: secrets must be defined`,
         retry: false,
       });

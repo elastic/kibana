@@ -21,9 +21,25 @@ export enum FetchStatus {
 
 export type DiscoverDisplayMode = 'embedded' | 'standalone';
 
+export interface DiscoverCustomizationContext {
+  /*
+   * Display mode in which discover is running
+   */
+  displayMode: DiscoverDisplayMode;
+  /**
+   * Whether or not to show the Log Explorer tabs
+   */
+  showLogsExplorerTabs: boolean;
+}
+
 export interface RecordsFetchResponse {
   records: DataTableRecord[];
   textBasedQueryColumns?: DatatableColumn[];
   textBasedHeaderWarning?: string;
   interceptedWarnings?: SearchResponseWarning[];
+}
+
+export interface SidebarToggleState {
+  isCollapsed: boolean;
+  toggle: undefined | ((isCollapsed: boolean) => void);
 }

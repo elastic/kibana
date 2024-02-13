@@ -105,21 +105,8 @@ export const getFTRConfig = ({
         return value;
       });
 
-      if (
-        specFileFTRConfig?.enableExperimental?.length &&
-        _.some(vars.kbnTestServer.serverArgs, (value) =>
-          value.includes('--xpack.securitySolution.enableExperimental')
-        )
-      ) {
-        vars.kbnTestServer.serverArgs = _.filter(
-          vars.kbnTestServer.serverArgs,
-          (value) => !value.includes('--xpack.securitySolution.enableExperimental')
-        );
-        vars.kbnTestServer.serverArgs.push(
-          `--xpack.securitySolution.enableExperimental=${JSON.stringify(
-            specFileFTRConfig?.enableExperimental
-          )}`
-        );
+      if (specFileFTRConfig?.kbnServerArgs?.length) {
+        vars.kbnTestServer.serverArgs.push(...specFileFTRConfig?.kbnServerArgs);
       }
 
       if (specFileFTRConfig?.license) {

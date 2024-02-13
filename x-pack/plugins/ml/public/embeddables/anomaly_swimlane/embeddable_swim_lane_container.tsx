@@ -108,6 +108,7 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
   );
 
   if (error) {
+    onRenderComplete();
     return (
       <EuiCallOut
         title={

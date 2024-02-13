@@ -28,7 +28,7 @@ import {
   Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
-import { getTimezone } from '../../../lib/get_timezone';
+import { getTimeZone } from '@kbn/visualization-utils';
 import { getUISettings, getCharts } from '../../../../services';
 import { GRID_LINE_CONFIG, ICON_TYPES_MAP, STACKED_OPTIONS } from '../../constants';
 import { AreaSeriesDecorator } from './decorators/area_decorator';
@@ -89,7 +89,7 @@ export const TimeSeries = ({
   const { theme: themeService, activeCursor: activeCursorService } = getCharts();
 
   const chartRef = useRef();
-  const chartTheme = themeService.useChartsTheme();
+  const chartBaseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const handleCursorUpdate = useActiveCursor(activeCursorService, chartRef, {
     isDateHistogram: true,
@@ -121,13 +121,11 @@ export const TimeSeries = ({
   }
 
   const uiSettings = getUISettings();
-  const timeZone = getTimezone(uiSettings);
+  const timeZone = getTimeZone(uiSettings);
   const hasBarChart = series.some(({ bars }) => bars?.show);
 
   // apply legend style change if bgColor is configured
   const classes = classNames(getChartClasses(backgroundColor));
-
-  const baseTheme = getBaseTheme(themeService.useChartsBaseTheme(), backgroundColor);
 
   const onBrushEndListener = ({ x }) => {
     if (!x) {
@@ -196,15 +194,12 @@ export const TimeSeries = ({
         pointerUpdateDebounce={0}
         theme={[
           {
-            crosshair: {
-              ...chartTheme.crosshair,
-            },
             axes: {
               tickLabel: {
                 padding: {
                   inner: hasVisibleAnnotations
                     ? TICK_LABEL_WITH_ANNOTATIONS_PADDING
-                    : chartTheme.axes.tickLabel.padding.inner,
+                    : chartBaseTheme.axes.tickLabel.padding.inner,
                 },
               },
             },
@@ -226,9 +221,8 @@ export const TimeSeries = ({
               labelOptions: { maxLines: truncateLegend ? maxLegendLines ?? 1 : 0 },
             },
           },
-          chartTheme,
         ]}
-        baseTheme={baseTheme}
+        baseTheme={chartBaseTheme}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },
         }}

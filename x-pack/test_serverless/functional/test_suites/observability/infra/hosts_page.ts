@@ -7,7 +7,7 @@
 
 import moment from 'moment';
 import expect from '@kbn/expect';
-import type { WebElementWrapper } from '../../../../../../test/functional/services/lib/web_element_wrapper';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 import { HOSTS_VIEW_PATH } from './constants';
@@ -36,7 +36,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await retry.waitFor(
       'wait for table and KPI charts to load',
       async () =>
-        (await pageObjects.infraHostsView.isHostTableLoading()) &&
+        (await pageObjects.infraHostsView.isHostTableLoaded()) &&
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 

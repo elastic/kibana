@@ -37,14 +37,9 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     },
 
     async getAssetDetailsMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsMetricsChartGrid');
-      return container.findAllByCssSelector('[data-test-subj*="infraAssetDetailsMetricsChart"]');
-    },
-
-    async getAssetDetailsNginxMetricsCharts() {
-      const container = await testSubjects.find('infraAssetDetailsNginxMetricsChartGrid');
+      const container = await testSubjects.find('infraAssetDetailsHostMetricsChartGrid');
       return container.findAllByCssSelector(
-        '[data-test-subj*="infraAssetDetailsNginxMetricsChart"]'
+        '[data-test-subj*="infraAssetDetailsHostMetricsChart"]'
       );
     },
 
@@ -65,6 +60,51 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
 
     async clickShowAllMetadataOverviewTab() {
       return testSubjects.click('infraAssetDetailsMetadataShowAllButton');
+    },
+
+    async cpuProfilingPromptExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsCPUProfilingPrompt');
+    },
+
+    async cpuProfilingPromptMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsCPUProfilingPrompt');
+    },
+
+    async profilingTabExists() {
+      return await testSubjects.existOrFail('infraAssetDetailsProfilingTab');
+    },
+
+    async profilingTabMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsProfilingTab');
+    },
+
+    // Collapsable sections
+    async metadataSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsMetadataCollapsible');
+    },
+    async alertsSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsCollapsible');
+    },
+    async metricsSectionCollapsibleExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsMetricsCollapsible');
+    },
+
+    async alertsSectionCollapsibleClick() {
+      return await testSubjects.click('infraAssetDetailsAlertsCollapsible');
+    },
+
+    async alertsSectionClosedContentExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
+    },
+    async alertsSectionClosedContentMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentWithAlerts');
+    },
+
+    async alertsSectionClosedContentNoAlertsExist() {
+      return await testSubjects.existOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
+    },
+    async alertsSectionClosedContentNoAlertsMissing() {
+      return await testSubjects.missingOrFail('infraAssetDetailsAlertsClosedContentNoAlerts');
     },
 
     // Metadata

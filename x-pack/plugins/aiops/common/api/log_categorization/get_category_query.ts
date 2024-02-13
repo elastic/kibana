@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Category } from './types';
 
 export const QUERY_MODE = {
@@ -17,7 +18,7 @@ export const getCategoryQuery = (
   field: string,
   categories: Category[],
   mode: QueryMode = QUERY_MODE.INCLUDE
-) => ({
+): Record<string, estypes.QueryDslBoolQuery> => ({
   bool: {
     [mode]: categories.map(({ key: query }) => ({
       match: {

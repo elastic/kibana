@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+source "$(dirname "${BASH_SOURCE[0]}")/vault_fns.sh"
+
 is_pr() {
   [[ "${GITHUB_PR_NUMBER-}" ]] && return
   false

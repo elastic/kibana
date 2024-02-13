@@ -215,6 +215,7 @@ export interface XYState {
   labelsOrientation?: LabelsOrientationConfig;
   curveType?: XYCurveType;
   fillOpacity?: number;
+  minBarHeight?: number;
   hideEndzones?: boolean;
   showCurrentTimeMarker?: boolean;
   valuesInLegend?: boolean;

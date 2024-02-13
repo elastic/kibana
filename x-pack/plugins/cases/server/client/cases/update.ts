@@ -321,6 +321,7 @@ export const update = async (
       alertsService,
       licensingService,
       notificationService,
+      attachmentService,
     },
     user,
     logger,
@@ -329,8 +330,9 @@ export const update = async (
 
   try {
     const query = decodeWithExcessOrThrow(CasesPatchRequestRt)(cases);
+    const caseIds = query.cases.map((q) => q.id);
     const myCases = await caseService.getCases({
-      caseIds: query.cases.map((q) => q.id),
+      caseIds,
     });
 
     /**
@@ -451,6 +453,10 @@ export const update = async (
       alertsService,
     });
 
+    const commentsMap = await attachmentService.getter.getCaseCommentStats({
+      caseIds,
+    });
+
     const returnUpdatedCase = updatedCases.saved_objects.reduce((flattenCases, updatedCase) => {
       const originalCase = casesMap.get(updatedCase.id);
 
@@ -458,9 +464,18 @@ export const update = async (
         return flattenCases;
       }
 
+      const { userComments: totalComment, alerts: totalAlerts } = commentsMap.get(
+        updatedCase.id
+      ) ?? {
+        userComments: 0,
+        alerts: 0,
+      };
+
       flattenCases.push(
         flattenCaseSavedObject({
           savedObject: mergeOriginalSOWithUpdatedSO(originalCase, updatedCase),
+          totalComment,
+          totalAlerts,
         })
       );
       return flattenCases;

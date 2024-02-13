@@ -13,10 +13,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
     'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
@@ -26,11 +26,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const fieldEditor = getService('fieldEditor');
   const retry = getService('retry');
   const dataGrid = getService('dataGrid');
-  const INITIAL_FIELD_LIST_SUMMARY = '53 available fields. 0 empty fields. 3 meta fields.';
+  const INITIAL_FIELD_LIST_SUMMARY = '53 available fields. 3 meta fields.';
 
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {
@@ -70,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '7 available fields. 0 empty fields. 2 meta fields.'
+            '7 available fields. 2 meta fields.'
           );
         });
 
@@ -79,7 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('second updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '13 available fields. 0 empty fields. 3 meta fields.'
+            '13 available fields. 3 meta fields.'
           );
         });
 
@@ -124,7 +125,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('first updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '30 available fields. 0 empty fields. 2 meta fields.'
+            '30 available fields. 2 meta fields.'
           );
         });
 
@@ -133,7 +134,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('second updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '4 available fields. 0 empty fields. 0 meta fields.'
+            '4 available fields. 0 meta fields.'
           );
         });
 
@@ -148,7 +149,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '2 available fields. 0 empty fields. 0 meta fields.'
+            '2 available fields. 0 meta fields.'
           );
         });
 
@@ -163,7 +164,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await retry.waitFor('updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            '4 available fields. 0 empty fields. 0 meta fields.'
+            '4 available fields. 0 meta fields.'
           );
         });
 
@@ -242,13 +243,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       it('should collapse when clicked', async function () {
-        await PageObjects.discover.toggleSidebarCollapse();
-        await testSubjects.existOrFail('discover-sidebar');
+        await PageObjects.discover.closeSidebar();
+        await testSubjects.existOrFail('dscShowSidebarButton');
         await testSubjects.missingOrFail('fieldList');
       });
 
       it('should expand when clicked', async function () {
-        await PageObjects.discover.toggleSidebarCollapse();
+        await PageObjects.discover.openSidebar();
         await testSubjects.existOrFail('discover-sidebar');
         await testSubjects.existOrFail('fieldList');
       });
@@ -269,10 +270,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.join(', ')).to.be(expectedInitialAvailableFields);
 
         // Available fields after scrolling down
-        const emptySectionButton = await find.byCssSelector(
-          PageObjects.unifiedFieldList.getSidebarSectionSelector('empty', true)
+        const metaSectionButton = await find.byCssSelector(
+          PageObjects.unifiedFieldList.getSidebarSectionSelector('meta', true)
         );
-        await emptySectionButton.scrollIntoViewIfNecessary();
+        await metaSectionButton.scrollIntoViewIfNecessary();
 
         await retry.waitFor('list to update after scrolling', async () => {
           availableFields = await PageObjects.unifiedFieldList.getSidebarSectionFieldNames(
@@ -284,12 +285,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.join(', ')).to.be(
           `${expectedInitialAvailableFields}, url, utc_time, xss`
         );
-
-        // Expand Empty section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('empty')).join(', ')
-        ).to.be('');
 
         // Expand Meta section
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
@@ -323,16 +318,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be(true);
 
         // Available fields after scrolling down
-        const emptySectionButton = await find.byCssSelector(
-          PageObjects.unifiedFieldList.getSidebarSectionSelector('empty', true)
+        const metaSectionButton = await find.byCssSelector(
+          PageObjects.unifiedFieldList.getSidebarSectionSelector('meta', true)
         );
-        await emptySectionButton.scrollIntoViewIfNecessary();
-
-        // Expand Empty section
-        await PageObjects.unifiedFieldList.toggleSidebarSection('empty');
-        expect(
-          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('empty')).join(', ')
-        ).to.be('');
+        await metaSectionButton.scrollIntoViewIfNecessary();
 
         // Expand Meta section
         await PageObjects.unifiedFieldList.toggleSidebarSection('meta');
@@ -347,7 +336,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('relatedContent');
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '53 available fields. 1 unmapped field. 0 empty fields. 3 meta fields.'
+          '53 available fields. 1 unmapped field. 3 meta fields.'
         );
       });
 
@@ -368,7 +357,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(availableFields.includes('@message')).to.be(true);
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '2 selected fields. 2 popular fields. 53 available fields. 0 empty fields. 3 meta fields.'
+          '2 selected fields. 2 popular fields. 53 available fields. 3 meta fields.'
         );
 
         await PageObjects.unifiedFieldList.clickFieldListItemRemove('@message');
@@ -388,7 +377,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ).to.be('@message, _id, extension');
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '3 selected fields. 3 popular fields. 53 available fields. 0 empty fields. 3 meta fields.'
+          '3 selected fields. 3 popular fields. 53 available fields. 3 meta fields.'
         );
       });
 
@@ -412,7 +401,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '0 available fields. 0 empty fields. 0 meta fields.'
+          '0 available fields. 0 meta fields.'
         );
         await testSubjects.missingOrFail(
           `${PageObjects.unifiedFieldList.getSidebarSectionSelector('available')}-fetchWarning`
@@ -457,7 +446,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '6 available fields. 0 empty fields. 3 meta fields.'
+          '6 available fields. 3 meta fields.'
         );
 
         await PageObjects.discover.selectIndexPattern('with-timefield');
@@ -536,7 +525,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '6873 available fields. 0 empty fields. 3 meta fields.'
+          '6873 available fields. 3 meta fields.'
         );
 
         await PageObjects.discover.selectIndexPattern('logstash-*');
@@ -575,7 +564,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 0 empty fields. 3 meta fields.'
+          '54 available fields. 3 meta fields.'
         );
 
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
@@ -594,7 +583,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 0 empty fields. 3 meta fields.'
+          '54 available fields. 3 meta fields.'
         );
 
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
@@ -631,7 +620,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // check that the sidebar is rendered
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '54 available fields. 0 empty fields. 3 meta fields.'
+          '54 available fields. 3 meta fields.'
         );
         let allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_invalid-runtimefield')).to.be(true);
@@ -688,7 +677,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
-          '7 available fields. 0 empty fields. 3 meta fields.'
+          '7 available fields. 3 meta fields.'
         );
 
         await kibanaServer.importExport.unload(

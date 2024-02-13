@@ -8,7 +8,6 @@ import { renderHook } from '@testing-library/react-hooks';
 import { useKibana as mockUseKibana } from '../../lib/kibana/__mocks__';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 import { useAddToExistingCase } from './use_add_to_existing_case';
-import { useGetUserCasesPermissions } from '../../lib/kibana';
 import {
   allCasesPermissions,
   readCasesPermissions,
@@ -18,13 +17,13 @@ import { AttachmentType } from '@kbn/cases-plugin/common';
 
 const mockedUseKibana = mockUseKibana();
 const mockGetUseCasesAddToExistingCaseModal = jest.fn();
+const mockCanUseCases = jest.fn();
 
 jest.mock('../../lib/kibana', () => {
   const original = jest.requireActual('../../lib/kibana');
 
   return {
     ...original,
-    useGetUserCasesPermissions: jest.fn(),
     useKibana: () => ({
       ...mockedUseKibana,
       services: {
@@ -33,6 +32,7 @@ jest.mock('../../lib/kibana', () => {
           hooks: {
             useCasesAddToExistingCaseModal: mockGetUseCasesAddToExistingCaseModal,
           },
+          helpers: { canUseCases: mockCanUseCases },
         },
       },
     }),
@@ -47,7 +47,7 @@ describe('useAddToExistingCase', () => {
   };
 
   beforeEach(() => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+    mockCanUseCases.mockReturnValue(allCasesPermissions());
   });
 
   it('useCasesAddToExistingCaseModal with attachments', () => {
@@ -56,6 +56,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(mockGetUseCasesAddToExistingCaseModal).toHaveBeenCalledWith({
@@ -68,26 +69,28 @@ describe('useAddToExistingCase', () => {
   });
 
   it("disables the button if the user can't create but can read", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+    mockCanUseCases.mockReturnValue(readCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
   });
 
   it("disables the button if the user can't read but can create", () => {
-    (useGetUserCasesPermissions as jest.Mock).mockReturnValue(writeCasesPermissions());
+    mockCanUseCases.mockReturnValue(writeCasesPermissions());
 
     const { result } = renderHook(() =>
       useAddToExistingCase({
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -99,6 +102,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: null,
         timeRange,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -110,6 +114,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange: null,
         onAddToCaseClicked: mockOnAddToCaseClicked,
+        lensMetadata: undefined,
       })
     );
     expect(result.current.disabled).toEqual(true);
@@ -118,6 +123,9 @@ describe('useAddToExistingCase', () => {
   it('should open add to existing case modal', () => {
     const mockOpenCaseModal = jest.fn();
     const mockClick = jest.fn();
+    const lensMetadata = {
+      description: 'test_description',
+    };
 
     mockGetUseCasesAddToExistingCaseModal.mockReturnValue({ open: mockOpenCaseModal });
 
@@ -126,6 +134,7 @@ describe('useAddToExistingCase', () => {
         lensAttributes: kpiHostMetricLensAttributes,
         timeRange,
         onAddToCaseClicked: mockClick,
+        lensMetadata,
       })
     );
 
@@ -137,6 +146,7 @@ describe('useAddToExistingCase', () => {
         persistableStateAttachmentState: {
           attributes: kpiHostMetricLensAttributes,
           timeRange,
+          metadata: lensMetadata,
         },
         persistableStateAttachmentTypeId: '.lens',
         type: AttachmentType.persistableState as const,

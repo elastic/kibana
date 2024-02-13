@@ -28,7 +28,15 @@ export async function onComplete() {
 
   const report = await ciStats.getPrReport(process.env.CI_STATS_BUILD_ID);
   if (report?.md) {
-    buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
+    // buildkite has a metadata size limit of 100kb, so we only add this, if it's small enough
+    if (new Blob([report.md]).size < 100000) {
+      buildkite.setMetadata('pr_comment:ci_stats_report:body', report.md);
+    } else {
+      buildkite.setMetadata(
+        'pr_comment:ci_stats_report:body',
+        'The CI Stats report is too large to be displayed here, check out the CI build annotation for this information.'
+      );
+    }
 
     const annotationType = report?.success ? 'info' : 'error';
     buildkite.setAnnotation('ci-stats-report', annotationType, report.md);

@@ -6,7 +6,7 @@
  */
 
 import React, { FC } from 'react';
-import { Chart, Settings, TooltipType, Tooltip } from '@elastic/charts';
+import { Chart, Settings, TooltipType, Tooltip, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { ModelItem, Anomaly } from '../../../../common/results_loader';
 import { Anomalies } from '../common/anomalies';
@@ -50,7 +50,8 @@ export const AnomalyChart: FC<Props> = ({
         <Chart>
           <Tooltip type={TooltipType.None} />
           <Settings
-            // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             xDomain={xDomain}
             locale={i18n.getLocale()}
           />

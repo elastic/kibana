@@ -30,11 +30,12 @@ import {
 import { FormattedDate, FormattedTime } from '@kbn/i18n-react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import { DASHBOARD_COMPLIANCE_SCORE_CHART } from '../test_subjects';
 import { statusColors } from '../../../common/constants';
 import { RULE_FAILED, RULE_PASSED } from '../../../../common/constants';
 import { CompactFormattedNumber } from '../../../components/compact_formatted_number';
-import type { Evaluation, PostureTrend, Stats } from '../../../../common/types';
+import type { Evaluation, PostureTrend, Stats } from '../../../../common/types_old';
 import { useKibana } from '../../../common/hooks/use_kibana';
 
 interface ComplianceScoreChartProps {
@@ -45,7 +46,125 @@ interface ComplianceScoreChartProps {
   onEvalCounterClick: (evaluation: Evaluation) => void;
 }
 
-const getPostureScorePercentage = (postureScore: number): string => `${Math.round(postureScore)}%`;
+const CounterButtonLink = ({
+  text,
+  count,
+  color,
+  onClick,
+}: {
+  count: number;
+  text: string;
+  color: EuiTextProps['color'];
+  onClick: EuiLinkButtonProps['onClick'];
+}) => {
+  const { euiTheme } = useEuiTheme();
+
+  return (
+    <>
+      <EuiText
+        size="s"
+        style={{
+          fontWeight: euiTheme.font.weight.bold,
+          marginBottom: euiTheme.size.xs,
+        }}
+      >
+        {text}
+      </EuiText>
+
+      <EuiLink
+        color="text"
+        onClick={onClick}
+        css={css`
+          display: flex;
+          &:hover {
+            text-decoration: none;
+          }
+        `}
+      >
+        <EuiText
+          color={color}
+          css={css`
+            &:hover {
+              border-bottom: 2px solid ${color};
+              padding-bottom: 4px;
+            }
+          `}
+          style={{ fontWeight: euiTheme.font.weight.medium, fontSize: '18px' }}
+          size="s"
+        >
+          <CompactFormattedNumber number={count} abbreviateAbove={999} />
+          &nbsp;
+        </EuiText>
+      </EuiLink>
+    </>
+  );
+};
+
+const CompactPercentageLabels = ({
+  onEvalCounterClick,
+  stats,
+}: {
+  onEvalCounterClick: (evaluation: Evaluation) => void;
+  stats: { totalPassed: number; totalFailed: number };
+}) => (
+  <>
+    <CounterLink
+      text="passed"
+      count={stats.totalPassed}
+      color={statusColors.passed}
+      onClick={() => onEvalCounterClick(RULE_PASSED)}
+      tooltipContent={i18n.translate(
+        'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
+        { defaultMessage: 'Passed findings' }
+      )}
+    />
+    <EuiText size="s">&nbsp;-&nbsp;</EuiText>
+    <CounterLink
+      text="failed"
+      count={stats.totalFailed}
+      color={statusColors.failed}
+      onClick={() => onEvalCounterClick(RULE_FAILED)}
+      tooltipContent={i18n.translate(
+        'xpack.csp.complianceScoreChart.counterButtonLink.failedFindingsTooltip',
+        { defaultMessage: 'Failed findings' }
+      )}
+    />
+  </>
+);
+
+const PercentageLabels = ({
+  onEvalCounterClick,
+  stats,
+}: {
+  onEvalCounterClick: (evaluation: Evaluation) => void;
+  stats: { totalPassed: number; totalFailed: number };
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const borderLeftStyles = { borderLeft: euiTheme.border.thin, paddingLeft: euiTheme.size.m };
+  return (
+    <EuiFlexGroup gutterSize="l" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false} style={borderLeftStyles}>
+        <CounterButtonLink
+          text="Passed Findings"
+          count={stats.totalPassed}
+          color={statusColors.passed}
+          onClick={() => onEvalCounterClick(RULE_PASSED)}
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false} style={borderLeftStyles}>
+        <CounterButtonLink
+          text="Failed Findings"
+          count={stats.totalFailed}
+          color={statusColors.failed}
+          onClick={() => onEvalCounterClick(RULE_FAILED)}
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
+
+export const getPostureScorePercentage = (postureScore: number): string =>
+  `${Math.round(postureScore)}%`;
 
 const PercentageInfo = ({
   compact,
@@ -91,7 +210,6 @@ const ComplianceTrendChart = ({ trend }: { trend: PostureTrend[] }) => {
         )}
       />
       <Settings
-        theme={charts.theme.useChartsTheme()}
         baseTheme={charts.theme.useChartsBaseTheme()}
         showLegend={false}
         legendPosition="right"
@@ -177,27 +295,17 @@ export const ComplianceScoreChart = ({
               alignItems="flexStart"
               style={{ paddingRight: euiTheme.size.xl }}
             >
-              <CounterLink
-                text="passed"
-                count={data.totalPassed}
-                color={statusColors.passed}
-                onClick={() => onEvalCounterClick(RULE_PASSED)}
-                tooltipContent={i18n.translate(
-                  'xpack.csp.complianceScoreChart.counterLink.passedFindingsTooltip',
-                  { defaultMessage: 'Passed findings' }
-                )}
-              />
-              <EuiText size="s">&nbsp;-&nbsp;</EuiText>
-              <CounterLink
-                text="failed"
-                count={data.totalFailed}
-                color={statusColors.failed}
-                onClick={() => onEvalCounterClick(RULE_FAILED)}
-                tooltipContent={i18n.translate(
-                  'xpack.csp.complianceScoreChart.counterLink.failedFindingsTooltip',
-                  { defaultMessage: 'Failed findings' }
-                )}
-              />
+              {compact ? (
+                <CompactPercentageLabels
+                  stats={{ totalPassed: data.totalPassed, totalFailed: data.totalFailed }}
+                  onEvalCounterClick={onEvalCounterClick}
+                />
+              ) : (
+                <PercentageLabels
+                  stats={{ totalPassed: data.totalPassed, totalFailed: data.totalFailed }}
+                  onEvalCounterClick={onEvalCounterClick}
+                />
+              )}
             </EuiFlexGroup>
           </EuiFlexItem>
         </EuiFlexGroup>

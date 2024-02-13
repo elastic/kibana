@@ -46,7 +46,8 @@ describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  describe('Favorite Timelines', () => {
+  // https://github.com/elastic/kibana/issues/173168
+  describe('Favorite Timelines', { tags: ['@brokenInServerless'] }, () => {
     it('should appear on overview page', () => {
       createTimeline(getTimeline())
         .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)

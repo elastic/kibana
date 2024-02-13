@@ -9,15 +9,12 @@ import React from 'react';
 import {
   EuiFlexGroupProps,
   EuiFlexGroup,
-  EuiHorizontalRule,
   EuiFlexItem,
   EuiLink,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
-  EuiCallOut,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { AnnotationsContextProvider } from '../../../../context/annotations/annotations_context';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
@@ -37,6 +34,7 @@ import { useFiltersForEmbeddableCharts } from '../../../../hooks/use_filters_for
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 import { MobileStats } from './stats/stats';
 import { MobileLocationStats } from './stats/location_stats';
+import { useAdHocApmDataView } from '../../../../hooks/use_adhoc_apm_data_view';
 /**
  * The height a chart should be if it's next to a table with 5 rows and a title.
  * Add the height of the pagination row.
@@ -46,6 +44,7 @@ export const chartHeight = 288;
 export function MobileServiceOverview() {
   const { serviceName } = useApmServiceContext();
   const router = useApmRouter();
+  const { dataView } = useAdHocApmDataView();
 
   const {
     query,
@@ -109,45 +108,6 @@ export function MobileServiceOverview() {
       <ChartPointerEventContextProvider>
         <EuiFlexGroup direction="column" gutterSize="s">
           <EuiFlexItem>
-            <EuiHorizontalRule />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.apm.serviceOverview.mobileCallOutTitle',
-                {
-                  defaultMessage: 'Mobile APM',
-                }
-              )}
-              iconType="mobile"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.apm.serviceOverview.mobileCallOutText"
-                  defaultMessage="This is a mobile service, which is currently released as a technical
-            preview. You can help us improve the experience by giving feedback. {feedbackLink}."
-                  values={{
-                    feedbackLink: (
-                      <EuiLink
-                        target={'_blank'}
-                        data-test-subj="apmMobileServiceOverviewGiveFeedbackLink"
-                        href="https://ela.st/feedback-apm-mobile"
-                      >
-                        {i18n.translate(
-                          'xpack.apm.serviceOverview.mobileCallOutLink',
-                          {
-                            defaultMessage: 'Give feedback',
-                          }
-                        )}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </p>
-            </EuiCallOut>
-            <EuiSpacer size="s" />
-          </EuiFlexItem>
-          <EuiFlexItem>
             <MobileStats
               start={start}
               end={end}
@@ -157,16 +117,17 @@ export function MobileServiceOverview() {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <EuiFlexGroup>
+              <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem grow={8}>
                   <GeoMap
                     start={start}
                     end={end}
                     kuery={kueryWithMobileFilters}
                     filters={embeddableFilters}
+                    dataView={dataView}
                   />
                 </EuiFlexItem>
-                <EuiFlexItem grow={4}>
+                <EuiFlexItem grow={3}>
                   <MobileLocationStats
                     start={start}
                     end={end}
@@ -232,7 +193,6 @@ export function MobileServiceOverview() {
                     kuery={kueryWithMobileFilters}
                     environment={environment}
                     fixedHeight={true}
-                    isSingleColumn={isSingleColumn}
                     start={start}
                     end={end}
                     showPerPageOptions={false}

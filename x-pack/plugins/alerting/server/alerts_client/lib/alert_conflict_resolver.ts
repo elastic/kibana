@@ -23,6 +23,7 @@ import {
 } from '@kbn/rule-data-utils';
 
 import { zip, get } from 'lodash';
+import { sanitizeBulkErrorResponse } from '../..';
 
 // these fields are the one's we'll refresh from the fresh mget'd docs
 const REFRESH_FIELDS_ALWAYS = [ALERT_WORKFLOW_STATUS, ALERT_WORKFLOW_TAGS, ALERT_CASE_IDS];
@@ -269,8 +270,9 @@ interface ResponseStatsResult {
 
 // generate a summary of the original bulk request attempt, for logging
 function getResponseStats(bulkResponse: BulkResponse): ResponseStatsResult {
+  const sanitizedResponse = sanitizeBulkErrorResponse(bulkResponse) as BulkResponse;
   const stats: ResponseStatsResult = { success: 0, conflicts: 0, errors: 0, messages: [] };
-  for (const item of bulkResponse.items) {
+  for (const item of sanitizedResponse.items) {
     const op = item.create || item.index || item.update || item.delete;
     if (op?.error) {
       if (op?.status === 409 && op === item.index) {

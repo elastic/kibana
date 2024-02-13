@@ -15,6 +15,7 @@ import {
   RectAnnotation,
   Settings,
   Tooltip,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -66,7 +67,7 @@ export function ExpressionChart({
   timeRange,
   timeFieldName,
 }: Props) {
-  const { charts, uiSettings } = useKibana().services;
+  const { charts, uiSettings, theme } = useKibana().services;
   const { isLoading, data } = useExpressionChartData(
     expression,
     derivedIndexPattern,
@@ -89,7 +90,7 @@ export function ExpressionChart({
     return <NoDataState />;
   }
 
-  const isDarkMode = uiSettings?.get('theme:darkMode') || false;
+  const isDarkMode = theme?.getTheme().darkMode ?? false;
   const firstSeries = first(first(data.pages)!.series);
   // Creating a custom series where the ID is changed to 0
   // so that we can get a proper domain
@@ -192,6 +193,8 @@ export function ExpressionChart({
               tooltip: { visible: true },
             }}
             theme={getChartTheme(isDarkMode)}
+            // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+            baseTheme={LEGACY_LIGHT_THEME}
             locale={i18n.getLocale()}
           />
         </Chart>

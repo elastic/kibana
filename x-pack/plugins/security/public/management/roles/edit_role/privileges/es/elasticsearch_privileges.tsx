@@ -24,8 +24,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { ClusterPrivileges } from './cluster_privileges';
 import { IndexPrivileges } from './index_privileges';
-import type { SecurityLicense } from '../../../../../../common/licensing';
-import type { BuiltinESPrivileges, Role } from '../../../../../../common/model';
+import type { BuiltinESPrivileges, Role, SecurityLicense } from '../../../../../../common';
 import type { IndicesAPIClient } from '../../../indices_api_client';
 import { CollapsiblePanel } from '../../collapsible_panel';
 import type { RoleValidator } from '../../validate_role';
@@ -43,6 +42,7 @@ interface Props {
   indexPatterns: string[];
   remoteClusters?: Cluster[];
   canUseRemoteIndices?: boolean;
+  isDarkMode?: boolean;
 }
 
 export class ElasticsearchPrivileges extends Component<Props, {}> {
@@ -174,6 +174,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
           onChange={onChange}
           availableIndexPrivileges={builtinESPrivileges.index}
           editable={editable}
+          isDarkMode={this.props.isDarkMode}
         />
 
         {canUseRemoteIndices && (
@@ -209,6 +210,7 @@ export class ElasticsearchPrivileges extends Component<Props, {}> {
               onChange={onChange}
               availableIndexPrivileges={builtinESPrivileges.index}
               editable={editable}
+              isDarkMode={this.props.isDarkMode}
             />
           </>
         )}

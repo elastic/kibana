@@ -6,8 +6,14 @@
  * Side Public License, v 1.
  */
 
-export interface NoDataPagePluginSetup {
+export interface NoDataPagePublicSetup {
   getAnalyticsNoDataPageFlavor: () => 'kibana' | 'serverless_search' | 'serverless_observability';
 }
 
-export type NoDataPagePluginStart = NoDataPagePluginSetup;
+export type NoDataPagePublicStart = NoDataPagePublicSetup;
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface NoDataPagePublicSetupDependencies {}
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface NoDataPagePublicStartDependencies {}

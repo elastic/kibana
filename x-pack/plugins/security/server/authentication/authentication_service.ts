@@ -16,6 +16,10 @@ import type {
   LoggerFactory,
 } from '@kbn/core/server';
 import type { KibanaFeature } from '@kbn/features-plugin/server';
+import type {
+  AuditServiceSetup,
+  AuthenticationServiceStart,
+} from '@kbn/security-plugin-types-server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import { APIKeys } from './api_keys';
@@ -28,7 +32,6 @@ import { renderUnauthenticatedPage } from './unauthenticated_page';
 import type { AuthenticatedUser, SecurityLicense } from '../../common';
 import { NEXT_URL_QUERY_STRING_PARAMETER } from '../../common/constants';
 import { shouldProviderUseLoginForm } from '../../common/model';
-import type { AuditServiceSetup } from '../audit';
 import type { ConfigType } from '../config';
 import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
@@ -37,12 +40,14 @@ import type { Session } from '../session_management';
 import type { UserProfileServiceStartInternal } from '../user_profile';
 
 interface AuthenticationServiceSetupParams {
-  http: Pick<HttpServiceSetup, 'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse'>;
+  http: Pick<
+    HttpServiceSetup,
+    'basePath' | 'csp' | 'registerAuth' | 'registerOnPreResponse' | 'staticAssets'
+  >;
   customBranding: CustomBrandingSetup;
   elasticsearch: Pick<ElasticsearchServiceSetup, 'setUnauthorizedErrorHandler'>;
   config: ConfigType;
   license: SecurityLicense;
-  buildNumber: number;
 }
 
 interface AuthenticationServiceStartParams {
@@ -78,23 +83,6 @@ export interface InternalAuthenticationServiceStart extends AuthenticationServic
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
 }
 
-/**
- * Authentication services available on the security plugin's start contract.
- */
-export interface AuthenticationServiceStart {
-  apiKeys: Pick<
-    APIKeys,
-    | 'areAPIKeysEnabled'
-    | 'areCrossClusterAPIKeysEnabled'
-    | 'create'
-    | 'invalidate'
-    | 'validate'
-    | 'grantAsInternalUser'
-    | 'invalidateAsInternalUser'
-  >;
-  getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
-}
-
 export class AuthenticationService {
   private license!: SecurityLicense;
   private authenticator?: Authenticator;
@@ -106,7 +94,6 @@ export class AuthenticationService {
     config,
     http,
     license,
-    buildNumber,
     elasticsearch,
     customBranding,
   }: AuthenticationServiceSetupParams) {
@@ -218,8 +205,8 @@ export class AuthenticationService {
         });
         return toolkit.render({
           body: renderUnauthenticatedPage({
-            buildNumber,
             basePath: http.basePath,
+            staticAssets: http.staticAssets,
             originalURL,
             customBranding: customBrandingValue,
           }),

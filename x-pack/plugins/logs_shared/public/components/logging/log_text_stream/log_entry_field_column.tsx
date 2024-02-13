@@ -19,7 +19,7 @@ import {
   WrapMode,
 } from './text_styles';
 
-interface LogEntryFieldColumnProps {
+export interface LogEntryFieldColumnProps {
   columnValue: LogColumn;
   highlights: LogColumn[];
   isActiveHighlight: boolean;

@@ -141,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         [SPACE_IDS]: ['default'],
         ['kibana.alert.title']: "rule 'always fire' matched query",
         ['kibana.alert.evaluation.conditions']: 'Number of matching documents is greater than -1',
+        ['kibana.alert.evaluation.threshold']: -1,
         ['kibana.alert.evaluation.value']: '0',
         [ALERT_ACTION_GROUP]: 'query matched',
         [ALERT_FLAPPING]: false,

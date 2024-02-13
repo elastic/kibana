@@ -65,6 +65,7 @@ import { getRenderCustomToolbarWithElements } from '../../../../components/disco
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
+import { useDiscoverCustomization } from '../../../../customizations';
 
 const containerStyles = css`
   position: relative;
@@ -254,6 +255,12 @@ function DiscoverDocumentsComponent({
     [dataView, onAddColumn, onAddFilter, onRemoveColumn, query, savedSearch.id, setExpandedDoc]
   );
 
+  const {
+    customCellRenderer: externalCustomRenderers,
+    customGridColumnsConfiguration,
+    customControlColumnsConfiguration,
+  } = useDiscoverCustomization('data_table') || {};
+
   const documents = useObservable(stateContainer.dataState.data$.documents$);
 
   const callouts = useMemo(
@@ -419,6 +426,10 @@ function DiscoverDocumentsComponent({
                   totalHits={totalHits}
                   onFetchMoreRecords={onFetchMoreRecords}
                   componentsTourSteps={TOUR_STEPS}
+                  headerRowHeight={3}
+                  externalCustomRenderers={externalCustomRenderers}
+                  customGridColumnsConfiguration={customGridColumnsConfiguration}
+                  customControlColumnsConfiguration={customControlColumnsConfiguration}
                 />
               </CellActionsProvider>
             </div>

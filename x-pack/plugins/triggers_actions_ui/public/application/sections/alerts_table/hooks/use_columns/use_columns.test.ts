@@ -14,8 +14,15 @@ import { useColumns, UseColumnsArgs, UseColumnsResp } from './use_columns';
 import { useFetchBrowserFieldCapabilities } from '../use_fetch_browser_fields_capabilities';
 import { BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { AlertsTableStorage } from '../../alerts_table_state';
+import { createStartServicesMock } from '../../../../../common/lib/kibana/kibana_react.mock';
 
-jest.mock('../../../../../common/lib/kibana');
+const mockUseKibanaReturnValue = createStartServicesMock();
+jest.mock('../../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockUseKibanaReturnValue,
+  })),
+}));
 jest.mock('../use_fetch_browser_fields_capabilities');
 
 const setItemStorageMock = jest.fn();

@@ -10,7 +10,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { RISK_SCORE_DELETE_INDICES } from '../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../types';
 import { deleteEsIndices } from './lib/delete_indices';
-import { deleteIndicesRequestBody } from '../../../../common/api/risk_score';
+import { deleteIndicesRequestBody } from '../../../../common/api/entity_analytics/risk_score';
 
 export const deleteEsIndicesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned

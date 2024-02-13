@@ -28,6 +28,30 @@ export function getIndexPatternSavedObjects() {
   }));
 }
 
+export async function makeManagedIndexPatternsGlobal(
+  savedObjectsClient: SavedObjectsClientContract
+) {
+  const logger = appContextService.getLogger();
+
+  const results = [];
+
+  for (const indexPatternType of indexPatternTypes) {
+    try {
+      const result = await savedObjectsClient.updateObjectsSpaces(
+        [{ id: `${indexPatternType}-*`, type: INDEX_PATTERN_SAVED_OBJECT_TYPE }],
+        ['*'],
+        []
+      );
+
+      results.push(result);
+    } catch (error) {
+      logger.error(`Error making managed index patterns global: ${error.message}`);
+    }
+  }
+
+  return results;
+}
+
 export async function removeUnusedIndexPatterns(savedObjectsClient: SavedObjectsClientContract) {
   const logger = appContextService.getLogger();
   // get all user installed packages

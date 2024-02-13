@@ -17,7 +17,7 @@
       "uiActionsEnhanced",
       "visualizations"
     ],
-    "optionalPlugins": ["triggersActionsUi"],
+    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
     "requiredBundles": ["savedObjects"]
   }
 }

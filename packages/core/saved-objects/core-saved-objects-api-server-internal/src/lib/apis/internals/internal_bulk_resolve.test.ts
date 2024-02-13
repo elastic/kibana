@@ -26,12 +26,9 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 import { internalBulkResolve, type InternalBulkResolveParams } from './internal_bulk_resolve';
 import { normalizeNamespace } from '../utils';
 import {
-  type ISavedObjectsEncryptionExtension,
   type ISavedObjectsSecurityExtension,
-  type ISavedObjectTypeRegistry,
   type SavedObject,
   SavedObjectsErrorHelpers,
-  type SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import {
   enforceError,
@@ -39,7 +36,7 @@ import {
   setupAuthorizeAndRedactInternalBulkResolveSuccess,
 } from '../../../test_helpers/repository.test.common';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
-import { kibanaMigratorMock } from '../../../mocks';
+import { apiContextMock, type ApiExecutionContextMock } from '../../../mocks';
 
 const VERSION_PROPS = { _seq_no: 1, _primary_term: 1 };
 const OBJ_TYPE = 'obj-type';
@@ -59,35 +56,38 @@ beforeEach(() => {
 
 describe('internalBulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let migrator: ReturnType<typeof kibanaMigratorMock.create>;
-  let serializer: SavedObjectsSerializer;
   let incrementCounterInternal: jest.Mock<any, any>;
-  let registry: jest.Mocked<ISavedObjectTypeRegistry>;
+  let serializer: SavedObjectsSerializer;
+  let apiContext: ApiExecutionContextMock;
+
+  beforeEach(() => {
+    apiContext = apiContextMock.create({ allowedTypes: [OBJ_TYPE, ENCRYPTED_TYPE] });
+
+    apiContext.helpers.common.getIndexForType.mockImplementation(
+      (type: string) => `index-for-${type}`
+    );
+
+    apiContext.helpers.migration.migrateAndDecryptStorageDocument.mockImplementation(
+      ({ document }) => Promise.resolve(document as SavedObject)
+    );
+
+    apiContext.extensions = {} as unknown as typeof apiContext.extensions;
+
+    client = apiContext.client;
+
+    const registry = typeRegistryMock.create();
+    serializer = new SavedObjectsSerializer(registry);
+    apiContext.serializer = serializer as unknown as typeof apiContext.serializer;
+  });
 
   /** Sets up the type registry, saved objects client, etc. and return the full parameters object to be passed to `internalBulkResolve` */
   function setup(
     objects: SavedObjectsBulkResolveObject[],
-    options: SavedObjectsBaseOptions = {},
-    extensions?: {
-      encryptionExt?: ISavedObjectsEncryptionExtension;
-      securityExt?: ISavedObjectsSecurityExtension;
-    }
+    options: SavedObjectsBaseOptions = {}
   ): InternalBulkResolveParams {
-    registry = typeRegistryMock.create();
-    client = elasticsearchClientMock.createElasticsearchClient();
-    migrator = kibanaMigratorMock.create();
-    serializer = new SavedObjectsSerializer(registry);
     incrementCounterInternal = jest.fn().mockRejectedValue(new Error('increment error')); // mock error to implicitly test that it is caught and swallowed
     return {
-      registry,
-      allowedTypes: [OBJ_TYPE, ENCRYPTED_TYPE],
-      migrator,
-      client,
-      serializer,
-      getIndexForType: (type: string) => `index-for-${type}`,
       incrementCounterInternal,
-      encryptionExtension: extensions?.encryptionExt,
-      securityExtension: extensions?.securityExt,
       objects,
       options,
     };
@@ -242,7 +242,7 @@ describe('internalBulkResolve', () => {
       );
       mockIsNotFoundFromUnsupportedServer.mockReturnValue(true);
 
-      await expect(() => internalBulkResolve(params)).rejects.toThrow(
+      await expect(() => internalBulkResolve(params, apiContext)).rejects.toThrow(
         SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError()
       );
       expect(client.bulk).toHaveBeenCalledTimes(1);
@@ -252,7 +252,7 @@ describe('internalBulkResolve', () => {
     it('returns an empty array if no object args are passed in', async () => {
       const params = setup([], { namespace });
 
-      const result = await internalBulkResolve(params);
+      const result = await internalBulkResolve(params, apiContext);
       expect(client.bulk).not.toHaveBeenCalled();
       expect(client.mget).not.toHaveBeenCalled();
       expect(result.resolved_objects).toEqual([]);
@@ -262,7 +262,7 @@ describe('internalBulkResolve', () => {
       const objects = [{ type: UNSUPPORTED_TYPE, id: '1' }];
       const params = setup(objects, { namespace });
 
-      const result = await internalBulkResolve(params);
+      const result = await internalBulkResolve(params, apiContext);
       expect(client.bulk).not.toHaveBeenCalled();
       expect(client.mget).not.toHaveBeenCalled();
       expect(result.resolved_objects).toEqual([expectUnsupportedTypeError({ id: '1' })]);
@@ -289,7 +289,7 @@ describe('internalBulkResolve', () => {
       );
       mockRawDocExistsInNamespace.mockReturnValue(false); // for objs 3 and 3-newId
 
-      const result = await internalBulkResolve(params);
+      const result = await internalBulkResolve(params, apiContext);
       expectBulkArgs(expectedNamespaceString, ['1', '2', '3']);
       expectMgetArgs(namespace, ['1', '2', '2-newId', '3', '3-newId']);
       expect(mockRawDocExistsInNamespace).toHaveBeenCalledTimes(2); // for objs 3 and 3-newId
@@ -311,7 +311,7 @@ describe('internalBulkResolve', () => {
         // does not attempt to fetch obj 1-newId, because that alias is disabled
       );
 
-      const result = await internalBulkResolve(params);
+      const result = await internalBulkResolve(params, apiContext);
       expectBulkArgs(expectedNamespaceString, ['1']);
       expectMgetArgs(namespace, ['1']);
       expect(result.resolved_objects).toEqual([
@@ -352,7 +352,7 @@ describe('internalBulkResolve', () => {
         { found: true } // fetch obj 7-newId
       );
 
-      const result = await internalBulkResolve(params);
+      const result = await internalBulkResolve(params, apiContext);
       const bulkIds = ['2', '3', '4', '5', '6', '7'];
       expectBulkArgs(expectedNamespaceString, bulkIds);
       const mgetIds = ['2', '3', '4', '4-newId', '5', '5-newId', '6', '6-newId', '7', '7-newId'];
@@ -368,7 +368,7 @@ describe('internalBulkResolve', () => {
       ]);
     });
 
-    it('migrates the resolved objects', async () => {
+    it('migrates and decrypts the resolved objects', async () => {
       const objects = [
         { type: OBJ_TYPE, id: '1' },
         { type: OBJ_TYPE, id: '2' },
@@ -376,81 +376,28 @@ describe('internalBulkResolve', () => {
       const params = setup(objects, { namespace });
       mockBulkResults({ found: false }, { found: false });
       mockMgetResults({ found: true }, { found: true });
-      migrator.migrateDocument.mockImplementation(
-        (doc) => `migrated-${doc}` as unknown as SavedObjectUnsanitizedDoc
+      const migrationHelper = apiContext.helpers.migration;
+      migrationHelper.migrateAndDecryptStorageDocument.mockImplementation(({ document }) =>
+        Promise.resolve(`migrated-${document}` as unknown as SavedObject)
       );
 
-      await expect(internalBulkResolve(params)).resolves.toHaveProperty('resolved_objects', [
-        expect.objectContaining({ saved_object: 'migrated-mock-obj-for-1' }),
-        expect.objectContaining({ saved_object: 'migrated-mock-obj-for-2' }),
-      ]);
-
-      expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
-      expect(migrator.migrateDocument).nthCalledWith(
-        1,
-        'mock-obj-for-1',
-        expect.objectContaining({ allowDowngrade: expect.any(Boolean) })
+      await expect(internalBulkResolve(params, apiContext)).resolves.toHaveProperty(
+        'resolved_objects',
+        [
+          expect.objectContaining({ saved_object: 'migrated-mock-obj-for-1' }),
+          expect.objectContaining({ saved_object: 'migrated-mock-obj-for-2' }),
+        ]
       );
-      expect(migrator.migrateDocument).nthCalledWith(2, 'mock-obj-for-2', {
-        allowDowngrade: expect.any(Boolean),
+
+      expect(migrationHelper.migrateAndDecryptStorageDocument).toHaveBeenCalledTimes(2);
+      expect(migrationHelper.migrateAndDecryptStorageDocument).nthCalledWith(1, {
+        document: 'mock-obj-for-1',
+        typeMap: undefined,
       });
-    });
-  });
-
-  describe('with encryption extension', () => {
-    const namespace = 'foo';
-
-    const attributes = {
-      attrNotSoSecret: '*not-so-secret*',
-      attrOne: 'one',
-      attrSecret: '*secret*',
-      attrThree: 'three',
-      title: 'Testing',
-    };
-
-    beforeEach(() => {
-      mockGetSavedObjectFromSource.mockImplementation((_registry, type, id) => {
-        return {
-          id,
-          type,
-          namespaces: [namespace],
-          attributes,
-          references: [],
-        } as SavedObject;
+      expect(migrationHelper.migrateAndDecryptStorageDocument).nthCalledWith(2, {
+        document: 'mock-obj-for-2',
+        typeMap: undefined,
       });
-    });
-
-    it('only attempts to decrypt and strip attributes for types that are encryptable', async () => {
-      const objects = [
-        { type: OBJ_TYPE, id: '11' }, // non encryptable type
-        { type: ENCRYPTED_TYPE, id: '12' }, // encryptable type
-      ];
-      const mockEncryptionExt = savedObjectsExtensionsMock.createEncryptionExtension();
-      const params = setup(objects, { namespace }, { encryptionExt: mockEncryptionExt });
-      mockBulkResults(
-        // No alias matches
-        { found: false },
-        { found: false }
-      );
-      mockMgetResults(
-        // exact matches
-        { found: true },
-        { found: true }
-      );
-
-      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(false);
-      mockEncryptionExt.isEncryptableType.mockReturnValueOnce(true);
-
-      await internalBulkResolve(params);
-
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledTimes(2);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(OBJ_TYPE);
-      expect(mockEncryptionExt.isEncryptableType).toBeCalledWith(ENCRYPTED_TYPE);
-
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledTimes(1);
-      expect(mockEncryptionExt.decryptOrStripResponseAttributes).toBeCalledWith(
-        expect.objectContaining({ type: ENCRYPTED_TYPE, id: '12', attributes })
-      );
     });
   });
 
@@ -487,7 +434,8 @@ describe('internalBulkResolve', () => {
       });
 
       mockSecurityExt = savedObjectsExtensionsMock.createSecurityExtension();
-      params = setup(objects, { namespace }, { securityExt: mockSecurityExt });
+      apiContext.extensions.securityExtension = mockSecurityExt;
+      params = setup(objects, { namespace });
 
       mockBulkResults(
         // No alias matches
@@ -503,14 +451,14 @@ describe('internalBulkResolve', () => {
 
     test(`propagates decorated error when unauthorized`, async () => {
       setupAuthorizeAndRedactInternalBulkResolveFailure(mockSecurityExt);
-      await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
+      await expect(internalBulkResolve(params, apiContext)).rejects.toThrow(enforceError);
       expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
     });
 
     test(`returns result when successful`, async () => {
       setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
 
-      const result = await internalBulkResolve(params);
+      const result = await internalBulkResolve(params, apiContext);
       expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
       const bulkIds = objects.map((obj) => obj.id);
@@ -524,7 +472,7 @@ describe('internalBulkResolve', () => {
     test(`returns empty array when no objects are provided`, async () => {
       setupAuthorizeAndRedactInternalBulkResolveSuccess(mockSecurityExt);
 
-      const result = await internalBulkResolve({ ...params, objects: [] });
+      const result = await internalBulkResolve({ ...params, objects: [] }, apiContext);
       expect(result).toEqual({ resolved_objects: [] });
       expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).not.toHaveBeenCalled();
     });
@@ -536,7 +484,7 @@ describe('internalBulkResolve', () => {
 
       test(`in the default space`, async () => {
         await expect(
-          internalBulkResolve({ ...params, options: { namespace: 'default' } })
+          internalBulkResolve({ ...params, options: { namespace: 'default' } }, apiContext)
         ).rejects.toThrow(enforceError);
         expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
@@ -547,7 +495,7 @@ describe('internalBulkResolve', () => {
       });
 
       test(`in a non-default space`, async () => {
-        await expect(internalBulkResolve(params)).rejects.toThrow(enforceError);
+        await expect(internalBulkResolve(params, apiContext)).rejects.toThrow(enforceError);
         expect(mockSecurityExt.authorizeAndRedactInternalBulkResolve).toHaveBeenCalledTimes(1);
 
         const { namespace: actualNamespace, objects: actualObjects } =

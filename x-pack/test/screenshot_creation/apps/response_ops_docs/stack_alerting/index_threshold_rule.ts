@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rule-types-index-threshold-conditions',
         screenshotDirectories,
         1400,
-        1024
+        1300
       );
 
       await testSubjects.scrollIntoView('selectIndexExpression');
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rule-types-index-threshold-example-aggregation',
         screenshotDirectories,
         1400,
-        1024
+        1300
       );
       await ofComboBox.type('bytes');
       const ofOptionsString = await comboBox.getOptionsList('availablefieldsOptionsComboBox');
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'rule-types-index-threshold-example-threshold',
         screenshotDirectories,
         1400,
-        1024
+        1300
       );
 
       await testSubjects.setValue('intervalInput', '4');

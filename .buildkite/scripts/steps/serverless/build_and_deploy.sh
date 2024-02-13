@@ -22,6 +22,7 @@ deploy() {
   esac
 
   PROJECT_NAME="kibana-pr-$BUILDKITE_PULL_REQUEST-$PROJECT_TYPE"
+  is_pr_with_label "ci:project-persist-deployment" && PROJECT_NAME="keep_$PROJECT_NAME"
   PROJECT_CREATE_CONFIGURATION='{
     "name": "'"$PROJECT_NAME"'",
     "region_id": "aws-eu-west-1",
@@ -59,6 +60,11 @@ deploy() {
       -XPOST -d "$PROJECT_CREATE_CONFIGURATION" &>> $DEPLOY_LOGS
 
     PROJECT_ID=$(jq -r --slurp '.[1].id' $DEPLOY_LOGS)
+    if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
+      echo "Failed to create project. Deploy logs:"
+      cat $DEPLOY_LOGS
+      exit 1
+    fi
 
     echo "Get credentials..."
     curl -s -XPOST -H "Authorization: ApiKey $PROJECT_API_KEY" \
@@ -72,7 +78,14 @@ deploy() {
     VAULT_SECRET_ID="$(retry 5 15 gcloud secrets versions access latest --secret=kibana-buildkite-vault-secret-id)"
     VAULT_TOKEN=$(retry 5 30 vault write -field=token auth/approle/login role_id="$VAULT_ROLE_ID" secret_id="$VAULT_SECRET_ID")
     retry 5 30 vault login -no-print "$VAULT_TOKEN"
-    retry 5 5 vault write "secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+
+    # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
+    if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+      vault_set "cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+    else
+      vault_kv_set "cloud-deploy/$PROJECT_NAME" username="$PROJECT_USERNAME" password="$PROJECT_PASSWORD" id="$PROJECT_ID"
+    fi
+
   else
     echo "Updating project..."
     curl -s \
@@ -86,6 +99,13 @@ deploy() {
   PROJECT_KIBANA_LOGIN_URL="${PROJECT_KIBANA_URL}/login"
   PROJECT_ELASTICSEARCH_URL=$(jq -r --slurp '.[1].endpoints.elasticsearch' $DEPLOY_LOGS)
 
+  # TODO: remove after https://github.com/elastic/kibana-operations/issues/15 is done
+  if [[ "$IS_LEGACY_VAULT_ADDR" == "true" ]]; then
+    VAULT_READ_COMMAND="vault read $VAULT_PATH_PREFIX/cloud-deploy/$PROJECT_NAME"
+  else
+    VAULT_READ_COMMAND="vault kv get $VAULT_KV_PREFIX/cloud-deploy/$PROJECT_NAME"
+  fi
+
   cat << EOF | buildkite-agent annotate --style "info" --context "project-$PROJECT_TYPE"
 ### $PROJECT_TYPE_LABEL Deployment
 
@@ -93,7 +113,7 @@ Kibana: $PROJECT_KIBANA_LOGIN_URL
 
 Elasticsearch: $PROJECT_ELASTICSEARCH_URL
 
-Credentials: \`vault read secret/kibana-issues/dev/cloud-deploy/$PROJECT_NAME\`
+Credentials: \`$VAULT_READ_COMMAND\`
 
 Kibana image: \`$KIBANA_IMAGE\`
 EOF
@@ -105,3 +125,5 @@ EOF
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
 is_pr_with_label "ci:project-deploy-observability" && deploy "observability"
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
+
+exit 0;

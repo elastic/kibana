@@ -309,7 +309,8 @@ describe('<FollowerIndicesList />', () => {
       });
     });
 
-    describe('detail panel', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/142774
+    describe.skip('detail panel', () => {
       test('should open a detail panel when clicking on a follower index', async () => {
         expect(exists('followerIndexDetail')).toBe(false);
 

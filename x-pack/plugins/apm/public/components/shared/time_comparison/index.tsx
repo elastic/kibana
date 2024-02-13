@@ -36,7 +36,7 @@ const PrependContainer = euiStyled.div`
 export function TimeComparison() {
   const trackApmEvent = useUiTracker({ app: 'apm' });
   const history = useHistory();
-  const { isSmall } = useBreakpoints();
+  const { isSmall, isMedium } = useBreakpoints();
   const {
     query: { rangeFrom, rangeTo, comparisonEnabled, offset },
   } = useAnyOfApmParams(
@@ -113,7 +113,7 @@ export function TimeComparison() {
 
   return (
     <EuiSelect
-      fullWidth={isSmall}
+      fullWidth={isSmall || isMedium}
       data-test-subj="comparisonSelect"
       disabled={comparisonEnabled === false}
       options={comparisonOptions}

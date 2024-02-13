@@ -6,7 +6,6 @@
  */
 
 import { calculateAuto } from '@kbn/calculate-auto';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALL_VALUE,
@@ -20,6 +19,9 @@ import {
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
+import { ElasticsearchClient } from '@kbn/core/server';
+import { estypes } from '@elastic/elasticsearch';
+import { typedSearch } from '../../utils/queries';
 import { APMTransactionDurationIndicator } from '../../domain/models';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';
@@ -43,7 +45,7 @@ export class GetPreviewData {
     indicator: APMTransactionDurationIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
-    const filter = [];
+    const filter: estypes.QueryDslQueryContainer[] = [];
     if (indicator.params.service !== ALL_VALUE)
       filter.push({
         match: { 'service.name': indicator.params.service },
@@ -61,11 +63,11 @@ export class GetPreviewData {
         match: { 'transaction.type': indicator.params.transactionType },
       });
     if (!!indicator.params.filter)
-      filter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+      filter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
 
     const truncatedThreshold = Math.trunc(indicator.params.threshold * 1000);
 
-    const result = await this.esClient.search({
+    const result = await typedSearch(this.esClient, {
       index: indicator.params.index,
       size: 0,
       query: {
@@ -84,18 +86,23 @@ export class GetPreviewData {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             _good: {
               range: {
                 field: 'transaction.duration.histogram',
-                ranges: [{ to: truncatedThreshold }],
+                keyed: true,
+                ranges: [{ to: truncatedThreshold, key: 'target' }],
               },
             },
             good: {
               bucket_script: {
                 buckets_path: {
-                  _good: `_good['*-${truncatedThreshold}.0']>_count`,
+                  _good: `_good['target']>_count`,
                 },
                 script: 'params._good',
               },
@@ -110,17 +117,21 @@ export class GetPreviewData {
       },
     });
 
-    // @ts-ignore buckets is not improperly typed
-    return result.aggregations?.perMinute.buckets.map((bucket) => ({
-      date: bucket.key_as_string,
-      sliValue:
-        !!bucket.good && !!bucket.total ? computeSLI(bucket.good.value, bucket.total.value) : null,
-      events: {
-        good: bucket.good?.value ?? 0,
-        bad: (bucket.total?.value ?? 0) - (bucket.good?.value ?? 0),
-        total: bucket.total?.value ?? 0,
-      },
-    }));
+    return (
+      result.aggregations?.perMinute.buckets.map((bucket) => {
+        const good = (bucket.good?.value as number) ?? 0;
+        const total = bucket.total?.value ?? 0;
+        return {
+          date: bucket.key_as_string,
+          sliValue: computeSLI(good, total),
+          events: {
+            good,
+            total,
+            bad: total - good,
+          },
+        };
+      }) ?? []
+    );
   }
 
   private async getAPMTransactionErrorPreviewData(
@@ -145,7 +156,7 @@ export class GetPreviewData {
         match: { 'transaction.type': indicator.params.transactionType },
       });
     if (!!indicator.params.filter)
-      filter.push(getElastichsearchQueryOrThrow(indicator.params.filter));
+      filter.push(getElasticsearchQueryOrThrow(indicator.params.filter));
 
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -165,6 +176,10 @@ export class GetPreviewData {
           date_histogram: {
             field: '@timestamp',
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             good: {
@@ -208,7 +223,7 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const getHistogramIndicatorAggregations = new GetHistogramIndicatorAggregation(indicator);
-    const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
     const timestampField = indicator.params.timestampField;
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -226,6 +241,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             ...getHistogramIndicatorAggregations.execute({
@@ -259,7 +278,7 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const timestampField = indicator.params.timestampField;
-    const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
     const getCustomMetricIndicatorAggregation = new GetCustomMetricIndicatorAggregation(indicator);
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -277,6 +296,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             ...getCustomMetricIndicatorAggregation.execute({
@@ -310,7 +333,7 @@ export class GetPreviewData {
     options: Options
   ): Promise<GetPreviewDataResponse> {
     const timestampField = indicator.params.timestampField;
-    const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
     const getCustomMetricIndicatorAggregation = new GetTimesliceMetricIndicatorAggregation(
       indicator
     );
@@ -330,6 +353,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             ...getCustomMetricIndicatorAggregation.execute('metric'),
@@ -349,9 +376,9 @@ export class GetPreviewData {
     indicator: KQLCustomIndicator,
     options: Options
   ): Promise<GetPreviewDataResponse> {
-    const filterQuery = getElastichsearchQueryOrThrow(indicator.params.filter);
-    const goodQuery = getElastichsearchQueryOrThrow(indicator.params.good);
-    const totalQuery = getElastichsearchQueryOrThrow(indicator.params.total);
+    const filterQuery = getElasticsearchQueryOrThrow(indicator.params.filter);
+    const goodQuery = getElasticsearchQueryOrThrow(indicator.params.good);
+    const totalQuery = getElasticsearchQueryOrThrow(indicator.params.total);
     const timestampField = indicator.params.timestampField;
     const result = await this.esClient.search({
       index: indicator.params.index,
@@ -369,6 +396,10 @@ export class GetPreviewData {
           date_histogram: {
             field: timestampField,
             fixed_interval: options.interval,
+            extended_bounds: {
+              min: options.range.start,
+              max: options.range.end,
+            },
           },
           aggs: {
             good: { filter: goodQuery },
@@ -395,12 +426,21 @@ export class GetPreviewData {
 
   public async execute(params: GetPreviewDataParams): Promise<GetPreviewDataResponse> {
     try {
-      const bucketSize = Math.max(
-        calculateAuto
-          .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
-          ?.asMinutes() ?? 0,
-        1
-      );
+      // If the time range is 24h or less, then we want to use a 1m bucket for the
+      // Timeslice metric so that the chart is as close to the evaluation as possible.
+      // Otherwise due to how the statistics work, the values might not look like
+      // they've breached the threshold.
+      const bucketSize =
+        params.indicator.type === 'sli.metric.timeslice' &&
+        params.range.end - params.range.start <= 86_400_000 &&
+        params.objective?.timesliceWindow
+          ? params.objective.timesliceWindow.asMinutes()
+          : Math.max(
+              calculateAuto
+                .near(100, moment.duration(params.range.end - params.range.start, 'ms'))
+                ?.asMinutes() ?? 0,
+              1
+            );
       const options: Options = {
         range: params.range,
         interval: `${bucketSize}m`,
@@ -429,7 +469,7 @@ export class GetPreviewData {
   }
 }
 
-function getElastichsearchQueryOrThrow(kuery: string | undefined = '') {
+function getElasticsearchQueryOrThrow(kuery: string | undefined = '') {
   try {
     return toElasticsearchQuery(fromKueryExpression(kuery));
   } catch (err) {

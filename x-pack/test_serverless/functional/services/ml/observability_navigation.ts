@@ -16,10 +16,10 @@ export function MachineLearningNavigationProviderObservability({
 
   async function navigateToArea(id: string) {
     await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops');
-    await testSubjects.existOrFail(`~nav-item-id-observability_project_nav.aiops.ml:${id}`, {
+    await testSubjects.existOrFail(`~nav-item-observability_project_nav.aiops.ml:${id}`, {
       timeout: 60 * 1000,
     });
-    await testSubjects.click(`~nav-item-id-observability_project_nav.aiops.ml:${id}`);
+    await testSubjects.click(`~nav-item-observability_project_nav.aiops.ml:${id}`);
   }
 
   return {

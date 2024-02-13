@@ -13,7 +13,7 @@ export {
   metrics,
 } from './inventory_models';
 
-export { podSnapshotMetricTypes } from './inventory_models/pod';
+export { podSnapshotMetricTypes } from './inventory_models/kubernetes/pod';
 export { containerSnapshotMetricTypes } from './inventory_models/container';
 export { awsS3SnapshotMetricTypes } from './inventory_models/aws_s3';
 export { hostSnapshotMetricTypes } from './inventory_models/host';

@@ -18,7 +18,6 @@ import { ml } from '../../../../../services/ml_api_service';
 
 import { useRefreshAnalyticsList } from '../../../../common';
 import { extractCloningConfig, isAdvancedConfig } from '../../components/action_clone';
-import { createKibanaDataView } from '../../../../../components/ml_inference/retry_create_data_view';
 
 import { ActionDispatchers, ACTION } from './actions';
 import { reducer } from './reducer';
@@ -60,7 +59,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
 
   const { form, jobConfig, isAdvancedEditorEnabled } = state;
   const { createDataView, jobId } = form;
-  let { destinationIndex } = form;
 
   const addRequestMessage = (requestMessage: FormMessage) =>
     dispatch({ type: ACTION.ADD_REQUEST_MESSAGE, requestMessage });
@@ -94,12 +92,13 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
       isAdvancedEditorEnabled ? jobConfig : getJobConfigFromFormState(form)
     ) as DataFrameAnalyticsConfig;
 
-    if (isAdvancedEditorEnabled) {
-      destinationIndex = analyticsJobConfig.dest.index;
-    }
-
     try {
-      await ml.dataFrameAnalytics.createDataFrameAnalytics(jobId, analyticsJobConfig);
+      await ml.dataFrameAnalytics.createDataFrameAnalytics(
+        jobId,
+        analyticsJobConfig,
+        createDataView,
+        form.timeFieldName
+      );
       addRequestMessage({
         message: i18n.translate(
           'xpack.ml.dataframe.stepCreateForm.createDataFrameAnalyticsSuccessMessage',
@@ -110,9 +109,6 @@ export const useCreateAnalyticsForm = (): CreateAnalyticsFormProps => {
         ),
       });
       setIsJobCreated(true);
-      if (createDataView) {
-        createKibanaDataView(destinationIndex, dataViews, form.timeFieldName, addRequestMessage);
-      }
       refresh();
       return true;
     } catch (e) {

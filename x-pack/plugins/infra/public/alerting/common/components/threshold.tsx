@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { Comparator } from '../../../../common/alerting/metrics';
 
 export interface ChartProps {
-  theme: PartialTheme;
+  theme?: PartialTheme;
   baseTheme: Theme;
 }
 

@@ -85,6 +85,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     return tableData;
   };
 
+  // FLAKY: https://github.com/elastic/kibana/issues/170357
+  // FLAKY: https://github.com/elastic/kibana/issues/173670
   describe('endpoint list', function () {
     targetTags(this, ['@ess', '@serverless']);
 
@@ -117,8 +119,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.endpoint.navigateToEndpointList();
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/170357
-      describe.skip('when there is data,', () => {
+      describe('when there is data,', () => {
         before(async () => {
           indexedData = await endpointTestResources.loadEndpointData({ numHosts: 3 });
           await pageObjects.endpoint.navigateToEndpointList();

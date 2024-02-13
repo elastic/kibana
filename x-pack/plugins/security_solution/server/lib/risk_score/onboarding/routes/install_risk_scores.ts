@@ -16,7 +16,7 @@ import type { SetupPlugins } from '../../../../plugin';
 import { buildSiemResponse } from '../../../detection_engine/routes/utils';
 
 import { installRiskScoreModule } from '../helpers/install_risk_score_module';
-import { onboardingRiskScoreRequestBody } from '../../../../../common/api/risk_score';
+import { onboardingRiskScoreRequestBody } from '../../../../../common/api/entity_analytics/risk_score';
 
 export const installRiskScoresRoute = (
   router: SecuritySolutionPluginRouter,

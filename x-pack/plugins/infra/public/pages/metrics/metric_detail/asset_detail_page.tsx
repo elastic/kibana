@@ -8,6 +8,7 @@
 import React from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { NoRemoteCluster } from '../../../components/empty_states';
 import { SourceErrorPage } from '../../../components/source_error_page';
 import { SourceLoadingPage } from '../../../components/source_loading_page';
@@ -15,6 +16,7 @@ import { useSourceContext } from '../../../containers/metrics_source';
 import { AssetDetails } from '../../../components/asset_details/asset_details';
 import { MetricsPageTemplate } from '../page_template';
 import { commonFlyoutTabs } from '../../../common/asset_details_config/asset_details_tabs';
+import { useParentBreadcrumbResolver } from './hooks/use_parent_breadcrumb_resolver';
 
 export const AssetDetailPage = () => {
   const { isLoading, loadSourceFailureMessage, loadSource, source } = useSourceContext();
@@ -23,6 +25,19 @@ export const AssetDetailPage = () => {
   } = useRouteMatch<{ type: InventoryItemType; node: string }>();
 
   const { metricIndicesExist, remoteClustersExist } = source?.status ?? {};
+
+  const parentBreadcrumbResolver = useParentBreadcrumbResolver();
+
+  const breadcrumbOptions = parentBreadcrumbResolver.getBreadcrumbOptions(nodeType);
+  useMetricsBreadcrumbs([
+    {
+      ...breadcrumbOptions.link,
+      text: breadcrumbOptions.text,
+    },
+    {
+      text: nodeId,
+    },
+  ]);
 
   if (isLoading || !source) return <SourceLoadingPage />;
 

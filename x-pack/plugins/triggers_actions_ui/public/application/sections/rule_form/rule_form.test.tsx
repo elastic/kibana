@@ -29,6 +29,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { ALERTS_FEATURE_ID, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';
 
+const toMapById = [
+  (acc: Map<unknown, unknown>, val: { id: unknown }) => acc.set(val.id, val),
+  new Map(),
+] as const;
+
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -46,8 +51,8 @@ export const TestExpression: FunctionComponent<any> = () => {
   );
 };
 
-jest.mock('../../hooks/use_load_rule_types', () => ({
-  useLoadRuleTypes: jest.fn(),
+jest.mock('../../hooks/use_load_rule_types_query', () => ({
+  useLoadRuleTypesQuery: jest.fn(),
 }));
 jest.mock('../../../common/lib/kibana');
 jest.mock('../../lib/capabilities', () => ({
@@ -113,7 +118,7 @@ describe('rule_form', () => {
 
     async function setup(enforceMinimum = false, schedule = '1m') {
       const mocks = coreMock.createSetup();
-      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
+      const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
       const myRuleModel = {
         id: 'my-rule-type',
         description: 'Sample rule type model',
@@ -172,12 +177,13 @@ describe('rule_form', () => {
         },
         enabledInLicense: false,
       };
-      useLoadRuleTypes.mockReturnValue({
-        ruleTypes: [myRule, disabledByLicenseRule],
-        ruleTypeIndex: new Map([
-          [myRule.id, myRule],
-          [disabledByLicenseRule.id, disabledByLicenseRule],
-        ]),
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: new Map([
+            [myRule.id, myRule],
+            [disabledByLicenseRule.id, disabledByLicenseRule],
+          ]),
+        },
       });
       const [
         {
@@ -278,7 +284,7 @@ describe('rule_form', () => {
       } = options || {};
 
       const mocks = coreMock.createSetup();
-      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
+      const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
       const ruleTypes: RuleType[] = ruleTypesOverwrite || [
         {
           id: 'my-rule-type',
@@ -327,11 +333,11 @@ describe('rule_form', () => {
           enabledInLicense: false,
         },
       ];
-      const ruleTypeIndex = ruleTypes.reduce((acc, item) => {
-        acc.set(item.id, item);
-        return acc;
-      }, new Map());
-      useLoadRuleTypes.mockReturnValue({ ruleTypes, ruleTypeIndex });
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: ruleTypes.reduce(...toMapById),
+        },
+      });
       const [
         {
           application: { capabilities },
@@ -596,7 +602,7 @@ describe('rule_form', () => {
       expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
     });
 
-    it('should be able to select multiple consumer', async () => {
+    it('should render multiple consumers in the dropdown and select the first one in the list if no default is specified', async () => {
       await setup({
         initialRuleOverwrite: {
           name: 'Simple rule',
@@ -660,7 +666,7 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(mockSetConsumer).toHaveBeenLastCalledWith(null);
+      expect(mockSetConsumer).toHaveBeenLastCalledWith('infrastructure');
     });
 
     it('should not display the consumer select for invalid rule types', async () => {
@@ -1034,46 +1040,48 @@ describe('rule_form', () => {
     let wrapper: ReactWrapper<any>;
 
     async function setup() {
-      const { useLoadRuleTypes } = jest.requireMock('../../hooks/use_load_rule_types');
-      useLoadRuleTypes.mockReturnValue({
-        ruleTypes: [
-          {
-            id: 'other-consumer-producer-rule-type',
-            name: 'Test',
-            actionGroups: [
-              {
-                id: 'testActionGroup',
-                name: 'Test Action Group',
+      const { useLoadRuleTypesQuery } = jest.requireMock('../../hooks/use_load_rule_types_query');
+      useLoadRuleTypesQuery.mockReturnValue({
+        ruleTypesState: {
+          data: [
+            {
+              id: 'other-consumer-producer-rule-type',
+              name: 'Test',
+              actionGroups: [
+                {
+                  id: 'testActionGroup',
+                  name: 'Test Action Group',
+                },
+              ],
+              defaultActionGroupId: 'testActionGroup',
+              minimumLicenseRequired: 'basic',
+              recoveryActionGroup: RecoveredActionGroup,
+              producer: ALERTS_FEATURE_ID,
+              authorizedConsumers: {
+                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                test: { read: true, all: true },
               },
-            ],
-            defaultActionGroupId: 'testActionGroup',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: RecoveredActionGroup,
-            producer: ALERTS_FEATURE_ID,
-            authorizedConsumers: {
-              [ALERTS_FEATURE_ID]: { read: true, all: true },
-              test: { read: true, all: true },
             },
-          },
-          {
-            id: 'same-consumer-producer-rule-type',
-            name: 'Test',
-            actionGroups: [
-              {
-                id: 'testActionGroup',
-                name: 'Test Action Group',
+            {
+              id: 'same-consumer-producer-rule-type',
+              name: 'Test',
+              actionGroups: [
+                {
+                  id: 'testActionGroup',
+                  name: 'Test Action Group',
+                },
+              ],
+              defaultActionGroupId: 'testActionGroup',
+              minimumLicenseRequired: 'basic',
+              recoveryActionGroup: RecoveredActionGroup,
+              producer: 'test',
+              authorizedConsumers: {
+                [ALERTS_FEATURE_ID]: { read: true, all: true },
+                test: { read: true, all: true },
               },
-            ],
-            defaultActionGroupId: 'testActionGroup',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: RecoveredActionGroup,
-            producer: 'test',
-            authorizedConsumers: {
-              [ALERTS_FEATURE_ID]: { read: true, all: true },
-              test: { read: true, all: true },
             },
-          },
-        ],
+          ].reduce(...toMapById),
+        },
       });
       const mocks = coreMock.createSetup();
       const [
@@ -1152,7 +1160,7 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(useLoadRuleTypes).toHaveBeenCalled();
+      expect(useLoadRuleTypesQuery).toHaveBeenCalled();
     }
 
     it('renders rule type options which producer correspond to the rule consumer', async () => {
@@ -1198,7 +1206,7 @@ describe('rule_form', () => {
             minimumScheduleInterval: { value: '1m', enforce: false },
           }}
           dispatch={() => {}}
-          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [] }}
+          errors={{ name: [], 'schedule.interval': [], ruleTypeId: [], actionConnectors: [] }}
           operation="create"
           actionTypeRegistry={actionTypeRegistry}
           ruleTypeRegistry={ruleTypeRegistry}

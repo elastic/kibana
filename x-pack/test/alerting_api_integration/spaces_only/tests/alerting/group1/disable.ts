@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
@@ -75,7 +76,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await checkAAD({
         supertest: supertestWithoutAuth,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -149,7 +150,12 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       validateEvent(event, {
         spaceId: Spaces.space1.id,
         savedObjects: [
-          { type: 'alert', id: ruleId, rel: 'primary', type_id: 'test.cumulative-firing' },
+          {
+            type: RULE_SAVED_OBJECT_TYPE,
+            id: ruleId,
+            rel: 'primary',
+            type_id: 'test.cumulative-firing',
+          },
         ],
         message: "instance 'instance-0' has been untracked because the rule was disabled",
         shouldHaveEventEnd: false,
@@ -193,7 +199,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
       await checkAAD({
         supertest: supertestWithoutAuth,
         spaceId: Spaces.space1.id,
-        type: 'alert',
+        type: RULE_SAVED_OBJECT_TYPE,
         id: createdRule.id,
       });
     });
@@ -237,7 +243,7 @@ export default function createDisableRuleTests({ getService }: FtrProviderContex
         await checkAAD({
           supertest: supertestWithoutAuth,
           spaceId: Spaces.space1.id,
-          type: 'alert',
+          type: RULE_SAVED_OBJECT_TYPE,
           id: createdRule.id,
         });
       });

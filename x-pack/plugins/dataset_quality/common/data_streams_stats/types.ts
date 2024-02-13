@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { APIClientRequestParamsOf, APIReturnType } from '../rest/create_call_dataset_quality_api';
+import { APIClientRequestParamsOf, APIReturnType } from '../rest';
 import { DataStreamStat } from './data_stream_stat';
 
 export type GetDataStreamsStatsParams =
@@ -14,5 +14,23 @@ export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse =
   APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
 export type DataStreamStatServiceResponse = DataStreamStat[];
-export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type IntegrationType = GetDataStreamsStatsResponse['integrations'][0];
+export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0] & {
+  integration?: IntegrationType;
+};
+
+export type GetDataStreamsDegradedDocsStatsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/degraded_docs`>['params'];
+export type GetDataStreamsDegradedDocsStatsQuery = GetDataStreamsDegradedDocsStatsParams['query'];
+export type GetDataStreamsDegradedDocsStatsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/degraded_docs`>;
+export type DataStreamDegradedDocsStatServiceResponse = DegradedDocsStatType[];
+export type DegradedDocsStatType = GetDataStreamsDegradedDocsStatsResponse['degradedDocs'][0];
+
+export type GetDataStreamDetailsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>['params']['path'];
+export type GetDataStreamDetailsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/{dataStream}/details`>;
+
+export type { DataStreamStat } from './data_stream_stat';
+export type { DataStreamDetails } from '../api_types';

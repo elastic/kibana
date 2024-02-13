@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import {
-  ContextualInsight,
-  Message,
-  MessageRole,
-  useObservabilityAIAssistant,
-} from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo } from 'react';
+import { i18n } from '@kbn/i18n';
+import { Message, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { Frame } from '.';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   frame?: Frame;
 }
 
 export function FrameInformationAIAssistant({ frame }: Props) {
-  const aiAssistant = useObservabilityAIAssistant();
+  const {
+    observabilityAIAssistant: { ObservabilityAIAssistantContextualInsight },
+  } = useProfilingDependencies().start;
 
   const promptMessages = useMemo<Message[] | undefined>(() => {
     if (frame?.functionName && frame.exeFileName) {
@@ -91,8 +89,8 @@ export function FrameInformationAIAssistant({ frame }: Props) {
 
   return (
     <>
-      {aiAssistant.isEnabled() && promptMessages ? (
-        <ContextualInsight
+      {ObservabilityAIAssistantContextualInsight && promptMessages ? (
+        <ObservabilityAIAssistantContextualInsight
           messages={promptMessages}
           title={i18n.translate('xpack.profiling.frameInformationWindow.optimizeFunction', {
             defaultMessage: 'Optimize function',

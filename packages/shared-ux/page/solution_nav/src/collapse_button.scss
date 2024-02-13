@@ -1,7 +1,9 @@
+@import 'variables';
+
 .kbnSolutionNavCollapseButton {
   position: absolute;
   opacity: 0;
-  left: 248px - $euiSize;
+  left: $solutionNavWidth - $euiSize;
   top: $euiSizeL;
   z-index: 2;
 
@@ -18,7 +20,7 @@
   &:hover,
   &:focus {
     opacity: 1;
-    left: 248px - $euiSizeL;
+    left: $solutionNavWidth - $euiSizeL;
   }
 
   .kbnSolutionNav__sidebar:hover & {
@@ -39,7 +41,7 @@
   top: 0;
   bottom: 0;
   height: 100%;
-  width: $euiSizeXXL;
+  width: $solutionNavCollapsedWidth;
   border-radius: 0;
   // Keep the icon at the top instead of it getting shifted to the center of the page
   padding-top: $euiSizeL + $euiSizeS;

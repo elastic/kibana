@@ -65,6 +65,10 @@ import {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/server';
 import { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -82,7 +86,7 @@ export interface APMPluginSetupDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: {};
   share: SharePluginSetup;
-
+  observabilityAIAssistant: ObservabilityAIAssistantPluginSetup;
   // optional dependencies
   actions?: ActionsPlugin['setup'];
   alerting?: AlertingPlugin['setup'];
@@ -108,7 +112,7 @@ export interface APMPluginStartDependencies {
   metricsDataAccess: MetricsDataPluginSetup;
   dataViews: DataViewsServerPluginStart;
   share: undefined;
-
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   // optional dependencies
   actions?: ActionsPlugin['start'];
   alerting?: AlertingPlugin['start'];

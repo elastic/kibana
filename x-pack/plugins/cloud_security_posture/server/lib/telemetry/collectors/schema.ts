@@ -193,4 +193,18 @@ export const cspmUsageSchema: MakeSchemaFrom<CspmUsage> = {
       },
     },
   },
+  muted_rules_stats: {
+    type: 'array',
+    items: {
+      id: { type: 'keyword' },
+      name: { type: 'keyword' },
+      section: { type: 'keyword' },
+      benchmark_id: { type: 'keyword' },
+      benchmark_name: { type: 'keyword' },
+      benchmark_version: { type: 'keyword' },
+      rule_number: { type: 'keyword' },
+      posture_type: { type: 'keyword' },
+      version: { type: 'keyword' },
+    },
+  },
 };

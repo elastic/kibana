@@ -31,18 +31,75 @@
         "children": [
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.addDocView",
+            "id": "def-common.DocViewsRegistry.Unnamed",
             "type": "Function",
             "tags": [],
-            "label": "addDocView",
-            "description": [
-              "\nExtends and adds the given doc view to the registry array"
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
             ],
+            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/unified-doc-viewer",
+                "id": "def-common.DocViewsRegistry.Unnamed.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "initialValue",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/unified-doc-viewer",
+                    "scope": "common",
+                    "docId": "kibKbnUnifiedDocViewerPluginApi",
+                    "section": "def-common.DocViewsRegistry",
+                    "text": "DocViewsRegistry"
+                  },
+                  " | ",
+                  "DocView",
+                  "[] | undefined"
+                ],
+                "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-common.DocViewsRegistry.getAll",
+            "type": "Function",
+            "tags": [],
+            "label": "getAll",
+            "description": [],
+            "signature": [
+              "() => ",
+              "DocView",
+              "[]"
+            ],
+            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-common.DocViewsRegistry.add",
+            "type": "Function",
+            "tags": [],
+            "label": "add",
+            "description": [],
             "signature": [
               "(docViewRaw: ",
-              "DocViewInput",
+              "DocView",
               " | ",
-              "DocViewInputFn",
+              "DocViewFactory",
               ") => void"
             ],
             "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
@@ -51,15 +108,15 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.addDocView.$1",
+                "id": "def-common.DocViewsRegistry.add.$1",
                 "type": "CompoundType",
                 "tags": [],
                 "label": "docViewRaw",
                 "description": [],
                 "signature": [
-                  "DocViewInput",
+                  "DocView",
                   " | ",
-                  "DocViewInputFn"
+                  "DocViewFactory"
                 ],
                 "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
@@ -71,19 +128,13 @@
           },
           {
             "parentPluginId": "@kbn/unified-doc-viewer",
-            "id": "def-common.DocViewsRegistry.getDocViewsSorted",
+            "id": "def-common.DocViewsRegistry.removeById",
             "type": "Function",
             "tags": [],
-            "label": "getDocViewsSorted",
-            "description": [
-              "\nReturns a sorted array of doc_views for rendering tabs"
-            ],
+            "label": "removeById",
+            "description": [],
             "signature": [
-              "(hit: ",
-              "DataTableRecord",
-              ") => ",
-              "DocView",
-              "[]"
+              "(id: string) => void"
             ],
             "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
             "deprecated": false,
@@ -91,13 +142,13 @@
             "children": [
               {
                 "parentPluginId": "@kbn/unified-doc-viewer",
-                "id": "def-common.DocViewsRegistry.getDocViewsSorted.$1",
-                "type": "Object",
+                "id": "def-common.DocViewsRegistry.removeById.$1",
+                "type": "string",
                 "tags": [],
-                "label": "hit",
+                "label": "id",
                 "description": [],
                 "signature": [
-                  "DataTableRecord"
+                  "string"
                 ],
                 "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
                 "deprecated": false,
@@ -105,6 +156,29 @@
                 "isRequired": true
               }
             ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/unified-doc-viewer",
+            "id": "def-common.DocViewsRegistry.clone",
+            "type": "Function",
+            "tags": [],
+            "label": "clone",
+            "description": [],
+            "signature": [
+              "() => ",
+              {
+                "pluginId": "@kbn/unified-doc-viewer",
+                "scope": "common",
+                "docId": "kibKbnUnifiedDocViewerPluginApi",
+                "section": "def-common.DocViewsRegistry",
+                "text": "DocViewsRegistry"
+              }
+            ],
+            "path": "packages/kbn-unified-doc-viewer/src/services/doc_views_registry.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
             "returnComment": []
           }
         ],

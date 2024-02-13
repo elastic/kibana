@@ -6,7 +6,7 @@
  */
 
 import type { SearchHit } from '@kbn/es-types';
-import { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import {
   SERVICE_ENVIRONMENT,
@@ -15,16 +15,16 @@ import {
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
 import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
-import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
+import { getAgentConfigEtagMetrics } from './get_agent_config_etag_metrics';
 
 export async function findExactConfiguration({
   service,
   internalESClient,
-  apmIndices,
+  apmEventClient,
 }: {
   service: AgentConfiguration['service'];
   internalESClient: APMInternalESClient;
-  apmIndices: APMIndices;
+  apmEventClient: APMEventClient;
 }) {
   const serviceNameFilter = service.name
     ? { term: { [SERVICE_NAME]: service.name } }
@@ -43,13 +43,10 @@ export async function findExactConfiguration({
     },
   };
 
-  const [agentConfig, configsAppliedToAgentsThroughFleet] = await Promise.all([
-    internalESClient.search<AgentConfiguration, typeof params>(
-      'find_exact_agent_configuration',
-      params
-    ),
-    getConfigsAppliedToAgentsThroughFleet(internalESClient, apmIndices),
-  ]);
+  const agentConfig = await internalESClient.search<
+    AgentConfiguration,
+    typeof params
+  >('find_exact_agent_configuration', params);
 
   const hit = agentConfig.hits.hits[0] as
     | SearchHit<AgentConfiguration>
@@ -59,11 +56,33 @@ export async function findExactConfiguration({
     return;
   }
 
+  const appliedByAgent = await getIsAppliedByAgent({
+    apmEventClient,
+    agentConfiguration: hit._source,
+  });
+
   return {
     id: hit._id,
     ...convertConfigSettingsToString(hit)._source,
-    applied_by_agent:
-      hit._source.applied_by_agent ||
-      configsAppliedToAgentsThroughFleet.hasOwnProperty(hit._source.etag),
+    applied_by_agent: appliedByAgent,
   };
+}
+
+async function getIsAppliedByAgent({
+  apmEventClient,
+  agentConfiguration,
+}: {
+  apmEventClient: APMEventClient;
+  agentConfiguration: AgentConfiguration;
+}) {
+  if (agentConfiguration.applied_by_agent) {
+    return true;
+  }
+
+  const appliedEtags = await getAgentConfigEtagMetrics(
+    apmEventClient,
+    agentConfiguration.etag
+  );
+
+  return appliedEtags.includes(agentConfiguration.etag);
 }

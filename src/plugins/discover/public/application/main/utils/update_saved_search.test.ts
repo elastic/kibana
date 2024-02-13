@@ -70,7 +70,7 @@ describe('updateSavedSearch', () => {
       },
     });
     expect(savedSearch.searchSource.getField('query')).toEqual(query);
-    expect(savedSearch.searchSource.getField('filter')).toEqual([appFilter, globalFilter]);
+    expect(savedSearch.searchSource.getField('filter')).toEqual([globalFilter, appFilter]);
   });
 
   it('should set query and filters from services', async () => {

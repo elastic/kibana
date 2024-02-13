@@ -103,6 +103,10 @@ describe('looksLikeTypingIn', () => {
       { preamble: 'GET _cat/indices?s=index&exp', autocomplete: 'and_wildcards', input: '=' },
       { preamble: 'GET _cat/indices?v&', autocomplete: 'expand_wildcards', input: '=' },
       { preamble: 'GET _cat/indices?v&exp', autocomplete: 'and_wildcards', input: '=' },
+      // autocomplete skips one iteration of token evaluation if user types in every letter
+      { preamble: 'GET .kibana', autocomplete: '/', input: '_' }, // token '/' may not be evaluated
+      { preamble: 'GET .kibana', autocomplete: ',', input: '.' }, // token ',' may not be evaluated
+      { preamble: 'GET .kibana', autocomplete: '?', input: 'k' }, // token '?' may not be evaluated
     ];
     for (const c of cases) {
       const name =

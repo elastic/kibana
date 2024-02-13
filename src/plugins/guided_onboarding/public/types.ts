@@ -15,18 +15,19 @@ import type {
   GuideConfig,
   GuideParams,
 } from '@kbn/guided-onboarding';
-import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import type { PluginStatus, PluginState } from '../common';
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface GuidedOnboardingPluginSetup {}
+export interface GuidedOnboardingPluginSetup {
+  cloud: CloudSetup;
+}
 
 export interface GuidedOnboardingPluginStart {
   guidedOnboardingApi?: GuidedOnboardingApi;
 }
 
 export interface AppPluginStartDependencies {
-  cloud?: CloudStart;
+  cloud: CloudStart;
 }
 
 export interface GuidedOnboardingApi {

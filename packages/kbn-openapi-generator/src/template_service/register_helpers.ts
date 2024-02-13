@@ -47,4 +47,7 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('isUnknown', (val: object) => {
     return !('type' in val || '$ref' in val || 'anyOf' in val || 'oneOf' in val || 'allOf' in val);
   });
+  handlebarsInstance.registerHelper('startsWithSpecialChar', (val: string) => {
+    return /^[^a-zA-Z0-9]/.test(val);
+  });
 }

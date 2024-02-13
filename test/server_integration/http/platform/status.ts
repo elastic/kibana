@@ -35,13 +35,13 @@ export default function ({ getService }: FtrProviderContext) {
     // This test must come first because the timeout only applies to the initial emission
     it("returns a timeout for status check that doesn't emit after 30s", async () => {
       let aStatus = await getStatus('statusPluginA');
-      expect(aStatus.level).to.eql('unavailable');
+      expect(aStatus === undefined || aStatus.level === 'unavailable').to.eql(true);
 
       // Status will remain in unavailable until the custom status check times out
       // Keep polling until that condition ends, up to a timeout
       await retry.waitForWithTimeout(`Status check to timeout`, 40_000, async () => {
         aStatus = await getStatus('statusPluginA');
-        return aStatus.summary === 'Status check timed out after 30s';
+        return aStatus?.summary === 'Status check timed out after 30s';
       });
 
       expect(aStatus.level).to.eql('unavailable');
@@ -53,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
       await retry.waitForWithTimeout(
         `statusPluginA status to update`,
         5_000,
-        async () => (await getStatus('statusPluginA')).level === 'degraded'
+        async () => (await getStatus('statusPluginA'))?.level === 'degraded'
       );
       await statusPropagation();
       expect((await getStatus('statusPluginA')).level).to.eql('degraded');

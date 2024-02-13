@@ -5,117 +5,66 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-import {
-  EuiFilterButton,
-  EuiFilterSelectItem,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiPopover,
-  EuiText,
-  EuiIcon,
-} from '@elastic/eui';
-import styled from 'styled-components';
+import React from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
+import { OWNER_INFO } from '../../../common/constants';
 import * as i18n from './translations';
 import type { Solution } from './types';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
+import type { CasesOwners } from '../../client/helpers/can_use_cases';
+import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilterPopoverProps {
-  onSelectedOptionsChanged: (value: string[]) => void;
-  options: Solution[];
-  optionsEmptyLabel?: string;
-  selectedOptions: string[];
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
+  selectedOptionKeys: string[];
+  availableSolutions: string[];
 }
 
-const ScrollableDiv = styled.div`
-  max-height: 250px;
-  overflow: auto;
-`;
+const isValidSolution = (solution: string): solution is CasesOwners =>
+  Object.keys(OWNER_INFO).includes(solution);
 
-const toggleSelectedGroup = (group: string, selectedGroups: string[]): string[] => {
-  const selectedGroupIndex = selectedGroups.indexOf(group);
-  if (selectedGroupIndex >= 0) {
-    return [
-      ...selectedGroups.slice(0, selectedGroupIndex),
-      ...selectedGroups.slice(selectedGroupIndex + 1),
-    ];
+const mapToReadableSolutionName = (solution: string): Solution => {
+  if (isValidSolution(solution)) {
+    return OWNER_INFO[solution];
   }
-  return [...selectedGroups, group];
+
+  return { id: solution, label: solution, iconType: '' };
 };
 
-/**
- * Popover for selecting a field to filter on
- *
- * @param buttonLabel label on dropdwon button
- * @param onSelectedOptionsChanged change listener to be notified when option selection changes
- * @param options to display for filtering
- * @param optionsEmptyLabel shows when options empty
- * @param selectedOptions manage state of selectedOptions
- */
 export const SolutionFilterComponent = ({
-  onSelectedOptionsChanged,
-  options,
-  optionsEmptyLabel,
-  selectedOptions,
+  onChange,
+  selectedOptionKeys,
+  availableSolutions,
 }: FilterPopoverProps) => {
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const { owner } = useCasesContext();
+  const hasOwner = Boolean(owner.length);
+  const options = mapToMultiSelectOption(hasOwner ? owner : availableSolutions);
+  const solutions = availableSolutions.map((solution) => mapToReadableSolutionName(solution));
 
-  const setIsPopoverOpenCb = useCallback(() => setIsPopoverOpen(!isPopoverOpen), [isPopoverOpen]);
-  const toggleSelectedGroupCb = useCallback(
-    (option) => onSelectedOptionsChanged(toggleSelectedGroup(option, selectedOptions)),
-    [selectedOptions, onSelectedOptionsChanged]
-  );
+  const renderOption = (option: EuiSelectableOption) => {
+    const solution = solutions.find((solutionData) => solutionData.id === option.label) as Solution;
+    return (
+      <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <EuiIcon size="m" type={solution.iconType} title={solution.label} />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>{solution.label}</EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   return (
-    <EuiPopover
-      ownFocus
-      button={
-        <EuiFilterButton
-          data-test-subj={'solution-filter-popover-button'}
-          iconType="arrowDown"
-          onClick={setIsPopoverOpenCb}
-          isSelected={isPopoverOpen}
-          numFilters={options.length}
-          hasActiveFilters={selectedOptions.length > 0}
-          numActiveFilters={selectedOptions.length}
-          aria-label={i18n.SOLUTION}
-        >
-          {i18n.SOLUTION}
-        </EuiFilterButton>
-      }
-      isOpen={isPopoverOpen}
-      closePopover={setIsPopoverOpenCb}
-      panelPaddingSize="none"
-      repositionOnScroll
-    >
-      <ScrollableDiv>
-        {options.map((option, index) => (
-          <EuiFilterSelectItem
-            checked={selectedOptions.includes(option.id) ? 'on' : undefined}
-            data-test-subj={`solution-filter-popover-item-${option.id}`}
-            key={`${index}-${option.id}`}
-            onClick={toggleSelectedGroupCb.bind(null, option.id)}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
-              <EuiFlexItem grow={false}>
-                <EuiIcon size="m" type={option.iconType} title={option.label} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>{option.label}</EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFilterSelectItem>
-        ))}
-      </ScrollableDiv>
-      {options.length === 0 && optionsEmptyLabel != null && (
-        <EuiFlexGroup gutterSize="m" justifyContent="spaceAround">
-          <EuiFlexItem grow={true}>
-            <EuiPanel>
-              <EuiText>{optionsEmptyLabel}</EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      )}
-    </EuiPopover>
+    <MultiSelectFilter
+      buttonLabel={i18n.SOLUTION}
+      id={'owner'}
+      onChange={onChange}
+      options={options}
+      renderOption={renderOption}
+      selectedOptionKeys={selectedOptionKeys}
+      isLoading={false}
+    />
   );
 };
 

@@ -9,7 +9,7 @@ import { NewPackagePolicy } from '@kbn/fleet-plugin/common';
 import { cloneDeep } from 'lodash';
 import { processorsFormatter } from './processors_formatter';
 import { LegacyConfigKey } from '../../../../common/constants/monitor_management';
-import { ConfigKey, DataStream, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum, MonitorFields } from '../../../../common/runtime_types';
 import { throttlingFormatter } from './browser_formatters';
 import { replaceStringWithParams } from '../formatting_utils';
 import { syntheticsPolicyFormatters } from './formatters';
@@ -28,7 +28,7 @@ export interface ProcessorFields {
 
 export const formatSyntheticsPolicy = (
   newPolicy: NewPackagePolicy,
-  monitorType: DataStream,
+  monitorType: MonitorTypeEnum,
   config: Partial<MonitorFields & ProcessorFields>,
   params: Record<string, string>,
   isLegacy?: boolean

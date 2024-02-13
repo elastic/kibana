@@ -26,9 +26,6 @@ export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   .euiFormRow {
     max-width: 800px;
   }
-  &:focus-within {
-    flex-grow: 4;
-  }
 `;
 
 export const operationCss = (euiTheme: EuiThemeComputed) => css`

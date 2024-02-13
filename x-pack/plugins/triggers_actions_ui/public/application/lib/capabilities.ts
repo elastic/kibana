@@ -18,8 +18,8 @@ type Capabilities = Record<string, any>;
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
-export const hasExecuteActionsCapability = (capabilities: Capabilities) =>
-  capabilities?.actions?.execute;
+export const hasExecuteActionsCapability = (capabilities: Capabilities, actionTypeId?: string) =>
+  actionTypeId === '.sentinelone' ? capabilities?.actions?.save : capabilities?.actions?.execute;
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 

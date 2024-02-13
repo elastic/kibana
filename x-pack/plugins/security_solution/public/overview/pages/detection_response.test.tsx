@@ -11,6 +11,7 @@ import { render } from '@testing-library/react';
 import { DetectionResponse } from './detection_response';
 import { TestProviders } from '../../common/mock';
 import { noCasesPermissions, readCasesPermissions } from '../../cases_test_utils';
+import { useKibana as mockUseKibana } from '../../common/lib/kibana/__mocks__';
 
 jest.mock('../components/detection_response/alerts_by_status', () => ({
   AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
@@ -75,12 +76,24 @@ jest.mock('../../detections/containers/detection_engine/alerts/use_alerts_privil
 }));
 
 const defaultUseCasesPermissionsReturn = readCasesPermissions();
-const mockUseCasesPermissions = jest.fn(() => defaultUseCasesPermissionsReturn);
-jest.mock('../../common/lib/kibana/hooks', () => {
-  const original = jest.requireActual('../../common/lib/kibana/hooks');
+
+const mockedUseKibana = mockUseKibana();
+const mockCanUseCases = jest.fn();
+
+jest.mock('../../common/lib/kibana', () => {
+  const original = jest.requireActual('../../common/lib/kibana');
+
   return {
     ...original,
-    useGetUserCasesPermissions: () => mockUseCasesPermissions(),
+    useKibana: () => ({
+      ...mockedUseKibana,
+      services: {
+        ...mockedUseKibana.services,
+        cases: {
+          helpers: { canUseCases: mockCanUseCases },
+        },
+      },
+    }),
   };
 });
 
@@ -90,7 +103,7 @@ describe('DetectionResponse', () => {
     mockUseSourcererDataView.mockReturnValue(defaultUseSourcererReturn);
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
-    mockUseCasesPermissions.mockReturnValue(defaultUseCasesPermissionsReturn);
+    mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
   });
 
   it('should render default page', () => {
@@ -197,7 +210,7 @@ describe('DetectionResponse', () => {
   });
 
   it('should not render cases data sections if the user does not have cases read permission', () => {
-    mockUseCasesPermissions.mockReturnValue(noCasesPermissions());
+    mockCanUseCases.mockReturnValue(noCasesPermissions());
 
     const result = render(
       <TestProviders>
@@ -218,7 +231,7 @@ describe('DetectionResponse', () => {
   });
 
   it('should render page permissions message if the user does not have read permission', () => {
-    mockUseCasesPermissions.mockReturnValue(noCasesPermissions());
+    mockCanUseCases.mockReturnValue(noCasesPermissions());
     mockUseAlertsPrivileges.mockReturnValue({
       hasKibanaREAD: true,
       hasIndexRead: false,

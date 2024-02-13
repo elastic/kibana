@@ -16,6 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const PageObjects = getPageObjects([
     'settings',
+    'svlCommonPage',
     'common',
     'header',
     'discover',
@@ -343,6 +344,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Search source Alert', () => {
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
+      await PageObjects.svlCommonPage.loginAsAdmin();
 
       log.debug('create source indices');
       await createSourceIndex();
@@ -378,9 +380,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // should not have data view selected by default
       const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      // TODO: Serverless Security has an existing data view by default
+      // TODO: Serverless Security and Search have an existing data view by default
       const dataViewSelectorText = await dataViewSelector.getVisibleText();
-      if (!dataViewSelectorText.includes('.alerts-security')) {
+      if (
+        !dataViewSelectorText.includes('.alerts-security') &&
+        !dataViewSelectorText.includes('default:all-data')
+      ) {
         expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
       }
 
@@ -444,6 +449,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should navigate to alert results via link provided in notification', async () => {
+      await PageObjects.settings.refreshDataViewFieldList(OUTPUT_DATA_VIEW);
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);
     });

@@ -4,21 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
 import { ObservabilityAIAssistantChatServiceProvider } from '../../context/observability_ai_assistant_chat_service_provider';
 import { useAbortableAsync } from '../../hooks/use_abortable_async';
-import { useConversation } from '../../hooks/use_conversation';
-import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useObservabilityAIAssistant } from '../../hooks/use_observability_ai_assistant';
-import { EMPTY_CONVERSATION_TITLE } from '../../i18n';
 import { AssistantAvatar } from '../assistant_avatar';
 import { ChatFlyout } from '../chat/chat_flyout';
 
 export function ObservabilityAIAssistantActionMenuItem() {
   const service = useObservabilityAIAssistant();
-  const connectors = useGenAIConnectors();
 
   const [isOpen, setIsOpen] = useState(false);
 
@@ -32,14 +28,21 @@ export function ObservabilityAIAssistantActionMenuItem() {
     [service, isOpen]
   );
 
-  const [conversationId, setConversationId] = useState<string>();
+  const initialMessages = useMemo(() => [], []);
 
-  const { conversation, displayedMessages, setDisplayedMessages, save, saveTitle } =
-    useConversation({
-      conversationId,
-      connectorId: connectors.selectedConnector,
-      chatService: chatService.value,
-    });
+  useEffect(() => {
+    const keyboardListener = (event: KeyboardEvent) => {
+      if (event.ctrlKey && event.code === 'Semicolon') {
+        setIsOpen(true);
+      }
+    };
+
+    window.addEventListener('keypress', keyboardListener);
+
+    return () => {
+      window.removeEventListener('keypress', keyboardListener);
+    };
+  }, []);
 
   if (!service.isEnabled()) {
     return null;
@@ -59,7 +62,7 @@ export function ObservabilityAIAssistantActionMenuItem() {
             {!isOpen || chatService.value ? (
               <AssistantAvatar size="xs" />
             ) : (
-              <EuiLoadingSpinner size="s" />
+              <EuiLoadingSpinner size="m" />
             )}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
@@ -72,26 +75,12 @@ export function ObservabilityAIAssistantActionMenuItem() {
       {chatService.value ? (
         <ObservabilityAIAssistantChatServiceProvider value={chatService.value}>
           <ChatFlyout
+            initialTitle=""
+            initialMessages={initialMessages}
             isOpen={isOpen}
-            title={conversation.value?.conversation.title ?? EMPTY_CONVERSATION_TITLE}
-            messages={displayedMessages}
-            conversationId={conversationId}
             startedFrom="appTopNavbar"
             onClose={() => {
-              setIsOpen(() => false);
-            }}
-            onChatComplete={(messages) => {
-              save(messages)
-                .then((nextConversation) => {
-                  setConversationId(nextConversation.conversation.id);
-                })
-                .catch(() => {});
-            }}
-            onChatUpdate={(nextMessages) => {
-              setDisplayedMessages(nextMessages);
-            }}
-            onChatTitleSave={(newTitle) => {
-              saveTitle(newTitle);
+              setIsOpen(false);
             }}
           />
         </ObservabilityAIAssistantChatServiceProvider>

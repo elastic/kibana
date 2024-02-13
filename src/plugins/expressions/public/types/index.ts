@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import type { SerializableRecord } from '@kbn/utility-types';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Adapters } from '@kbn/inspector-plugin/public';
+import { ExecutionContextSearch } from '@kbn/es-query';
 import {
   IInterpreterRenderHandlers,
   ExpressionValue,
@@ -35,7 +35,7 @@ export interface ExpressionInterpreter {
 }
 
 export interface IExpressionLoaderParams {
-  searchContext?: SerializableRecord;
+  searchContext?: ExecutionContextSearch;
   context?: ExpressionValue;
   variables?: Record<string, unknown>;
   // Enables debug tracking on each expression in the AST
@@ -52,10 +52,14 @@ export interface IExpressionLoaderParams {
   syncColors?: boolean;
   syncCursor?: boolean;
   syncTooltips?: boolean;
+  // if this is set to true, a veil will be shown when resizing visualizations in response
+  // to a chart resize event (see src/plugins/chart_expressions/common/chart_size_transition_veil.tsx).
+  // This should be only set to true if the client will be responding to the resize events
+  shouldUseSizeTransitionVeil?: boolean;
   hasCompatibleActions?: ExpressionRenderHandlerParams['hasCompatibleActions'];
   getCompatibleCellValueActions?: ExpressionRenderHandlerParams['getCompatibleCellValueActions'];
   executionContext?: KibanaExecutionContext;
-
+  abortController?: AbortController;
   /**
    * The flag to toggle on emitting partial results.
    * By default, the partial results are disabled.

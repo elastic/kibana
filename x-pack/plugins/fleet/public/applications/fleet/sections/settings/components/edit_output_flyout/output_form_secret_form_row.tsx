@@ -23,14 +23,29 @@ import { i18n } from '@kbn/i18n';
 export const SecretFormRow: React.FC<{
   fullWidth?: boolean;
   children: ConstructorParameters<typeof EuiFormRow>[0]['children'];
+  useSecretsStorage: boolean;
+  onToggleSecretStorage: (secretEnabled: boolean) => void;
   error?: string[];
   isInvalid?: boolean;
-  title: string;
-  clear: () => void;
+  title?: string;
+  clear?: () => void;
   initialValue?: any;
-  onUsePlainText: () => void;
-}> = ({ fullWidth, error, isInvalid, children, clear, title, initialValue, onUsePlainText }) => {
-  const hasInitialValue = initialValue !== undefined;
+  cancelEdit?: () => void;
+  label?: JSX.Element;
+}> = ({
+  fullWidth,
+  error,
+  isInvalid,
+  children,
+  clear,
+  title,
+  initialValue,
+  onToggleSecretStorage,
+  cancelEdit,
+  useSecretsStorage,
+  label,
+}) => {
+  const hasInitialValue = !!initialValue;
   const [editMode, setEditMode] = useState(!initialValue);
   const valueHiddenPanel = (
     <EuiPanel color="subdued" borderRadius="none" hasShadow={false}>
@@ -66,7 +81,7 @@ export const SecretFormRow: React.FC<{
     <EuiButtonEmpty
       onClick={() => {
         setEditMode(false);
-        clear();
+        if (cancelEdit) cancelEdit();
       }}
       color="primary"
       iconType="refresh"
@@ -87,16 +102,16 @@ export const SecretFormRow: React.FC<{
     <>
       {children}
       {hasInitialValue && (
-        <EuiFlexGroup justifyContent="flexEnd">
+        <EuiFlexGroup justifyContent="flexEnd" data-test-subj="secretCancelChangeBtn">
           <EuiFlexItem grow={false}>{cancelButton}</EuiFlexItem>
         </EuiFlexGroup>
       )}
     </>
   );
 
-  const label = (
+  const secretLabel = (
     <span>
-      <EuiIcon type="lock" />
+      <EuiIcon type="lock" data-test-subj="lockIcon" />
       &nbsp;
       {title}
       &nbsp;
@@ -117,7 +132,7 @@ export const SecretFormRow: React.FC<{
       defaultMessage="This field uses secret storage and requires Fleet Server v8.12.0 and above. {revertLink}"
       values={{
         revertLink: (
-          <EuiButtonEmpty onClick={onUsePlainText} color="primary" size="xs">
+          <EuiButtonEmpty onClick={() => onToggleSecretStorage(false)} color="primary" size="xs">
             <FormattedMessage
               id="xpack.fleet.settings.editOutputFlyout.revertToPlaintextLink"
               defaultMessage="Click to use plain text storage instead"
@@ -128,15 +143,42 @@ export const SecretFormRow: React.FC<{
     />
   ) : undefined;
 
+  const plainTextHelp = (
+    <FormattedMessage
+      id="xpack.fleet.settings.editOutputFlyout.secretInputCalloutTitle"
+      defaultMessage="This field should be stored as a secret, currently it is set to be stored as plain text. {enableSecretLink}"
+      values={{
+        enableSecretLink: (
+          <EuiButtonEmpty onClick={() => onToggleSecretStorage(true)} color="primary" size="xs">
+            <FormattedMessage
+              id="xpack.fleet.settings.editOutputFlyout.revertToSecretStorageLink"
+              defaultMessage="Click to use secret storage instead"
+            />
+          </EuiButtonEmpty>
+        ),
+      }}
+    />
+  );
+
   const inputComponent = editMode ? editValue : valueHiddenPanel;
 
-  return (
+  return useSecretsStorage ? (
     <EuiFormRow
       fullWidth={fullWidth}
-      label={label}
+      label={secretLabel}
       error={error}
       isInvalid={isInvalid}
       helpText={helpText}
+    >
+      {inputComponent}
+    </EuiFormRow>
+  ) : (
+    <EuiFormRow
+      fullWidth={fullWidth}
+      error={error}
+      isInvalid={isInvalid}
+      label={label}
+      helpText={plainTextHelp}
     >
       {inputComponent}
     </EuiFormRow>

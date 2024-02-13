@@ -1,11 +1,15 @@
 {
   "paths": {
     "advancedSettings": "src/plugins/advanced_settings",
+    "aiAssistantManagementSelection": "src/plugins/ai_assistant_management/selection",
+    "aiAssistantManagementObservability": "src/plugins/ai_assistant_management/observability",
     "alerts": "packages/kbn-alerts/src",
     "alertsUIShared": "packages/kbn-alerts-ui-shared/src",
+    "alertingTypes": "packages/kbn-alerting-types",
     "apmOss": "src/plugins/apm_oss",
     "autocomplete": "packages/kbn-securitysolution-autocomplete/src",
     "bfetch": "src/plugins/bfetch",
+    "bfetchError": "packages/kbn-bfetch-error",
     "cases": ["packages/kbn-cases-components"],
     "cellActions": "packages/kbn-cell-actions",
     "charts": "src/plugins/charts",
@@ -26,6 +30,7 @@
     "discover": ["src/plugins/discover", "packages/kbn-discover-utils"],
     "savedSearch": "src/plugins/saved_search",
     "embeddableApi": "src/plugins/embeddable",
+    "presentationPanel": "src/plugins/presentation_panel",
     "embeddableExamples": "examples/embeddable_examples",
     "esQuery": "packages/kbn-es-query/src",
     "esUi": "src/plugins/es_ui_shared",
@@ -75,6 +80,7 @@
     "kibana_utils": "src/plugins/kibana_utils",
     "kibana-react": "src/plugins/kibana_react",
     "kibanaOverview": "src/plugins/kibana_overview",
+    "lensFormulaDocs": "packages/kbn-lens-formula-docs",
     "lists": "packages/kbn-securitysolution-list-utils/src",
     "exceptionList-components": "packages/kbn-securitysolution-exception-list-components/src",
     "management": [
@@ -99,6 +105,8 @@
     "share": "src/plugins/share",
     "sharedUXPackages": "packages/shared-ux",
     "searchApiPanels": "packages/kbn-search-api-panels/",
+    "searchErrors": "packages/kbn-search-errors",
+    "searchIndexDocuments": "packages/kbn-search-index-documents",
     "searchResponseWarnings": "packages/kbn-search-response-warnings",
     "securitySolutionPackages": "x-pack/packages/security-solution",
     "serverlessPackages": "packages/serverless",
@@ -128,12 +136,14 @@
     "visTypeXy": "src/plugins/vis_types/xy",
     "visualizations": "src/plugins/visualizations",
     "visualizationUiComponents": "packages/kbn-visualization-ui-components",
+    "visualizationUtils": "packages/kbn-visualization-utils",
     "unifiedDocViewer": ["src/plugins/unified_doc_viewer", "packages/kbn-unified-doc-viewer"],
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
     "unifiedHistogram": "src/plugins/unified_histogram",
     "unifiedDataTable": "packages/kbn-unified-data-table",
-    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge"
+    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge",
+    "managedContentBadge": "packages/kbn-managed-content-badge"
   },
   "translations": []
 }

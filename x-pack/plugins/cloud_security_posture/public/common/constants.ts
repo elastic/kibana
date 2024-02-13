@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../common/types_old';
 import {
   CLOUDBEAT_EKS,
   CLOUDBEAT_VANILLA,
@@ -45,7 +45,14 @@ export const LOCAL_STORAGE_PAGE_SIZE_BENCHMARK_KEY = 'cloudPosture:benchmark:pag
 export const LOCAL_STORAGE_PAGE_SIZE_RULES_KEY = 'cloudPosture:rules:pageSize';
 export const LOCAL_STORAGE_DASHBOARD_CLUSTER_SORT_KEY =
   'cloudPosture:complianceDashboard:clusterSort';
+export const LOCAL_STORAGE_DASHBOARD_BENCHMARK_SORT_KEY =
+  'cloudPosture:complianceDashboard:benchmarkSort';
 export const LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY = 'cloudPosture:findings:lastSelectedTab';
+
+export const LOCAL_STORAGE_VULNERABILITIES_GROUPING_KEY = 'cspLatestVulnerabilitiesGrouping';
+export const LOCAL_STORAGE_FINDINGS_GROUPING_KEY = 'cspLatestFindingsGrouping';
+
+export const SESSION_STORAGE_FIELDS_MODAL_SHOW_SELECTED = 'cloudPosture:fieldsModal:showSelected';
 
 export type CloudPostureIntegrations = Record<
   CloudSecurityPolicyTemplate,
@@ -99,7 +106,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         icon: googleCloudLogo,
         testId: 'cisGcpTestId',
       },
-      // needs to be a function that disables/enabled based on integration version
       {
         type: CLOUDBEAT_AZURE,
         name: i18n.translate('xpack.csp.cspmIntegration.azureOption.nameTitle', {
@@ -108,8 +114,6 @@ export const cloudPostureIntegrations: CloudPostureIntegrations = {
         benchmark: i18n.translate('xpack.csp.cspmIntegration.azureOption.benchmarkTitle', {
           defaultMessage: 'CIS Azure',
         }),
-        disabled: false,
-        isBeta: true,
         icon: 'logoAzure',
         testId: 'cisAzureTestId',
       },
@@ -224,3 +228,12 @@ export const NO_FINDINGS_STATUS_REFRESH_INTERVAL_MS = 10000;
 
 export const DETECTION_ENGINE_RULES_KEY = 'detection_engine_rules';
 export const DETECTION_ENGINE_ALERTS_KEY = 'detection_engine_alerts';
+
+export const DEFAULT_GROUPING_TABLE_HEIGHT = 512;
+
+export const FINDINGS_GROUPING_OPTIONS = {
+  RESOURCE_NAME: 'resource.name',
+  RULE_NAME: 'rule.name',
+  CLOUD_ACCOUNT_NAME: 'cloud.account.name',
+  ORCHESTRATOR_CLUSTER_NAME: 'orchestrator.cluster.name',
+};

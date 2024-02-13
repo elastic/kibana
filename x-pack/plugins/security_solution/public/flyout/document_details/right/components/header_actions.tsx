@@ -10,8 +10,8 @@ import React, { memo } from 'react';
 import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatById } from '@kbn/elastic-assistant';
+import { URL_PARAM_KEY } from '../../../../common/hooks/use_url_state';
 import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
-import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useAssistant } from '../hooks/use_assistant';
@@ -39,7 +39,7 @@ export const HeaderActions: VFC = memo(() => {
 
   const modifier = (value: string) => {
     const query = new URLSearchParams(window.location.search);
-    return `${value}&${FLYOUT_URL_PARAM}=${query.get(FLYOUT_URL_PARAM)}`;
+    return `${value}&${URL_PARAM_KEY.eventFlyout}=${query.get(URL_PARAM_KEY.eventFlyout)}`;
   };
 
   const { showAssistant, promptContextId } = useAssistant({

@@ -34,6 +34,7 @@ import {
   DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS,
   DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE,
@@ -80,10 +81,12 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('have.text', 'open');
 
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('have.text', 'Risk score:');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('have.text', 'Risk score');
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
       .should('be.visible')
       .and('have.text', rule.risk_score);
+
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ASSIGNEES).should('have.text', 'Assignees');
 
     cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
       .should('be.visible')

@@ -22,7 +22,7 @@ import {
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { BAR_HEIGHT } from './constants';
-import { useChartTheme } from '../../../../../hooks/use_chart_theme';
+import { useBaseChartTheme } from '../../../../../hooks/use_base_chart_theme';
 import { WaterfallChartChartContainer, WaterfallChartTooltip } from './styles';
 import { useWaterfallContext, WaterfallData } from '..';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
@@ -75,7 +75,7 @@ export const WaterfallBarChart = ({
   barStyleAccessor,
   index,
 }: Props) => {
-  const theme = useChartTheme();
+  const baseChartTheme = useBaseChartTheme();
   const { onElementClick, onProjectionClick } = useWaterfallContext();
   const handleElementClick = useMemo(() => onElementClick, [onElementClick]);
   const handleProjectionClick = useMemo(() => onProjectionClick, [onProjectionClick]);
@@ -97,7 +97,8 @@ export const WaterfallBarChart = ({
         <Settings
           showLegend={false}
           rotation={90}
-          theme={theme}
+          // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+          baseTheme={baseChartTheme}
           onProjectionClick={handleProjectionClick}
           onElementClick={handleElementClick}
           locale={i18n.getLocale()}

@@ -11,29 +11,52 @@ import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
-import { getFormattedMessageContent } from './helpers';
-import { PerformEvaluationParams } from './settings/evaluation_settings/use_perform_evaluation';
+import {
+  getFormattedMessageContent,
+  getOptionalRequestParams,
+  hasParsableResponse,
+} from './helpers';
 
 export interface FetchConnectorExecuteAction {
-  assistantLangChain: boolean;
+  isEnabledRAGAlerts: boolean;
+  alertsIndexPattern?: string;
+  allow?: string[];
+  allowReplacement?: string[];
+  isEnabledKnowledgeBase: boolean;
+  assistantStreamingEnabled: boolean;
   apiConfig: Conversation['apiConfig'];
   http: HttpSetup;
   messages: Message[];
+  onNewReplacements: (newReplacements: Record<string, string>) => void;
+  replacements?: Record<string, string>;
   signal?: AbortSignal | undefined;
+  size?: number;
 }
 
 export interface FetchConnectorExecuteResponse {
   response: string | ReadableStreamDefaultReader<Uint8Array>;
   isError: boolean;
   isStream: boolean;
+  traceData?: {
+    transactionId: string;
+    traceId: string;
+  };
 }
 
 export const fetchConnectorExecuteAction = async ({
-  assistantLangChain,
+  isEnabledRAGAlerts,
+  alertsIndexPattern,
+  allow,
+  allowReplacement,
+  isEnabledKnowledgeBase,
+  assistantStreamingEnabled,
   http,
   messages,
+  onNewReplacements,
+  replacements,
   apiConfig,
   signal,
+  size,
 }: FetchConnectorExecuteAction): Promise<FetchConnectorExecuteResponse> => {
   const outboundMessages = messages.map((msg) => ({
     role: msg.role,
@@ -58,21 +81,34 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = !assistantLangChain;
+  const isStream = assistantStreamingEnabled && !isEnabledKnowledgeBase && !isEnabledRAGAlerts;
+  const optionalRequestParams = getOptionalRequestParams({
+    isEnabledRAGAlerts,
+    alertsIndexPattern,
+    allow,
+    allowReplacement,
+    replacements,
+    size,
+  });
+
   const requestBody = isStream
     ? {
         params: {
           subActionParams: body,
           subAction: 'invokeStream',
         },
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+        ...optionalRequestParams,
       }
     : {
         params: {
           subActionParams: body,
           subAction: 'invokeAI',
         },
-        assistantLangChain,
+        isEnabledKnowledgeBase,
+        isEnabledRAGAlerts,
+        ...optionalRequestParams,
       };
 
   try {
@@ -111,7 +147,12 @@ export const fetchConnectorExecuteAction = async ({
       connector_id: string;
       status: string;
       data: string;
+      replacements?: Record<string, string>;
       service_message?: string;
+      trace_data?: {
+        transaction_id: string;
+        trace_id: string;
+      };
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
@@ -133,13 +174,33 @@ export const fetchConnectorExecuteAction = async ({
         isStream: false,
       };
     }
+
+    // Only add traceData if it exists in the response
+    const traceData =
+      response.trace_data?.trace_id != null && response.trace_data?.transaction_id != null
+        ? {
+            traceId: response.trace_data?.trace_id,
+            transactionId: response.trace_data?.transaction_id,
+          }
+        : undefined;
+
+    onNewReplacements(response.replacements ?? {});
+
     return {
-      response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
+      response: hasParsableResponse({
+        isEnabledRAGAlerts,
+        isEnabledKnowledgeBase,
+      })
+        ? getFormattedMessageContent(response.data)
+        : response.data,
       isError: false,
       isStream: false,
+      traceData,
     };
   } catch (error) {
-    const reader = error?.response?.body?.getReader();
+    const getReader = error?.response?.body?.getReader;
+    const reader =
+      isStream && typeof getReader === 'function' ? getReader.call(error.response.body) : null;
 
     if (!reader) {
       return {
@@ -269,60 +330,6 @@ export const deleteKnowledgeBase = async ({
     });
 
     return response as DeleteKnowledgeBaseResponse;
-  } catch (error) {
-    return error as IHttpFetchError;
-  }
-};
-
-export interface PostEvaluationParams {
-  http: HttpSetup;
-  evalParams?: PerformEvaluationParams;
-  signal?: AbortSignal | undefined;
-}
-
-export interface PostEvaluationResponse {
-  success: boolean;
-}
-
-/**
- * API call for evaluating models.
- *
- * @param {Object} options - The options object.
- * @param {HttpSetup} options.http - HttpSetup
- * @param {string} [options.evalParams] - Params necessary for evaluation
- * @param {AbortSignal} [options.signal] - AbortSignal
- *
- * @returns {Promise<PostEvaluationResponse | IHttpFetchError>}
- */
-export const postEvaluation = async ({
-  http,
-  evalParams,
-  signal,
-}: PostEvaluationParams): Promise<PostEvaluationResponse | IHttpFetchError> => {
-  try {
-    const path = `/internal/elastic_assistant/evaluate`;
-    const query = {
-      models: evalParams?.models.sort()?.join(','),
-      agents: evalParams?.agents.sort()?.join(','),
-      evaluationType: evalParams?.evaluationType.sort()?.join(','),
-      evalModel: evalParams?.evalModel.sort()?.join(','),
-      outputIndex: evalParams?.outputIndex,
-    };
-
-    const response = await http.fetch(path, {
-      method: 'POST',
-      body: JSON.stringify({
-        dataset: JSON.parse(evalParams?.dataset ?? '[]'),
-        evalPrompt: evalParams?.evalPrompt ?? '',
-      }),
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      query,
-      signal,
-    });
-
-    return response as PostEvaluationResponse;
   } catch (error) {
     return error as IHttpFetchError;
   }

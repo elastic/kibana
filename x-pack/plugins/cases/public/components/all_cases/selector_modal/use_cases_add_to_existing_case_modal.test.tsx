@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import React from 'react';
 import AllCasesSelectorModal from '.';
 import type { CaseUI } from '../../../../common';
-import { StatusAll } from '../../../../common';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AppMockRenderer } from '../../../common/mock';
 import { allCasesPermissions, createAppMockRenderer } from '../../../common/mock';
@@ -117,7 +116,7 @@ describe('use cases add to existing case modal hook', () => {
       expect.objectContaining({
         type: CasesContextStoreActionsList.OPEN_ADD_TO_CASE_MODAL,
         payload: expect.objectContaining({
-          hiddenStatuses: [CaseStatuses.closed, StatusAll],
+          hiddenStatuses: [CaseStatuses.closed],
         }),
       })
     );

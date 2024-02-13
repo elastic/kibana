@@ -18,8 +18,8 @@ import {
 } from '../../common/runtime_types';
 
 export const getDevLocation = (devUrl: string): PublicLocation => ({
-  id: 'localhost',
-  label: 'Local Synthetics Service',
+  id: 'dev',
+  label: 'Dev Service',
   geo: { lat: 0, lon: 0 },
   url: devUrl,
   isServiceManaged: true,
@@ -45,12 +45,7 @@ export async function getServiceLocations(server: SyntheticsServerSetup) {
       locations: Record<string, ManifestLocation>;
     }>(server.config.service!.manifestUrl!);
 
-    const availableLocations =
-      server.isDev || server.config.service?.showExperimentalLocations
-        ? Object.entries(data.locations)
-        : Object.entries(data.locations).filter(([_, location]) => {
-            return location.status === LocationStatus.GA;
-          });
+    const availableLocations = Object.entries(data.locations);
 
     availableLocations.forEach(([locationId, location]) => {
       locations.push({

@@ -76,6 +76,7 @@ export interface ActionTypeExecutorOptions<
   taskInfo?: TaskInfo;
   configurationUtilities: ActionsConfigurationUtilities;
   source?: ActionExecutionSource<unknown>;
+  request?: KibanaRequest;
 }
 
 export type ActionResult = Connector;
@@ -118,6 +119,7 @@ export interface ActionValidationService {
 }
 
 export type RenderParameterTemplates<Params extends ActionTypeParams> = (
+  logger: Logger,
   params: Params,
   variables: Record<string, unknown>,
   actionId?: string

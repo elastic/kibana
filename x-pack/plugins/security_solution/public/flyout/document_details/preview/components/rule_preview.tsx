@@ -16,7 +16,7 @@ import { RulePreviewTitle } from './rule_preview_title';
 import { RuleAboutSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_about_section';
 import { RuleScheduleSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
 import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
-import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
+import { StepRuleActionsReadOnly } from '../../../../detection_engine/rule_creation/components/step_rule_actions';
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 import { FlyoutError } from '../../../shared/components/flyout_error';
 import {

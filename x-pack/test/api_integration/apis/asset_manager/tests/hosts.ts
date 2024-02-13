@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { timerange, infra } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { Asset } from '@kbn/assetManager-plugin/common/types_api';
 import { ASSETS_ENDPOINT } from './constants';
 import { FtrProviderContext } from '../types';
+import { generateHostsData } from './helpers';
 
 const HOSTS_ASSETS_ENDPOINT = `${ASSETS_ENDPOINT}/hosts`;
 
@@ -74,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.body).to.have.property('hosts');
       expect(response.body.hosts.length).to.equal(6);
 
-      const ids = response.body.hosts.map((result: Asset) => result['asset.id'][0]);
+      const ids = response.body.hosts.map((result: Asset) => result['asset.id']);
 
       expect(ids).to.eql([
         'my-host-1',
@@ -86,17 +86,4 @@ export default function ({ getService }: FtrProviderContext) {
       ]);
     });
   });
-}
-
-function generateHostsData({ from, to, count = 1 }: { from: string; to: string; count: number }) {
-  const range = timerange(from, to);
-
-  const hosts = Array(count)
-    .fill(0)
-    .map((_, idx) => infra.host(`my-host-${idx}`));
-
-  return range
-    .interval('1m')
-    .rate(1)
-    .generator((timestamp, index) => hosts.map((host) => host.metrics().timestamp(timestamp)));
 }

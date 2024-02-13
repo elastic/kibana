@@ -6,11 +6,10 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import type { CreateAPIKeyParams, CreateAPIKeyResult } from '@kbn/security-plugin-types-server';
 
 import type { ApiKeyToInvalidate } from '../../../common/model';
 import type {
-  CreateAPIKeyParams,
-  CreateAPIKeyResult,
   GetAPIKeysResult,
   UpdateAPIKeyParams,
   UpdateAPIKeyResult,

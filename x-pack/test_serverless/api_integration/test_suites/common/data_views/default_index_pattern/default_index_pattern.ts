@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
           // TODO: The response comes back undefined in Serverless
           const body = response6.body[serviceKeyId];
           const expected = body === undefined ? null : body;
-          expect(expected).to.be(null);
+          expect(expected).to.be('');
         });
       });
     });

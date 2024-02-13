@@ -143,7 +143,7 @@
           {
             "name": "page",
             "in": "query",
-            "description": "The page number to return",
+            "description": "The page to use for pagination, must be greater or equal than 1",
             "schema": {
               "type": "integer",
               "default": 1
@@ -153,7 +153,7 @@
           {
             "name": "perPage",
             "in": "query",
-            "description": "The number of SLOs to return per page",
+            "description": "Number of SLOs returned by page",
             "schema": {
               "type": "integer",
               "default": 25,
@@ -280,7 +280,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/slo_response"
+                  "$ref": "#/components/schemas/slo_with_summary_response"
                 }
               }
             }
@@ -361,7 +361,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/slo_response"
+                  "$ref": "#/components/schemas/slo_definition_response"
                 }
               }
             }
@@ -605,6 +605,79 @@
         }
       }
     },
+    "/s/{spaceId}/api/observability/slos/{sloId}/_reset": {
+      "post": {
+        "summary": "Resets an SLO.",
+        "operationId": "resetSloOp",
+        "description": "You must have the `write` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "$ref": "#/components/parameters/slo_id"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/slo_definition_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not found response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/404_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/s/{spaceId}/internal/observability/slos/_historical_summary": {
       "post": {
         "summary": "Retrieves the historical summary for a list of SLOs",
@@ -638,6 +711,104 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/historical_summary_response"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/400_response"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/401_response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Unauthorized response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/403_response"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/s/{spaceId}/internal/observability/slos/_definitions": {
+      "get": {
+        "summary": "Get the SLO definitions",
+        "operationId": "getDefinitionsOp",
+        "description": "You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.\n",
+        "tags": [
+          "slo"
+        ],
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/kbn_xsrf"
+          },
+          {
+            "$ref": "#/components/parameters/space_id"
+          },
+          {
+            "name": "includeOutdatedOnly",
+            "in": "query",
+            "description": "Indicates if the API returns only outdated SLO or all SLO definitions",
+            "schema": {
+              "type": "boolean"
+            },
+            "example": true
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "description": "Filters the SLOs by name",
+            "schema": {
+              "type": "string"
+            },
+            "example": "my service availability"
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "description": "The page to use for pagination, must be greater or equal than 1",
+            "schema": {
+              "type": "number"
+            },
+            "example": 1
+          },
+          {
+            "name": "perPage",
+            "in": "query",
+            "description": "Number of SLOs returned by page",
+            "schema": {
+              "type": "integer",
+              "default": 100,
+              "maximum": 1000
+            },
+            "example": 100
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/find_slo_definitions_response"
                 }
               }
             }
@@ -1587,7 +1758,7 @@
           }
         }
       },
-      "slo_response": {
+      "slo_with_summary_response": {
         "title": "SLO response",
         "type": "object",
         "required": [
@@ -1606,7 +1777,8 @@
           "instanceId",
           "tags",
           "createdAt",
-          "updatedAt"
+          "updatedAt",
+          "version"
         ],
         "properties": {
           "id": {
@@ -1708,6 +1880,11 @@
             "description": "The last update date",
             "type": "string",
             "example": "2023-01-12T10:03:19.000Z"
+          },
+          "version": {
+            "description": "The internal SLO version",
+            "type": "number",
+            "example": 2
           }
         }
       },
@@ -1731,7 +1908,7 @@
           "results": {
             "type": "array",
             "items": {
-              "$ref": "#/components/schemas/slo_response"
+              "$ref": "#/components/schemas/slo_with_summary_response"
             }
           }
         }
@@ -1994,6 +2171,126 @@
           }
         }
       },
+      "slo_definition_response": {
+        "title": "SLO definition response",
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "description",
+          "indicator",
+          "timeWindow",
+          "budgetingMethod",
+          "objective",
+          "settings",
+          "revision",
+          "enabled",
+          "groupBy",
+          "tags",
+          "createdAt",
+          "updatedAt",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "description": "The identifier of the SLO.",
+            "type": "string",
+            "example": "8853df00-ae2e-11ed-90af-09bb6422b258"
+          },
+          "name": {
+            "description": "The name of the SLO.",
+            "type": "string",
+            "example": "My Service SLO"
+          },
+          "description": {
+            "description": "The description of the SLO.",
+            "type": "string",
+            "example": "My SLO description"
+          },
+          "indicator": {
+            "discriminator": {
+              "propertyName": "type",
+              "mapping": {
+                "sli.apm.transactionErrorRate": "#/components/schemas/indicator_properties_apm_availability",
+                "sli.kql.custom": "#/components/schemas/indicator_properties_custom_kql",
+                "sli.apm.transactionDuration": "#/components/schemas/indicator_properties_apm_latency",
+                "sli.metric.custom": "#/components/schemas/indicator_properties_custom_metric",
+                "sli.histogram.custom": "#/components/schemas/indicator_properties_histogram",
+                "sli.metric.timeslice": "#/components/schemas/indicator_properties_timeslice_metric"
+              }
+            },
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/indicator_properties_custom_kql"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_apm_availability"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_apm_latency"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_custom_metric"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_histogram"
+              },
+              {
+                "$ref": "#/components/schemas/indicator_properties_timeslice_metric"
+              }
+            ]
+          },
+          "timeWindow": {
+            "$ref": "#/components/schemas/time_window"
+          },
+          "budgetingMethod": {
+            "$ref": "#/components/schemas/budgeting_method"
+          },
+          "objective": {
+            "$ref": "#/components/schemas/objective"
+          },
+          "settings": {
+            "$ref": "#/components/schemas/settings"
+          },
+          "revision": {
+            "description": "The SLO revision",
+            "type": "number",
+            "example": 2
+          },
+          "enabled": {
+            "description": "Indicate if the SLO is enabled",
+            "type": "boolean",
+            "example": true
+          },
+          "groupBy": {
+            "description": "optional group by field to use to generate an SLO per distinct value",
+            "type": "string",
+            "example": "some.field"
+          },
+          "tags": {
+            "description": "List of tags",
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "createdAt": {
+            "description": "The creation date",
+            "type": "string",
+            "example": "2023-01-12T10:03:19.000Z"
+          },
+          "updatedAt": {
+            "description": "The last update date",
+            "type": "string",
+            "example": "2023-01-12T10:03:19.000Z"
+          },
+          "version": {
+            "description": "The internal SLO version",
+            "type": "number",
+            "example": 2
+          }
+        }
+      },
       "historical_summary_request": {
         "title": "Historical summary request",
         "type": "object",
@@ -2033,6 +2330,31 @@
               "errorBudget": {
                 "$ref": "#/components/schemas/error_budget"
               }
+            }
+          }
+        }
+      },
+      "find_slo_definitions_response": {
+        "title": "Find SLO definitions response",
+        "description": "A paginated response of SLO definitions matching the query.\n",
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "number",
+            "example": 2
+          },
+          "perPage": {
+            "type": "number",
+            "example": 100
+          },
+          "total": {
+            "type": "number",
+            "example": 123
+          },
+          "results": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/slo_definition_response"
             }
           }
         }

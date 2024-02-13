@@ -10,6 +10,7 @@ import {
   Axis,
   Chart,
   CurveType,
+  LEGACY_LIGHT_THEME,
   Position,
   ScaleType,
   Settings,
@@ -59,7 +60,12 @@ export const OverlapDistributionComparison = ({
         hide={true}
       />
 
-      <Settings showLegend={false} locale={i18n.getLocale()} />
+      <Settings
+        // TODO connect to charts.theme service see src/plugins/charts/public/services/theme/README.md
+        baseTheme={LEGACY_LIGHT_THEME}
+        showLegend={false}
+        locale={i18n.getLocale()}
+      />
       <AreaSeries
         id="dataVisualizer.overlapDistributionComparisonChart"
         name={i18n.translate('xpack.dataVisualizer.dataDrift.distributionComparisonChartName', {

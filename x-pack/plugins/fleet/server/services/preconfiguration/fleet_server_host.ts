@@ -11,6 +11,8 @@ import { normalizeHostsForAgents } from '../../../common/services';
 import type { FleetConfigType } from '../../config';
 import { DEFAULT_FLEET_SERVER_HOST_ID } from '../../constants';
 
+import { FleetError } from '../../errors';
+
 import type { FleetServerHost } from '../../types';
 import { appContextService } from '../app_context';
 import {
@@ -63,7 +65,7 @@ export function getPreconfiguredFleetServerHostFromConfig(config?: FleetConfigTy
   ]);
 
   if (fleetServerHosts.filter((fleetServerHost) => fleetServerHost.is_default).length > 1) {
-    throw new Error('Only one default Fleet Server host is allowed');
+    throw new FleetError('Only one default Fleet Server host is allowed');
   }
 
   return fleetServerHosts;
@@ -108,6 +110,7 @@ export async function createOrUpdatePreconfiguredFleetServerHosts(
           (!existingHost.is_preconfigured ||
             existingHost.is_default !== preconfiguredFleetServerHost.is_default ||
             existingHost.name !== preconfiguredFleetServerHost.name ||
+            isDifferent(existingHost.is_internal, preconfiguredFleetServerHost.is_internal) ||
             isDifferent(
               existingHost.host_urls.map(normalizeHostsForAgents),
               preconfiguredFleetServerHost.host_urls.map(normalizeHostsForAgents)

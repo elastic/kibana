@@ -8,6 +8,9 @@
 import type { estypes } from '@elastic/elasticsearch';
 import { createHash } from 'crypto';
 import { v5 as uuidv5 } from 'uuid';
+
+import type { AlertWithCommonFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type {
   ThresholdNormalized,
   ThresholdWithCardinality,
@@ -94,3 +97,22 @@ export const searchResultHasAggs = <
 >(
   obj: SignalSearchResponse<Record<estypes.AggregateName, estypes.AggregationsAggregate>>
 ): obj is T => obj?.aggregations != null;
+
+/**
+ * transforms documents returned from bulk creation into Hit formatting
+ * basically, moving all fields(apart from _id & _index) from root node to _source property
+ * { _id: 1, _index: "logs", field1, field2 } => { _id: 1, _index: "logs", _source: { field1, field2 } }
+ */
+export const transformBulkCreatedItemsToHits = <T extends BaseFieldsLatest>(
+  items: Array<AlertWithCommonFieldsLatest<T> & { _id: string; _index: string }>
+) =>
+  items.map((alert) => {
+    const { _id, _index, ...source } = alert;
+    return {
+      _id,
+      _index,
+      _source: {
+        ...source,
+      },
+    };
+  });

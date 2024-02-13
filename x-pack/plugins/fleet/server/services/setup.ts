@@ -7,19 +7,20 @@
 
 import fs from 'fs/promises';
 
+import apm from 'elastic-apm-node';
+
 import { compact } from 'lodash';
 import pMap from 'p-map';
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
+import { MessageSigningError } from '../../common/errors';
+
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
 import type { DefaultPackagesInstallationError } from '../../common/types';
 
-import { SO_SEARCH_LIMIT } from '../constants';
-
 import { appContextService } from './app_context';
-import { agentPolicyService } from './agent_policy';
 import { ensurePreconfiguredPackagesAndPolicies } from './preconfiguration';
 import {
   ensurePreconfiguredOutputs,
@@ -32,7 +33,6 @@ import {
 import { outputService } from './output';
 import { downloadSourceService } from './download_source';
 
-import { ensureDefaultEnrollmentAPIKeyForAgentPolicy } from './api_keys';
 import { getRegistryUrl, settingsService } from '.';
 import { awaitIfPending } from './setup_utils';
 import { ensureFleetFinalPipelineIsInstalled } from './epm/elasticsearch/ingest_pipeline/install';
@@ -49,11 +49,17 @@ import {
   getPreconfiguredFleetServerHostFromConfig,
 } from './preconfiguration/fleet_server_host';
 import { cleanUpOldFileIndices } from './setup/clean_old_fleet_indices';
+import type { UninstallTokenInvalidError } from './security/uninstall_token_service';
+import { ensureAgentPoliciesFleetServerKeysAndPolicies } from './setup/fleet_server_policies_enrollment_keys';
 
 export interface SetupStatus {
   isInitialized: boolean;
   nonFatalErrors: Array<
-    PreconfigurationError | DefaultPackagesInstallationError | UpgradeManagedPackagePoliciesResult
+    | PreconfigurationError
+    | DefaultPackagesInstallationError
+    | UpgradeManagedPackagePoliciesResult
+    | UninstallTokenInvalidError
+    | { error: MessageSigningError }
   >;
 }
 
@@ -61,7 +67,17 @@ export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  const t = apm.startTransaction('fleet-setup', 'fleet');
+
+  try {
+    return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  } catch (error) {
+    apm.captureError(error);
+    t.setOutcome('failure');
+    throw error;
+  } finally {
+    t.end();
+  }
 }
 
 async function createSetupSideEffects(
@@ -106,14 +122,18 @@ async function createSetupSideEffects(
       esClient,
       getPreconfiguredOutputFromConfig(appContextService.getConfig())
     ),
-
     settingsService.settingsSetup(soClient),
   ]);
 
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
+  logger.debug('Backfilling output performance presets');
+  await outputService.backfillAllOutputPresets(soClient, esClient);
+
   logger.debug('Setting up Fleet Elasticsearch assets');
+  let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
+  stepSpan?.end();
 
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
@@ -136,6 +156,7 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up initial Fleet packages');
 
+  stepSpan = apm.startSpan('Install preconfigured packages and policies', 'preconfiguration');
   const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
     await ensurePreconfiguredPackagesAndPolicies(
       soClient,
@@ -146,46 +167,65 @@ async function createSetupSideEffects(
       defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
+  stepSpan?.end();
 
+  stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
   const packagePolicyUpgradeErrors = (
     await upgradeManagedPackagePolicies(soClient, esClient)
   ).filter((result) => (result.errors ?? []).length > 0);
-
-  const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
+  stepSpan?.end();
 
   logger.debug('Upgrade Fleet package install versions');
+  stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
+  stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');
+  stepSpan = apm.startSpan('Configure message signing', 'preconfiguration');
   if (!appContextService.getMessageSigningService()?.isEncryptionAvailable) {
     logger.warn(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
     );
   }
-  await appContextService.getMessageSigningService()?.generateKeyPair();
-
-  logger.debug('Generating Agent uninstall tokens');
-  if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-    logger.warn(
-      'xpack.encryptedSavedObjects.encryptionKey is not configured, agent uninstall tokens are being stored in plain text'
-    );
+  let messageSigningServiceNonFatalError: { error: MessageSigningError } | undefined;
+  try {
+    await appContextService.getMessageSigningService()?.generateKeyPair();
+  } catch (error) {
+    if (error instanceof MessageSigningError) {
+      messageSigningServiceNonFatalError = { error };
+    } else {
+      throw error;
+    }
   }
-  await appContextService.getUninstallTokenService()?.generateTokensForAllPolicies();
+  stepSpan?.end();
 
-  if (appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
-    logger.debug('Checking for and encrypting plain text uninstall tokens');
-    await appContextService.getUninstallTokenService()?.encryptTokens();
-  }
+  stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
 
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
+  stepSpan?.end();
 
-  logger.debug('Setting up Fleet enrollment keys');
-  await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
+  logger.debug(
+    'Setting up Fleet enrollment keys and verifying fleet server policies are not out-of-sync'
+  );
+  await ensureAgentPoliciesFleetServerKeysAndPolicies({ soClient, esClient, logger });
+  stepSpan?.end();
+
+  const nonFatalErrors = [
+    ...preconfiguredPackagesNonFatalErrors,
+    ...packagePolicyUpgradeErrors,
+    ...(messageSigningServiceNonFatalError ? [messageSigningServiceNonFatalError] : []),
+  ];
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
-    formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
+    formatNonFatalErrors(nonFatalErrors)
+      .map((e) => JSON.stringify(e))
+      .forEach((error) => {
+        logger.info(error);
+        apm.captureError(error);
+      });
   }
 
   logger.info('Fleet setup completed');
@@ -222,6 +262,7 @@ export async function ensureFleetGlobalEsAssets(
           esClient,
           installation,
         }).catch((err) => {
+          apm.captureError(err);
           logger.error(
             `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
           );
@@ -230,34 +271,6 @@ export async function ensureFleetGlobalEsAssets(
       { concurrency: 10 }
     );
   }
-}
-
-async function ensureDefaultEnrollmentAPIKeysExists(
-  soClient: SavedObjectsClientContract,
-  esClient: ElasticsearchClient,
-  options?: { forceRecreate?: boolean }
-) {
-  const security = appContextService.getSecurity();
-  if (!security) {
-    return;
-  }
-
-  if (!(await security.authc.apiKeys.areAPIKeysEnabled())) {
-    return;
-  }
-
-  const { items: agentPolicies } = await agentPolicyService.list(soClient, {
-    perPage: SO_SEARCH_LIMIT,
-  });
-
-  await pMap(
-    agentPolicies,
-    (agentPolicy) =>
-      ensureDefaultEnrollmentAPIKeyForAgentPolicy(soClient, esClient, agentPolicy.id),
-    {
-      concurrency: 20,
-    }
-  );
 }
 
 /**
@@ -308,6 +321,7 @@ export async function ensureFleetDirectories() {
 
   try {
     await fs.stat(bundledPackageLocation);
+    logger.debug(`Bundled package directory ${bundledPackageLocation} exists`);
   } catch (error) {
     logger.warn(
       `Bundled package directory ${bundledPackageLocation} does not exist. All packages will be sourced from ${registryUrl}.`

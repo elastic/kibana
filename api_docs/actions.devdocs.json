@@ -2845,6 +2845,27 @@
             "path": "x-pack/plugins/actions/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-server.ActionTypeExecutorOptions.request",
+            "type": "Object",
+            "tags": [],
+            "label": "request",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.KibanaRequest",
+                "text": "KibanaRequest"
+              },
+              "<unknown, unknown, unknown, any> | undefined"
+            ],
+            "path": "x-pack/plugins/actions/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4574,6 +4595,27 @@
             "path": "x-pack/plugins/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.ActionTypeExecutorResult.errorSource",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "errorSource",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "taskManager",
+                "scope": "common",
+                "docId": "kibTaskManagerPluginApi",
+                "section": "def-common.TaskErrorSource",
+                "text": "TaskErrorSource"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5170,15 +5212,15 @@
         "signature": [
           "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T[K]> : T[K]; }"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5215,6 +5257,51 @@
       },
       {
         "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_EXCHANGE_URL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_EXCHANGE_URL",
+        "description": [],
+        "signature": [
+          "\"https://login.microsoftonline.com\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_GRAPH_API_SCOPE",
+        "description": [],
+        "signature": [
+          "\"https://graph.microsoft.com/.default\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.DEFAULT_MICROSOFT_GRAPH_API_URL",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_MICROSOFT_GRAPH_API_URL",
+        "description": [],
+        "signature": [
+          "\"https://graph.microsoft.com/v1.0\""
+        ],
+        "path": "x-pack/plugins/actions/common/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
         "id": "def-common.ExecutionLogSortFields",
         "type": "Type",
         "tags": [],
@@ -5230,13 +5317,28 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIConnectorFeatureId",
+        "id": "def-common.GenerativeAIForObservabilityConnectorFeatureId",
         "type": "string",
         "tags": [],
-        "label": "GenerativeAIConnectorFeatureId",
+        "label": "GenerativeAIForObservabilityConnectorFeatureId",
         "description": [],
         "signature": [
-          "\"generativeAI\""
+          "\"generativeAIForObservability\""
+        ],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "GenerativeAIForSecurityConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"generativeAIForSecurity\""
         ],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5283,15 +5385,15 @@
         "signature": [
           "(requested: ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T>) => T"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5306,15 +5408,15 @@
             "signature": [
               "{ [K in keyof T as CamelToSnake<RenameActionToConnector<Extract<K, string>>>]: K extends \"frequency\" ? ",
               {
-                "pluginId": "actions",
+                "pluginId": "@kbn/actions-types",
                 "scope": "common",
-                "docId": "kibActionsPluginApi",
+                "docId": "kibKbnActionsTypesPluginApi",
                 "section": "def-common.AsApiContract",
                 "text": "AsApiContract"
               },
               "<T[K]> : T[K]; }"
             ],
-            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5331,23 +5433,23 @@
         "signature": [
           "(responded: T) => T extends (infer Item)[] ? ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<Item>[] : ",
           {
-            "pluginId": "actions",
+            "pluginId": "@kbn/actions-types",
             "scope": "common",
-            "docId": "kibActionsPluginApi",
+            "docId": "kibKbnActionsTypesPluginApi",
             "section": "def-common.AsApiContract",
             "text": "AsApiContract"
           },
           "<T>"
         ],
-        "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+        "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -5362,7 +5464,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/plugins/actions/common/rewrite_request_case.ts",
+            "path": "packages/kbn-actions-types/rewrite_request_case_types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -5570,10 +5672,10 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.GenerativeAIFeature",
+        "id": "def-common.GenerativeAIForObservabilityFeature",
         "type": "Object",
         "tags": [],
-        "label": "GenerativeAIFeature",
+        "label": "GenerativeAIForObservabilityFeature",
         "description": [],
         "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -5581,7 +5683,7 @@
         "children": [
           {
             "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.id",
+            "id": "def-common.GenerativeAIForObservabilityFeature.id",
             "type": "string",
             "tags": [],
             "label": "id",
@@ -5592,7 +5694,7 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.name",
+            "id": "def-common.GenerativeAIForObservabilityFeature.name",
             "type": "string",
             "tags": [],
             "label": "name",
@@ -5603,7 +5705,54 @@
           },
           {
             "parentPluginId": "actions",
-            "id": "def-common.GenerativeAIFeature.compatibility",
+            "id": "def-common.GenerativeAIForObservabilityFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.GenerativeAIForSecurityFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "GenerativeAIForSecurityFeature",
+        "description": [],
+        "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/plugins/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.GenerativeAIForSecurityFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

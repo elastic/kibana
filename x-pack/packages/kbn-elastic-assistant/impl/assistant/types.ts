@@ -17,5 +17,7 @@ export interface Prompt {
 }
 
 export interface KnowledgeBaseConfig {
-  assistantLangChain: boolean;
+  isEnabledRAGAlerts: boolean;
+  isEnabledKnowledgeBase: boolean;
+  latestAlerts: number;
 }

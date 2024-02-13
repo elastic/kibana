@@ -6,9 +6,11 @@
  */
 
 import { isEqual } from 'lodash';
+import { LogsExplorerLocatorParams } from '@kbn/deeplinks-observability';
 import {
   ALERT_ACTION_GROUP,
   ALERT_EVALUATION_VALUES,
+  ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
   ALERT_GROUP,
 } from '@kbn/rule-data-utils';
@@ -16,12 +18,14 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import { IBasePath, Logger } from '@kbn/core/server';
 import { LifecycleRuleExecutor } from '@kbn/rule-registry-plugin/server';
+import { getEvaluationValues, getThreshold } from './lib/get_values';
 import { AlertsLocatorParams, getAlertUrl } from '../../../../common';
+import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { ObservabilityConfig } from '../../..';
 import { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, UNGROUPED_FACTORY_KEY } from './constants';
 import {
   AlertStates,
-  CustomThresholdRuleParams,
+  CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
   CustomThresholdAlertState,
   CustomThresholdAlertContext,
@@ -48,18 +52,23 @@ import { EvaluatedRuleParams, evaluateRule } from './lib/evaluate_rule';
 import { MissingGroupsRecord } from './lib/check_missing_group';
 import { convertStringsToMissingGroupsRecord } from './lib/convert_strings_to_missing_groups_record';
 
+export interface CustomThresholdLocators {
+  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  logsExplorerLocator?: LocatorPublic<LogsExplorerLocatorParams>;
+}
+
 export const createCustomThresholdExecutor = ({
-  alertsLocator,
   basePath,
   logger,
   config,
+  locators: { alertsLocator, logsExplorerLocator },
 }: {
   basePath: IBasePath;
   logger: Logger;
   config: ObservabilityConfig;
-  alertsLocator?: LocatorPublic<AlertsLocatorParams>;
+  locators: CustomThresholdLocators;
 }): LifecycleRuleExecutor<
-  CustomThresholdRuleParams,
+  CustomThresholdRuleTypeParams,
   CustomThresholdRuleTypeState,
   CustomThresholdAlertState,
   CustomThresholdAlertContext,
@@ -92,6 +101,7 @@ export const createCustomThresholdExecutor = ({
       getAlertByAlertUuid,
       getAlertStartedDate,
       searchSourceClient,
+      alertFactory: baseAlertFactory,
     } = services;
 
     const alertFactory: CustomThresholdAlertFactory = (
@@ -100,6 +110,7 @@ export const createCustomThresholdExecutor = ({
       actionGroup,
       additionalContext,
       evaluationValues,
+      threshold,
       group
     ) =>
       alertWithLifecycle({
@@ -108,6 +119,7 @@ export const createCustomThresholdExecutor = ({
           [ALERT_REASON]: reason,
           [ALERT_ACTION_GROUP]: actionGroup,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
+          [ALERT_EVALUATION_THRESHOLD]: threshold,
           [ALERT_GROUP]: group,
           ...flattenAdditionalContext(additionalContext),
         },
@@ -131,22 +143,23 @@ export const createCustomThresholdExecutor = ({
         ? state.missingGroups
         : [];
 
-    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration!);
-    const dataView = initialSearchSource.getField('index')!.getIndexPattern();
-    const dataViewName = initialSearchSource.getField('index')!.name;
-    const timeFieldName = initialSearchSource.getField('index')?.timeFieldName;
-    if (!dataView) {
+    const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
+    const dataView = initialSearchSource.getField('index')!;
+    const { id: dataViewId, timeFieldName } = dataView;
+    const dataViewIndexPattern = dataView.getIndexPattern();
+    const dataViewName = dataView.getName();
+    if (!dataViewIndexPattern) {
       throw new Error('No matched data view');
     } else if (!timeFieldName) {
       throw new Error('The selected data view does not have a timestamp field');
     }
 
-    // Calculate initial start and end date with no time window, as each criteria has it's own time window
+    // Calculate initial start and end date with no time window, as each criterion has its own time window
     const { dateStart, dateEnd } = getTimeRange();
     const alertResults = await evaluateRule(
       services.scopedClusterClient.asCurrentUser,
       params as EvaluatedRuleParams,
-      dataView,
+      dataViewIndexPattern,
       timeFieldName,
       compositeSize,
       alertOnGroupDisappear,
@@ -169,8 +182,17 @@ export const createCustomThresholdExecutor = ({
     const hasGroups = !isEqual(groups, [UNGROUPED_FACTORY_KEY]);
     let scheduledActionsCount = 0;
 
+    const alertLimit = baseAlertFactory.alertLimit.getValue();
+    let hasReachedLimit = false;
+
     // The key of `groups` is the alert instance ID.
     for (const group of groups) {
+      if (scheduledActionsCount >= alertLimit) {
+        // need to set this so that warning is displayed in the UI and in the logs
+        hasReachedLimit = true;
+        break; // once limit is reached, we break out of the loop and don't schedule any more alerts
+      }
+
       // AND logic; all criteria must be across the threshold
       const shouldAlertFire = alertResults.every((result) => result[group]?.shouldFire);
       // AND logic; because we need to evaluate all criteria, if one of them reports no data then the
@@ -223,6 +245,8 @@ export const createCustomThresholdExecutor = ({
 
       if (reason) {
         const timestamp = startedAt.toISOString();
+        const threshold = getThreshold(criteria);
+        const evaluationValues = getEvaluationValues(alertResults, group);
         const actionGroupId: CustomThresholdActionGroup =
           nextState === AlertStates.OK
             ? RecoveredActionGroup.id
@@ -240,19 +264,13 @@ export const createCustomThresholdExecutor = ({
           new Set([...(additionalContext.tags ?? []), ...options.rule.tags])
         );
 
-        const evaluationValues = alertResults.reduce((acc: Array<number | null>, result) => {
-          if (result[group]) {
-            acc.push(result[group].currentValue);
-          }
-          return acc;
-        }, []);
-
         const alert = alertFactory(
           `${group}`,
           reason,
           actionGroupId,
           additionalContext,
           evaluationValues,
+          threshold,
           groupByKeysObjectMapping[group]
         );
         const alertUuid = getAlertUuid(group);
@@ -270,17 +288,26 @@ export const createCustomThresholdExecutor = ({
           group: groupByKeysObjectMapping[group],
           reason,
           timestamp,
-          value: alertResults.map((result, index) => {
+          value: alertResults.map((result) => {
             const evaluation = result[group];
             if (!evaluation) {
               return null;
             }
             return formatAlertResult(evaluation).currentValue;
           }),
+          viewInAppUrl: getViewInAppUrl({
+            dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+            filter: params.searchConfiguration.query.query,
+            logsExplorerLocator,
+            metrics: alertResults.length === 1 ? alertResults[0][group].metrics : [],
+            startedAt: indexedStartedAt,
+          }),
           ...additionalContext,
         });
       }
     }
+
+    baseAlertFactory.alertLimit.setLimitReached(hasReachedLimit);
     const { getRecoveredAlerts } = services.alertFactory.done();
     const recoveredAlerts = getRecoveredAlerts();
 
@@ -294,6 +321,7 @@ export const createCustomThresholdExecutor = ({
       const alertUuid = getAlertUuid(recoveredAlertId);
       const timestamp = startedAt.toISOString();
       const indexedStartedAt = getAlertStartedDate(recoveredAlertId) ?? timestamp;
+      const group = groupByKeysObjectForRecovered[recoveredAlertId];
 
       const alertHits = alertUuid ? await getAlertByAlertUuid(alertUuid) : undefined;
       const additionalContext = getContextForRecoveredAlerts(alertHits);
@@ -306,8 +334,15 @@ export const createCustomThresholdExecutor = ({
           alertsLocator,
           basePath.publicBaseUrl
         ),
-        group: groupByKeysObjectForRecovered[recoveredAlertId],
+        group,
         timestamp: startedAt.toISOString(),
+        viewInAppUrl: getViewInAppUrl({
+          dataViewId: params.searchConfiguration?.index?.title ?? dataViewId,
+          filter: params.searchConfiguration.query.query,
+          logsExplorerLocator,
+          metrics: params.criteria[0]?.metrics,
+          startedAt: indexedStartedAt,
+        }),
         ...additionalContext,
       });
     }

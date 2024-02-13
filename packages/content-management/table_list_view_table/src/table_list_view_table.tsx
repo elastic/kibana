@@ -27,7 +27,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useOpenContentEditor } from '@kbn/content-management-content-editor';
-import type { OpenContentEditorParams } from '@kbn/content-management-content-editor';
+import type {
+  OpenContentEditorParams,
+  SavedObjectsReference,
+} from '@kbn/content-management-content-editor';
+import type { UserContentCommonSchema } from '@kbn/content-management-table-list-view-common';
 
 import {
   Table,
@@ -37,7 +41,7 @@ import {
   UpdatedAtField,
 } from './components';
 import { useServices } from './services';
-import type { SavedObjectsReference, SavedObjectsFindOptionsReference } from './services';
+import type { SavedObjectsFindOptionsReference } from './services';
 import { getReducer } from './reducer';
 import type { SortColumnField } from './components';
 import { useTags } from './use_tags';
@@ -92,11 +96,6 @@ export interface TableListViewTableProps<
   editItem?(item: T): void;
 
   /**
-   * Handler to set edit action visiblity, and content editor readonly state per item. If not provided all non-managed items are considered editable. Note: Items with the managed property set to true will always be non-editable.
-   */
-  itemIsEditable?(item: T): boolean;
-
-  /**
    * Name for the column containing the "title" value.
    */
   titleColumnName?: string;
@@ -140,18 +139,6 @@ export interface State<T extends UserContentCommonSchema = UserContentCommonSche
   tableSort: {
     field: SortColumnField;
     direction: Direction;
-  };
-}
-
-export interface UserContentCommonSchema {
-  id: string;
-  updatedAt: string;
-  managed?: boolean;
-  references: SavedObjectsReference[];
-  type: string;
-  attributes: {
-    title: string;
-    description?: string;
   };
 }
 
@@ -267,7 +254,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   findItems,
   createItem,
   editItem,
-  itemIsEditable,
   deleteItems,
   getDetailViewLink,
   onClickTitle,
@@ -448,14 +434,34 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     items,
   });
 
-  const isEditable = useCallback(
-    (item: T) => {
-      // If the So is `managed` it is never editable.
-      if (item.managed) return false;
-      return itemIsEditable?.(item) ?? true;
-    },
-    [itemIsEditable]
-  );
+  const tableItemsRowActions = useMemo(() => {
+    return items.reduce<TableItemsRowActions>((acc, item) => {
+      const ret = {
+        ...acc,
+        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
+      };
+
+      if (item.managed) {
+        ret[item.id] = {
+          ...ret[item.id],
+          delete: {
+            enabled: false,
+            reason: i18n.translate('contentManagement.tableList.managedItemNoDelete', {
+              defaultMessage: 'This item is managed by Elastic. It cannot be deleted.',
+            }),
+          },
+          edit: {
+            enabled: false,
+            reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
+              defaultMessage: 'This item is managed by Elastic. Clone it before making changes.',
+            }),
+          },
+        };
+      }
+
+      return ret;
+    }, {});
+  }, [items, rowItemActions]);
 
   const inspectItem = useCallback(
     (item: T) => {
@@ -472,7 +478,9 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
         },
         entityName,
         ...contentEditor,
-        isReadonly: contentEditor.isReadonly || !isEditable(item),
+        isReadonly:
+          contentEditor.isReadonly || tableItemsRowActions[item.id]?.edit?.enabled === false,
+        readonlyReason: tableItemsRowActions[item.id]?.edit?.reason,
         onSave:
           contentEditor.onSave &&
           (async (args) => {
@@ -483,7 +491,14 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           }),
       });
     },
-    [getTagIdsFromReferences, openContentEditor, entityName, contentEditor, isEditable, fetchItems]
+    [
+      getTagIdsFromReferences,
+      openContentEditor,
+      entityName,
+      contentEditor,
+      tableItemsRowActions,
+      fetchItems,
+    ]
   );
 
   const tableColumns = useMemo(() => {
@@ -557,7 +572,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
           ),
           icon: 'pencil',
           type: 'icon',
-          available: (item) => isEditable(item),
+          available: (item) => Boolean(tableItemsRowActions[item.id]?.edit?.enabled),
           enabled: (v) => !(v as unknown as { error: string })?.error,
           onClick: editItem,
           'data-test-subj': `edit-action`,
@@ -613,7 +628,7 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
     addOrRemoveExcludeTagFilter,
     addOrRemoveIncludeTagFilter,
     DateFormatterComp,
-    isEditable,
+    tableItemsRowActions,
     inspectItem,
   ]);
 
@@ -624,15 +639,6 @@ function TableListViewTableComp<T extends UserContentCommonSchema>({
   const selectedItems = useMemo(() => {
     return selectedIds.map((selectedId) => itemsById[selectedId]);
   }, [selectedIds, itemsById]);
-
-  const tableItemsRowActions = useMemo(() => {
-    return items.reduce<TableItemsRowActions>((acc, item) => {
-      return {
-        ...acc,
-        [item.id]: rowItemActions ? rowItemActions(item) : undefined,
-      };
-    }, {});
-  }, [items, rowItemActions]);
 
   // ------------
   // Callbacks

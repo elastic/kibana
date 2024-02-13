@@ -16,7 +16,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { getDisplayedFeaturePrivileges } from './__fixtures__';
 import type { PrivilegeSummaryTableProps } from './privilege_summary_table';
 import { PrivilegeSummaryTable } from './privilege_summary_table';
-import type { RoleKibanaPrivilege } from '../../../../../../../common/model';
+import type { RoleKibanaPrivilege } from '../../../../../../../common';
 import { kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 

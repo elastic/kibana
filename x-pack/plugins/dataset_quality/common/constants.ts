@@ -6,4 +6,9 @@
  */
 
 export const DATASET_QUALITY_APP_ID = 'dataset_quality';
-export const DATA_STREAMS_STATS_URL = '/internal/dataset_quality/data_streams/stats';
+export const DEFAULT_DATASET_TYPE = 'logs';
+
+export const POOR_QUALITY_MINIMUM_PERCENTAGE = 3;
+export const DEGRADED_QUALITY_MINIMUM_PERCENTAGE = 0;
+export const DEFAULT_SORT_FIELD = 'title';
+export const DEFAULT_SORT_DIRECTION = 'asc';

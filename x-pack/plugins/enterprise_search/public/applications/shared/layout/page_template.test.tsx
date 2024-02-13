@@ -228,4 +228,41 @@ describe('EnterpriseSearchPageTemplateWrapper', () => {
       });
     });
   });
+
+  describe('Embedded Console', () => {
+    it('renders embedded console if available', () => {
+      const renderMock = jest.fn();
+      renderMock.mockReturnValue(null);
+
+      setMockValues({
+        readOnlyMode: false,
+        consolePlugin: { renderEmbeddableConsole: renderMock },
+      });
+
+      shallow(
+        <EnterpriseSearchPageTemplateWrapper>
+          <div className="hello">world</div>
+        </EnterpriseSearchPageTemplateWrapper>
+      );
+
+      expect(renderMock).toHaveBeenCalled();
+    });
+    it('Hides embedded console if available but page template prop set to hide', () => {
+      const renderMock = jest.fn();
+      renderMock.mockReturnValue(null);
+
+      setMockValues({
+        readOnlyMode: false,
+        consolePlugin: { renderEmbeddableConsole: renderMock },
+      });
+
+      shallow(
+        <EnterpriseSearchPageTemplateWrapper hideEmbeddedConsole>
+          <div className="hello">world</div>
+        </EnterpriseSearchPageTemplateWrapper>
+      );
+
+      expect(renderMock).not.toHaveBeenCalled();
+    });
+  });
 });

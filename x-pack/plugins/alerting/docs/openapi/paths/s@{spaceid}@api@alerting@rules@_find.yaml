@@ -20,7 +20,7 @@ get:
         type: string
         default: OR
         examples:
-          - OR
+          - AND
     - name: fields
       in: query
       description: The fields to return in the `attributes` key of the response.
@@ -69,12 +69,16 @@ get:
       description: An Elasticsearch simple_query_string query that filters the objects in the response.
       schema:
         type: string
+        examples:
+          - threshold +-test*
     - name: search_fields
       in: query
       description: The fields to perform the simple_query_string parsed query against.
       schema:
         oneOf:
           - type: string
+            examples:
+              - name
           - type: array
             items:
               type: string

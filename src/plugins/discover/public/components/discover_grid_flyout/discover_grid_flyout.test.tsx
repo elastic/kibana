@@ -7,8 +7,8 @@
  */
 
 import React from 'react';
+import { EuiButtonIcon, EuiContextMenuItem, EuiPopover } from '@elastic/eui';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import { EuiFlexItem } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import { DiscoverGridFlyout, DiscoverGridFlyoutProps } from './discover_grid_flyout';
@@ -35,6 +35,22 @@ jest.mock('../../customizations', () => ({
   ...jest.requireActual('../../customizations'),
   useDiscoverCustomization: jest.fn(),
 }));
+
+let mockBreakpointSize: string | null = null;
+
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+  return {
+    ...original,
+    useIsWithinBreakpoints: jest.fn((breakpoints: string[]) => {
+      if (mockBreakpointSize && breakpoints.includes(mockBreakpointSize)) {
+        return true;
+      }
+
+      return original.useIsWithinBreakpoints(breakpoints);
+    }),
+  };
+});
 
 const waitNextTick = () => new Promise((resolve) => setTimeout(resolve, 0));
 
@@ -227,7 +243,7 @@ describe('Discover flyout', function () {
     const singleDocumentView = findTestSubject(component, 'docTableRowAction');
     expect(singleDocumentView.length).toBeFalsy();
     const flyoutTitle = findTestSubject(component, 'docTableRowDetailsTitle');
-    expect(flyoutTitle.text()).toBe('Expanded row');
+    expect(flyoutTitle.text()).toBe('Row');
   });
 
   describe('with applied customizations', () => {
@@ -246,17 +262,32 @@ describe('Discover flyout', function () {
 
     describe('when actions are customized', () => {
       it('should display actions added by getActionItems', async () => {
+        mockBreakpointSize = 'xl';
         mockFlyoutCustomization.actions = {
           getActionItems: jest.fn(() => [
             {
               id: 'action-item-1',
               enabled: true,
-              Content: () => <EuiFlexItem data-test-subj="customActionItem1">Action 1</EuiFlexItem>,
+              label: 'Action 1',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem1',
+              onClick: jest.fn(),
             },
             {
               id: 'action-item-2',
               enabled: true,
-              Content: () => <EuiFlexItem data-test-subj="customActionItem2">Action 2</EuiFlexItem>,
+              label: 'Action 2',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem2',
+              onClick: jest.fn(),
+            },
+            {
+              id: 'action-item-3',
+              enabled: false,
+              label: 'Action 3',
+              iconType: 'document',
+              dataTestSubj: 'customActionItem3',
+              onClick: jest.fn(),
             },
           ]),
         };
@@ -268,6 +299,88 @@ describe('Discover flyout', function () {
 
         expect(action1.text()).toBe('Action 1');
         expect(action2.text()).toBe('Action 2');
+        expect(findTestSubject(component, 'customActionItem3').exists()).toBe(false);
+        mockBreakpointSize = null;
+      });
+
+      it('should display multiple actions added by getActionItems', async () => {
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() =>
+            Array.from({ length: 5 }, (_, i) => ({
+              id: `action-item-${i}`,
+              enabled: true,
+              label: `Action ${i}`,
+              iconType: 'document',
+              dataTestSubj: `customActionItem${i}`,
+              onClick: jest.fn(),
+            }))
+          ),
+        };
+
+        const { component } = await mountComponent({});
+        expect(
+          findTestSubject(component, 'docViewerFlyoutActions')
+            .find(EuiButtonIcon)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual([
+          'docTableRowAction',
+          'customActionItem0',
+          'customActionItem1',
+          'docViewerMoreFlyoutActionsButton',
+        ]);
+
+        act(() => {
+          findTestSubject(component, 'docViewerMoreFlyoutActionsButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(
+          component
+            .find(EuiPopover)
+            .find(EuiContextMenuItem)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual(['customActionItem2', 'customActionItem3', 'customActionItem4']);
+      });
+
+      it('should display multiple actions added by getActionItems in mobile view', async () => {
+        mockBreakpointSize = 's';
+
+        mockFlyoutCustomization.actions = {
+          getActionItems: jest.fn(() =>
+            Array.from({ length: 3 }, (_, i) => ({
+              id: `action-item-${i}`,
+              enabled: true,
+              label: `Action ${i}`,
+              iconType: 'document',
+              dataTestSubj: `customActionItem${i}`,
+              onClick: jest.fn(),
+            }))
+          ),
+        };
+
+        const { component } = await mountComponent({});
+        expect(findTestSubject(component, 'docViewerFlyoutActions').length).toBe(0);
+
+        act(() => {
+          findTestSubject(component, 'docViewerMobileActionsButton').simulate('click');
+        });
+
+        component.update();
+
+        expect(
+          component
+            .find(EuiPopover)
+            .find(EuiContextMenuItem)
+            .map((button) => button.prop('data-test-subj'))
+        ).toEqual([
+          'docTableRowAction',
+          'customActionItem0',
+          'customActionItem1',
+          'customActionItem2',
+        ]);
+
+        mockBreakpointSize = null;
       });
 
       it('should allow disabling default actions', async () => {
@@ -315,11 +428,14 @@ describe('Discover flyout', function () {
       it('should provide an actions prop collection to optionally update the grid content', async () => {
         mockFlyoutCustomization.Content = ({ actions }) => (
           <>
-            <button data-test-subj="addColumn" onClick={() => actions.addColumn('message')} />
-            <button data-test-subj="removeColumn" onClick={() => actions.removeColumn('message')} />
+            <button data-test-subj="addColumn" onClick={() => actions.onAddColumn?.('message')} />
+            <button
+              data-test-subj="removeColumn"
+              onClick={() => actions.onRemoveColumn?.('message')}
+            />
             <button
               data-test-subj="addFilter"
-              onClick={() => actions.addFilter?.('_exists_', 'message', '+')}
+              onClick={() => actions.filter?.('_exists_', 'message', '+')}
             />
           </>
         );

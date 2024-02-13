@@ -12,6 +12,7 @@ import type {
   BaseParamsV2,
   BasePayload,
   BasePayloadV2,
+  CsvPagingStrategy,
 } from '@kbn/reporting-common/types';
 
 export * from './constants';
@@ -41,7 +42,10 @@ interface CsvFromSavedObjectBase {
 export type JobParamsCsvFromSavedObject = CsvFromSavedObjectBase &
   Omit<BaseParamsV2, 'title'> & { title?: string };
 
-export type TaskPayloadCsvFromSavedObject = CsvFromSavedObjectBase & BasePayloadV2;
+export interface TaskPayloadCsvFromSavedObject extends CsvFromSavedObjectBase, BasePayloadV2 {
+  objectType: 'search';
+  pagingStrategy: CsvPagingStrategy;
+}
 
 export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 
@@ -51,3 +55,5 @@ export const CSV_SEARCHSOURCE_IMMEDIATE_TYPE = 'csv_searchsource_immediate';
 // but the extension points are still needed for pre-existing scripted automation, until 8.0
 export const CSV_REPORT_TYPE_DEPRECATED = 'CSV';
 export const CSV_JOB_TYPE_DEPRECATED = 'csv';
+
+export { getQueryFromCsvJob, type QueryInspection } from './lib/get_query_from_job';

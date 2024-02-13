@@ -15,19 +15,21 @@ export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve,
 
 export interface CallAgentWithRetryParams {
   agent: AgentExecutorEvaluator;
+  exampleId?: string;
   messages: BaseMessage[];
   logger: Logger | ToolingLog;
   maxRetries?: number;
 }
 export const callAgentWithRetry = async ({
   agent,
+  exampleId,
   messages,
   logger,
   maxRetries = 3,
 }: CallAgentWithRetryParams) => {
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      return await agent(messages);
+      return await agent(messages, exampleId);
     } catch (error) {
       // Check for 429, and then if there is a retry-after header
       const { isRateLimitError, retryAfter } = parseErrorMessage(error);

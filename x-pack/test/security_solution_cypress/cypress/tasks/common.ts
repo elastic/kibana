@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { recurse } from 'cypress-recurse';
 import { KIBANA_LOADING_ICON } from '../screens/security_header';
 import { EUI_BASIC_TABLE_LOADING } from '../screens/common/controls';
 
@@ -80,4 +81,14 @@ export const waitForWelcomePanelToBeLoaded = () => {
 export const waitForTableToLoad = () => {
   cy.get(EUI_BASIC_TABLE_LOADING).should('exist');
   cy.get(EUI_BASIC_TABLE_LOADING).should('not.exist');
+};
+
+export const waitForTabToBeLoaded = (tabId: string) => {
+  recurse(
+    () => cy.get(tabId).click(),
+    ($el) => expect($el).to.have.class('euiTab-isSelected'),
+    {
+      delay: 500,
+    }
+  );
 };

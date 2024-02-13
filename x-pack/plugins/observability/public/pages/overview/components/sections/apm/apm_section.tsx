@@ -22,7 +22,7 @@ import moment from 'moment';
 import React, { useContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ThemeContext } from 'styled-components';
-import { useChartTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
+import { useChartThemes, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { useDatePickerContext } from '../../../../../hooks/use_date_picker_context';
 import { SectionContainer } from '../section_container';
 import { getDataHandler } from '../../../../../context/has_data_context/data_handler';
@@ -55,7 +55,7 @@ function formatTpmStat(value?: number) {
 
 export function APMSection({ bucketSize }: Props) {
   const theme = useContext(ThemeContext);
-  const chartTheme = useChartTheme();
+  const chartThemes = useChartThemes();
   const history = useHistory();
   const { forceUpdate, hasDataMap } = useHasData();
   const { relativeStart, relativeEnd, absoluteStart, absoluteEnd, lastUpdated } =
@@ -147,7 +147,7 @@ export function APMSection({ bucketSize }: Props) {
       <ChartContainer isInitialLoad={isLoading && !data}>
         <Settings
           onBrushEnd={(event) => onBrushEnd({ x: (event as XYBrushEvent).x, history })}
-          theme={chartTheme}
+          {...chartThemes}
           showLegend={false}
           xDomain={{ min, max }}
           locale={i18n.getLocale()}

@@ -6,27 +6,26 @@
  * Side Public License, v 1.
  */
 
+import deepEqual from 'fast-deep-equal';
+import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
-import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
-import { get, isEqual } from 'lodash';
-import deepEqual from 'fast-deep-equal';
-import { Subscription, lastValueFrom, switchMap } from 'rxjs';
-import { distinctUntilChanged, skip, map } from 'rxjs/operators';
+import { lastValueFrom, Subscription, switchMap } from 'rxjs';
+import { distinctUntilChanged, map, skip } from 'rxjs/operators';
 
+import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
+import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
 import {
-  compareFilters,
   buildRangeFilter,
+  compareFilters,
   COMPARE_ALL_OPTIONS,
-  RangeFilterParams,
   Filter,
+  RangeFilterParams,
 } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { Embeddable, IContainer } from '@kbn/embeddable-plugin/public';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 
 import {
   ControlInput,
@@ -35,12 +34,12 @@ import {
   RANGE_SLIDER_CONTROL,
 } from '../..';
 import { pluginServices } from '../../services';
-import { RangeSliderReduxState } from '../types';
-import { IClearableControl } from '../../types';
 import { ControlsDataService } from '../../services/data/types';
-import { RangeSliderControl } from '../components/range_slider_control';
 import { ControlsDataViewsService } from '../../services/data_views/types';
+import { IClearableControl } from '../../types';
+import { RangeSliderControl } from '../components/range_slider_control';
 import { getDefaultComponentState, rangeSliderReducers } from '../range_slider_reducers';
+import { RangeSliderReduxState } from '../types';
 
 const diffDataFetchProps = (
   current?: RangeSliderDataFetchProps,
@@ -431,7 +430,7 @@ export class RangeSliderEmbeddable
     this.node = node;
     const ControlsServicesProvider = pluginServices.getContextProvider();
     ReactDOM.render(
-      <KibanaThemeProvider theme$={pluginServices.getServices().theme.theme$}>
+      <KibanaThemeProvider theme={pluginServices.getServices().core.theme}>
         <ControlsServicesProvider>
           <RangeSliderControlContext.Provider value={this}>
             <RangeSliderControl />

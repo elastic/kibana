@@ -19,11 +19,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'header',
     'timePicker',
-    'unifiedFieldList',
-    'visualize',
     'svlCommonNavigation',
   ]);
 
@@ -38,6 +37,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // and load a set of makelogs data
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace(defaultSettings);
+      await PageObjects.svlCommonPage.loginWithRole('viewer');
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.timePicker.setDefaultAbsoluteRange();
     });
@@ -77,8 +77,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('Side nav', function () {
-      // Discover does not exist in Serverless O11y side nav (Log Explorer instead)
-      this.tags('skipSvlOblt');
+      this.tags([
+        'skipSvlOblt', // the "Discover" side nav entry does something different in oblt
+      ]);
 
       it('should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover', async () => {
         await PageObjects.common.navigateToApp('discover');

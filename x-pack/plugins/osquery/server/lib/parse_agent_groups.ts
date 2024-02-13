@@ -6,8 +6,8 @@
  */
 
 import { uniq } from 'lodash';
-import type { SavedObjectsClientContract } from '@kbn/core/server';
-import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { OSQUERY_INTEGRATION_NAME } from '../../common';
 import type { OsqueryAppContext } from './osquery_app_context_services';
 
@@ -20,15 +20,56 @@ export interface AgentSelection {
 
 const PER_PAGE = 9000;
 
-const aggregateResults = async (
-  generator: (page: number, perPage: number) => Promise<{ results: string[]; total: number }>
+export const aggregateResults = async (
+  generator: (
+    page: number,
+    perPage: number,
+    searchAfter?: unknown[],
+    pitId?: string
+  ) => Promise<{ results: string[]; total: number; searchAfter?: unknown[] }>,
+  esClient: ElasticsearchClient,
+  context: OsqueryAppContext
 ) => {
-  const { results, total } = await generator(1, PER_PAGE);
+  let results: string[];
+  const { results: initialResults, total } = await generator(1, PER_PAGE);
   const totalPages = Math.ceil(total / PER_PAGE);
-  let currPage = 2;
-  while (currPage <= totalPages) {
-    const { results: additionalResults } = await generator(currPage++, PER_PAGE);
-    results.push(...additionalResults);
+  if (totalPages === 1) {
+    // One page only, no need for PIT
+    results = initialResults;
+  } else {
+    const { id: pitId } = await esClient.openPointInTime({
+      index: AGENTS_INDEX,
+      keep_alive: '10m',
+    });
+    let currentSort: unknown[] | undefined;
+    // Refetch first page with PIT
+    const { results: pitInitialResults, searchAfter } = await generator(
+      1,
+      PER_PAGE,
+      currentSort, // No searchAfter for first page, its built based on first page results
+      pitId
+    );
+    results = pitInitialResults;
+    currentSort = searchAfter;
+    let currPage = 2;
+    while (currPage <= totalPages) {
+      const { results: additionalResults, searchAfter: additionalSearchAfter } = await generator(
+        currPage++,
+        PER_PAGE,
+        currentSort,
+        pitId
+      );
+      results.push(...additionalResults);
+      currentSort = additionalSearchAfter;
+    }
+
+    try {
+      await esClient.closePointInTime({ id: pitId });
+    } catch (error) {
+      context.logFactory
+        .get()
+        .warn(`Error closing point in time with id: ${pitId}. Error: ${error.message}`);
+    }
   }
 
   return uniq<string>(results);
@@ -36,6 +77,7 @@ const aggregateResults = async (
 
 export const parseAgentSelection = async (
   soClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   context: OsqueryAppContext,
   agentSelection: AgentSelection
 ) => {
@@ -52,28 +94,42 @@ export const parseAgentSelection = async (
   const kueryFragments = ['status:online'];
 
   if (agentService && packagePolicyService) {
-    const osqueryPolicies = await aggregateResults(async (page, perPage) => {
-      const { items, total } = await packagePolicyService.list(soClient, {
-        kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
-        perPage,
-        page,
-      });
+    const osqueryPolicies = await aggregateResults(
+      async (page, perPage) => {
+        const { items, total } = await packagePolicyService.list(soClient, {
+          kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${OSQUERY_INTEGRATION_NAME}`,
+          perPage,
+          page,
+        });
 
-      return { results: items.map((it) => it.policy_id), total };
-    });
+        return { results: items.map((it) => it.policy_id), total };
+      },
+      esClient,
+      context
+    );
     kueryFragments.push(`policy_id:(${uniq(osqueryPolicies).join(' or ')})`);
     if (allAgentsSelected) {
       const kuery = kueryFragments.join(' and ');
-      const fetchedAgents = await aggregateResults(async (page, perPage) => {
-        const res = await agentService.listAgents({
-          perPage,
-          page,
-          kuery,
-          showInactive: false,
-        });
+      const fetchedAgents = await aggregateResults(
+        async (page, perPage, searchAfter?: unknown[], pitId?: string) => {
+          const res = await agentService.listAgents({
+            ...(searchAfter ? { searchAfter } : {}),
+            ...(pitId ? { pitId } : {}),
+            perPage,
+            page,
+            kuery,
+            showInactive: false,
+          });
 
-        return { results: res.agents.map((agent) => agent.id), total: res.total };
-      });
+          return {
+            results: res.agents.map((agent) => agent.id),
+            total: res.total,
+            searchAfter: res.agents[res.agents.length - 1].sort,
+          };
+        },
+        esClient,
+        context
+      );
       fetchedAgents.forEach(addAgent);
     } else {
       if (platformsSelected.length > 0 || policiesSelected.length > 0) {
@@ -88,16 +144,26 @@ export const parseAgentSelection = async (
 
         kueryFragments.push(`(${groupFragments.join(' or ')})`);
         const kuery = kueryFragments.join(' and ');
-        const fetchedAgents = await aggregateResults(async (page, perPage) => {
-          const res = await agentService.listAgents({
-            perPage,
-            page,
-            kuery,
-            showInactive: false,
-          });
+        const fetchedAgents = await aggregateResults(
+          async (page, perPage, searchAfter?: unknown[], pitId?: string) => {
+            const res = await agentService.listAgents({
+              ...(searchAfter ? { searchAfter } : {}),
+              ...(pitId ? { pitId } : {}),
+              perPage,
+              page,
+              kuery,
+              showInactive: false,
+            });
 
-          return { results: res.agents.map((agent) => agent.id), total: res.total };
-        });
+            return {
+              results: res.agents.map((agent) => agent.id),
+              total: res.total,
+              searchAfter: res.agents[res.agents.length - 1].sort,
+            };
+          },
+          esClient,
+          context
+        );
         fetchedAgents.forEach(addAgent);
       }
     }

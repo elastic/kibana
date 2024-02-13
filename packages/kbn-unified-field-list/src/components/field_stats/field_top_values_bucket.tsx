@@ -87,7 +87,7 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
             grow={true}
             data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
             css={css`
-              overflow-wrap: break-word;
+              overflow-wrap: anywhere;
             `}
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (

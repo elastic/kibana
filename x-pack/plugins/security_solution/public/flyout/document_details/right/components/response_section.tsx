@@ -10,6 +10,7 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ResponseButton } from './response_button';
 import { ExpandableSection } from './expandable_section';
+import { useRightPanelContext } from '../context';
 import { RESPONSE_SECTION_TEST_ID } from './test_ids';
 export interface ResponseSectionProps {
   /**
@@ -22,6 +23,7 @@ export interface ResponseSectionProps {
  * Most bottom section of the overview tab. It contains a summary of the response tab.
  */
 export const ResponseSection: VFC<ResponseSectionProps> = ({ expanded = false }) => {
+  const { isPreview } = useRightPanelContext();
   return (
     <ExpandableSection
       expanded={expanded}
@@ -33,7 +35,14 @@ export const ResponseSection: VFC<ResponseSectionProps> = ({ expanded = false })
       }
       data-test-subj={RESPONSE_SECTION_TEST_ID}
     >
-      <ResponseButton />
+      {isPreview ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.response.previewMessage"
+          defaultMessage="Response is not available in alert preview."
+        />
+      ) : (
+        <ResponseButton />
+      )}
     </ExpandableSection>
   );
 };

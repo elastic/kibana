@@ -18,6 +18,15 @@ export function getErrorCacheTileKey(canonical: { x: number; y: number; z: numbe
 export class TileErrorCache {
   private _cache: Record<LayerId, Record<TileKey, TileError>> = {};
 
+  public clearLayer(layerId: string, onClear: () => void) {
+    if (!(layerId in this._cache)) {
+      return;
+    }
+
+    delete this._cache[layerId];
+    onClear();
+  }
+
   public clearTileError(layerId: string | undefined, tileKey: string, onClear: () => void) {
     if (!layerId || !(layerId in this._cache)) {
       return;

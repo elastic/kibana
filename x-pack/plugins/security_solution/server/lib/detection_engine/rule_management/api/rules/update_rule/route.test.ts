@@ -23,7 +23,7 @@ import {
   getUpdateRulesSchemaMock,
 } from '../../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getQueryRuleParams } from '../../../../rule_schema/mocks';
-import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine/model/rule_response_actions';
+import { ResponseActionTypesEnum } from '../../../../../../../common/api/detection_engine';
 
 jest.mock('../../../../../machine_learning/authz');
 
@@ -189,11 +189,12 @@ describe('Update rule route', () => {
       // @ts-expect-error We're writting to a read only property just for the purpose of the test
       clients.config.experimentalFeatures.endpointResponseActionsEnabled = true;
     });
-    const getResponseAction = (command: string = 'isolate') => ({
+    const getResponseAction = (command: string = 'isolate', config?: object) => ({
       action_type_id: '.endpoint',
       params: {
         command,
         comment: '',
+        ...(config ? { config } : {}),
       },
     });
     const defaultAction = getResponseAction();
@@ -249,6 +250,7 @@ describe('Update rule route', () => {
                 params: {
                   command: 'isolate',
                   comment: '',
+                  config: undefined,
                 },
               },
             ],
@@ -272,7 +274,7 @@ describe('Update rule route', () => {
       );
     });
     test('fails when provided with an unsupported command', async () => {
-      const wrongAction = getResponseAction('processes');
+      const wrongAction = getResponseAction('execute');
 
       const request = requestMock.create({
         method: 'post',
@@ -284,7 +286,23 @@ describe('Update rule route', () => {
       });
       const result = await server.validate(request);
       expect(result.badRequest).toHaveBeenCalledWith(
-        'type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "saved_query", saved_id: Required, type: Invalid literal value, expected "threshold", and 18 more'
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.command: Invalid enum value. Expected 'kill-process' | 'suspend-process', received 'execute', response_actions.0.params.config: Required`
+      );
+    });
+    test('fails when provided with payload missing data', async () => {
+      const wrongAction = getResponseAction('kill-process', { overwrite: true });
+
+      const request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_RULES_URL,
+        body: {
+          ...getCreateRulesSchemaMock(),
+          response_actions: [wrongAction],
+        },
+      });
+      const result = await server.validate(request);
+      expect(result.badRequest).toHaveBeenCalledWith(
+        `response_actions.0.action_type_id: Invalid literal value, expected \".osquery\", response_actions.0.params.command: Invalid literal value, expected \"isolate\", response_actions.0.params.config.field: Required`
       );
     });
   });

@@ -15,7 +15,7 @@ import {
   useDeepEqualSelector,
   useShallowEqualSelector,
 } from '../../../../../../common/hooks/use_selector';
-import { timelineActions, timelineSelectors } from '../../../../../store/timeline';
+import { timelineActions, timelineSelectors } from '../../../../../store';
 import type { OnFilterChange } from '../../../events';
 import type { Sort } from '../../sort';
 import { Actions } from '../actions';

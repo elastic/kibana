@@ -18,6 +18,7 @@
     "requiredBundles": [
       "kibanaUtils"
     ],
+    "runtimePluginDependencies" : ["security"],
     "extraPublicDirs": [
       "common"
     ]

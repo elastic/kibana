@@ -10,7 +10,7 @@ import Chance from 'chance';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export
-export default function ({ getPageObjects, getService }: FtrProviderContext) {
+export default function ({ getPageObjects }: FtrProviderContext) {
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
   const hoursToMillisecond = (hours: number) => hours * 60 * 60 * 1000;
@@ -55,7 +55,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     },
   ];
 
-  describe.skip('Old Data', function () {
+  describe('Old Data', function () {
     this.tags(['cloud_security_posture_findings']);
     let findings: typeof pageObjects.findings;
 
@@ -77,7 +77,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add(dataOldKspm);
 
         await findings.navigateToLatestFindingsPage();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CSPM', async () => {
@@ -86,7 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.add(dataOldCspm);
 
         await findings.navigateToLatestFindingsPage();
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
     });

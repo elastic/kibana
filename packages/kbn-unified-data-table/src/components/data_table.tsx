@@ -26,7 +26,6 @@ import {
   EuiDataGridInMemory,
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
-  EuiDataGridCellValueElementProps,
   EuiDataGridCustomToolbarProps,
   EuiDataGridToolBarVisibilityOptions,
   EuiDataGridToolBarVisibilityDisplaySelectorOptions,
@@ -47,16 +46,25 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ThemeServiceStart } from '@kbn/react-kibana-context-common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
-import type {
+import {
   UnifiedDataTableSettings,
   ValueToStringConverter,
   DataTableColumnTypes,
+  CustomCellRenderer,
+  CustomGridColumnsConfiguration,
+  CustomControlColumnConfiguration,
 } from '../types';
 import { getDisplayedColumns } from '../utils/columns';
 import { convertValueToString } from '../utils/convert_value_to_string';
 import { getRowsPerPageOptions } from '../utils/rows_per_page';
 import { getRenderCellValueFn } from '../utils/get_render_cell_value';
-import { getEuiGridColumns, getLeadControlColumns, getVisibleColumns } from './data_table_columns';
+import {
+  getAllControlColumns,
+  getEuiGridColumns,
+  getLeadControlColumns,
+  getVisibleColumns,
+  hasSourceTimeFieldValue,
+} from './data_table_columns';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';
@@ -122,6 +130,10 @@ export interface UnifiedDataTableProps {
    * Field tokens could be rendered in column header next to the field name.
    */
   showColumnTokens?: boolean;
+  /**
+   * Determines number of rows of a column header
+   */
+  headerRowHeight?: number;
   /**
    * If set, the given document is displayed in a flyout
    */
@@ -320,10 +332,15 @@ export interface UnifiedDataTableProps {
   /**
    * An optional settings for a specified fields rendering like links. Applied only for the listed fields rendering.
    */
-  externalCustomRenderers?: Record<
-    string,
-    (props: EuiDataGridCellValueElementProps) => React.ReactNode
-  >;
+  externalCustomRenderers?: CustomCellRenderer;
+  /**
+   * An optional settings for customising the column
+   */
+  customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
+  /**
+   * An optional settings to control which columns to render as trailing and leading control columns
+   */
+  customControlColumnsConfiguration?: CustomControlColumnConfiguration;
   /**
    * Name of the UnifiedDataTable consumer component or application
    */
@@ -351,6 +368,7 @@ export const UnifiedDataTable = ({
   columns,
   columnTypes,
   showColumnTokens,
+  headerRowHeight,
   controlColumnIds = CONTROL_COLUMN_IDS_DEFAULT,
   dataView,
   loadingState,
@@ -400,6 +418,8 @@ export const UnifiedDataTable = ({
   componentsTourSteps,
   gridStyleOverride,
   rowLineHeightOverride,
+  customGridColumnsConfiguration,
+  customControlColumnsConfiguration,
 }: UnifiedDataTableProps) => {
   const { fieldFormats, toastNotifications, dataViewFieldEditor, uiSettings, storage, data } =
     services;
@@ -541,25 +561,6 @@ export const UnifiedDataTable = ({
     );
   }, [currentPageSize, setPagination]);
 
-  /**
-   * Sorting
-   */
-  const sortingColumns = useMemo(() => sort.map(([id, direction]) => ({ id, direction })), [sort]);
-
-  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
-  const onTableSort = useCallback(
-    (sortingColumnsData) => {
-      if (isSortEnabled) {
-        if (isPlainRecord) {
-          setInmemorySortingColumns(sortingColumnsData);
-        } else if (onSort) {
-          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
-        }
-      }
-    },
-    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
-  );
-
   const shouldShowFieldHandler = useMemo(() => {
     const dataViewFields = dataView.fields.getAll().map((fld) => fld.name);
     return getShouldShowFieldHandler(dataViewFields, dataView, showMultiFields);
@@ -625,9 +626,15 @@ export const UnifiedDataTable = ({
     [dataView, onFieldEdited, services.dataViewFieldEditor]
   );
 
+  const shouldShowTimeField = useMemo(
+    () =>
+      hasSourceTimeFieldValue(displayedColumns, dataView, columnTypes, showTimeCol, isPlainRecord),
+    [dataView, displayedColumns, isPlainRecord, showTimeCol, columnTypes]
+  );
+
   const visibleColumns = useMemo(
-    () => getVisibleColumns(displayedColumns, dataView, showTimeCol),
-    [dataView, displayedColumns, showTimeCol]
+    () => getVisibleColumns(displayedColumns, dataView, shouldShowTimeField),
+    [dataView, displayedColumns, shouldShowTimeField]
   );
 
   const getCellValue = useCallback<UseDataGridColumnsCellActionsProps['getCellValue']>(
@@ -681,6 +688,8 @@ export const UnifiedDataTable = ({
         visibleCellActions,
         columnTypes,
         showColumnTokens,
+        headerRowHeight,
+        customGridColumnsConfiguration,
       }),
     [
       onFilter,
@@ -700,6 +709,8 @@ export const UnifiedDataTable = ({
       visibleCellActions,
       columnTypes,
       showColumnTokens,
+      headerRowHeight,
+      customGridColumnsConfiguration,
     ]
   );
 
@@ -717,6 +728,32 @@ export const UnifiedDataTable = ({
     }),
     [visibleColumns, hideTimeColumn, onSetColumns]
   );
+
+  /**
+   * Sorting
+   */
+  const sortingColumns = useMemo(
+    () =>
+      sort
+        .map(([id, direction]) => ({ id, direction }))
+        .filter(({ id }) => visibleColumns.includes(id)),
+    [sort, visibleColumns]
+  );
+
+  const [inmemorySortingColumns, setInmemorySortingColumns] = useState([]);
+  const onTableSort = useCallback(
+    (sortingColumnsData) => {
+      if (isSortEnabled) {
+        if (isPlainRecord) {
+          setInmemorySortingColumns(sortingColumnsData);
+        } else if (onSort) {
+          onSort(sortingColumnsData.map(({ id, direction }: SortObj) => [id, direction]));
+        }
+      }
+    },
+    [onSort, isSortEnabled, isPlainRecord, setInmemorySortingColumns]
+  );
+
   const sorting = useMemo(() => {
     if (isSortEnabled) {
       return {
@@ -724,19 +761,31 @@ export const UnifiedDataTable = ({
         onSort: onTableSort,
       };
     }
-    return { columns: sortingColumns, onSort: () => {} };
+    return {
+      columns: sortingColumns,
+      onSort: () => {},
+    };
   }, [isSortEnabled, sortingColumns, isPlainRecord, inmemorySortingColumns, onTableSort]);
 
   const canSetExpandedDoc = Boolean(setExpandedDoc && !!renderDocumentView);
 
-  const leadingControlColumns = useMemo(() => {
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
     const internalControlColumns = getLeadControlColumns(canSetExpandedDoc).filter(({ id }) =>
       controlColumnIds.includes(id)
     );
     return externalControlColumns
       ? [...internalControlColumns, ...externalControlColumns]
       : internalControlColumns;
-  }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
+  }, [canSetExpandedDoc, controlColumnIds, externalControlColumns]);
+
+  const controlColumnsConfig = customControlColumnsConfiguration?.({
+    controlColumns: getAllControlColumns(),
+  });
+
+  const customLeadingControlColumn =
+    controlColumnsConfig?.leadingControlColumns ?? leadingControlColumns;
+  const customTrailingControlColumn =
+    controlColumnsConfig?.trailingControlColumns ?? trailingControlColumns;
 
   const additionalControls = useMemo(() => {
     if (!externalAdditionalControls && !usedSelectedDocs.length) {
@@ -909,7 +958,7 @@ export const UnifiedDataTable = ({
               columns={euiGridColumns}
               columnVisibility={columnsVisibility}
               data-test-subj="docTable"
-              leadingControlColumns={leadingControlColumns}
+            leadingControlColumns={customLeadingControlColumn}
               onColumnResize={onResize}
               pagination={paginationObj}
               renderCellValue={renderCellValue}
@@ -923,7 +972,7 @@ export const UnifiedDataTable = ({
               gridStyle={gridStyleOverride ?? GRID_STYLE}
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
-              trailingControlColumns={trailingControlColumns}
+            trailingControlColumns={customTrailingControlColumn}
             />
           )}
         </div>

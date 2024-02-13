@@ -265,6 +265,11 @@ export const basicFileMock: FileJSON = {
   fileKind: '',
   status: 'READY',
   extension: 'png',
+  hash: {
+    md5: 'md5',
+    sha1: 'sha1',
+    sha256: 'sha256',
+  },
 };
 
 export const caseWithAlerts = {
@@ -1150,9 +1155,25 @@ export const getCaseUsersMockResponse = (): CaseUsers => {
 export const customFieldsMock: CaseUICustomField[] = [
   { type: CustomFieldTypes.TEXT, key: 'test_key_1', value: 'My text test value 1' },
   { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', value: true },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', value: null },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', value: null },
 ];
 
 export const customFieldsConfigurationMock: CasesConfigurationUICustomField[] = [
-  { type: CustomFieldTypes.TEXT, key: 'test_key_1', label: 'My test label 1', required: true },
-  { type: CustomFieldTypes.TOGGLE, key: 'test_key_2', label: 'My test label 2', required: false },
+  {
+    type: CustomFieldTypes.TEXT,
+    key: 'test_key_1',
+    label: 'My test label 1',
+    required: true,
+    defaultValue: 'My default value',
+  },
+  {
+    type: CustomFieldTypes.TOGGLE,
+    key: 'test_key_2',
+    label: 'My test label 2',
+    required: true,
+    defaultValue: true,
+  },
+  { type: CustomFieldTypes.TEXT, key: 'test_key_3', label: 'My test label 3', required: false },
+  { type: CustomFieldTypes.TOGGLE, key: 'test_key_4', label: 'My test label 4', required: false },
 ];

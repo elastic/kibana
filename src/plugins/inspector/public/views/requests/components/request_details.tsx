@@ -96,7 +96,7 @@ export function RequestDetails(props: Props) {
           </EuiTab>
         ))}
       </EuiTabs>
-      <selectedDetail.component request={props.request} />
+      <selectedDetail.component key={props.request.id} request={props.request} />
     </>
   ) : null;
 }

@@ -6,7 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSkeletonText } from '@elastic/eui';
-import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
+import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
@@ -23,8 +23,9 @@ import {
  * or a no-data message if investigation guide hasn't been set up on the rule
  */
 export const InvestigationGuide: React.FC = () => {
-  const { openLeftPanel } = useExpandableFlyoutContext();
-  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser } = useRightPanelContext();
+  const { openLeftPanel } = useExpandableFlyoutApi();
+  const { eventId, indexName, scopeId, dataFormattedForFieldBrowser, isPreview } =
+    useRightPanelContext();
 
   const { loading, error, basicAlertData, ruleNote } = useInvestigationGuide({
     dataFormattedForFieldBrowser,
@@ -56,7 +57,12 @@ export const InvestigationGuide: React.FC = () => {
           </h5>
         </EuiTitle>
       </EuiFlexItem>
-      {loading ? (
+      {isPreview ? (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.investigation.investigationGuide.previewMessage"
+          defaultMessage="Investigation guide is not available in alert preview."
+        />
+      ) : loading ? (
         <EuiSkeletonText
           data-test-subj={INVESTIGATION_GUIDE_LOADING_TEST_ID}
           contentAriaLabel={i18n.translate(

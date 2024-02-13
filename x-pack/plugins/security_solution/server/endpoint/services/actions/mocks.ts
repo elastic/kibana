@@ -9,6 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
 import { Readable } from 'stream';
+import type { TransportRequestOptions } from '@elastic/transport';
 import type { HapiReadableStream } from '../../../types';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { FleetActionGenerator } from '../../../../common/endpoint/data_generators/fleet_action_generator';
@@ -146,15 +147,24 @@ export const applyActionListEsSearchMock = (
   // @ts-expect-error incorrect type
   esClient.search.mockImplementation(async (...args) => {
     const params = args[0] ?? {};
+    const options: TransportRequestOptions = args[1] ?? {};
     const indexes = Array.isArray(params.index) ? params.index : [params.index];
 
     if (indexes.includes(ENDPOINT_ACTIONS_INDEX)) {
-      return { body: { ...actionRequests } };
+      if (options.meta) {
+        return { body: { ...actionRequests } };
+      }
+
+      return actionRequests;
     } else if (
       indexes.includes(AGENT_ACTIONS_RESULTS_INDEX) ||
       indexes.includes(ENDPOINT_ACTION_RESPONSES_INDEX_PATTERN)
     ) {
-      return { body: { ...actionResponses } };
+      if (options.meta) {
+        return { body: { ...actionResponses } };
+      }
+
+      return actionResponses;
     }
 
     if (priorSearchMockImplementation) {

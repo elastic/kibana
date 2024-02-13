@@ -31,6 +31,8 @@ interface Props {
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
   kuery: string;
+  rangeFrom: string;
+  rangeTo: string;
 }
 
 export function ProfilingTopNFunctions({
@@ -42,6 +44,8 @@ export function ProfilingTopNFunctions({
   endIndex,
   dataSource,
   kuery,
+  rangeFrom,
+  rangeTo,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -97,6 +101,8 @@ export function ProfilingTopNFunctions({
               data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
               href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
                 kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
+                rangeFrom,
+                rangeTo,
               })}
             >
               {i18n.translate('xpack.apm.profiling.topnFunctions.link', {

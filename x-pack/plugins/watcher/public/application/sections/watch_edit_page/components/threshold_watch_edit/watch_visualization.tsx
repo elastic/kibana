@@ -12,6 +12,7 @@ import {
   Chart,
   LineAnnotation,
   LineSeries,
+  PartialTheme,
   Position,
   ScaleType,
   Settings,
@@ -33,7 +34,7 @@ import { comparators } from '../../../../models/watch/comparators';
 import { SectionError, Error } from '../../../../components';
 import { useAppContext } from '../../../../app_context';
 
-const customTheme = () => {
+const customTheme = (): PartialTheme => {
   return {
     lineSeriesStyle: {
       line: {
@@ -90,7 +91,7 @@ const getTimeBuckets = (watch: any, timeBuckets: any) => {
 export const WatchVisualization = () => {
   const { createTimeBuckets, theme, uiSettings } = useAppContext();
   const { watch } = useContext(WatchContext);
-  const chartsTheme = theme.useChartsTheme();
+  const chartBaseTheme = theme.useChartsBaseTheme();
   const {
     index,
     timeField,
@@ -216,7 +217,8 @@ export const WatchVisualization = () => {
         {watchVisualizationDataKeys.length ? (
           <Chart size={['100%', 300]} renderer="canvas">
             <Settings
-              theme={[customTheme(), chartsTheme]}
+              theme={[customTheme()]}
+              baseTheme={chartBaseTheme}
               xDomain={domain}
               showLegend={!!watch.termField}
               showLegendExtra

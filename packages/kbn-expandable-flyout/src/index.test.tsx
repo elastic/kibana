@@ -8,6 +8,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+
 import { Panel } from './types';
 import { ExpandableFlyout } from '.';
 import {
@@ -15,91 +16,84 @@ import {
   PREVIEW_SECTION_TEST_ID,
   RIGHT_SECTION_TEST_ID,
 } from './components/test_ids';
-import { ExpandableFlyoutContext } from './context';
+import { type State } from './state';
+import { TestProvider } from './test/provider';
+
+const registeredPanels: Panel[] = [
+  {
+    key: 'key',
+    component: () => <div>{'component'}</div>,
+  },
+];
 
 describe('ExpandableFlyout', () => {
-  const registeredPanels: Panel[] = [
-    {
-      key: 'key',
-      component: () => <div>{'component'}</div>,
-    },
-  ];
-
   it(`shouldn't render flyout if no panels`, () => {
-    const context: ExpandableFlyoutContext = {
-      panels: {
-        right: undefined,
-        left: undefined,
-        preview: [],
-      },
-    } as unknown as ExpandableFlyoutContext;
+    const context = {
+      right: undefined,
+      left: undefined,
+      preview: [],
+    } as unknown as State;
 
     const result = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(result.asFragment()).toMatchInlineSnapshot(`<DocumentFragment />`);
   });
 
   it('should render right section', () => {
-    const context: ExpandableFlyoutContext = {
-      panels: {
-        right: {
-          id: 'key',
-        },
-        left: {},
-        preview: [],
+    const context = {
+      right: {
+        id: 'key',
       },
-    } as unknown as ExpandableFlyoutContext;
+      left: {},
+      preview: [],
+    } as unknown as State;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(RIGHT_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render left section', () => {
-    const context: ExpandableFlyoutContext = {
-      panels: {
-        right: {},
-        left: {
-          id: 'key',
-        },
-        preview: [],
+    const context = {
+      right: {},
+      left: {
+        id: 'key',
       },
-    } as unknown as ExpandableFlyoutContext;
+      preview: [],
+    } as unknown as State;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(LEFT_SECTION_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render preview section', () => {
-    const context: ExpandableFlyoutContext = {
-      panels: {
-        right: {},
-        left: {},
-        preview: [
-          {
-            id: 'key',
-          },
-        ],
-      },
-    } as unknown as ExpandableFlyoutContext;
+    const context = {
+      right: {},
+      left: {},
+      preview: [
+        {
+          id: 'key',
+        },
+      ],
+    } as State;
 
     const { getByTestId } = render(
-      <ExpandableFlyoutContext.Provider value={context}>
+      <TestProvider state={context}>
         <ExpandableFlyout registeredPanels={registeredPanels} />
-      </ExpandableFlyoutContext.Provider>
+      </TestProvider>
     );
 
     expect(getByTestId(PREVIEW_SECTION_TEST_ID)).toBeInTheDocument();

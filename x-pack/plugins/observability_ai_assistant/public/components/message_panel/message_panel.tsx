@@ -9,7 +9,7 @@ import React from 'react';
 import { FailedToLoadResponse } from './failed_to_load_response';
 
 interface Props {
-  error?: Error;
+  error?: boolean;
   body?: React.ReactNode;
   controls?: React.ReactNode;
 }

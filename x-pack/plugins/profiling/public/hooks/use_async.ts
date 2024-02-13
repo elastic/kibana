@@ -6,6 +6,8 @@
  */
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { AutoAbortedHttpService, useAutoAbortedHttpClient } from './use_auto_aborted_http_client';
 
 export enum AsyncStatus {
@@ -27,6 +29,11 @@ export type UseAsync = <T>(
 ) => AsyncState<T>;
 
 export const useAsync: UseAsync = (fn, dependencies) => {
+  const {
+    start: {
+      core: { notifications },
+    },
+  } = useProfilingDependencies();
   const [refreshId, setRefreshId] = useState(0);
 
   const refresh = useCallback(() => {
@@ -83,6 +90,31 @@ export const useAsync: UseAsync = (fn, dependencies) => {
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [httpClient, refreshId, ...dependencies]);
+
+  useEffect(() => {
+    // Show a toast notification if an API takes more them 15s to return
+    const timeout = setTimeout(() => {
+      if (asyncState.status === AsyncStatus.Loading) {
+        notifications.toasts.addWarning(
+          {
+            title: i18n.translate('xpack.profiling.fetch.toast.title', {
+              defaultMessage: 'Data Retrieval in Progress',
+            }),
+            text: i18n.translate('xpack.profiling.fetch.toast.describe', {
+              defaultMessage:
+                'If necessary, retrieving requested data from the warm storage tier may take longer than expected.',
+            }),
+          },
+          {
+            toastLifeTimeMs: 300000,
+          }
+        );
+      }
+    }, 15000);
+    return () => {
+      clearTimeout(timeout);
+    };
+  }, [asyncState.status, notifications.toasts]);
 
   return asyncState;
 };

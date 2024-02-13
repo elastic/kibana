@@ -10,6 +10,7 @@ import aws from 'aws4';
 import type { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -25,8 +26,17 @@ import type {
   InvokeAIActionResponse,
   StreamActionParams,
 } from '../../../common/bedrock/types';
-import { SUB_ACTION, DEFAULT_TOKEN_LIMIT } from '../../../common/bedrock/constants';
-import { StreamingResponse } from '../../../common/bedrock/types';
+import {
+  SUB_ACTION,
+  DEFAULT_TOKEN_LIMIT,
+  DEFAULT_BEDROCK_MODEL,
+} from '../../../common/bedrock/constants';
+import {
+  DashboardActionParams,
+  DashboardActionResponse,
+  StreamingResponse,
+} from '../../../common/bedrock/types';
+import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
 
 interface SignedRequest {
   host: string;
@@ -56,6 +66,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     });
 
     this.registerSubAction({
+      name: SUB_ACTION.DASHBOARD,
+      method: 'getDashboard',
+      schema: DashboardActionParamsSchema,
+    });
+
+    this.registerSubAction({
       name: SUB_ACTION.TEST,
       method: 'runApi',
       schema: RunActionParamsSchema,
@@ -77,9 +93,18 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     if (!error.response?.status) {
       return `Unexpected API Error: ${error.code ?? ''} - ${error.message ?? 'Unknown error'}`;
     }
+    if (
+      error.response.status === 400 &&
+      error.response?.data?.message === 'The requested operation is not recognized by the service.'
+    ) {
+      // Leave space in the string below, \n is not being rendered in the UI
+      return `API Error: ${error.response.data.message}
+
+The Kibana Connector in use may need to be reconfigured with an updated Amazon Bedrock endpoint, like \`bedrock-runtime\`.`;
+    }
     if (error.response.status === 401) {
       return `Unauthorized API Error${
-        error.response?.data?.message ? ` - ${error.response.data.message}` : ''
+        error.response?.data?.message ? `: ${error.response.data.message}` : ''
       }`;
     }
     return `API Error: ${error.response?.statusText}${
@@ -117,6 +142,42 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
         accessKeyId: this.secrets.accessKey,
       }
     ) as SignedRequest;
+  }
+
+  /**
+   *  retrieves a dashboard from the Kibana server and checks if the
+   *  user has the necessary privileges to access it.
+   * @param dashboardId The ID of the dashboard to retrieve.
+   */
+  public async getDashboard({
+    dashboardId,
+  }: DashboardActionParams): Promise<DashboardActionResponse> {
+    const privilege = (await this.esClient.transport.request({
+      path: '/_security/user/_has_privileges',
+      method: 'POST',
+      body: {
+        index: [
+          {
+            names: ['.kibana-event-log-*'],
+            allow_restricted_indices: true,
+            privileges: ['read'],
+          },
+        ],
+      },
+    })) as { has_all_requested: boolean };
+
+    if (!privilege?.has_all_requested) {
+      return { available: false };
+    }
+
+    const response = await initDashboard({
+      logger: this.logger,
+      savedObjectsClient: this.savedObjectsClient,
+      dashboardId,
+      genAIProvider: 'Bedrock',
+    });
+
+    return { available: response.success };
   }
 
   /**
@@ -176,9 +237,14 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    * @param messages An array of messages to be sent to the API
    * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<IncomingMessage> {
+  public async invokeStream({
+    messages,
+    model,
+    stopSequences,
+    temperature,
+  }: InvokeAIActionParams): Promise<IncomingMessage> {
     const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody({ messages })),
+      body: JSON.stringify(formatBedrockBody({ messages, model, stopSequences, temperature })),
       model,
     })) as unknown as IncomingMessage;
     return res;
@@ -186,28 +252,50 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
   /**
    * Deprecated. Use invokeStream instead.
-   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
+   * TODO: remove once streaming work is implemented in langchain mode for security solution
    * tracked here: https://github.com/elastic/security-team/issues/7363
-   * No token tracking implemented for this method
    */
   public async invokeAI({
     messages,
     model,
   }: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
-    const res = await this.runApi({ body: JSON.stringify(formatBedrockBody({ messages })), model });
+    const res = await this.runApi({
+      body: JSON.stringify(formatBedrockBody({ messages, model })),
+      model,
+    });
     return { message: res.completion.trim() };
   }
 }
 
 const formatBedrockBody = ({
+  model = DEFAULT_BEDROCK_MODEL,
   messages,
+  stopSequences = ['\n\nHuman:'],
+  temperature = 0.5,
 }: {
+  model?: string;
   messages: Array<{ role: string; content: string }>;
+  stopSequences?: string[];
+  temperature?: number;
 }) => {
   const combinedMessages = messages.reduce((acc: string, message) => {
     const { role, content } = message;
-    // Bedrock only has Assistant and Human, so 'system' and 'user' will be converted to Human
-    const bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
+    const [, , modelName, majorVersion, minorVersion] =
+      (model || '').match(/(\w+)\.(.*)-v(\d+)(?::(\d+))?/) || [];
+    // Claude only has Assistant and Human, so 'user' will be converted to Human
+    let bedrockRole: string;
+
+    if (
+      role === 'system' &&
+      modelName === 'claude' &&
+      Number(majorVersion) >= 2 &&
+      Number(minorVersion) >= 1
+    ) {
+      bedrockRole = '';
+    } else {
+      bedrockRole = role === 'assistant' ? '\n\nAssistant:' : '\n\nHuman:';
+    }
+
     return `${acc}${bedrockRole}${content}`;
   }, '');
 
@@ -215,8 +303,8 @@ const formatBedrockBody = ({
     // end prompt in "Assistant:" to avoid the model starting its message with "Assistant:"
     prompt: `${combinedMessages} \n\nAssistant:`,
     max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
-    temperature: 0.5,
+    temperature,
     // prevent model from talking to itself
-    stop_sequences: ['\n\nHuman:'],
+    stop_sequences: stopSequences,
   };
 };

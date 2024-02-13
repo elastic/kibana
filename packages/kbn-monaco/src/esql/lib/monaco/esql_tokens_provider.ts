@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { CharStreams, Token } from 'antlr4ts';
+import { CharStreams, type Token } from 'antlr4ts';
 import { monaco } from '../../../monaco_imports';
 import { ANTLREErrorListener } from '../../../common/error_listener';
 
@@ -16,6 +16,7 @@ import { ESQLState } from './esql_state';
 
 import { getLexer } from '../antlr_facade';
 import { ESQL_TOKEN_POSTFIX } from '../constants';
+import { enrichTokensWithFunctionsMetadata } from './esql_token_helpers';
 
 const EOF = -1;
 
@@ -24,10 +25,16 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
     return new ESQLState();
   }
 
-  tokenize(line: string, state: monaco.languages.IState): monaco.languages.ILineTokens {
+  tokenize(line: string, prevState: ESQLState): monaco.languages.ILineTokens {
     const errorStartingPoints: number[] = [];
     const errorListener = new ANTLREErrorListener();
-    const inputStream = CharStreams.fromString(line);
+    // This has the drawback of not styling any ESQL wrong query as
+    // | from ...
+    const cleanedLine =
+      prevState.getLineNumber() && line.trimStart()[0] === '|'
+        ? line.trimStart().substring(1)
+        : line;
+    const inputStream = CharStreams.fromString(cleanedLine);
     const lexer = getLexer(inputStream, errorListener);
 
     let done = false;
@@ -50,7 +57,12 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
           const tokenTypeName = lexer.vocabulary.getSymbolicName(token.type);
 
           if (tokenTypeName) {
-            const myToken = new ESQLToken(tokenTypeName, token.startIndex, token.stopIndex);
+            const indexOffset = cleanedLine === line ? 0 : line.length - cleanedLine.length;
+            const myToken = new ESQLToken(
+              tokenTypeName,
+              token.startIndex + indexOffset,
+              token.stopIndex + indexOffset
+            );
             myTokens.push(myToken);
           }
         }
@@ -63,6 +75,11 @@ export class ESQLTokensProvider implements monaco.languages.TokensProvider {
 
     myTokens.sort((a, b) => a.startIndex - b.startIndex);
 
-    return new ESQLLineTokens(myTokens);
+    // special tratement for functions
+    // the previous custom Kibana grammar baked functions directly as tokens, so highlight was easier
+    // The ES grammar doesn't have the token concept of "function"
+    const tokensWithFunctions = enrichTokensWithFunctionsMetadata(myTokens);
+
+    return new ESQLLineTokens(tokensWithFunctions, prevState.getLineNumber() + 1);
   }
 }

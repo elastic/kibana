@@ -7,7 +7,7 @@
 
 import type { Threats } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { SearchHit } from '../../../common/search_strategy';
-import { buildThreatDescription } from '../components/rules/description_step/helpers';
+import { buildThreatDescription } from '../../detection_engine/rule_creation_ui/components/description_step/helpers';
 
 export const getMitreComponentParts = (searchHit?: SearchHit) => {
   const ruleParameters = searchHit?.fields

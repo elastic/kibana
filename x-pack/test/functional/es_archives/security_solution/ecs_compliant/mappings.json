@@ -66,6 +66,9 @@
           "properties": {
             "name": {
               "type": "keyword"
+            },
+            "uptime": {
+              "type": "long"
             }
           }
         },

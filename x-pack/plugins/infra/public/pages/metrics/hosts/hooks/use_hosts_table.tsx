@@ -5,18 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
-import {
-  EuiBasicTableColumn,
-  CriteriaWithPagination,
-  EuiTableSelectionType,
-  type EuiBasicTable,
-} from '@elastic/eui';
+import React, { useCallback, useMemo, useState } from 'react';
+import { EuiBasicTableColumn, CriteriaWithPagination, EuiTableSelectionType } from '@elastic/eui';
 import createContainer from 'constate';
+import useAsync from 'react-use/lib/useAsync';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import { CloudProvider } from '@kbn/custom-icons';
-import { hostLensFormulas } from '../../../../common/visualizations';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -27,7 +23,7 @@ import type {
 } from '../../../../../common/http_api';
 import { Sorting, useHostsTableUrlState } from './use_hosts_table_url_state';
 import { useHostsViewContext } from './use_hosts_view';
-import { useMetricsDataViewContext } from './use_data_view';
+import { useMetricsDataViewContext } from './use_metrics_data_view';
 import { ColumnHeader } from '../components/table/column_header';
 import { TABLE_COLUMN_LABEL } from '../translations';
 import { METRICS_TOOLTIP } from '../../../../common/visualizations';
@@ -124,8 +120,11 @@ const sortTableData =
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
+
+  const { value: formulas } = useAsync(() => inventoryModel.metrics.getFormulas());
 
   const [{ detailsItemId, pagination, sorting }, setProperties] = useHostsTableUrlState();
   const {
@@ -137,8 +136,6 @@ export const useHostsTable = () => {
     },
   } = useKibanaContextForPlugin();
   const { dataView } = useMetricsDataViewContext();
-
-  const tableRef = useRef<EuiBasicTable | null>(null);
 
   const closeFlyout = useCallback(() => setProperties({ detailsItemId: null }), [setProperties]);
 
@@ -159,7 +156,6 @@ export const useHostsTable = () => {
 
     filterManagerService.addFilters(newFilter);
     setSelectedItems([]);
-    tableRef.current?.setSelection([]);
   }, [dataView, filterManagerService, selectedItems]);
 
   const reportHostEntryClick = useCallback(
@@ -241,7 +237,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={hostLensFormulas.cpuUsage.value}
+            formula={formulas?.cpuUsage.value}
           />
         ),
         field: 'cpu',
@@ -255,7 +251,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={hostLensFormulas.normalizedLoad1m.value}
+            formula={formulas?.normalizedLoad1m.value}
           />
         ),
         field: 'normalizedLoad1m',
@@ -269,7 +265,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={hostLensFormulas.memoryUsage.value}
+            formula={formulas?.memoryUsage.value}
           />
         ),
         field: 'memory',
@@ -283,7 +279,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={hostLensFormulas.memoryFree.value}
+            formula={formulas?.memoryFree.value}
           />
         ),
         field: 'memoryFree',
@@ -296,8 +292,8 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
-            toolTip={METRICS_TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskUsage.value}
+            toolTip={METRICS_TOOLTIP.diskUsage}
+            formula={formulas?.diskUsage.value}
           />
         ),
         field: 'diskSpaceUsage',
@@ -311,7 +307,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={METRICS_TOOLTIP.rx}
-            formula={hostLensFormulas.rx.value}
+            formula={formulas?.rx.value}
           />
         ),
         field: 'rx',
@@ -326,7 +322,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={METRICS_TOOLTIP.tx}
-            formula={hostLensFormulas.tx.value}
+            formula={formulas?.tx.value}
           />
         ),
         field: 'tx',
@@ -337,12 +333,24 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [detailsItemId, reportHostEntryClick, setProperties]
+    [
+      detailsItemId,
+      formulas?.cpuUsage.value,
+      formulas?.diskUsage.value,
+      formulas?.memoryFree.value,
+      formulas?.memoryUsage.value,
+      formulas?.normalizedLoad1m.value,
+      formulas?.rx.value,
+      formulas?.tx.value,
+      reportHostEntryClick,
+      setProperties,
+    ]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {
     onSelectionChange,
     selectable: (item: HostNodeRow) => !!item.name,
+    selected: selectedItems,
   };
 
   return {
@@ -358,9 +366,6 @@ export const useHostsTable = () => {
     selection,
     selectedItemsCount: selectedItems.length,
     filterSelectedHosts,
-    refs: {
-      tableRef,
-    },
   };
 };
 
