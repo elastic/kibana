@@ -5,13 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
-import { AlertsTableFlyoutBaseProps } from '../../../../types';
-
-type FlyoutHeaderProps = AlertsTableFlyoutBaseProps;
-const FlyoutHeader = (props: FlyoutHeaderProps) => {
-  return <h2>Alerts page</h2>;
-};
-
+import { GlobalAlertsPage } from './global_alerts_page';
 // eslint-disable-next-line import/no-default-export
-export default FlyoutHeader;
+export default GlobalAlertsPage;

@@ -4,6 +4,5 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { AlertsPage } from './alerts_page';
-// eslint-disable-next-line import/no-default-export
-export { AlertsPage as default };
+
+export const nonNullable = <T>(v: T): v is NonNullable<T> => v != null;
