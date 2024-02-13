@@ -153,7 +153,7 @@ export default ({ getService }: FtrProviderContext): void => {
             url: 'http://localhost',
           },
           isMissingSecrets: true,
-          name: 'Some connector',
+          name: 'Webhook connector',
           secrets: {},
         },
         coreMigrationVersion: '8.7.0',

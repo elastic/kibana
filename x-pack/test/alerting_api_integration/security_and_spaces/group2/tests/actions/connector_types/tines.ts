@@ -38,14 +38,10 @@ export default function tinesTest({ getService }: FtrProviderContext) {
   const configService = getService('config');
   const createTinesConnector = async (url: string) => {
     const id = await createConnector(supertest, {
-      name: 'An Opsgenie simulator',
-      connector_type_id: '.opsgenie',
-      config: {
-        apiUrl: url,
-      },
-      secrets: {
-        apiKey: '123',
-      },
+      name,
+      connector_type_id: connectorTypeId,
+      config: { url },
+      secrets,
     });
 
     return id;

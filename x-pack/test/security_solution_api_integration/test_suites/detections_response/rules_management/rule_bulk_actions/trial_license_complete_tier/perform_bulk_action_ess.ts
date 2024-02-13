@@ -392,17 +392,15 @@ export default ({ getService }: FtrProviderContext): void => {
         describe('set_rule_actions', () => {
           it('should migrate legacy actions on edit when actions edited', async () => {
             const ruleId = 'ruleId';
-            const [connector, createdRule] = await Promise.all([
-              supertest
-                .post(`/api/actions/connector`)
-                .set('kbn-xsrf', 'foo')
-                .send({
-                  name: 'My action',
-                  connector_type_id: '.slack',
-                  secrets: {
-                    webhookUrl: 'http://localhost:1234',
-                  },
-                }),
+            const [connectorId, createdRule] = await Promise.all([
+              createConnector(supertest, {
+                name: 'My action',
+                connector_type_id: '.slack',
+                config: {},
+                secrets: {
+                  webhookUrl: 'http://localhost:1234',
+                },
+              }),
               createRule(supertest, log, getSimpleRule(ruleId, true)),
             ]);
             // create a new connector
@@ -411,7 +409,7 @@ export default ({ getService }: FtrProviderContext): void => {
               getWebHookConnectorParams()
             );
 
-            await createLegacyRuleAction(supertest, createdRule.id, connector.body.id);
+            await createLegacyRuleAction(supertest, createdRule.id, connectorId);
 
             // check for legacy sidecar action
             const sidecarActionsResults = await getLegacyActionSO(es);
@@ -444,7 +442,7 @@ export default ({ getService }: FtrProviderContext): void => {
             const expectedRuleActions = [
               {
                 ...webHookActionMock,
-                id: webHookConnector.id,
+                id: webHookConnectorId,
                 action_type_id: '.webhook',
                 uuid: body.attributes.results.updated[0].actions[0].uuid,
                 frequency: { summary: true, throttle: '1h', notifyWhen: 'onThrottleInterval' },
