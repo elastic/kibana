@@ -9,6 +9,23 @@ import { decodeStackTraceResponse } from '@kbn/profiling-utils';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProfilingESClient } from '../../../common/profiling_es_client';
 
+interface Params {
+  client: ProfilingESClient;
+  sampleSize: number;
+  durationSeconds: number;
+  co2PerKWH: number;
+  datacenterPUE: number;
+  pervCPUWattX86: number;
+  pervCPUWattArm64: number;
+  awsCostDiscountRate: number;
+  costPervCPUPerHour: number;
+  azureCostDiscountRate: number;
+  showErrorFrames: boolean;
+  indices?: string[];
+  stacktraceIdsField?: string;
+  query: QueryDslQueryContainer;
+}
+
 export async function searchStackTraces({
   client,
   sampleSize,
@@ -19,25 +36,12 @@ export async function searchStackTraces({
   pervCPUWattArm64,
   awsCostDiscountRate,
   costPervCPUPerHour,
-  indices,
-  stacktraceIdsField,
-  query,
+  azureCostDiscountRate,
   showErrorFrames,
-}: {
-  client: ProfilingESClient;
-  sampleSize: number;
-  durationSeconds: number;
-  co2PerKWH: number;
-  datacenterPUE: number;
-  pervCPUWattX86: number;
-  pervCPUWattArm64: number;
-  awsCostDiscountRate: number;
-  costPervCPUPerHour: number;
-  indices?: string[];
-  stacktraceIdsField?: string;
-  query: QueryDslQueryContainer;
-  showErrorFrames: boolean;
-}) {
+  indices,
+  query,
+  stacktraceIdsField,
+}: Params) {
   const response = await client.profilingStacktraces({
     query,
     sampleSize,
@@ -48,6 +52,7 @@ export async function searchStackTraces({
     pervCPUWattArm64,
     awsCostDiscountRate,
     costPervCPUPerHour,
+    azureCostDiscountRate,
     indices,
     stacktraceIdsField,
   });
