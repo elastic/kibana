@@ -160,7 +160,7 @@ export const initRoutes = (
   }
 
   if (config.experimentalFeatures.riskScoringRoutesEnabled) {
-    riskScorePreviewRoute(router, logger, config.experimentalFeatures);
+    riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger, config.experimentalFeatures);
     riskEngineStatusRoute(router);
     riskEngineInitRoute(router, getStartServices);
@@ -171,11 +171,10 @@ export const initRoutes = (
       riskEnginePrivilegesRoute(router, getStartServices);
     }
   }
-  if (config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled) {
-    assetCriticalityStatusRoute(router, logger);
-    assetCriticalityUpsertRoute(router, logger);
-    assetCriticalityGetRoute(router, logger);
-    assetCriticalityDeleteRoute(router, logger);
-    assetCriticalityPrivilegesRoute(router, getStartServices, logger);
-  }
+
+  assetCriticalityStatusRoute(router, logger);
+  assetCriticalityUpsertRoute(router, logger);
+  assetCriticalityGetRoute(router, logger);
+  assetCriticalityDeleteRoute(router, logger);
+  assetCriticalityPrivilegesRoute(router, getStartServices, logger);
 };

@@ -42,6 +42,7 @@ import {
   ENTRA_DOCUMENT_TAB,
   OKTA_DOCUMENT_TAB,
 } from '../../screens/users/flyout_asset_panel';
+import { enableAssetCriticality } from '../../tasks/api_calls/kibana_advanced_settings';
 
 const USER_NAME = 'user1';
 const SIEM_KIBANA_HOST_NAME = 'Host-fwarau82er';
@@ -54,7 +55,6 @@ describe(
       ftrConfig: {
         kbnServerArgs: [
           `--xpack.securitySolution.enableExperimental=${JSON.stringify([
-            'entityAnalyticsAssetCriticalityEnabled',
             'newUserDetailsFlyoutManagedUser',
           ])}`,
         ],
@@ -66,6 +66,7 @@ describe(
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new_complete_data' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       cy.task('esArchiverLoad', { archiveName: 'user_managed_data' });
+      enableAssetCriticality();
     });
 
     after(() => {
