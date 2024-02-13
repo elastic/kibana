@@ -17,8 +17,6 @@ import type {
 } from '../../server/assistant_functions/get_slo_change_point';
 import { ObservabilityPublicPluginsStart } from '../plugin';
 
-const fnList = ['avg', 'sum', 'min', 'max'];
-
 interface SLOChangePointChart {
   metricField: string;
   embeddablePlugin: ObservabilityPublicPluginsStart['embeddable'];

@@ -259,12 +259,6 @@ export class ObservabilityAIAssistantClient {
               ai_assistant_args: JSON.stringify(lastMessage.message.function_call!.arguments ?? {}),
             });
 
-            const context = await this.getChatContext();
-            const formattedContext = Object.keys(context).reduce((acc, key) => {
-              acc[key] = context[key].value;
-              return acc;
-            }, {});
-
             const functionResponse =
               numFunctionsCalled >= MAX_FUNCTION_CALLS
                 ? {
@@ -279,7 +273,6 @@ export class ObservabilityAIAssistantClient {
                       name: lastMessage.message.function_call!.name,
                       messages: nextMessages,
                       args: lastMessage.message.function_call!.arguments,
-                      context: formattedContext,
                       signal,
                     })
                     .then((response) => {
