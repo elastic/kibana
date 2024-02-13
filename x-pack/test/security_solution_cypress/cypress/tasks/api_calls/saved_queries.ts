@@ -45,7 +45,7 @@ export const deleteSavedQueries = () => {
   const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
   rootRequest({
     method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed`,
+    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
     body: {
       query: {
         bool: {
