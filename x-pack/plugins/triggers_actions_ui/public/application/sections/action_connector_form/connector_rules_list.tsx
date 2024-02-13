@@ -34,6 +34,7 @@ import { DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE } from '../../constants';
 import { rulesLastRunOutcomeTranslationMapping } from '../rules_list/translations';
 import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
+import { RuleTagBadge } from '../rules_list/components/rule_tag_badge';
 
 export interface ConnectorRulesListProps {
   connector: ActionConnector;
@@ -48,6 +49,8 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
 
   const [searchText, setSearchText] = useState<string>('');
   const [searchFilter, setSearchFilter] = useState<string>('');
+  const [tagPopoverOpenId, setTagPopoverOpenId] = useState<string | null>(null);
+
   const [page, setPage] = useState<Pagination>({
     index: 0,
     size: DEFAULT_CONNECTOR_RULES_LIST_PAGE_SIZE,
@@ -119,6 +122,13 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
     isInitialLoading && (ruleTypesState.isLoading || (!showNoAuthPrompt && rulesState.isLoading));
   const isLoading = ruleTypesState.isLoading || rulesState.isLoading;
 
+  const onSetTagPopoverOpenId = useCallback(
+    (id: string | null) => () => {
+      setTagPopoverOpenId(id);
+    },
+    [setTagPopoverOpenId]
+  );
+
   const columns = useMemo<Array<EuiBasicTableColumn<Rule>>>(() => {
     return [
       {
@@ -128,6 +138,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         }),
         sortable: true,
         truncateText: false,
+        width: '33%',
         render: (name: string, rule: Rule) => {
           return (
             <EuiFlexGroup direction="column" gutterSize="xs">
@@ -151,6 +162,24 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         },
       },
       {
+        field: 'tags',
+        name: i18n.translate('xpack.triggersActionsUI.sections.connectorRulesList.columns.tags', {
+          defaultMessage: 'Tags',
+        }),
+        width: '50px',
+        sortable: false,
+        render: (ruleTags: string[], rule: Rule) => {
+          return ruleTags.length > 0 ? (
+            <RuleTagBadge
+              isOpen={tagPopoverOpenId === rule.id}
+              tags={ruleTags}
+              onClick={onSetTagPopoverOpenId(rule.id)}
+              onClose={onSetTagPopoverOpenId(null)}
+            />
+          ) : null;
+        },
+      },
+      {
         field: 'lastRun.outcome',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.connectorRulesList.columns.lastResponse',
@@ -159,6 +188,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         width: '150px',
         sortable: true,
         truncateText: false,
+        align: 'right',
         render: (_, rule: Rule) => {
           return (
             rule.lastRun && (
@@ -170,7 +200,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
         },
       },
     ];
-  }, [ruleTypesState, getUrlForApp]);
+  }, [ruleTypesState, tagPopoverOpenId, getUrlForApp, onSetTagPopoverOpenId]);
 
   const onChange = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setSearchText(e.target.value);
@@ -195,7 +225,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
           data-test-subj="connectorRulesListSearch"
           aria-label={i18n.translate(
             'xpack.triggersActionsUI.sections.connectorRulesList.fieldSearch.label',
-            { defaultMessage: 'Search rules' }
+            { defaultMessage: 'Search rules by name and tags' }
           )}
           fullWidth
           incremental={false}
@@ -203,7 +233,7 @@ export const ConnectorRulesList = (props: ConnectorRulesListProps) => {
           onSearch={onSearch}
           placeholder={i18n.translate(
             'xpack.triggersActionsUI.sections.connectorRulesList.fieldSearch.placeholder',
-            { defaultMessage: 'Search rules' }
+            { defaultMessage: 'Search rules by name and tags' }
           )}
           value={searchText}
         />
