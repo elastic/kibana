@@ -378,24 +378,3 @@ export interface GetSLOChangePointFunctionResponse {
   data: any;
 }
 
-// how to pass space id to assistant
-// how to add labels to table
-// how to add links to apps to your responses
-
-// improving natural language model, having to provide more context
-
-// how do I let the user know that their given field cannot be used for change point detection
-
-// TODO: Fetch alerts for given SLOs
-
-// Can determine lookback time based on alert window.
-
-// link to change point detection docs
-
-// omit the change point value, it's not relevant compared to the time
-
-// What I've learned
-// * Running change point detection from the alert start minus the long window can be misleading
-
-// Issues
-// Visualization sometimes does not match results
