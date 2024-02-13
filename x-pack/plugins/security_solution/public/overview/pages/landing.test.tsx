@@ -11,7 +11,7 @@ import { Router } from '@kbn/shared-ux-router';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 
-jest.mock('../../common/components/landing_page');
+jest.mock('../../common/components/empty_prompt');
 jest.mock('../../common/components/page_wrapper', () => ({
   SecuritySolutionPageWrapper: jest
     .fn()
@@ -25,6 +25,6 @@ describe('LandingPage', () => {
         <LandingPage />
       </Router>
     );
-    expect(queryByTestId('siem-landing-page')).toBeInTheDocument();
+    expect(queryByTestId('empty-prompt')).toBeInTheDocument();
   });
 });

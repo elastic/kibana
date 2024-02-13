@@ -6,17 +6,23 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { fireEvent, render } from '@testing-library/react';
 import { EmptyPromptComponent } from './empty_prompt';
-import { ADD_DATA_PATH } from '../../../../common';
-import { useVariation } from '../utils';
+import { SecurityPageName } from '../../../../common';
+import { useNavigateTo } from '../../lib/kibana';
+import { AddIntegrationsSteps } from '../landing_page/onboarding/types';
 
-jest.mock('../utils');
-jest.mock('../../lib/kibana');
+const mockNavigateTo = jest.fn();
+const mockUseNavigateTo = useNavigateTo as jest.Mock;
+
+jest.mock('../../lib/kibana', () => ({
+  useNavigateTo: jest.fn(),
+}));
 
 describe('EmptyPromptComponent component', () => {
   beforeEach(() => {
-    (useVariation as jest.Mock).mockReset();
+    jest.clearAllMocks();
+    mockUseNavigateTo.mockImplementation(() => ({ navigateTo: mockNavigateTo }));
   });
 
   it('has add data links', () => {
@@ -26,22 +32,13 @@ describe('EmptyPromptComponent component', () => {
 
   describe.each(['header', 'footer'])('URLs at the %s', (place) => {
     it('points to the default Add data URL', () => {
-      const { queryByTestId } = render(<EmptyPromptComponent />);
-      const link = queryByTestId(`add-integrations-${place}`);
-      expect(link?.getAttribute('href')).toBe(ADD_DATA_PATH);
-    });
-
-    it('points to the resolved Add data URL by useVariation', () => {
-      const customResolvedUrl = '/test/url';
-      (useVariation as jest.Mock).mockImplementationOnce(
-        (cloudExperiments, featureFlagName, defaultValue, setter) => {
-          setter(customResolvedUrl);
-        }
-      );
-
-      const { queryByTestId } = render(<EmptyPromptComponent />);
-      const link = queryByTestId(`add-integrations-${place}`);
-      expect(link?.getAttribute('href')).toBe(customResolvedUrl);
+      const { getByTestId } = render(<EmptyPromptComponent />);
+      const link = getByTestId(`add-integrations-${place}`);
+      fireEvent.click(link);
+      expect(mockNavigateTo).toBeCalledWith({
+        deepLinkId: SecurityPageName.landing,
+        path: `#${AddIntegrationsSteps.connectToDataSources}`,
+      });
     });
   });
 });
