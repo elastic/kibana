@@ -5,8 +5,11 @@
  * 2.0.
  */
 
+import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
+import { getDiscoverColumnsWithFallbackFieldsFromDisplayOptions } from '../../../../utils/convert_discover_app_state';
+import { DataViewSelection, isDataViewSelection } from '../../../../../common/dataset_selection';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
   getDiscoverAppStateFromContext,
@@ -105,4 +108,34 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
   }
 
   context.discoverStateContainer.appState.update(getDiscoverAppStateFromContext(context));
+};
+
+export const redirectToDiscoverAction =
+  (
+    discover: DiscoverStart
+  ): ActionFunction<LogsExplorerControllerContext, LogsExplorerControllerEvent> =>
+  (context, event) => {
+    if (event.type === 'UPDATE_DATASET_SELECTION' && isDataViewSelection(event.data)) {
+      return redirectToDiscover({ context, datasetSelection: event.data, discover });
+    }
+  };
+
+export const redirectToDiscover = ({
+  context,
+  datasetSelection,
+  discover,
+}: {
+  discover: DiscoverStart;
+  context: LogsExplorerControllerContext;
+  datasetSelection: DataViewSelection;
+}) => {
+  return discover.locator?.navigate({
+    breakdownField: context.chart.breakdownField ?? undefined,
+    columns: getDiscoverColumnsWithFallbackFieldsFromDisplayOptions(context),
+    dataViewSpec: datasetSelection.selection.dataView.toDataviewSpec(),
+    filters: context.filters,
+    query: context.query,
+    refreshInterval: context.refreshInterval,
+    timeRange: context.time,
+  });
 };
