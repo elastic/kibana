@@ -120,6 +120,7 @@ describe('Querybar Menu component', () => {
         }),
       },
       quickFilters: [],
+      queryBarMenuRef: React.createRef(),
     };
   });
   it('should not render the popover if the openQueryBarMenu prop is false', async () => {

@@ -18,14 +18,13 @@ import {
 } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
+import { binaryToString, getSimpleRule } from '../../../utils';
 import {
-  binaryToString,
   createRule,
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getSimpleRule,
-} from '../../../utils';
+} from '../../../../../../common/utils/security_solution';
 import {
   createUserAndRole,
   deleteUserAndRole,
@@ -57,12 +56,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('Endpoint Exception', () => {
-      /* 
-       Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+      /*
+       Following the release of version 8.7, this test can be considered as an evaluation of exporting
        an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
        within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
-       and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
-       thereby enabling simulation of migration scenarios. 
+       and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule,
+       thereby enabling simulation of migration scenarios.
       */
       it('should be able to reimport a rule referencing an old version of endpoint exception list with existing comments', async () => {
         // create an exception list
@@ -224,12 +223,12 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('Detection Exception', () => {
-      /* 
-       Following the release of version 8.7, this test can be considered as an evaluation of exporting 
+      /*
+       Following the release of version 8.7, this test can be considered as an evaluation of exporting
        an outdated List Item. A notable distinction lies in the absence of the "expire_time" property
        within the getCreateExceptionListMinimalSchemaMock, which allows for differentiation between older
-       and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule, 
-       thereby enabling simulation of migration scenarios. 
+       and newer versions. The rationale behind this approach is the lack of version tracking for both List and Rule,
+       thereby enabling simulation of migration scenarios.
       */
       it('should be able to reimport a rule referencing an old version of detection exception list with existing comments', async () => {
         // create an exception list
