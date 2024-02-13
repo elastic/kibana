@@ -75,7 +75,7 @@ export function SettingWithSiblingFlyout({
                 className="lnsSettingWithSiblingFlyout"
               >
                 <EuiFlyoutHeader hasBorder className="lnsSettingWithSiblingFlyout__header">
-                  <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
                       <EuiButtonIcon
                         color="text"
