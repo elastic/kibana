@@ -124,6 +124,7 @@ export interface ExplorerAppState {
   query?: any;
   mlShowCharts?: boolean;
 }
+
 export interface ExplorerGlobalState {
   ml: { jobIds: JobId[] };
   time?: TimeRange;
@@ -279,7 +280,8 @@ export type MlLocatorState =
   | MlGenericUrlState
   | NotificationsUrlState
   | TrainedModelsUrlState
-  | MemoryUsageUrlState;
+  | MemoryUsageUrlState
+  | ChangePointDetectionUrlState;
 
 export type MlLocatorParams = MlLocatorState & SerializableRecord;
 
@@ -302,4 +304,19 @@ export interface NotificationsQueryState {
 export type NotificationsUrlState = MLPageState<
   typeof ML_PAGES.NOTIFICATIONS,
   NotificationsQueryState | undefined
+>;
+
+export interface ChangePointDetectionQueryState {
+  index: string;
+  timeRange?: TimeRange;
+  fieldConfigs: Array<{
+    fn: string;
+    splitField?: string;
+    metricField: string;
+  }>;
+}
+
+export type ChangePointDetectionUrlState = MLPageState<
+  typeof ML_PAGES.AIOPS_CHANGE_POINT_DETECTION,
+  ChangePointDetectionQueryState
 >;

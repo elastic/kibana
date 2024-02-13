@@ -8,6 +8,7 @@
 import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createDatasetQuality } from './components/dataset_quality';
 import { createDatasetQualityControllerLazyFactory } from './controller/lazy_create_controller';
+import { DataStreamsStatsService } from './services/data_streams_stats';
 import {
   DatasetQualityPluginSetup,
   DatasetQualityPluginStart,
@@ -25,14 +26,19 @@ export class DatasetQualityPlugin
   }
 
   public start(core: CoreStart, plugins: DatasetQualityStartDeps): DatasetQualityPluginStart {
+    const dataStreamStatsClient = new DataStreamsStatsService().start({
+      http: core.http,
+    }).client;
+
     const DatasetQuality = createDatasetQuality({
       core,
       plugins,
+      dataStreamStatsClient,
     });
 
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
-      plugins,
+      dataStreamStatsClient,
     });
 
     return { DatasetQuality, createDatasetQualityController };
