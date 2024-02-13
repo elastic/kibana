@@ -51,6 +51,7 @@ export {
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingAzureCostDiscountRate,
   apmEnableTransactionProfiling,
 } from './ui_settings_keys';
 
