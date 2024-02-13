@@ -27,7 +27,7 @@ export const allowedExperimentalValues = Object.freeze({
    * we don't want people to be able to violate security by getting access to whole documents
    * around telemetry they should not.
    * @see telemetry_detection_rules_preview_route.ts
-   * @see test/detection_engine_api_integration/security_and_spaces/tests/telemetry/README.md
+   * @see test/security_solution_api_integration/test_suites/telemetry/README.md
    */
   previewTelemetryUrlEnabled: false,
 
