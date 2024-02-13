@@ -19,7 +19,6 @@ export type DynamicTreeViewProps = {
     clusterName?: string
   ) => void;
   hasSelection?: boolean;
-  'aria-label': string;
   selected?: string;
   expanded?: boolean;
 };

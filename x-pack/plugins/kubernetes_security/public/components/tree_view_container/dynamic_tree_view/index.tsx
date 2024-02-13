@@ -64,7 +64,6 @@ export const DynamicTreeView = ({
   onSelect,
   selected = '',
   expanded = true,
-  ...props
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
 
@@ -72,8 +71,6 @@ export const DynamicTreeView = ({
 
   const { data, fetchNextPage, isFetchingNextPage, hasNextPage, isLoading } =
     useFetchDynamicTreeView(query, tree[depth].key, indexPattern, expanded);
-
-  const ariaLabel = props['aria-label'];
 
   const onLoadMoreKeydown = (event: React.KeyboardEvent) => {
     switch (event.key) {
@@ -161,7 +158,6 @@ export const DynamicTreeView = ({
       <ul
         className="euiTreeView"
         aria-describedby={data?.pages?.length ? 'dynamicTreeViewInstructionId' : undefined}
-        aria-label={ariaLabel}
       >
         {itemList.map((aggData) => {
           const queryFilter = {
@@ -179,7 +175,6 @@ export const DynamicTreeView = ({
               {({ isExpanded, onToggleExpand }) => (
                 <DynamicTreeViewItem
                   aggData={aggData}
-                  aria-label={ariaLabel}
                   depth={depth}
                   expanded={expanded}
                   isExpanded={isExpanded}
@@ -232,7 +227,6 @@ const DynamicTreeViewItem = ({
   selected,
   expanded,
   query,
-  ...props
 }: DynamicTreeViewItemProps) => {
   const isLastNode = depth === tree.length - 1;
   const styles = useStyles(depth);
@@ -366,7 +360,6 @@ const DynamicTreeViewItem = ({
             tree={tree}
             onSelect={onSelect}
             selected={selected}
-            aria-label={`${aggData.key} child of ${props['aria-label']}`}
           />
         )}
       </div>
