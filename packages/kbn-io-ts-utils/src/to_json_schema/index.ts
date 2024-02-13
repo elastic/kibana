@@ -7,7 +7,7 @@
  */
 import * as t from 'io-ts';
 import { mapValues } from 'lodash';
-import { isParsableType } from '../parseable_types';
+import { isParsableType, ParseableType } from '../parseable_types';
 
 interface JSONSchemaObject {
   type: 'object';
@@ -45,13 +45,12 @@ type JSONSchema =
   | JSONSchemaAllOf
   | JSONSchemaAnyOf;
 
-export const toJsonSchema = (type: t.Mixed): JSONSchema => {
+export const toJsonSchema = (type: t.Type<any> | ParseableType): JSONSchema => {
   if (isParsableType(type)) {
     switch (type._tag) {
       case 'ArrayType':
         return { type: 'array', items: toJsonSchema(type.type) };
 
-      // @ts-expect-error upgrade typescript v4.9.5
       case 'BooleanType':
         return { type: 'boolean' };
 
@@ -74,11 +73,9 @@ export const toJsonSchema = (type: t.Mixed): JSONSchema => {
       case 'IntersectionType':
         return { allOf: type.types.map(toJsonSchema) };
 
-      // @ts-expect-error upgrade typescript v4.9.5
       case 'NumberType':
         return { type: 'number' };
 
-      // @ts-expect-error upgrade typescript v4.9.5
       case 'StringType':
         return { type: 'string' };
     }

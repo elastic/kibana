@@ -13,7 +13,7 @@ import { FetcherResult } from '../../hooks/use_fetcher';
 type InspectResponse = Request[];
 
 export interface InspectorContextValue {
-  addInspectorRequest: <Data>(result: FetcherResult<Data>) => void;
+  addInspectorRequest: (result: FetcherResult<any>) => void;
   inspectorAdapters: { requests: RequestAdapter };
 }
 
@@ -78,7 +78,6 @@ export function InspectorContextProvider({ children }: { children: ReactNode }) 
   }, [history, inspectorAdapters]);
 
   return (
-    // @ts-expect-error upgrade typescript v4.9.5
     <InspectorContext.Provider value={{ ...value, addInspectorRequest }}>
       {children}
     </InspectorContext.Provider>

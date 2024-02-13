@@ -69,13 +69,13 @@ createServerRouteFactory<{}, { options: { tags: string[] } }>()({
 });
 
 // Public APIs should be versioned
-// @ts-expect-error upgrade typescript v4.9.5
+// @ts-expect-error
 createServerRouteFactory<{}, { options: { tags: string[] } }>()({
   endpoint: 'GET /api/endpoint_with_params',
   options: {
     tags: [],
   },
-  // @ts-expect-error upgrade typescript v4.9.5
+  // @ts-expect-error
   handler: async (resources) => {},
 });
 
