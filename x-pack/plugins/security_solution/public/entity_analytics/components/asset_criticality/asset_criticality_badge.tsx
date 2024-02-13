@@ -12,10 +12,10 @@ import { CRITICALITY_LEVEL_TITLE, CRITICALITY_LEVEL_DESCRIPTION } from './transl
 import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
 
 export const CRITICALITY_LEVEL_COLOR: Record<CriticalityLevel, string> = {
-  very_important: '#E7664C',
-  important: '#D6BF57',
-  normal: '#54B399',
-  not_important: euiLightVars.euiColorMediumShade,
+  extreme_impact: '#E7664C',
+  high_impact: '#D6BF57',
+  medium_impact: '#54B399',
+  low_impact: euiLightVars.euiColorMediumShade,
 };
 
 export const AssetCriticalityBadge: React.FC<{

@@ -28,7 +28,7 @@ describe('ContextsTable', () => {
           category_1_count: 12,
           category_2_count: 0,
           category_2_score: 0,
-          criticality_level: 'very_important',
+          criticality_level: 'extreme_impact',
           criticality_modifier: 2,
           notes: [],
           inputs: [],
@@ -42,7 +42,7 @@ describe('ContextsTable', () => {
 
     expect(screen.getByText('Asset Criticality Level')).toBeInTheDocument();
     expect(screen.getByTestId('risk-inputs-asset-criticality-badge')).toBeInTheDocument();
-    expect(screen.getByText('Very important')).toBeInTheDocument();
+    expect(screen.getByText('Extreme Impact')).toBeInTheDocument();
   });
 
   it('renders the correct criticality when the risk does not have a criticality_level', () => {
