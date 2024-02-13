@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, useRef, MouseEvent, KeyboardEvent, useMemo } from 'react';
+import React, { useEffect, useState, useRef, KeyboardEvent, useMemo } from 'react';
 import {
   EuiTreeView,
   EuiText,
@@ -250,17 +250,10 @@ const DynamicTreeViewItem = ({
   };
 
   const onButtonToggle = () => {
-    if (!isLastNode && !isExpanded) {
-      onToggleExpand();
-    }
-    handleSelect();
-  };
-
-  const onArrowToggle = (event: MouseEvent<SVGElement>) => {
-    disableEventDefaults(event);
     if (!isLastNode) {
       onToggleExpand();
     }
+    handleSelect();
   };
 
   // Enable keyboard navigation
