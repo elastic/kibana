@@ -322,7 +322,7 @@ export class SavedSearchEmbeddable
       : child;
 
     const query = savedSearch.searchSource.getField('query');
-    const dataView = savedSearch.searchSource.getField('index')!;
+    const dataView = savedSearch.searchSource.getField('index');
     const useTextBased = this.isTextBasedSearch(savedSearch);
 
     try {

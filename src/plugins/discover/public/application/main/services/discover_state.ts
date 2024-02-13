@@ -188,7 +188,7 @@ export interface DiscoverStateContainer {
      * Set the currently selected data view
      * @param dataView
      */
-    setDataView: (dataView: DataView) => void;
+    setDataView: (dataView: DataView | undefined) => void;
     /**
      * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
      */

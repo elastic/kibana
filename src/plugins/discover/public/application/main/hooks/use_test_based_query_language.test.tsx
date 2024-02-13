@@ -146,11 +146,10 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
 
-  test('changing a text based query with same result columns should change state when loading and finished', async () => {
+  test('changing a text based query with same result columns should not change state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
     stateContainer.dataState.data$.documents$.next(msgComplete);
-    replaceUrlState.mockReset();
 
     documents$.next({
       recordRawType: RecordRawType.PLAIN,
@@ -164,14 +163,7 @@ describe('useTextBasedQueryLanguage', () => {
       ],
       query: { esql: 'from the-data-view-2' },
     });
-    // await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
-    /**
-    await waitFor(() => {
-      expect(replaceUrlState).toHaveBeenCalledWith({
-        columns: [],
-      });
-    });
-      */
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(0));
   });
 
   test('only changing a text based query with same result columns should not change columns', async () => {

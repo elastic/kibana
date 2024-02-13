@@ -25,7 +25,7 @@ export function updateVolatileSearchSource(
     sort,
     customFilters,
   }: {
-    dataView: DataView;
+    dataView?: DataView;
     services: DiscoverServices;
     sort?: SortOrder[];
     customFilters: Filter[];
@@ -46,7 +46,7 @@ export function updateVolatileSearchSource(
 
   let filters = [...customFilters];
 
-  if (dataView.type !== DataViewType.ROLLUP) {
+  if (dataView && dataView?.type !== DataViewType.ROLLUP) {
     // Set the date range filter fields from timeFilter using the absolute format. Search sessions requires that it be converted from a relative range
     const timeFilter = data.query.timefilter.timefilter.createFilter(dataView);
     filters = timeFilter ? [...filters, timeFilter] : filters;
