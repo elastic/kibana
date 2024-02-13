@@ -45,7 +45,7 @@ export const getLensAttributes = ({
   title?: string;
   filters: Filter[];
   query: Query | AggregateQuery;
-  dataView: DataView;
+  dataView?: DataView;
   timeInterval: string | undefined;
   breakdownField: DataViewField | undefined;
   suggestion: Suggestion | undefined;
@@ -62,10 +62,10 @@ export const getLensAttributes = ({
     date_column: {
       dataType: 'date',
       isBucketed: true,
-      label: dataView.timeFieldName ?? '',
+      label: dataView?.timeFieldName ?? '',
       operationType: 'date_histogram',
       scale: 'interval',
-      sourceField: dataView.timeFieldName,
+      sourceField: dataView?.timeFieldName,
       params: {
         interval: timeInterval ?? 'auto',
       },
@@ -195,12 +195,12 @@ export const getLensAttributes = ({
       }),
     references: [
       {
-        id: dataView.id ?? '',
+        id: dataView?.id ?? '',
         name: 'indexpattern-datasource-current-indexpattern',
         type: 'index-pattern',
       },
       {
-        id: dataView.id ?? '',
+        id: dataView?.id ?? '',
         name: 'indexpattern-datasource-layer-unifiedHistogram',
         type: 'index-pattern',
       },
@@ -224,8 +224,8 @@ export const getLensAttributes = ({
   return {
     attributes,
     requestData: {
-      dataViewId: dataView.id,
-      timeField: dataView.timeFieldName,
+      dataViewId: dataView?.id,
+      timeField: dataView?.timeFieldName,
       timeInterval,
       breakdownField: breakdownField?.name,
     },

@@ -152,7 +152,7 @@ export function getDataStateContainer({
   getAppState: () => DiscoverAppState;
   getInternalState: () => InternalState;
   getSavedSearch: () => SavedSearch;
-  setDataView: (dataView: DataView) => void;
+  setDataView: (dataView: DataView | undefined) => void;
 }): DiscoverDataStateContainer {
   const { data, uiSettings, toastNotifications } = services;
   const { timefilter } = data.query.timefilter;

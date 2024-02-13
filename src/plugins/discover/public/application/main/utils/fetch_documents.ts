@@ -36,7 +36,7 @@ export const fetchDocuments = (
     // not a rollup data view.
     searchSource.setOverwriteDataViewType(undefined);
   }
-  const dataView = searchSource.getField('index')!;
+  const dataView = searchSource.getField('index');
   const isFetchingMore = Boolean(searchSource.getField('searchAfter'));
 
   const executionContext = {

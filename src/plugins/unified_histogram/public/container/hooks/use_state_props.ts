@@ -36,7 +36,7 @@ export const useStateProps = ({
   requestAdapter,
 }: {
   stateService: UnifiedHistogramStateService | undefined;
-  dataView: DataView;
+  dataView: DataView | undefined;
   query: Query | AggregateQuery | undefined;
   searchSessionId: string | undefined;
   requestAdapter: RequestAdapter | undefined;

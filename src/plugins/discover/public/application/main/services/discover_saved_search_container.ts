@@ -201,7 +201,7 @@ export function getSavedSearchContainer({
     const previousSavedSearch = getState();
     const dataView = nextDataView
       ? nextDataView
-      : previousSavedSearch.searchSource.getField('index')!;
+      : previousSavedSearch.searchSource.getField('index');
 
     const nextSavedSearch = updateSavedSearch({
       savedSearch: { ...previousSavedSearch },

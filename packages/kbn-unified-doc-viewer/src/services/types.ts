@@ -28,7 +28,7 @@ export type DocViewFilterFn = (
 
 export interface DocViewRenderProps {
   hit: DataTableRecord;
-  dataView: DataView;
+  dataView?: DataView;
   columns?: string[];
   /**
    * If not provided, types will be derived by default from the dataView field types.

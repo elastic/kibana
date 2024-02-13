@@ -20,7 +20,7 @@ export type ShouldShowFieldInTableHandler = (fieldName: string) => boolean;
  */
 export const getShouldShowFieldHandler = (
   fields: string[],
-  dataView: DataView,
+  dataView: DataView | undefined,
   showMultiFields: boolean
 ): ShouldShowFieldInTableHandler => {
   if (showMultiFields) {
@@ -45,9 +45,9 @@ export const getShouldShowFieldHandler = (
 
 const canShowFieldInTable = (
   fieldName: string,
-  dataView: DataView
+  dataView?: DataView
 ): { parentName?: string; show: boolean } => {
-  const mapped = dataView.fields.getByName(fieldName);
+  const mapped = dataView?.fields.getByName(fieldName);
 
   if (!mapped) {
     return { show: true };

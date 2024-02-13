@@ -57,7 +57,7 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
   /**
    * The current data view
    */
-  dataView: DataView;
+  dataView?: DataView;
   /**
    * The current query
    */
@@ -305,6 +305,9 @@ export const UnifiedHistogramLayout = ({
       : ResizableLayoutMode.Single;
 
   const currentTopPanelHeight = topPanelHeight ?? defaultTopPanelHeight;
+  if (!dataView) {
+    return null;
+  }
 
   return (
     <>

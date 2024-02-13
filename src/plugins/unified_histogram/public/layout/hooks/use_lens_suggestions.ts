@@ -33,7 +33,7 @@ export const useLensSuggestions = ({
   lensSuggestionsApi,
   onSuggestionChange,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
   query?: Query | AggregateQuery;
   originalSuggestion?: Suggestion;
   isPlainRecord?: boolean;
@@ -45,13 +45,16 @@ export const useLensSuggestions = ({
   table?: Datatable;
 }) => {
   const suggestions = useMemo(() => {
-    const context = {
-      dataViewSpec: dataView?.toSpec(),
-      fieldName: '',
-      textBasedColumns: columns,
-      query: query && isOfAggregateQueryType(query) ? query : undefined,
-    };
-    const allSuggestions = isPlainRecord
+    const context =
+      dataView && isPlainRecord
+        ? {
+            dataViewSpec: dataView?.toSpec(),
+            fieldName: '',
+            textBasedColumns: columns,
+            query: query && isOfAggregateQueryType(query) ? query : undefined,
+          }
+        : undefined;
+    const allSuggestions = context
       ? lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? []
       : [];
 
@@ -68,7 +71,7 @@ export const useLensSuggestions = ({
   const histogramSuggestion = useMemo(() => {
     if (
       !currentSuggestion &&
-      dataView.isTimeBased() &&
+      dataView?.isTimeBased() &&
       query &&
       isOfAggregateQueryType(query) &&
       getAggregateQueryMode(query) === 'esql' &&
@@ -115,6 +118,7 @@ export const useLensSuggestions = ({
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
   useEffect(() => {
+    if (!dataView) return;
     const newSuggestionsDeps = getSuggestionDeps({ dataView, query, columns });
 
     if (!isEqual(suggestionDeps.current, newSuggestionsDeps)) {
@@ -146,7 +150,7 @@ const getSuggestionDeps = ({
   query,
   columns,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
   query?: Query | AggregateQuery;
   columns?: DatatableColumn[];
-}) => [dataView.id, columns, query];
+}) => [dataView?.id, columns, query];

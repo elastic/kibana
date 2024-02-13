@@ -81,7 +81,7 @@ export const buildStateSubscribe =
 
       // If the requested data view is not found, don't try to load it,
       // and instead reset the app state to the fallback data view
-      if (fallback) {
+      if (fallback && nextDataView) {
         appState.update({ index: nextDataView.id }, true);
         return;
       }

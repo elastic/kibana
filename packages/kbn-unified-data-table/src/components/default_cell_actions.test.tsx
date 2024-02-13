@@ -97,7 +97,7 @@ describe('Default cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('extension'),
+      dataTableContextMock.dataView?.fields.getByName('extension'),
       'jpg',
       '+'
     );
@@ -117,7 +117,7 @@ describe('Default cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('extension'),
+      dataTableContextMock.dataView?.fields.getByName('extension'),
       undefined,
       '+'
     );
@@ -137,7 +137,7 @@ describe('Default cell actions ', function () {
     const button = findTestSubject(component, 'filterForButton');
     await button.simulate('click');
     expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('message'),
+      dataTableContextMock.dataView?.fields.getByName('message'),
       '',
       '+'
     );
@@ -157,7 +157,7 @@ describe('Default cell actions ', function () {
     const button = findTestSubject(component, 'filterOutButton');
     await button.simulate('click');
     expect(dataTableContextMock.onFilter).toHaveBeenCalledWith(
-      dataTableContextMock.dataView.fields.getByName('extension'),
+      dataTableContextMock.dataView?.fields.getByName('extension'),
       'jpg',
       '-'
     );

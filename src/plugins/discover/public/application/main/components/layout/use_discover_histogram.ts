@@ -219,7 +219,7 @@ export const useDiscoverHistogram = ({
     query: textBasedQuery,
     columns,
   } = useObservable(textBasedFetchComplete$, {
-    dataView: stateContainer.internalState.getState().dataView!,
+    dataView: stateContainer.internalState.getState().dataView,
     query: stateContainer.appState.getState().query,
     columns: savedSearchData$.documents$.getValue().textBasedQueryColumns ?? [],
   });
@@ -307,7 +307,7 @@ export const useDiscoverHistogram = ({
     };
   }, [isPlainRecord, stateContainer.dataState.fetch$, textBasedFetchComplete$, unifiedHistogram]);
 
-  const dataView = useInternalStateSelector((state) => state.dataView!);
+  const dataView = useInternalStateSelector((state) => state.dataView);
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
@@ -411,7 +411,7 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => fetchStatus === FetchStatus.COMPLETE),
     map(({ textBasedQueryColumns }) => ({
-      dataView: stateContainer.internalState.getState().dataView!,
+      dataView: stateContainer.internalState.getState().dataView,
       query: stateContainer.appState.getState().query!,
       columns: textBasedQueryColumns ?? [],
     }))

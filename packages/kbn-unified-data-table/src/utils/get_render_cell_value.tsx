@@ -38,7 +38,7 @@ export const getRenderCellValueFn = ({
   externalCustomRenderers,
   isPlainRecord,
 }: {
-  dataView: DataView;
+  dataView?: DataView;
   rows: DataTableRecord[] | undefined;
   useNewFieldsApi: boolean;
   shouldShowFieldHandler: ShouldShowFieldInTableHandler;
@@ -58,7 +58,7 @@ export const getRenderCellValueFn = ({
     isExpanded,
   }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
-    const field = dataView.fields.getByName(columnId);
+    const field = dataView?.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
 
     useEffect(() => {
@@ -171,7 +171,7 @@ function renderPopoverContent({
   row: DataTableRecord;
   field: DataViewField | undefined;
   columnId: string;
-  dataView: DataView;
+  dataView?: DataView;
   useTopLevelObjectColumns: boolean;
   fieldFormats: FieldFormatsStart;
   closePopover: () => void;

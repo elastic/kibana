@@ -60,7 +60,7 @@ export function Doc(props: DocProps) {
               <FormattedMessage
                 id="discover.doc.failedToLocateDataView"
                 defaultMessage="No data view matches ID {dataViewId}."
-                values={{ dataViewId: dataView.id }}
+                values={{ dataViewId: dataView?.id }}
               />
             }
           />

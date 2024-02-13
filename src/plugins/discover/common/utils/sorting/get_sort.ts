@@ -14,12 +14,12 @@ export type SortPairObj = Record<string, string>;
 export type SortPair = SortOrder | SortPairObj;
 export type SortInput = SortPair | SortPair[];
 
-export function isSortable(fieldName: string, dataView: DataView): boolean {
-  const field = dataView.getFieldByName(fieldName);
+export function isSortable(fieldName: string, dataView?: DataView): boolean {
+  const field = dataView?.getFieldByName(fieldName);
   return !!(field && field.sortable);
 }
 
-function createSortObject(sortPair: SortInput, dataView: DataView): SortPairObj | undefined {
+function createSortObject(sortPair: SortInput, dataView?: DataView): SortPairObj | undefined {
   if (
     Array.isArray(sortPair) &&
     sortPair.length === 2 &&
@@ -45,7 +45,7 @@ export function isLegacySort(sort: SortPair[] | SortPair): sort is SortPair {
  * @param {object} dataView used for determining default sort
  * @returns Array<{object}> an array of sort objects
  */
-export function getSort(sort: SortPair[] | SortPair, dataView: DataView): SortPairObj[] {
+export function getSort(sort: SortPair[] | SortPair, dataView?: DataView): SortPairObj[] {
   if (Array.isArray(sort)) {
     if (isLegacySort(sort)) {
       // To stay compatible with legacy sort, which just supported a single sort field
@@ -62,7 +62,7 @@ export function getSort(sort: SortPair[] | SortPair, dataView: DataView): SortPa
  * compared to getSort it doesn't return an array of objects, it returns an array of arrays
  * [[fieldToSort: directionToSort]]
  */
-export function getSortArray(sort: SortInput, dataView: DataView): SortOrder[] {
+export function getSortArray(sort: SortInput, dataView?: DataView): SortOrder[] {
   return getSort(sort, dataView).reduce((acc: SortOrder[], sortPair) => {
     const entries = Object.entries(sortPair);
     if (entries && entries[0]) {

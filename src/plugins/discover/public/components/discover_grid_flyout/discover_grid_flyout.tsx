@@ -40,7 +40,7 @@ export interface DiscoverGridFlyoutProps {
   columnTypes?: Record<string, string>;
   hit: DataTableRecord;
   hits?: DataTableRecord[];
-  dataView: DataView;
+  dataView?: DataView;
   onAddColumn: (column: string) => void;
   onClose: () => void;
   onFilter?: DocViewFilterFn;

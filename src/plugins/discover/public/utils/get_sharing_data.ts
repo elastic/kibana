@@ -38,7 +38,7 @@ export async function getSharingData(
 ) {
   const { uiSettings, data } = services;
   const searchSource = currentSearchSource.createCopy();
-  const index = searchSource.getField('index')!;
+  const index = searchSource.getField('index');
   let existingFilter = searchSource.getField('filter') as Filter[] | Filter | undefined;
 
   searchSource.setField(
@@ -71,8 +71,12 @@ export async function getSharingData(
     }
   }
 
-  const absoluteTimeFilter = data.query.timefilter.timefilter.createFilter(index);
-  const relativeTimeFilter = data.query.timefilter.timefilter.createRelativeFilter(index);
+  const absoluteTimeFilter = index
+    ? data.query.timefilter.timefilter.createFilter(index)
+    : undefined;
+  const relativeTimeFilter = index
+    ? data.query.timefilter.timefilter.createRelativeFilter(index)
+    : undefined;
   return {
     getSearchSource: ({
       addGlobalTimeFilter,

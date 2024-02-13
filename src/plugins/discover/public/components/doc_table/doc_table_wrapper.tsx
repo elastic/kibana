@@ -150,7 +150,7 @@ export const DocTableWrapper = forwardRef(
     const shouldShowFieldHandler = useMemo(
       () =>
         getShouldShowFieldHandler(
-          dataView.fields.map((field: DataViewField) => field.name),
+          dataView ? dataView.fields.map((field: DataViewField) => field.name) : [],
           dataView,
           showMultiFields
         ),

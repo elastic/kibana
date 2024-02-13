@@ -42,7 +42,9 @@ export const useFlyoutActions = ({
     },
     {
       id: 'surroundingDocument',
-      enabled: Boolean(!viewSurroundingDocument.disabled && dataView.isTimeBased() && dataView.id),
+      enabled: Boolean(
+        !viewSurroundingDocument.disabled && dataView?.isTimeBased() && dataView?.id
+      ),
       dataTestSubj: 'docTableRowAction',
       iconType: 'documents',
       href: contextViewHref,
