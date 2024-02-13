@@ -10,7 +10,7 @@ import { ML_PAGES } from '../../../common/constants/locator';
 import type { ChangePointDetectionUrlState } from '../../../common/types/locator';
 
 /**
- * Creates URL to the Change Point Deteciton page
+ * Creates URL to the Change Point Detection page
  */
 export function formatChangePointDetectionUrl(
   appBasePath: string,

@@ -26,7 +26,7 @@ export function createOpenChangePointInMlAppAction(
     },
     getDisplayName: () =>
       i18n.translate('xpack.aiops.actions.openChangePointInMlAppName', {
-        defaultMessage: 'Open in AIOps labs',
+        defaultMessage: 'Open in AIOps Labs',
       }),
     async getHref(context): Promise<string | undefined> {
       const locator = pluginStart.share.url.locators.get('ML_APP_LOCATOR')!;
