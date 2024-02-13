@@ -44,6 +44,7 @@ export interface BulkCreateSuppressedAlertsParams
   enrichedEvents: SignalSourceHit[];
   toReturn: SearchAfterAndBulkCreateReturnType;
 }
+// TODO validate Warning cases + how to reuse this util
 /**
  * bulk create and suppress alerts
  * takes care of missing fields logic, i.e. if missing fields configured not to be suppressed,
@@ -113,10 +114,18 @@ export const bulkCreateSuppressedAlerts = async ({
 
   addToSearchAfterReturn({ current: toReturn, next: bulkCreateResult });
 
+  const alertsWereTruncated =
+    (toReturn.suppressedAlertsCount ?? 0) + toReturn.createdSignalsCount >= suppressionMaxSignals ||
+    toReturn.createdSignalsCount >= tuple.maxSignals;
+
+  if (alertsWereTruncated) {
+    // TODO validate this case
+    // toReturn.warningMessages.push(getSuppressionMaxSignalsWarning());
+    // ruleExecutionLogger.warn(getSuppressionMaxSignalsWarning());
+  }
+
   return {
     ...bulkCreateResult,
-    alertsWereTruncated:
-      (toReturn.suppressedAlertsCount ?? 0) + toReturn.createdSignalsCount >=
-        suppressionMaxSignals || toReturn.createdSignalsCount >= tuple.maxSignals,
+    alertsWereTruncated,
   };
 };
