@@ -63,7 +63,7 @@ export function SloOverview({
     list: slo ? [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }] : [],
   });
 
-  const [selectedSlo, setSelectedSlo] = React.useState<SLOWithSummaryResponse | null>(null);
+  const [selectedSlo, setSelectedSlo] = useState<SLOWithSummaryResponse | null>(null);
 
   useEffect(() => {
     refetch();
