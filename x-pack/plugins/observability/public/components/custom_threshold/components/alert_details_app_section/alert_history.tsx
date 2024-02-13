@@ -110,8 +110,7 @@ export function AlertHistoryChart({ rule, dataView, alert }: Props) {
           <EuiTitle size="xs">
             <h2>
               {i18n.translate('xpack.observability.customThreshold.alertHistory.chartTitle', {
-                defaultMessage: '{ruleName} alerts history',
-                values: { ruleName: rule.name },
+                defaultMessage: 'Alerts history',
               })}
             </h2>
           </EuiTitle>

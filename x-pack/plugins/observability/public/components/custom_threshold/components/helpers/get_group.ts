@@ -9,12 +9,21 @@ import { Filter } from '@kbn/es-query';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Group } from '../types';
 
-export const getGroupQueries = (groups?: Group[], fieldName?: string): QueryDslQueryContainer[] => {
+/*
+ * groupFieldName
+ * In some cases, like AAD indices, the field name for group value is differen from group.field,
+ * in AAD case, it is ALERT_GROUP_VALUE (`kibana.alert.group.value`). groupFieldName allows
+ * passing a different field name to be used in the query.
+ */
+export const getGroupQueries = (
+  groups?: Group[],
+  groupFieldName?: string
+): QueryDslQueryContainer[] => {
   return (
     (groups &&
       groups.map((group) => ({
         term: {
-          [fieldName || group.field]: {
+          [groupFieldName || group.field]: {
             value: group.value,
           },
         },
@@ -23,6 +32,6 @@ export const getGroupQueries = (groups?: Group[], fieldName?: string): QueryDslQ
   );
 };
 
-export const getGroupFilters = (groups?: Group[], fieldName?: string): Filter[] => {
-  return getGroupQueries(groups, fieldName).map((query) => ({ meta: {}, query }));
+export const getGroupFilters = (groups?: Group[], groupFieldName?: string): Filter[] => {
+  return getGroupQueries(groups, groupFieldName).map((query) => ({ meta: {}, query }));
 };
