@@ -7,21 +7,18 @@
 
 import {
   ConnectorStatus,
+  CrawlerViewIndex,
   DisplayType,
   FieldType,
   FilteringValidationState,
   SyncStatus,
+  ConnectorViewIndex,
 } from '@kbn/search-connectors';
+import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors/types/indices';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
-import {
-  ApiViewIndex,
-  ConnectorViewIndex,
-  CrawlerViewIndex,
-  IngestionMethod,
-  IngestionStatus,
-} from '../types';
+import { ApiViewIndex } from '../types';
 
 export const apiIndex: ApiViewIndex = {
   count: 1,
