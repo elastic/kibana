@@ -6,16 +6,24 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  LazySavedObjectSaveModalDashboard,
+  withSuspense,
+} from '@kbn/presentation-util-plugin/public';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React from 'react';
+import React, { useState, useCallback } from 'react';
+import { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import { ChartData } from '../../../typings/slo';
 import { useKibana } from '../../../utils/kibana_react';
 import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
-import { WideChart } from './wide_chart';
-
+import { ErrorBudgetActions } from './error_budget_actions';
+import { ErrorBudgetChart } from './error_budget_chart';
+import { useErrorBudgetActions } from '../hooks/use_error_budget_actions';
+import { SLO_ERROR_BUDGET_EMBEDDABLE } from '../../../embeddable/slo/error_budget/slo_error_budget_embeddable';
+const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
   data: ChartData[];
   isLoading: boolean;
@@ -41,7 +49,10 @@ function formatTime(minutes: number) {
 }
 
 export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
-  const { uiSettings } = useKibana().services;
+  const [isMouseOver, setIsMouseOver] = useState(false);
+
+  const [isDashboardAttachmentReady, setDashboardAttachmentReady] = useState(false);
+  const { uiSettings, embeddable } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
@@ -59,78 +70,114 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
     );
   }
 
+  const handleAttachToDashboardSave: SaveModalDashboardProps['onSave'] = useCallback(
+    ({ dashboardId, newTitle, newDescription }) => {
+      const stateTransfer = embeddable!.getStateTransfer();
+      const embeddableInput = {
+        title: newTitle,
+        description: newDescription,
+        sloId: slo.id,
+        sloInstanceId: slo.instanceId,
+      };
+
+      const state = {
+        input: embeddableInput,
+        type: SLO_ERROR_BUDGET_EMBEDDABLE,
+      };
+
+      const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
+
+      stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+        state,
+        path,
+      });
+    },
+    [embeddable, slo.id, slo.instanceId]
+  );
+
   return (
-    <EuiPanel paddingSize="m" color="transparent" hasBorder data-test-subj="errorBudgetChartPanel">
-      <EuiFlexGroup direction="column" gutterSize="l">
-        <EuiFlexGroup direction="column" gutterSize="none">
-          <EuiFlexItem>
-            <EuiTitle size="xs">
-              <h2>
-                {i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.title', {
-                  defaultMessage: 'Error budget burn down',
-                })}
-              </h2>
-            </EuiTitle>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText color="subdued" size="s">
-              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
-                ? i18n.translate(
-                    'xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration',
-                    {
-                      defaultMessage: 'Last {duration}',
-                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
-                    }
-                  )
-                : toDurationAdverbLabel(slo.timeWindow.duration)}
-            </EuiText>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+    <>
+      <EuiPanel
+        paddingSize="m"
+        color="transparent"
+        hasBorder
+        data-test-subj="errorBudgetChartPanel"
+        onMouseOver={() => {
+          if (!isMouseOver) {
+            setIsMouseOver(true);
+          }
+        }}
+        onMouseLeave={() => {
+          if (isMouseOver) {
+            setIsMouseOver(false);
+          }
+        }}
+      >
+        <EuiFlexGroup direction="column" gutterSize="l">
+          <EuiFlexGroup direction="column" gutterSize="none">
+            <EuiFlexItem>
+              <EuiFlexGroup>
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h2>
+                      {i18n.translate(
+                        'xpack.observability.slo.sloDetails.errorBudgetChartPanel.title',
+                        {
+                          defaultMessage: 'Error budget burn down',
+                        }
+                      )}
+                    </h2>
+                  </EuiTitle>
+                </EuiFlexItem>
 
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              titleColor={isSloFailed ? 'danger' : 'success'}
-              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
-              titleSize="s"
-              description={i18n.translate(
-                'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
-                { defaultMessage: 'Remaining' }
-              )}
-              reverse
-            />
-          </EuiFlexItem>
-          {errorBudgetTimeRemainingFormatted ? (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                titleColor={isSloFailed ? 'danger' : 'success'}
-                title={errorBudgetTimeRemainingFormatted}
-                titleSize="s"
-                description={i18n.translate(
-                  'xpack.observability.slo.sloDetails.errorBudgetChartPanel.remaining',
-                  { defaultMessage: 'Remaining' }
-                )}
-                reverse
-              />
+                <EuiFlexGroup justifyContent="flexEnd" wrap>
+                  {isMouseOver && (
+                    <EuiFlexItem grow={false}>
+                      <ErrorBudgetActions
+                        setDashboardAttachmentReady={setDashboardAttachmentReady}
+                      />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
+              </EuiFlexGroup>
             </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                  ? i18n.translate(
+                      'xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration',
+                      {
+                        defaultMessage: 'Last {duration}',
+                        values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                      }
+                    )
+                  : toDurationAdverbLabel(slo.timeWindow.duration)}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
 
-        <EuiFlexItem>
-          <WideChart
-            chart="area"
-            id={i18n.translate(
-              'xpack.observability.slo.sloDetails.errorBudgetChartPanel.chartTitle',
-              {
-                defaultMessage: 'Error budget remaining',
-              }
-            )}
-            state={isSloFailed ? 'error' : 'success'}
-            data={data}
-            isLoading={isLoading}
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+          <ErrorBudgetChart slo={slo} data={data} isLoading={isLoading} />
+        </EuiFlexGroup>
+      </EuiPanel>
+      {isDashboardAttachmentReady ? (
+        <SavedObjectSaveModalDashboard
+          objectType={i18n.translate(
+            'xpack.observability.slo.item.actions.attachToDashboard.objectTypeLabel',
+            { defaultMessage: 'SLO Error Budget' }
+          )}
+          documentInfo={{
+            title: i18n.translate(
+              'xpack.observability.slo.item.actions.attachToDashboard.attachmentTitle',
+              { defaultMessage: 'SLO Error Budget' }
+            ),
+          }}
+          canSaveByReference={false}
+          onClose={() => {
+            setDashboardAttachmentReady(false);
+          }}
+          onSave={handleAttachToDashboardSave}
+        />
+      ) : null}
+    </>
   );
 }

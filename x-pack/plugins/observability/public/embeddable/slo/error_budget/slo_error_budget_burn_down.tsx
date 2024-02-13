@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiLoadingChart } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingChart, EuiLink } from '@elastic/eui';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALL_VALUE } from '@kbn/slo-schema';
@@ -15,7 +15,7 @@ import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
 import { useFetchSloDetails } from '../../../hooks/slo/use_fetch_slo_details';
 
-import { ErrorBudgetChartPanel } from '../../../pages/slo_details/components/error_budget_chart_panel';
+import { ErrorBudgetChart } from '../../../pages/slo_details/components/error_budget_chart';
 
 import { EmbeddableSloProps } from './types';
 
@@ -102,12 +102,22 @@ export function SloErrorBudget({
   }
 
   return (
-    <div ref={containerRef} style={{ width: '100%' }}>
-      <ErrorBudgetChartPanel
-        data={errorBudgetBurnDownData}
-        isLoading={historicalSummaryLoading}
-        slo={slo!}
-      />
+    <div ref={containerRef} style={{ width: '100%', padding: 10 }}>
+      <EuiFlexGroup justifyContent="flexEnd" wrap>
+        <EuiFlexItem grow={false}>
+          <EuiLink data-test-subj="o11ySloErrorBudgetLink" onClick={() => {}}>
+            {slo.name}
+          </EuiLink>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiFlexGroup direction="column" gutterSize="l">
+        <ErrorBudgetChart
+          data={errorBudgetBurnDownData}
+          isLoading={historicalSummaryLoading}
+          slo={slo!}
+        />
+      </EuiFlexGroup>
     </div>
   );
 }
