@@ -56,7 +56,6 @@ export const MethodCrawler: React.FC = () => {
           disabled={isGated || Boolean(errorConnectingMessage)}
           buttonLoading={status === Status.LOADING}
           docsUrl={docLinks.crawlerOverview}
-          hasPrefix
         />
       </EuiFlexItem>
     </EuiFlexGroup>

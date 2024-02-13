@@ -42,7 +42,6 @@ export interface Props {
   disabled?: boolean;
   docsUrl?: string;
   error?: string | React.ReactNode;
-  hasPrefix?: boolean;
   isBeta?: boolean;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
@@ -57,12 +56,12 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   onSubmit,
   type,
   isBeta,
-  hasPrefix = false,
 }) => {
   const {
     fullIndexName,
     fullIndexNameExists,
     fullIndexNameIsValid,
+    hasPrefix,
     language,
     rawName,
     languageSelectValue,

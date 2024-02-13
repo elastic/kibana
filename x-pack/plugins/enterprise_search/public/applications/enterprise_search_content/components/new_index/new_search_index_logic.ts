@@ -107,7 +107,7 @@ export const NewSearchIndexLogic = kea<MakeLogicType<NewSearchIndexValues, NewSe
   path: ['enterprise_search', 'content', 'new_search_index'],
   reducers: {
     hasPrefix: [
-      true,
+      false,
       {
         setHasPrefix: (_, { hasPrefix }) => hasPrefix,
       },
