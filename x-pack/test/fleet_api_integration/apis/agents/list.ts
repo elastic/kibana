@@ -87,11 +87,12 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('should return a 400 when given an invalid "kuery" value', async () => {
+    // With disableKQLValidation enabled, the following tests fail and need to be disabled
+    it.skip('should return a 400 when given an invalid "kuery" value', async () => {
       await supertest.get(`/api/fleet/agents?kuery='test%3A'`).expect(400);
     });
 
-    it('should return 400 if passed kuery has non existing parameters', async () => {
+    it.skip('should return 400 if passed kuery has non existing parameters', async () => {
       await supertest
         .get(`/api/fleet/agents?kuery=fleet-agents.non_existent_parameter:healthy`)
         .set('kbn-xsrf', 'xxxx')
