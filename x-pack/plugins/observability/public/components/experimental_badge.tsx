@@ -22,3 +22,16 @@ export function ExperimentalBadge() {
     />
   );
 }
+
+export function BetaBadge() {
+  return (
+    <EuiBetaBadge
+      label={i18n.translate('xpack.observability.experimentalBadgeLabel', {
+        defaultMessage: 'Beta',
+      })}
+      tooltipContent={i18n.translate('xpack.observability.experimentalBadgeDescription', {
+        defaultMessage: 'This functionality is in beta and is subject to change.',
+      })}
+    />
+  );
+}
