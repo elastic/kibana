@@ -26,6 +26,7 @@ import {
   profilingAWSCostDiscountRate,
   profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
@@ -52,6 +53,7 @@ const costSettings = [
   profilingAzureCostDiscountRate,
   profilingCostPervCPUPerHour,
 ];
+const miscSettings = [profilingShowErrorFrames];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -62,7 +64,7 @@ export function Settings() {
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings('profiling', [...co2Settings, ...costSettings]);
+    useEditableSettings('profiling', [...co2Settings, ...costSettings, ...miscSettings]);
 
   async function handleSave() {
     try {
@@ -205,6 +207,20 @@ export function Settings() {
               ),
             },
             settings: costSettings,
+          },
+          {
+            label: i18n.translate('xpack.profiling.settings.miscSection', {
+              defaultMessage: 'Miscellaneous settings',
+            }),
+            description: {
+              title: (
+                <FormattedMessage
+                  id="xpack.profiling.settings.misc.title"
+                  defaultMessage="Universal Profiling miscellaneous settings."
+                />
+              ),
+            },
+            settings: miscSettings,
           },
         ].map((item) => (
           <>

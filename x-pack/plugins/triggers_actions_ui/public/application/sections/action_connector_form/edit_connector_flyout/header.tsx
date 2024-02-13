@@ -8,26 +8,27 @@
 import React, { memo } from 'react';
 import { css } from '@emotion/react';
 import {
-  EuiTitle,
+  EuiBetaBadge,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
-  EuiText,
   EuiFlyoutHeader,
-  IconType,
-  EuiBetaBadge,
+  EuiIcon,
   EuiTab,
   EuiTabs,
+  EuiText,
+  EuiTitle,
+  IconType,
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { betaBadgeProps } from '../beta_badge_props';
+import { betaBadgeProps, technicalPreviewBadgeProps } from '../beta_badge_props';
 import { EditConnectorTabs } from '../../../../types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasExecuteActionsCapability } from '../../../lib/capabilities';
 
 const FlyoutHeaderComponent: React.FC<{
+  isBeta?: boolean;
   isExperimental?: boolean;
   isPreconfigured: boolean;
   connectorName: string;
@@ -38,6 +39,7 @@ const FlyoutHeaderComponent: React.FC<{
   icon?: IconType | null;
 }> = ({
   icon,
+  isBeta = false,
   isExperimental = false,
   isPreconfigured,
   connectorName,
@@ -89,11 +91,18 @@ const FlyoutHeaderComponent: React.FC<{
                   />
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  {isExperimental && (
+                  {isBeta ? (
                     <EuiBetaBadge
                       label={betaBadgeProps.label}
                       tooltipContent={betaBadgeProps.tooltipContent}
                     />
+                  ) : (
+                    isExperimental && (
+                      <EuiBetaBadge
+                        label={technicalPreviewBadgeProps.label}
+                        tooltipContent={technicalPreviewBadgeProps.tooltipContent}
+                      />
+                    )
                   )}
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -117,13 +126,20 @@ const FlyoutHeaderComponent: React.FC<{
                   </h3>
                 </EuiTitle>
               </EuiFlexItem>
-              {isExperimental && (
-                <EuiFlexItem grow={false}>
-                  <EuiBetaBadge
-                    label={betaBadgeProps.label}
-                    tooltipContent={betaBadgeProps.tooltipContent}
-                  />
-                </EuiFlexItem>
+              {isBeta ? (
+                <EuiBetaBadge
+                  label={betaBadgeProps.label}
+                  tooltipContent={betaBadgeProps.tooltipContent}
+                />
+              ) : (
+                isExperimental && (
+                  <EuiFlexItem grow={false}>
+                    <EuiBetaBadge
+                      label={technicalPreviewBadgeProps.label}
+                      tooltipContent={technicalPreviewBadgeProps.tooltipContent}
+                    />
+                  </EuiFlexItem>
+                )
               )}
             </EuiFlexGroup>
           )}

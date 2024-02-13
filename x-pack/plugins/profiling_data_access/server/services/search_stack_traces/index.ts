@@ -23,6 +23,7 @@ interface Params {
   awsCostDiscountRate: number;
   costPervCPUPerHour: number;
   azureCostDiscountRate: number;
+  showErrorFrames: boolean;
 }
 
 export async function searchStackTraces({
@@ -39,6 +40,7 @@ export async function searchStackTraces({
   awsCostDiscountRate,
   costPervCPUPerHour,
   azureCostDiscountRate,
+  showErrorFrames,
 }: Params) {
   const response = await client.profilingStacktraces({
     query: {
@@ -69,5 +71,5 @@ export async function searchStackTraces({
     azureCostDiscountRate,
   });
 
-  return decodeStackTraceResponse(response);
+  return decodeStackTraceResponse(response, showErrorFrames);
 }

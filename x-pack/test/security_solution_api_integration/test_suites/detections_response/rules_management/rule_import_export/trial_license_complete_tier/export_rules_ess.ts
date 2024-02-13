@@ -16,10 +16,6 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import {
   binaryToString,
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
   getSimpleRule,
   getSimpleRuleOutput,
   getWebHookAction,
@@ -30,6 +26,12 @@ import {
   createRuleThroughAlertingEndpoint,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
