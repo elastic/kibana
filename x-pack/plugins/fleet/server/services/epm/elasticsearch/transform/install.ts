@@ -449,14 +449,14 @@ const installTransformsAssets = async (
     // generate api key, and pass es-secondary-authorization in header when creating the transforms.
     const secondaryAuth = transforms.some((t) => t.runAsKibanaSystem === false)
       ? await generateTransformSecondaryAuthHeaders({
-          authorizationHeader,
-          logger,
-          pkgName: packageInstallContext.packageInfo.name,
-          pkgVersion: packageInstallContext.packageInfo.version,
-          username,
-        })
+        authorizationHeader,
+        logger,
+        pkgName: packageInstallContext.packageInfo.name,
+        pkgVersion: packageInstallContext.packageInfo.version,
+        username,
+      })
       : // No need to generate api key/secondary auth if all transforms are run as kibana_system user
-        undefined;
+      undefined;
     // delete all previous transform
     await Promise.all([
       deleteTransforms(
@@ -712,6 +712,20 @@ async function handleTransformInstall({
 }): Promise<TransformEsAssetReference> {
   let isUnauthorizedAPIKey = false;
   try {
+    // @TODO: remove
+    console.log(
+      `--@@{
+      transform_id: transform.installationName,
+      defer_validation: true,
+      body: transform.content,
+    }\n`,
+      secondaryAuth ? { ...secondaryAuth } : undefined,
+      JSON.stringify({
+        transform_id: transform.installationName,
+        defer_validation: true,
+        body: transform.content,
+      })
+    );
     await retryTransientEsErrors(
       () =>
         // defer_validation: true on put if the source index is not available
@@ -729,6 +743,8 @@ async function handleTransformInstall({
     );
     logger.debug(`Created transform: ${transform.installationName}`);
   } catch (err) {
+    // @TODO: remove
+    console.log(`--@@err`, err);
     const isResponseError = err instanceof errors.ResponseError;
     isUnauthorizedAPIKey =
       isResponseError &&
@@ -771,7 +787,11 @@ async function handleTransformInstall({
         throw err;
       }
     }
-  } else {
+  }
+
+  // @TODO: remove
+  console.log(`--@@transform.content.settings`, JSON.stringify(transform.content.settings));
+  if (startTransform === false || transform.content?.settings?.unattended === true) {
     // if transform was not set to start automatically in yml config,
     // we need to check using _stats if the transform had insufficient permissions
     try {

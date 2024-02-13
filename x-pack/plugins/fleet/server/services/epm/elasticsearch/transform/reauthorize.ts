@@ -68,6 +68,18 @@ async function reauthorizeAndStartTransform({
       () => esClient.transform.startTransform({ transform_id: transformId }, { ignore: [409] }),
       { logger, additionalResponseStatuses: [400] }
     );
+
+    // Transform can already be started even without sufficient permission if 'unattended: true'
+    // So we are just catching that special case, and showcase on the UI
+    if (
+      startedTransform &&
+      startedTransform.status === 409 &&
+      Array.isArray(startedTransform.error?.root_cause) &&
+      startedTransform.error.root_cause[0]?.reason?.includes('already started')
+    ) {
+      return { transformId, success: true, error: null };
+    }
+
     logger.debug(`Started transform: ${transformId}`);
     return { transformId, success: startedTransform.acknowledged, error: null };
   } catch (err) {
@@ -97,7 +109,7 @@ export async function handleTransformReauthorizeAndStart({
   if (!secondaryAuth) {
     throw Error(
       'A valid secondary authorization with sufficient `manage_transform` permission is needed to re-authorize and start transforms. ' +
-        'This could be because security is not enabled, or API key cannot be generated.'
+      'This could be because security is not enabled, or API key cannot be generated.'
     );
   }
 
@@ -162,6 +174,8 @@ export async function handleTransformReauthorizeAndStart({
     authorizedTransforms = await Promise.all(transformsPromises).then((results) => results.flat());
   }
 
+  // @TODO: remove
+  console.log(`--@@authorizedTransforms`, authorizedTransforms);
   const so = await savedObjectsClient.get<Installation>(PACKAGES_SAVED_OBJECT_TYPE, pkgName);
   const esReferences = so.attributes.installed_es ?? [];
 
