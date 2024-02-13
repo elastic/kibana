@@ -72,8 +72,17 @@ export function registerContextFunction({
         );
 
         const screenDescription = appContexts.map((context) => context.description).join('\n\n');
+        // any data that falls within the token limit, send it automatically
 
-        const content = { screen_description: screenDescription, learnings: [] };
+        const dataWithinTokenLimit = compact(appContexts.flatMap((context) => context.data)).filter(
+          (data) => encode(JSON.stringify(data.value)).length <= MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN
+        );
+
+        const content = {
+          screen_description: screenDescription,
+          learnings: [],
+          ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
+        };
 
         if (!isKnowledgeBaseAvailable) {
           return { content };
@@ -126,22 +135,10 @@ export function registerContextFunction({
       return new Observable<MessageAddEvent>((subscriber) => {
         getContext()
           .then(({ content }) => {
-            // any data that falls within the token limit, send it automatically
-
-            const dataWithinTokenLimit = compact(
-              appContexts.flatMap((context) => context.data)
-            ).filter(
-              (data) =>
-                encode(JSON.stringify(data.value)).length <= MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN
-            );
-
             subscriber.next(
               createFunctionResponseMessage({
                 name: 'context',
-                content: {
-                  ...content,
-                  ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
-                },
+                content,
               })
             );
 
