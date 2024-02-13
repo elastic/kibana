@@ -4760,6 +4760,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/formatters@link:packages/kbn-formatters":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ftr-apis-plugin@link:src/plugins/ftr_apis":
   version "0.0.0"
   uid ""
