@@ -42,8 +42,8 @@ export const changeDataView =
     // to guarantee the correct update on the data view selection and avoid a race condition
     // when updating the control panels.
     const nextDataView = await dataViews.get(context.datasetSelection.toDataviewSpec().id, false);
-    discoverStateContainer.actions.setDataView(nextDataView);
     if (nextDataView.id) {
       await discoverStateContainer.actions.onChangeDataView(nextDataView.id);
     }
+    discoverStateContainer.actions.setDataView(nextDataView);
   };
