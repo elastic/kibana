@@ -49,7 +49,7 @@ import { BASE_BUCKET_DAILY, BASE_BUCKET_PERMANENT } from './bucket_config';
       rm manifest.json
       cp manifest-permanent.json manifest.json
       gsutil -m cp -r gs://${bucket}/* gs://${BASE_BUCKET_PERMANENT}/${version}/
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_DAILY}/${version}/
+      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp manifest.json gs://${BASE_BUCKET_PERMANENT}/${version}/
     `,
       { shell: '/bin/bash' }
     );
