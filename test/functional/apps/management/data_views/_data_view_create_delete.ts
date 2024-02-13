@@ -20,8 +20,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const es = getService('es');
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
-  // FLAKY: https://github.com/elastic/kibana/issues/174066
-  describe.skip('creating and deleting default data view', function describeIndexTests() {
+  describe('creating and deleting default data view', function describeIndexTests() {
     before(async function () {
       await esArchiver.emptyKibanaIndex();
       await esArchiver.loadIfNeeded(
