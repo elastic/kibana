@@ -134,7 +134,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "risk-engine-configuration": "b105d4a3c6adce40708d729d12e5ef3c8fbd9508",
         "rules-settings": "892a2918ebaeba809a612b8d97cec0b07c800b5f",
         "sample-data-telemetry": "37441b12f5b0159c2d6d5138a494c9f440e950b5",
-        "search": "2c1ab8a17e6972be2fa8d3880ba2305dfd9a5a6e",
+        "search": "cf69e2bf8ae25c10af21887cd6effc4a9ea73064",
         "search-session": "b2fcd840e12a45039ada50b1355faeafa39876d1",
         "search-telemetry": "b568601618744720b5662946d3103e3fb75fe8ee",
         "security-rule": "07abb4d7e707d91675ec0495c73816394c7b521f",
