@@ -10,6 +10,7 @@ import './_index.scss';
 import ReactDOM from 'react-dom';
 import { pick } from 'lodash';
 
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { AppMountParameters, CoreStart, HttpStart } from '@kbn/core/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-date-picker';
@@ -33,6 +34,8 @@ import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
 import type { StartServices } from './contexts/kibana';
+import { fieldFormatServiceFactory } from './services/field_format_service_factory';
+import { indexServiceFactory } from './util/index_service';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
@@ -53,13 +56,20 @@ const localStorage = new Storage(window.localStorage);
 /**
  * Provides global services available across the entire ML app.
  */
-export function getMlGlobalServices(httpStart: HttpStart, usageCollection?: UsageCollectionSetup) {
+export function getMlGlobalServices(
+  httpStart: HttpStart,
+  dataViews: DataViewsContract,
+  usageCollection?: UsageCollectionSetup
+) {
   const httpService = new HttpService(httpStart);
   const mlApiServices = mlApiServicesProvider(httpService);
+  const mlIndexUtils = indexServiceFactory(dataViews);
+  const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
 
   return {
     httpService,
     mlApiServices,
+    mlFieldFormatService,
     mlUsageCollection: mlUsageCollectionProvider(usageCollection),
     mlCapabilities: new MlCapabilitiesService(mlApiServices),
     mlLicense: new MlLicense(),
@@ -106,7 +116,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
       ...coreStart,
-      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
+      mlServices: getMlGlobalServices(coreStart.http, deps.data.dataViews, deps.usageCollection),
     };
   }, [deps, coreStart]);
 

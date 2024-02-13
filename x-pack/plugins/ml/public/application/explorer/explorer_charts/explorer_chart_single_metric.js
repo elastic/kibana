@@ -24,6 +24,7 @@ import {
   getSeverityWithLow,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTime } from '@kbn/ml-date-utils';
+import { context } from '@kbn/kibana-react-plugin/public';
 
 import { formatValue } from '../../formatters/format_value';
 import {
@@ -39,13 +40,14 @@ import {
   getMultiBucketImpactTooltipValue,
 } from '../../util/chart_utils';
 import { LoadingIndicator } from '../../components/loading_indicator/loading_indicator';
-import { mlFieldFormatService } from '../../services/field_format_service';
 import { TRANSPARENT_BACKGROUND } from './constants';
 
 const CONTENT_WRAPPER_HEIGHT = 215;
 const CONTENT_WRAPPER_CLASS = 'ml-explorer-chart-content-wrapper';
 
 export class ExplorerChartSingleMetric extends React.Component {
+  static contextType = context;
+
   static propTypes = {
     tooManyBuckets: PropTypes.bool,
     seriesConfig: PropTypes.object,
@@ -85,7 +87,10 @@ export class ExplorerChartSingleMetric extends React.Component {
       return;
     }
 
-    const fieldFormat = mlFieldFormatService.getFieldFormat(config.jobId, config.detectorIndex);
+    const fieldFormat = this.context.services.mlServices.mlFieldFormatService.getFieldFormat(
+      config.jobId,
+      config.detectorIndex
+    );
 
     let vizWidth = 0;
     const chartHeight = 170;

@@ -18,8 +18,6 @@ import { ML_JOB_ID } from '@kbn/ml-anomaly-utils';
 import { basicResolvers } from '../resolvers';
 import { ML_PAGES } from '../../../locator';
 import { NavigateToPath, useMlKibana } from '../../contexts/kibana';
-import { fieldFormatServiceFactory } from '../../services/field_format_service_factory';
-import { indexServiceFactory } from '../../util/index_service';
 
 import { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
 
@@ -30,7 +28,6 @@ import { Explorer } from '../../explorer';
 import { mlJobService } from '../../services/job_service';
 import { ml } from '../../services/ml_api_service';
 import { useExplorerData } from '../../explorer/actions';
-import { explorerServiceFactory } from '../../explorer/explorer_dashboard_service';
 import { getDateFormatTz } from '../../explorer/explorer_utils';
 import { useJobSelection } from '../../components/job_selector/use_job_selection';
 import { useTableInterval } from '../../components/controls/select_interval';
@@ -105,7 +102,7 @@ interface ExplorerUrlStateManagerProps {
 
 const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTimeRange }) => {
   const {
-    services: { cases, data, presentationUtil, mlServices },
+    services: { cases, presentationUtil },
   } = useMlKibana();
 
   const [globalState] = useUrlState('_g');
@@ -120,15 +117,9 @@ const ExplorerUrlStateManager: FC<ExplorerUrlStateManagerProps> = ({ jobsWithTim
     (job) => jobIds.includes(job.id) && job.isRunning === true
   );
 
-  const explorerService = useMemo(() => {
-    const mlIndexUtils = indexServiceFactory(data.dataViews);
-    const fieldFormatService = fieldFormatServiceFactory(mlServices.mlApiServices, mlIndexUtils);
-    return explorerServiceFactory(fieldFormatService);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  const explorerState = useObservable(explorerService.state$);
   const anomalyExplorerContext = useAnomalyExplorerContext();
+  const { explorerService } = anomalyExplorerContext;
+  const explorerState = useObservable(anomalyExplorerContext.explorerService.state$);
 
   const refresh = useRefresh();
   const lastRefresh = refresh?.lastRefresh ?? 0;
