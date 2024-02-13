@@ -19,6 +19,7 @@ export type PipelinesEditTestBed = TestBed<PipelineFormTestSubjects> & {
 export const PIPELINE_TO_EDIT = {
   name: 'my_pipeline',
   description: 'pipeline description',
+  deprecated: true,
   processors: [
     {
       set: {

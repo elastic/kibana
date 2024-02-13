@@ -22,7 +22,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const transform = getService('transform');
   const pageObjects = getPageObjects(['discover']);
 
-  describe('creation_index_pattern', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/151889
+  // Failing: See https://github.com/elastic/kibana/issues/151811
+  describe.skip('creation_index_pattern', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -527,7 +529,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.sourceSelection.selectSource(testData.source);
         });
 
-        it('navigates through the wizard and sets all needed fields', async () => {
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176697
+        // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/176698
+        it.skip('navigates through the wizard and sets all needed fields', async () => {
           await transform.testExecution.logTestStep('displays the define step');
           await transform.wizard.assertDefineStepActive();
 
