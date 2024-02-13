@@ -10,6 +10,7 @@ import React, { useState } from 'react';
 import { OpenAIKeyCallout } from './open_ai_key_callout';
 
 import { OpenAIKeyFlyOut } from './open_ai_key_flyout';
+import { i18n } from '@kbn/i18n';
 
 interface OpenAIKeyFieldProps {
   apiKey: string;
@@ -33,8 +34,10 @@ export const OpenAIKeyField: React.FC<OpenAIKeyFieldProps> = ({ apiKey, onSave }
           <OpenAIKeyFlyOut openAPIKey={apiKey} onSave={onSave} onClose={onCloseOpenAIFlyOut} />
         )}
         {apiKey ? (
-          <EuiButtonEmpty flush="both" onClick={handleOpenAIFlyOut}>
-            Edit OpenAI API key
+          <EuiButtonEmpty flush="both" size="xs" onClick={handleOpenAIFlyOut}>
+            {i18n.translate('aiPlayground.sidebar.openAIField.editLabel', {
+              defaultMessage: 'Edit OpenAI API key',
+            })}
           </EuiButtonEmpty>
         ) : (
           <OpenAIKeyCallout openAIFlyOutOpen={handleOpenAIFlyOut} />
