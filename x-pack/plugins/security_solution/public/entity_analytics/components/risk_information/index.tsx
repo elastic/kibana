@@ -82,10 +82,10 @@ interface CriticalityLevelTableItem {
 }
 
 const criticalityLevelTableItems: CriticalityLevelTableItem[] = [
-  CriticalityLevels.VERY_IMPORTANT,
-  CriticalityLevels.IMPORTANT,
-  CriticalityLevels.NORMAL,
-  CriticalityLevels.NOT_IMPORTANT,
+  CriticalityLevels.EXTREME_IMPACT,
+  CriticalityLevels.HIGH_IMPACT,
+  CriticalityLevels.MEDIUM_IMPACT,
+  CriticalityLevels.LOW_IMPACT,
 ].map((level) => ({ level, weight: CriticalityModifiers[level] }));
 
 const getCriticalityLevelTableColumns = (): Array<

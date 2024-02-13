@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import type { CriticalityLevel } from './types';
-
 export const ASSET_CRITICALITY_INDEX_PATTERN = '.asset-criticality.asset-criticality-*';
 
 type AssetCriticalityIndexPrivilege = 'read' | 'write';
@@ -18,18 +16,18 @@ export const ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES = {
  * enum of asset criticality levels corresponding to the union type {@link CriticalityLevel}
  */
 export enum CriticalityLevels {
-  VERY_IMPORTANT = 'very_important',
-  IMPORTANT = 'important',
-  NORMAL = 'normal',
-  NOT_IMPORTANT = 'not_important',
+  EXTREME_IMPACT = 'extreme_impact',
+  HIGH_IMPACT = 'high_impact',
+  MEDIUM_IMPACT = 'medium_impact',
+  LOW_IMPACT = 'low_impact',
 }
 
 /**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
  */
-export const CriticalityModifiers: Record<CriticalityLevel, number> = {
-  [CriticalityLevels.VERY_IMPORTANT]: 2,
-  [CriticalityLevels.IMPORTANT]: 1.5,
-  [CriticalityLevels.NORMAL]: 1,
-  [CriticalityLevels.NOT_IMPORTANT]: 0.5,
+export const CriticalityModifiers: Record<CriticalityLevels, number> = {
+  [CriticalityLevels.EXTREME_IMPACT]: 2,
+  [CriticalityLevels.HIGH_IMPACT]: 1.5,
+  [CriticalityLevels.MEDIUM_IMPACT]: 1,
+  [CriticalityLevels.LOW_IMPACT]: 0.5,
 };

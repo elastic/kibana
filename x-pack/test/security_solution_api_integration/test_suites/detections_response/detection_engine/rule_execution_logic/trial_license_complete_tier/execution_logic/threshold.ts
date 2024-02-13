@@ -452,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
         const previewAlerts = await getPreviewAlerts({ es, previewId, sort: ['host.name'] });
         const fullAlert = previewAlerts[0]?._source;
 
-        expect(fullAlert?.['host.asset.criticality']).toEqual('important');
+        expect(fullAlert?.['host.asset.criticality']).toEqual('high_impact');
       });
     });
   });
