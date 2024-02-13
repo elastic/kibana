@@ -334,6 +334,14 @@ export const ALERTS_AS_DATA_URL = '/internal/rac/alerts' as const;
 export const ALERTS_AS_DATA_FIND_URL = `${ALERTS_AS_DATA_URL}/find` as const;
 
 /**
+ * Security Integrations routes
+ */
+export const SECRUTIY_INTEGRATIONS_FLEET_MANAGED_INDEX_TEMPLATES_URL =
+  '/internal/fleet_index_templates' as const;
+
+export const SECURITY_INTEGRATIONS_CRIBL_ROUTING_PIPELINE = 'cribl-routing-pipeline' as const;
+
+/**
  * Common naming convention for an unauthenticated user
  */
 export const UNAUTHENTICATED_USER = 'Unauthenticated' as const;
