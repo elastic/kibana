@@ -99,7 +99,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
   if (headlessBrowser === '1') {
     // Using the new headless mode (instead of `options.headless()`)
     // See: https://www.selenium.dev/blog/2023/headless-is-going-away/
-    options.addArguments('headless=new');
+    options.addArguments('headless=old');
 
     // Use --disable-gpu to avoid an error from a missing Mesa library, as per
     // See: https://chromium.googlesource.com/chromium/src/+/lkgr/headless/README.md
@@ -115,7 +115,7 @@ function initChromiumOptions(browserType: Browsers, acceptInsecureCerts: boolean
 
     // Using the new headless mode (instead of `options.headless()`)
     // See: https://www.selenium.dev/blog/2023/headless-is-going-away/
-    options.addArguments('headless=new');
+    options.addArguments('headless=old');
 
     options.addArguments('disable-gpu', 'remote-debugging-port=9222');
   }
