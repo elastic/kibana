@@ -45,12 +45,10 @@ export const DeleteModelsModal: FC<DeleteModelsModalProps> = ({ models, onClose 
     WithRequired<ModelItem, 'pipelines'>
   >;
 
-  const modelsWithInferenceAPIs = models.filter(
-    (m) => Array.isArray(m.inference_apis) && m.inference_apis.length > 0
-  ) as Array<WithRequired<ModelItem, 'inference_apis'>>;
+  const modelsWithInferenceAPIs = models.filter((m) => m.hasInferenceServices);
 
   const inferenceAPIsIDs: string[] = modelsWithInferenceAPIs.flatMap((model) => {
-    return model.inference_apis.map((inference) => inference.model_id);
+    return (model.inference_apis ?? []).map((inference) => inference.model_id);
   });
 
   const pipelinesCount = modelsWithPipelines.reduce((acc, curr) => {
