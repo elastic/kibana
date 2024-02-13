@@ -111,7 +111,7 @@ export const hasWildcardAndInvalidOperator = ({
   value,
 }: {
   operator: EntryTypes | TrustedAppEntryTypes;
-  value: TrustedAppEntryTypes.value | EntryTypes.value;
+  value: string;
 }): boolean => {
   if (operator !== 'wildcard' && validateWildcardInput(value)) {
     return true;
