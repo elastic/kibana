@@ -24,8 +24,8 @@ import {
   ALERT_THRESHOLD_RESULT,
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  createRule,
   getOpenAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,

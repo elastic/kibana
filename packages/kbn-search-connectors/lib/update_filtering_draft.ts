@@ -49,17 +49,14 @@ export const updateFilteringDraft = async (
       state: FilteringValidationState.EDITED,
     },
   };
-  const connectorResult = await fetchConnectorById(client, connectorId);
-  if (!connectorResult) {
+  const connector = await fetchConnectorById(client, connectorId);
+  if (!connector) {
     throw new Error(`Could not find connector with id ${connectorId}`);
   }
-  const { value: connector, seqNo, primaryTerm } = connectorResult;
 
   const result = await client.update<Connector>({
     doc: { ...connector, filtering: [{ ...connector.filtering[0], draft }] },
     id: connectorId,
-    if_primary_term: primaryTerm,
-    if_seq_no: seqNo,
     index: CONNECTORS_INDEX,
   });
 
