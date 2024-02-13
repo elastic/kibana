@@ -124,6 +124,7 @@ export type SingleMetricViewerEmbeddableInput = EmbeddableInput &
 export interface AnomalyChartsServices {
   anomalyDetectorService: AnomalyDetectorService;
   anomalyExplorerService: AnomalyExplorerChartsService;
+  mlFieldFormatService: MlFieldFormatService;
   mlResultsService: MlResultsService;
   mlApiServices?: MlApiServices;
 }

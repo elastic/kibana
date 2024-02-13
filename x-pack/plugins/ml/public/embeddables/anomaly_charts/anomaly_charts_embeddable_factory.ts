@@ -68,17 +68,27 @@ export class AnomalyChartsEmbeddableFactory
   }
 
   private async getServices(): Promise<AnomalyChartsEmbeddableServices> {
-    const [coreStart, pluginsStart] = await this.getStartServices();
-
-    const { AnomalyDetectorService } = await import(
-      '../../application/services/anomaly_detector_service'
-    );
-    const { mlApiServicesProvider } = await import('../../application/services/ml_api_service');
-    const { mlResultsServiceProvider } = await import('../../application/services/results_service');
+    const [
+      [coreStart, pluginsStart],
+      { AnomalyDetectorService },
+      { fieldFormatServiceFactory },
+      { indexServiceFactory },
+      { mlApiServicesProvider },
+      { mlResultsServiceProvider },
+    ] = await Promise.all([
+      await this.getStartServices(),
+      await import('../../application/services/anomaly_detector_service'),
+      await import('../../application/services/field_format_service_factory'),
+      await import('../../application/util/index_service'),
+      await import('../../application/services/ml_api_service'),
+      await import('../../application/services/results_service'),
+    ]);
 
     const httpService = new HttpService(coreStart.http);
     const anomalyDetectorService = new AnomalyDetectorService(httpService);
     const mlApiServices = mlApiServicesProvider(httpService);
+    const mlIndexUtils = indexServiceFactory(pluginsStart.data.dataViews);
+    const mlFieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
     const mlResultsService = mlResultsServiceProvider(mlApiServices);
 
     const anomalyExplorerService = new AnomalyExplorerChartsService(
@@ -90,7 +100,7 @@ export class AnomalyChartsEmbeddableFactory
     return [
       coreStart,
       pluginsStart as MlDependencies,
-      { anomalyDetectorService, anomalyExplorerService, mlResultsService },
+      { anomalyDetectorService, anomalyExplorerService, mlFieldFormatService, mlResultsService },
     ];
   }
 
