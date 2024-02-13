@@ -321,7 +321,7 @@ export class FilterBarService extends FtrService {
     await this.addFilterAndSelectDataView(null, filter);
   }
 
-  public async addDslFilter(value: string) {
+  public async addDslFilter(value: string, waitUntilLoadingHasFinished = true) {
     await this.testSubjects.click('addFilter');
     await this.testSubjects.click('editQueryDSL');
     await this.monacoEditor.waitCodeEditorReady('addFilterPopover');
@@ -331,7 +331,9 @@ export class FilterBarService extends FtrService {
     await this.retry.try(async () => {
       await this.testSubjects.waitForDeleted('saveFilter');
     });
-    await this.header.waitUntilLoadingHasFinished();
+    if (waitUntilLoadingHasFinished) {
+      await this.header.waitUntilLoadingHasFinished();
+    }
   }
 
   /**

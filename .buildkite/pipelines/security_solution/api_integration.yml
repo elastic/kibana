@@ -23,6 +23,7 @@ steps:
           limit: 2
 
   - group: 'Execute Tests'
+    key: test_execution
     depends_on: build_image
     steps:
       - label: Running exception_workflows:qa:serverless
