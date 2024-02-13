@@ -42,6 +42,7 @@ import type {
   EndpointActionDataParameterTypes,
 } from '../../../../../../common/endpoint/types';
 import type { CommonResponseActionMethodOptions } from '../lib/types';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 export class EndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'endpoint';
@@ -92,6 +93,7 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
           agents: agentIds.valid,
           data: {
             command,
+            comment: actionReq.comment,
             parameters: actionReq.parameters as EndpointActionDataParameterTypes,
           },
         });
@@ -254,10 +256,23 @@ export class EndpointActionsClient extends ResponseActionsClientImpl {
     actionRequest: ExecuteActionRequestBody,
     options: CommonResponseActionMethodOptions = {}
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
+    let actionRequestWithDefaults = actionRequest;
+
+    // Default for `timeout` applied here if not defined on request
+    if (!actionRequestWithDefaults.parameters.timeout) {
+      actionRequestWithDefaults = {
+        ...actionRequest,
+        parameters: {
+          ...actionRequest.parameters,
+          timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+        },
+      };
+    }
+
     return this.handleResponseAction<
       ExecuteActionRequestBody,
       ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
-    >('execute', actionRequest, options);
+    >('execute', actionRequestWithDefaults, options);
   }
 
   async upload(
