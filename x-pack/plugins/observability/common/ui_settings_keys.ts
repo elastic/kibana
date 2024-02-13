@@ -39,3 +39,4 @@ export const profilingCo2PerKWH = 'observability:profilingCo2PerKWH';
 export const profilingDatacenterPUE = 'observability:profilingDatacenterPUE';
 export const profilingAWSCostDiscountRate = 'observability:profilingAWSCostDiscountRate';
 export const profilingCostPervCPUPerHour = 'observability:profilingCostPervCPUPerHour';
+export const apmEnableTransactionProfiling = 'observability:apmEnableTransactionProfiling';

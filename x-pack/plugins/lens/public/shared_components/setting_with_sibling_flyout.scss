@@ -1,6 +1,6 @@
-@import '../../mixins';
+@import '../mixins';
 
-.lnsPalettePanelContainer {
+.lnsSettingWithSiblingFlyout {
   // Use the EuiFlyout style
   @include euiFlyout;
   // But with custom positioning to keep it within the sidebar contents
@@ -14,15 +14,15 @@
   z-index: $euiZLevel3 + 1
 }
 
-.lnsPalettePanelContainer__header {
+.lnsSettingWithSiblingFlyout__header {
   padding: $euiSize;
 }
 
-.lnsPalettePanelContainer__content {
+.lnsSettingWithSiblingFlyout__content {
   @include euiYScroll;
   flex: 1;
 }
 
-.lnsPalettePanelContainer__footer {
+.lnsSettingWithSiblingFlyout__footer {
   padding: $euiSize;
 }

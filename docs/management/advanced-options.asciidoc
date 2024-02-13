@@ -448,6 +448,9 @@ Determines whether the <<service-time-comparison, comparison feature>> is enable
 [[observability-apm-enable-infra-view]]`observability:enableInfrastructureView`::
 Enables the Infrastructure view in the APM app.
 
+[[observability-apm-enable-transaction-profiling]]`observability:apmEnableTransactionProfiling`::
+Enable Universal Profiling on Transaction view.
+
 [[observability-enable-inspect-es-queries]]`observability:enableInspectEsQueries`::
 When enabled, allows you to inspect {es} queries in API responses.
 
