@@ -215,7 +215,7 @@ export const RuleForm = ({
       ? getDurationUnitValue(rule.schedule.interval)
       : defaultScheduleIntervalUnit
   );
-  const [alertDelay, setAlertDelay] = useState<number | undefined>(rule.alertDelay?.active);
+  const [alertDelay, setAlertDelay] = useState<number | undefined>(rule.alertDelay?.active ?? 1);
   const [defaultActionGroupId, setDefaultActionGroupId] = useState<string | undefined>(undefined);
 
   const [availableRuleTypes, setAvailableRuleTypes] = useState<RuleTypeItems>([]);
@@ -827,38 +827,39 @@ export const RuleForm = ({
       )}
 
       <EuiFlexItem>
-        <EuiFormRow
-          fullWidth
-          data-test-subj="alertDelayFormRow"
-          display="rowCompressed"
-          label={[
-            <FormattedMessage
-              id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel"
-              defaultMessage="Alert creation delay"
-            />,
-            <EuiIconTip
-              position="right"
-              type="questionInCircle"
-              content={
-                <FormattedMessage
-                  id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
-                  defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
-                />
-              }
-            />,
-          ]}
-        >
+        <EuiFormRow fullWidth data-test-subj="alertDelayFormRow" display="rowCompressed">
           <EuiFieldNumber
             fullWidth
-            min={0}
-            value={alertDelay}
+            min={1}
+            value={alertDelay || ''}
             name="alertDelay"
             data-test-subj="alertDelayInput"
+            prepend={[
+              i18n.translate('xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldLabel', {
+                defaultMessage: 'Alert after',
+              }),
+              <EuiIconTip
+                position="right"
+                type="questionInCircle"
+                content={
+                  <FormattedMessage
+                    id="xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldHelp"
+                    defaultMessage="An alert occurs only when the specified number of consecutive runs meet the rule conditions."
+                  />
+                }
+              />,
+            ]}
+            append={i18n.translate(
+              'xpack.triggersActionsUI.sections.ruleForm.alertDelayFieldAppendLabel',
+              {
+                defaultMessage: 'consecutive matches',
+              }
+            )}
             onChange={(e) => {
               const value = e.target.value;
               if (value === '' || INTEGER_REGEX.test(value)) {
                 const parsedValue = value === '' ? '' : parseInt(value, 10);
-                setAlertDelayProperty('active', parsedValue || 0);
+                setAlertDelayProperty('active', parsedValue || 1);
                 setAlertDelay(parsedValue || undefined);
               }
             }}
