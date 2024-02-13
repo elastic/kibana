@@ -6,49 +6,35 @@
  */
 
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
+import { Logger } from '@kbn/logging';
 import type { Serializable } from '@kbn/utility-types';
 import dedent from 'dedent';
+import { encode } from 'gpt-tokenizer';
 import * as t from 'io-ts';
 import { compact, last, omit } from 'lodash';
-import { lastValueFrom } from 'rxjs';
-import { Logger } from '@kbn/logging';
+import { lastValueFrom, Observable } from 'rxjs';
 import { FunctionRegistrationParameters } from '.';
-import { MessageRole, type Message } from '../../common/types';
+import { MessageAddEvent } from '../../common/conversation_complete';
+import { FunctionVisibility, MessageRole, type Message } from '../../common/types';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantClient } from '../service/client';
+import { createFunctionResponseMessage } from '../service/util/create_function_response_message';
 
-export function registerRecallFunction({
+const MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN = 1000;
+
+export function registerContextFunction({
   client,
   registerFunction,
   resources,
-}: FunctionRegistrationParameters) {
+  isKnowledgeBaseAvailable,
+}: FunctionRegistrationParameters & { isKnowledgeBaseAvailable: boolean }) {
   registerFunction(
     {
-      name: 'recall',
+      name: 'context',
       contexts: ['core'],
-      description: `Use this function to recall earlier learnings. Anything you will summarize can be retrieved again later via this function.
-      
-      The learnings are sorted by score, descending.
-      
-      Make sure the query covers ONLY the following aspects:
-      - Anything you've inferred from the user's request, but is not mentioned in the user's request
-      - The functions you think might be suitable for answering the user's request. If there are multiple functions that seem suitable, create multiple queries. Use the function name in the query.  
-
-      DO NOT include the user's request. It will be added internally.
-      
-      The user asks: "can you visualise the average request duration for opbeans-go over the last 7 days?"
-      You recall: {
-        "queries": [
-          "APM service,
-          "lens function usage",
-          "get_apm_timeseries function usage"    
-        ],
-        "categories": [
-          "lens",
-          "apm"
-        ]
-      }`,
-      descriptionForUser: 'This function allows the assistant to recall previous learnings.',
+      description:
+        'This function provides context as to what the user is looking at on their screen, and recalled documents from the knowledge base that matches their query',
+      visibility: FunctionVisibility.AssistantOnly,
       parameters: {
         type: 'object',
         additionalProperties: false,
@@ -77,49 +63,95 @@ export function registerRecallFunction({
         required: ['queries', 'categories'],
       } as const,
     },
-    async ({ arguments: { queries, categories }, messages, connectorId }, signal) => {
-      const systemMessage = messages.find((message) => message.message.role === MessageRole.System);
+    async ({ arguments: args, messages, connectorId, screenContexts }, signal) => {
+      const { queries, categories } = args;
 
-      if (!systemMessage) {
-        throw new Error('No system message found');
-      }
+      async function getContext() {
+        const systemMessage = messages.find(
+          (message) => message.message.role === MessageRole.System
+        );
 
-      const userMessage = last(
-        messages.filter((message) => message.message.role === MessageRole.User)
-      );
+        const screenDescription = compact(
+          screenContexts.map((context) => context.screenDescription)
+        ).join('\n\n');
+        // any data that falls within the token limit, send it automatically
 
-      const nonEmptyQueries = compact(queries);
+        const dataWithinTokenLimit = compact(
+          screenContexts.flatMap((context) => context.data)
+        ).filter(
+          (data) => encode(JSON.stringify(data.value)).length <= MAX_TOKEN_COUNT_FOR_DATA_ON_SCREEN
+        );
 
-      const queriesOrUserPrompt = nonEmptyQueries.length
-        ? nonEmptyQueries
-        : compact([userMessage?.message.content]);
+        const content = {
+          screen_description: screenDescription,
+          learnings: [],
+          ...(dataWithinTokenLimit.length ? { data_on_screen: dataWithinTokenLimit } : {}),
+        };
 
-      const suggestions = await retrieveSuggestions({
-        userMessage,
-        client,
-        categories,
-        queries: queriesOrUserPrompt,
-      });
+        if (!isKnowledgeBaseAvailable) {
+          return { content };
+        }
 
-      if (suggestions.length === 0) {
+        if (!systemMessage) {
+          throw new Error('No system message found');
+        }
+
+        const userMessage = last(
+          messages.filter((message) => message.message.role === MessageRole.User)
+        );
+
+        const nonEmptyQueries = compact(queries);
+
+        const queriesOrUserPrompt = nonEmptyQueries.length
+          ? nonEmptyQueries
+          : compact([userMessage?.message.content]);
+
+        queriesOrUserPrompt.push(screenDescription);
+
+        const suggestions = await retrieveSuggestions({
+          userMessage,
+          client,
+          categories,
+          queries: queriesOrUserPrompt,
+        });
+
+        if (suggestions.length === 0) {
+          return {
+            content,
+          };
+        }
+
+        const relevantDocuments = await scoreSuggestions({
+          suggestions,
+          queries: queriesOrUserPrompt,
+          messages,
+          client,
+          connectorId,
+          signal,
+          logger: resources.logger,
+        });
+
         return {
-          content: [] as unknown as Serializable,
+          content: { ...content, learnings: relevantDocuments as unknown as Serializable },
         };
       }
 
-      const relevantDocuments = await scoreSuggestions({
-        suggestions,
-        queries: queriesOrUserPrompt,
-        messages,
-        client,
-        connectorId,
-        signal,
-        logger: resources.logger,
-      });
+      return new Observable<MessageAddEvent>((subscriber) => {
+        getContext()
+          .then(({ content }) => {
+            subscriber.next(
+              createFunctionResponseMessage({
+                name: 'context',
+                content,
+              })
+            );
 
-      return {
-        content: relevantDocuments as unknown as Serializable,
-      };
+            subscriber.complete();
+          })
+          .catch((error) => {
+            subscriber.error(error);
+          });
+      });
     }
   );
 }
