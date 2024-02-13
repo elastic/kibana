@@ -319,7 +319,7 @@ export const createPureLogsExplorerControllerStateMachine = (
 
 export interface LogsExplorerControllerStateMachineDependencies {
   datasetsClient: IDatasetsClient;
-  plugins: LogsExplorerStartDeps;
+  plugins: Pick<LogsExplorerStartDeps, 'dataViews' | 'discover'>;
   initialContext?: LogsExplorerControllerContext;
   query: QueryStart;
   toasts: IToasts;

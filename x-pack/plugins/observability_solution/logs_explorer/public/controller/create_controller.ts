@@ -43,7 +43,7 @@ export const createLogsExplorerControllerFactory =
     customizations?: LogsExplorerCustomizations;
     initialState?: InitialState;
   }): Promise<LogsExplorerController> => {
-    const { data } = plugins;
+    const { data, dataViews, discover } = plugins;
 
     const datasetsClient = new DatasetsService().start({
       http: core.http,
@@ -70,7 +70,7 @@ export const createLogsExplorerControllerFactory =
 
     const machine = createLogsExplorerControllerStateMachine({
       datasetsClient,
-      plugins,
+      plugins: { dataViews, discover },
       initialContext,
       query: discoverServices.data.query,
       toasts: core.notifications.toasts,
