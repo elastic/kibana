@@ -189,7 +189,7 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
             title={
               <FormattedMessage
                 id="xpack.ml.trainedModels.modelsList.forceStopDialog.inferenceServicesWarning"
-                defaultMessage="The following {inferenceServicesCount, plural, one {deployment is} other {deployments are}} used by _inference API and can not be stopped:"
+                defaultMessage="The following {inferenceServicesCount, plural, one {deployment is} other {deployments are}} used by the _inference API and can not be stopped:"
                 values={{ inferenceServicesCount: inferenceServiceIDs.length }}
               />
             }
