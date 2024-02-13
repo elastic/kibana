@@ -375,7 +375,7 @@ This type of migration will be in charge of updating saved object fields in Elas
 
 This migration strategy of write/update operations means that a user's data will be migrated incrementally, and that both types of data (non-migrated and migrated saved objects) will coexist for an indeterminate amount of time. Therefore we have to maintain backwards data compatibility for the non-migrated data types.
 
-The migration logic should take place as a first step within the handler logic of all endpoints that carry out write/update endpoint operations, and the endpoint should return the already-migrated rule(s).
+The migration logic should take place within the handler logic of all endpoints that carry out write/update endpoint operations, and the endpoint should return the already-migrated rule(s).
 
 ##### Rule Management endpoints that should include migration-on-write logic
 
@@ -418,66 +418,57 @@ All endpoints that respond with a rule Saved Object, typed as `RuleResponse`, wi
 
 This means that the endpoints will always respond with the rules with the new schema, while the actual rule might still be stored with the legacy schema in Elasticsearch, if it still has not been migrated-on-write.
 
-The **normalization on read** will be carried out by a new `normalizePrebuiltSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. Inside this method, we will use `normalizePrebuiltSchemaOnRuleRead` to calculate the normalized values of `prebuilt` and `immutable`.
+The **normalization on read** will be carried out by a new `normalizePrebuiltSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. Inside this method, we will use `normalizePrebuiltSchemaOnRuleRead` to calculate the normalized values of `external_source` and `immutable`.
 
 _Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
 
 ```ts
-// [... file continues above...]
 
-export const internalRuleToAPIResponse = (
-  rule: SanitizedRule<RuleParams> | ResolvedSanitizedRule<RuleParams>
-): RequiredOptional<RuleResponse> => {
-  // [... more method implementation details...]
+export const internalRuleToAPIResponse = (rule) => {
   return {
-    name: rule.name,
-    tags: rule.tags,
-
-    // [... more object properties ...]
-
     ...commonParamsCamelToSnake(rule.params), // <--- rule params are converted here
     ...typeSpecificCamelToSnake(rule.params),
-
     // [... more object properties ...]
   };
 };
-
-// [... file continues here...]
 
 export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
-  const { immutable, prebuilt } = normalizePrebuiltSchemaOnRuleRead(params);
+  const { immutable, external_source } = normalizePrebuiltSchemaOnRuleRead(params);
 
   return {
-    description: params.description,
-    risk_score: params.riskScore,
-
-    // [... more object properties ...]
-
     immutable,
-    prebuilt,
+    external_source,
+    // [... more object properties ...]
   };
 };
 
-// [... file continues below...]
 ```
 
-And the `normalizePrebuiltSchemaOnRuleRead` is defined so:
+And the `normalizePrebuiltSchemaOnRuleRead` can be defined so:
 
 _Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/prebuilt_rule_schema_migrations.ts_ (New file)
 
 ```ts
-interface MigrationResponse {
+interface OnReadNormalizationResult {
   immutable: IsRuleImmutable;
-  prebuilt?: Prebuilt;
+  external_source?: ExternalSourceAttributes;
 }
 
-const getPrebuiltValueForRuleRead = (ruleParams: BaseRuleParams): Prebuilt | undefined => {
-  if (ruleParams.prebuilt) {
-    return ruleParams.prebuilt;
+/**
+ * To calculate `external_source`:
+ * - Use `external_source` field  if already exists in the internal rule object params.
+ * - If it does not exist, check the value `immutable` from the rules param:
+ *   - if it is `true`, create a new `external_source` object, with `isCustomized` set to `false` and `repoNam` set to `elastic_prebuilt` (Use case of external_source rules that have not been yet migrated-on-write)
+ *   - otherwise, the field should be `undefined` (use case of custom rules).
+ */
+const getExternalSourceValueForRuleRead = (ruleParams: BaseRuleParams): ExternalSourceAttributes | undefined => {
+  if (ruleParams.external_source) {
+    return ruleParams.external_source;
   }
 
   if (ruleParams.immutable) {
     return {
+      repoName: 'elastic_prebuilt'
       isCustomized: false,
     };
   }
@@ -487,34 +478,24 @@ const getPrebuiltValueForRuleRead = (ruleParams: BaseRuleParams): Prebuilt | und
 
 export const normalizePrebuiltSchemaOnRuleRead = (
   ruleParams: BaseRuleParams
-): MigrationResponse => {
-  const immutable = Boolean(ruleParams.prebuilt) || ruleParams.immutable;
-  const prebuilt = getPrebuiltValueForRuleRead(ruleParams);
+): OnReadNormalizationResult => {
+  
+  
+/**
+ * To calculate `immutable`:
+ * - Checks if the `external_source` field exists in the rule's parameters.
+ *   - If `external_source` exists, sets `immutable` to `true`. (Use case of Rules that have already been migrated-on-write)
+ *   - If `external_source` does not exist, return the value of the params' `immutable` field. (Use case of Rules that have not yet been migrated on write.)
+ */
+  const immutable = Boolean(ruleParams.external_source) || Boolean(ruleParams.immutable);  
+  const external_source = getExternalSourceValueForRuleRead(ruleParams);
 
   return {
     immutable,
-    prebuilt,
+    external_source,
   };
 };
 ```
-
-The logic for calculating the `immutable` and `prebuilt` fields for **normalization-on-read**, seen in the code above, is as follows:
-
-- For `immutable`:
-
-  - Check if the `prebuilt` field exists in the rule's parameters, and set `immutable` to `true` if it does.
-    - Use case 1: rules that have already been migrated-on-write
-  - If it does not exist, set `immutable` to the current value of the params' `immutable` field.
-    - Use case 2: rules that have not yet been migrated on write
-
-- For `prebuilt`:
-  - If the `prebuilt` field already exists in the internal rule object params, use that value:
-    - Use case 1: prebuilt rules that have already been migrated-on-write
-  - If it does not exist, check the value `immutable` from the rules param:
-    - if it is `true`, create a new `prebuilt` object. This object will only have the `isCustomized` field, set to `false`. The `elasticUpdateDate` date will not be known and must be left undefined.
-      - Use case 2: prebuilt rules that have not been yet migrated-on-write
-    - otherwise, the field should be `undefined`.
-      - Use case 3L: custom rules
 
 ##### Rule Management endpoints that will perform normalization-on-read
 
@@ -533,7 +514,7 @@ The logic for calculating the `immutable` and `prebuilt` fields for **normalizat
 
 ### Technical implementation of migration-on-write
 
-The logic for the migration of the rule saved objects, which means the determination of the `immutable` and `prebuilt` fields before writing to ES, will be encapsulated in three helper methods:
+The logic for the migration of the rule saved objects, which means the determination of the `immutable` and `external_source` fields before writing to ES, will be encapsulated in three helper methods:
 
 - `migratePrebuiltSchemaOnRuleCreation` for rule creation
 - `migratePrebuiltSchemaOnRuleUpdate` for rule updates (including patching)
