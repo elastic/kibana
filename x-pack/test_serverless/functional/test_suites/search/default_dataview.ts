@@ -13,7 +13,8 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
-  describe('default dataView', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/175601
+  describe.skip('default dataView', function () {
     // Error: expected testSubject(kbnOverviewElasticsearchGettingStarted) to exist
     this.tags(['failsOnMKI']);
     before(async () => {

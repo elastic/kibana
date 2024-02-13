@@ -291,8 +291,8 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(1);
         const fullAlert = previewAlerts[0]._source;
 
-        expect(fullAlert?.['host.asset.criticality']).toBe('normal');
-        expect(fullAlert?.['user.asset.criticality']).toBe('very_important');
+        expect(fullAlert?.['host.asset.criticality']).toBe('medium_impact');
+        expect(fullAlert?.['user.asset.criticality']).toBe('extreme_impact');
       });
     });
   });
