@@ -568,6 +568,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableTransactionProfiling': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:profilingShowErrorFrames': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
