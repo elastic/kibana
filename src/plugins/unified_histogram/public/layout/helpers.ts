@@ -8,7 +8,7 @@
 
 import { AggregateQuery } from '@kbn/es-query';
 
-const TRANSFORMATIONAL_COMMANDS = ['stats', 'project', 'keep'];
+const TRANSFORMATIONAL_COMMANDS = ['stats', 'keep'];
 
 export const shouldDisplayHistogram = (query: AggregateQuery) => {
   let queryHasTransformationalCommands = false;

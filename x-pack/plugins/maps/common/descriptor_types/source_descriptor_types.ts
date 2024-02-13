@@ -45,12 +45,15 @@ export type ESQLSourceDescriptor = AbstractSourceDescriptor & {
   id: string;
   esql: string;
   columns: ESQLColumn[];
+  dataViewId: string;
   /*
    * Date field used to narrow ES|QL requests by global time range
    */
   dateField?: string;
   /*
-   * Geo field used to narrow ES|QL requests by visible map area
+   * Geo field used to narrow ES|QL requests by
+   * 1. by visible map area
+   * 2. spatial filters drawn on map
    */
   geoField?: string;
   narrowByGlobalSearch: boolean;
