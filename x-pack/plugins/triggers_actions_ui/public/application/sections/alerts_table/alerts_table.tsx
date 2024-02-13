@@ -24,10 +24,12 @@ import {
   EuiDataGridRefProps,
   EuiFlexGroup,
   EuiDataGridProps,
+  EuiCallOut,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
 import { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { useSorting, usePagination, useBulkActions, useActionsColumn } from './hooks';
 import { AlertsTableProps, FetchAlertData } from '../../../types';
 import { ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL } from './translations';
@@ -75,6 +77,11 @@ const isSystemCell = (columnId: string): columnId is SystemCellId => {
 const Row = styled.div`
   display: flex;
   min-width: fit-content;
+`;
+
+const CellErrorCallOut = styled(EuiCallOut)`
+  padding: 0;
+  background: none;
 `;
 
 type CustomGridBodyProps = Pick<
@@ -386,39 +393,55 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
 
   const handleRenderCellValue = useCallback(
     (_props: EuiDataGridCellValueElementProps) => {
-      // https://github.com/elastic/eui/issues/5811
-      const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
-      const alert = alerts[idx];
-      // ecsAlert is needed for security solution
-      const ecsAlert = ecsAlertsData[idx];
-      if (alert) {
-        const data: Array<{ field: string; value: string[] }> = [];
-        Object.entries(alert ?? {}).forEach(([key, value]) => {
-          data.push({ field: key, value: value as string[] });
-        });
-        if (isSystemCell(_props.columnId)) {
-          return (
-            <SystemCellFactory
-              alert={alert}
-              columnId={_props.columnId}
-              isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
-              cases={cases}
-              maintenanceWindows={maintenanceWindows}
-              showAlertStatusWithFlapping={showAlertStatusWithFlapping}
-              caseAppId={casesConfig?.appId}
-            />
-          );
-        }
+      try {
+        // https://github.com/elastic/eui/issues/5811
+        const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+        const alert = alerts[idx];
+        // ecsAlert is needed for security solution
+        const ecsAlert = ecsAlertsData[idx];
+        if (alert) {
+          const data: Array<{ field: string; value: string[] }> = [];
+          Object.entries(alert ?? {}).forEach(([key, value]) => {
+            data.push({ field: key, value: value as string[] });
+          });
+          if (isSystemCell(_props.columnId)) {
+            return (
+              <SystemCellFactory
+                alert={alert}
+                columnId={_props.columnId}
+                isLoading={isLoading || isLoadingCases || isLoadingMaintenanceWindows}
+                cases={cases}
+                maintenanceWindows={maintenanceWindows}
+                showAlertStatusWithFlapping={showAlertStatusWithFlapping}
+                caseAppId={casesConfig?.appId}
+              />
+            );
+          }
 
-        return renderCellValue({
-          ..._props,
-          data,
-          ecsData: ecsAlert,
-        });
-      } else if (isLoading) {
-        return <EuiSkeletonText lines={1} />;
+          return renderCellValue({
+            ..._props,
+            data,
+            ecsData: ecsAlert,
+          });
+        } else if (isLoading) {
+          return <EuiSkeletonText lines={1} />;
+        }
+        return null;
+      } catch (e) {
+        return (
+          <CellErrorCallOut
+            title={
+              <FormattedMessage
+                id="x-pack.triggersActionsUI.sections.alertTable.cellErrorTitle"
+                defaultMessage="Error while rendering cell"
+              />
+            }
+            size="s"
+            color="danger"
+            iconType="error"
+          />
+        );
       }
-      return null;
     },
     [
       alerts,
