@@ -11,15 +11,7 @@ import type {
   EuiTourState,
   EuiTourStepProps,
 } from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  EuiTourStep,
-  useEuiTour,
-} from '@elastic/eui';
+import { EuiText, EuiTourStep, useEuiTour } from '@elastic/eui';
 import { noop } from 'lodash';
 import type { FC } from 'react';
 import React, { useEffect, useMemo } from 'react';
@@ -34,6 +26,7 @@ export interface RulesFeatureTourContextType {
 }
 
 export const PER_FIELD_UPGRADE_TOUR_ANCHOR = 'perFieldUpgradeTour';
+export const PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR = 'updatePrebuiltRulePreview';
 
 const TOUR_STORAGE_KEY = NEW_FEATURES_TOUR_STORAGE_KEYS.RULE_MANAGEMENT_PAGE;
 const TOUR_POPOVER_WIDTH = 400;
@@ -68,51 +61,24 @@ export const PrebuiltRulesUpgradeTour: FC = () => {
     [storage]
   );
 
-  const [tourSteps, tourActions, tourState] = useEuiTour(stepsConfig, restoredState);
+  const [tourSteps, , tourState] = useEuiTour(stepsConfig, restoredState);
 
   useEffect(() => {
     const { isTourActive, currentTourStep } = tourState;
     storage.set(TOUR_STORAGE_KEY, { isTourActive, currentTourStep });
   }, [tourState, storage]);
 
-  const shouldShowRuleUpgradeTour = useIsElementMounted(PER_FIELD_UPGRADE_TOUR_ANCHOR);
+  const isTourAnchorMounted = useIsElementMounted(PER_FIELD_UPGRADE_TOUR_ANCHOR);
+  const isFlyoutOpen = useIsElementMounted(PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR);
+  const shouldShowRuleUpgradeTour = isTourAnchorMounted && !isFlyoutOpen;
 
   const enhancedSteps = useMemo(
     () =>
-      tourSteps.map((item, index) => ({
+      tourSteps.map((item) => ({
         ...item,
-        content: (
-          <>
-            {item.content}
-            {tourSteps.length > 1 && (
-              <>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup responsive={false} gutterSize="s" alignItems="center">
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowLeft"
-                      aria-label={'previous'}
-                      display="empty"
-                      disabled={index === 0}
-                      onClick={tourActions.decrementStep}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType="arrowRight"
-                      aria-label={'next'}
-                      display="base"
-                      disabled={index === tourSteps.length - 1}
-                      onClick={tourActions.incrementStep}
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            )}
-          </>
-        ),
+        content: item.content,
       })),
-    [tourSteps, tourActions]
+    [tourSteps]
   );
 
   return shouldShowRuleUpgradeTour ? (
