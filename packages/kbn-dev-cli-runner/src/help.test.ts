@@ -95,14 +95,14 @@ describe('getCommandLevelHelp()', () => {
       })
     ).toMatchInlineSnapshot(`
       "
-        node node_modules/jest-worker/build/workers/processChild.js foo [...names]
+        node scripts/jest foo [...names]
 
         Some thing that we wrote to help us execute things.
-
+        
         Example:
-
+        
           foo = bar = baz
-
+        
           Are you getting it?
 
         Command-specific options:
@@ -113,17 +113,13 @@ describe('getCommandLevelHelp()', () => {
 
         Global options:
           --global-flag      some flag that applies to all commands
-          --verbose, -v      Log verbosely
-          --debug            Log debug messages (less than verbose)
-          --quiet            Only log errors
-          --silent           Don't log anything
           --help             Show this message
 
         To see the help for other commands run:
-          node node_modules/jest-worker/build/workers/processChild.js help [command]
+          node scripts/jest help [command]
 
         To see the list of commands run:
-          node node_modules/jest-worker/build/workers/processChild.js --help
+          node scripts/jest --help
 
       "
     `);
@@ -149,34 +145,30 @@ describe('getHelpForAllCommands()', () => {
         Runs a dev task
 
         Commands:
-          foo [...names]
+          [1m[97m[40m foo [...names] [49m[39m[22m
             Some thing that we wrote to help us execute things.
-
+            
             Example:
-
+            
               foo = bar = baz
-
+            
               Are you getting it?
-
+          
             Options:
               --foo              Some flag
               --bar              Another flag
                                   Secondary info
               --baz, -b          Hey hello
-
-          bar [...names]
+            
+          [1m[97m[40m bar [...names] [49m[39m[22m
             Some other thing that we wrote to help us execute things.
-
+          
             Options:
               --baz, -b          Hey hello
-
+            
 
         Global options:
           --global-flag      some flag that applies to all commands
-          --verbose, -v      Log verbosely
-          --debug            Log debug messages (less than verbose)
-          --quiet            Only log errors
-          --silent           Don't log anything
           --help             Show this message
 
         To show the help information about a specific command run:
