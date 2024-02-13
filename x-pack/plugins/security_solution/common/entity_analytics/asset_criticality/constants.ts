@@ -15,11 +15,21 @@ export const ASSET_CRITICALITY_REQUIRED_ES_INDEX_PRIVILEGES = {
 };
 
 /**
+ * enum of asset criticality levels corresponding to the union type {@link CriticalityLevel}
+ */
+export enum CriticalityLevels {
+  VERY_IMPORTANT = 'very_important',
+  IMPORTANT = 'important',
+  NORMAL = 'normal',
+  NOT_IMPORTANT = 'not_important',
+}
+
+/**
  * CriticalityModifiers are used to adjust the risk score based on the criticality of the asset.
  */
 export const CriticalityModifiers: Record<CriticalityLevel, number> = {
-  very_important: 2,
-  important: 1.5,
-  normal: 1,
-  not_important: 0.5,
+  [CriticalityLevels.VERY_IMPORTANT]: 2,
+  [CriticalityLevels.IMPORTANT]: 1.5,
+  [CriticalityLevels.NORMAL]: 1,
+  [CriticalityLevels.NOT_IMPORTANT]: 0.5,
 };

@@ -33,8 +33,10 @@ import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
 import { RiskScoreEntity, RiskSeverity } from '../../../../common/search_strategy';
-import type { CriticalityLevel } from '../../../../common/entity_analytics/asset_criticality/types';
-import { CriticalityModifiers } from '../../../../common/entity_analytics/asset_criticality';
+import {
+  CriticalityLevels,
+  CriticalityModifiers,
+} from '../../../../common/entity_analytics/asset_criticality';
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 import { AssetCriticalityBadge } from '../asset_criticality';
@@ -75,13 +77,16 @@ const riskLevelTableItems: RiskLevelTableItem[] = [
 ];
 
 interface CriticalityLevelTableItem {
-  level: CriticalityLevel;
+  level: CriticalityLevels;
   weight: number;
 }
 
-const criticalityLevelTableItems: CriticalityLevelTableItem[] = (
-  Object.keys(CriticalityModifiers) as CriticalityLevel[]
-).map((level) => ({ level, weight: CriticalityModifiers[level] }));
+const criticalityLevelTableItems: CriticalityLevelTableItem[] = [
+  CriticalityLevels.VERY_IMPORTANT,
+  CriticalityLevels.IMPORTANT,
+  CriticalityLevels.NORMAL,
+  CriticalityLevels.NOT_IMPORTANT,
+].map((level) => ({ level, weight: CriticalityModifiers[level] }));
 
 const getCriticalityLevelTableColumns = (): Array<
   EuiBasicTableColumn<CriticalityLevelTableItem>
@@ -89,7 +94,7 @@ const getCriticalityLevelTableColumns = (): Array<
   {
     field: 'level',
     name: i18n.INFORMATION_TIER_HEADER,
-    render: (level: CriticalityLevel) => <AssetCriticalityBadge criticalityLevel={level} />,
+    render: (level: CriticalityLevels) => <AssetCriticalityBadge criticalityLevel={level} />,
   },
   {
     field: 'weight',
