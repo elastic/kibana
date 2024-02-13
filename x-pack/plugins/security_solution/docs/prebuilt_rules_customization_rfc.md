@@ -717,110 +717,35 @@ The resulting values for `immutable` and `external_source` when calling these en
 
 ---
 
-#### `migratePrebuiltSchemaOnRuleBulkEdit`
+#### Bulk editing rules
 
-This migration method will apply to the following use case and endpoints:
+The endpoint **Bulk Actions** - `POST /rules/_bulk_action` has the same outputs from the migration logic as the endpoints listed in the above section, so it was included in the scenarios in the table above. 
 
-- Bulk updating rules:
+However, this endpoint has some specific details that should be mentioned.
+
+Firstly, when bulk editing rules, the migration should apply for the following use cases:
   - Bulk adding or deleting index patterns
   - Bulk adding or deleting tags
   - Updating rule schedules
-  - Adding rules actions // _(TODO: Should this define prebuilt.isCustomized? The current rulesClient implementation counts it as a rule modification, but it looks like we shouldn't. Separating this from other types of modification will need some further work on the rulesClient side.)_
-    - **Bulk Actions endpoint** - `POST /rules/_bulk_action` (bulk edit action)
+  - Adding rules actions
+  - Duplicating a rule (migration applied only to the new rule)
 
-In contrast with the other migration methods, we will use the new `migratePrebuiltSchemaOnRuleBulkEdit` within the Alerting Framework's `RuleClient` since we need to migrate the rule's `prebuilt` and `immutable` parameters before the `RuleClient` does the saving of the rule into Elasticsearch.
+Out of the actions mentioned above, the only use cases that should possibily result in the migration having a result of `external_source.isCustomized = true` are the first three:
+  - Bulk adding or deleting index patterns
+  - Bulk adding or deleting tags
+  - Updating rule schedules
 
-This however, gives us the advantage that the `RuleClient` already includes logic to calculate if a rule's attributes or parameters have been modified from its initial values, so we can rely on that to calculate the `prebuilt.isCustomized` field during the update.
+That is, updating a rule's actions or duplicating a rule should not be considered a customization of a prebuilt rule.
 
-_Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/prebuilt_rule_schema_migrations.ts_ (New file)
+Secondly, in contrast with other endpoints, the migration for bulk editing rules needs to be carried within the Alerting Framework's `RuleClient` since we need to migrate the rule's `external_source` and `immutable` parameters before the `RuleClient` does the saving of the rule into Elasticsearch.
 
-```ts
-import { RuleParams } from '../../../types';
-
-const getPrebuiltValueForRuleBulkEdit = (
-  ruleParams: RuleParams,
-  isRuleUpdatedDuringBulkUpdate: boolean
-) => {
-  if (ruleParams?.prebuilt) {
-    return {
-      ...ruleParams.prebuilt,
-      isCustomized: ruleParams.prebuilt.isCustomized || isRuleUpdatedDuringBulkUpdate,
-    };
-  }
-
-  if (ruleParams.immutable) {
-    return {
-      isCustomized: isRuleUpdatedDuringBulkUpdate,
-    };
-  }
-
-  return undefined;
-};
-
-export const migratePrebuiltSchemaOnRuleBulkEdit = (
-  ruleParams: RuleParams,
-  isRuleUpdatedDuringBulkUpdate: boolean
-) => {
-  const immutable = Boolean(ruleParams.prebuilt) || ruleParams.immutable;
-  const prebuilt = getPrebuiltValueForRuleBulkEdit(ruleParams, isRuleUpdatedDuringBulkUpdate);
-
-  ruleParams.prebuilt = prebuilt;
-  ruleParams.immutable = immutable;
-};
-```
+This however, gives us the advantage that the `RuleClient` already includes logic to calculate if a rule's attributes or parameters have been modified from its initial values, so we can rely on that to calculate the `external_source.isCustomized` field during the update.
 
 Notice that here we are migrating the `ruleParams` in-place; the object is later used to save the updated rules into Elasticsearch.
 
-The `RulesClient` class has a `bulkEdit` method, which is called by our **Bulk Actions endpoint** `POST /rules/_bulk_action`. That method includes complex logic, but we can focus on the `updateRuleAttributesAndParamsInMemory` method, where the rule attributes and parameters are updated before being saved to ES. This function also calculates the booleans `isAttributesUpdateSkipped` and `isParamsUpdateSkipped` which we can leverage to set the `prebuilt.isCustomized` field in our params.
+The `RulesClient` class has a `bulkEdit` method, which is called by our **Bulk Actions endpoint** `POST /rules/_bulk_action`. That method includes complex logic, but we can focus on the `updateRuleAttributesAndParamsInMemory` method, where the rule attributes and parameters are updated before being saved to ES. This function also calculates the booleans `isAttributesUpdateSkipped` and `isParamsUpdateSkipped` which we can leverage to calculate the new value of the `external_source.isCustomized` field in our params.
 
-_Source: [x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts)_
-
-```ts
-export async function bulkEditRules() {
-  // calls bulkEditRulesOcc()
-}
-
-function bulkEditRulesOcc() {
-  // calls updateRuleAttributesAndParamsInMemory()
-}
-async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
-  {
-    // [...]
-  }
-): Promise<void> {
-  try {
-    // [...]
-
-    const {
-      rule: updatedRule,
-      // [...]
-      isAttributesUpdateSkipped,
-    } = await getUpdatedAttributesFromOperations<Params>({
-      // [...]
-    });
-
-    // [...]
-
-    const { modifiedParams: ruleParams, isParamsUpdateSkipped } = paramsModifier
-      ? await paramsModifier(updatedRule.params)
-      : {
-          modifiedParams: updatedRule.params,
-          isParamsUpdateSkipped: true,
-        };
-
-    // [...]
-
-    const isRuleUpdated = !(isAttributesUpdateSkipped && isParamsUpdateSkipped);
-
-    // Migrate `ruleParams.prebuilt` and `ruleParams.immutable` in-place
-    migratePrebuiltSchemaOnRuleBulkEdit(ruleParams, isRuleUpdated);
-
-    // [...]
-  } catch (error) {
-    // [...]
-  }
-}
-```
+_See Source: [x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/bulk_edit_rules.ts)_
 
 ---
 
@@ -832,7 +757,7 @@ async function updateRuleAttributesAndParamsInMemory<Params extends RuleParams>(
 
 Across our application, both in the frontend and serverside, we use KQL filters to retrieve rules based on whether they are prebuilt rules or not - this means that the current behaviour of these values relies on the `immutable` field being set to either `true` or `false`.
 
-As we have mentioned before, we need to assume that at any point in time, there will be a mixture of rules whose saved object has already been migrated on Elasticsearch and others will not. This means that the retrieval of rules will need to maintain backwards compatibility: in order to determine if a rule is prebuilt, preferentially search for the existence of the `prebuilt` field; if that doesn't exist, fallback to the legacy logic of checking a rule's `immutable` value.
+As we have mentioned before, we need to assume that at any point in time, there will be a mixture of rules whose saved object has already been migrated on Elasticsearch and others will not. This means that the retrieval of rules will need to maintain backwards compatibility: in order to determine if a rule is prebuilt, preferentially search for the existence of the `external_source` field; if that doesn't exist,  we should fall back to the legacy logic of checking a rule's `immutable` value.
 
 This means that we will need to update the constants and KQL filters that we have hardcoded in our application to reflect the new schema:
 
