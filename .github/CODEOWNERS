@@ -1528,6 +1528,12 @@ x-pack/test/security_solution_api_integration/test_suites/genai @elastic/securit
 # Security Solution onboarding tour
 /x-pack/plugins/security_solution/public/common/components/guided_onboarding @elastic/security-threat-hunting-explore
 
+# Security Service Integrations
+x-pack/plugins/security_solution/common/security_integrations @elastic/security-service-integrations
+x-pack/plugins/security_solution/public/security_integrations @elastic/security-service-integrations
+x-pack/plugins/security_solution/server/security_integrations @elastic/security-service-integrations
+x-pack/plugins/security_solution/server/lib/security_integrations @elastic/security-service-integrations
+
 # Kibana design
 # scss overrides should be below this line for specificity
 **/*.scss @elastic/kibana-design
