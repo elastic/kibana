@@ -757,67 +757,23 @@ _See Source: [x-pack/plugins/alerting/server/application/rule/methods/bulk_edit/
 
 Across our application, both in the frontend and serverside, we use KQL filters to retrieve rules based on whether they are prebuilt rules or not - this means that the current behaviour of these values relies on the `immutable` field being set to either `true` or `false`.
 
-As we have mentioned before, we need to assume that at any point in time, there will be a mixture of rules whose saved object has already been migrated on Elasticsearch and others will not. This means that the retrieval of rules will need to maintain backwards compatibility: in order to determine if a rule is prebuilt, preferentially search for the existence of the `external_source` field; if that doesn't exist,  we should fall back to the legacy logic of checking a rule's `immutable` value.
+As mentioned before, we need to assume that at any point in time, there will be a mixture of rules whose saved object has already been migrated on Elasticsearch and others will not. This means that the retrieval of rules will need to maintain backwards compatibility: in order to determine if a rule is prebuilt, preferentially search for the existence of the `external_source` field; if that doesn't exist,  we should fall back to the legacy logic of checking a rule's `immutable` value.
 
 This means that we will need to update the constants and KQL filters that we have hardcoded in our application to reflect the new schema:
 
-_Source: [x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts)_
+_See source of rule params keys: [x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_fields.ts)_
 
-```ts
-// [... file continues above...]
+Will need to update the `x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts` file, where the `convertRulesFilterToKQL` method is defined. This method is used both in the frontend and in the serverside, and translates rule filter options to KQL filters that Elasticsearch can understand.
 
-export const PARAMS_IMMUTABLE_FIELD = 'alert.attributes.params.immutable';
-export const PARAMS_PREBUILT_FIELD = 'alert.attributes.params.prebuilt'; // new constant
-export const PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD = 'alert.attributes.params.prebuilt.isCustomized'; // new constant
-```
+Here, we need to update the KQL filters and the logic for fetching Elastic prebuilt and custom rules, relying on `external_rules` but with fallback to `immutable`:
 
-And we will need to update the `x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts` file, where the `convertRulesFilterToKQL` method is defined. This method is used both in the frontend and in the serverside, and translates rule filter options to KQL filters that Elasticsearch can understand.
+_Source for `convertRulesFilterToKQL`: [x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts)_
 
-Here, we need to update the KQL filters and the logic for fetching Elastic prebuilt and custom rules, relying on `prebuilt` but with fallback to `immutable`:
+In order to retrieve rules in which the `alert.attributes.params.external_source` field exists, we must rely instead on the existence of `alert.attributes.params.external_source.repo_name`. This is so because  KQL syntax does not allow searching for the existence of an object like `external_source` with the recommended syntax `alert.attributes.params.external_source: *`.
 
-_Source: [x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/common/detection_engine/rule_management/rule_filtering.ts)_
+But we can use the `external_source` field's `repo_name` subfield instead, which will always exist within the object (it is required) and replace the KQL filter for `alert.attributes.params.external_source.repo_name: *`. 
 
-```ts
-// [... file continues above...]
-
-// KQL does not allow to search for existence of the prebuilt object field by itself, since params is unmapped
-// so we need to search for the existence of the isCustomized subfield instead, which is required
-export const KQL_FILTER_PREBUILT_RULES = `${PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD}: *`;
-export const KQL_FILTER_CUSTOM_RULES = `NOT ${PARAMS_PREBUILT_IS_CUSTOMIZED_FIELD}: *`;
-export const KQL_FILTER_IMMUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: true`;
-export const KQL_FILTER_MUTABLE_RULES = `${PARAMS_IMMUTABLE_FIELD}: false`;
-
-interface RulesFilterOptions {
-  filter: string;
-  showCustomRules: boolean;
-  showElasticRules: boolean;
-  ...
-}
-
-export function convertRulesFilterToKQL({
-  filter: searchTerm,
-  showCustomRules,
-  showElasticRules,
-  ...
-}: Partial<RulesFilterOptions>): string {
-  const kql: string[] = [];
-
-  // [... file continues ...]
-
-  if (showCustomRules && showElasticRules) {
-    // if both showCustomRules && showElasticRules selected we omit filter, as it includes all existing rules
-  } else if (showElasticRules) {
-    kql.push(`(${KQL_FILTER_PREBUILT_RULES} OR ${KQL_FILTER_IMMUTABLE_RULES})`);
-  } else if (showCustomRules) {
-    kql.push(`(${KQL_FILTER_CUSTOM_RULES} OR ${KQL_FILTER_MUTABLE_RULES})`);
-  }
-
-  // [... file continues below...]
-```
-
-Ntocie that in order to retrieve rules in which the `alert.attributes.params.prebuilt` field exists, we must rely instead on the existence of `alert.attributes.params.prebuilt.isCustomized`. This is so because the `prebuilt` field lives inside the unmapped `params` field, and KQL syntax does not allow searching for the existence of an object like `prebuilt` with the recommended syntax `alert.attributes.params.prebuilt: *`.
-
-But we can use the `prebuilt` field's `isCustomized` subfield instead, which will always exist within the object (it is required) and replace the KQL filter for `alert.attributes.params.prebuilt.isCustomized: *`.
+This will allow us to retrieve all rules that originate from an external source, or conditionally, from a specific source. For example, using the filter `alert.attributes.params.external_source.repo_name: elastic_prebuilt` should return only prebuilt rules created by Elastic.
 
 ### Rule Management endpoints
 
