@@ -73,7 +73,10 @@ const allSuggestionsAggregationBuilder: OptionsListSuggestionAggregationBuilder 
       `aggregations.${subTypeNested ? 'nestedSuggestions.suggestions' : 'suggestions'}.buckets`
     )?.reduce((acc: OptionsListSuggestions, suggestion: EsBucket) => {
       acc.push({
-        value: suggestion.key_as_string ? suggestion.key_as_string : suggestion.key,
+        value:
+          fieldSpec?.type === 'boolean' && suggestion.key_as_string
+            ? suggestion.key_as_string
+            : suggestion.key,
         docCount: suggestion.doc_count,
       });
       return acc;
