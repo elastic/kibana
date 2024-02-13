@@ -291,24 +291,41 @@ export function getEuiGridColumns({
   );
 }
 
-export function hasSourceTimeFieldValue(
+export function canPrependTimeFieldColumn(
   columns: string[],
-  dataView: DataView,
+  timeFieldName: string | undefined,
   columnTypes: DataTableColumnTypes | undefined,
   showTimeCol: boolean,
   isPlainRecord: boolean
 ) {
-  const timeFieldName = dataView.timeFieldName;
-  if (!isPlainRecord || !columns.includes('_source') || !timeFieldName || !columnTypes) {
-    return showTimeCol;
+  if (!showTimeCol) {
+    return false;
   }
-  return timeFieldName in columnTypes;
+
+  if (isPlainRecord) {
+    return (
+      !!columnTypes &&
+      !!timeFieldName &&
+      timeFieldName in columnTypes &&
+      columns.includes('_source')
+    );
+  }
+
+  return true;
 }
 
-export function getVisibleColumns(columns: string[], dataView: DataView, showTimeCol: boolean) {
+export function getVisibleColumns(
+  columns: string[],
+  dataView: DataView,
+  shouldPrependTimeFieldColumn: boolean
+) {
   const timeFieldName = dataView.timeFieldName;
 
-  if (showTimeCol && timeFieldName && !columns.find((col) => col === timeFieldName)) {
+  if (
+    shouldPrependTimeFieldColumn &&
+    timeFieldName &&
+    !columns.find((col) => col === timeFieldName)
+  ) {
     return [timeFieldName, ...columns];
   }
 
