@@ -73,14 +73,14 @@ export function ChatHeader({
 
   const handleNavigateToConversations = () => {
     if (conversationId) {
-      router.navigateToConversationsApp('/conversations/{conversationId}', {
+      router.push('/conversations/{conversationId}', {
         path: {
           conversationId,
         },
         query: {},
       });
     } else {
-      router.navigateToConversationsApp('/conversations/new', { path: {}, query: {} });
+      router.push('/conversations/new', { path: {}, query: {} });
     }
   };
 

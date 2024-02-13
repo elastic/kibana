@@ -6168,7 +6168,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alert_route.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -7617,6 +7621,14 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_edit/bulk_edit_rules_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack/bulk_untrack_alerts_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_untrack_by_query/bulk_untrack_alerts_by_query_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -13760,6 +13772,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/plugins/security_solution/server/endpoint/routes/agent/agent_status_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/detection_engine/fleet_integrations/api/get_installed_integrations/route.ts"
               },
               {
@@ -14859,6 +14875,10 @@
               {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/plugins/cloud_security_posture/server/routes/benchmark_rules/bulk_action/bulk_action.ts"
+              },
+              {
+                "plugin": "dataVisualizer",
+                "path": "x-pack/plugins/data_visualizer/server/routes.ts"
               },
               {
                 "plugin": "ecsDataQualityDashboard",

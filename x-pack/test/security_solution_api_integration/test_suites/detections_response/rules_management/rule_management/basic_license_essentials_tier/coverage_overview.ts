@@ -17,13 +17,12 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
-  createRule,
-  deleteAllRules,
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
   getCustomQueryRuleParams,
   createNonSecurityRule,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../../common/utils/security_solution';
 import { getCoverageOverview } from '../../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {
