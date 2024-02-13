@@ -110,11 +110,6 @@ export class AuthenticationService {
       (config.authc.sortedProviders.length > 0 &&
         shouldProviderUseLoginForm(config.authc.sortedProviders[0].type));
 
-    const isLoginSelectorEnabled = config.authc.selector.enabled;
-    const isLoginFormAvailable =
-      config.authc.sortedProviders.length > 0 &&
-      shouldProviderUseLoginForm(config.authc.sortedProviders[0].type);
-
     http.registerAuth(async (request, response, t) => {
       if (!license.isLicenseAvailable()) {
         this.logger.error('License is not available, authentication is not possible.');
