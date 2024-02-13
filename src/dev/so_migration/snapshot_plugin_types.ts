@@ -92,7 +92,7 @@ function collectSOSnapshotMeta(): MigrationSnapshotMeta {
   const buildUrl = process.env.BUILDKITE_BUILD_URL || null;
   const prId = process.env.BUILDKITE_MESSAGE?.match(/\(#(\d+)\)/)?.[1];
   const pullRequestUrl = prId ? `https://github.com/elastic/kibana/pulls/${prId}` : null;
-  const kibanaCommitHash = process.env.BUILDKITE_COMMIT || getLocalHash();
+  const kibanaCommitHash = process.env.BUILDKITE_COMMIT || getLocalHash() || 'unknown';
 
   return {
     timestamp,

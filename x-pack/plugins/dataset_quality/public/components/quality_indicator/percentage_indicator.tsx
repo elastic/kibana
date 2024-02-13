@@ -23,7 +23,7 @@ export function QualityPercentageIndicator({ percentage = 0 }: { percentage?: nu
       : 'good';
 
   const description = (
-    <EuiText>
+    <EuiText size="s">
       <FormattedNumber value={percentage} />%
     </EuiText>
   );

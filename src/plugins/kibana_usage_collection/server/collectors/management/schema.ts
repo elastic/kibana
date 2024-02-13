@@ -166,6 +166,13 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'data_views:cache_max_age': {
+    type: 'long',
+    _meta: {
+      description:
+        "Sets the 'max-age' cache header value for data view fields API requests. A value of 0 will disable caching.",
+    },
+  },
   'discover:searchOnPageLoad': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -449,6 +456,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:apmEnableTableSearchBar': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:apmAWSLambdaPriceFactor': {
     type: 'text',
     _meta: { description: 'Non-default value of setting.' },
@@ -557,6 +568,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:profilingShowErrorFrames': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'observability:profilingPerVCPUWattX86': {
     type: 'integer',
     _meta: { description: 'Non-default value of setting.' },
@@ -585,6 +600,10 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'observability:enableInfrastructureHostsCustomDashboards': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'securitySolution:enableGroupedNav': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -607,6 +626,14 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
   },
   'observability:profilingAWSCostDiscountRate': {
     type: 'integer',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'data_views:fields_excluded_data_tiers': {
+    type: 'keyword',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'devTools:enableDockedConsole': {
+    type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
 };

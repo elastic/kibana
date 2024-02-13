@@ -60,7 +60,7 @@ export class InspectorViewChooser extends Component<Props, State> {
           this.closeSelector();
         }}
         toolTipContent={view.help}
-        toolTipPosition="left"
+        toolTipProps={{ position: 'left' }}
         data-test-subj={`inspectorViewChooser${view.title}`}
       >
         {view.title}

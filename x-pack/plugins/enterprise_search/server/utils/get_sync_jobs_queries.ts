@@ -295,14 +295,7 @@ export const getConnectedCountQuery = (isCrawler?: boolean) => {
           },
           {
             term: {
-              'connector.service_type': CRAWLER_SERVICE_TYPE,
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                gte: moment().subtract(30, 'minutes').toISOString(),
-              },
+              service_type: CRAWLER_SERVICE_TYPE,
             },
           },
         ],
@@ -321,7 +314,7 @@ export const getConnectedCountQuery = (isCrawler?: boolean) => {
           bool: {
             must_not: {
               term: {
-                'connector.service_type': CRAWLER_SERVICE_TYPE,
+                service_type: CRAWLER_SERVICE_TYPE,
               },
             },
           },
@@ -366,21 +359,10 @@ export const getIncompleteCountQuery = (isCrawler?: boolean) => {
   if (isCrawler) {
     return {
       bool: {
-        should: [
+        must_not: [
           {
-            bool: {
-              must_not: {
-                terms: {
-                  status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
-                },
-              },
-            },
-          },
-          {
-            range: {
-              last_seen: {
-                lt: moment().subtract(30, 'minutes').toISOString(),
-              },
+            terms: {
+              status: [ConnectorStatus.CONNECTED, ConnectorStatus.ERROR],
             },
           },
         ],

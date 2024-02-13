@@ -15,7 +15,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { LazyField } from '@kbn/advanced-settings-plugin/public';
+import { withSuspense } from '@kbn/shared-ux-utility';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -25,13 +25,21 @@ import {
   profilingPervCPUWattArm64,
   profilingAWSCostDiscountRate,
   profilingCostPervCPUPerHour,
+  profilingShowErrorFrames,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import { FieldRowProvider } from '@kbn/management-settings-components-field-row';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';
+
+const LazyFieldRow = React.lazy(async () => ({
+  default: (await import('@kbn/management-settings-components-field-row')).FieldRow,
+}));
+
+const FieldRow = withSuspense(LazyFieldRow);
 
 const co2Settings = [
   profilingCo2PerKWH,
@@ -40,28 +48,23 @@ const co2Settings = [
   profilingPervCPUWattArm64,
 ];
 const costSettings = [profilingAWSCostDiscountRate, profilingCostPervCPUPerHour];
+const miscSettings = [profilingShowErrorFrames];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
   const {
     start: {
-      core: { docLinks, notifications },
+      core: { docLinks, notifications, settings },
     },
   } = useProfilingDependencies();
 
-  const {
-    handleFieldChange,
-    settingsEditableConfig,
-    unsavedChanges,
-    saveAll,
-    isSaving,
-    cleanUnsavedChanges,
-  } = useEditableSettings('profiling', [...co2Settings, ...costSettings]);
+  const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
+    useEditableSettings('profiling', [...co2Settings, ...costSettings, ...miscSettings]);
 
   async function handleSave() {
     try {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
-        return settingsEditableConfig[key].requiresPageReload;
+        return fields[key].requiresPageReload;
       });
       await saveAll();
       trackProfilingEvent({ metric: 'general_settings_save' });
@@ -78,6 +81,8 @@ export function Settings() {
       });
     }
   }
+
+  const hasInvalidChanges = Object.values(unsavedChanges).some(({ isInvalid }) => isInvalid);
 
   return (
     <ProfilingAppPageTemplate hideSearchBar>
@@ -160,6 +165,20 @@ export function Settings() {
             },
             settings: costSettings,
           },
+          {
+            label: i18n.translate('xpack.profiling.settings.miscSection', {
+              defaultMessage: 'Miscellaneous settings',
+            }),
+            description: {
+              title: (
+                <FormattedMessage
+                  id="xpack.profiling.settings.misc.title"
+                  defaultMessage="Universal Profiling miscellaneous settings."
+                />
+              ),
+            },
+            settings: miscSettings,
+          },
         ].map((item) => (
           <>
             <EuiPanel key={item.label} grow={false} hasShadow={false} hasBorder paddingSize="none">
@@ -201,17 +220,23 @@ export function Settings() {
                   </>
                 ) : null}
                 {item.settings.map((settingKey) => {
-                  const editableConfig = settingsEditableConfig[settingKey];
+                  const field = fields[settingKey];
                   return (
-                    <LazyField
-                      key={settingKey}
-                      setting={editableConfig}
-                      handleChange={handleFieldChange}
-                      enableSaving
-                      docLinks={docLinks.links}
-                      toasts={notifications.toasts}
-                      unsavedChanges={unsavedChanges[settingKey]}
-                    />
+                    <FieldRowProvider
+                      {...{
+                        links: docLinks.links.management,
+                        showDanger: (message: string) => notifications.toasts.addDanger(message),
+                        validateChange: (key: string, value: any) =>
+                          settings.client.validateValue(key, value),
+                      }}
+                    >
+                      <FieldRow
+                        field={field}
+                        isSavingEnabled={true}
+                        onFieldChange={handleFieldChange}
+                        unsavedChange={unsavedChanges[settingKey]}
+                      />
+                    </FieldRowProvider>
                   );
                 })}
               </EuiPanel>
@@ -229,6 +254,7 @@ export function Settings() {
               defaultMessage: 'Save changes',
             })}
             unsavedChangesCount={Object.keys(unsavedChanges).length}
+            areChangesInvalid={hasInvalidChanges}
           />
         )}
       </>

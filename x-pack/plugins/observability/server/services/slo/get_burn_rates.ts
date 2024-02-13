@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { KibanaSavedObjectsSLORepository } from './slo_repository';
-import { DefaultSLIClient } from './sli_client';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { Logger } from '@kbn/core/server';
 import { Duration } from '../../domain/models';
-import { computeSLI, computeBurnRate } from '../../domain/services';
+import { computeBurnRate, computeSLI } from '../../domain/services';
+import { DefaultSLIClient } from './sli_client';
+import { KibanaSavedObjectsSLORepository } from './slo_repository';
 
 interface Services {
   soClient: SavedObjectsClientContract;
   esClient: ElasticsearchClient;
+  logger: Logger;
 }
 
 interface LookbackWindow {
@@ -28,9 +30,9 @@ export async function getBurnRates(
   windows: LookbackWindow[],
   services: Services
 ) {
-  const { soClient, esClient } = services;
+  const { soClient, esClient, logger } = services;
 
-  const repository = new KibanaSavedObjectsSLORepository(soClient);
+  const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
   const sliClient = new DefaultSLIClient(esClient);
   const slo = await repository.findById(sloId);
 

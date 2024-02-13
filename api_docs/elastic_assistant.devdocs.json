@@ -1741,7 +1741,9 @@
           "type": "Object",
           "tags": [],
           "label": "actions",
-          "description": [],
+          "description": [
+            "\nActions plugin start contract."
+          ],
           "signature": [
             {
               "pluginId": "actions",
@@ -1757,12 +1759,120 @@
         },
         {
           "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginStart.registerFeatures",
+          "type": "Function",
+          "tags": [],
+          "label": "registerFeatures",
+          "description": [
+            "\nRegister features to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct features are available. See {@link getPluginNameFromRequest} for more details.\n"
+          ],
+          "signature": [
+            "(pluginName: string, features: Partial<",
+            {
+              "pluginId": "@kbn/elastic-assistant-common",
+              "scope": "common",
+              "docId": "kibKbnElasticAssistantCommonPluginApi",
+              "section": "def-common.AssistantFeatures",
+              "text": "AssistantFeatures"
+            },
+            ">) => void"
+          ],
+          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.registerFeatures.$1",
+              "type": "string",
+              "tags": [],
+              "label": "pluginName",
+              "description": [
+                "Name of the plugin the features should be registered to"
+              ],
+              "signature": [
+                "string"
+              ],
+              "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            },
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.registerFeatures.$2",
+              "type": "Object",
+              "tags": [],
+              "label": "features",
+              "description": [
+                "Partial<AssistantFeatures> to be registered with for the given plugin"
+              ],
+              "signature": [
+                "Partial<",
+                {
+                  "pluginId": "@kbn/elastic-assistant-common",
+                  "scope": "common",
+                  "docId": "kibKbnElasticAssistantCommonPluginApi",
+                  "section": "def-common.AssistantFeatures",
+                  "text": "AssistantFeatures"
+                },
+                ">"
+              ],
+              "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+              "deprecated": false,
+              "trackAdoption": false,
+              "isRequired": true
+            }
+          ],
+          "returnComment": []
+        },
+        {
+          "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginStart.getRegisteredFeatures",
+          "type": "Function",
+          "tags": [],
+          "label": "getRegisteredFeatures",
+          "description": [
+            "\nGet the registered features for a given plugin name."
+          ],
+          "signature": [
+            "(pluginName: string) => ",
+            {
+              "pluginId": "@kbn/elastic-assistant-common",
+              "scope": "common",
+              "docId": "kibKbnElasticAssistantCommonPluginApi",
+              "section": "def-common.AssistantFeatures",
+              "text": "AssistantFeatures"
+            }
+          ],
+          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "returnComment": [],
+          "children": [
+            {
+              "parentPluginId": "elasticAssistant",
+              "id": "def-server.ElasticAssistantPluginStart.getRegisteredFeatures.$1",
+              "type": "string",
+              "tags": [],
+              "label": "pluginName",
+              "description": [
+                "Name of the plugin to get the features for"
+              ],
+              "path": "x-pack/plugins/elastic_assistant/server/services/app_context.ts",
+              "deprecated": false,
+              "trackAdoption": false
+            }
+          ]
+        },
+        {
+          "parentPluginId": "elasticAssistant",
           "id": "def-server.ElasticAssistantPluginStart.registerTools",
           "type": "Function",
           "tags": [],
           "label": "registerTools",
           "description": [
-            "\nRegister tools to be used by the elastic assistant"
+            "\nRegister tools to be used by the elastic assistant.\n\nNote: Be sure to use the pluginName that is sent in the request headers by your plugin to ensure it is extracted\nand the correct tools are selected. See {@link getPluginNameFromRequest} for more details.\n"
           ],
           "signature": [
             "(pluginName: string, tools: ",
@@ -1830,7 +1940,7 @@
           "tags": [],
           "label": "getRegisteredTools",
           "description": [
-            "\nGet the registered tools"
+            "\nGet the registered tools for a given plugin name."
           ],
           "signature": [
             "(pluginName: string) => ",

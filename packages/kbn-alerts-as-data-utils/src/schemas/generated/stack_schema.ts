@@ -68,6 +68,7 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const StackAlertRequired = rt.type({
 });
+// prettier-ignore
 const StackAlertOptional = rt.partial({
   'kibana.alert.evaluation.conditions': schemaString,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,

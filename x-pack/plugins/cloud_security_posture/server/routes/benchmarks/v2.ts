@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import {
   CSP_BENCHMARK_RULE_SAVED_OBJECT_TYPE,
@@ -18,10 +18,12 @@ import { CspBenchmarkRule, Benchmark } from '../../../common/types/latest';
 import { getClusters } from '../compliance_dashboard/get_clusters';
 import { getStats } from '../compliance_dashboard/get_stats';
 import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';
 
 export const getBenchmarksData = async (
   soClient: SavedObjectsClientContract,
-  esClient: any,
+  encryptedSoClient: SavedObjectsClientContract,
+  esClient: ElasticsearchClient,
   logger: Logger
 ): Promise<Benchmark[]> => {
   // Returns a list of benchmark based on their Version and Benchmark ID
@@ -53,6 +55,7 @@ export const getBenchmarksData = async (
   });
 
   const benchmarkAgg: any = benchmarksResponse.aggregations;
+  const rulesFilter = await getMutedRulesFilterQuery(encryptedSoClient);
 
   const { id: pitId } = await esClient.openPointInTime({
     index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -78,6 +81,7 @@ export const getBenchmarksData = async (
                 { term: { 'rule.benchmark.version': benchmarkVersion } },
                 { term: { safe_posture_type: postureType } },
               ],
+              must_not: rulesFilter,
             },
           };
           const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings, logger);
@@ -106,11 +110,12 @@ export const getBenchmarksData = async (
 };
 
 export const getBenchmarks = async (
-  esClient: any,
+  esClient: ElasticsearchClient,
   soClient: SavedObjectsClientContract,
+  encryptedSoClient: SavedObjectsClientContract,
   logger: Logger
 ) => {
-  const benchmarks = await getBenchmarksData(soClient, esClient, logger);
+  const benchmarks = await getBenchmarksData(soClient, encryptedSoClient, esClient, logger);
   const getBenchmarkResponse = {
     items: benchmarks,
   };

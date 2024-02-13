@@ -28,6 +28,7 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '../../../editor_frame_service/editor_frame/expression_helpers';
+import { MAX_NUM_OF_COLUMNS } from '../../../datasources/text_based/utils';
 import {
   useLensSelector,
   selectFramePublicAPI,
@@ -42,6 +43,7 @@ import { FlyoutWrapper } from './flyout_wrapper';
 import { getSuggestions } from './helpers';
 import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/suggestion_panel';
 import { useApplicationUserMessages } from '../../get_application_user_messages';
+import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -76,6 +78,7 @@ export function LensEditConfigurationFlyout({
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [suggestsLimitedColumns, setSuggestsLimitedColumns] = useState(false);
   const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
@@ -87,7 +90,6 @@ export function LensEditConfigurationFlyout({
     visualizationMap[visualization.activeId ?? attributes.visualizationType];
 
   const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
-  const suggestsLimitedColumns = activeDatasource?.suggestsLimitedColumns?.(datasourceState);
 
   const layers = useMemo(
     () => activeDatasource.getLayers(datasourceState),
@@ -101,6 +103,11 @@ export function LensEditConfigurationFlyout({
       const adaptersTables = previousAdapters.current?.tables?.tables as Record<string, Datatable>;
       const [table] = Object.values(adaptersTables || {});
       if (table) {
+        // there are cases where a query can return a big amount of columns
+        // at this case we don't suggest all columns in a table but the first
+        // MAX_NUM_OF_COLUMNS
+        const columns = Object.keys(table.rows?.[0]) ?? [];
+        setSuggestsLimitedColumns(columns.length >= MAX_NUM_OF_COLUMNS);
         layers.forEach((layer) => {
           activeData[layer] = table;
         });
@@ -193,40 +200,57 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onApply = useCallback(() => {
+    const dsStates = Object.fromEntries(
+      Object.entries(datasourceStates).map(([id, ds]) => {
+        const dsState = ds.state;
+        return [id, dsState];
+      })
+    );
+    const references = extractReferencesFromState({
+      activeDatasources: Object.keys(datasourceStates).reduce(
+        (acc, id) => ({
+          ...acc,
+          [id]: datasourceMap[id],
+        }),
+        {}
+      ),
+      datasourceStates,
+      visualizationState: visualization.state,
+      activeVisualization,
+    });
+    const attrs = {
+      ...attributes,
+      state: {
+        ...attributes.state,
+        visualization: visualization.state,
+        datasourceStates: dsStates,
+      },
+      references,
+      visualizationType: visualization.activeId,
+      title: visualization.activeId ?? '',
+    };
     if (savedObjectId) {
-      const dsStates = Object.fromEntries(
-        Object.entries(datasourceStates).map(([id, ds]) => {
-          const dsState = ds.state;
-          return [id, dsState];
-        })
-      );
-      const references = extractReferencesFromState({
-        activeDatasources: Object.keys(datasourceStates).reduce(
-          (acc, id) => ({
-            ...acc,
-            [id]: datasourceMap[id],
-          }),
-          {}
-        ),
-        datasourceStates,
-        visualizationState: visualization.state,
-        activeVisualization,
-      });
-      const attrs = {
-        ...attributes,
-        state: {
-          ...attributes.state,
-          visualization: visualization.state,
-          datasourceStates: dsStates,
-        },
-        references,
-      };
       saveByRef?.(attrs);
       updateByRefInput?.(savedObjectId);
     }
-    onApplyCb?.();
+
+    // check if visualization type changed, if it did, don't pass the previous visualization state
+    const prevVisState =
+      previousAttributes.current.visualizationType === visualization.activeId
+        ? previousAttributes.current.state.visualization
+        : undefined;
+    const telemetryEvents = activeVisualization.getTelemetryEventsOnSave?.(
+      visualization.state,
+      prevVisState
+    );
+    if (telemetryEvents && telemetryEvents.length) {
+      trackUiCounterEvents(telemetryEvents);
+    }
+
+    onApplyCb?.(attrs as TypedLensByValueInput['attributes']);
     closeFlyout?.();
   }, [
+    visualization.activeId,
     savedObjectId,
     closeFlyout,
     onApplyCb,
@@ -234,9 +258,9 @@ export function LensEditConfigurationFlyout({
     visualization.state,
     activeVisualization,
     attributes,
+    datasourceMap,
     saveByRef,
     updateByRefInput,
-    datasourceMap,
   ]);
 
   const { getUserMessages } = useApplicationUserMessages({
@@ -255,14 +279,15 @@ export function LensEditConfigurationFlyout({
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
   const runQuery = useCallback(
-    async (q) => {
+    async (q, abortController) => {
       const attrs = await getSuggestions(
         q,
         startDependencies,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
-        setErrors
+        setErrors,
+        abortController
       );
       if (attrs) {
         setCurrentAttributes?.(attrs);
@@ -418,13 +443,13 @@ export function LensEditConfigurationFlyout({
                 hideMinimizeButton
                 editorIsInline
                 hideRunQueryText
-                disableSubmitAction={isEqual(query, prevQuery.current)}
-                onTextLangQuerySubmit={(q) => {
+                onTextLangQuerySubmit={async (q, a) => {
                   if (q) {
-                    runQuery(q);
+                    await runQuery(q, a);
                   }
                 }}
                 isDisabled={false}
+                allowQueryCancellation={true}
               />
             </EuiFlexItem>
           )}

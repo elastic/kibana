@@ -13,15 +13,11 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
+        class="euiFilterButton__text emotion-euiFilterButton__text"
+        data-text="All"
+        title="All"
       >
-        <span
-          class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
-          data-text="All"
-          title="All"
-        >
-          All
-        </span>
+        All
       </span>
     </span>
   </button>
@@ -34,15 +30,11 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
+        class="euiFilterButton__text emotion-euiFilterButton__text"
+        data-text="Up"
+        title="Up"
       >
-        <span
-          class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
-          data-text="Up"
-          title="Up"
-        >
-          Up
-        </span>
+        Up
       </span>
     </span>
   </button>
@@ -55,15 +47,11 @@ exports[`StatusFilterComponent renders without errors for valid props 1`] = `
       class="euiButtonEmpty__content emotion-euiButtonDisplayContent-euiFilterButton__content"
     >
       <span
-        class="eui-textTruncate euiButtonEmpty__text euiFilterButton__text emotion-euiFilterButton__text"
+        class="euiFilterButton__text emotion-euiFilterButton__text"
+        data-text="Down"
+        title="Down"
       >
-        <span
-          class="euiFilterButton__textShift emotion-euiFilterButton__textShift"
-          data-text="Down"
-          title="Down"
-        >
-          Down
-        </span>
+        Down
       </span>
     </span>
   </button>

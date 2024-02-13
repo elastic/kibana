@@ -412,7 +412,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
                     wrapHits,
                     wrapSequences,
                     listClient,
-                    ruleDataReader: ruleDataClient.getReader({ namespace: options.spaceId }),
+                    ruleDataClient,
                     mergeStrategy,
                     primaryTimestamp,
                     secondaryTimestamp,

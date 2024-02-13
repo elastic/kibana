@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FlameGraph } from '../../../components/flamegraph';
@@ -25,7 +26,10 @@ export function FlameGraphView() {
 
   const {
     services: { fetchElasticFlamechart },
+    start: { core },
   } = useProfilingDependencies();
+
+  const showErrorFrames = core.uiSettings.get<boolean>(profilingShowErrorFrames);
 
   const state = useTimeRangeAsync(
     ({ http }) => {
@@ -34,9 +38,10 @@ export function FlameGraphView() {
         timeFrom: new Date(timeRange.start).getTime(),
         timeTo: new Date(timeRange.end).getTime(),
         kuery,
+        showErrorFrames,
       });
     },
-    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery]
+    [fetchElasticFlamechart, timeRange.start, timeRange.end, kuery, showErrorFrames]
   );
 
   const { data } = state;

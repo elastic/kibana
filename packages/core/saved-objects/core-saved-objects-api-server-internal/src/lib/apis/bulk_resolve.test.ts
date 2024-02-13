@@ -114,7 +114,10 @@ describe('#bulkResolve', () => {
         ],
       });
       expect(mockInternalBulkResolve).toHaveBeenCalledTimes(1);
-      expect(mockInternalBulkResolve).toHaveBeenCalledWith(expect.objectContaining({ objects }));
+      expect(mockInternalBulkResolve).toHaveBeenCalledWith(
+        expect.objectContaining({ objects }),
+        expect.any(Object)
+      );
     });
 
     it('throws when internalBulkResolve throws', async () => {

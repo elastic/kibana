@@ -40,7 +40,7 @@ export default function ({ getService }: FtrProviderContext) {
   describe('Custom Threshold rule - AVG - US - FIRED', () => {
     const CUSTOM_THRESHOLD_RULE_ALERT_INDEX = '.alerts-observability.threshold.alerts-default';
     const ALERT_ACTION_INDEX = 'alert-action-threshold';
-    const DATE_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
+    const DATA_VIEW = 'traces-apm*,metrics-apm*,logs-apm*';
     const DATA_VIEW_ID = 'data-view-id';
     const DATA_VIEW_NAME = 'test-data-view-name';
 
@@ -57,7 +57,7 @@ export default function ({ getService }: FtrProviderContext) {
         supertest,
         name: DATA_VIEW_NAME,
         id: DATA_VIEW_ID,
-        title: DATE_VIEW,
+        title: DATA_VIEW,
       });
     });
 
@@ -163,7 +163,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -187,7 +187,9 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
+        expect(resp.hits.hits[0]._source)
+          .property('kibana.alert.evaluation.threshold')
+          .eql([7500000]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({

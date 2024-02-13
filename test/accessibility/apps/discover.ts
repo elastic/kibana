@@ -109,7 +109,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.clickSavedQueriesPopOver();
       await testSubjects.click('saved-query-management-load-button');
       await savedQueryManagementComponent.deleteSavedQuery('test');
-      await a11y.testAppSnapshot();
+      await a11y.testAppSnapshot({
+        // The saved query selectable search input has invalid aria attrs after
+        // the query is deleted and the `emptyMessage` is displayed, and it fails
+        // with this error, likely because the list is replaced by `emptyMessage`:
+        // [aria-valid-attr-value]: Ensures all ARIA attributes have valid values
+        excludeTestSubj: ['saved-query-management-search-input'],
+      });
     });
 
     // adding a11y tests for the new data grid
@@ -159,24 +165,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await a11y.testAppSnapshot();
     });
 
-    it('a11y test for chart options panel', async () => {
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await a11y.testAppSnapshot();
-    });
-
     it('a11y test for data grid with hidden chart', async () => {
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.closeHistogramPanel();
       await a11y.testAppSnapshot();
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramChartToggle');
+      await PageObjects.discover.openHistogramPanel();
     });
 
     it('a11y test for time interval panel', async () => {
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
-      await testSubjects.click('unifiedHistogramTimeIntervalPanel');
+      await testSubjects.click('unifiedHistogramTimeIntervalSelectorButton');
       await a11y.testAppSnapshot();
-      await testSubjects.click('contextMenuPanelTitleButton');
-      await testSubjects.click('unifiedHistogramChartOptionsToggle');
     });
 
     it('a11y test for data grid sort panel', async () => {
@@ -205,7 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('a11y test for data grid with collapsed side bar', async () => {
       await PageObjects.discover.closeSidebar();
       await a11y.testAppSnapshot();
-      await PageObjects.discover.toggleSidebarCollapse();
+      await PageObjects.discover.openSidebar();
     });
 
     it('a11y test for adding a field from side bar', async () => {

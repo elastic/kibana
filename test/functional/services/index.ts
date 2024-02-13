@@ -11,12 +11,10 @@ import { services as commonServiceProviders } from '../../common/services';
 
 import { AppsMenuService } from './apps_menu';
 import {
-  BrowserProvider,
   FailureDebuggingProvider,
   PngService,
   ScreenshotsService,
   SnapshotsService,
-  TestSubjects,
 } from './common';
 import { ComboBoxService } from './combo_box';
 import {
@@ -61,7 +59,6 @@ export const services = {
   ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
-  testSubjects: TestSubjects,
   docTable: DocTableService,
   png: PngService,
   screenshots: ScreenshotsService,
@@ -83,7 +80,6 @@ export const services = {
   dataGrid: DataGridService,
   embedding: EmbeddingService,
   renderable: RenderableService,
-  browser: BrowserProvider,
   pieChart: PieChartService,
   inspector: InspectorService,
   fieldEditor: FieldEditorService,

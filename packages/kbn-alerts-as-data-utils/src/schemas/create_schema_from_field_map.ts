@@ -322,6 +322,7 @@ export const schemaGeoPoint = rt.union([
 export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const %%schemaPrefix%%Required = %%REQUIRED_FIELDS%%;
+// prettier-ignore
 const %%schemaPrefix%%Optional = %%OPTIONAL_FIELDS%%;
 
 // prettier-ignore

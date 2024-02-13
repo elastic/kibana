@@ -36,6 +36,7 @@ node scripts/build \
   --docker-tag="$KIBANA_IMAGE_TAG" \
   --skip-docker-ubuntu \
   --skip-docker-ubi \
+  --skip-docker-fips \
   --skip-docker-cloud \
   --skip-docker-contexts
 
@@ -95,6 +96,7 @@ CDN_ASSETS_FOLDER=$(mktemp -d)
 tar -xf "kibana-$BASE_VERSION-cdn-assets.tar.gz" -C "$CDN_ASSETS_FOLDER" --strip=1
 
 gsutil -m cp -r "$CDN_ASSETS_FOLDER/*" "gs://$GCS_SA_CDN_QA_BUCKET/$GIT_ABBREV_COMMIT"
+gcloud auth revoke "$GCS_SA_CDN_QA_EMAIL"
 
 echo "--- Upload archives"
 buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
@@ -118,9 +120,7 @@ steps:
     build:
       env:
         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
-        SERVICE: kibana-controller
-        NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana-serverless
+        SERVICE: kibana
         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
 EOF
 

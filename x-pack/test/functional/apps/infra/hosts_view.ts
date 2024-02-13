@@ -122,7 +122,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     await retry.waitFor(
       'wait for table and KPI charts to load',
       async () =>
-        (await pageObjects.infraHostsView.isHostTableLoading()) &&
+        (await pageObjects.infraHostsView.isHostTableLoaded()) &&
         (await pageObjects.infraHostsView.isKPIChartsLoaded())
     );
 
@@ -207,6 +207,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           it('should render 9 charts in the Metrics section', async () => {
             const hosts = await pageObjects.assetDetails.getAssetDetailsMetricsCharts();
             expect(hosts.length).to.equal(9);
+          });
+
+          it('should show all section as collapsable', async () => {
+            await pageObjects.assetDetails.metadataSectionCollapsibleExist();
+            await pageObjects.assetDetails.alertsSectionCollapsibleExist();
+            await pageObjects.assetDetails.metricsSectionCollapsibleExist();
           });
 
           it('should show alerts', async () => {
@@ -457,7 +463,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         const ACTIVE_ALERTS = 6;
         const RECOVERED_ALERTS = 4;
         const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-        const COLUMNS = 6;
+        const COLUMNS = 11;
 
         before(async () => {
           await browser.scrollTop();
@@ -574,7 +580,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const ACTIVE_ALERTS = 2;
           const RECOVERED_ALERTS = 2;
           const ALL_ALERTS = ACTIVE_ALERTS + RECOVERED_ALERTS;
-          const COLUMNS = 6;
+          const COLUMNS = 11;
 
           await pageObjects.infraHostsView.visitAlertTab();
 

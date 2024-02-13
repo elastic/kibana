@@ -41,6 +41,7 @@ export const mockRiskScoreState = {
   isAuthorized: true,
   isDeprecated: false,
   loading: false,
+  error: undefined,
 };
 
 export const mockOktaUserFields: ManagedUserFields = {

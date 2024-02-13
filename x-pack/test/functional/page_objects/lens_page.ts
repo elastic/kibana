@@ -1173,7 +1173,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async getDatatableCell(rowIndex = 0, colIndex = 0) {
       return await find.byCssSelector(
-        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-row-index="${rowIndex}"]`
+        `[data-test-subj="lnsDataTable"] [data-test-subj="dataGridRowCell"][data-gridcell-column-index="${colIndex}"][data-gridcell-visible-row-index="${rowIndex}"]`
       );
     },
 
@@ -1187,6 +1187,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
     async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
+      await el.moveMouseTo({ xOffset: 0, yOffset: -20 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
       await el.click();
       let buttonEl;
       if (direction !== 'none') {
@@ -1933,8 +1934,9 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         await testSubjects.existOrFail('lns-indexPattern-dimensionContainerClose');
       });
       await testSubjects.click('lns_colorEditing_trigger');
-      // disable autoAssign
-      await testSubjects.setEuiSwitch('lns-colorMapping-autoAssignSwitch', 'uncheck');
+
+      // assign all
+      await testSubjects.click('lns-colorMapping-assignmentsPromptAddAll');
 
       await testSubjects.click(`lns-colorMapping-colorSwatch-${colorSwatchIndex}`);
 
@@ -1945,6 +1947,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await this.closePaletteEditor();
 
       await this.closeDimensionEditor();
+    },
+
+    async getWorkspaceVisContainerDimensions() {
+      const visContainer = await testSubjects.find('lnsWorkspacePanelWrapper__innerContent');
+      const [width, height] = await Promise.all([
+        visContainer.getComputedStyle('width'),
+        visContainer.getComputedStyle('height'),
+      ]);
+
+      return { width, height };
+    },
+
+    async getWorkspaceVisContainerStyles() {
+      const visContainer = await testSubjects.find('lnsWorkspacePanelWrapper__innerContent');
+      const [maxWidth, maxHeight, minWidth, minHeight, aspectRatio] = await Promise.all([
+        visContainer.getComputedStyle('max-width'),
+        visContainer.getComputedStyle('max-height'),
+        visContainer.getComputedStyle('min-width'),
+        visContainer.getComputedStyle('min-height'),
+        visContainer.getComputedStyle('aspect-ratio'),
+      ]);
+
+      return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
     },
   });
 }

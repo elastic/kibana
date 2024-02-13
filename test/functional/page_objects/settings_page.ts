@@ -39,7 +39,7 @@ export class SettingsPageObject extends FtrService {
   async clickKibanaGlobalSettings() {
     await this.testSubjects.click('settings');
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click('advancedSettingsTab-global-settings');
+    await this.testSubjects.click('settings-tab-global-settings');
   }
 
   async clickKibanaSavedObjects() {
@@ -73,21 +73,24 @@ export class SettingsPageObject extends FtrService {
   async getAdvancedSettings(propertyName: string) {
     this.log.debug('in getAdvancedSettings');
     return await this.testSubjects.getAttribute(
-      `advancedSetting-editField-${propertyName}`,
+      `management-settings-editField-${propertyName}`,
       'value'
     );
   }
 
   async expectDisabledAdvancedSetting(propertyName: string) {
     expect(
-      await this.testSubjects.getAttribute(`advancedSetting-editField-${propertyName}`, 'disabled')
+      await this.testSubjects.getAttribute(
+        `management-settings-editField-${propertyName}`,
+        'disabled'
+      )
     ).to.eql('true');
   }
 
   async getAdvancedSettingCheckbox(propertyName: string) {
     this.log.debug('in getAdvancedSettingCheckbox');
     return await this.testSubjects.getAttribute(
-      `advancedSetting-editField-${propertyName}`,
+      `management-settings-editField-${propertyName}`,
       'checked'
     );
   }
@@ -95,37 +98,37 @@ export class SettingsPageObject extends FtrService {
   async getAdvancedSettingAriaCheckbox(propertyName: string) {
     this.log.debug('in getAdvancedSettingAriaCheckbox');
     return await this.testSubjects.getAttribute(
-      `advancedSetting-editField-${propertyName}`,
+      `management-settings-editField-${propertyName}`,
       'aria-checked'
     );
   }
 
   async clearAdvancedSettings(propertyName: string) {
-    await this.testSubjects.click(`advancedSetting-resetField-${propertyName}`);
+    await this.testSubjects.click(`management-settings-resetField-${propertyName}`);
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.testSubjects.click(`settings-save-button`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsSelect(propertyName: string, propertyValue: string) {
     await this.find.clickByCssSelector(
-      `[data-test-subj="advancedSetting-editField-${propertyName}"] option[value="${propertyValue}"]`
+      `[data-test-subj="management-settings-editField-${propertyName}"] option[value="${propertyValue}"]`
     );
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.testSubjects.click(`settings-save-button`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsInput(propertyName: string, propertyValue: string) {
-    const input = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    const input = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
     await input.clearValue();
     await input.type(propertyValue);
-    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.testSubjects.click(`settings-save-button`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsTextArea(propertyName: string, propertyValue: string) {
-    const wrapper = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    const wrapper = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
     const textarea = await wrapper.findByTagName('textarea');
     await textarea.focus();
     // only way to properly replace the value of the ace editor is via the JS api
@@ -133,17 +136,17 @@ export class SettingsPageObject extends FtrService {
       (editor: string, value: string) => {
         return (window as any).ace.edit(editor).setValue(value);
       },
-      `advancedSetting-editField-${propertyName}-editor`,
+      `management-settings-editField-${propertyName}-editor`,
       propertyValue
     );
-    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.testSubjects.click(`settings-save-button`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
   async setAdvancedSettingsImage(propertyName: string, path: string) {
-    const input = await this.testSubjects.find(`advancedSetting-editField-${propertyName}`);
+    const input = await this.testSubjects.find(`management-settings-editField-${propertyName}`);
     await input.type(path);
-    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.testSubjects.click(`settings-save-button`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -155,9 +158,9 @@ export class SettingsPageObject extends FtrService {
       if (curValue === (value ? 'true' : 'false')) return;
     }
 
-    await this.testSubjects.click(`advancedSetting-editField-${propertyName}`);
+    await this.testSubjects.click(`management-settings-editField-${propertyName}`);
     await this.header.waitUntilLoadingHasFinished();
-    await this.testSubjects.click(`advancedSetting-saveButton`);
+    await this.testSubjects.click(`settings-save-button`);
     await this.header.waitUntilLoadingHasFinished();
   }
 
@@ -212,14 +215,14 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getSaveDataViewButtonActive() {
-    await this.retry.try(async () => {
-      expect(
+    await this.retry.waitFor('active save button', async () => {
+      return (
         (
           await this.find.allByCssSelector(
             '[data-test-subj="saveIndexPatternButton"]:not(.euiButton-isDisabled)'
           )
-        ).length
-      ).to.be(1);
+        ).length === 1
+      );
     });
     return await this.testSubjects.find('saveIndexPatternButton');
   }
@@ -235,6 +238,9 @@ export class SettingsPageObject extends FtrService {
 
   async clickEditIndexButton() {
     await this.testSubjects.click('editIndexPatternButton');
+    await this.retry.waitFor('flyout', async () => {
+      return await this.testSubjects.exists('indexPatternEditorFlyout');
+    });
   }
 
   async clickDeletePattern() {
@@ -494,6 +500,34 @@ export class SettingsPageObject extends FtrService {
     await customDataViewIdInput.type(value);
   }
 
+  async refreshDataViewFieldList(
+    dataViewName?: string,
+    options: { ignoreMissing?: boolean } = { ignoreMissing: false }
+  ) {
+    if (dataViewName) {
+      await this.common.navigateToApp('management/kibana/dataViews');
+      await this.header.waitUntilLoadingHasFinished();
+      if (
+        options.ignoreMissing &&
+        (await this.testSubjects.exists(`detail-link-${dataViewName}`)) === false
+      ) {
+        return;
+      }
+      await this.testSubjects.click(`detail-link-${dataViewName}`);
+    }
+    await this.testSubjects.click('refreshDataViewButton');
+
+    // wait for refresh to start
+    await new Promise((r) => setTimeout(r, 500));
+
+    // wait for refresh to finish
+    await this.retry.try(async () => {
+      const btn = await this.testSubjects.find('refreshDataViewButton');
+      const disabled = await btn.getAttribute('disabled');
+      expect(disabled).to.be(null);
+    });
+  }
+
   async allowHiddenClick() {
     await this.testSubjects.click('toggleAdvancedSetting');
     const allowHiddenField = await this.testSubjects.find('allowHiddenField');
@@ -581,7 +615,13 @@ export class SettingsPageObject extends FtrService {
     await this.clickEditIndexButton();
     await this.header.waitUntilLoadingHasFinished();
 
+    let hasSubmittedTheForm = false;
+
     await this.retry.try(async () => {
+      if (hasSubmittedTheForm && !(await this.testSubjects.exists('indexPatternEditorFlyout'))) {
+        // the flyout got closed
+        return;
+      }
       if (dataViewName) {
         await this.setNameField(dataViewName);
       }
@@ -592,6 +632,8 @@ export class SettingsPageObject extends FtrService {
       }
       const indexPatternSaveBtn = await this.getSaveIndexPatternButton();
       await indexPatternSaveBtn.click();
+
+      hasSubmittedTheForm = true;
 
       const form = await this.testSubjects.findAll('indexPatternEditorForm');
       const hasValidationErrors =

@@ -67,7 +67,7 @@ describe('CorrelationsDetails', () => {
   it('renders all sections', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, documentId: 'documentId', indices: ['index1'] });
+      .mockReturnValue({ show: true, documentId: 'event-id', indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
@@ -115,7 +115,7 @@ describe('CorrelationsDetails', () => {
   it('should render no section and show error message if show values are false', () => {
     jest
       .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, documentId: 'documentId', indices: ['index1'] });
+      .mockReturnValue({ show: false, documentId: 'event-id', indices: ['index1'] });
     jest
       .mocked(useShowRelatedAlertsBySameSourceEvent)
       .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
@@ -144,7 +144,9 @@ describe('CorrelationsDetails', () => {
   });
 
   it('should render no section if values are null', () => {
-    jest.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({ show: true });
+    jest
+      .mocked(useShowRelatedAlertsByAncestry)
+      .mockReturnValue({ show: true, documentId: 'event-id' });
     jest.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true });
     jest.mocked(useShowRelatedCases).mockReturnValue(false);

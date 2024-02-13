@@ -1,0 +1,35 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+import type { CoreStart } from '@kbn/core/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type { Dispatch } from 'react';
+
+/**
+ * EmbeddableConsoleProps are optional props used when rendering the embeddable developer console.
+ */
+export interface EmbeddableConsoleProps {
+  /**
+   * The default height of the content area.
+   */
+  size?: 's' | 'm' | 'l';
+}
+
+export interface EmbeddableConsoleDependencies {
+  core: CoreStart;
+  usageCollection?: UsageCollectionStart;
+  setDispatch: (dispatch: Dispatch<EmbeddedConsoleAction> | null) => void;
+}
+
+export type EmbeddedConsoleAction =
+  | { type: 'open'; payload?: { content?: string } }
+  | { type: 'close' };
+
+export interface EmbeddedConsoleStore {
+  isOpen: boolean;
+  loadFromContent?: string;
+}

@@ -123,11 +123,11 @@ function MultipleInstanceCustomTooltip({
         )}
       </div>
       {values.map((value) => {
-        const { color } = value;
+        const { color, seriesIdentifier } = value;
         const datum = value.datum as unknown as MainStatsServiceInstanceItem;
         const { latency, serviceNodeName, throughput } = datum;
         return (
-          <div className="echTooltip__list" key={serviceNodeName}>
+          <div className="echTooltip__list" key={seriesIdentifier.key}>
             <div className="echTooltip__item">
               <div
                 className="echTooltip__item--backgroundColor"

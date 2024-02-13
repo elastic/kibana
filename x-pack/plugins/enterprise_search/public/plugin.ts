@@ -7,6 +7,7 @@
 
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
+import { ConsolePluginStart } from '@kbn/console-plugin/public';
 import {
   AppMountParameters,
   CoreStart,
@@ -23,6 +24,7 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
+import { ELASTICSEARCH_URL_PLACEHOLDER } from '@kbn/search-api-panels/constants';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
@@ -60,6 +62,7 @@ interface PluginsSetup {
 export interface PluginsStart {
   charts: ChartsPluginStart;
   cloud?: CloudSetup & CloudStart;
+  console?: ConsolePluginStart;
   data: DataPublicPluginStart;
   guidedOnboarding: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
@@ -69,17 +72,29 @@ export interface PluginsStart {
   ml: MlPluginStart;
 }
 
+export interface ESConfig {
+  elasticsearch_host: string;
+}
+
 export class EnterpriseSearchPlugin implements Plugin {
   private config: ClientConfigType;
+  private esConfig: ESConfig;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.config = initializerContext.config.get<ClientConfigType>();
+    this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
   }
 
   private data: ClientData = {} as ClientData;
 
   private async getInitialData(http: HttpSetup) {
-    if (!this.config.host && this.config.canDeployEntSearch) return; // No API to call
+    try {
+      this.esConfig = await http.get('/internal/enterprise_search/es_config');
+    } catch {
+      this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
+    }
+
+    if (!this.config.host) return; // No API to call
     if (this.hasInitialized) return; // We've already made an initial call
 
     try {
@@ -113,7 +128,12 @@ export class EnterpriseSearchPlugin implements Plugin {
 
   private getPluginData() {
     // Small helper for grouping plugin data related args together
-    return { config: this.config, data: this.data, isSidebarEnabled: this.isSidebarEnabled };
+    return {
+      config: this.config,
+      data: this.data,
+      esConfig: this.esConfig,
+      isSidebarEnabled: this.isSidebarEnabled,
+    };
   }
 
   private hasInitialized: boolean = false;
@@ -417,13 +437,17 @@ export class EnterpriseSearchPlugin implements Plugin {
     }
   }
 
-  public async start(core: CoreStart) {
+  public start(core: CoreStart) {
     if (!this.config.ui?.enabled) {
       return;
     }
     // This must be called here in start() and not in `applications/index.tsx` to prevent loading
     // race conditions with our apps' `routes.ts` being initialized before `renderApp()`
     docLinks.setDocLinks(core.docLinks);
+
+    // Return empty start contract rather than void in order for plugins
+    // that depend on the enterprise search plugin to determine whether it is enabled or not
+    return {};
   }
 
   public stop() {}

@@ -1,0 +1,18 @@
+---
+name: nginx_proxy
+fields:
+  base:
+    fields: "*"
+  log:
+    fields:
+      level: {}
+      logger: {}
+  http:
+    fields:
+      response:
+        fields:
+          status_code: {}
+          bytes: {}
+  host:
+    fields:
+      name: {}

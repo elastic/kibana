@@ -74,7 +74,8 @@ export async function getTemplateInputs(
   soClient: SavedObjectsClientContract,
   pkgName: string,
   pkgVersion: string,
-  format: Format
+  format: Format,
+  prerelease?: boolean
 ) {
   const packageInfoMap = new Map<string, PackageInfo>();
   let packageInfo: PackageInfo;
@@ -86,6 +87,7 @@ export async function getTemplateInputs(
       savedObjectsClient: soClient,
       pkgName,
       pkgVersion,
+      prerelease,
     });
   }
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');

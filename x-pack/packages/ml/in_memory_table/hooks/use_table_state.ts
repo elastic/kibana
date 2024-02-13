@@ -11,7 +11,7 @@ import { EuiInMemoryTable, Direction, Pagination } from '@elastic/eui';
 /**
  * Returned type for useTableState hook
  */
-export interface UseTableState<T> {
+export interface UseTableState<T extends object> {
   /**
    * Callback function which gets called whenever the pagination or sorting state of the table changed
    */
@@ -36,13 +36,14 @@ export interface UseTableState<T> {
  * @param {string} initialSortField - field name to sort by default
  * @param {string} initialSortDirection - default to 'asc'
  */
-export function useTableState<T>(
+export function useTableState<T extends object>(
   items: T[],
   initialSortField: string,
-  initialSortDirection: 'asc' | 'desc' = 'asc'
+  initialSortDirection: 'asc' | 'desc' = 'asc',
+  initialPagionation?: Partial<Pagination>
 ) {
-  const [pageIndex, setPageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [pageIndex, setPageIndex] = useState(initialPagionation?.pageIndex ?? 0);
+  const [pageSize, setPageSize] = useState(initialPagionation?.pageSize ?? 10);
   const [sortField, setSortField] = useState<string>(initialSortField);
   const [sortDirection, setSortDirection] = useState<Direction>(initialSortDirection);
 
@@ -63,7 +64,7 @@ export function useTableState<T>(
     pageIndex,
     pageSize,
     totalItemCount: (items ?? []).length,
-    pageSizeOptions: [10, 20, 50],
+    pageSizeOptions: initialPagionation?.pageSizeOptions ?? [10, 20, 50],
     showPerPageOptions: true,
   };
 
