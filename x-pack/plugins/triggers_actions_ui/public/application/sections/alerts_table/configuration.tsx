@@ -7,13 +7,17 @@
 
 import React from 'react';
 import {
-  ALERT_DURATION,
+  ALERT_EVALUATION_THRESHOLD,
+  ALERT_EVALUATION_VALUES,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_REASON,
+  ALERT_RULE_CATEGORY,
+  ALERT_RULE_NAME,
+  ALERT_RULE_TAGS,
+  ALERT_START,
   ALERT_STATUS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
-import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { getDefaultAlertFlyout } from './alerts_flyout/default_alerts_flyout';
@@ -29,7 +33,7 @@ const columns = [
       defaultMessage: 'Alert Status',
     }),
     id: ALERT_STATUS,
-    initialWidth: 110,
+    initialWidth: 120,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -40,16 +44,66 @@ const columns = [
       }
     ),
     id: TIMESTAMP,
-    initialWidth: 230,
+    initialWidth: 200,
     schema: 'datetime',
   },
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.durationColumnDescription', {
-      defaultMessage: 'Duration',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.startedColumnDescription', {
+      defaultMessage: 'Started',
     }),
-    id: ALERT_DURATION,
-    initialWidth: 116,
+    id: ALERT_START,
+    initialWidth: 200,
+    schema: 'datetime',
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.ruleCategoryColumnDescription',
+      {
+        defaultMessage: 'Rule category',
+      }
+    ),
+    id: ALERT_RULE_CATEGORY,
+    initialWidth: 160,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleColumnDescription', {
+      defaultMessage: 'Rule',
+    }),
+    id: ALERT_RULE_NAME,
+    initialWidth: 230,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate('xpack.triggersActionsUI.alertsTable.ruleTagsColumnDescription', {
+      defaultMessage: 'Rule tags',
+    }),
+    id: ALERT_RULE_TAGS,
+    initialWidth: 120,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.evaluationValuesColumnDescription',
+      {
+        defaultMessage: 'Evaluation values',
+      }
+    ),
+    id: ALERT_EVALUATION_VALUES,
+    initialWidth: 120,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate(
+      'xpack.triggersActionsUI.alertsTable.evaluationThresholdColumnDescription',
+      {
+        defaultMessage: 'Evaluation threshold',
+      }
+    ),
+    id: ALERT_EVALUATION_THRESHOLD,
+    initialWidth: 120,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -58,6 +112,7 @@ const columns = [
     }),
     id: ALERT_REASON,
     linkField: '*',
+    initialWidth: 260,
   },
   {
     columnHeaderType: 'not-filtered',
@@ -84,7 +139,7 @@ export const getAlertsTableConfiguration = (
     sort: [
       {
         [TIMESTAMP]: {
-          order: 'desc' as SortOrder,
+          order: 'desc',
         },
       },
     ],
