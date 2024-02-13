@@ -71,6 +71,47 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await find.allByCssSelector('.echLegendItem')).to.have.length(4);
     });
 
+    describe('dimension flyout keeping open/closing when palette is open ', () => {
+      it('should keep the dimension editor open when switching to a chart that moves the column to the new group', async () => {
+        await PageObjects.visualize.navigateToNewVisualization();
+        await PageObjects.visualize.clickVisType('lens');
+        await PageObjects.lens.goToTimeRange();
+
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_yDimensionPanel > lns-empty-dimension',
+          operation: 'average',
+          field: 'bytes',
+        });
+
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: '@message.raw',
+          keepOpen: true,
+        });
+
+        await PageObjects.lens.openPalettePanel();
+
+        await PageObjects.lens.switchToVisualization('bar');
+
+        expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(true);
+      });
+      it('should close the dimension editor when switching to a chart that removes the column', async () => {
+        await PageObjects.lens.closeDimensionEditor();
+        await PageObjects.lens.configureDimension({
+          dimension: 'lnsXY_splitDimensionPanel > lns-empty-dimension',
+          operation: 'terms',
+          field: '@message.raw',
+          keepOpen: true,
+        });
+
+        await PageObjects.lens.openPalettePanel();
+        await PageObjects.lens.switchToVisualization('lnsLegacyMetric');
+
+        expect(await PageObjects.lens.isDimensionEditorOpen()).to.eql(false);
+      });
+    });
+
     it('should create an xy visualization with filters aggregation', async () => {
       await PageObjects.visualize.gotoVisualizationLandingPage();
       await listingTable.searchForItemWithName('lnsXYvis');

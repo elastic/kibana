@@ -24,6 +24,7 @@ steps:
 
   - group: "Execute Tests"
     depends_on: build_image
+    key: test_execution
     steps:
     # - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore
     #   label: 'Serverless MKI QA Explore - Security Solution Cypress Tests'
