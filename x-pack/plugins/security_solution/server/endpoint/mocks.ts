@@ -103,6 +103,7 @@ export const createMockEndpointAppContextService = (
   const fleetActionsClientMock = createFleetActionsClientMock();
   const loggerFactory = loggingSystemMock.create();
   const featureUsageMock = createFeatureUsageServiceMock();
+  const messageSigningService = createMessageSigningServiceMock();
 
   return {
     start: jest.fn(),
@@ -123,7 +124,7 @@ export const createMockEndpointAppContextService = (
     getLicenseService: jest.fn(),
     getFeatureUsageService: jest.fn().mockReturnValue(featureUsageMock),
     getExceptionListsClient: jest.fn(),
-    getMessageSigningService: jest.fn(),
+    getMessageSigningService: jest.fn().mockReturnValue(messageSigningService),
     getFleetActionsClient: jest.fn(async (_) => fleetActionsClientMock),
   } as unknown as jest.Mocked<EndpointAppContextService>;
 };

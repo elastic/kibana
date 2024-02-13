@@ -12,6 +12,7 @@ import { endpointActionClientMock } from './mocks';
 import { responseActionsClientMock } from '../mocks';
 import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
 import type { ResponseActionRequestBody } from '../../../../../../common/endpoint/types';
+import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 
 describe('EndpointActionsClient', () => {
   let classConstructorOptions: ResponseActionsClientOptions;
@@ -66,6 +67,7 @@ describe('EndpointActionsClient', () => {
       data: {
         command: 'isolate',
         parameters: undefined,
+        comment: 'test comment',
       },
       expiration: expect.any(String),
       input_type: 'endpoint',
@@ -232,16 +234,26 @@ describe('EndpointActionsClient', () => {
     async (methodName) => {
       await endpointActionsClient[methodName](responseActionMethods[methodName]);
 
-      const expectedParams =
-        methodName === 'upload'
-          ? {
-              ...responseActionMethods[methodName].parameters,
-              file_id: '123-456-789',
-              file_name: 'foo.txt',
-              file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
-              file_size: 45632,
-            }
-          : responseActionMethods[methodName].parameters;
+      let expectedParams = responseActionMethods[methodName].parameters;
+
+      switch (methodName) {
+        case 'upload':
+          expectedParams = {
+            ...expectedParams,
+            file_id: '123-456-789',
+            file_name: 'foo.txt',
+            file_sha256: '96b76a1a911662053a1562ac14c4ff1e87c2ff550d6fe52e1e0b3790526597d3',
+            file_size: 45632,
+          };
+          break;
+
+        case 'execute':
+          expectedParams = {
+            ...expectedParams,
+            timeout: DEFAULT_EXECUTE_ACTION_TIMEOUT,
+          };
+          break;
+      }
 
       expect(
         (await classConstructorOptions.endpointService.getFleetActionsClient()).create as jest.Mock
@@ -249,6 +261,7 @@ describe('EndpointActionsClient', () => {
         expect.objectContaining({
           data: {
             command: expect.any(String),
+            comment: 'test comment',
             parameters: expectedParams,
           },
         })
