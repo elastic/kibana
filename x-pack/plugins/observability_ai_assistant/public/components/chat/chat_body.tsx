@@ -28,23 +28,18 @@ import { useLicense } from '../../hooks/use_license';
 import { useObservabilityAIAssistantChatService } from '../../hooks/use_observability_ai_assistant_chat_service';
 import type { UseGenAIConnectorsResult } from '../../hooks/use_genai_connectors';
 import type { UseKnowledgeBaseResult } from '../../hooks/use_knowledge_base';
-import { type Conversation, type Message, MessageRole, Suggestion } from '../../../common/types';
+import { type Conversation, type Message, MessageRole } from '../../../common/types';
 import { ChatHeader } from './chat_header';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 import { ChatTimeline } from './chat_timeline';
 import { Feedback } from '../feedback_buttons';
 import { IncorrectLicensePanel } from './incorrect_license_panel';
 import { WelcomeMessage } from './welcome_message';
-import {
-  ChatActionClickHandler,
-  ChatActionClickType,
-  type ChatFlyoutSecondSlotHandler,
-} from './types';
+import { ChatActionClickHandler, ChatActionClickType } from './types';
 import { ASSISTANT_SETUP_TITLE, EMPTY_CONVERSATION_TITLE, UPGRADE_LICENSE_TITLE } from '../../i18n';
 import type { StartedFrom } from '../../utils/get_timeline_items_from_conversation';
 import { TELEMETRY, sendEvent } from '../../analytics';
-import { Suggestions } from '../suggestions/suggestions';
-import { useContextualSuggestions } from '../../hooks/use_contextual_suggestions';
+import { FlyoutWidthMode } from './chat_flyout';
 
 const fullHeightClassName = css`
   height: 100%;
@@ -95,34 +90,34 @@ const animClassName = css`
 const PADDING_AND_BORDER = 32;
 
 export function ChatBody({
-  initialTitle,
-  initialMessages,
-  initialConversationId,
   connectors,
-  knowledgeBase,
   currentUser,
+  flyoutWidthMode,
+  initialConversationId,
+  initialMessages,
+  initialTitle,
+  knowledgeBase,
   showLinkToConversationsApp,
   startedFrom,
-  chatFlyoutSecondSlotHandler,
   onConversationUpdate,
+  onToggleFlyoutWidthMode,
 }: {
+  connectors: UseGenAIConnectorsResult;
+  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
+  flyoutWidthMode?: FlyoutWidthMode;
   initialTitle?: string;
   initialMessages?: Message[];
   initialConversationId?: string;
-  connectors: UseGenAIConnectorsResult;
   knowledgeBase: UseKnowledgeBaseResult;
-  currentUser?: Pick<AuthenticatedUser, 'full_name' | 'username'>;
   showLinkToConversationsApp: boolean;
   startedFrom?: StartedFrom;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
   onConversationUpdate: (conversation: { conversation: Conversation['conversation'] }) => void;
+  onToggleFlyoutWidthMode?: (flyoutWidthMode: FlyoutWidthMode) => void;
 }) {
   const license = useLicense();
   const hasCorrectLicense = license?.hasAtLeast('enterprise');
   const euiTheme = useEuiTheme();
   const scrollBarStyles = euiScrollBarStyles(euiTheme);
-
-  const { signal } = new AbortController();
 
   const chatService = useObservabilityAIAssistantChatService();
 
@@ -164,15 +159,6 @@ export function ChatBody({
       ? 1200 - 250 + 'px' // page template max width - conversation list width.
       : '100%'};
   `;
-
-  const suggestions = useContextualSuggestions({
-    chatService,
-    connectors,
-    conversation,
-    messages,
-    signal,
-    state,
-  });
 
   const [stickToBottom, setStickToBottom] = useState(true);
 
@@ -302,17 +288,6 @@ export function ChatBody({
     }
   };
 
-  const handleSuggestionClick = (suggestion: Suggestion) => {
-    next(
-      messages.concat([
-        {
-          '@timestamp': new Date().toISOString(),
-          message: { role: MessageRole.User, content: suggestion.prompt },
-        },
-      ])
-    );
-  };
-
   if (!hasCorrectLicense && !initialConversationId) {
     footer = (
       <>
@@ -356,11 +331,7 @@ export function ChatBody({
               className={animClassName}
             >
               {connectors.connectors?.length === 0 || messages.length === 1 ? (
-                <WelcomeMessage
-                  connectors={connectors}
-                  knowledgeBase={knowledgeBase}
-                  onSelectSuggestion={handleSuggestionClick}
-                />
+                <WelcomeMessage connectors={connectors} knowledgeBase={knowledgeBase} />
               ) : (
                 <ChatTimeline
                   startedFrom={startedFrom}
@@ -385,19 +356,9 @@ export function ChatBody({
                   onStopGenerating={() => {
                     stop();
                   }}
-                  chatFlyoutSecondSlotHandler={chatFlyoutSecondSlotHandler}
                   onActionClick={handleActionClick}
                 />
               )}
-              {conversation && conversation.value && 'id' in conversation.value.conversation ? (
-                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
-                  <Suggestions
-                    suggestions={state === ChatState.Loading ? [] : suggestions.value || []}
-                    isLoading={suggestions.loading}
-                    onSelect={handleSuggestionClick}
-                  />
-                </EuiPanel>
-              ) : null}
             </EuiPanel>
           </div>
         </EuiFlexItem>
@@ -492,6 +453,7 @@ export function ChatBody({
               ? conversation.value.conversation.id
               : undefined
           }
+          flyoutWidthMode={flyoutWidthMode}
           licenseInvalid={!hasCorrectLicense && !initialConversationId}
           loading={isLoading}
           showLinkToConversationsApp={showLinkToConversationsApp}
@@ -500,6 +462,7 @@ export function ChatBody({
           onSaveTitle={(newTitle) => {
             saveTitle(newTitle);
           }}
+          onToggleFlyoutWidthMode={onToggleFlyoutWidthMode}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>

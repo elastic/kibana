@@ -19,13 +19,14 @@ import { registerVisualizeESQLFunction } from './visualize_esql';
 
 export type FunctionRegistrationParameters = Omit<
   Parameters<ChatRegistrationFunction>[0],
-  'registerContext'
+  'registerContext' | 'hasFunction'
 >;
 
 export const registerFunctions: ChatRegistrationFunction = async ({
   client,
   registerContext,
   registerFunction,
+  hasFunction,
   resources,
   signal,
 }) => {
@@ -53,8 +54,6 @@ export const registerFunctions: ChatRegistrationFunction = async ({
 
         If multiple functions are suitable, use the most specific and easy one. E.g., when the user asks to visualise APM data, use the APM functions (if available) rather than "query".
 
-        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
-
         Note that ES|QL (the Elasticsearch query language, which is NOT Elasticsearch SQL, but a new piped language) is the preferred query language.
 
         If the user wants to visualize data, or run any arbitrary query, always use the "query" function. DO NOT UNDER ANY CIRCUMSTANCES generate ES|QL queries
@@ -66,7 +65,18 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         When the "visualize_query" function has been called, a visualization has been displayed to the user. DO NOT UNDER ANY CIRCUMSTANCES follow up a "visualize_query" function call with your own visualization attempt.
         If the "execute_query" function has been called, summarize these results for the user. The user does not see a visualization in this case.
 
+        Use the "get_dataset_info" function if it is not clear what fields or indices the user means, or if you want to get more information about the mappings.
+
         If the "get_dataset_info" function returns no data, and the user asks for a query, generate a query anyway with the "query" function, but be explicit about it potentially being incorrect.
+
+        ${
+          hasFunction('get_data_on_screen')
+            ? `You have access to data on the screen by calling the "get_data_on_screen" function.
+        Use it to help the user understand what they are looking at. A short summary of what they are looking at is available in the return of the "context" function.
+        Data that is compact enough automatically gets included in the response for the "context" function.
+        `
+            : ''
+        }
         `
     );
 
@@ -78,16 +88,17 @@ export const registerFunctions: ChatRegistrationFunction = async ({
         `;
 
       registerSummarizationFunction(registrationParameters);
-      registerContextFunction(registrationParameters);
       registerLensFunction(registrationParameters);
-      registerVisualizeESQLFunction(registrationParameters);
     } else {
       description += `You do not have a working memory. If the user expects you to remember the previous conversations, tell them they can set up the knowledge base.`;
     }
 
+    registerContextFunction({ ...registrationParameters, isKnowledgeBaseAvailable: isReady });
+
     registerElasticsearchFunction(registrationParameters);
     registerKibanaFunction(registrationParameters);
     registerQueryFunction(registrationParameters);
+    registerVisualizeESQLFunction(registrationParameters);
     registerAlertsFunction(registrationParameters);
     registerGetDatasetInfoFunction(registrationParameters);
 

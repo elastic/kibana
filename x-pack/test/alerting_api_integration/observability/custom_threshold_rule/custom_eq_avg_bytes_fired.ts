@@ -182,7 +182,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.rule.category',
-          'Custom threshold (Beta)'
+          'Custom threshold'
         );
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', 'logs');
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.name', 'Threshold rule');
@@ -206,7 +206,7 @@ export default function ({ getService }: FtrProviderContext) {
         expect(resp.hits.hits[0]._source).property('kibana.alert.workflow_status', 'open');
         expect(resp.hits.hits[0]._source).property('event.kind', 'signal');
         expect(resp.hits.hits[0]._source).property('event.action', 'open');
-
+        expect(resp.hits.hits[0]._source).property('kibana.alert.evaluation.threshold').eql([0.9]);
         expect(resp.hits.hits[0]._source)
           .property('kibana.alert.rule.parameters')
           .eql({

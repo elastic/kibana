@@ -156,7 +156,7 @@ export function useChat({
       setChatState(ChatState.Loading);
 
       const next$ = chatService.complete({
-        chatContext: service.getChatContext(),
+        screenContexts: service.getScreenContexts(),
         connectorId,
         messages: getWithSystemMessage(nextMessages, systemMessage),
         persist,

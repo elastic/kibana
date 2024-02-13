@@ -357,6 +357,7 @@ export function ServiceList({
 
   const tableSearchBar: TableSearchBar<ServiceListItem> = useMemo(() => {
     return {
+      isEnabled: false,
       fieldsToSearch: ['serviceName'],
       maxCountExceeded,
       onChangeSearchQuery,

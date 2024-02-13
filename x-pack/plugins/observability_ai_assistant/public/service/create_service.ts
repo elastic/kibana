@@ -9,9 +9,10 @@ import type { AnalyticsServiceStart, CoreStart } from '@kbn/core/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import { remove } from 'lodash';
+import { ObservabilityAIAssistantScreenContext } from '../../common/types';
 import { createCallObservabilityAIAssistantAPI } from '../api';
 import type { ChatRegistrationRenderFunction, ObservabilityAIAssistantService } from '../types';
-import type { ChatContext, Suggestion } from '../../common/types';
 
 export function createService({
   analytics,
@@ -31,9 +32,8 @@ export function createService({
   const client = createCallObservabilityAIAssistantAPI(coreStart);
 
   const registrations: ChatRegistrationRenderFunction[] = [];
-  const suggestions: Suggestion[] = [];
 
-  let chatContext: ChatContext = {};
+  const screenContexts: ObservabilityAIAssistantScreenContext[] = [];
 
   return {
     isEnabled: () => {
@@ -41,9 +41,6 @@ export function createService({
     },
     register: (fn) => {
       registrations.push(fn);
-    },
-    registerStarterSuggestions(newSuggestions: Suggestion[]) {
-      suggestions.push(...newSuggestions);
     },
     start: async ({ signal }) => {
       const mod = await import('./create_chat_service');
@@ -53,13 +50,14 @@ export function createService({
     getCurrentUser: () => securityStart.authc.getCurrentUser(),
     getLicense: () => licenseStart.license$,
     getLicenseManagementLocator: () => shareStart,
-    getStarterSuggestions: () => suggestions,
-    setChatContext: (newChatContext: ChatContext) => {
-      chatContext = {
-        ...chatContext,
-        ...newChatContext,
+    setScreenContext: (context: ObservabilityAIAssistantScreenContext) => {
+      screenContexts.push(context);
+      return () => {
+        remove(screenContexts, context);
       };
     },
-    getChatContext: () => chatContext,
+    getScreenContexts: () => {
+      return screenContexts;
+    },
   };
 }

@@ -37,14 +37,12 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import { previewRule, getOpenAlerts, getPreviewAlerts } from '../../../../utils';
 import {
-  previewRule,
-  getOpenAlerts,
-  getPreviewAlerts,
   deleteAllAlerts,
   deleteAllRules,
   createRule,
-} from '../../../../utils';
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

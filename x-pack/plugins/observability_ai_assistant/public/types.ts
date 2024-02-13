@@ -34,15 +34,14 @@ import type {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type {
-  ChatContext,
   ContextDefinition,
   FunctionDefinition,
   FunctionResponse,
   Message,
+  ObservabilityAIAssistantScreenContext,
   PendingMessage,
-  Suggestion,
 } from '../common/types';
-import type { ChatActionClickHandler, ChatFlyoutSecondSlotHandler } from './components/chat/types';
+import type { ChatActionClickHandler } from './components/chat/types';
 import type { ObservabilityAIAssistantAPIClient } from './api';
 import type { InsightProps } from './components/insight/insight';
 import type { UseGenAIConnectorsResult } from './hooks/use_genai_connectors';
@@ -64,7 +63,7 @@ export interface ObservabilityAIAssistantChatService {
     }
   ) => Observable<StreamingChatResponseEventWithoutError>;
   complete: (options: {
-    chatContext: ChatContext;
+    screenContexts: ObservabilityAIAssistantScreenContext[];
     conversationId?: string;
     connectorId: string;
     messages: Message[];
@@ -73,19 +72,13 @@ export interface ObservabilityAIAssistantChatService {
   }) => Observable<StreamingChatResponseEventWithoutError>;
   getContexts: () => ContextDefinition[];
   getFunctions: (options?: { contexts?: string[]; filter?: string }) => FunctionDefinition[];
-  getContextualSuggestions: (options: {
-    connectorId: string;
-    conversationId: string;
-    signal: AbortSignal;
-  }) => Promise<Suggestion[]>;
   hasFunction: (name: string) => boolean;
   hasRenderFunction: (name: string) => boolean;
   renderFunction: (
     name: string,
     args: string | undefined,
     response: { data?: string; content?: string },
-    onActionClick: ChatActionClickHandler,
-    chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler
+    onActionClick: ChatActionClickHandler
   ) => React.ReactNode;
 }
 
@@ -95,19 +88,16 @@ export interface ObservabilityAIAssistantService {
   getCurrentUser: () => Promise<AuthenticatedUser>;
   getLicense: () => Observable<ILicense>;
   getLicenseManagementLocator: () => SharePluginStart;
-  getStarterSuggestions: () => Suggestion[];
   start: ({}: { signal: AbortSignal }) => Promise<ObservabilityAIAssistantChatService>;
   register: (fn: ChatRegistrationRenderFunction) => void;
-  registerStarterSuggestions: (suggestion: Suggestion[]) => void;
-  setChatContext: (newChatContext: ChatContext) => void;
-  getChatContext: () => ChatContext;
+  setScreenContext: (screenContext: ObservabilityAIAssistantScreenContext) => () => void;
+  getScreenContexts: () => ObservabilityAIAssistantScreenContext[];
 }
 
 export type RenderFunction<TArguments, TResponse extends FunctionResponse> = (options: {
   arguments: TArguments;
   response: TResponse;
   onActionClick: ChatActionClickHandler;
-  chatFlyoutSecondSlotHandler?: ChatFlyoutSecondSlotHandler;
 }) => React.ReactNode;
 
 export type RegisterRenderFunctionDefinition<
@@ -154,5 +144,4 @@ export interface ObservabilityAIAssistantPluginStart {
       RefAttributes<{}>
   > | null;
   useGenAIConnectors: () => UseGenAIConnectorsResult;
-  useObservabilityAIAssistantChatContext: () => {};
 }

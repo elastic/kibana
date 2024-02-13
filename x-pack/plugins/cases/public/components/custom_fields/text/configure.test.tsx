@@ -12,7 +12,8 @@ import userEvent from '@testing-library/user-event';
 import { FormTestComponent } from '../../../common/test_utils';
 import { Configure } from './configure';
 
-describe('Configure ', () => {
+// Failing: See https://github.com/elastic/kibana/issues/176600
+describe.skip('Configure ', () => {
   const onSubmit = jest.fn();
 
   beforeEach(() => {
@@ -41,6 +42,27 @@ describe('Configure ', () => {
     await waitFor(() => {
       // data, isValid
       expect(onSubmit).toBeCalledWith({}, true);
+    });
+  });
+
+  it('updates field options with default value correctly when not required', async () => {
+    render(
+      <FormTestComponent onSubmit={onSubmit}>
+        <Configure />
+      </FormTestComponent>
+    );
+
+    userEvent.paste(await screen.findByTestId('text-custom-field-default-value'), 'Default value');
+    userEvent.click(await screen.findByTestId('form-test-component-submit-button'));
+
+    await waitFor(() => {
+      // data, isValid
+      expect(onSubmit).toBeCalledWith(
+        {
+          defaultValue: 'Default value',
+        },
+        true
+      );
     });
   });
 
