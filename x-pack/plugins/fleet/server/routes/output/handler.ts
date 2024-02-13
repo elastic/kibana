@@ -186,7 +186,9 @@ async function validateOutputServerless(
         if (nAttempts > 0) {
           await attempt(nAttempts - 1);
         } else {
-          throw Boom.badRequest(e.message);
+          throw Boom.badRequest(
+            `Output id ${SERVERLESS_DEFAULT_OUTPUT_ID} not found in saved objects: ${e.message}`
+          );
         }
       }
     }

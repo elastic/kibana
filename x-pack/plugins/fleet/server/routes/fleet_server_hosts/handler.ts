@@ -51,7 +51,9 @@ async function checkFleetServerHostsWriteAPIsAllowed(
         if (nAttempts > 0) {
           await attempt(nAttempts - 1);
         } else {
-          throw new FleetNotFoundError(e.message);
+          throw new FleetNotFoundError(
+            `Fleet Server host id ${SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID} not found in saved objects: ${e.message}`
+          );
         }
       }
     }
