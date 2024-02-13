@@ -8,12 +8,15 @@
     "server": true,
     "browser": true,
     "requiredPlugins": [
+      "dataViews",
       "embeddable",
       "uiActions",
       "dashboard",
+      "data",
+      "charts",
+      "fieldFormats"
     ],
-    "extraPublicDirs": [
-      "public/hello_world"
-    ]
+    "requiredBundles": ["presentationUtil"],
+    "extraPublicDirs": ["public/hello_world"]
   }
 }

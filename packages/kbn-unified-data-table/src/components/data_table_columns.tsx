@@ -22,7 +22,7 @@ import type { ValueToStringConverter, DataTableColumnTypes } from '../types';
 import { buildCellActions } from './default_cell_actions';
 import { getSchemaByKbnType } from './data_table_schema';
 import { SelectButton } from './data_table_document_selection';
-import { defaultTimeColumnWidth } from '../constants';
+import { defaultTimeColumnWidth, ROWS_HEIGHT_OPTIONS } from '../constants';
 import { buildCopyColumnNameButton, buildCopyColumnValuesButton } from './build_copy_column_button';
 import { buildEditFieldButton } from './build_edit_field_button';
 import { DataTableColumnHeader, DataTableTimeColumnHeader } from './data_table_column_header';
@@ -145,7 +145,7 @@ function buildEuiGridColumn({
     schema: getSchemaByKbnType(columnType),
     isSortable: isSortEnabled && (isPlainRecord || dataViewField?.sortable === true),
     display:
-      showColumnTokens || (headerRowHeight && headerRowHeight !== 1) ? (
+      showColumnTokens || headerRowHeight !== 1 ? (
         <DataTableColumnHeaderMemoized
           dataView={dataView}
           columnName={columnName}
@@ -212,6 +212,16 @@ function buildEuiGridColumn({
   return column;
 }
 
+export const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
+  if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto) {
+    return undefined;
+  } else if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.single) {
+    return 1;
+  }
+
+  return headerRowHeightLines;
+};
+
 export function getEuiGridColumns({
   columns,
   columnsCellActions,
@@ -229,7 +239,7 @@ export function getEuiGridColumns({
   visibleCellActions,
   columnTypes,
   showColumnTokens,
-  headerRowHeight,
+  headerRowHeightLines,
   customGridColumnsConfiguration,
 }: {
   columns: string[];
@@ -251,10 +261,11 @@ export function getEuiGridColumns({
   visibleCellActions?: number;
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
-  headerRowHeight?: number;
+  headerRowHeightLines: number;
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
+  const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
 
   return columns.map((column, columnIndex) =>
     buildEuiGridColumn({
