@@ -29,7 +29,7 @@ export function BetaBadge() {
       label={i18n.translate('xpack.observability.experimentalBadgeLabel', {
         defaultMessage: 'Beta',
       })}
-      tooltipContent={i18n.translate('xpack.observability.experimentalBadgeDescription', {
+      tooltipContent={i18n.translate('xpack.observability.betaBadgeDescription', {
         defaultMessage: 'This functionality is in beta and is subject to change.',
       })}
     />
