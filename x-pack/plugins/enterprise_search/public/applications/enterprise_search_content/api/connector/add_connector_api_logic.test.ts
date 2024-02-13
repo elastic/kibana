@@ -38,7 +38,6 @@ describe('addConnectorApiLogic', () => {
       await expect(result).resolves.toEqual({
         id: 'unique id',
         indexName: 'indexName',
-        name: 'indexName',
       });
     });
     it('adds delete param if specific', async () => {
@@ -64,7 +63,6 @@ describe('addConnectorApiLogic', () => {
       await expect(result).resolves.toEqual({
         id: 'unique id',
         indexName: 'indexName',
-        name: 'indexName',
       });
     });
   });
