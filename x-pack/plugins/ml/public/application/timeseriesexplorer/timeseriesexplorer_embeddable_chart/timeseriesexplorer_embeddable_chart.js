@@ -275,11 +275,8 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
       )
       .pipe(
         map((resp) => {
-          console.log('resp', resp);
           const anomalies = resp.anomalies;
-          console.log('mlJobService', mlJobService);
           const detectorsByJob = mlJobService.detectorsByJob;
-          console.log('detectorsByJob', detectorsByJob);
           anomalies.forEach((anomaly) => {
             // Add a detector property to each anomaly.
             // Default to functionDescription if no description available.
@@ -815,8 +812,6 @@ export class TimeSeriesExplorerEmbeddableChart extends React.Component {
     this.previousChartProps = chartProps;
     this.previousShowForecast = showForecast;
     this.previousShowModelBounds = showModelBounds;
-
-    console.log('tableData', tableData);
 
     return (
       <>
