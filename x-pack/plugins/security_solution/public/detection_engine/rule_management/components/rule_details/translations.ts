@@ -28,6 +28,13 @@ export const UPDATES_TAB_LABEL = i18n.translate(
   }
 );
 
+export const JSON_VIEW_UPDATES_TAB_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.jsonViewUpdatesTabLabel',
+  {
+    defaultMessage: 'JSON view',
+  }
+);
+
 export const DISMISS_BUTTON_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.dismissButtonLabel',
   {

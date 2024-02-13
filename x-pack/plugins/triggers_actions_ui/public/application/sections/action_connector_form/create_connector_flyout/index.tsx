@@ -21,8 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   ActionConnector,
   ActionType,
-  ActionTypeModel,
   ActionTypeIndex,
+  ActionTypeModel,
   ActionTypeRegistryContract,
 } from '../../../../types';
 import { hasSaveActionsCapability } from '../../../lib/capabilities';
@@ -211,6 +211,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
         actionTypeMessage={actionTypeModel?.selectMessage}
         compatibility={getConnectorCompatibility(actionType?.supportedFeatureIds)}
         isExperimental={actionTypeModel?.isExperimental}
+        isBeta={actionTypeModel?.isBeta}
       />
       <EuiFlyoutBody
         banner={!actionType && hasActionsUpgradeableByTrial ? <UpgradeLicenseCallOut /> : null}
