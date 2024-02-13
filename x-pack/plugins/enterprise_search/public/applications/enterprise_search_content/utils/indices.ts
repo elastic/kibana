@@ -14,14 +14,11 @@ import {
   ConnectorStatus,
   CrawlerViewIndex,
   ConnectorViewIndex,
-} from '@kbn/search-connectors';
-
-import {
   ConnectorIndex,
   ElasticsearchIndex,
   IngestionStatus,
   IngestionMethod,
-} from '@kbn/search-connectors/types/indices';
+} from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 import { CrawlerIndex, ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';

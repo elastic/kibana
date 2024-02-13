@@ -13,7 +13,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestionStatus } from '@kbn/search-connectors/types/indices';
+import { IngestionStatus } from '@kbn/search-connectors';
 
 import { generateEncodedPath } from '../../../../shared/encode_path_params';
 

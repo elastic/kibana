@@ -22,7 +22,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { IngestionStatus } from '@kbn/search-connectors/types/indices';
+import { IngestionStatus } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../../common/types/api';
 import { HttpLogic } from '../../../../../shared/http';

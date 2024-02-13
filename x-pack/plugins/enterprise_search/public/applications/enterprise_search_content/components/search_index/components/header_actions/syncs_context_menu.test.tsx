@@ -17,7 +17,7 @@ import {
   EuiResizeObserver,
 } from '@elastic/eui';
 
-import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors/types/indices';
+import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
 import { Status } from '../../../../../../../common/types/api';

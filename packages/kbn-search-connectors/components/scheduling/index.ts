@@ -7,5 +7,3 @@
  */
 
 export * from './connector_scheduling';
-export * from './connector_unconfigured';
-export * from './connector_error';

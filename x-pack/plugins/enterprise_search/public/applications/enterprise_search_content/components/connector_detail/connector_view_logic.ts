@@ -7,9 +7,13 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { Connector, FeatureName, IngestPipelineParams } from '@kbn/search-connectors';
-
-import { IngestionMethod, IngestionStatus } from '@kbn/search-connectors/types/indices';
+import {
+  Connector,
+  FeatureName,
+  IngestPipelineParams,
+  IngestionMethod,
+  IngestionStatus,
+} from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 

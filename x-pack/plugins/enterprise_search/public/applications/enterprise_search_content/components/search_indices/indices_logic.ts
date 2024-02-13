@@ -7,7 +7,7 @@
 
 import { kea, MakeLogicType } from 'kea';
 
-import { IngestionMethod } from '@kbn/search-connectors/types/indices';
+import { IngestionMethod } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';
 import { Meta } from '../../../../../common/types/pagination';

@@ -6,7 +6,7 @@
  */
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { IngestionStatus } from '@kbn/search-connectors/types/indices';
+import { IngestionStatus } from '@kbn/search-connectors';
 import React from 'react';
 
 export const ConnectorError: React.FC<{ ingestionStatus: IngestionStatus }> = ({

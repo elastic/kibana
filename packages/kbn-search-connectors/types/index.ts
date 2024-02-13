@@ -12,3 +12,4 @@ export * from './native_connectors';
 export * from './optimistic_concurrency';
 export * from './pagination';
 export * from './cron_editor';
+export * from './indices';

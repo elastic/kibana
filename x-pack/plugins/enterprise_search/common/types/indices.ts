@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
-import { ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors/types/indices';
+import { Connector, ConnectorIndex, ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { Crawler } from './crawler';
 

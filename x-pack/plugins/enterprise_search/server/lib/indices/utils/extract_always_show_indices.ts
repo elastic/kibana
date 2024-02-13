@@ -6,7 +6,7 @@
  */
 
 import { SecurityHasPrivilegesPrivileges } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchIndex } from '@kbn/search-connectors/types/indices';
+import { ElasticsearchIndex } from '@kbn/search-connectors';
 
 import { AlwaysShowPattern } from '../../../../common/types/indices';
 

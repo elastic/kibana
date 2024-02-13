@@ -20,10 +20,10 @@ import {
   ConnectorStatus,
   ConnectorViewIndex,
   CrawlerViewIndex,
+  IngestionStatus,
   SchedulingConfiguraton,
   SyncJobType,
 } from '@kbn/search-connectors/types';
-import { IngestionStatus } from '@kbn/search-connectors/types/indices';
 import React, { useContext, useEffect, useState } from 'react';
 import { LicenseContext } from '../configuration';
 import { ConnectorError } from './connector_error';

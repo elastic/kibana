@@ -13,8 +13,9 @@ import {
   FilteringValidationState,
   SyncStatus,
   ConnectorViewIndex,
+  IngestionStatus,
+  IngestionMethod,
 } from '@kbn/search-connectors';
-import { IngestionStatus, IngestionMethod } from '@kbn/search-connectors/types/indices';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
 
