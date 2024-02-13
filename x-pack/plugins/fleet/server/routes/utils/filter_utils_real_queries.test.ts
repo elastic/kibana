@@ -846,14 +846,29 @@ describe('validateKuery validates real kueries', () => {
     });
   });
   describe('Feature flag disableKQLValidation', () => {
-    it('Allows to skip validation', async () => {
+    beforeEach(() => {
       mockedAppContextService.getExperimentalFeatures.mockReturnValue({
         disableKQLValidation: true,
       });
+    });
+
+    it('Allows to skip validation for a free text query', async () => {
+      const validationObj = validateKuery(`test`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
+    });
+
+    it('Allows to skip validation for a catch all query', async () => {
+      const validationObj = validateKuery(`*`, [AGENTS_PREFIX], AGENT_MAPPINGS, true);
+      expect(validationObj?.isValid).toEqual(true);
+      expect(validationObj?.error).toEqual(undefined);
+    });
+
+    it('Allows to skip validation for a disallowed query too', async () => {
       const validationObj = validateKuery(
-        `${FLEET_ENROLLMENT_API_PREFIX}.policy_id: policyId1`,
-        [FLEET_ENROLLMENT_API_PREFIX],
-        ENROLLMENT_API_KEY_MAPPINGS,
+        `non_existent_parameter: 'test_id'`,
+        [AGENTS_PREFIX],
+        AGENT_MAPPINGS,
         true
       );
       expect(validationObj?.isValid).toEqual(true);
