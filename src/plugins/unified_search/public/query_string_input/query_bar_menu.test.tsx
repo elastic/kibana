@@ -119,7 +119,7 @@ describe('Querybar Menu component', () => {
           ],
         }),
       },
-      quickFilters: [],
+      additionalQueryBarMenuItems: [],
       queryBarMenuRef: React.createRef(),
     };
   });
@@ -346,41 +346,35 @@ describe('Querybar Menu component', () => {
     expect(component.find('[data-test-subj="filter-sets-removeAllFilters"]').length).toBeFalsy();
   });
 
-  it('should render quick filters menu items', async () => {
+  it('should render additional menu items', async () => {
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
       showFilterBar: true,
-      quickFilters: [
+      additionalQueryBarMenuItems: [
         {
-          name: 'Test quick filter',
-          filter: {
-            meta: {},
-            query: { bool: {} },
-          },
+          name: 'Test additional query bar menu item',
         },
       ],
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(component.find('[data-test-subj^="quick-filters-item"]').length).toBeTruthy();
+    expect(
+      component.find('[data-test-subj^="additional-query-bar-menu-item"]').length
+    ).toBeTruthy();
   });
 
-  it('should render nested quick filters menu items', async () => {
+  it('should render nested additional menu items', async () => {
     const newProps: QueryBarMenuProps = {
       ...props,
       openQueryBarMenu: true,
       showFilterBar: true,
-      quickFilters: [
+      additionalQueryBarMenuItems: [
         {
-          groupName: 'Grouped filters',
+          title: 'Grouped additional query bar menu items',
           items: [
             {
-              name: 'Test quick filter',
-              filter: {
-                meta: {},
-                query: { bool: {} },
-              },
+              name: 'Test additional query bar menu item',
             },
           ],
         },
@@ -388,6 +382,8 @@ describe('Querybar Menu component', () => {
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(component.find('[data-test-subj^="quick-filters-item"]').length).toBeTruthy();
+    expect(
+      component.find('[data-test-subj^="additional-query-bar-menu-item"]').length
+    ).toBeTruthy();
   });
 });

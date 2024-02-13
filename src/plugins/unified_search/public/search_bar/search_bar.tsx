@@ -27,6 +27,7 @@ import type { SavedQueryAttributes } from '@kbn/data-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/public';
 
 import { i18n } from '@kbn/i18n';
+import { AdditionalQueryBarMenuItem } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { SavedQueryMeta, SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
@@ -39,7 +40,6 @@ import type {
   SuggestionsListSize,
 } from '../typeahead/suggestions_component';
 import { searchBarStyles } from './search_bar.styles';
-import { QuickFiltersMenuItem } from '../query_string_input/quick_filters';
 
 export interface SearchBarInjectedDeps {
   kibana: KibanaReactContextValue<IUnifiedSearchPluginServices>;
@@ -65,7 +65,7 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showDatePicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
-  quickFilters?: QuickFiltersMenuItem[];
+  additionalQueryBarMenuItems?: AdditionalQueryBarMenuItem[];
   filtersForSuggestions?: Filter[];
   hiddenFilterPanelOptions?: QueryBarMenuProps['hiddenPanelOptions'];
   prependFilterBar?: React.ReactNode;
@@ -157,7 +157,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
     showSubmitButton: true,
     showAutoRefreshOnly: false,
     filtersForSuggestions: [],
-    quickFilters: [],
+    additionalQueryBarMenuItems: [],
   };
 
   private services = this.props.kibana.services;
@@ -533,7 +533,7 @@ class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> extends C
         openQueryBarMenu={this.state.openQueryBarMenu}
         onFiltersUpdated={this.props.onFiltersUpdated}
         filters={this.props.filters}
-        quickFilters={this.props.quickFilters ?? []}
+        additionalQueryBarMenuItems={this.props.additionalQueryBarMenuItems ?? []}
         hiddenPanelOptions={this.props.hiddenFilterPanelOptions}
         query={this.state.query as Query}
         savedQuery={this.props.savedQuery}

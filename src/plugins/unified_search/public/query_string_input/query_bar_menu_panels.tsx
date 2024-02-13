@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { useState, useRef, useEffect, RefObject, useCallback, useMemo } from 'react';
+import React, { useState, useRef, useEffect, RefObject, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import {
   EuiContextMenuPanelDescriptor,
@@ -39,7 +39,6 @@ import {
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
-import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import type { IUnifiedSearchPluginServices } from '../types';
 import { fromUser } from './from_user';
 import { QueryLanguageSwitcher } from './language_switcher';
@@ -156,9 +155,27 @@ export enum QueryBarMenuPanel {
   selectLanguage = 'selectLanguage',
 }
 
+type AdditionalQueryBarMenuPanelDescriptor = Omit<EuiContextMenuPanelDescriptor, 'id' | 'items'> & {
+  items: AdditionalQueryBarMenuItem[];
+  icon?: EuiContextMenuPanelItemDescriptor['icon'];
+};
+
+export type AdditionalQueryBarMenuItemDescriptor = Exclude<
+  EuiContextMenuPanelItemDescriptor,
+  EuiContextMenuPanelDescriptor
+>;
+
+export type AdditionalQueryBarMenuItem =
+  | AdditionalQueryBarMenuItemDescriptor
+  | AdditionalQueryBarMenuPanelDescriptor;
+
+const isAdditionalQueryBarMenuPanel = (
+  item: EuiContextMenuPanelItemDescriptor | AdditionalQueryBarMenuPanelDescriptor
+): item is AdditionalQueryBarMenuPanelDescriptor => 'title' in item;
+
 export interface QueryBarMenuPanelsProps {
   filters?: Filter[];
-  quickFilters: QuickFiltersMenuItem[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItem[];
   savedQuery?: SavedQuery;
   language: string;
   dateRangeFrom?: string;
@@ -186,7 +203,7 @@ export interface QueryBarMenuPanelsProps {
 
 export function useQueryBarMenuPanels({
   filters,
-  quickFilters,
+  additionalQueryBarMenuItems,
   savedQuery,
   language,
   dateRangeFrom,
@@ -220,52 +237,40 @@ export function useQueryBarMenuPanels({
   const [hasFiltersOrQuery, setHasFiltersOrQuery] = useState(false);
   const [savedQueryHasChanged, setSavedQueryHasChanged] = useState(false);
 
-  const applyQuickFilter = useCallback(
-    (filter: Filter) => {
-      if (!filters?.some((f) => compareFilters(f, filter))) {
-        onFiltersUpdated?.([...(filters ?? []), filter]);
-      }
-      closePopover();
-    },
-    [closePopover, filters, onFiltersUpdated]
-  );
-
-  const quickFiltersContextMenuData = useMemo(() => {
-    if (showFilterBar && quickFilters.length > 0) {
+  const additionalQueryBarMenuItemsData = useMemo(() => {
+    if (showFilterBar && additionalQueryBarMenuItems.length > 0) {
       // EuiContextMenu expects a flattened panels structure so here we collect all
       // the nested panels in a linear list
       const panels = [] as EuiContextMenuPanelDescriptor[];
-      const quickFiltersItemToContextMenuItem = (qf: QuickFiltersMenuItem) => {
-        if (isQuickFiltersGroup(qf)) {
-          const panelId = `quick-filters-panel-${panels.length}`;
+      const additionalQueryBarMenuItemToContextMenuItem = (
+        menuItem: AdditionalQueryBarMenuItem
+      ) => {
+        if (isAdditionalQueryBarMenuPanel(menuItem)) {
+          const panelId = `additional-query-bar-menu-panel-${panels.length}`;
           panels.push({
             id: panelId,
-            title: qf.groupName,
-            items: qf.items.map(
-              quickFiltersItemToContextMenuItem
+            title: menuItem.title,
+            items: menuItem.items.map(
+              additionalQueryBarMenuItemToContextMenuItem
             ) as EuiContextMenuPanelItemDescriptor[],
             'data-test-subj': panelId,
           } as EuiContextMenuPanelDescriptor);
           return {
-            name: qf.groupName,
-            icon: qf.icon ?? 'filterInCircle',
+            name: menuItem.title,
+            icon: menuItem.icon,
             panel: panelId,
-            'data-test-subj': `quick-filters-item-${qf.groupName}`,
+            'data-test-subj': `additional-query-bar-menu-item-${menuItem.title}`,
           };
         } else {
           return {
-            ...qf,
-            icon: qf.icon ?? 'filterInCircle',
-            onClick: () => {
-              applyQuickFilter(qf.filter);
-            },
-            'data-test-subj': `quick-filters-item-${qf.name}`,
+            ...menuItem,
+            'data-test-subj': `additional-query-bar-menu-item-${menuItem.name}`,
           };
         }
       };
       return {
-        items: quickFilters.map(
-          quickFiltersItemToContextMenuItem
+        items: additionalQueryBarMenuItems.map(
+          additionalQueryBarMenuItemToContextMenuItem
         ) as EuiContextMenuPanelItemDescriptor[],
         panels,
       };
@@ -275,7 +280,7 @@ export function useQueryBarMenuPanels({
         panels: [],
       };
     }
-  }, [applyQuickFilter, quickFilters, showFilterBar]);
+  }, [additionalQueryBarMenuItems, showFilterBar]);
 
   useEffect(() => {
     if (savedQuery) {
@@ -477,8 +482,8 @@ export function useQueryBarMenuPanels({
     );
   }
 
-  if (showFilterBar && quickFilters.length > 0) {
-    items.push(...[...quickFiltersContextMenuData.items, { isSeparator: true } as const]);
+  if (showFilterBar && additionalQueryBarMenuItems.length > 0) {
+    items.push(...[...additionalQueryBarMenuItemsData.items, { isSeparator: true } as const]);
   }
 
   // saved queries actions are only shown when the showQueryInput and showFilterBar is true
@@ -630,7 +635,7 @@ export function useQueryBarMenuPanels({
       width: 400,
       content: <div>{manageFilterSetComponent}</div>,
     },
-    ...quickFiltersContextMenuData.panels,
+    ...additionalQueryBarMenuItemsData.panels,
   ] as EuiContextMenuPanelDescriptor[];
 
   if (hiddenPanelOptions && hiddenPanelOptions.length > 0) {

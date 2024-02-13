@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { Query, TimeRange } from '@kbn/es-query';
+import { compareFilters, Query, TimeRange } from '@kbn/es-query';
 import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import { AdditionalQueryBarMenuItem } from '@kbn/unified-search-plugin/public/query_string_input/query_bar_menu_panels';
+import { isQuickFiltersGroup, QuickFiltersMenuItem } from './quick_filters';
 import { NO_INDEX_PATTERNS } from './constants';
 import { SEARCH_BAR_PLACEHOLDER } from './translations';
 import { AlertsSearchBarProps, QueryLanguageType } from './types';
@@ -94,6 +96,34 @@ export function AlertsSearchBar({
     });
   };
 
+  const quickFiltersItemToAdditionalQueryBarMenuItem = useCallback(
+    (qfi: QuickFiltersMenuItem): AdditionalQueryBarMenuItem => {
+      if (isQuickFiltersGroup(qfi)) {
+        return {
+          ...qfi,
+          items: qfi.items.map(quickFiltersItemToAdditionalQueryBarMenuItem),
+        } as AdditionalQueryBarMenuItem;
+      }
+      const { filter, ...menuItem } = qfi;
+      return {
+        ...menuItem,
+        onClick: () => {
+          if (!filters?.some((f) => compareFilters(f, filter))) {
+            onFiltersUpdated?.([...(filters ?? []), filter]);
+          }
+        },
+      } as AdditionalQueryBarMenuItem;
+    },
+    [filters, onFiltersUpdated]
+  );
+
+  const additionalQueryBarMenuItems = useMemo<AdditionalQueryBarMenuItem[]>(() => {
+    if (!quickFilters?.length) {
+      return [];
+    }
+    return quickFilters.map(quickFiltersItemToAdditionalQueryBarMenuItem);
+  }, [quickFilters, quickFiltersItemToAdditionalQueryBarMenuItem]);
+
   return (
     <SearchBar
       appName={appName}
@@ -103,7 +133,7 @@ export function AlertsSearchBar({
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}
-      quickFilters={quickFilters}
+      additionalQueryBarMenuItems={additionalQueryBarMenuItems}
       dateRangeFrom={rangeFrom}
       dateRangeTo={rangeTo}
       displayStyle="inPage"

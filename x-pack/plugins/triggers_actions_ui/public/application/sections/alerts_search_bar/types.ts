@@ -8,7 +8,7 @@
 import { Filter } from '@kbn/es-query';
 import { ValidFeatureId } from '@kbn/rule-data-utils';
 import { SearchBarProps } from '@kbn/unified-search-plugin/public/search_bar/search_bar';
-import { QuickFiltersMenuItem } from '@kbn/unified-search-plugin/public/query_string_input/quick_filters';
+import { QuickFiltersMenuItem } from './quick_filters';
 
 export type QueryLanguageType = 'lucene' | 'kuery';
 

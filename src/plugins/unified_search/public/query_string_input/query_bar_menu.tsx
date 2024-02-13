@@ -29,8 +29,8 @@ import {
   useQueryBarMenuPanels,
   QueryBarMenuPanelsProps,
   QueryBarMenuPanel,
+  AdditionalQueryBarMenuItem,
 } from './query_bar_menu_panels';
-import { QuickFiltersMenuItem } from './quick_filters';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
 import {
   withCloseFilterEditorConfirmModal,
@@ -67,7 +67,7 @@ export interface QueryBarMenuProps extends WithCloseFilterEditorConfirmModalProp
   hiddenPanelOptions?: QueryBarMenuPanelsProps['hiddenPanelOptions'];
   onFiltersUpdated?: (filters: Filter[]) => void;
   filters?: Filter[];
-  quickFilters: QuickFiltersMenuItem[];
+  additionalQueryBarMenuItems: AdditionalQueryBarMenuItem[];
   query?: Query;
   savedQuery?: SavedQuery;
   onClearSavedQuery?: () => void;
@@ -102,7 +102,7 @@ function QueryBarMenuComponent({
   toggleFilterBarMenuPopover,
   onFiltersUpdated,
   filters,
-  quickFilters,
+  additionalQueryBarMenuItems,
   query,
   savedQuery,
   onClearSavedQuery,
@@ -167,7 +167,7 @@ function QueryBarMenuComponent({
 
   const panels = useQueryBarMenuPanels({
     filters,
-    quickFilters,
+    additionalQueryBarMenuItems,
     savedQuery,
     language,
     dateRangeFrom,

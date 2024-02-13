@@ -23,8 +23,8 @@ import {
 } from '@kbn/rule-data-utils';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { BoolQuery } from '@kbn/es-query';
-import { QuickFiltersMenuItem } from '@kbn/unified-search-plugin/public/query_string_input/quick_filters';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { QuickFiltersMenuItem } from '../alerts_search_bar/quick_filters';
 import { NoPermissionPrompt } from '../../components/prompts/no_permission_prompt';
 import { ALERT_TABLE_GLOBAL_CONFIG_ID } from '../../constants';
 import { useRuleStats } from './hooks/use_rule_stats';
@@ -129,12 +129,10 @@ const PageContent = () => {
       );
     }
     filters.push({
-      groupName: i18n.translate(
-        'xpack.triggersActionsUI.sections.globalAlerts.quickFilters.status',
-        {
-          defaultMessage: 'Status',
-        }
-      ),
+      title: i18n.translate('xpack.triggersActionsUI.sections.globalAlerts.quickFilters.status', {
+        defaultMessage: 'Status',
+      }),
+      icon: 'bell',
       items: [ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED, ALERT_STATUS_UNTRACKED].map((s) => ({
         name: s,
         filter: createMatchPhraseFilter(ALERT_STATUS, s),
