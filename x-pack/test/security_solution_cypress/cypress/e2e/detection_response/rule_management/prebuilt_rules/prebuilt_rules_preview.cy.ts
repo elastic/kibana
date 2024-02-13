@@ -1070,39 +1070,39 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
         assertSelectedPreviewTab('JSON view');
 
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
-          .contains('Base version')
-          .as('baseVersionColumnHeading');
+          .contains('Current rule')
+          .as('currentRuleColumnHeading');
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW)
           .contains('Elastic update')
           .as('elasticUpdateColumnHeading');
 
-        cy.get('@baseVersionColumnHeading').should('be.visible');
+        cy.get('@currentRuleColumnHeading').should('be.visible');
         cy.get('@elasticUpdateColumnHeading').should('be.visible');
 
-        /* "Base version" should be the left column, "Elastic update" should be the right column. */
-        cy.get('@baseVersionColumnHeading').then(($baseVersionColumnHeading) => {
-          const baseVersionLeftOffset = $baseVersionColumnHeading.offset()?.left || 0;
+        /* "Current rule" should be the left column, "Elastic update" should be the right column. */
+        cy.get('@currentRuleColumnHeading').then(($currentRuleColumnHeading) => {
+          const currentRuleLeftOffset = $currentRuleColumnHeading.offset()?.left || 0;
           cy.get('@elasticUpdateColumnHeading').then(($elasticUpdateColumnHeading) => {
             const elasticUpdateLeftOffset = $elasticUpdateColumnHeading.offset()?.left || 0;
-            expect(baseVersionLeftOffset).to.be.lessThan(elasticUpdateLeftOffset);
+            expect(currentRuleLeftOffset).to.be.lessThan(elasticUpdateLeftOffset);
           });
         });
 
-        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 1').as('baseVersionValue');
+        cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 1').as('currentRuleValue');
         cy.get(UPDATE_PREBUILT_RULE_PREVIEW).contains('"version": 2').as('updateVersionValue');
 
-        cy.get('@baseVersionValue').should('be.visible');
+        cy.get('@currentRuleValue').should('be.visible');
         cy.get('@updateVersionValue').should('be.visible');
 
         /*
-          "Base version" version value should be displayed in the left column, 
+          "Current rule" version value should be displayed in the left column, 
           "Elastic update" version value should be displayed the right column.
         */
-        cy.get('@baseVersionValue').then(($baseVersionValue) => {
-          const baseVersionLeftOffset = $baseVersionValue.offset()?.left || 0;
+        cy.get('@currentRuleValue').then(($currentRuleValue) => {
+          const currentRuleLeftOffset = $currentRuleValue.offset()?.left || 0;
           cy.get('@updateVersionValue').then(($updateVersionValue) => {
             const updateVersionLeftOffset = $updateVersionValue.offset()?.left || 0;
-            expect(baseVersionLeftOffset).to.be.lessThan(updateVersionLeftOffset);
+            expect(currentRuleLeftOffset).to.be.lessThan(updateVersionLeftOffset);
           });
         });
 
