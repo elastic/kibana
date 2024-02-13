@@ -6,6 +6,7 @@
  */
 
 import type { RequestHandler, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import Boom from '@hapi/boom';
@@ -174,15 +175,32 @@ async function validateOutputServerless(
   if (outputId && !output.hosts) {
     return;
   }
-  const defaultOutput = await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+
+  // API integration tests have been flaky due to the request to get the default
+  // output, this function adds retry logic.
+  async function attempt(nAttempts: number) {
+    try {
+      return await outputService.get(soClient, SERVERLESS_DEFAULT_OUTPUT_ID);
+    } catch (e) {
+      if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
+        if (nAttempts > 0) {
+          await attempt(nAttempts - 1);
+        } else {
+          throw Boom.badRequest(e.message);
+        }
+      }
+    }
+  }
+
+  const defaultOutput = await attempt(3);
   let originalOutput;
   if (outputId) {
     originalOutput = await outputService.get(soClient, outputId);
   }
   const type = output.type || originalOutput?.type;
-  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput.hosts)) {
+  if (type === outputType.Elasticsearch && !isEqual(output.hosts, defaultOutput?.hosts)) {
     throw Boom.badRequest(
-      `Elasticsearch output host must have default URL in serverless: ${defaultOutput.hosts}`
+      `Elasticsearch output host must have default URL in serverless: ${defaultOutput?.hosts}`
     );
   }
 }

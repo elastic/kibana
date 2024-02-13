@@ -40,13 +40,16 @@ async function checkFleetServerHostsWriteAPIsAllowed(
     return;
   }
 
+  // Elasticsearch outputs must have the default host URL in serverless.
+  // API integration tests have been flaky due to the request to get the default
+  // Fleet server host failing, this function adds retry logic.
   async function attempt(nAttempts: number) {
     try {
       return await getFleetServerHost(soClient, SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID);
     } catch (e) {
       if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
         if (nAttempts > 0) {
-          attempt(nAttempts - 1);
+          await attempt(nAttempts - 1);
         } else {
           throw new FleetNotFoundError(e.message);
         }
