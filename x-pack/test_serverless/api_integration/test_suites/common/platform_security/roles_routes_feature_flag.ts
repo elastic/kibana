@@ -13,54 +13,37 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('security', function () {
     describe('route access', () => {
-      describe('roles/privileges/permissions', () => {
-        it('get all privileges', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/privileges')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+      describe('roles', () => {
+        describe('enabled', () => {
+          it('get role', async () => {
+            const { body, status } = await supertest
+              .get('/api/security/role/superuser')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertResponseStatusCode(200, status, body);
+          });
+
+          it('get all roles', async () => {
+            const { body, status } = await supertest
+              .get('/api/security/role')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertResponseStatusCode(200, status, body);
+          });
         });
 
-        it('get built-in elasticsearch privileges', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/esPrivileges/builtin')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
-        });
+        describe('disabled/moved', () => {
+          it('delete role', async () => {
+            const { body, status } = await supertest
+              .delete('/api/security/role/superuser')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertResponseStatusCode(410, status, body);
+          });
 
-        it('create/update role', async () => {
-          const { body, status } = await supertest
-            .put('/api/security/role/test')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertResponseStatusCode(400, status, body);
-        });
-
-        it('get role', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/role/superuser')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertResponseStatusCode(200, status, body);
-        });
-
-        it('get all roles', async () => {
-          const { body, status } = await supertest
-            .get('/api/security/role')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertResponseStatusCode(200, status, body);
-        });
-
-        it('delete role', async () => {
-          const { body, status } = await supertest
-            .delete('/api/security/role/superuser')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertResponseStatusCode(410, status, body);
-        });
-
-        it('get shared saved object permissions', async () => {
-          const { body, status } = await supertest
-            .get('/internal/security/_share_saved_object_permissions')
-            .set(svlCommonApi.getInternalRequestHeader());
-          svlCommonApi.assertApiNotFound(body, status);
+          it('create/update role', async () => {
+            const { body, status } = await supertest
+              .put('/api/security/role/test')
+              .set(svlCommonApi.getInternalRequestHeader());
+            svlCommonApi.assertResponseStatusCode(400, status, body);
+          });
         });
       });
     });
