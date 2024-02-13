@@ -74,6 +74,7 @@ export const Chat = () => {
           prompt: data[ChatFormFields.prompt],
           indices: 'workplace_index',
           api_key: data[ChatFormFields.openAIKey],
+          citations: data[ChatFormFields.citations],
         },
       }
     );

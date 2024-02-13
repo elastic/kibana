@@ -46,7 +46,7 @@ export function registerAIPlaygroundRoutes({ log, router }: RouteDependencies) {
           },
         },
         prompt: Prompt(data.prompt, {
-          citations: true,
+          citations: data.citations,
           context: true,
           type: 'openai',
         }),
