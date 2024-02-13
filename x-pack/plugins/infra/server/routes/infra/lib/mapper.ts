@@ -46,11 +46,12 @@ export const mapToApiResponse = (
     })
     .sort((a, b) => {
       return b.cpuValue - a.cpuValue;
-    });
+    })
+    .map(({ cpuValue, ...rest }) => rest);
 
   return {
     type: params.type,
-    nodes: hosts.map(({ cpuValue, ...rest }) => rest),
+    nodes: hosts,
   };
 };
 

@@ -12,6 +12,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_UUID,
 } from '@kbn/rule-data-utils';
+import { INFRA_ALERT_FEATURE_ID } from '../../../../../common/constants';
 import { BUCKET_KEY, MAX_SIZE } from '../constants';
 import { InfraAlertsClient } from '../helpers/get_infra_alerts_client';
 
@@ -52,7 +53,7 @@ export async function getHostsAlertsCount({
     query: {
       bool: {
         filter: [
-          ...termQuery(ALERT_RULE_PRODUCER, 'infrastructure'),
+          ...termQuery(ALERT_RULE_PRODUCER, INFRA_ALERT_FEATURE_ID),
           ...termQuery(ALERT_STATUS, ALERT_STATUS_ACTIVE),
           ...termsQuery(BUCKET_KEY, ...hostNamesShortList),
           ...rangeQuery,
