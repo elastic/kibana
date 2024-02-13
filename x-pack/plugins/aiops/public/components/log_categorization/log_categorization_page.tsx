@@ -52,7 +52,6 @@ import { SamplingMenu } from './sampling_menu';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import type { DocumentStats } from '../../hooks/use_document_count_stats';
-import { FieldAliasWarning } from './field_alias_warning';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -393,25 +392,19 @@ export const LogCategorizationPage: FC<LogCategorizationPageProps> = ({ embeddin
       />
 
       {selectedField !== undefined && data !== null && data.categories.length > 0 ? (
-        <>
-          {data.displayExamples === false ? (
-            <FieldAliasWarning selectedField={selectedField} index={dataView.getIndexPattern()} />
-          ) : null}
-
-          <CategoryTable
-            categories={data.categories}
-            aiopsListState={stateFromUrl}
-            dataViewId={dataView.id!}
-            eventRate={eventRate}
-            selectedField={selectedField}
-            pinnedCategory={pinnedCategory}
-            setPinnedCategory={setPinnedCategory}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            timefilter={timefilter}
-            displayExamples={data.displayExamples}
-          />
-        </>
+        <CategoryTable
+          categories={data.categories}
+          aiopsListState={stateFromUrl}
+          dataViewId={dataView.id!}
+          eventRate={eventRate}
+          selectedField={selectedField}
+          pinnedCategory={pinnedCategory}
+          setPinnedCategory={setPinnedCategory}
+          selectedCategory={selectedCategory}
+          setSelectedCategory={setSelectedCategory}
+          timefilter={timefilter}
+          displayExamples={data.displayExamples}
+        />
       ) : null}
     </EuiPageBody>
   );

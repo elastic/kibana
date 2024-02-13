@@ -51,7 +51,6 @@ import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 import { CreateCategorizationJobButton } from './create_categorization_job';
-import { FieldAliasWarning } from './field_alias_warning';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -390,13 +389,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 </EuiTabs>
                 <EuiSpacer size="s" />
               </>
-            ) : null}
-
-            {data.displayExamples === false ? (
-              <FieldAliasWarning
-                selectedField={selectedField.name}
-                index={dataView.getIndexPattern()}
-              />
             ) : null}
 
             <CategoryTable
