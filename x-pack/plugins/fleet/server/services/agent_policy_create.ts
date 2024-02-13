@@ -91,6 +91,7 @@ interface CreateAgentPolicyParams {
   spaceId: string;
   user?: AuthenticatedUser;
   authorizationHeader?: HTTPAuthorizationHeader | null;
+  force?: boolean;
 }
 
 export async function createAgentPolicyWithPackages({
@@ -103,6 +104,7 @@ export async function createAgentPolicyWithPackages({
   spaceId,
   user,
   authorizationHeader,
+  force,
 }: CreateAgentPolicyParams) {
   let agentPolicyId = newPolicy.id;
   const packagesToInstall = [];
@@ -128,6 +130,7 @@ export async function createAgentPolicyWithPackages({
       packagesToInstall,
       spaceId,
       authorizationHeader,
+      force,
     });
   }
 

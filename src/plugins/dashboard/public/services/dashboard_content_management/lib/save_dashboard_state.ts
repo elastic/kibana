@@ -73,6 +73,7 @@ export const saveDashboardState = async ({
   lastSavedId,
   saveOptions,
   currentState,
+  panelReferences,
   dashboardBackup,
   contentManagement,
   savedObjectsTagging,
@@ -180,6 +181,8 @@ export const saveDashboardState = async ({
     ? savedObjectsTagging.updateTagsReferences(dashboardReferences, tags)
     : dashboardReferences;
 
+  const allReferences = [...references, ...(panelReferences ?? [])];
+
   /**
    * Save the saved object using the content management
    */
@@ -191,7 +194,11 @@ export const saveDashboardState = async ({
     >({
       contentTypeId: DASHBOARD_CONTENT_ID,
       data: attributes,
-      options: { id: idToSaveTo, references, overwrite: true },
+      options: {
+        id: idToSaveTo,
+        references: allReferences,
+        overwrite: true,
+      },
     });
     const newId = result.item.id;
 
@@ -207,12 +214,12 @@ export const saveDashboardState = async ({
        */
       if (newId !== lastSavedId) {
         dashboardBackup.clearState(lastSavedId);
-        return { redirectRequired: true, id: newId };
+        return { redirectRequired: true, id: newId, references: allReferences };
       } else {
         dashboardContentManagementCache.deleteDashboard(newId); // something changed in an existing dashboard, so delete it from the cache so that it can be re-fetched
       }
     }
-    return { id: newId };
+    return { id: newId, references: allReferences };
   } catch (error) {
     toasts.addDanger({
       title: dashboardSaveToastStrings.getFailureString(currentState.title, error.message),
