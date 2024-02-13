@@ -127,8 +127,8 @@ export const CustomCriblForm = memo<PackagePolicyReplaceDefineStepExtensionCompo
 
     useEffect(() => {
       const fetchData = async () => {
-        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-        const { indexTemplates, permissionsError } = await getFleetManagedIndexTemplates(http!);
+        if (!http) return;
+        const { indexTemplates, permissionsError } = await getFleetManagedIndexTemplates(http);
         setDatastreamOpts(indexTemplates);
 
         if (permissionsError) {
