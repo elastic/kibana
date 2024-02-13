@@ -40,5 +40,5 @@ export function registerAiopsUiActions(
     createCategorizeFieldAction(coreStart, pluginStart)
   );
 
-uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
+  uiActions.addTriggerAction(CONTEXT_MENU_TRIGGER, openChangePointInMlAppAction);
 }
