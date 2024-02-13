@@ -38,6 +38,7 @@ import {
   hasCCSSource,
   isSettingItem,
   isAssignment,
+  isVariable,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -201,11 +202,9 @@ function validateFunctionColumnArg(
           }
           // do not validate any further for now, only count() accepts wildcard as args...
         } else {
-          // guaranteed by the check above
-          const columnHit = getColumnHit(nameHit!, references);
-          // check the type of the column hit
-          const typeHit = columnHit!.type;
           if (!isEqualType(actualArg, argDef, references, parentCommand)) {
+            // guaranteed by the check above
+            const columnHit = getColumnHit(nameHit!, references);
             messages.push(
               getMessageFromId({
                 messageId: 'wrongArgumentType',
@@ -213,7 +212,7 @@ function validateFunctionColumnArg(
                   name: astFunction.name,
                   argType: argDef.type,
                   value: actualArg.name,
-                  givenType: typeHit,
+                  givenType: columnHit!.type,
                 },
                 locations: actualArg.location,
               })
@@ -584,10 +583,10 @@ function validateColumnForCommand(
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
         ({ type, innerType }) => type === 'column' && innerType
       );
+      // this should be guaranteed by the columnCheck above
+      const columnRef = getColumnHit(nameHit, references)!;
 
       if (columnParamsWithInnerTypes.length) {
-        // this should be guaranteed by the columnCheck above
-        const columnRef = getColumnHit(nameHit, references)!;
         const hasSomeWrongInnerTypes = columnParamsWithInnerTypes.every(({ innerType }) => {
           return innerType !== 'any' && innerType !== columnRef.type;
         });
@@ -611,6 +610,7 @@ function validateColumnForCommand(
       }
       if (
         hasWildcard(nameHit) &&
+        !isVariable(columnRef) &&
         !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
       ) {
         messages.push(
