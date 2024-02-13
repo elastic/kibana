@@ -101,13 +101,13 @@ export const getItems: (
       ? [
           {
             category: i18n.translate(
-              'xpack.securitySolution.flyout.entityDetails.contextGroupLabel',
+              'xpack.securitySolution.flyout.entityDetails.assetCriticalityGroupLabel',
               {
-                defaultMessage: 'Contexts',
+                defaultMessage: 'Asset Criticality',
               }
             ),
             score: entityData?.risk.category_2_score ?? 0,
-            count: entityData?.risk.category_2_count ?? 0,
+            count: undefined,
           },
         ]
       : []),
