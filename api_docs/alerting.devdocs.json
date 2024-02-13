@@ -5080,9 +5080,9 @@
           },
           "<never> | ",
           "RuleWithLegacyId",
-          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; } & {}>) => Promise<",
+          "<never>)[]; total: number; taskIdsFailedToBeEnabled: string[]; }>; bulkDisableRules: (options: Readonly<{ filter?: string | undefined; ids?: string[] | undefined; untrack?: boolean | undefined; } & {}>) => Promise<",
           "BulkDisableRulesResult",
-          "<Record<string, any>>>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; }) => Promise<void>; snooze: (options: ",
+          "<Record<string, any>>>; updateApiKey: (options: { id: string; }) => Promise<void>; enable: (options: { id: string; }) => Promise<void>; disable: (options: { id: string; untrack?: boolean | undefined; }) => Promise<void>; snooze: (options: ",
           "SnoozeRuleOptions",
           ") => Promise<void>; unsnooze: (options: ",
           "UnsnoozeParams",
@@ -5102,7 +5102,7 @@
             "section": "def-common.RuleTypeParams",
             "text": "RuleTypeParams"
           },
-          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{} & { indices: string[]; alertUuids: string[]; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
+          ">, \"id\" | \"snoozeSchedule\">; version?: string | undefined; }) => Promise<void>; unmuteAll: (options: { id: string; }) => Promise<void>; muteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; unmuteInstance: (options: Readonly<{} & { alertId: string; alertInstanceId: string; }>) => Promise<void>; bulkUntrackAlerts: (options: Readonly<{ indices?: string[] | undefined; alertUuids?: string[] | undefined; query?: any[] | undefined; featureIds?: string[] | undefined; } & { isUsingQuery: boolean; }>) => Promise<void>; runSoon: (options: { id: string; }) => Promise<string | undefined>; listRuleTypes: () => Promise<Set<",
           "RegistryAlertTypeWithAuth",
           ">>; getSpaceId: () => string | undefined; getAuthorization: () => ",
           {

@@ -30,14 +30,16 @@ import {
 } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
   getEqlRuleForAlertTesting,
   getOpenAlerts,
   getPreviewAlerts,
   previewRule,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../../common/utils/security_solution';
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

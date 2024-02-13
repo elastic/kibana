@@ -6,7 +6,7 @@
  */
 
 import type { EqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { getRuleForAlertTesting } from './get_rule_for_alert_testing';
+import { getRuleForAlertTesting } from '../../../../../common/utils/security_solution';
 
 /**
  * This is a typical alert testing rule that is easy for most basic testing of output of EQL alerts.
