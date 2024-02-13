@@ -13,7 +13,7 @@ export interface Tag {
   color: string;
 }
 
-export type TableRowAction = 'delete';
+export type TableRowAction = 'delete' | 'edit';
 
 export type RowActions = {
   [action in TableRowAction]?: {

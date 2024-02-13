@@ -58,6 +58,14 @@ export const searchConfigurationSchema = schema.object({
     }),
     query: schema.string(),
   }),
+  filter: schema.maybe(
+    schema.arrayOf(
+      schema.object({
+        query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+        meta: schema.recordOf(schema.string(), schema.any()),
+      })
+    )
+  ),
 });
 
 type CreateLifecycleExecutor = ReturnType<typeof createLifecycleExecutor>;
@@ -121,7 +129,7 @@ export function thresholdRuleType(
   return {
     id: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
     name: i18n.translate('xpack.observability.threshold.ruleName', {
-      defaultMessage: 'Custom threshold (Beta)',
+      defaultMessage: 'Custom threshold',
     }),
     fieldsForAAD: CUSTOM_THRESHOLD_AAD_FIELDS,
     validate: {

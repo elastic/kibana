@@ -9,6 +9,7 @@
 export { config } from './src/logging_config';
 export type {
   LoggingConfigType,
+  LoggingConfigWithBrowserType,
   loggerContextConfigSchema,
   loggerSchema,
 } from './src/logging_config';

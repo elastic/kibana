@@ -23,8 +23,8 @@ import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/a
 import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
+import { createRule } from '../../../../../../../common/utils/security_solution';
 import {
-  createRule,
   getOpenAlerts,
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,

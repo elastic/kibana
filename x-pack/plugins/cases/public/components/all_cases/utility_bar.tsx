@@ -38,6 +38,8 @@ interface Props {
   pagination: Pagination;
   selectedColumns: CasesColumnSelection[];
   onSelectedColumnsChange: (columns: CasesColumnSelection[]) => void;
+  onClearFilters: () => void;
+  showClearFiltersButton: boolean;
 }
 
 export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
@@ -49,6 +51,8 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
     pagination,
     selectedColumns,
     onSelectedColumnsChange,
+    onClearFilters,
+    showClearFiltersButton,
   }) => {
     const { euiTheme } = useEuiTheme();
     const refreshCases = useRefreshCases();
@@ -212,6 +216,20 @@ export const CasesTableUtilityBar: FunctionComponent<Props> = React.memo(
                       {i18n.REFRESH}
                     </EuiButtonEmpty>
                   </EuiFlexItem>
+                  {showClearFiltersButton ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonEmpty
+                        onClick={onClearFilters}
+                        size="xs"
+                        iconSide="left"
+                        iconType="cross"
+                        flush="left"
+                        data-test-subj="all-cases-clear-filters-link-icon"
+                      >
+                        {i18n.CLEAR_FILTERS}
+                      </EuiButtonEmpty>
+                    </EuiFlexItem>
+                  ) : null}
                 </EuiFlexGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
