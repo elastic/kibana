@@ -1645,10 +1645,10 @@
   dependencies:
     tslib "^2.0.0"
 
-"@elastic/ai-assist@0.0.7":
-  version "0.0.7"
-  resolved "https://registry.yarnpkg.com/@elastic/ai-assist/-/ai-assist-0.0.7.tgz#a315cb167cc0a5013e119bb916a81694dc5d9154"
-  integrity sha512-SEzDsjm5/LNJGfZHSnVRVqY4wB/4L5vnwyid5zZNDXMvTGBuMBiH4AgfRTAKU0z0Qqdty1x99xcgEfQ5jx3EAQ==
+"@elastic/ai-assist@0.0.8":
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/@elastic/ai-assist/-/ai-assist-0.0.8.tgz#126a4d0b403c8571d0bc14f2a7bb9f1f5e8920eb"
+  integrity sha512-i/oztg5UH5EiVoBk+ASSsoyBg6ldPUFdjx8ioBY9B4BqT5Jk61XrtD+dJA0cWfazClRS5naArrWsd3Gb/OvUrA==
   dependencies:
     "@elastic/elasticsearch" "^8.11.0"
     "@langchain/community" "^0.0.20"
