@@ -42,6 +42,7 @@ export interface Props {
   disabled?: boolean;
   docsUrl?: string;
   error?: string | React.ReactNode;
+  hasPrefix?: boolean;
   isBeta?: boolean;
   onNameChange?(name: string): void;
   onSubmit(name: string, language: LanguageForOptimization): void;
@@ -56,6 +57,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
   onSubmit,
   type,
   isBeta,
+  hasPrefix = false,
 }) => {
   const {
     fullIndexName,
@@ -65,7 +67,8 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
     rawName,
     languageSelectValue,
   } = useValues(NewSearchIndexLogic);
-  const { setRawName, setLanguageSelectValue } = useActions(NewSearchIndexLogic);
+  const { setRawName, setLanguageSelectValue, setHasPrefix } = useActions(NewSearchIndexLogic);
+  setHasPrefix(type === INGESTION_METHOD_IDS.CRAWLER);
 
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setRawName(e.target.value);
@@ -195,7 +198,7 @@ export const NewSearchIndexTemplate: React.FC<Props> = ({
                     value={rawName}
                     onChange={handleNameChange}
                     autoFocus
-                    prepend="search-"
+                    prepend={hasPrefix ? 'search-' : undefined}
                   />
                 </EuiFormRow>
                 <EuiText size="xs" color="subdued">
