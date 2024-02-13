@@ -80,13 +80,9 @@ export const PolicySettingsLayout = memo<PolicySettingsLayoutProps>(
     const handleSettingsOnChange: PolicySettingsFormProps['onChange'] = useCallback(
       (updates) => {
         setPolicySettings(updates.updatedPolicy);
-
-        const policyChanged = !isEqual(updates.updatedPolicy, policy.inputs[0].config.policy.value);
-        if (policyChanged !== policyModified) {
-          setPolicyModified(policyChanged);
-        }
+        setPolicyModified(!isEqual(updates.updatedPolicy, policy.inputs[0].config.policy.value));
       },
-      [policy.inputs, policyModified]
+      [policy.inputs]
     );
     const handleCancelOnClick = useNavigateToAppEventHandler(...navigateToAppArguments);
 

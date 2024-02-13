@@ -107,7 +107,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
       (fetchedNote ? note !== fetchedNote.note : note !== '') ||
       manifestVersion !== deployedVersion;
 
-    setUnsavedChanges(saveButtonEnabled);
+    useEffect(() => {
+      setUnsavedChanges(saveButtonEnabled);
+    }, [saveButtonEnabled, setUnsavedChanges]);
 
     const onSave = useCallback(() => {
       const update = cloneDeep(policy);

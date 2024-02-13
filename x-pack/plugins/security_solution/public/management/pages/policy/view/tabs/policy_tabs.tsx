@@ -86,8 +86,11 @@ export const PolicyTabs = React.memo(() => {
   const isInProtectionUpdatesTab = usePolicyDetailsSelector(isOnProtectionUpdatesView);
   const policyId = usePolicyDetailsSelector(policyIdFromParams);
 
-  const [showUnsavedChangesModalForTab, setShowUnsavedChangesModalForTab] =
-    useState<EuiTabbedContentTab | null>(null);
+  const [unsavedChangesModal, setUnsavedChangesModal] = useState<{
+    showModal: boolean;
+    nextTab: EuiTabbedContentTab | null;
+  }>({ showModal: false, nextTab: null });
+
   const [unsavedChanges, setUnsavedChanges] = useState<
     Record<PolicyTabKeys.SETTINGS | PolicyTabKeys.PROTECTION_UPDATES, boolean>
   >({
@@ -418,10 +421,14 @@ export const PolicyTabs = React.memo(() => {
     isInProtectionUpdatesTab,
   ]);
 
+  const cancelUnsavedChangesModal = useCallback(() => {
+    setUnsavedChangesModal({ showModal: false, nextTab: null });
+  }, [setUnsavedChangesModal]);
+
   const changeTab = useCallback(
     (selectedTab: EuiTabbedContentTab) => {
-      if (showUnsavedChangesModalForTab) {
-        setShowUnsavedChangesModalForTab(null);
+      if (unsavedChangesModal.showModal) {
+        cancelUnsavedChangesModal();
       }
       let path: string = '';
       switch (selectedTab.id) {
@@ -446,7 +453,13 @@ export const PolicyTabs = React.memo(() => {
       }
       history.push(path, routeState?.backLink ? { backLink: routeState.backLink } : null);
     },
-    [history, policyId, routeState.backLink, showUnsavedChangesModalForTab]
+    [
+      cancelUnsavedChangesModal,
+      history,
+      policyId,
+      routeState.backLink,
+      unsavedChangesModal.showModal,
+    ]
   );
 
   const onTabClickHandler = useCallback(
@@ -455,13 +468,19 @@ export const PolicyTabs = React.memo(() => {
         (isInSettingsTab && unsavedChanges[PolicyTabKeys.SETTINGS]) ||
         (isInProtectionUpdatesTab && unsavedChanges[PolicyTabKeys.PROTECTION_UPDATES])
       ) {
-        setShowUnsavedChangesModalForTab(selectedTab);
+        setUnsavedChangesModal({ showModal: true, nextTab: selectedTab });
       } else {
         changeTab(selectedTab);
       }
     },
     [changeTab, isInProtectionUpdatesTab, isInSettingsTab, unsavedChanges]
   );
+
+  const confirmUnsavedChangesModal = useCallback(() => {
+    if (unsavedChangesModal.nextTab) {
+      changeTab(unsavedChangesModal.nextTab);
+    }
+  }, [changeTab, unsavedChangesModal.nextTab]);
 
   // show loader for privileges validation
   if (privilegesLoading) {
@@ -470,10 +489,10 @@ export const PolicyTabs = React.memo(() => {
 
   return (
     <>
-      {showUnsavedChangesModalForTab && (
+      {unsavedChangesModal.showModal && (
         <UnsavedChangesConfirmModal
-          onCancel={() => setShowUnsavedChangesModalForTab(null)}
-          onConfirm={() => changeTab(showUnsavedChangesModalForTab)}
+          onCancel={cancelUnsavedChangesModal}
+          onConfirm={confirmUnsavedChangesModal}
         />
       )}
       <EuiTabbedContent
