@@ -53,6 +53,7 @@ import {
   RESERVED_CONFIG_YML_KEYS,
 } from '../../common/constants';
 import { normalizeHostsForAgents } from '../../common/services';
+import type { KafkaOutput } from '../../common/types';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
   OutputInvalidError,
@@ -1026,6 +1027,30 @@ class OutputService {
           updateData.service_token = data.secrets?.service_token as string;
         }
       }
+    }
+
+    // allow_edit and secrets field are not excluded from AAD, we cannot change this anymore,
+    // so we need to make sure each time those fields are changed encrypted field are changed too
+    // Add ssl so it's re-encrypted if allow_edit or secrets changed
+    if ((updateData.allow_edit || updateData.secrets) && !updateData.ssl) {
+      updateData.ssl = originalOutput.ssl ? JSON.stringify(originalOutput.ssl) : undefined;
+    }
+
+    const newOutputType = updateData.type ? updateData.type : originalOutput.type;
+    if (
+      (updateData.allow_edit || updateData.secrets) &&
+      newOutputType === outputType.Kafka &&
+      !(updateData as KafkaOutput).password
+    ) {
+      (updateData as KafkaOutput).password = (originalOutput as KafkaOutput).password;
+    }
+
+    // Always include allow_edit and secrets as there included in AAD to encrypt the SO
+    if (!updateData.allow_edit) {
+      updateData.allow_edit = originalOutput.allow_edit;
+    }
+    if (!updateData.secrets) {
+      updateData.secrets = originalOutput.secrets;
     }
 
     auditLoggingService.writeCustomSoAuditLog({
