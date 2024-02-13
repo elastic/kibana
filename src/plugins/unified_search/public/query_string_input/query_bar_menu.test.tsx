@@ -355,15 +355,14 @@ describe('Querybar Menu component', () => {
         items: [
           {
             name: 'Test additional query bar menu item',
+            'data-test-subj': 'additional-query-bar-menu-item',
           },
         ],
       },
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(
-      component.find('[data-test-subj^="additional-query-bar-menu-item"]').length
-    ).toBeTruthy();
+    expect(component.find('[data-test-subj="additional-query-bar-menu-item"]').length).toBeTruthy();
   });
 
   it('should render additional menu panels', async () => {
@@ -372,6 +371,13 @@ describe('Querybar Menu component', () => {
       openQueryBarMenu: true,
       showFilterBar: true,
       additionalQueryBarMenuItems: {
+        items: [
+          {
+            name: 'Go to nested menu',
+            'data-test-subj': 'additional-query-bar-menu-panel-link',
+            panel: 'panel-1',
+          },
+        ],
         panels: [
           {
             id: 'panel-1',
@@ -379,6 +385,7 @@ describe('Querybar Menu component', () => {
             items: [
               {
                 name: 'Test additional query bar menu item',
+                'data-test-subj': 'additional-query-bar-nested-menu-item',
               },
             ],
           },
@@ -387,8 +394,16 @@ describe('Querybar Menu component', () => {
     };
     const component = mount(wrapQueryBarMenuComponentInContext(newProps, 'kuery'));
 
-    expect(
-      component.find('[data-test-subj^="additional-query-bar-menu-item"]').length
-    ).toBeTruthy();
+    component
+      .find('[data-test-subj="additional-query-bar-menu-panel-link"]')
+      .first()
+      .simulate('click');
+
+    await waitFor(() => {
+      component.update();
+      expect(
+        component.find('[data-test-subj="additional-query-bar-nested-menu-item"]').length
+      ).toBeTruthy();
+    });
   });
 });
