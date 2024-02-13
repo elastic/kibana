@@ -64,7 +64,7 @@ describe('RiskInputsTab', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('risk-input-contexts-title')).not.toBeInTheDocument();
+    expect(queryByTestId('risk-input-asset-criticality-title')).not.toBeInTheDocument();
     expect(getByTestId('risk-input-table-description-cell')).toHaveTextContent(
       'Risk inputRule Name'
     );
@@ -79,7 +79,7 @@ describe('RiskInputsTab', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('risk-input-contexts-title')).toBeInTheDocument();
+    expect(queryByTestId('risk-input-asset-criticality-title')).toBeInTheDocument();
   });
 
   it('paginates', () => {
