@@ -26,7 +26,7 @@ export function SearchConnectorTab() {
           'aiAssistantManagementObservability.searchConnectorTab.searchConnectorsEnablesYouTextLabel',
           {
             defaultMessage:
-              'Connectors enables you to index content from external sources thereby making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
+              'Connectors enable you to index content from external sources thereby making it available for the AI Assistant. This can greatly improve the relevance of the AI Assistant’s responses.',
           }
         )}
       </EuiText>
