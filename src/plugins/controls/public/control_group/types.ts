@@ -42,7 +42,6 @@ export interface ControlGroupSettings {
 
 export type ControlGroupComponentState = ControlGroupSettings & {
   lastSavedInput: PersistableControlGroupInput;
-  invalidSelectionsControlId?: string;
   controlsHaveInvalidSelections?: boolean;
 };
 

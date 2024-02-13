@@ -21,7 +21,7 @@
     padding: 0 $euiSizeS;
 
     .euiIcon {
-      background-color: $euiColorVis5_behindText;
+      background-color: transparent;
       width: $euiSizeS * 2;
       border-radius: $euiSizeXS;
       padding: 0 calc($euiSizeXS / 2);

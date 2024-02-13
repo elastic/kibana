@@ -62,12 +62,6 @@ export const rangeSliderReducers = {
     if (action.payload.min !== undefined) state.componentState.min = Math.floor(action.payload.min);
     if (action.payload.max !== undefined) state.componentState.max = Math.ceil(action.payload.max);
   },
-  setInvalidRangeWarningOpen: (
-    state: WritableDraft<RangeSliderReduxState>,
-    action: PayloadAction<boolean>
-  ) => {
-    state.componentState.showInvalidRangeWarning = action.payload;
-  },
   publishFilters: (
     state: WritableDraft<RangeSliderReduxState>,
     action: PayloadAction<Filter[] | undefined>

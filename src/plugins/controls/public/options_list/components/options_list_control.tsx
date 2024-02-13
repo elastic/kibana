@@ -156,6 +156,7 @@ export const OptionsListControl = ({
                 delay="long"
               >
                 <EuiToken
+                  tabIndex={0}
                   iconType="alert"
                   size="s"
                   color="euiColorVis5"

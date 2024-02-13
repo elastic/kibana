@@ -11,7 +11,7 @@ import { get, isEmpty, isEqual } from 'lodash';
 import React, { createContext, useContext } from 'react';
 import ReactDOM from 'react-dom';
 import { batch } from 'react-redux';
-import { lastValueFrom, Subscription, merge, switchMap } from 'rxjs';
+import { lastValueFrom, Subscription, switchMap } from 'rxjs';
 import { distinctUntilChanged, map } from 'rxjs/operators';
 
 import { DataView, DataViewField } from '@kbn/data-views-plugin/public';
@@ -166,14 +166,15 @@ export class RangeSliderEmbeddable
       distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', '']))
     );
 
-    // run validations when input changes or value changes
     this.subscriptions.add(
-      merge(dataFetchPipe, valueChangePipe)
+      dataFetchPipe
         .pipe(
           switchMap(async () => {
             try {
+              this.dispatch.setLoading(true);
               await this.runRangeSliderQuery();
               await this.runValidations();
+              this.dispatch.setLoading(false);
             } catch (e) {
               this.onLoadingError(e.message);
             }
@@ -182,13 +183,20 @@ export class RangeSliderEmbeddable
         .subscribe()
     );
 
-    // publish filters when input changes
+    // publish filters when value changes
     this.subscriptions.add(
       valueChangePipe
         .pipe(
           switchMap(async () => {
-            const rangeFilter = await this.buildFilter();
-            this.dispatch.publishFilters(rangeFilter);
+            try {
+              this.dispatch.setLoading(true);
+              const rangeFilter = await this.buildFilter();
+              this.dispatch.publishFilters(rangeFilter);
+              await this.runValidations();
+              this.dispatch.setLoading(false);
+            } catch (e) {
+              this.onLoadingError(e.message);
+            }
           })
         )
         .subscribe()
@@ -389,7 +397,6 @@ export class RangeSliderEmbeddable
       const total = resp?.rawResponse?.hits?.total;
 
       const docCount = typeof total === 'number' ? total : total?.value;
-      this.dispatch.setIsInvalid(!docCount);
 
       const {
         explicitInput: { value },
@@ -401,6 +408,7 @@ export class RangeSliderEmbeddable
   };
 
   private reportInvalidSelections = (hasInvalidSelections: boolean) => {
+    this.dispatch.setIsInvalid(hasInvalidSelections);
     this.parent?.reportInvalidSelections({
       id: this.id,
       hasInvalidSelections,
@@ -414,7 +422,6 @@ export class RangeSliderEmbeddable
   public reload = async () => {
     try {
       await this.runRangeSliderQuery();
-      // await this.buildFilter();
     } catch (e) {
       this.onLoadingError(e.message);
     }

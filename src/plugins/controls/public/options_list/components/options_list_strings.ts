@@ -36,7 +36,7 @@ export const OptionsListStrings = {
     getInvalidSelectionWarningTitle: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.control.invalidSelectionWarningTitle', {
         defaultMessage:
-          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection} other {selections}} return no results',
+          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results',
         values: {
           invalidSelectionCount,
         },
@@ -44,7 +44,7 @@ export const OptionsListStrings = {
     getInvalidSelectionWarningContent: (invalidSelectionCount: number) =>
       i18n.translate('controls.optionsList.control.invalidSelectionWarningMessage', {
         defaultMessage:
-          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection} other {selections}} return no results. Remove them for complete results',
+          '{invalidSelectionCount} {invalidSelectionCount, plural, one {selection returns} other {selections return}} no results. Remove them for complete results',
         values: {
           invalidSelectionCount,
         },
