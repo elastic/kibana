@@ -221,7 +221,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       appRoute: APP_PATH,
       category: DEFAULT_APP_CATEGORIES.security,
       updater$: this.appUpdater$,
-      visibleIn: ['globalSearch'],
+      visibleIn: ['globalSearch', 'home', 'kibanaOverview'],
       euiIconType: APP_ICON_SOLUTION,
       mount: async (params: AppMountParameters) => {
         // required to show the alert table inside cases

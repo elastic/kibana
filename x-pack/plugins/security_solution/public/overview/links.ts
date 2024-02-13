@@ -43,7 +43,6 @@ export const overviewLinks: LinkItem = {
       defaultMessage: 'Overview',
     }),
   ],
-  visibleIn: ['home', 'kibanaOverview'],
 };
 
 export const gettingStartedLinks: LinkItem = {
