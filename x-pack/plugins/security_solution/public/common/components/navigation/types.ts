@@ -42,5 +42,4 @@ export interface NavTab {
   betaOptions?: {
     text: string;
   };
-  tourAnchor?: string;
 }

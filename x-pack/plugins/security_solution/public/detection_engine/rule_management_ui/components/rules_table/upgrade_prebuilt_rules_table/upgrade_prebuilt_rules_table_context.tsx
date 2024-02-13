@@ -35,7 +35,7 @@ import { MlJobUpgradeModal } from '../../../../../detections/components/modals/m
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations';
 import * as i18n from './translations';
-import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from './upgrade_prebuilt_rules_tour';
+import { PREBUILT_RULE_UPDATE_FLYOUT_ANCHOR } from '../feature_tour/rules_feature_tour';
 
 export interface UpgradePrebuiltRulesTableState {
   /**

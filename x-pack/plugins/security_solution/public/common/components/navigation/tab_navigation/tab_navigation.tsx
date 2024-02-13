@@ -25,7 +25,6 @@ const TabNavigationItemComponent = ({
   isSelected,
   isBeta,
   betaOptions,
-  tourAnchor,
 }: TabNavigationItemProps) => {
   const { getAppUrl, navigateTo } = useNavigation();
 
@@ -51,7 +50,7 @@ const TabNavigationItemComponent = ({
       href={appHref}
       onClick={handleClick}
       append={isBeta && <EuiBadge color={'#E0E5EE'}>{betaOptions?.text ?? BETA}</EuiBadge>}
-      id={tourAnchor}
+      id={id}
     >
       {name}
     </EuiTab>
@@ -98,7 +97,6 @@ export const TabNavigationComponent: React.FC<TabNavigationProps> = ({ navTabs }
             isSelected={isSelected}
             isBeta={tab.isBeta}
             betaOptions={tab.betaOptions}
-            tourAnchor={tab.tourAnchor}
           />
         );
       }),

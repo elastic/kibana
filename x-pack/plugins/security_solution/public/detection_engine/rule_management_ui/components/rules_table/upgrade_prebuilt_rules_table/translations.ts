@@ -38,21 +38,6 @@ export const UPDATE_BUTTON_LABEL = i18n.translate(
   }
 );
 
-export const UPDATE_TOUR_TITLE = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.updateTourTitle',
-  {
-    defaultMessage: 'New field view of updates',
-  }
-);
-
-export const UPDATE_TOUR_DESCRIPTION = i18n.translate(
-  'xpack.securitySolution.detectionEngine.ruleDetails.updateTourDescription',
-  {
-    defaultMessage:
-      'You can now view the diff of updates in the flyout by clicking on the rule name.',
-  }
-);
-
 export const UPDATE_FLYOUT_PER_FIELD_TOOLTIP_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.detectionEngine.ruleDetails.perFieldTooltip',
   {
