@@ -26,7 +26,7 @@ export function ExperimentalBadge() {
 export function BetaBadge() {
   return (
     <EuiBetaBadge
-      label={i18n.translate('xpack.observability.experimentalBadgeLabel', {
+      label={i18n.translate('xpack.observability.betaBadgeLabel', {
         defaultMessage: 'Beta',
       })}
       tooltipContent={i18n.translate('xpack.observability.betaBadgeDescription', {
