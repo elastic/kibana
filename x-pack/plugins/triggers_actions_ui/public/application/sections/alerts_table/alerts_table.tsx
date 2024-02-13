@@ -24,6 +24,7 @@ import {
   EuiDataGridRefProps,
   EuiFlexGroup,
   EuiDataGridProps,
+  EuiDataGridCellPopoverElementProps,
 } from '@elastic/eui';
 import { useQueryClient } from '@tanstack/react-query';
 import styled from '@emotion/styled';
@@ -436,6 +437,38 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     ]
   );
 
+  const renderCellPopover = useCallback(
+    () =>
+      props.alertsTableConfiguration?.getRenderCellPopover
+        ? props.alertsTableConfiguration?.getRenderCellPopover({
+            context: renderCellContext,
+          })
+        : undefined,
+    [props.alertsTableConfiguration, renderCellContext]
+  )();
+
+  const handleRenderCellPopover = useCallback(
+    (_props: EuiDataGridCellPopoverElementProps) => {
+      if (!renderCellPopover) {
+        return undefined;
+      }
+      const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
+      const alert = alerts[idx];
+      if (alert) {
+        const data: Array<{ field: string; value: string[] }> = [];
+        Object.entries(alert ?? {}).forEach(([key, value]) => {
+          data.push({ field: key, value: value as string[] });
+        });
+        return renderCellPopover({
+          ..._props,
+          data,
+        });
+      }
+      return null;
+    },
+    [alerts, pagination.pageIndex, pagination.pageSize, renderCellPopover]
+  );
+
   const dataGridPagination = useMemo(
     () => ({
       ...pagination,
@@ -565,6 +598,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
             onColumnResize={onColumnResize}
             ref={dataGridRef}
             renderCustomGridBody={props.dynamicRowHeight ? renderCustomGridBody : undefined}
+            renderCellPopover={handleRenderCellPopover}
           />
         )}
       </section>
