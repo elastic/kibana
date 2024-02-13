@@ -13,10 +13,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const PageObjects = getPageObjects([
     'common',
+    'svlCommonPage',
     'discover',
     'timePicker',
     'header',
-    'unifiedSearch',
     'unifiedFieldList',
   ]);
   const testSubjects = getService('testSubjects');
@@ -31,6 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('discover sidebar', function describeIndexTests() {
     before(async function () {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
+      await PageObjects.svlCommonPage.loginAsAdmin();
     });
 
     beforeEach(async () => {

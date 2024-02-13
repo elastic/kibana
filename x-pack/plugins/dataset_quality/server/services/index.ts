@@ -6,3 +6,4 @@
  */
 
 export { dataStreamService } from './data_stream';
+export { indexStatsService } from './index_stats';

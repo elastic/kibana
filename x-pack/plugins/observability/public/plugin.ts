@@ -45,7 +45,7 @@ import {
   TriggersAndActionsUIPublicPluginStart,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { BehaviorSubject, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { map, mergeMap } from 'rxjs/operators';
 
 import { AiopsPluginStart } from '@kbn/aiops-plugin/public/types';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/public';
@@ -390,47 +390,71 @@ export class Plugin
 
     pluginsSetup.observabilityShared.navigation.registerSections(
       from(appUpdater$).pipe(
-        map((value) => {
-          const deepLinks = value(app)?.deepLinks ?? [];
+        mergeMap((value) =>
+          from(coreSetup.getStartServices()).pipe(
+            map(([coreStart, pluginsStart]) => {
+              const deepLinks = value(app)?.deepLinks ?? [];
 
-          const overviewLink = !Boolean(pluginsSetup.serverless)
-            ? [
-                {
-                  label: i18n.translate('xpack.observability.overviewLinkTitle', {
-                    defaultMessage: 'Overview',
-                  }),
+              const overviewLink = !Boolean(pluginsSetup.serverless)
+                ? [
+                    {
+                      label: i18n.translate('xpack.observability.overviewLinkTitle', {
+                        defaultMessage: 'Overview',
+                      }),
+                      app: observabilityAppId,
+                      path: OVERVIEW_PATH,
+                    },
+                  ]
+                : [];
+
+              const isAiAssistantEnabled =
+                pluginsStart.observabilityAIAssistant.service.isEnabled();
+
+              console.log({ isAiAssistantEnabled });
+
+              const aiAssistantLink =
+                isAiAssistantEnabled &&
+                !Boolean(pluginsSetup.serverless) &&
+                Boolean(pluginsSetup.observabilityAIAssistant)
+                  ? [
+                      {
+                        label: i18n.translate('xpack.observability.aiAssistantLinkTitle', {
+                          defaultMessage: 'AI Assistant',
+                        }),
+                        app: 'observabilityAIAssistant',
+                        path: '/conversations/new',
+                      },
+                    ]
+                  : [];
+
+              // Reformat the visible links to be NavigationEntry objects instead of
+              // AppDeepLink objects.
+              //
+              // In our case the deep links and sections being registered are the
+              // same, and the logic to hide them based on flags or capabilities is
+              // the same, so we just want to make a new list with the properties
+              // needed by `registerSections`, which are different than the
+              // properties used by the deepLinks.
+              //
+              // See https://github.com/elastic/kibana/issues/103325.
+              const otherLinks: NavigationEntry[] = deepLinks
+                .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
+                .map((link) => ({
                   app: observabilityAppId,
-                  path: OVERVIEW_PATH,
+                  label: link.title,
+                  path: link.path ?? '',
+                }));
+
+              return [
+                {
+                  label: '',
+                  sortKey: 100,
+                  entries: [...overviewLink, ...otherLinks, ...aiAssistantLink],
                 },
-              ]
-            : [];
-
-          // Reformat the visible links to be NavigationEntry objects instead of
-          // AppDeepLink objects.
-          //
-          // In our case the deep links and sections being registered are the
-          // same, and the logic to hide them based on flags or capabilities is
-          // the same, so we just want to make a new list with the properties
-          // needed by `registerSections`, which are different than the
-          // properties used by the deepLinks.
-          //
-          // See https://github.com/elastic/kibana/issues/103325.
-          const otherLinks: NavigationEntry[] = deepLinks
-            .filter((link) => link.navLinkStatus === AppNavLinkStatus.visible)
-            .map((link) => ({
-              app: observabilityAppId,
-              label: link.title,
-              path: link.path ?? '',
-            }));
-
-          return [
-            {
-              label: '',
-              sortKey: 100,
-              entries: [...overviewLink, ...otherLinks],
-            },
-          ];
-        })
+              ];
+            })
+          )
+        )
       )
     );
 
