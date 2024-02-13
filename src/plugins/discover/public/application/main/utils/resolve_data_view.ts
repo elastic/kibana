@@ -20,7 +20,7 @@ interface DataViewData {
   /**
    * Loaded data view (might be default data view if requested was not found)
    */
-  loaded: DataView;
+  loaded: DataView | undefined;
   /**
    * Id of the requested data view
    */
@@ -67,10 +67,10 @@ export async function loadDataView({
     fetchId = dataViewSpec.id!;
   }
 
-  let fetchedDataView: DataView | null = null;
+  let fetchedDataView: DataView | undefined;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId) : null;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId) : undefined;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -85,13 +85,14 @@ export async function loadDataView({
     // eslint-disable-next-line no-empty
   } catch (e) {}
 
-  let defaultDataView: DataView | null = null;
+  let defaultDataView: DataView | undefined;
   if (!fetchedDataView) {
     try {
-      defaultDataView = await dataViews.getDefaultDataView({
+      const defaultDataViewResult = await dataViews.getDefaultDataView({
         displayErrors: false,
         refreshFields: true,
       });
+      defaultDataView = defaultDataViewResult || undefined;
     } catch (e) {
       //
     }
@@ -101,7 +102,7 @@ export async function loadDataView({
   return {
     list: dataViewList || [],
     // we can be certain that the data view exists due to an earlier hasData check
-    loaded: fetchedDataView || defaultDataView!,
+    loaded: fetchedDataView || defaultDataView,
     stateVal: fetchId,
     stateValFound: Boolean(fetchId) && Boolean(fetchedDataView),
   };
@@ -150,18 +151,20 @@ export function resolveDataView(
       });
       return ownDataView;
     }
-    toastNotifications.addWarning({
-      title: warningTitle,
-      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-        defaultMessage:
-          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-        values: {
-          loadedDataViewTitle: loadedDataView.getIndexPattern(),
-          loadedDataViewId: loadedDataView.id,
-        },
-      }),
-      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-    });
+    if (loadedDataView) {
+      toastNotifications.addWarning({
+        title: warningTitle,
+        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+          defaultMessage:
+            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+          values: {
+            loadedDataViewTitle: loadedDataView.getIndexPattern(),
+            loadedDataViewId: loadedDataView.id,
+          },
+        }),
+        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+      });
+    }
   }
 
   return loadedDataView;
