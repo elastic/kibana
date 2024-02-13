@@ -74,6 +74,19 @@ export function defineQueryApiKeysRoute({
         }
 
         const queryResponse = await esClient.asCurrentUser.security.queryApiKeys(request.body);
+        const fullAggResponse = await esClient.asCurrentUser.security.queryApiKeys({
+          size: 0,
+          //@ts-ignore
+          aggs: {
+            usernames: {
+              composite: {
+                sources: [{ username: { terms: { field: 'username' } } }],
+              },
+            },
+          },
+        });
+
+        console.log({ fullAggResponse, queryResponse });
 
         const validKeys = queryResponse.api_keys.filter(({ invalidated }) => !invalidated);
 
