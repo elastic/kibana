@@ -22,6 +22,7 @@ import { euiTreeViewStyles } from '@elastic/eui/lib/components/tree_view/tree_vi
 
 import {
   TREE_NAVIGATION_LOADING,
+  TREE_NAVIGATION_EMPTY,
   TREE_NAVIGATION_SHOW_MORE,
 } from '../../../../common/translations';
 import { useFetchDynamicTreeView } from './hooks';
@@ -159,8 +160,16 @@ export const DynamicTreeView = ({
         {isLoading && (
           <EuiTreeView.Item
             id="dynamicTreeViewLoading"
+            css={styles.nonInteractiveItem}
             icon={<EuiLoadingSpinner size="s" />}
             label={TREE_NAVIGATION_LOADING}
+          />
+        )}
+        {!isLoading && !itemList.length && (
+          <EuiTreeView.Item
+            id="dynamicTreeViewEmpty"
+            css={styles.nonInteractiveItem}
+            label={TREE_NAVIGATION_EMPTY}
           />
         )}
         {itemList.map((aggData) => {

@@ -43,6 +43,12 @@ export const useStyles = (depth: number) => {
         gap: size.xs,
       },
     };
+    const nonInteractiveItem: CSSObject = {
+      pointerEvents: 'none',
+      '&:hover, &:focus': {
+        backgroundColor: 'transparent',
+      },
+    };
     const euiTreeViewWrapper: CSSObject = {
       ul: {
         marginLeft: '0 !important',
@@ -53,6 +59,7 @@ export const useStyles = (depth: number) => {
     return {
       loadMoreButton,
       loadMoreBadge,
+      nonInteractiveItem,
       euiTreeViewWrapper,
     };
   }, [euiTheme, depth]);
