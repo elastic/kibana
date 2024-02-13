@@ -455,13 +455,9 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       const idx = _props.rowIndex - pagination.pageSize * pagination.pageIndex;
       const alert = alerts[idx];
       if (alert) {
-        const data: Array<{ field: string; value: string[] }> = [];
-        Object.entries(alert ?? {}).forEach(([key, value]) => {
-          data.push({ field: key, value: value as string[] });
-        });
         return renderCellPopover({
           ..._props,
-          data,
+          alert,
         });
       }
       return null;
