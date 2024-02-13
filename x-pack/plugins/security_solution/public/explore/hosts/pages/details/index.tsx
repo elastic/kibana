@@ -10,6 +10,7 @@ import {
   EuiFlexItem,
   EuiHorizontalRule,
   EuiSpacer,
+  EuiTitle,
   EuiWindowEvent,
 } from '@elastic/eui';
 import { noop } from 'lodash/fp';
@@ -20,6 +21,12 @@ import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { tableDefaults, dataTableSelectors, TableId } from '@kbn/securitysolution-data-table';
+import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  useAssetCriticalityData,
+  useAssetCriticalityPrivileges,
+} from '../../../../entity_analytics/components/asset_criticality/use_asset_criticality';
+import { AssetCriticalitySelector } from '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector';
 import { AlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status';
 import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
@@ -167,6 +174,14 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
     [detailName]
   );
 
+  const entity = useMemo(() => ({ type: 'host' as const, name: detailName }), [detailName]);
+  const privileges = useAssetCriticalityPrivileges(entity.name);
+  const canReadAssetCriticality = !!privileges.data?.has_read_permissions;
+  const criticality = useAssetCriticalityData({
+    entity,
+    enabled: canReadAssetCriticality,
+  });
+
   return (
     <>
       {indicesExist ? (
@@ -199,7 +214,21 @@ const HostDetailsComponent: React.FC<HostDetailsProps> = ({ detailName, hostDeta
                   ),
                 ]}
               />
-
+              {canReadAssetCriticality && (
+                <>
+                  <EuiTitle size="xs">
+                    <h3>
+                      <FormattedMessage
+                        id="xpack.securitySolution..users.assetCriticality.sectionTitle"
+                        defaultMessage="Asset Criticality"
+                      />
+                    </h3>
+                  </EuiTitle>
+                  <EuiSpacer size="s" />
+                  <AssetCriticalitySelector compressed criticality={criticality} entity={entity} />
+                  <EuiHorizontalRule margin="m" />
+                </>
+              )}
               <AnomalyTableProvider
                 criteriaFields={hostToCriteria(hostOverview)}
                 startDate={from}

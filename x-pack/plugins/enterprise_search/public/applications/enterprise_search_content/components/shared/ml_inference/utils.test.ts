@@ -4,89 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { nerModel, textClassificationModel } from '../../../__mocks__/ml_models.mock';
 
-import { TrainedModelConfigResponse } from '@kbn/ml-plugin/common/types/trained_models';
-
-import {
-  getMLType,
-  getModelDisplayTitle,
-  isSupportedMLModel,
-  sortSourceFields,
-  NLP_CONFIG_KEYS,
-} from './utils';
+import { getMLType, getModelDisplayTitle, sortSourceFields, NLP_CONFIG_KEYS } from './utils';
 
 describe('ml inference utils', () => {
-  describe('isSupportedMLModel', () => {
-    const makeFakeModel = (
-      config: Partial<TrainedModelConfigResponse>
-    ): TrainedModelConfigResponse => {
-      const { inference_config: _throwAway, ...base } = nerModel;
-      return {
-        inference_config: {},
-        ...base,
-        ...config,
-      };
-    };
-    it('returns true for expected models', () => {
-      const models: TrainedModelConfigResponse[] = [
-        nerModel,
-        textClassificationModel,
-        makeFakeModel({
-          inference_config: {
-            text_embedding: {},
-          },
-          model_id: 'mock-text_embedding',
-        }),
-        makeFakeModel({
-          inference_config: {
-            zero_shot_classification: {
-              classification_labels: [],
-            },
-          },
-          model_id: 'mock-zero_shot_classification',
-        }),
-        makeFakeModel({
-          inference_config: {
-            question_answering: {},
-          },
-          model_id: 'mock-question_answering',
-        }),
-        makeFakeModel({
-          inference_config: {
-            fill_mask: {},
-          },
-          model_id: 'mock-fill_mask',
-        }),
-        makeFakeModel({
-          inference_config: {
-            classification: {},
-          },
-          model_id: 'lang_ident_model_1',
-          model_type: 'lang_ident',
-        }),
-      ];
-
-      for (const model of models) {
-        expect(isSupportedMLModel(model)).toBe(true);
-      }
-    });
-
-    it('returns false for unexpected models', () => {
-      const models: TrainedModelConfigResponse[] = [
-        makeFakeModel({}),
-        makeFakeModel({
-          inference_config: {
-            fakething: {},
-          },
-        }),
-      ];
-
-      for (const model of models) {
-        expect(isSupportedMLModel(model)).toBe(false);
-      }
-    });
-  });
   describe('sortSourceFields', () => {
     it('promotes fields', () => {
       let fields: string[] = ['id', 'body', 'url'];

@@ -283,7 +283,6 @@ export const useDashboardListingTable = ({
       createItem: !showWriteControls || !showCreateDashboardButton ? undefined : createItem,
       deleteItems: !showWriteControls ? undefined : deleteItems,
       editItem: !showWriteControls ? undefined : editItem,
-      itemIsEditable: () => showWriteControls,
       emptyPrompt,
       entityName,
       entityNamePlural,
