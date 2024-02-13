@@ -22,7 +22,6 @@ async function getPrProjects() {
       .map((response) => response.data.items)
       .flat()
       .filter((project) => project.name.match(match))
-      .filter((project) => project) // filter undefined match
       .map((project) => {
         const [, prNumber, projectType] = project.name.match(match);
         return {
@@ -62,6 +61,9 @@ async function deleteProject({
 
 async function purgeProjects() {
   const prProjects = await getPrProjects();
+
+  console.log(prProjects);
+
   const projectsToPurge = [];
   for (const project of prProjects) {
     const NOW = new Date().getTime() / 1000;
