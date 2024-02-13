@@ -533,6 +533,7 @@ export function useQueryBarMenuPanels({
     {
       id: QueryBarMenuPanel.saveAsNewQuery,
       title: strings.getSaveCurrentFilterSetLabel(),
+      width: 400,
       content: <div css={{ padding: euiThemeVars.euiSizeM }}>{saveAsNewQueryFormComponent}</div>,
     },
     {
