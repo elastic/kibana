@@ -7,6 +7,7 @@
 
 import type { CoreSetup } from '@kbn/core-lifecycle-server';
 import type { Logger } from '@kbn/logging';
+import { IUiSettingsClient } from '@kbn/core/server';
 import type {
   ChatRegistrationFunction,
   RegisterFunction,
@@ -32,6 +33,7 @@ export interface FunctionRegistrationParameters {
   registerFunction: RegisterFunction;
   resources: ObservabilityRouteHandlerResources;
   dataViewsClient: DataViewsService;
+  uiSettingsClient: IUiSettingsClient;
 }
 export function registerAssistantFunctions({
   coreSetup,
@@ -41,6 +43,7 @@ export function registerAssistantFunctions({
   getRacClientWithRequest,
   ruleDataService,
   dataViews,
+  uiSettingsClient,
 }: {
   coreSetup: CoreSetup;
   config: ObservabilityConfig;
@@ -49,6 +52,7 @@ export function registerAssistantFunctions({
   getRacClientWithRequest: RegisterRoutesDependencies['getRacClientWithRequest'];
   ruleDataService: RegisterRoutesDependencies['ruleDataService'];
   dataViews: DataViewsServerPluginStart;
+  uiSettingsClient: IUiSettingsClient;
 }): ChatRegistrationFunction {
   return async ({ resources, registerContext, registerFunction }) => {
     const observabilityRouteHandlerResources: ObservabilityRouteHandlerResources = {
@@ -69,7 +73,7 @@ export function registerAssistantFunctions({
     const soClient = (await resources.context.core).savedObjects.client;
     const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
     const dataViewsClient = await dataViews.dataViewsServiceFactory(soClient, esClient);
-    const repository = new KibanaSavedObjectsSLORepository(soClient);
+    const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     // TODO: handle space id
     const summaryClient = new DefaultSummaryClient(esClient);
     const summarySearchClient = new DefaultSummarySearchClient(esClient, logger, 'default');
@@ -84,6 +88,7 @@ export function registerAssistantFunctions({
       },
       registerFunction,
       dataViewsClient,
+      uiSettingsClient,
     };
 
     registerGetSLOListFunction(parameters);

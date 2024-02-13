@@ -5,9 +5,11 @@
  * 2.0.
  */
 import { TimeBuckets } from '@kbn/data-plugin/common';
+import type { IUiSettingsClient } from '@kbn/core/server';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import moment from 'moment';
 import { FromSchema } from 'json-schema-to-ts';
-import { DataView } from '@kbn/data-views-plugin/common';
+import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { i18n } from '@kbn/i18n';
 import datemath from '@kbn/datemath';
@@ -15,6 +17,11 @@ import { FunctionRegistrationParameters } from '.';
 export interface SLOSourceItem {
   name: string;
   sourceIndex: string;
+}
+
+export interface ChangePointResponse {
+  aggregations: { change_point_request: { bucket: { key: string }; type: string } };
+  fieldName: string;
 }
 
 const parameters = {
@@ -31,11 +38,11 @@ const parameters = {
     },
     start: {
       type: 'string',
-      description: 'Optional start of the time range, in Elasticsearch date math, like `now`.',
+      description: 'Optional start of the time range, in Elasticsearch date math, like `now-24h`.',
     },
     end: {
       type: 'string',
-      description: 'Optional end of the time range, in Elasticsearch date math, like `now-24h`.',
+      description: 'Optional end of the time range, in Elasticsearch date math, like `now`.',
     },
     field: {
       type: 'string',
@@ -73,6 +80,7 @@ export function registerGetSLOChangeDetectionFunction({
   resources,
   registerFunction,
   dataViewsClient,
+  uiSettingsClient,
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
@@ -112,54 +120,45 @@ export function registerGetSLOChangeDetectionFunction({
       } = args;
       const sloChangePoint = new SLOChangePoint(
         sloClient,
-        name,
-        id,
+        uiSettingsClient,
+        dataViewsClient,
         start,
         end,
+        name,
+        id,
         alertStart,
         longWindow,
         metricOperation
       );
-      const slo = await sloChangePoint.getSLO();
-      const { start: absoluteStart, end: absoluteEnd } = sloChangePoint.getAbsoluteStartTime();
+      await sloChangePoint.setup();
+      const dataView = sloChangePoint.dataView;
+      const { start: absoluteStart, end: absoluteEnd } = sloChangePoint.absoluteStartTime;
 
       const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
 
-      const sourceIndex = slo.indicator.params.index;
-      let dataView: DataView;
-
-      const dataViewId = (await dataViewsClient.getIdsWithTitle()).find((view) => {
-        return view.title === sourceIndex;
-      })?.id;
-      if (dataViewId) {
-        dataView = await dataViewsClient.get(dataViewId);
-      } else {
-        dataView = await dataViewsClient.create({
-          title: sourceIndex,
-        });
-      }
-
-      const metricFields = dataView.fields
+      const metricFields = dataView?.fields
         .getByType('number')
         .filter((f) => f.aggregatable === true)
         .map((f) => f.name);
 
       const results = await Promise.all(
-        metricFields.map((fieldName) =>
+        (metricFields || []).map((fieldName) =>
           getChangePointForField({
-            index: sourceIndex,
+            index: sloChangePoint.sourceIndex!,
             field: fieldName,
             esClient,
             start: absoluteStart,
             end: absoluteEnd,
             aggregationType: metricOperation,
-            interval: sloChangePoint.getBucketInterval().expression,
+            interval: sloChangePoint.bucketInterval?.expression!,
           })
         )
       );
 
       const changes = results.map((result) => ({
-        changedAtApproximateTime: result.aggregations?.change_point_request?.bucket?.key,
+        changedAtApproximateTime: moment(result.aggregations?.change_point_request?.bucket?.key)
+          .tz(sloChangePoint.timezone!)
+          .format(sloChangePoint.dateFormat),
         typeOfChange: result.aggregations?.change_point_request?.type,
         fieldName: result.fieldName,
       }));
@@ -180,64 +179,84 @@ export function registerGetSLOChangeDetectionFunction({
 }
 
 export class SLOChangePoint {
-  private timeBuckets = new TimeBuckets({
-    'histogram:maxBars': 1000,
-    'histogram:barTarget': 50,
-    dateFormat: 'YYYY-MM-DD',
-    'dateFormat:scaled': [
-      ['', 'HH:mm:ss.SSS'],
-      ['PT1S', 'HH:mm:ss'],
-      ['PT1M', 'HH:mm'],
-      ['PT1H', 'YYYY-MM-DD HH:mm'],
-      ['P1DT', 'YYYY-MM-DD'],
-      ['P1YT', 'YYYY'],
-    ],
-  });
+  public dateFormat?: string;
+  public timeBuckets?: TimeBuckets;
+  public timezone?: string;
+  public dataView?: DataView;
+  public slo?: SLOWithSummaryResponse;
 
   constructor(
     private sloClient: FunctionRegistrationParameters['sloClient'],
-    private name: string,
-    private id: string | undefined,
-    private start: string,
-    private end: string,
-    private alertStart: string,
-    private longWindow: string,
-    private metricOperation = 'avg'
-  ) {
+    private uiSettingsClient: IUiSettingsClient,
+    private dataViewsClient: DataViewsService,
+    private start?: string,
+    private end?: string,
+    private name?: string,
+    private id?: string,
+    private alertStart?: string,
+    private longWindow?: string,
+    private metricOperation? = 'avg'
+  ) {}
+
+  public async setup() {
+    this.dateFormat = await this.uiSettingsClient.get('dateFormat');
+    this.timeBuckets = new TimeBuckets({
+      'histogram:maxBars': await this.uiSettingsClient.get('histogram:maxBars'),
+      'histogram:barTarget': await this.uiSettingsClient.get('histogram:barTarget'),
+      dateFormat: this.dateFormat,
+      'dateFormat:scaled': await this.uiSettingsClient.get('dateFormat:scaled'),
+    });
+    this.slo = await this.getSLO();
+    const sourceIndex = this.slo?.indicator.params.index;
+    const dataViewId = (await this.dataViewsClient.getIdsWithTitle()).find((view) => {
+      return view.title === sourceIndex;
+    })?.id;
+    if (dataViewId) {
+      this.dataView = await this.dataViewsClient.get(dataViewId);
+    } else {
+      this.dataView = await this.dataViewsClient.create({
+        title: sourceIndex,
+      });
+    }
+
+    const tz = await this.uiSettingsClient.get('dateFormat:tz');
+    this.timezone = tz === 'Browser' ? 'UTC' : tz;
+
     this.setTimeBounds();
   }
 
   public async getSLO() {
+    const kqlQueries = [];
+    if (!this.id && !this.name) {
+      throw new Error('Please provide one of the following: SLO name or SLO ID');
+    }
+    if (this.id) {
+      kqlQueries.push(`slo.id: "${this.id}"`);
+    }
+    if (this.name) {
+      kqlQueries.push(`slo.name: "${this.name}*"`);
+    }
     const params = {
-      kqlQuery: `slo.name: "${this.name}*"`,
+      kqlQuery: kqlQueries.join(' AND '),
       page: '1',
       perPage: '1',
     };
-    if (this.id) {
-      params.kqlQuery += ` AND slo.id: "${this.id}"`;
-    }
+
     const findResponse = await this.sloClient.find.execute(params);
     return findResponse.results[0];
   }
 
-  public get alertWindowStart() {
-    if (this.alertStart && this.longWindow) {
-      return datemath
-        .parse(`now-${this.longWindow}`, { forceNow: new Date(this.alertStart) })
-        ?.valueOf();
-    }
-    return null;
-  }
-
-  public getAbsoluteStartTime() {
-    const end = this.end ? datemath.parse(this.end).valueOf() : datemath.parse('now').valueOf();
+  public get absoluteStartTime() {
+    const end = this.end
+      ? datemath.parse(this.end)?.toISOString()
+      : datemath.parse('now')?.toISOString();
     let start;
     if (this.start) {
-      start = datemath.parse(this.start).valueOf();
+      start = datemath.parse(this.start!)?.toISOString();
     } else if (this.alertWindowStart) {
-      start = datemath.parse(this.alertWindowStart).valueOf();
+      start = this.alertWindowStart;
     } else {
-      start = datemath.parse('now-24h').valueOf();
+      start = datemath.parse('now-24h')?.toISOString();
     }
     return {
       start,
@@ -245,21 +264,44 @@ export class SLOChangePoint {
     };
   }
 
-  public getTimeBound() {
-    timeBuckets.getTimeBound();
+  public get alertWindowStart() {
+    if (this.alertStart && this.longWindow) {
+      return datemath
+        .parse(`now-${this.longWindow}`, { forceNow: new Date(this.alertStart) })
+        ?.toISOString();
+    }
+    return null;
+  }
+
+  public get sourceIndex() {
+    return this.slo?.indicator.params.index;
+  }
+
+  public get timebound() {
+    this.checkTimeBuckets();
+    return this.timeBuckets?.getTimeBound();
   }
 
   public setTimeBounds() {
-    const absoluteStartTime = this.getAbsoluteStartTime();
-    this.timeBuckets.setBounds({
-      min: moment(absoluteStartTime.start),
-      max: moment(absoluteStartTime.end),
+    this.checkTimeBuckets();
+    this.timeBuckets?.setBounds({
+      min: moment(this.absoluteStartTime.start),
+      max: moment(this.absoluteStartTime.end),
     });
-    this.timeBuckets.setInterval('auto');
+    this.timeBuckets?.setInterval('auto');
   }
 
-  public getBucketInterval() {
-    return this.timeBuckets.getInterval();
+  public get bucketInterval() {
+    this.checkTimeBuckets();
+    return this.timeBuckets?.getInterval();
+  }
+
+  private checkTimeBuckets() {
+    if (!this.timeBuckets) {
+      throw new Error(
+        'Timebuckets not registered. Please call the setup function before continuing'
+      );
+    }
   }
 }
 
@@ -269,18 +311,18 @@ async function getChangePointForField({
   esClient,
   start,
   end,
-  aggregationType,
+  aggregationType = 'avg',
   interval,
 }: {
   index: string;
   field: string;
   esClient: ElasticsearchClient;
-  start: string;
-  end: string;
-  aggregationType: 'avg' | 'min' | 'max' | 'sum';
+  start?: string;
+  end?: string;
+  aggregationType?: string;
   interval: string;
-}) {
-  return new Promise((resolve) => {
+}): Promise<ChangePointResponse> {
+  return new Promise<ChangePointResponse>((resolve) => {
     esClient
       .search({
         index,
@@ -324,7 +366,7 @@ async function getChangePointForField({
         resolve({
           ...searchResults,
           fieldName: field,
-        });
+        } as unknown as ChangePointResponse);
       });
   });
 }

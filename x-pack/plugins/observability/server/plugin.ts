@@ -380,6 +380,10 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
         repository: getObservabilityServerRouteRepository(config),
       });
 
+      const internalSoClient = new SavedObjectsClient(
+        coreStart.savedObjects.createInternalRepository()
+      );
+
       plugins.observabilityAIAssistant.service.register(
         registerAssistantFunctions({
           config,
@@ -389,6 +393,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           getRacClientWithRequest: pluginStart.ruleRegistry.getRacClientWithRequest,
           ruleDataService,
           dataViews: pluginStart.dataViews,
+          uiSettingsClient: coreStart.uiSettings.asScopedToClient(internalSoClient),
         })
       );
 
