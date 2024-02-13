@@ -122,5 +122,3 @@ purgeProjects().catch((e) => {
   console.error(e.toString());
   process.exitCode = 1;
 });
-
-// no op commit
