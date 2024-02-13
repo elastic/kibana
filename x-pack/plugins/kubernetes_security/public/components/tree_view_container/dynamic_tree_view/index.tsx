@@ -7,7 +7,7 @@
 
 import React, { useEffect, useState, useRef, MouseEvent, KeyboardEvent, useMemo } from 'react';
 import {
-  EuiIcon,
+  EuiTreeView,
   EuiText,
   EuiI18n,
   EuiScreenReaderOnly,
@@ -15,7 +15,11 @@ import {
   keys,
   EuiLoadingSpinner,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+// @ts-expect-error style types not defined, but they exist
+import { euiTreeViewStyles } from '@elastic/eui/lib/components/tree_view/tree_view.styles';
+
 import {
   TREE_NAVIGATION_LOADING,
   TREE_NAVIGATION_SHOW_MORE,
@@ -66,6 +70,8 @@ export const DynamicTreeView = ({
   expanded = true,
 }: DynamicTreeViewProps) => {
   const styles = useStyles(depth);
+  const euiStyles = euiTreeViewStyles(useEuiTheme());
+  const euiTreeViewCss = [euiStyles.euiTreeView, euiStyles.default];
 
   const { indexPattern, setNoResults, setTreeNavSelection } = useTreeViewContext();
 
@@ -132,17 +138,7 @@ export const DynamicTreeView = ({
   }, [data?.pages]);
 
   return (
-    <EuiText
-      size="s"
-      className={`euiTreeView__wrapper ${!expanded ? 'euiTreeView__wrapper--hidden' : ''}`}
-      css={styles.treeViewWrapper(expanded)}
-    >
-      {isLoading && (
-        <div>
-          <EuiLoadingSpinner size="s" />
-          <span css={styles.loadMoreTextLeft}>{TREE_NAVIGATION_LOADING}</span>
-        </div>
-      )}
+    <EuiText size="s" css={styles.euiTreeViewWrapper} hidden={!expanded}>
       {depth === 0 && (
         <EuiI18n
           token="euiTreeView.listNavigationInstructions"
@@ -156,9 +152,16 @@ export const DynamicTreeView = ({
         </EuiI18n>
       )}
       <ul
-        className="euiTreeView"
+        css={euiTreeViewCss}
         aria-describedby={data?.pages?.length ? 'dynamicTreeViewInstructionId' : undefined}
       >
+        {isLoading && (
+          <EuiTreeView.Item
+            id="dynamicTreeViewLoading"
+            icon={<EuiLoadingSpinner size="s" />}
+            label={TREE_NAVIGATION_LOADING}
+          />
+        )}
         {itemList.map((aggData) => {
           const queryFilter = {
             ...query,
@@ -190,26 +193,25 @@ export const DynamicTreeView = ({
           );
         })}
         {hasNextPage && (
-          <li key="load_more" className="euiTreeView__node" css={styles.loadMoreButtonWrapper}>
-            <EuiBadge
-              css={styles.loadMoreButton}
-              onClickAriaLabel={TREE_NAVIGATION_SHOW_MORE(tree[depth].namePlural)}
-              data-test-subj={BUTTON_TEST_ID}
-              onKeyDown={(event: React.KeyboardEvent) => onLoadMoreKeydown(event)}
-              onClick={onClickNextPageHandler}
-            >
-              <span css={styles.loadMoreText}>
+          <EuiTreeView.Item
+            id="dynamicTreeViewLoadMore"
+            css={styles.loadMoreButton}
+            aria-label={TREE_NAVIGATION_SHOW_MORE(tree[depth].namePlural)}
+            data-test-subj={BUTTON_TEST_ID}
+            onKeyDown={(event: React.KeyboardEvent) => onLoadMoreKeydown(event)}
+            onClick={onClickNextPageHandler}
+            label={
+              <EuiBadge
+                css={styles.loadMoreBadge}
+                iconSide="right"
+                iconType={isFetchingNextPage ? EuiLoadingSpinner : 'arrowDown'}
+              >
                 {isFetchingNextPage
                   ? TREE_NAVIGATION_LOADING
                   : TREE_NAVIGATION_SHOW_MORE(tree[depth].namePlural)}
-              </span>
-              {isFetchingNextPage ? (
-                <EuiLoadingSpinner size="s" />
-              ) : (
-                <EuiIcon size="s" type="arrowDown" />
-              )}
-            </EuiBadge>
-          </li>
+              </EuiBadge>
+            }
+          />
         )}
       </ul>
     </EuiText>
@@ -229,7 +231,6 @@ const DynamicTreeViewItem = ({
   query,
 }: DynamicTreeViewItemProps) => {
   const isLastNode = depth === tree.length - 1;
-  const styles = useStyles(depth);
   const buttonRef = useRef<Record<string, any>>({});
 
   const handleSelect = () => {
@@ -316,32 +317,22 @@ const DynamicTreeViewItem = ({
   const clusterLevel = BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS[tree[depth].type];
 
   return (
-    <li
-      className={`euiTreeView__node
-        ${isExpanded ? 'euiTreeView__node--expanded' : ''}
-        ${isSelected ? 'euiTreeView__node--selected' : ''}
-      `}
-    >
-      <button
-        data-test-subj={expanded ? BUTTON_TEST_ID : ''}
-        className="euiTreeView__nodeInner euiTreeView__nodeInner--withArrows"
-        onClick={onButtonToggle}
-        onKeyDown={onKeyDown}
-        ref={(el) => (buttonRef.current[aggData.key] = el)}
-        css={isLastNode ? styles.leafNodeButton : undefined}
-      >
-        {!isLastNode && (
-          <EuiIcon
-            className="euiTreeView__expansionArrow"
-            type={isExpanded ? 'arrowDown' : 'arrowRight'}
-            onClick={onArrowToggle}
-          />
-        )}
-        <TreeViewIcon {...tree[depth].iconProps} css={styles.labelIcon} />
-        <EuiToolTip content={`${clusterLevel}: ${aggData.key}`}>
-          <span className="euiTreeView__nodeLabel">{aggData.key_as_string || aggData.key}</span>
+    <EuiTreeView.Item
+      id={aggData.key_as_string || `${aggData.key}`}
+      hasArrow={!isLastNode}
+      isExpanded={isExpanded}
+      isActive={isSelected}
+      onClick={onButtonToggle}
+      onKeyDown={onKeyDown}
+      icon={<TreeViewIcon {...tree[depth].iconProps} />}
+      label={
+        <EuiToolTip anchorClassName="eui-textTruncate" content={`${clusterLevel}: ${aggData.key}`}>
+          <span>{aggData.key_as_string || aggData.key}</span>
         </EuiToolTip>
-      </button>
+      }
+      buttonRef={(el: HTMLButtonElement) => (buttonRef.current[aggData.key] = el)}
+      data-test-subj={expanded ? BUTTON_TEST_ID : ''}
+    >
       <div
         onKeyDown={(event: React.KeyboardEvent) => onChildrenKeydown(event, aggData.key.toString())}
       >
@@ -363,6 +354,6 @@ const DynamicTreeViewItem = ({
           />
         )}
       </div>
-    </li>
+    </EuiTreeView.Item>
   );
 };
