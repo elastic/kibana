@@ -15,13 +15,13 @@ import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/d
 import { AttachmentType, Case } from '@kbn/cases-plugin/common';
 import { ALERT_CASE_IDS } from '@kbn/rule-data-utils';
 import {
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   createRule,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
-  getQuerySignalIds,
-} from '../../../detection_engine_api_integration/utils';
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  getQueryAlertIds,
+} from '../../../common/utils/security_solution';
 import { superUser } from './authentication/users';
 import { User } from './authentication/types';
 import { getSpaceUrlPrefix } from './api/helpers';
@@ -35,13 +35,13 @@ export const createSecuritySolutionAlerts = async (
   numberOfSignals: number = 1
 ): Promise<estypes.SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const rule = {
-    ...getRuleForSignalTesting(['auditbeat-*']),
+    ...getRuleForAlertTesting(['auditbeat-*']),
     query: 'process.executable: "/usr/bin/sudo"',
   };
   const { id } = await createRule(supertest, log, rule);
   await waitForRuleSuccess({ supertest, log, id });
-  await waitForSignalsToBePresent(supertest, log, numberOfSignals, [id]);
-  const signals = await getSignalsByIds(supertest, log, [id]);
+  await waitForAlertsToBePresent(supertest, log, numberOfSignals, [id]);
+  const signals = await getAlertsByIds(supertest, log, [id]);
 
   return signals;
 };
@@ -53,7 +53,7 @@ export const getSecuritySolutionAlerts = async (
   const { body: updatedAlert } = await supertest
     .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
     .set('kbn-xsrf', 'true')
-    .send(getQuerySignalIds(alertIds))
+    .send(getQueryAlertIds(alertIds))
     .expect(200);
 
   return updatedAlert;
