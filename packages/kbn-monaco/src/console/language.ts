@@ -21,18 +21,6 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
   ignoreCase: true,
   tokenizer: {
     root: [
-      [
-        /<style\s*>/,
-        {
-          token: 'keyword',
-          bracket: '@open',
-          next: '@css_block',
-          nextEmbedded: 'text/css',
-        },
-      ],
-
-      [/<\/style\s*>/, { token: 'keyword', bracket: '@close' }],
-
       // whitespace
       { include: '@rule_whitespace' },
       // start a multi-line comment
@@ -61,12 +49,6 @@ export const lexerRules: monaco.languages.IMonarchLanguage = {
       [/@escapes/, 'string.escape'],
       [/\\./, 'string.escape.invalid'],
       [/"/, { token: 'string.quote', bracket: '@close', next: '@pop' }],
-    ],
-    css_block: [
-      [/[^"<]+/, ''],
-      [/<\/style\s*>/, { token: '@rematch', next: '@pop', nextEmbedded: '@pop' }],
-      [/"/, 'string', '@string'],
-      [/</, ''],
     ],
   },
 };
