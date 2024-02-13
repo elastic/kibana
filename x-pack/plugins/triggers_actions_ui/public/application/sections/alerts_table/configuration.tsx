@@ -36,7 +36,7 @@ const columns = [
       defaultMessage: 'Alert Status',
     }),
     id: ALERT_STATUS,
-    initialWidth: 140,
+    initialWidth: 120,
   },
   {
     displayAsText: FEATURE_LABEL,
@@ -53,7 +53,7 @@ const columns = [
       }
     ),
     id: TIMESTAMP,
-    initialWidth: 230,
+    initialWidth: 200,
     schema: 'datetime',
   },
   {
