@@ -17,8 +17,6 @@ import { AnomalyChartsStateService } from './anomaly_charts_state_service';
 import { AnomalyExplorerChartsService } from '../services/anomaly_explorer_charts_service';
 import { useTableSeverity } from '../components/controls/select_severity';
 import { AnomalyDetectionAlertsStateService } from './alerts';
-import { fieldFormatServiceFactory } from '../services/field_format_service_factory';
-import { indexServiceFactory } from '../util/index_service';
 import { explorerServiceFactory, type ExplorerService } from './explorer_dashboard_service';
 
 export interface AnomalyExplorerContextValue {
@@ -61,7 +59,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
 
   const {
     services: {
-      mlServices: { mlApiServices },
+      mlServices: { mlApiServices, mlFieldFormatService },
       uiSettings,
       data,
     },
@@ -81,9 +79,7 @@ export const AnomalyExplorerContextProvider: FC = ({ children }) => {
   // updates so using `useEffect` is the right thing to do here to not get errors
   // related to React lifecycle methods.
   useEffect(() => {
-    const mlIndexUtils = indexServiceFactory(data.dataViews);
-    const fieldFormatService = fieldFormatServiceFactory(mlApiServices, mlIndexUtils);
-    const explorerService = explorerServiceFactory(fieldFormatService);
+    const explorerService = explorerServiceFactory(mlFieldFormatService);
 
     const anomalyTimelineService = new AnomalyTimelineService(
       timefilter,
