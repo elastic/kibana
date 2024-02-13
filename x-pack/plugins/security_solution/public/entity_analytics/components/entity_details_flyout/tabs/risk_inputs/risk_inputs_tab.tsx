@@ -244,7 +244,7 @@ const RiskInputsAssetCriticalitySection: React.FC<{
       <EuiText size="xs" color="subdued">
         <FormattedMessage
           id="xpack.securitySolution.flyout.entityDetails.riskInputs.assetCriticalityDescription"
-          defaultMessage="The criticality at the time of the risk score calculation."
+          defaultMessage="The criticality assigned at the time of the risk score calculation."
         />
       </EuiText>
       <EuiSpacer size="s" />
