@@ -11,11 +11,12 @@ import React, { useState } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { Meta, Story } from '@storybook/react';
 import { IndexPattern } from '@kbn/io-ts-utils';
-import { DataViewListItem } from '@kbn/data-views-plugin/common';
+import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import {
   AllDatasetSelection,
   DatasetSelection,
-  DatasetSelectionChange,
+  DataViewSelection,
+  SelectionChange,
 } from '../../../common/dataset_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DatasetSelector } from './dataset_selector';
@@ -43,8 +44,8 @@ const meta: Meta<typeof DatasetSelector> = {
 export default meta;
 
 const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
-  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection>(() =>
-    AllDatasetSelection.create()
+  const [datasetSelection, setDatasetSelection] = useState<DatasetSelection | DataViewSelection>(
+    () => AllDatasetSelection.create()
   );
 
   const [search, setSearch] = useState<DatasetsSelectorSearchParams>({
@@ -59,7 +60,7 @@ const DatasetSelectorTemplate: Story<DatasetSelectorProps> = (args) => {
     }
   };
 
-  const onSelectionChange: DatasetSelectionChange = (newSelection) => {
+  const onSelectionChange: SelectionChange = (newSelection) => {
     setDatasetSelection(newSelection);
   };
 
@@ -123,7 +124,6 @@ Basic.args = {
   isLoadingUncategorized: false,
   isSearchingIntegrations: false,
   onDataViewsReload: () => alert('Reload data views...'),
-  onDataViewSelection: (dataView) => alert(`Navigate to data view "${dataView.name}"`),
   onDataViewsTabClick: () => console.log('Load data views...'),
   onIntegrationsReload: () => alert('Reload integrations...'),
   onUncategorizedTabClick: () => console.log('Load uncategorized streams...'),
@@ -508,7 +508,7 @@ const mockDatasets: Dataset[] = [
   { name: 'data-scaling-logs-*' as IndexPattern },
 ].map((dataset) => Dataset.create(dataset));
 
-const mockDataViews: DataViewListItem[] = [
+const mockDataViews: DataViewDescriptor[] = [
   {
     id: 'logs-*',
     namespaces: ['default'],
@@ -528,4 +528,4 @@ const mockDataViews: DataViewListItem[] = [
     typeMeta: {},
     name: 'synthetics-dashboard',
   },
-];
+].map((dataView) => DataViewDescriptor.create(dataView));

@@ -9,13 +9,11 @@ import { useCallback } from 'react';
 import createContainer from 'constate';
 import { useInterpret, useSelector } from '@xstate/react';
 import { DataViewListItem, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DiscoverStart } from '@kbn/discover-plugin/public';
 import { SortOrder } from '../../common/latest';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
 
 interface DataViewsContextDeps {
   dataViewsService: DataViewsPublicPluginStart;
-  discoverService: DiscoverStart;
 }
 
 export interface SearchDataViewsParams {
@@ -28,11 +26,10 @@ export type SearchDataViews = (params: SearchDataViewsParams) => void;
 export type LoadDataViews = () => void;
 export type ReloadDataViews = () => void;
 
-const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDeps) => {
+const useDataViews = ({ dataViewsService }: DataViewsContextDeps) => {
   const dataViewsStateService = useInterpret(() =>
     createDataViewsStateMachine({
       dataViews: dataViewsService,
-      discover: discoverService,
     })
   );
 
@@ -57,15 +54,6 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
       dataViewsStateService.send({
         type: 'SEARCH_DATA_VIEWS',
         search: searchParams,
-      }),
-    [dataViewsStateService]
-  );
-
-  const selectDataView: DataViewSelectionHandler = useCallback(
-    (dataView) =>
-      dataViewsStateService.send({
-        type: 'SELECT_DATA_VIEW',
-        dataView,
       }),
     [dataViewsStateService]
   );
@@ -96,7 +84,6 @@ const useDataViews = ({ dataViewsService, discoverService }: DataViewsContextDep
     loadDataViews,
     reloadDataViews,
     searchDataViews,
-    selectDataView,
     sortDataViews,
   };
 };

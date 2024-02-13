@@ -45,6 +45,7 @@ import {
   LENS_VISUALIZATION_MIN_WIDTH,
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
+import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 export interface RiskSummaryProps<T extends RiskScoreEntity> {
   riskScoreData: RiskScoreState<T>;
@@ -77,8 +78,19 @@ const RiskSummaryComponent = <T extends RiskScoreEntity>({
 
   const xsFontSize = useEuiFontSize('xxs').fontSize;
 
-  const columns = useMemo(buildColumns, []);
-  const rows = useMemo(() => getItems(entityData), [entityData]);
+  const isAssetCriticalityEnabled = useIsExperimentalFeatureEnabled(
+    'entityAnalyticsAssetCriticalityEnabled'
+  );
+
+  const columns = useMemo(
+    () => buildColumns(isAssetCriticalityEnabled),
+    [isAssetCriticalityEnabled]
+  );
+
+  const rows = useMemo(
+    () => getItems(entityData, isAssetCriticalityEnabled),
+    [entityData, isAssetCriticalityEnabled]
+  );
 
   const onToggle = useCallback(
     (isOpen) => {
