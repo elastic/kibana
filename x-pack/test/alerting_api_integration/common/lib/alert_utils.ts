@@ -101,10 +101,13 @@ export class AlertUtils {
     return request;
   }
 
-  public getDisableRequest(alertId: string) {
+  public getDisableRequest(alertId: string, untrack?: boolean) {
     const request = this.supertestWithoutAuth
       .post(`${getUrlPrefix(this.space.id)}/api/alerting/rule/${alertId}/_disable`)
-      .set('kbn-xsrf', 'foo');
+      .set('kbn-xsrf', 'foo')
+      .send({
+        untrack: untrack === undefined ? true : untrack,
+      });
     if (this.user) {
       return request.auth(this.user.username, this.user.password);
     }

@@ -6,7 +6,7 @@
  */
 
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
-import type { EcsError } from '@kbn/ecs';
+import type { EcsError } from '@elastic/ecs';
 import { validateAgents, validateAlertError, validateEndpointLicense } from './validate';
 import type { LicenseService } from '../../../../../common/license/license';
 

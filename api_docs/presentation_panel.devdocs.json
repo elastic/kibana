@@ -117,7 +117,7 @@
             "section": "def-common.PanelPackage",
             "text": "PanelPackage"
           },
-          ") => Promise<string>; } & Partial<Pick<",
+          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -221,7 +221,7 @@
             "section": "def-common.PanelPackage",
             "text": "PanelPackage"
           },
-          ") => Promise<string>; } & Partial<Pick<",
+          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -381,7 +381,7 @@
             "section": "def-common.PanelPackage",
             "text": "PanelPackage"
           },
-          ") => Promise<string>; } & Partial<Pick<",
+          ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "common",
@@ -539,7 +539,7 @@
                     "section": "def-common.PanelPackage",
                     "text": "PanelPackage"
                   },
-                  ") => Promise<string>; } & Partial<Pick<",
+                  ") => Promise<string>; getChildIds: () => string[]; getChild: (childId: string) => unknown; } & Partial<Pick<",
                   {
                     "pluginId": "@kbn/presentation-publishing",
                     "scope": "common",

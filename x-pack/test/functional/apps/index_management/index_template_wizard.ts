@@ -117,13 +117,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await testSubjects.setValue('indexPatternsField', 'test-index-pattern');
 
         // Go to Mappings step
-        await pageObjects.indexManagement.clickNextButton();
-        expect(await testSubjects.getVisibleText('stepTitle')).to.be(
-          'Component templates (optional)'
-        );
-        await pageObjects.indexManagement.clickNextButton();
-        expect(await testSubjects.getVisibleText('stepTitle')).to.be('Index settings (optional)');
-        await pageObjects.indexManagement.clickNextButton();
+        await testSubjects.click('formWizardStep-3');
         expect(await testSubjects.getVisibleText('stepTitle')).to.be('Mappings (optional)');
       });
 

@@ -476,7 +476,7 @@ describe('Task Runner Cancel', () => {
     );
     expect(logger.debug).nthCalledWith(
       8,
-      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
+      'ruleRunMetrics for test:1: {"numSearches":3,"totalSearchDurationMs":23423,"esSearchDurationMs":33,"numberOfTriggeredActions":1,"numberOfGeneratedActions":1,"numberOfActiveAlerts":1,"numberOfRecoveredAlerts":0,"numberOfNewAlerts":1,"numberOfDelayedAlerts":0,"hasReachedAlertLimit":false,"hasReachedQueuedActionsLimit":false,"triggeredActionsStatus":"complete"}'
     );
   }
 
@@ -520,6 +520,7 @@ describe('Task Runner Cancel', () => {
         numberOfNewAlerts: newAlerts,
         numberOfRecoveredAlerts: recoveredAlerts,
         numberOfTriggeredActions: triggeredActions,
+        numberOfDelayedAlerts: 0,
         totalSearchDurationMs: 23423,
         hasReachedAlertLimit,
         triggeredActionsStatus: 'complete',
