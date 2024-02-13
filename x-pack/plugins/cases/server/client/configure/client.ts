@@ -49,10 +49,7 @@ import { updateMappings } from './update_mappings';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
 import { ConfigurationRt, ConfigurationsRt } from '../../../common/types/domain';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
-import {
-  validateCustomFieldTypesInRequest,
-  validateOptionalCustomFieldsInRequest,
-} from './validators';
+import { validateCustomFieldTypesInRequest } from './validators';
 
 /**
  * Defines the internal helper functions.
@@ -256,7 +253,6 @@ export async function update(
     const request = decodeWithExcessOrThrow(ConfigurationPatchRequestRt)(req);
 
     validateDuplicatedCustomFieldKeysInRequest({ requestCustomFields: request.customFields });
-    validateOptionalCustomFieldsInRequest({ requestCustomFields: request.customFields });
 
     const { version, ...queryWithoutVersion } = request;
 
@@ -370,9 +366,6 @@ export async function create(
       decodeWithExcessOrThrow(ConfigurationRequestRt)(configRequest);
 
     validateDuplicatedCustomFieldKeysInRequest({
-      requestCustomFields: validatedConfigurationRequest.customFields,
-    });
-    validateOptionalCustomFieldsInRequest({
       requestCustomFields: validatedConfigurationRequest.customFields,
     });
 

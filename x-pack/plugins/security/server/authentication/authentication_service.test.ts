@@ -19,6 +19,7 @@ import type {
   ElasticsearchServiceSetup,
   HttpServiceSetup,
   HttpServiceStart,
+  IStaticAssets,
   KibanaRequest,
   Logger,
   LoggerFactory,
@@ -63,7 +64,7 @@ describe('AuthenticationService', () => {
     elasticsearch: jest.Mocked<ElasticsearchServiceSetup>;
     config: ConfigType;
     license: jest.Mocked<SecurityLicense>;
-    buildNumber: number;
+    staticAssets: IStaticAssets;
     customBranding: jest.Mocked<CustomBrandingSetup>;
   };
   let mockStartAuthenticationParams: {
@@ -96,7 +97,7 @@ describe('AuthenticationService', () => {
         isTLSEnabled: false,
       }),
       license: licenseMock.create(),
-      buildNumber: 100500,
+      staticAssets: coreSetupMock.http.staticAssets,
       customBranding: customBrandingServiceMock.createSetupContract(),
     };
     mockCanRedirectRequest.mockReturnValue(false);
@@ -983,7 +984,7 @@ describe('AuthenticationService', () => {
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/app/some',
         });
       });
@@ -1015,7 +1016,7 @@ describe('AuthenticationService', () => {
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/app/some',
         });
       });
@@ -1050,7 +1051,7 @@ describe('AuthenticationService', () => {
 
         expect(mockRenderUnauthorizedPage).toHaveBeenCalledWith({
           basePath: mockSetupAuthenticationParams.http.basePath,
-          buildNumber: 100500,
+          staticAssets: expect.any(Object),
           originalURL: '/mock-server-basepath/',
         });
       });

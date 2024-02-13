@@ -46,6 +46,7 @@ describe('UninstallCommandFlyout', () => {
   const uninstallTokenMetadataFixture: UninstallTokenMetadata = {
     id: 'id-1',
     policy_id: 'policy_id',
+    policy_name: 'policy_name',
     created_at: '2023-06-19T08:47:31.457Z',
   };
 
@@ -168,11 +169,32 @@ describe('UninstallCommandFlyout', () => {
       );
     });
 
-    it('displays the selected policy id to the user', () => {
+    it('displays the selected policy id and policy name to the user', () => {
       const renderResult = render();
 
       const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
-      expect(policyIdHint.textContent).toBe('Valid for the following agent policy: policy_id');
+      expect(policyIdHint.textContent).toBe(
+        'Valid for the following agent policy:policy_name (policy_id)'
+      );
+    });
+
+    it('displays hint if policy name is missing', () => {
+      const getTokenResponseFixture: MockResponseType<GetUninstallTokenResponse> = {
+        isLoading: false,
+        error: null,
+        data: {
+          item: { ...uninstallTokenFixture, policy_name: null },
+        },
+      };
+      useGetUninstallTokenMock.mockReturnValue(getTokenResponseFixture);
+
+      const renderResult = render();
+
+      const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
+      expect(policyIdHint.textContent).toBe(
+        "Valid for the following agent policy:- This token's related Agent policy has already been deleted, so the policy name is unavailable. (policy_id)"
+      );
+      expect(renderResult.getByTestId('emptyPolicyNameHint')).toBeInTheDocument();
     });
   });
 
