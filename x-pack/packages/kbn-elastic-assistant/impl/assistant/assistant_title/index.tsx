@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { Dispatch, SetStateAction, useCallback, useEffect, useMemo, useState } from 'react';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiInlineEditTitle,
   EuiLink,
   EuiModalHeaderTitle,
   EuiPopover,
@@ -23,6 +24,7 @@ import * as i18n from '../translations';
 import type { Conversation } from '../../..';
 import { ConnectorSelectorInline } from '../../connectorland/connector_selector_inline/connector_selector_inline';
 import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
+import { useConversation } from '../use_conversation';
 
 /**
  * Renders a header title, a tooltip button, and a popover with
@@ -30,11 +32,22 @@ import { AssistantAvatar } from '../assistant_avatar/assistant_avatar';
  */
 export const AssistantTitle: React.FC<{
   isDisabled?: boolean;
-  title: string | JSX.Element;
+  title: string;
   docLinks: Omit<DocLinksStart, 'links'>;
   selectedConversation: Conversation | undefined;
+  setSelectedConversationId: Dispatch<SetStateAction<string>>;
   isFlyoutMode: boolean;
-}> = ({ isDisabled = false, title, docLinks, selectedConversation, isFlyoutMode }) => {
+}> = ({
+  isDisabled = false,
+  title,
+  docLinks,
+  selectedConversation,
+  setSelectedConversationId,
+  isFlyoutMode,
+}) => {
+  const [newTitle, setNewTitle] = useState(() => title);
+  const { updateConversationTitle } = useConversation();
+
   const selectedConnectorId = selectedConversation?.apiConfig?.connectorId;
 
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = docLinks;
@@ -72,6 +85,21 @@ export const AssistantTitle: React.FC<{
   const onButtonClick = useCallback(() => setIsPopoverOpen((isOpen: boolean) => !isOpen), []);
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
 
+  const handleUpdateTitle = useCallback(
+    (updatedTitle: string) => {
+      if (selectedConversation) {
+        updateConversationTitle({ currentTitle: selectedConversation?.id, updatedTitle });
+        setSelectedConversationId(updatedTitle);
+      }
+    },
+    [selectedConversation, setSelectedConversationId, updateConversationTitle]
+  );
+
+  useEffect(() => {
+    // Reset the title when the prop changes
+    setNewTitle(title);
+  }, [title]);
+
   return (
     <EuiModalHeaderTitle>
       <EuiFlexGroup gutterSize="m" alignItems="center">
@@ -86,9 +114,20 @@ export const AssistantTitle: React.FC<{
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiTitle size={'s'}>
-                  <h3>{title}</h3>
-                </EuiTitle>
+                {isFlyoutMode ? (
+                  <EuiInlineEditTitle
+                    heading="h3"
+                    inputAriaLabel="Edit text inline"
+                    value={newTitle}
+                    onChange={(e) => setNewTitle(e.currentTarget.nodeValue || '')}
+                    onCancel={() => setNewTitle(title)}
+                    onSave={handleUpdateTitle}
+                  />
+                ) : (
+                  <EuiTitle size={'s'}>
+                    <h3>{title}</h3>
+                  </EuiTitle>
+                )}
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiPopover
@@ -124,6 +163,7 @@ export const AssistantTitle: React.FC<{
               isDisabled={isDisabled || selectedConversation === undefined}
               selectedConnectorId={selectedConnectorId}
               selectedConversation={selectedConversation}
+              isFlyoutMode={isFlyoutMode}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

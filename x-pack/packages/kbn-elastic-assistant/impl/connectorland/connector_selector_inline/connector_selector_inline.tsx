@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiOutsideClickDetector,
+  EuiText,
+} from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import { css } from '@emotion/css';
@@ -24,6 +30,7 @@ interface Props {
   selectedConnectorId?: string;
   selectedConversation?: Conversation;
   isFlyoutMode: boolean;
+  hideLabel?: boolean;
 }
 
 const inputContainerClassName = css`
@@ -156,13 +163,13 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
             <span>
               <EuiButtonEmpty
                 className={placeholderButtonClassName}
-                color={'text'}
+                color={isFlyoutMode ? 'primary' : 'text'}
                 data-test-subj="connectorSelectorPlaceholderButton"
                 iconSide={'right'}
                 iconType="arrowDown"
                 isDisabled={localIsDisabled}
                 onClick={onConnectorClick}
-                size="xs"
+                size={isFlyoutMode ? 'm' : 'xs'}
               >
                 {selectedConnectorName}
               </EuiButtonEmpty>

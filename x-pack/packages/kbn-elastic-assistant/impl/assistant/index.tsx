@@ -155,7 +155,7 @@ const AssistantComponent: React.FC<Props> = ({
   const isWelcomeSetup = useMemo(() => {
     // if any conversation has a connector id, we're not in welcome set up
     return Object.keys(conversations).some(
-      (conversation) => conversations[conversation].apiConfig.connectorId != null
+      (conversation) => conversations[conversation].apiConfig?.connectorId != null
     )
       ? false
       : (connectors?.length ?? 0) === 0;

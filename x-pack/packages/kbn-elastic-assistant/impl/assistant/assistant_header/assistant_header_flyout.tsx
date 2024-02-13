@@ -147,6 +147,7 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
               isDisabled={isDisabled || currentConversation === undefined}
               selectedConnectorId={selectedConnectorId}
               selectedConversation={currentConversation}
+              isFlyoutMode={true}
             />
           </EuiPanel>
         ),
@@ -204,13 +205,21 @@ export const AssistantHeaderFlyout: React.FC<Props> = ({
           )}
         </EuiFlexGroup>
       </FlyoutNavigation>
-      <EuiPanel hasShadow={false} paddingSize="m">
+      <EuiPanel
+        hasShadow={false}
+        paddingSize="m"
+        css={css`
+          padding-top: ${euiThemeVars.euiSizeS};
+          padding-bottom: ${euiThemeVars.euiSizeS};
+        `}
+      >
         <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
           <EuiFlexItem>
             <AssistantTitle
               docLinks={docLinks}
               title={currentConversation.id ?? title}
               selectedConversation={currentConversation}
+              setSelectedConversationId={setSelectedConversationId}
               isFlyoutMode={true}
             />
           </EuiFlexItem>

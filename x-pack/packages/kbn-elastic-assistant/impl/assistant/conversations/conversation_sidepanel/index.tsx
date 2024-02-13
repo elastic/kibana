@@ -13,23 +13,15 @@ import {
   EuiListGroup,
   EuiListGroupItem,
   EuiPanel,
-  EuiButtonEmpty,
-  EuiModal,
-  EuiModalBody,
-  EuiModalFooter,
-  EuiModalHeader,
-  EuiModalHeaderTitle,
 } from '@elastic/eui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import useEvent from 'react-use/lib/useEvent';
-import { FormProvider, useForm } from 'react-hook-form';
 
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { Conversation } from '../../../..';
 import { DEFAULT_CONVERSATION_TITLE } from '../../use_conversation/translations';
 import { useConversation } from '../../use_conversation';
-import { TitleField } from './title_field';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
@@ -124,45 +116,35 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
       ]
     );
 
-    const [isModalVisible, setIsModalVisible] = useState(false);
-
-    const showModal = () => {
-      setIsModalVisible(true);
-    };
-
-    const closeModal = () => {
-      setIsModalVisible(false);
-    };
+    const onSubmit = useCallback(() => {
+      const newConversation = createConversation({
+        conversationIds,
+        apiConfig: conversations[selectedConversationId].apiConfig,
+      });
+      onConversationSelected(newConversation.id);
+    }, [
+      conversationIds,
+      conversations,
+      createConversation,
+      onConversationSelected,
+      selectedConversationId,
+    ]);
 
     useEvent('keydown', onKeyDown);
 
-    const hookFormMethods = useForm({
-      defaultValues: {
-        title: '',
-      },
-    });
-
-    const onSubmit = useCallback(
-      (data) => {
-        createConversation({ conversationId: data.title });
-        onConversationSelected(data.title);
-        closeModal();
-      },
-      [createConversation, onConversationSelected]
-    );
-
     return (
-      <>
-        <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
-          <EuiFlexItem>
-            <EuiPanel hasShadow={false} borderRadius="none">
-              <EuiListGroup
-                size="xs"
-                css={css`
-                  padding: 0;
-                `}
-              >
-                {Object.values(conversations).map((conversation) => (
+      <EuiFlexGroup direction="column" justifyContent="spaceBetween" gutterSize="s">
+        <EuiFlexItem>
+          <EuiPanel hasShadow={false} borderRadius="none">
+            <EuiListGroup
+              size="xs"
+              css={css`
+                padding: 0;
+              `}
+            >
+              {Object.values(conversations)
+                .reverse()
+                .map((conversation) => (
                   <EuiListGroupItem
                     key={conversation.id}
                     onClick={() => onConversationSelected(conversation.id)}
@@ -184,82 +166,41 @@ export const ConversationSidePanel: React.FC<Props> = React.memo(
                     }}
                   />
                 ))}
-              </EuiListGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiPanel
-              hasShadow={false}
-              hasBorder
-              borderRadius="none"
-              paddingSize="m"
-              css={css`
-                border-left: 0;
-                border-right: 0;
-                border-bottom: 0;
-                padding-top: 12px;
-                padding-bottom: 12px;
-              `}
+            </EuiListGroup>
+          </EuiPanel>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiPanel
+            hasShadow={false}
+            hasBorder
+            borderRadius="none"
+            paddingSize="m"
+            css={css`
+              border-left: 0;
+              border-right: 0;
+              border-bottom: 0;
+              padding-top: 12px;
+              padding-bottom: 12px;
+            `}
+          >
+            <EuiButton
+              color="primary"
+              fill
+              iconType="discuss"
+              onClick={onSubmit}
+              fullWidth
+              size="s"
             >
-              <EuiButton
-                color="primary"
-                fill
-                iconType="discuss"
-                onClick={showModal}
-                fullWidth
-                size="s"
-              >
-                {i18n.translate(
-                  'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
-                  {
-                    defaultMessage: 'New chat',
-                  }
-                )}
-              </EuiButton>
-            </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {isModalVisible && (
-          <FormProvider {...hookFormMethods}>
-            <EuiModal onClose={closeModal}>
-              <EuiModalHeader>
-                <EuiModalHeaderTitle>
-                  <h1>
-                    {i18n.translate(
-                      'xpack.elasticAssistant.assistant.conversations.sidePanel.createChatModalTitle',
-                      {
-                        defaultMessage: 'Create New Chat',
-                      }
-                    )}
-                  </h1>
-                </EuiModalHeaderTitle>
-              </EuiModalHeader>
-              <EuiModalBody>
-                <TitleField conversationIds={conversationIds} />
-              </EuiModalBody>
-              <EuiModalFooter>
-                <EuiButtonEmpty onClick={closeModal}>
-                  {i18n.translate(
-                    'xpack.elasticAssistant.assistant.conversations.sidePanelSide.cancelButtonLabel',
-                    {
-                      defaultMessage: 'Cancel',
-                    }
-                  )}
-                </EuiButtonEmpty>
-                <EuiButton onClick={hookFormMethods.handleSubmit(onSubmit)} fill>
-                  {i18n.translate(
-                    'xpack.elasticAssistant.assistant.conversations.sidePanel.saveButtonLabel',
-                    {
-                      defaultMessage: 'Save',
-                    }
-                  )}
-                </EuiButton>
-              </EuiModalFooter>
-            </EuiModal>
-          </FormProvider>
-        )}
-      </>
+              {i18n.translate(
+                'xpack.elasticAssistant.assistant.conversations.sidePanel.newChatButtonLabel',
+                {
+                  defaultMessage: 'New chat',
+                }
+              )}
+            </EuiButton>
+          </EuiPanel>
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );

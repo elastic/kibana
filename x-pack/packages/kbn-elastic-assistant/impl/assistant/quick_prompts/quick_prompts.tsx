@@ -96,6 +96,7 @@ export const QuickPrompts: React.FC<QuickPromptsProps> = React.memo(
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
+        justifyContent={isFlyoutMode ? 'spaceBetween' : 'flexStart'}
         css={
           !isFlyoutMode &&
           css`

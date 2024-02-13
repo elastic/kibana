@@ -7,6 +7,7 @@
 
 import { useCallback } from 'react';
 
+import { omit } from 'lodash/fp';
 import { useAssistantContext } from '../../assistant_context';
 import { Conversation, Message } from '../../assistant_context/types';
 import * as i18n from './translations';
@@ -31,6 +32,8 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   },
 };
 
+export const NEW_CONVERSATION_PREFIX = 'New conversation';
+
 interface AppendMessageProps {
   conversationId: string;
   message: Message;
@@ -46,8 +49,10 @@ interface AppendReplacementsProps {
 }
 
 interface CreateConversationProps {
-  conversationId: string;
+  conversationId?: string;
   messages?: Message[];
+  conversationIds?: string[];
+  apiConfig?: Conversation['apiConfig'];
 }
 
 interface SetApiConfigProps {
@@ -59,6 +64,11 @@ interface SetConversationProps {
   conversation: Conversation;
 }
 
+interface UpdateConversationTitleProps {
+  currentTitle: string;
+  updatedTitle: string;
+}
+
 interface UseConversation {
   appendMessage: ({ conversationId, message }: AppendMessageProps) => Message[];
   amendMessage: ({ conversationId, content }: AmendMessageProps) => void;
@@ -67,12 +77,35 @@ interface UseConversation {
     replacements,
   }: AppendReplacementsProps) => Record<string, string>;
   clearConversation: (conversationId: string) => void;
-  createConversation: ({ conversationId, messages }: CreateConversationProps) => Conversation;
+  createConversation: ({
+    conversationId,
+    messages,
+    conversationIds,
+    apiConfig,
+  }: CreateConversationProps) => Conversation;
   deleteConversation: (conversationId: string) => void;
   removeLastMessage: (conversationId: string) => Message[];
   setApiConfig: ({ conversationId, apiConfig }: SetApiConfigProps) => void;
   setConversation: ({ conversation }: SetConversationProps) => void;
+  updateConversationTitle: ({ currentTitle, updatedTitle }: UpdateConversationTitleProps) => void;
 }
+
+function extractNumberFromItem(item: string) {
+  const match = item.match(/\d+/);
+  return match ? parseInt(match[0], 10) : 0;
+}
+
+const getNewConversationId = (conversationIds: string[] = []) => {
+  const draftConversationsList = conversationIds.filter((id) =>
+    /^New conversation( \d+)?$/.test(id)
+  );
+
+  if (!draftConversationsList.length) return NEW_CONVERSATION_PREFIX;
+
+  const lastId = draftConversationsList.map(extractNumberFromItem).sort((a, b) => b - a)[0] ?? 0;
+
+  return `${NEW_CONVERSATION_PREFIX} ${lastId + 1}`;
+};
 
 export const useConversation = (): UseConversation => {
   const {
@@ -242,7 +275,12 @@ export const useConversation = (): UseConversation => {
    * Create a new conversation with the given conversationId, and optionally add messages
    */
   const createConversation = useCallback(
-    ({ conversationId, messages }: CreateConversationProps): Conversation => {
+    ({
+      conversationId,
+      messages,
+      conversationIds,
+      apiConfig,
+    }: CreateConversationProps): Conversation => {
       const defaultSystemPromptId = getDefaultSystemPrompt({
         allSystemPrompts,
         conversation: undefined,
@@ -251,20 +289,20 @@ export const useConversation = (): UseConversation => {
       const newConversation: Conversation = {
         ...DEFAULT_CONVERSATION_STATE,
         apiConfig: {
-          ...DEFAULT_CONVERSATION_STATE.apiConfig,
+          ...(apiConfig ?? DEFAULT_CONVERSATION_STATE.apiConfig),
           defaultSystemPromptId,
         },
-        id: conversationId,
+        id: conversationId ?? getNewConversationId(conversationIds),
         messages: messages != null ? messages : [],
       };
       setConversations((prev: Record<string, Conversation>) => {
-        const prevConversation: Conversation | undefined = prev[conversationId];
+        const prevConversation: Conversation | undefined = prev[newConversation.id];
         if (prevConversation != null) {
           throw new Error('Conversation already exists!');
         } else {
           return {
             ...prev,
-            [conversationId]: {
+            [newConversation.id]: {
               ...newConversation,
             },
           };
@@ -335,6 +373,22 @@ export const useConversation = (): UseConversation => {
     [setConversations]
   );
 
+  const updateConversationTitle = useCallback(
+    ({ currentTitle, updatedTitle }: UpdateConversationTitleProps): void => {
+      setConversations((prev: Record<string, Conversation>) => {
+        const conversation = prev[currentTitle];
+        return {
+          ...omit([currentTitle], prev),
+          [updatedTitle]: {
+            ...conversation,
+            id: updatedTitle,
+          },
+        };
+      });
+    },
+    [setConversations]
+  );
+
   return {
     amendMessage,
     appendMessage,
@@ -345,5 +399,6 @@ export const useConversation = (): UseConversation => {
     removeLastMessage,
     setApiConfig,
     setConversation,
+    updateConversationTitle,
   };
 };
