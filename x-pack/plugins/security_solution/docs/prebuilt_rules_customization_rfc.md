@@ -514,14 +514,30 @@ The logic for the migration of the rule saved objects, which means the determina
 
 Let's see all possible use cases that will require migration-on-write, the endpoints that they apply to, and the expected resulting migrated field, based on the action and their input.
 
-#### Upgrading rules
+#### Updating and upgrading rules
 
-Upgrading rules can currently be performed via four endpoints:
+Updating rules can currently be performed via five endpoints:
 
 - **Update Rule** - `PUT /rules`
 - **Patch Rule** - `PATCH /rules`
 - **Bulk Update Rules** - `PUT /rules/_bulk_update`
 - **Bulk Patch Rules** - `PATCH /rules/_bulk_update`
+- **Bulk Actions** - `POST /rules/_bulk_action`: with **bulk edit** action
+
+Upgrading prebuilt rules to their newer version is done by two endpoints:
+
+- **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged`
+- **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal)
+
+The legacy endpoint does not allow for customization of fields during the upgrade, but the new rule upgrade customization endpoint does. 
+
+Additionally:
+
+- **Bulk Actions** - `POST /rules/_bulk_action`: with **duplicate** action
+
+will perform migration but does not allow for customization during the duplication proces.
+
+So we can analyze the expected outputs of the migration of all these 8 endpoints together.
 
 The resulting values for `immutable` and `external_source` when calling these endpoints, and the migration being performed in the background, should be as follows:
 
@@ -537,7 +553,7 @@ The resulting values for `immutable` and `external_source` when calling these en
   </thead>
   <tbody>
     <tr>
-      <td>Migrating a custom rule (migrated or not yet)</td>
+      <td>Migrating a <b>custom rule</b> (migrated or not yet)</td>
       <td>
         <pre>undefined</pre>
       </td>
@@ -552,18 +568,18 @@ The resulting values for `immutable` and `external_source` when calling these en
       </td>
     </tr>
     <tr>
-      <td>Migrating a non yet migrated prebuilt rule, with customizations</td>
+      <td>Migrating a non yet migrated prebuilt rule, no customizations</td>
       <td>
         <pre>undefined</pre>
       </td>
       <td><pre>true</pre></td>
-      <td>Yes</td>
+      <td>No</td>
       <td>
         <pre>
           {
             external_source: {
               repoName: 'elastic_prebuilt',
-              isCustomized: true,
+              isCustomized: false,
               ...
             },
             immutable: true
@@ -618,32 +634,6 @@ The resulting values for `immutable` and `external_source` when calling these en
       </td>
     </tr>
     <tr>
-      <td>Migrating a migrated customized prebuilt rule, no customizations</td>
-      <td>
-        <pre> 
-          {
-            repoName: 'elastic_prebuilt',
-            isCustomized: true,
-              ...
-          }
-          </pre>
-      </td>
-      <td><pre>true</pre></td>
-      <td>No</td>
-      <td>
-        <pre>
-          {
-            external_source: {
-              repoName: 'elastic_prebuilt',
-              isCustomized: true,
-              ...
-            },
-            immutable: true
-          }
-        </pre>
-      </td>
-    </tr>
-    <tr>
       <td>Migrating a migrated customized prebuilt rule, with customizations</td>
       <td>
         <pre> 
@@ -662,6 +652,32 @@ The resulting values for `immutable` and `external_source` when calling these en
             external_source: {
               repoName: 'elastic_prebuilt',
               isCustomized: true,
+              ...
+            },
+            immutable: true
+          }
+        </pre>
+      </td>
+    </tr>
+    <tr>
+      <td>Migrating a migrated customized prebuilt rule, no customizations</td>
+      <td>
+        <pre> 
+          {
+            repoName: 'elastic_prebuilt',
+            isCustomized: true,
+              ...
+          }
+          </pre>
+      </td>
+      <td><pre>true</pre></td>
+      <td>No</td>
+      <td>
+        <pre>
+          {
+            external_source: {
+              repoName: 'elastic_prebuilt',
+              isCustomized: false,
               ...
             },
             immutable: true
@@ -694,560 +710,12 @@ The resulting values for `immutable` and `external_source` when calling these en
           }
         </pre>
       </td>
-
     </tr>
 
   </tbody>
 </table>
 
 ---
-
-- `migratePrebuiltSchemaOnRuleCreation` for rule creation
-- `migratePrebuiltSchemaOnRuleUpdate` for rule updates (including patching)
-- `migratePrebuiltSchemaOnRuleBulkEdit` for bulk rule updates
-
-These three migrations applied to the handler logic of our endpoints will cover all endpoints and use cases where we want to perform migration-on-write.
-
-Same as the normalization helper, these three helpers will have a return type of:
-
-```ts
-interface MigrationResponse {
-  immutable: IsRuleImmutable;
-  prebuilt?: Prebuilt;
-}
-```
-
-#### `migratePrebuiltSchemaOnRuleCreation`
-
-This migration method will apply to the following use cases and endpoints:
-
-- Updating a prebuilt rule when there is a rule type change
-  - **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal)
-  - **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged`
-- Importing a rule/prebuilt rule without overwriting an existing rule
-  - **Import Rules** - `POST /rules/_import`
-- Duplicating an existing rule
-  - **Bulk Actions endpoint** - `POST /rules/_bulk_action` (bulk duplicate action)
-
-Other non-migration scenarios and endpoints to which this helper will apply to are:
-
-- Installing a prebuilt rule:
-  - **Perform Rule Installation** - `POST /prebuilt_rules/install/_perform` (Internal)
-- Creating a custom rule:
-  - **Create Rules** - `POST /rules`
-- Bulk creating custom rules:
-  - **Bulk Create Rules** - `POST /rules/_bulk_create`
-
-_Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/prebuilt_rule_schema_migrations.ts_ (New file)
-
-```ts
-interface PrebuiltSchemaCreationMigrationProps {
-  input: CreateAPIInput;
-  isRuleToCreatePrebuilt: boolean;
-}
-
-const getPrebuiltValueForRuleCreation = (
-  input: CreateAPIInput,
-  isRuleToCreatePrebuilt: boolean
-): Prebuilt | undefined => {
-  if (!isRuleToCreatePrebuilt) {
-    return undefined;
-  }
-
-  if (input.prebuilt != null) {
-    return input.prebuilt;
-  }
-
-  return {
-    isCustomized: false,
-    elasticUpdateDate: input.elasticUpdateDate,
-  };
-};
-
-export const migratePrebuiltSchemaOnRuleCreation = ({
-  input,
-  isRuleToCreatePrebuilt,
-}: PrebuiltSchemaCreationMigrationProps): MigrationResponse => {
-  const immutable = isRuleToCreatePrebuilt;
-  const prebuilt = getPrebuiltValueForRuleCreation(input, isRuleToCreatePrebuilt);
-
-  return {
-    immutable,
-    prebuilt,
-  };
-};
-```
-
-In the code shown above, the `immutable` field is set to a boolean which equals the value of the passed `isRuleToCreatePrebuilt` boolean argument. The value of that argument will be passed as `true` or `false` depending on the use case:
-
-- creating a custom rule: `false`
-- installing a prebuilt rule: `true`
-- updating a prebuilt rule when there is a rule type change: `true`
-- importing a rule: can be `true` or `false` depending on the imported rule
-
-The `prebuilt` field will be set in the following way: (see `getPrebuiltValueForRuleCreation` above)
-
-- set to `undefined` if the `isRuleToCreatePrebuilt` is parameter is `false`. Use case when:
-  - creating a custom rule
-- if `isRuleToCreatePrebuilt` is passed as `true`:
-  - set it to `input.prebuilt` if defined. Use case when:
-    - importing a prebuilt rule
-    - updating a prebuilt rule with a rule type change
-  - set it to a new object with `isCustomized` set to `false` and `elasticUpdateDate` to the passed input, if it exists. Use case when:
-    - installing a prebuilt rule from scratch. In this case, `elasticUpdateDate` will come from the `PrebuiltRuleAsset` (or be undefined in historical version of rules).
-
-##### `convertCreateAPIToInternalSchema` and `createRules`
-
-For the first two use cases listed above ("Updating a prebuilt rule when there is a rule type change" and "Importing a rule/prebuilt rule without overwriting an existing rule") the `migratePrebuiltSchemaOnRuleCreation` helper method will be called by the `convertCreateAPIToInternalSchema` rule converter method, which transforms our API schema to the internal rule schema before saving to ES. We need to modify this method in the following way:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
-
-```ts
-// [... file continues above ...]
-
-export type CreateAPIInput = RuleCreateProps & {
-  related_integrations?: RelatedIntegrationArray;
-  required_fields?: RequiredFieldArray;
-  setup?: SetupGuide;
-  prebuilt?: Prebuilt;
-  elasticUpdateDate?: ElasticUpdateDate;
-};
-
-// eslint-disable-next-line complexity
-export const convertCreateAPIToInternalSchema = (
-  input: CreateAPIInput,
-  isRuleToCreatePrebuilt = false
-): InternalRuleCreate => {
-  // [...]
-
-  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleCreation({
-    input,
-    isRuleToCreatePrebuilt,
-  });
-
-  return {
-    name: input.name,
-    params: {
-      // [... other params ...]
-      immutable,
-      prebuilt,
-      // [... other params ...]
-      ...typeSpecificParams,
-    },
-    actions,
-  };
-};
-
-// [... file continues below ...]
-```
-
-Notice that the type for the `input` has been expaned to include the `prebuilt` field (which can now be passed in the case of importing rules), and the `elasticUpdateDate` (which is needed when installing a prebuilt rule from scratch). Additionally, the new `isRuleToCreatePrebuilt` parameter is passed to the helper, defaulting to `false`.
-
-Finally, the `convertCreateAPIToInternalSchema` helper is called by two different use cases:
-
-1. by the **Preview Rule - POST /detection_engine/rules/preview** endpoint, where no changes are needed.
-2. by the `createRules` method, which will be modified in the following way:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/create_rules.ts)_
-
-```ts
-// [... file continues above ...]
-
-export interface CreateRulesOptions<T extends RuleCreateProps = RuleCreateProps> {
-  rulesClient: RulesClient;
-  params: T;
-  id?: string;
-  isPrebuilt?: boolean; // renamed from "immutable"
-  defaultEnabled?: boolean;
-  allowMissingConnectorSecrets?: boolean;
-}
-
-// New prop types with extended fields for allowing imports
-type RuleCreateAndImportProps = RuleCreateProps & {
-  prebuilt?: Prebuilt;
-  immutable?: IsRuleImmutable;
-};
-
-const getIsRuleToCreatePrebuilt = (
-  params: RuleCreateAndImportProps,
-  isPrebuilt?: boolean
-): boolean => {
-  // If createRules is explicitly called with isPrebuilt, use that value.
-  // Use case when creating a custom rule or installing/updating a prebuilt rule.
-  if (isPrebuilt != null) {
-    return isPrebuilt;
-  }
-
-  // Otherwise, check the passed prebuilt or immutable params for existence.
-  // Use case when importing a rule. Default to false if neither are passed.
-  return (Boolean(params.prebuilt) || params.immutable) ?? false;
-};
-
-export const createRules = async ({
-  rulesClient,
-  params,
-  id,
-  isPrebuilt = false, // renamed from "immutable"
-}: CreateRulesOptions<RuleCreateAndImportProps>): Promise<SanitizedRule<RuleParams>> => {
-  const isRuleToCreatePrebuilt = getIsRuleToCreatePrebuilt(params, isPrebuilt);
-  const internalRule = convertCreateAPIToInternalSchema(
-    params,
-    isRuleToCreatePrebuilt,
-    defaultEnabled
-  );
-  const rule = await rulesClient.create<RuleParams>({
-    // [...]
-    data: internalRule,
-    // [...]
-  });
-
-  return rule;
-};
-```
-
-Notice in the code above that the new optional `isPrebuilt` parameter, which replaces `immutable`: this can be used when we know with certainity whether the rule we are creating is prebuilt or not. We know this when:
-
-- creating a custom rule: the `isPrebuilt` argument should be `false`
-- creating (installing) or updating a prebuilt rule: the `isPrebuilt` argument should be `true`
-
-However, when importing rules, we now don't have certaintiy whether the created rule should be prebuilt or not. In order to determine that, we should use the values passed in the `ndjson` file for the `prebuilt` field, or the `immutable` field, as backwards compatibility fallback.
-
-This logic is encapsulated in the `getIsRuleToCreatePrebuilt` method above.
-
-Notice, as well, that the `params` types have been extended to a new `RuleCreateAndImportProps` type to take in:
-
-- the `prebuilt` property, since when importing a prebuilt rule, this will be the value used for:
-  - for determining if a rule that is being imported is prebuilt or not
-  - setting the `prebuilt` field when creating the imported prebuilt rule.
-- the `immutable` property, to decide whether a rule that is being imported is prebuilt or not (when the rule has not been migrated and has the old schema)
-
-##### `duplicateRule`
-
-The other use case for `migratePrebuiltSchemaOnRuleCreation` is when duplicating a rule via the **Bulk Actions endpoint** (`POST /rules/_bulk_action`) with a bulk duplicate action.
-
-In this case, we will need to modify the `duplicateRule` helper that is used in that endpoint handler and make use of `migratePrebuiltSchemaOnRuleCreation`:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/actions/duplicate_rule.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/actions/duplicate_rule.ts)_
-
-```ts
-// [... file continues above ...]
-import { migratePrebuiltSchemaOnRuleCreation } from '../../normalization/prebuilt_rule_schema_migrations';
-import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
-
-// [...]
-
-export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<InternalRuleCreate> => {
-  // Generate a new static ruleId
-  const ruleId = uuidv4();
-
-  const isRuleToCreatePrebuilt = Boolean(rule.params.prebuilt) || rule.params.immutable;
-
-  // [...]
-
-  // Transform rule from internal to API format to pass
-  // it to the migration function with the correct types.
-  const ruleResponse = internalRuleToAPIResponse(rule);
-  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleCreation({
-    input: ruleResponse,
-    isRuleToCreatePrebuilt,
-  });
-
-  return {
-    name: `${rule.name} [${DUPLICATE_TITLE}]`,
-    // [...]
-    params: {
-      ...rule.params,
-      immutable,
-      prebuilt,
-      // [...]
-    },
-    // [...]
-  };
-};
-```
-
-Notice in the code above, the `rule` object passed into the `duplicateRule` function is in the internal rule schema format, so we need to use `internalRuleToAPIResponse` to convert it and pass it intoo `migratePrebuiltSchemaOnRuleCreation` in the expected format, in order calculate the values of `immutable` and `prebuilt`.
-
-#### `migratePrebuiltSchemaOnRuleUpdate`
-
-This migration method will apply to the following use cases and endpoints:
-
-- **Rule Update**:
-  - Updating a rule via the rule editing page (or directly via API)
-    - **Update Rule** - `PUT /rules`
-  - Bulk updating rules via API
-    - **Bulk Update Rules** - `PUT /rules/_bulk_update`
-- **Rule Patch**:
-  - Updating a prebuilt rule when there's NO rule type change:
-    - **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal)
-    - **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged`
-  - Importing a rule/prebuilt rule overwriting an existing rule:
-    - **Import Rules** - `POST /rules/_import`
-
-Other non-migration scenarios and endpoints to which this helper will apply to are:
-
-- Managing shared exception lists
-  - **Patch Rule** - `PATCH /rules`
-- Bulk patching rules (only via API)
-  - **Bulk Patch Rules** - `PATCH /rules/_bulk_update` (deprecated)
-- Creating rule exceptions
-  - **Create Rule Exceptions** - `POST /rules/{id}/exceptions`
-
-_Source: x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/prebuilt_rule_schema_migrations.ts_ (New file)
-
-```ts
-interface PrebuiltSchemaUpdateMigrationProps {
-  nextParams?: PatchAPINextParams;
-  existingParams: RuleParams;
-  isRuleCustomizedDuringUpdate: boolean;
-}
-
-const getPrebuiltValueForRuleUpdate = ({
-  nextParams,
-  existingParams,
-  isRuleCustomizedDuringUpdate,
-}: PrebuiltSchemaUpdateMigrationProps): Prebuilt | undefined => {
-  if (nextParams?.prebuilt) {
-    return nextParams?.prebuilt;
-  }
-
-  if (existingParams.prebuilt) {
-    return {
-      ...existingParams.prebuilt,
-      isCustomized: existingParams.prebuilt.isCustomized || isRuleCustomizedDuringUpdate,
-    };
-  }
-
-  if (existingParams.immutable) {
-    return {
-      isCustomized: isRuleCustomizedDuringUpdate,
-    };
-  }
-
-  return undefined;
-};
-
-export const migratePrebuiltSchemaOnRuleUpdate = ({
-  nextParams,
-  existingParams,
-  isRuleCustomizedDuringUpdate,
-}: PrebuiltSchemaUpdateMigrationProps): MigrationResponse => {
-  const immutable = (Boolean(existingParams.prebuilt) || existingParams.immutable) ?? false;
-  const prebuilt = getPrebuiltValueForRuleUpdate({
-    nextParams,
-    existingParams,
-    isRuleCustomizedDuringUpdate,
-  });
-
-  return {
-    immutable,
-    prebuilt,
-  };
-};
-```
-
-Notice that the `nextParams` argument of the `migratePrebuiltSchemaOnRuleUpdate` is optional: this is because this method can be used for both **patching** rules, where `nextParams` contains data that is needed for the calculation of the `prebuilt` and `immutable` fields, but also for the **updating** rules use case, when only the `existingParams` are necessary to calculate those fields.
-
-The logic for defining the `immutable` and `prebuilt` fields, implemented in the code above, is as follows:
-
-- for `immutable`:
-
-  - if the `prebuilt` field exists in the existing rule, `immutable` should be `true`.
-    - Use case 1: updating an already migrated custom or prebuilt rule
-    - Use case 2: importing (and overwriting) a rule that has a `prebuilt` field in the `ndjson` file payload
-  - otherwise, rely on the value of the existing rule's `immutable` field. Use case:
-    - Use case 3: updating a custom or prebuilt rule that hasn't yet been migrated
-    - Use case 4: importing (and overwriting) a rule that has a `immutable` field but no `prebuilt` field in the `ndjson` file payload
-  - if both are undefined, default to `false`:
-    - Use case 5: importing (and overwriting) a rule that has no `prebuilt` or `immutable` fields in the `ndjson` file payload.
-  - Notice that for calculating `immutable` we don't rely on `nextParams` because a rule should never change from custom to prebuilt, or viceversa.
-
-- for `prebuilt` - see `getPrebuiltValueForRuleUpdate` method above:
-
-  - take the `prebuilt` field as passed in the `nextParams`, if the object exists:
-
-    - Use case 1: importing (and overwriting) a rule that has a `prebuilt` field in the `ndjson` file payload
-    - Use case 2: updating a prebuilt rule with no rule type change (TODO: the prebuilt object has to be built in the `upgradePrebuiltRules` and passed in the next params. Create a function that build it and show changes in this RFC)
-
-  - If that is undefined, take the value from `prebuilt` from the `existingParams`, but with an updated value for `isCustomized`. This value should be true if the existing rule has already that prop as true, or if the rule was customized during the patch procedure (`isRuleCustomizedDuringUpdate` value passed as argument to `migratePrebuiltSchemaOnRuleUpdate`):
-    - Use case 3: patching already-migrated rules via API (`prebuilt` already exists in schema)
-  - If both `nextParams.prebuilt` and `existingParams.prebuilt` are undefined: check the value for the `immutable` field of the existing rule:
-    - if `immutable: true`: create a new `prebuilt` object where `isCustomized` has the value of `isRuleCustomizedDuringUpdate` and `elasticUpdateDate` is undefined:
-      - Use case 4: patching a non-migrated prebuilt rule via API
-    - if `immutable: false`, `prebuilt` should be undefined.
-      - Use case 5: patching a non-migrated custom rule via API
-
-This helper method will be called by two diffent functions:
-
-1. the `convertPatchAPIToInternalSchema` rule converter method, used in the use cases listed as **Rule Patch** at the beggining of this section
-2. the `updateRules` method, used in the use cases listed as **Rule Update** at the beggining of this section
-
-```mermaid
-graph TD;
-
-subgraph Call Stack
-  updateRules -->|calls| migratePrebuiltSchemaOnRuleUpgrade
-  patchRules -->|calls| convertPatchAPIToInternalSchema
-  convertPatchAPIToInternalSchema -->|calls| migratePrebuiltSchemaOnRuleUpgrade
-  migratePrebuiltSchemaOnRuleUpgrade
-end
-```
-
-##### `convertPatchAPIToInternalSchema` and `patchRules`
-
-We need to modify the `convertPatchAPIToInternalSchema` in the following way:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/normalization/rule_converters.ts)_
-
-```ts
-// [... file continues above ...]
-export type PatchAPINextParams = PatchRuleRequestBody & {
-  related_integrations?: RelatedIntegrationArray;
-  required_fields?: RequiredFieldArray;
-  setup?: SetupGuide;
-  prebuilt?: Prebuilt;
-};
-
-export const convertPatchAPIToInternalSchema = (
-  nextParams: PatchAPINextParams,
-  existingRule: SanitizedRule<RuleParams>,
-  isRuleCustomizedDuringUpdate = false
-): InternalRuleUpdate => {
-  const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
-  const existingParams = existingRule.params;
-
-  // [...]
-
-  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleUpdate({
-    nextParams,
-    existingParams,
-    isRuleCustomizedDuringUpdate,
-  });
-
-  return {
-    name: nextParams.name ?? existingRule.name,
-    tags: nextParams.tags ?? existingRule.tags,
-    params: {
-      // [...]
-      immutable,
-      prebuilt,
-      // [...]
-      ...typeSpecificParams,
-    },
-    // [...]
-  };
-};
-// [... file continues above ...]
-```
-
-Notice that the type for the `nextParams` has been expaned to include the `prebuilt` field (which can now be passed in the case of importing rules). Additionally, the new `isRuleToCreatePrebuilt` parameter is passed to the helper, defaulting to `false`.
-
-The `convertPatchAPIToInternalSchema` helper is called only by the `patchRules` method, which will be modified in the following way:
-
-_Source:[x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/patch_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/patch_rules.ts)_
-
-```ts
-// [... file continues above ...]
-
-import { convertPatchAPIToInternalSchema } from '../../normalization/rule_converters';
-
-export interface PatchRulesOptions {
-  rulesClient: RulesClient;
-  nextParams: PatchRuleRequestBody & {
-    related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
-    prebuilt?: Prebuilt; // extend nextParams with `prebuilt` property
-  };
-  existingRule: RuleAlertType | null | undefined;
-  isRuleCustomizedDuringUpdate?: boolean; // pass in new optional boolean
-}
-
-export const patchRules = async ({
-  rulesClient,
-  existingRule,
-  nextParams,
-  isRuleCustomizedDuringUpdate,
-}: // [...]
-PatchRulesOptions): Promise<PartialRule<RuleParams> | null> => {
-  // [...]
-
-  const patchedRule = convertPatchAPIToInternalSchema(
-    nextParams,
-    existingRule,
-    isRuleCustomizedDuringUpdate
-  );
-
-  const update = await rulesClient.update({
-    id: existingRule.id,
-    data: patchedRule,
-    // [...]
-  });
-
-  // [...]
-};
-```
-
-As seen in the snippet above, the type of the arguments of `patchRule` method, `PatchRulesOptions` will need to be updated as well, in order to allow passing the new `prebuilt` field in its `nextParams` property, as well as the `isRuleCustomizedDuringUpdate` boolean.
-
-The method `patchRule` is used in all use cases mentioned at the beggining of this section, so we have covered all of them with the correspondent migration.
-
-##### `updateRules`
-
-The `updateRules` method is used only in the Update and Bulk Update endpoints. It needs to be updated to make use of `migratePrebuiltSchemaOnRuleUpdate`:
-
-_Source: [x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/update_rules.ts](https://github.com/elastic/kibana/blob/main/x-pack/plugins/security_solution/server/lib/detection_engine/rule_management/logic/crud/update_rules.ts)_
-
-```ts
-// [... file continues above...]
-import { migratePrebuiltSchemaOnRuleUpdate } from '../../normalization/prebuilt_rule_schema_migrations';
-
-export interface UpdateRulesOptions {
-  rulesClient: RulesClient;
-  existingRule: RuleAlertType | null | undefined;
-  ruleUpdate: RuleUpdateProps;
-}
-
-export const updateRules = async ({
-  rulesClient,
-  existingRule,
-  ruleUpdate,
-}: UpdateRulesOptions): Promise<PartialRule<RuleParams> | null> => {
-  // [...]
-
-  // Calculate whether the rule was customized during the update
-  // TODO: Explain how this is calculated in all cases where it needs to be, in its own section
-  const isRuleCustomizedDuringUpdate = getIsRuleCustomizedDuringUpdate(existingRule, ruleUpdate);
-
-  // Calculate the values of immutable and prebuilt based on the existing params
-  // and the isRuleCustomizedDuringUpdate boolean
-  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleUpdate({
-    existingParams: existingRule.params,
-    isRuleCustomizedDuringUpdate,
-  });
-
-  const newInternalRule: InternalRuleUpdate = {
-    name: ruleUpdate.name,
-    // [...]
-    params: {
-      // [...]
-      immutable,
-      prebuilt,
-      // [...]
-      ...typeSpecificParams,
-    },
-    // [...]
-  };
-
-  const update = await rulesClient.update({
-    id: existingRule.id,
-    data: newInternalRule,
-  });
-
-  // [...]
-  return { ...update, enabled };
-};
-```
 
 #### `migratePrebuiltSchemaOnRuleBulkEdit`
 
