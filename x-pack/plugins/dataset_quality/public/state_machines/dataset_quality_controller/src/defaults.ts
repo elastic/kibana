@@ -36,7 +36,6 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityControllerState = {
       },
     },
     integrations: [],
-    query: '',
   },
   flyout: {},
   datasets: [],

@@ -6,21 +6,24 @@
  */
 
 import { OnRefreshChangeProps } from '@elastic/eui';
-import { Query } from '@kbn/es-query';
 import { useSelector } from '@xstate/react';
-import { useCallback, useMemo } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { IntegrationItem } from '../components/dataset_quality/filters/integrations_selector';
 
 export const useDatasetQualityFilters = () => {
   const { service } = useDatasetQualityContext();
 
-  const isLoadingIntegrations = useSelector(service, (state) => state.matches('datasets.fetching'));
-  const { timeRange, integrations: selectedIntegrations } = useSelector(
-    service,
-    (state) => state.context.filters
-  );
+  const [searchVal, setSearchVal] = useState('');
+
+  const isLoading = useSelector(service, (state) => state.matches('datasets.fetching'));
+  const {
+    timeRange,
+    integrations: selectedIntegrations,
+    query: selectedQuery,
+  } = useSelector(service, (state) => state.context.filters);
   const integrations = useSelector(service, (state) => state.context.integrations);
+  const datasets = useSelector(service, (state) => state.context.datasets);
 
   const onTimeChange = useCallback(
     (selectedTime: { start: string; end: string; isInvalid: boolean }) => {
@@ -84,8 +87,37 @@ export const useDatasetQualityFilters = () => {
     [service]
   );
 
+  const datasetItems = useMemo(() => {
+    const items = datasets
+      .filter(
+        (dataset) =>
+          dataset.title.toLowerCase().includes(searchVal.toLowerCase()) ||
+          dataset.rawName.toLowerCase().includes(searchVal.toLowerCase())
+      )
+      .map((dataset) => ({
+        label: `${dataset.name}-${dataset.namespace}`,
+      }));
+
+    if (!selectedQuery) {
+      return items;
+    }
+
+    const selectedQueryOption = items.filter((item) => item.label === selectedQuery);
+
+    return selectedQueryOption.length > 0
+      ? items
+      : [
+          {
+            label: selectedQuery,
+          },
+          ...items,
+        ];
+  }, [datasets, searchVal, selectedQuery]);
+
+  const onSearchChange = useCallback(setSearchVal, [setSearchVal]);
+
   const onQueryChange = useCallback(
-    (query: Query['query']) => {
+    (query: string) => {
       service.send({
         type: 'UPDATE_QUERY',
         query,
@@ -101,7 +133,10 @@ export const useDatasetQualityFilters = () => {
     onRefreshChange,
     integrations: integrationItems,
     onIntegrationsChange,
-    isLoadingIntegrations,
+    isLoading,
+    datasets: datasetItems,
+    selectedQuery,
+    onSearchChange,
     onQueryChange,
   };
 };

@@ -34,7 +34,7 @@ interface SuggestionsComponentProps {
 }
 
 export interface SuggestionsAbstraction {
-  type: 'alerts' | 'rules' | 'cases' | 'logs';
+  type: 'alerts' | 'rules' | 'cases';
   fields: Record<
     string,
     {

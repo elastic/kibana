@@ -6,7 +6,6 @@
  */
 
 import { DoneInvokeEvent } from 'xstate';
-import { type Query } from '@kbn/es-query';
 import { Integration } from '../../../../common/data_streams_stats/integration';
 import { Direction, SortField } from '../../../hooks';
 import { DegradedDocsStat } from '../../../../common/data_streams_stats/malformed_docs_stat';
@@ -45,7 +44,7 @@ interface FiltersCriteria {
   fullNames: boolean;
   timeRange: TimeRange;
   integrations: string[];
-  query: Query['query'];
+  query?: string;
 }
 
 export interface WithTableOptions {
@@ -157,7 +156,7 @@ export type DatasetQualityControllerEvent =
     }
   | {
       type: 'UPDATE_QUERY';
-      query: Query['query'];
+      query: string;
     }
   | DoneInvokeEvent<DataStreamDegradedDocsStatServiceResponse>
   | DoneInvokeEvent<DataStreamStatServiceResponse>

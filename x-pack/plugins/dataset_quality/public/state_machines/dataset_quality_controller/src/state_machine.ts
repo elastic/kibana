@@ -7,7 +7,7 @@
 
 import { IToasts } from '@kbn/core/public';
 import { assign, createMachine, DoneInvokeEvent, InterpreterFrom } from 'xstate';
-import { getDatasetQuery, getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
+import { getDateRange, mergeDegradedStatsIntoDataStreams } from '../../../utils';
 import {
   DataStreamDetails,
   DataStreamStatServiceResponse,
@@ -92,7 +92,7 @@ export const createPureDatasetQualityControllerStateMachine = (
               actions: ['storeIntegrations'],
             },
             UPDATE_QUERY: {
-              target: 'datasets.loaded',
+              target: 'datasets.fetching',
               actions: ['storeQuery'],
             },
           },
@@ -121,6 +121,9 @@ export const createPureDatasetQualityControllerStateMachine = (
               actions: ['storeTimeRange'],
             },
             REFRESH_DATA: {
+              target: 'degradedDocs.fetching',
+            },
+            UPDATE_QUERY: {
               target: 'degradedDocs.fetching',
             },
           },
@@ -308,14 +311,14 @@ export const createDatasetQualityControllerStateMachine = ({
       loadDataStreamStats: (context) =>
         dataStreamStatsClient.getDataStreamsStats({
           type: context.type as GetDataStreamsStatsQuery['type'],
-          /* datasetQuery: getDatasetQuery(context.filters.query), */
+          datasetQuery: context.filters.query,
         }),
       loadDegradedDocs: (context) => {
         const { start, end } = getDateRange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsDegradedStats({
           type: context.type as GetDataStreamsStatsQuery['type'],
-          /* datasetQuery: getDatasetQuery(context.filters.query), */
+          datasetQuery: context.filters.query,
           start,
           end,
         });

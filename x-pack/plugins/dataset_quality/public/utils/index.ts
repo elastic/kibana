@@ -6,7 +6,6 @@
  */
 
 export * from './filter_inactive_datasets';
-export * from './get_dataset_query';
 export * from './get_date_range';
 export * from './merge_degraded_docs_into_datastreams';
 export * from './use_kibana';

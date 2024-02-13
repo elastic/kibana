@@ -5,91 +5,69 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
-
-import { type SearchBarOwnProps } from '@kbn/unified-search-plugin/public/search_bar';
-import { fromKueryExpression, type Query } from '@kbn/es-query';
+import React, { useCallback } from 'react';
+import { EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { EuiSpacer, EuiTextColor } from '@elastic/eui';
-import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
-import { useAdHocDataView } from '../../../hooks/use_adhoc_data_view';
-import { useKibanaContextForPlugin } from '../../../utils';
 
-const SEARCH_BAR_SUGGESTIONS: SuggestionsAbstraction = {
-  type: 'logs',
-  fields: {
-    'data_stream.dataset': {
-      field: 'data_stream.dataset',
-      fieldToQuery: 'data_stream.dataset',
-      displayField: 'name',
-    },
-    'data_stream.namespace': {
-      field: 'data_stream.namespace',
-      fieldToQuery: 'data_stream.namespace',
-      displayField: 'namespace',
-    },
-  },
-};
+const SINGLE_SELECTION = { asPlainText: true };
+
+const placeholder = i18n.translate('xpack.datasetQuality.filterBar.placeholder', {
+  defaultMessage: 'Filter datasets',
+});
+
+const customOptionText = i18n.translate('xpack.datasetQuality.filterBar.customOptionText', {
+  defaultMessage: 'Add \\{searchValue\\} as your filter',
+});
 
 export interface FilterBarComponentProps {
-  query: Query['query'];
-  onQueryChange: (update: Query['query']) => void;
+  isLoading: boolean;
+  options: Array<EuiComboBoxOptionOption<string>>;
+  query?: string;
+  onQueryChange: (query: string) => void;
+  onSearchChange: (serachVal: string) => void;
 }
 
-export const FilterBar = ({ query, onQueryChange }: FilterBarComponentProps) => {
-  const {
-    services: {
-      unifiedSearch: {
-        ui: { SearchBar },
-      },
+export const FilterBar = ({
+  isLoading,
+  options,
+  query,
+  onSearchChange,
+  onQueryChange,
+}: FilterBarComponentProps) => {
+  const onChange = useCallback(
+    (selectedOptions) => {
+      onQueryChange(selectedOptions?.[0]?.label);
     },
-  } = useKibanaContextForPlugin();
+    [onQueryChange]
+  );
 
-  const { dataView } = useAdHocDataView(SEARCH_BAR_SUGGESTIONS);
+  const onCreateOption = useCallback(
+    (searchValue) => {
+      const normalizedSearchValue = searchValue.trim().toLowerCase();
 
-  const [error, setError] = useState<string | undefined>();
-
-  const onQuerySubmit: SearchBarOwnProps['onQuerySubmit'] = useCallback(
-    (payload, isUpdate) => {
-      try {
-        // Validates the query
-        const kueryNodes = fromKueryExpression(payload.query.query);
-        setError(undefined);
-        onQueryChange(payload.query.query);
-      } catch (e) {
-        setError(e.message);
+      if (!normalizedSearchValue) {
+        return;
       }
+
+      onQueryChange(searchValue);
     },
     [onQueryChange]
   );
 
   return (
-    <>
-      <SearchBar
-        appName={i18n.translate('xpack.apm.appName', {
-          defaultMessage: 'dataset-quality',
-        })}
-        iconType="search"
-        placeholder={'Filter datasets'}
-        useDefaultBehaviors={true}
-        indexPatterns={dataView ? [dataView] : []}
-        showQueryInput={true}
-        showQueryMenu={false}
-        showFilterBar={false}
-        showDatePicker={false}
-        showSubmitButton={false}
-        displayStyle="inPage"
-        onQuerySubmit={onQuerySubmit}
-        isClearable={true}
-        suggestionsAbstraction={SEARCH_BAR_SUGGESTIONS}
-      />
-
-      {error ? (
-        <>
-          <EuiSpacer size={'s'} />
-          <EuiTextColor color="danger">{error}</EuiTextColor>
-        </>
-      ) : null}
-    </>
+    <EuiComboBox
+      fullWidth
+      aria-label={placeholder}
+      placeholder={placeholder}
+      singleSelection={SINGLE_SELECTION}
+      options={options}
+      isLoading={isLoading}
+      onSearchChange={onSearchChange}
+      selectedOptions={query ? options.filter((option) => option.label === query) : []}
+      onChange={onChange}
+      onCreateOption={onCreateOption}
+      customOptionText={customOptionText}
+      isClearable
+    />
   );
 };
