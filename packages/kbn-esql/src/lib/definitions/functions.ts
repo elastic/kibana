@@ -20,7 +20,7 @@ const validateLogFunctions = (fnDef: ESQLFunction) => {
       messages.push({
         type: 'warning' as const,
         code: 'logOfNegativeValue',
-        text: i18n.translate('monaco.esql.divide.warning.logOfNegativeValue', {
+        text: i18n.translate('kbn-esql.divide.warning.logOfNegativeValue', {
           defaultMessage: 'Log of a negative number results in null: {value}',
           values: {
             value: arg.value,
