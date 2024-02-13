@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlSearchLandingPage.languageClients.expectLanguagePanelExists(id);
       }
       // Java is selected by default
-      await pageObjects.svlSearchLandingPage.languageClients.expectLanguageSelected('java');
+      await pageObjects.svlSearchLandingPage.languageClients.expectLanguageSelected('break');
 
       // We can select a non-default language
       await pageObjects.svlSearchLandingPage.languageClients.selectLanguage('curl');
