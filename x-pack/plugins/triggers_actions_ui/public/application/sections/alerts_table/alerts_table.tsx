@@ -432,7 +432,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
           <CellErrorCallOut
             title={
               <FormattedMessage
-                id="x-pack.triggersActionsUI.sections.alertTable.cellErrorTitle"
+                id="xpack.triggersActionsUI.sections.alertTable.cellErrorTitle"
                 defaultMessage="Error while rendering cell"
               />
             }
