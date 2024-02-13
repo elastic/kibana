@@ -391,3 +391,24 @@ export const REQUIRED_LABEL = i18n.translate(
     defaultMessage: 'Required',
   }
 );
+
+export const EVENT_ACTION_TRIGGER = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.eventActionTriggerOptionLabel',
+  {
+    defaultMessage: 'Trigger',
+  }
+);
+
+export const EVENT_ACTION_RESOLVE = i18n.translate(
+  'xpack.stackConnectors.components.serviceNow.eventActionResolveOptionLabel',
+  {
+    defaultMessage: 'Resolve',
+  }
+);
+
+export const EVENT_ACTION_LABEL = i18n.translate(
+  'xpack.stackConnectors.components.serviceNowITSM.eventActionFieldLabel',
+  {
+    defaultMessage: 'Event action',
+  }
+);
