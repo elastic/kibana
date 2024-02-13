@@ -74,7 +74,7 @@ export const getFindingsQuery = (
             },
           },
         ],
-        must_not: mutedRulesFilterQuery,
+        must_not: [...(query?.bool?.must_not ?? []), ...mutedRulesFilterQuery],
       },
     },
     ...(pageParam ? { from: pageParam } : {}),

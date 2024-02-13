@@ -182,7 +182,14 @@
               "\nColumns displayed in the table"
             ],
             "signature": [
-              "string[] | undefined"
+              {
+                "pluginId": "@kbn/deeplinks-observability",
+                "scope": "common",
+                "docId": "kibKbnDeeplinksObservabilityPluginApi",
+                "section": "def-common.GridColumnDisplayOptions",
+                "text": "GridColumnDisplayOptions"
+              },
+              "[] | undefined"
             ],
             "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
             "deprecated": false,
@@ -504,6 +511,21 @@
       },
       {
         "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.DocumentFieldGridColumnOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "DocumentFieldGridColumnOptions",
+        "description": [],
+        "signature": [
+          "{ type: \"document-field\"; field: string; width?: number | undefined; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
         "id": "def-common.FilterControls",
         "type": "Type",
         "tags": [],
@@ -519,6 +541,35 @@
             "text": "ListFilterControl"
           },
           " | undefined; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.GridColumnDisplayOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "GridColumnDisplayOptions",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.DocumentFieldGridColumnOptions",
+            "text": "DocumentFieldGridColumnOptions"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/deeplinks-observability",
+            "scope": "common",
+            "docId": "kibKbnDeeplinksObservabilityPluginApi",
+            "section": "def-common.SmartFieldGridColumnOptions",
+            "text": "SmartFieldGridColumnOptions"
+          }
         ],
         "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
@@ -656,6 +707,21 @@
           "\"SINGLE_DATASET_LOCATOR\""
         ],
         "path": "packages/deeplinks/observability/locators/observability_logs_explorer.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/deeplinks-observability",
+        "id": "def-common.SmartFieldGridColumnOptions",
+        "type": "Type",
+        "tags": [],
+        "label": "SmartFieldGridColumnOptions",
+        "description": [],
+        "signature": [
+          "{ type: \"smart-field\"; smartField: \"resource\" | \"content\"; width?: number | undefined; }"
+        ],
+        "path": "packages/deeplinks/observability/locators/logs_explorer.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
