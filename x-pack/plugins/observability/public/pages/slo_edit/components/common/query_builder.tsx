@@ -6,8 +6,9 @@
  */
 
 import { EuiFormRow } from '@elastic/eui';
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import { Controller, FieldPath, useFormContext } from 'react-hook-form';
+import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { useCreateDataView } from '../../../../hooks/use_create_data_view';
 import { useKibana } from '../../../../utils/kibana_react';
 import { CreateSLOForm } from '../../types';
@@ -38,11 +39,18 @@ export function QueryBuilder({
     },
   } = useKibana().services;
 
-  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
 
   const { dataView } = useCreateDataView({
     indexPatternString,
   });
+
+  const valueText = watch(name) as string;
+  const [inputVal, setInputVal] = useState<string>(valueText);
+
+  useEffect(() => {
+    setInputVal(valueText);
+  }, [valueText]);
 
   return (
     <EuiFormRow
@@ -57,6 +65,7 @@ export function QueryBuilder({
       }
       labelAppend={!required ? <OptionalText /> : undefined}
       isInvalid={getFieldState(name).invalid}
+      error={getFieldState(name).error?.message}
       fullWidth
     >
       <Controller
@@ -65,6 +74,15 @@ export function QueryBuilder({
         control={control}
         rules={{
           required: Boolean(required) && Boolean(dataView),
+          validate: (value) => {
+            try {
+              if (!dataView) return;
+              const ast = fromKueryExpression(String(value));
+              toElasticsearchQuery(ast, dataView);
+            } catch (e) {
+              return e.message;
+            }
+          },
         }}
         render={({ field, fieldState }) => (
           <QueryStringInput
@@ -76,11 +94,15 @@ export function QueryBuilder({
             isInvalid={fieldState.invalid}
             languageSwitcherPopoverAnchorPosition="rightDown"
             placeholder={placeholder}
-            query={{ query: String(field.value), language: 'kuery' }}
+            query={{ query: String(inputVal), language: 'kuery' }}
             size="s"
-            onChange={(value) => {
+            onSubmit={(value) => {
               field.onChange(value.query);
             }}
+            onChange={(value) => {
+              setInputVal(String(value.query));
+            }}
+            submitOnBlur={true}
           />
         )}
       />
