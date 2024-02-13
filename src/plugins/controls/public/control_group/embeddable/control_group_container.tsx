@@ -234,13 +234,11 @@ export class ControlGroupContainer extends Container<
   }) => {
     this.invalidSelectionsState = { ...this.invalidSelectionsState, [id]: hasInvalidSelections };
 
-    const childrenWithInvalidSelections = cachedChildEmbeddableOrder(
-      this.getInput().panels
-    ).idsInOrder.filter((childId) => {
+    const childrenHaveInvalidSelections = Object.keys(this.getInput().panels).some((childId) => {
       return this.invalidSelectionsState[childId];
     });
 
-    this.dispatch.setControlsHaveInvalidSelections(childrenWithInvalidSelections.length > 0);
+    this.dispatch.setControlsHaveInvalidSelections(childrenHaveInvalidSelections);
   };
 
   private setupSubscriptions = () => {
