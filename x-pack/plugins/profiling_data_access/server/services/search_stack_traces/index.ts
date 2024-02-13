@@ -6,29 +6,12 @@
  */
 
 import { decodeStackTraceResponse } from '@kbn/profiling-utils';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ProfilingESClient } from '../../../common/profiling_es_client';
-import { kqlQuery } from '../../utils/query';
 
-export async function searchStackTraces({
-  client,
-  sampleSize,
-  rangeFrom,
-  rangeTo,
-  kuery,
-  durationSeconds,
-  co2PerKWH,
-  datacenterPUE,
-  pervCPUWattX86,
-  pervCPUWattArm64,
-  awsCostDiscountRate,
-  costPervCPUPerHour,
-  showErrorFrames,
-}: {
+interface Params {
   client: ProfilingESClient;
   sampleSize: number;
-  rangeFrom: number;
-  rangeTo: number;
-  kuery: string;
   durationSeconds: number;
   co2PerKWH: number;
   datacenterPUE: number;
@@ -36,26 +19,31 @@ export async function searchStackTraces({
   pervCPUWattArm64: number;
   awsCostDiscountRate: number;
   costPervCPUPerHour: number;
+  azureCostDiscountRate: number;
   showErrorFrames: boolean;
-}) {
+  indices?: string[];
+  stacktraceIdsField?: string;
+  query: QueryDslQueryContainer;
+}
+
+export async function searchStackTraces({
+  client,
+  sampleSize,
+  durationSeconds,
+  co2PerKWH,
+  datacenterPUE,
+  pervCPUWattX86,
+  pervCPUWattArm64,
+  awsCostDiscountRate,
+  costPervCPUPerHour,
+  azureCostDiscountRate,
+  showErrorFrames,
+  indices,
+  query,
+  stacktraceIdsField,
+}: Params) {
   const response = await client.profilingStacktraces({
-    query: {
-      bool: {
-        filter: [
-          ...kqlQuery(kuery),
-          {
-            range: {
-              ['@timestamp']: {
-                gte: String(rangeFrom),
-                lt: String(rangeTo),
-                format: 'epoch_second',
-                boost: 1.0,
-              },
-            },
-          },
-        ],
-      },
-    },
+    query,
     sampleSize,
     durationSeconds,
     co2PerKWH,
@@ -64,6 +52,9 @@ export async function searchStackTraces({
     pervCPUWattArm64,
     awsCostDiscountRate,
     costPervCPUPerHour,
+    azureCostDiscountRate,
+    indices,
+    stacktraceIdsField,
   });
 
   return decodeStackTraceResponse(response, showErrorFrames);
