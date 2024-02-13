@@ -8,6 +8,7 @@
 import React from 'react';
 import { DocViewRenderProps } from '@kbn/unified-doc-viewer/src/services/types';
 import { LogDocument } from '../../common/document';
+import { LogsExplorerControllerContext } from '../state_machines/logs_explorer_controller';
 
 export type RenderPreviousContent<Props> = (props: Props) => React.ReactNode;
 
@@ -25,8 +26,15 @@ export interface LogsExplorerFlyoutContentProps {
   doc: LogDocument;
 }
 
+export type OnDiscoverNavigationHandler = (context: LogsExplorerControllerContext) => void;
+
+export interface LogsExplorerCustomizationEvents {
+  onDiscoverNavigation?: OnDiscoverNavigationHandler;
+}
+
 export interface LogsExplorerCustomizations {
   flyout?: {
     renderContent?: RenderContentCustomization<LogsExplorerFlyoutContentProps>;
   };
+  events?: LogsExplorerCustomizationEvents;
 }
