@@ -5,6 +5,11 @@
  * 2.0.
  */
 
-import { AlertConsumers } from '@kbn/rule-data-utils';
-
-export const ALERT_TABLE_GENERIC_CONFIG_ID = `${AlertConsumers.STACK_ALERTS}-generic-alert-table`;
+export const mlLog = {
+  fatal: jest.fn(),
+  error: jest.fn(),
+  warn: jest.fn(),
+  info: jest.fn(),
+  debug: jest.fn(),
+  trace: jest.fn(),
+};
