@@ -31,6 +31,7 @@ import {
   syntheticsThrottlingEnabled,
   enableLegacyUptimeApp,
   apmEnableProfilingIntegration,
+  profilingShowErrorFrames,
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPervCPUWattX86,
@@ -431,6 +432,15 @@ export const uiSettings: Record<string, UiSettings> = {
     value: true,
     schema: schema.boolean(),
     requiresPageReload: false,
+  },
+  [profilingShowErrorFrames]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingShowErrorFramesSettingName', {
+      defaultMessage: 'Show error frames in the Universal Profiling views',
+    }),
+    value: false,
+    schema: schema.boolean(),
+    requiresPageReload: true,
   },
   [profilingPervCPUWattX86]: {
     category: [observabilityFeatureId],
