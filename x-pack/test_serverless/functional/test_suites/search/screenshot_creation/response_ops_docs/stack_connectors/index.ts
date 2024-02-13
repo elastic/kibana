@@ -45,7 +45,7 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
 
     after(async () => {
       await rules.api.deleteAllRules(svlCommonApi.getInternalRequestHeader());
-      await actions.api.deleteAllConnectors(svlCommonApi.getInternalRequestHeader());
+      await actions.api.deleteAllConnectors();
       await es.indices.delete({ index: testIndex });
     });
 

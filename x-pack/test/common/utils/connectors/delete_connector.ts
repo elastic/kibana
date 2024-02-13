@@ -6,6 +6,10 @@
  */
 
 import type SuperTest from 'supertest';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { getSpaceUrlPrefix } from '../get_space_prefix';
 
 /**
@@ -22,5 +26,7 @@ export function deleteConnector(
 ): SuperTest.Test {
   return supertest
     .delete(`${getSpaceUrlPrefix(spaceId)}/api/actions/connector/${connectorId}`)
-    .set('kbn-xsrf', 'foo');
+    .set('kbn-xsrf', 'some-xsrf-token')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
 }

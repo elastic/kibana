@@ -34,7 +34,7 @@ export async function createConnector(
 ): Promise<string> {
   const { body } = await supertest
     .post(`${getSpaceUrlPrefix(spaceId)}/api/actions/connector/${id}`)
-    .set('kbn-xsrf', 'foo')
+    .set('kbn-xsrf', 'some-xsrf-token')
     .set(ELASTIC_HTTP_VERSION_HEADER, '1')
     .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send(connector)

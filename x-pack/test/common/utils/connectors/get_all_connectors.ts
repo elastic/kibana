@@ -6,6 +6,10 @@
  */
 
 import { ConnectorResponse } from '@kbn/actions-plugin/common/routes/connector/response';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type SuperTest from 'supertest';
 import { getSpaceUrlPrefix } from '../get_space_prefix';
 
@@ -21,7 +25,8 @@ export async function getAllConnectors(
 ): Promise<ConnectorResponse[]> {
   const { body: connectors } = await supertest
     .get(`${getSpaceUrlPrefix(spaceId)}/api/actions/connectors`)
-    .set({ 'kbn-xsrf': 'foo' })
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .expect(200);
 
   return connectors;
