@@ -471,32 +471,35 @@ export function useModelActions({
       },
       {
         name: (model) => {
-          const hasDeployments = model.state === MODEL_STATE.STARTED;
           return (
-            <EuiToolTip
-              position="left"
-              content={
-                hasDeployments
-                  ? i18n.translate(
-                      'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
-                      {
-                        defaultMessage: 'Model has started deployments',
-                      }
-                    )
-                  : null
-              }
-            >
-              <>
-                {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-                  defaultMessage: 'Delete model',
-                })}
-              </>
-            </EuiToolTip>
+            <>
+              {i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete model',
+              })}
+            </>
           );
         },
-        description: i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
-          defaultMessage: 'Delete model',
-        }),
+        description: (model: ModelItem) => {
+          const hasDeployments = model.deployment_ids.length > 0;
+          const { hasInferenceServices } = model;
+          return hasInferenceServices
+            ? i18n.translate(
+                'xpack.ml.trainedModels.modelsList.deleteDisabledWithInferenceServicesTooltip',
+                {
+                  defaultMessage: 'Model is used by the _inference API',
+                }
+              )
+            : hasDeployments
+            ? i18n.translate(
+                'xpack.ml.trainedModels.modelsList.deleteDisabledWithDeploymentsTooltip',
+                {
+                  defaultMessage: 'Model has started deployments',
+                }
+              )
+            : i18n.translate('xpack.ml.trainedModels.modelsList.deleteModelActionLabel', {
+                defaultMessage: 'Delete model',
+              });
+        },
         'data-test-subj': 'mlModelsTableRowDeleteAction',
         icon: 'trash',
         type: 'icon',
