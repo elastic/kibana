@@ -12,7 +12,8 @@ import React from 'react';
 export const EMPTY_POLICY_NAME_HINT = i18n.translate(
   'xpack.fleet.uninstallTokenList.emptyPolicyNameHint',
   {
-    defaultMessage: 'The related agent policy has already been deleted, hence its name is unknown.',
+    defaultMessage:
+      "This token's related Agent policy has already been deleted, so the policy name is unavailable.",
   }
 );
 

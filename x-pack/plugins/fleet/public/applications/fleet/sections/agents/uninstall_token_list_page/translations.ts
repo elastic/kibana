@@ -40,6 +40,6 @@ export const SEARCH_BY_POLICY_ID_OR_NAME_HINT = i18n.translate(
   'xpack.fleet.uninstallTokenList.searchByPolicyIdOrNameHint',
   {
     defaultMessage:
-      'If an Agent Policy is deleted, its name is deleted as well. Therefore you can only search for its uninstall tokens by using the ID of the deleted Agent Policy.',
+      'If an Agent policy is deleted, its policy name is also deleted. Use the policy ID to search for uninstall tokens related to deleted Agent policies.',
   }
 );

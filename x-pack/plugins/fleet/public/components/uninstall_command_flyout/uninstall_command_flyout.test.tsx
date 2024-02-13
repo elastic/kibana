@@ -192,7 +192,7 @@ describe('UninstallCommandFlyout', () => {
 
       const policyIdHint = renderResult.getByTestId('uninstall-command-flyout-policy-id-hint');
       expect(policyIdHint.textContent).toBe(
-        'Valid for the following agent policy:- The related agent policy has already been deleted, hence its name is unknown. (policy_id)'
+        "Valid for the following agent policy:- This token's related Agent policy has already been deleted, so the policy name is unavailable. (policy_id)"
       );
       expect(renderResult.getByTestId('emptyPolicyNameHint')).toBeInTheDocument();
     });

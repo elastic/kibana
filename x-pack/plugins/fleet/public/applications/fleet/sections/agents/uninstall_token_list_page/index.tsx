@@ -178,7 +178,7 @@ export const UninstallTokenListPage = () => {
       <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.fleet.uninstallTokenList.pageDescription"
-          defaultMessage="Uninstall token allows you to get the uninstall command if you need to uninstall the Agent/Endpoint on the Host."
+          defaultMessage="An uninstall token allows you to use the uninstall command to remove Elastic Agent from a host."
         />
       </EuiText>
 
